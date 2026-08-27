@@ -103,17 +103,30 @@ def github_repo_search(queries: list[str], max_pages: int) -> list[dict]:
     return list(hits.values())
 
 
-def wheelodex_rdepends(package: str = "rdflib", max_pages: int = 10) -> list[dict]:
-    """PyPI projects depending on rdflib, resolved to GitHub repositories."""
-    out: list[dict] = []
-    url = f"https://www.wheelodex.org/json/projects/{package}/rdepends"
-    pages = 0
-    while url and pages < max_pages:
-        data = _http_json(url)
-        pages += 1
-        for item in data.get("items", []):
-            out.append(item["name"])
-        url = (data.get("links") or {}).get("next")
+def wheelodex_rdepends(package: str = "rdflib", max_pages: int = 2) -> list[dict]:
+    """PyPI projects depending on rdflib, resolved to GitHub repositories.
+
+    Wheelodex's JSON API was withdrawn; the reverse-dependency listing is
+    scraped from the paginated HTML (stable ``/projects/<name>/`` links)."""
+    import re as _re
+    out: list[str] = []
+    for page in range(1, max_pages + 1):
+        url = (f"https://www.wheelodex.org/projects/{package}/rdepends/"
+               + (f"?page={page}" if page > 1 else ""))
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                html = resp.read().decode("utf-8", "replace")
+        except Exception as e:
+            print(f"  wheelodex stopped ({e})")
+            break
+        names = _re.findall(r'href="/projects/([\w.-]+)/"', html)
+        new = [n for n in names if n != package and n != ""]
+        if not new:
+            break
+        out.extend(new)
+        time.sleep(0.5)
+    out = sorted(set(out))
     records = []
     for name in out:
         try:
@@ -138,7 +151,7 @@ def wheelodex_rdepends(package: str = "rdflib", max_pages: int = 10) -> list[dic
             "strategies": ["wheelodex_rdepends"],
             "partial": True,
         })
-        time.sleep(0.3)
+        time.sleep(0.1)
     return records
 
 
@@ -184,23 +197,24 @@ def save_discovery(records: list[dict]) -> None:
 
 def run(config: dict) -> None:
     cfg = config["discovery"]
-    existing = load_discovery()
-    new: list[dict] = []
-    strategies = cfg["strategies"]
-    if "seed_list" in strategies:
-        print("strategy: seed_list")
-        new += seed_list(cfg["seed_repositories"])
-    if "github_repo_search" in strategies:
-        print("strategy: github_repo_search")
-        new += github_repo_search(cfg["github_repo_queries"], cfg["max_pages_per_query"])
-    if "github_code_search" in strategies:
-        print("strategy: github_code_search")
-        new += github_code_search(cfg["github_code_queries"], cfg["max_pages_per_query"])
-    if "wheelodex_rdepends" in strategies:
-        print("strategy: wheelodex_rdepends")
-        new += wheelodex_rdepends()
-    merged = merge(existing, new)
-    save_discovery(merged)
+    merged = load_discovery()
+    runners = {
+        "seed_list": lambda: seed_list(cfg["seed_repositories"]),
+        "github_repo_search": lambda: github_repo_search(
+            cfg["github_repo_queries"], cfg["max_pages_per_query"]),
+        "github_code_search": lambda: github_code_search(
+            cfg["github_code_queries"], cfg["max_pages_per_query"]),
+        "wheelodex_rdepends": wheelodex_rdepends,
+    }
+    for strategy in cfg["strategies"]:
+        print(f"strategy: {strategy}")
+        try:
+            found = runners[strategy]()
+        except Exception as e:               # a failed channel must not lose the rest
+            print(f"  ! strategy {strategy} failed: {e}")
+            continue
+        merged = merge(merged, found)
+        save_discovery(merged)               # incremental: crash-safe
     counts = defaultdict(int)
     for rec in merged:
         for s in rec["strategies"]:
