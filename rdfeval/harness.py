@@ -115,15 +115,23 @@ def run_pair(driver_file: str, entry: str | None = None,
             verdict["error"] = "no fixtures: provide calls=[(args, kwargs), …]"
             _emit(verdict)
             return verdict
-        for i, (args, kwargs) in enumerate(calls):
+        for i, fixture in enumerate(calls):
+            # a fixture is (args, kwargs) — or a callable returning that pair,
+            # invoked once per side so mutable arguments (graphs!) stay fresh
             try:
-                ro = fo(*args, **kwargs)
-                rt = ft(*args, **kwargs)
+                args_o, kw_o = fixture() if callable(fixture) else fixture
+                args_t, kw_t = fixture() if callable(fixture) else fixture
+                ro = fo(*args_o, **kw_o)
+                rt = ft(*args_t, **kw_t)
             except Exception:
                 verdict["error"] = traceback.format_exc(limit=8)
                 _emit(verdict)
                 return verdict
-            _compare_value(ro, rt, f"call[{i}]", diffs)
+            _compare_value(ro, rt, f"call[{i}].result", diffs)
+            for j, (ao, at) in enumerate(zip(args_o, args_t)):
+                _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs)
+            for k in kw_o:
+                _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]", diffs)
         verdict["calls"] = len(calls)
     else:
         verdict["method"] = "module-state"
