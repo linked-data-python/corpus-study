@@ -57,9 +57,9 @@ def _tok_count(text: str) -> int:
     return n
 
 
-def python_correspondence(source: str) -> dict:
+def python_correspondence(source: str, preamble: str | None = None) -> dict:
     """Per-triple correspondence metrics for the rdflib side."""
-    fa = analyze_source(source)
+    fa = analyze_source(source, preamble=preamble)
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -125,12 +125,16 @@ def _node_depth(root: ast.AST, target: ast.AST) -> int:
     return dfs(root, 0) or 0
 
 
-def measure_pair(py_source: str, ldpy_source: str) -> dict:
-    fa = analyze_source(py_source)
+def measure_pair(py_source: str, ldpy_source: str,
+                 preamble: str | None = None) -> dict:
+    """``preamble``: bindings-only source of the example's context shim
+    modules, so terms imported from a shim are recognised (analysis only —
+    the shim's surface counts on neither side)."""
+    fa = analyze_source(py_source, preamble=preamble)
     lm = measure_ldpy_source(ldpy_source)
     # rdflib constructs remaining in the ldpy version (outside islands)
-    residual = analyze_source(lm.masked_source)
-    corr = python_correspondence(py_source)
+    residual = analyze_source(lm.masked_source, preamble=preamble)
+    corr = python_correspondence(py_source, preamble=preamble)
 
     py_code_loc = fa.code_loc
     py = {
@@ -193,8 +197,11 @@ def run(config: dict) -> None:
         vstatus = (meta.get("validation") or {}).get("status")
         py_source = (ex_dir / "original.py").read_text()
         ldpy_source = (ex_dir / "translated.ldpy").read_text()
+        shims = [p for p in sorted(ex_dir.glob("*.py"))
+                 if p.name not in ("original.py", "driver.py")]
+        preamble = "\n".join(p.read_text() for p in shims) or None
         try:
-            pair = measure_pair(py_source, ldpy_source)
+            pair = measure_pair(py_source, ldpy_source, preamble=preamble)
         except LdpyMetricsError as e:
             print(f"  ! {meta['region_id']}: {e}")
             skipped.append((meta["region_id"], f"metrics-error: {e}"))

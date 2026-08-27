@@ -502,8 +502,14 @@ class _Analyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def analyze_source(source: str, path: str = "<string>") -> FileAnalysis:
-    """Analyse one Python source text."""
+def analyze_source(source: str, path: str = "<string>",
+                   preamble: str | None = None) -> FileAnalysis:
+    """Analyse one Python source text.
+
+    ``preamble``: optional bindings-only source (e.g. a context shim module
+    the file imports from) whose namespace/graph bindings seed the analysis;
+    its own operations and surface do NOT count.
+    """
     a = FileAnalysis(path=path)
     _surface_metrics(source, a)
     try:
@@ -518,6 +524,11 @@ def analyze_source(source: str, path: str = "<string>") -> FileAnalysis:
     # pass — with those bindings pre-seeded — records the operations.  This
     # catches uses that lexically precede the binding site.
     first = _Analyzer(a)
+    if preamble:
+        try:
+            first.visit(ast.parse(preamble))
+        except SyntaxError:
+            pass
     first.visit(tree)
     a.ops, a.category_counts = [], {}
     visitor = _Analyzer(a)

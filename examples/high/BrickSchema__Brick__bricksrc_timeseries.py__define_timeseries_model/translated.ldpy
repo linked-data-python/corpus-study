@@ -1,0 +1,39 @@
+# Extracted from BrickSchema/Brick@c12949f236 : bricksrc/timeseries.py
+# region: define_timeseries_model (lines 7-57, band high)
+# licence of the source repository: see meta.json
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+
+def define_timeseries_model(G):
+    """
+    Adds the timeseries model definitions to the graph G
+
+    Classes:
+    - TimeseriesReference
+    - Database
+
+    Properties:
+    - hasTimeseriesId (domain: TimeseriesReference, range: string)
+    - storedAt (domain: TimeseriesReference, range: Database)
+    """
+    G += g{
+        brick:TimeseriesReference a owl:Class, sh:NodeShape ;
+            skos:definition "Metadata describing where and how the data for a Brick Point is stored" ;
+            sh:property _:timeseries_id, _:timeseries_storedprop .
+
+        brick:Database a owl:Class ;
+            skos:definition "A database storing the timeseries data for the related point. Properties on this class are *to be determined*; feel free to add arbitrary properties onto Database instances for your particular deployment" .
+
+        _:timeseries_id a sh:PropertyShape ;
+            sh:path brick:hasTimeseriesId ;
+            sh:minCount 1 ;
+            sh:maxCount 1 ;
+            sh:datatype xsd:string .
+
+        _:timeseries_storedprop a sh:PropertyShape ;
+            sh:path brick:storedAt ;
+            sh:class brick:Database
+    }

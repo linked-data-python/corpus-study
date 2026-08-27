@@ -104,6 +104,10 @@ def run(config: dict) -> None:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     rdf_rows = [r for r in all_rows if r["rdf_ops"] > 0]
+    categories: dict[str, int] = {}
+    for r in rdf_rows:
+        for k, v in r["category_counts"].items():
+            categories[k] = categories.get(k, 0) + v
     summary = {
         "provenance": provenance(config),
         "repositories": len(manifest),
@@ -111,7 +115,12 @@ def run(config: dict) -> None:
         "rdf_files": len(rdf_rows),
         "unparsable_files": sum(1 for r in all_rows if r["error"]),
         "total_rdf_ops": sum(r["rdf_ops"] for r in rdf_rows),
+        "certain_ops": sum(r["certain_ops"] for r in rdf_rows),
         "total_triples_added": sum(r["triples_added"] for r in rdf_rows),
+        "total_terms_constructed": sum(r["terms_constructed"] for r in rdf_rows),
+        "rdf_loc_total": sum(r["total_loc"] for r in rdf_rows),
+        "rdf_lines_total": sum(r["rdf_lines"] for r in rdf_rows),
+        "category_totals": dict(sorted(categories.items())),
         "density_deciles": _deciles([r["rdf_node_density"] for r in rdf_rows]),
     }
     with open(RESULTS_SUMMARY / "corpus.json", "w") as f:
