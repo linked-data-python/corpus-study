@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ldpy-corpus-eval"
+version = "0.1.0"
+description = "Empirical evaluation pipeline: RDFLib Python corpus vs Linked-Data Python"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Maxime Lefrançois", email = "maxime.lefrancois@emse.fr" }]
+dependencies = ["rdflib>=6.0"]
+
+[project.optional-dependencies]
+plots = ["matplotlib"]
+dev = ["pytest"]
+
+[project.scripts]
+rdfeval = "rdfeval.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["rdfeval*"]

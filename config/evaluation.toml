@@ -1,0 +1,115 @@
+# Evaluation configuration — every threshold of the pipeline lives here.
+# Any change to this file should bump [meta].config_version; the version is
+# stamped into every generated result for traceability.
+
+[meta]
+config_version = "1.0.0"
+# Version of the evaluation pipeline semantics (bumped when metric
+# definitions change, independently of the code version).
+metrics_version = "1.0.0"
+
+[discovery]
+# Strategies actually implemented in rdfeval.discover; each hit records its
+# source so the corpus provenance is auditable.
+strategies = ["github_code_search", "github_repo_search", "wheelodex_rdepends", "seed_list"]
+# GitHub code-search queries: each is run and repositories of matching files
+# are collected (diversity beats popularity: several phrasings of rdflib use).
+github_code_queries = [
+    "\"from rdflib import\" language:python",
+    "\"import rdflib\" language:python",
+    "\"rdflib.Graph()\" language:python",
+    "\"prepareQuery\" rdflib language:python",
+]
+github_repo_queries = [
+    "rdflib in:readme,description language:python",
+    "sparql rdflib language:python",
+    "ontology rdflib language:python",
+    "\"knowledge graph\" rdflib language:python",
+]
+max_pages_per_query = 3          # 100 results/page on repo search, 100 on code search
+# Seed list: known substantial RDFLib users, curated for domain diversity
+# (libraries, applications, converters, ontology tooling, SPARQL-heavy).
+seed_repositories = [
+    "RDFLib/pySHACL",
+    "RDFLib/OWL-RL",
+    "RDFLib/pyLODE",
+    "RDFLib/sparqlwrapper",
+    "RDFLib/rdflib-endpoint",
+    "morph-kgc/morph-kgc",
+    "oeg-upm/yatter",
+    "linkml/linkml",
+    "BrickSchema/py-brickschema",
+    "NREL/BuildingMOTIF",
+    "westurner/csvw" ,
+    "cthoyt/pystow",
+    "biopragmatics/bioregistry",
+    "geopython/pygeoapi",
+    "opensemanticsearch/open-semantic-etl",
+    "SDM-TIB/SDM-RDFizer",
+    "usc-isi-i2/kgtk",
+    "vemonet/sparql-void-generator",
+    "gnames/gnverifier",
+    "zincware/ZnTrack",
+]
+
+[selection]
+# Repository-level inclusion criteria (applied by `rdfeval select`).
+exclude_forks = true
+exclude_archived = false          # archived projects are still real-world code
+min_python_files = 2
+min_rdf_files = 1                 # at least one RDF-relevant file after analysis
+# Licences under which storing extracted snippets in this repository is
+# acceptable. Repositories under other licences stay in the manifest and the
+# aggregate statistics, but no source region is copied out of them.
+snippet_licences = [
+    "MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "ISC",
+    "CC0-1.0", "Unlicense", "0BSD", "MPL-2.0",
+    "EPL-2.0", "GPL-3.0", "GPL-2.0", "LGPL-3.0", "LGPL-2.1", "AGPL-3.0",
+    "EUPL-1.2", "CC-BY-4.0", "CC-BY-SA-4.0", "W3C-20150513",
+]
+max_repos = 60                    # cap on cloned repositories
+
+[acquisition]
+clone_depth = 1                   # shallow clone; the commit SHA is recorded
+corpus_dir = "corpus/repos"
+
+[analysis]
+# Files larger than this are skipped (generated files, data dumps).
+max_file_bytes = 1_000_000
+# Directories never analysed inside a repository checkout.
+exclude_dirs = [".git", ".tox", ".venv", "venv", "node_modules", "build", "dist", "__pycache__", ".eggs"]
+
+[sampling]
+seed = 20260827
+# RDF-density bands over rdf_node_density = rdf_ast_nodes / total ast nodes.
+# Files with zero RDF operations are excluded from banding (they are the
+# "no-RDF" stratum, only useful as sanity control).
+band_low = [0.0, 0.05]
+band_medium = [0.05, 0.20]
+band_high = [0.20, 1.0]
+# Number of files sampled per band for the intensive evaluation.
+sample_low = 12
+sample_medium = 16
+sample_high = 24
+# Additional random control sample of low-density files (not translated,
+# used to check the analyser's false-positive rate by manual inspection).
+control_sample = 10
+# At most this many files may come from a single repository in one band
+# (prevents one large project from dominating a band).
+max_per_repo_per_band = 3
+
+[regions]
+# A region is a function/method/class or the module top level.
+min_rdf_ops = 2                   # regions with fewer RDF operations are not extracted
+max_region_loc = 120              # beyond this, keep the whole file instead
+# When the qualifying function regions cover less than this share of the
+# file's RDF operations, the whole file is kept instead (extracting a
+# region that hides most of the RDF work would be misleading).
+coverage_threshold = 0.5
+
+[validation]
+timeout_seconds = 60
+
+[userstudy]
+# How many validated pairs are exported as user-study task material.
+max_tasks = 24

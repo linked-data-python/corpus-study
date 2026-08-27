@@ -1,0 +1,187 @@
+"""Aggregate statistics, tables and figures over the measured pairs.
+
+Reads results/raw/pairs.jsonl (+ validation), computes distributions —
+never just means — and writes:
+
+    results/summary/aggregate.json     all aggregate numbers
+    results/summary/aggregate_bands.csv  per-band table
+    results/summary/fig_reduction.pdf/.png    reduction distributions
+    results/summary/fig_density_benefit.pdf/.png  density vs benefit
+    results/summary/fig_correspondence.pdf/.png   per-triple correspondence
+
+Only pairs whose semantic equivalence is established ("equivalent") enter
+the headline aggregates; unresolved/not-equivalent pairs are reported
+separately so nothing is silently dropped.
+"""
+
+from __future__ import annotations
+
+import json
+import statistics as st
+
+from .compare import load_pairs
+from .config import RESULTS_SUMMARY, provenance
+
+METRICS = ("code_loc", "tokens", "chars", "syntax_nodes")
+
+
+def _dist(values: list[float]) -> dict | None:
+    vs = [v for v in values if v is not None]
+    if not vs:
+        return None
+    vs.sort()
+    q = st.quantiles(vs, n=4) if len(vs) >= 2 else [vs[0]] * 3
+    return {
+        "n": len(vs),
+        "mean": round(st.mean(vs), 4),
+        "median": round(st.median(vs), 4),
+        "q1": round(q[0], 4), "q3": round(q[2], 4),
+        "min": round(vs[0], 4), "max": round(vs[-1], 4),
+    }
+
+
+def _reduction(row: dict, metric: str) -> float | None:
+    a = row["python"].get(metric)
+    b = row["ldpy"].get(metric)
+    if not a:
+        return None
+    return round(100.0 * (a - b) / a, 3)
+
+
+def run(config: dict) -> None:
+    pairs = load_pairs()
+    ok = [p for p in pairs if p["validation_status"] == "equivalent"]
+    other = [p for p in pairs if p["validation_status"] != "equivalent"]
+
+    agg: dict = {"provenance": provenance(config),
+                 "pairs_total": len(pairs),
+                 "pairs_equivalent": len(ok),
+                 "pairs_other": [
+                     {"region_id": p["region_id"],
+                      "status": p["validation_status"]} for p in other],
+                 "by_metric": {}, "by_band": {}, "by_repository": {},
+                 "correspondence": {}, "classification_counts": {}}
+
+    for p in pairs:
+        c = p.get("classification") or "unclassified"
+        agg["classification_counts"][c] = agg["classification_counts"].get(c, 0) + 1
+
+    for metric in METRICS:
+        agg["by_metric"][metric] = {
+            "reduction_pct": _dist([_reduction(p, metric) for p in ok]),
+            "ratio": _dist([p["ratios"].get(metric if metric != "code_loc"
+                                            else "code_loc") for p in ok]),
+        }
+
+    bands = sorted({p["band"] for p in ok})
+    for band in bands:
+        sub = [p for p in ok if p["band"] == band]
+        agg["by_band"][band] = {
+            "n": len(sub),
+            **{m: _dist([_reduction(p, m) for p in sub]) for m in METRICS},
+        }
+    for repo in sorted({p["repository"] for p in ok}):
+        sub = [p for p in ok if p["repository"] == repo]
+        agg["by_repository"][repo] = {
+            "n": len(sub),
+            "tokens_reduction": _dist([_reduction(p, "tokens") for p in sub]),
+        }
+
+    agg["correspondence"] = {
+        "python_scaffolding_tokens_per_triple": _dist(
+            [p["python"].get("corr_scaffolding_tokens_per_triple") for p in ok]),
+        "ldpy_scaffolding_tokens_per_triple": _dist(
+            [p["ldpy"].get("corr_scaffolding_tokens_per_triple") for p in ok]),
+        "python_nesting_per_term": _dist(
+            [p["python"].get("corr_nesting_per_term") for p in ok]),
+        "ldpy_nesting_per_term": _dist(
+            [p["ldpy"].get("corr_nesting_per_term") for p in ok]),
+        "python_constructors_per_triple": _dist(
+            [p["python"].get("corr_constructors_per_triple") for p in ok]),
+        "ldpy_constructors_per_triple": _dist(
+            [p["ldpy"].get("corr_constructors_per_triple") for p in ok]),
+        "python_staging_assignments_total": sum(
+            p["python"].get("corr_staging_assignments") or 0 for p in ok),
+    }
+
+    # density vs benefit (the §4 research question)
+    agg["density_vs_benefit"] = [
+        {"region_id": p["region_id"], "band": p["band"],
+         "rdf_ops": p["python"]["rdf_ops"],
+         "rdf_op_share": round(p["python"]["rdf_ops"]
+                               / max(p["python"]["syntax_nodes"], 1), 5),
+         "tokens_reduction_pct": _reduction(p, "tokens")}
+        for p in ok]
+
+    RESULTS_SUMMARY.mkdir(parents=True, exist_ok=True)
+    with open(RESULTS_SUMMARY / "aggregate.json", "w") as f:
+        json.dump(agg, f, indent=2, ensure_ascii=False)
+
+    _band_csv(agg)
+    try:
+        _figures(ok, agg)
+    except ImportError:
+        print("  (matplotlib unavailable: figures skipped)")
+    print(f"aggregate: {len(ok)} equivalent pairs aggregated; "
+          f"medians tokens {agg['by_metric']['tokens']['reduction_pct']}")
+
+
+def _band_csv(agg: dict) -> None:
+    import csv
+    with open(RESULTS_SUMMARY / "aggregate_bands.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["band", "n"] + [f"{m}_median_reduction_pct" for m in METRICS])
+        for band, d in agg["by_band"].items():
+            w.writerow([band, d["n"]] +
+                       [(d[m] or {}).get("median") for m in METRICS])
+
+
+def _figures(ok: list[dict], agg: dict) -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    # 1. reduction distributions per metric (box plots)
+    fig, ax = plt.subplots(figsize=(6, 3.2))
+    data = [[_reduction(p, m) for p in ok if _reduction(p, m) is not None]
+            for m in METRICS]
+    ax.boxplot(data, tick_labels=["LOC", "tokens", "chars", "syntax nodes"])
+    ax.axhline(0, color="grey", lw=0.5)
+    ax.set_ylabel("reduction (%)")
+    ax.set_title("LD Python vs RDFLib Python — surface reduction")
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(RESULTS_SUMMARY / f"fig_reduction.{ext}", dpi=150)
+    plt.close(fig)
+
+    # 2. RDF-op share vs token reduction
+    fig, ax = plt.subplots(figsize=(6, 3.2))
+    pts = agg["density_vs_benefit"]
+    colors = {"low": "tab:blue", "medium": "tab:orange", "high": "tab:red"}
+    for band in ("low", "medium", "high"):
+        xs = [p["rdf_op_share"] for p in pts if p["band"] == band]
+        ys = [p["tokens_reduction_pct"] for p in pts if p["band"] == band]
+        ax.scatter(xs, ys, label=band, color=colors[band], s=18)
+    ax.set_xlabel("RDF operations / syntax node (original)")
+    ax.set_ylabel("token reduction (%)")
+    ax.legend(title="density band")
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(RESULTS_SUMMARY / f"fig_density_benefit.{ext}", dpi=150)
+    plt.close(fig)
+
+    # 3. correspondence: scaffolding tokens per triple, paired
+    fig, ax = plt.subplots(figsize=(6, 3.2))
+    py = [p["python"].get("corr_scaffolding_tokens_per_triple") for p in ok]
+    ld = [p["ldpy"].get("corr_scaffolding_tokens_per_triple") for p in ok]
+    both = [(a, b) for a, b in zip(py, ld) if a is not None and b is not None]
+    for i, (a, b) in enumerate(both):
+        ax.plot([0, 1], [a, b], color="grey", lw=0.6, alpha=0.6)
+    ax.scatter([0] * len(both), [a for a, _ in both], color="tab:blue", zorder=3)
+    ax.scatter([1] * len(both), [b for _, b in both], color="tab:green", zorder=3)
+    ax.set_xticks([0, 1], ["RDFLib Python", "LD Python"])
+    ax.set_ylabel("scaffolding tokens per triple")
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(RESULTS_SUMMARY / f"fig_correspondence.{ext}", dpi=150)
+    plt.close(fig)
