@@ -13,11 +13,27 @@
     "graph_write": 2,
     "namespace_term": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDFS->rdfs, XSD->xsd, RDF->rdf, SH->sh"
+    "prefixes: RDFS->rdfs, XSD->xsd, RDF->rdf, SH->sh",
+    "LE cas de la strate : `if self.graph.value(pp, RDF.first):` -> `if bool(m{ {pp} rdf:first ?x }):` -- teste si un blank node est la tete d'une rdf:List. Demontre vrai (chemins sequence ecrits `( ... )`, cas1/cas7 de fixture.ttl) et faux/zero-solution (blank nodes sh:inversePath / sh:zeroOrMorePath a predicat unique, cas3/cas4, qui portent des predicats sans jamais avoir rdf:first -- voisinage direct du cas vrai).",
+    "`self.graph.value(current, RDF.first)` / `RDF.rest` (dans la boucle sequence) -> `m{ {current} rdf:first ?f }.first()` / `m{ {current} rdf:rest ?r }.first()`.",
+    "`list(self.graph.predicate_objects(subject=pp))` -> `list(m{ {pp} ?p ?o })` : arite 2, les lignes se destructurent directement en `bn_pred, bn_obj = pred_objects[0]`, sans devoir nommer un troisieme terme fixe.",
+    "`self.graph` est designe une fois (`@graph self.graph`, un attribut, pas un simple nom -- confirme : accepte tel quel) et couvre les quatre `m{ }` de la fonction ; aucun n'a besoin de nommer le graphe.",
+    "`Collection(self.graph, bn_obj)` (les deux occurrences, sh:union et sh:alternativePath) reste du rdflib brut : ce n'est pas un motif de triplet mais un algorithme (materialiser une rdf:List entiere), meme statut que .cbd() -- hors de portee de m{ } par construction, pas un manque du langage.",
+    "les classes reelles (PropertyPath et ses sous-classes) sont des pydantic BaseModel ; pydantic n'est pas installe dans cet environnement, donc le shim les reproduit en dataclasses de meme forme -- l'egalite structurelle par defaut des dataclasses est exactement l'oracle qu'il fallait, sans harnais de comparaison ad hoc.",
+    "harnais demo() (identique des deux cotes, meme convention que l'exemple `remove`) : recherche le noeud de chemin ancre a `ex:{anchor} ex:path`, appelle la region contre un PropertyShapeStub frais, et renvoie (resultat, appels a _add_path_to_shape) -- le stub relie sa propre recursion (`self._parse_property_path`) a l'implementation sous test via les globals de l'appelant, pour que la recursion du sh:sequence/inversePath reste a l'interieur de la version comparee."
   ],
   "draft_sha": "545236900a10da4d",
   "provenance": {
@@ -29,5 +45,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

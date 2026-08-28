@@ -10,11 +10,24 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SUB->sub"
+    "prefixes: SUB->sub",
+    "ROOT/OVL/_g/WIKI/SCHEMA/SKOS/DCT restored verbatim from the top of the real test file (context above the region's own line range, which the extractor could not carry): `_g` is the file's own Graph-from-Turtle-path helper, not an island. ROOT is repointed to this pair's own directory, and four Turtle files sit under overlays/wiki-memory/shapes/: page.shacl.ttl, thing.shacl.ttl and concept.shacl.ttl are trimmed verbatim from the repository at the pinned commit (real predicates, real values), plus a synthetic broken.shacl.ttl with no counterpart upstream.",
+    "LE cas de la strate : `(shape, SUB.frameRole, None) in g` -> `bool(m{ {shape} sub:frameRole ?fr })`. Demontre a la fois vrai (page/thing/concept.shacl.ttl) et faux (broken.shacl.ttl : wiki:BrokenShape ne declare aucun sub:frameRole, cas zero-solution) -- sans le harnais demo() ci-dessous, seule la branche vraie serait jamais observable.",
+    "les trois `g.value(shape, SUB.P)` -> `m{ {shape} sub:P ?v }.first()` : coherent avec le comportement par defaut de rdflib (`any=True`, aucune erreur sur plusieurs solutions), donc `.first()` et non `.one()`.",
+    "harnais demo() ajoute a l'identique dans les deux fichiers (exclu des metriques de surface, meme convention que l'exemple `remove`) : la region est un test pytest qui ne fait qu'asserter -- sans lui une AssertionError non rattrapee interromprait le pilote des le premier cas non concordant, rendant la moitie FAUX de bool(m{ }) invisible a l'oracle.",
+    "voisinage : wiki:PageDraftShape dans page.shacl.ttl porte les memes predicats avec un frameRole different (\"draft\") -- une requete dont la liaison du sujet aurait fui (matchant n'importe quel sh:NodeShape au lieu du {shape} donne) lirait sa valeur au lieu de celle de wiki:PageShape, et le pilote le verrait."
   ],
   "draft_sha": "d258dd14fb26a58c",
   "provenance": {
@@ -26,5 +39,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

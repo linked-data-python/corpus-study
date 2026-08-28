@@ -13,12 +13,24 @@
     "graph_read": 7,
     "namespace_term": 9
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: ECO->eco, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl, PROV->prov, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "5 of the 7 graph_read ops are the stratum's target and translate directly: artifact.subjects(RDF.type, ECO.X) x3 -> set(m{ ?s a eco:X }) (using Turtle's 'a', not rdf:type -- no other region in this batch used the shorthand), and artifact.objects(node, PROV.p) x2 -> m{ {node} prov:p ?var } inside the curator/actor loops.",
+    "The remaining 2 reads -- artifact.subjects() and artifact.all_nodes(), both called with NO fixed predicate/object -- were left as rdflib. Confirms the already-known corpus/403 finding (AGENT_BATCH 'constats deja acquis'): m{ ?s ?p ?o } over an entire graph is longer than the Python it replaces, and there's no m{ } shape for 'all nodes regardless of role' (all_nodes()) at all. Not a gap to report, a case the island correctly declines.",
+    "prefixes: ECO->eco, RDFS->rdfs, DCTERMS->dcterms, OWL->owl, PROV->prov, XSD->xsd (RDF is unused in the translation: 'a' replaces every RDF.type, so rdf: is never declared).",
+    "require(condition, message, errors) is the project's own helper (scripts/sstim-ecosystem-contract.py:416, fetched to confirm: `if not condition: errors.append(message)`), not an rdflib call -- left untranslated and shimmed via sstim_context.py, same treatment as fhirgraphutils' value()/CodeableConcept in the other region of this batch.",
+    "fixture.ttl's curator loops needed both a hit (agent1 self-attributed) and a miss (agent3 -> notAnAgent) to make the driver discriminating; checked by deliberately swapping prov:wasAttributedTo for prov:used in one m{ } during review -- the verdict failed with a concrete diff (wrong curator IRIs pulled in), confirming the fixture actually exercises the predicate, not just the subject."
+  ],
+  "article_candidate": true,
   "draft_sha": "6cad2df14e3f883e",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.238991+00:00",
