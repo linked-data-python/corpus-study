@@ -21,6 +21,7 @@ import statistics as st
 
 from .compare import load_pairs
 from .config import RESULTS_SUMMARY, provenance
+from .stats import paired_report
 
 METRICS = ("code_loc", "tokens", "chars", "syntax_nodes")
 
@@ -69,8 +70,10 @@ def run(config: dict) -> None:
     for metric in METRICS:
         agg["by_metric"][metric] = {
             "reduction_pct": _dist([_reduction(p, metric) for p in ok]),
-            "ratio": _dist([p["ratios"].get(metric if metric != "code_loc"
-                                            else "code_loc") for p in ok]),
+            "ratio": _dist([p["ratios"].get(metric) for p in ok]),
+            # paired, distribution-free comparison of the raw measurements
+            "paired": paired_report([p["python"].get(metric) for p in ok],
+                                    [p["ldpy"].get(metric) for p in ok]),
         }
 
     bands = sorted({p["band"] for p in ok})
@@ -87,22 +90,17 @@ def run(config: dict) -> None:
             "tokens_reduction": _dist([_reduction(p, "tokens") for p in sub]),
         }
 
+    corr_metrics = ("corr_scaffolding_tokens_per_triple",
+                    "corr_nesting_per_term", "corr_constructors_per_triple")
     agg["correspondence"] = {
-        "python_scaffolding_tokens_per_triple": _dist(
-            [p["python"].get("corr_scaffolding_tokens_per_triple") for p in ok]),
-        "ldpy_scaffolding_tokens_per_triple": _dist(
-            [p["ldpy"].get("corr_scaffolding_tokens_per_triple") for p in ok]),
-        "python_nesting_per_term": _dist(
-            [p["python"].get("corr_nesting_per_term") for p in ok]),
-        "ldpy_nesting_per_term": _dist(
-            [p["ldpy"].get("corr_nesting_per_term") for p in ok]),
-        "python_constructors_per_triple": _dist(
-            [p["python"].get("corr_constructors_per_triple") for p in ok]),
-        "ldpy_constructors_per_triple": _dist(
-            [p["ldpy"].get("corr_constructors_per_triple") for p in ok]),
-        "python_staging_assignments_total": sum(
-            p["python"].get("corr_staging_assignments") or 0 for p in ok),
+        m: {"python": _dist([p["python"].get(m) for p in ok]),
+            "ldpy": _dist([p["ldpy"].get(m) for p in ok]),
+            "paired": paired_report([p["python"].get(m) for p in ok],
+                                    [p["ldpy"].get(m) for p in ok])}
+        for m in corr_metrics
     }
+    agg["correspondence"]["python_staging_assignments_total"] = sum(
+        p["python"].get("corr_staging_assignments") or 0 for p in ok)
 
     # density vs benefit (the §4 research question)
     agg["density_vs_benefit"] = [
