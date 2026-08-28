@@ -54,6 +54,33 @@ python -m rdfeval userstudy   # draft task material -> ../user_study/config/
 python -m rdfeval all         # the offline stages (analyze..userstudy)
 ```
 
+### The second study: the whole language against the whole corpus (403)
+
+The stages above answer *how much of the corpus the construction half of the
+notation absorbs*, sampling files by RDF density. A second study
+([design record corpus/403](../DESIGN_CHOICES/corpus/403-evaluation-absorption-complete.md))
+asks the other question — for each **kind of use** of rdflib, is the
+construction the language proposes for it useful, where, how often — and so
+samples by *stratum of use*, not by band:
+
+```
+python -m rdfeval surface     # ... also writes results/raw/sites.jsonl:
+                              #     one record per located occurrence of a
+                              #     stratum shape (29 232 sites)
+python -m rdfeval strata      # seeded draw, 100 regions per stratum, capped
+                              #     at 4 per repository -> results/raw/strata.json
+                              #     + examples403/<stratum>/<id>/ with drafts
+#   -- translation by batches: see INSTRUCTIONS_403.md --
+python -m rdfeval validate    # (as above)
+```
+
+The strata overlap by design, so a region drawn for several is translated once
+and credited to each. Regions that **read** a graph are proved equivalent not
+by isomorphism but by the equality of the values both versions produce from a
+`fixture.ttl` input graph ([corpus/405](../DESIGN_CHOICES/corpus/405-oracle-de-lecture.md)).
+Current draw: **1 196 regions over 242 repositories, 14 strata** — 777 proved
+by isomorphism, 419 by values.
+
 Install: `pip install -e .[plots,dev]` plus `pip install -e ../ldpy`
 (the transpiler; used for translation validation and ldpy-side metrics).
 Tests: `python -m pytest tests/`.
