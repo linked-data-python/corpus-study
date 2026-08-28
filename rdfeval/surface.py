@@ -933,11 +933,23 @@ def _exported_namespaces(source: str) -> dict[str, str]:
         elif isinstance(stmt, ast.AnnAssign) and stmt.value is not None:
             targets, value = [stmt.target], stmt.value
         elif isinstance(stmt, ast.ClassDef):
-            for base in stmt.bases:
-                name = seed.b.rdflib_callee(base) or (
-                    base.id if isinstance(base, ast.Name) else None)
-                if name == "DefinedNamespace":
-                    out[stmt.name] = ""
+            # A `DefinedNamespace` subclass is a namespace only if it declares
+            # one: `_NS = Namespace("…")`.  A project's own *base* class —
+            # `class AliasingDefinedNamespace(DefinedNamespace)`, machinery for
+            # building namespaces — declares none, and importing it is not a
+            # namespace import.  Counting it inflated the stratum.
+            declares_ns = any(
+                isinstance(b, (ast.Assign, ast.AnnAssign))
+                and any(isinstance(t, ast.Name) and t.id == "_NS"
+                        for t in (b.targets if isinstance(b, ast.Assign)
+                                  else [b.target]))
+                for b in stmt.body)
+            if declares_ns:
+                for base in stmt.bases:
+                    name = seed.b.rdflib_callee(base) or (
+                        base.id if isinstance(base, ast.Name) else None)
+                    if name == "DefinedNamespace":
+                        out[stmt.name] = ""
             continue
         if not isinstance(value, ast.Call):
             continue

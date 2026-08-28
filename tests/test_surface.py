@@ -523,3 +523,20 @@ def test_a_constant_literal_is_not_a_coercion_site():
     s = surface_source(src, "t.py", "r/r")
     assert not [site for site in s.sites if site["kind"] == "coercion_datatype"]
     assert s.counts["literal_constant_typed"] == 1
+
+
+def test_a_defined_namespace_base_class_is_not_a_namespace():
+    """`class AliasingDefinedNamespace(DefinedNamespace)` is machinery for
+    building namespaces, not one: importing it is not a namespace import."""
+    from rdfeval.surface import _exported_namespaces
+    machinery = ("from rdflib.namespace import DefinedNamespace\n"
+                 "class AliasingDefinedNamespace(DefinedNamespace):\n"
+                 "    @classmethod\n"
+                 "    def alias(cls, name):\n"
+                 "        return name\n")
+    real = ("from rdflib.namespace import DefinedNamespace, Namespace\n"
+            "class PSDO(DefinedNamespace):\n"
+            "    _NS = Namespace('http://purl.obolibrary.org/obo/')\n"
+            "    thing: str\n")
+    assert _exported_namespaces(machinery) == {}
+    assert _exported_namespaces(real) == {"PSDO": ""}
