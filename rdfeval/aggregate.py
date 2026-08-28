@@ -173,6 +173,14 @@ def _by_stratum(ok: list[dict]) -> dict:
     A pair drawn for several strata counts in each: the question is whether
     the construction proposed for *that* use pays, and one region can answer
     for several.
+
+    **String-embedded pairs are reported apart, never pooled.**  RDF written
+    as text inside a Python string is ONE token to Python's tokenizer; making
+    it visible as an island multiplies the token count for a reason that has
+    nothing to do with notation quality (see ``compare.string_embedded_rdf``).
+    Whole strata are string-embedded by nature — every SPARQL query is — so
+    pooling them would publish, for `sparql_literal`, a token "reduction" of
+    -186 % that means only "the query text is now counted".
     """
     out: dict = {}
     for stratum in sorted({s for p in ok for s in p.get("strata", [])}):
@@ -181,12 +189,22 @@ def _by_stratum(ok: list[dict]) -> dict:
         for p in sub:
             classes[p.get("classification") or "unclassified"] = \
                 classes.get(p.get("classification") or "unclassified", 0) + 1
+        comparable = [p for p in sub if p.get("subgroup") != "string-embedded"]
+        embedded = [p for p in sub if p.get("subgroup") == "string-embedded"]
         out[stratum] = {
             "n": len(sub),
+            "n_surface_comparable": len(comparable),
+            "n_string_embedded": len(embedded),
             "classification": dict(sorted(classes.items())),
             "expressible": sum(1 for p in sub if p.get("classification") in
                                ("directly-expressible", "minor-restructuring")),
-            **{m: _dist([_reduction(p, m) for p in sub]) for m in METRICS},
+            "by_subgroup": {sg: len([p for p in sub if p.get("subgroup") == sg])
+                            for sg in sorted({p.get("subgroup") for p in sub})},
+            **{m: _dist([_reduction(p, m) for p in comparable])
+               for m in METRICS},
+            "string_embedded": {
+                m: _dist([_reduction(p, m) for p in embedded]) for m in METRICS
+            } if embedded else None,
         }
     return out
 

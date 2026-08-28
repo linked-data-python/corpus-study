@@ -301,3 +301,24 @@ def test_every_canonical_name_normalises_to_itself():
     named, unknown = normalise(CONSTRUCTIONS)
     assert unknown == []
     assert named == list(CONSTRUCTIONS)
+
+
+def test_string_embedded_pairs_are_reported_apart_never_pooled():
+    """RDF inside a Python string is ONE token to the tokenizer; making it
+    visible multiplies the count for a reason that is not notation quality.
+    A SPARQL stratum is string-embedded by nature."""
+    from rdfeval.aggregate import _by_stratum
+    def pair(rid, subgroup, py_tokens, ldpy_tokens):
+        return {"region_id": rid, "repository": "o/r", "strata": ["sparql_literal"],
+                "subgroup": subgroup, "classification": "directly-expressible",
+                "python": {"code_loc": 10, "tokens": py_tokens, "chars": 100,
+                           "syntax_nodes": 50},
+                "ldpy": {"code_loc": 10, "tokens": ldpy_tokens, "chars": 100,
+                         "syntax_nodes": 40}}
+    agg = _by_stratum([pair("a", "inline-construction", 100, 80),
+                       pair("b", "string-embedded", 100, 300)])
+    st = agg["sparql_literal"]
+    assert st["n"] == 2
+    assert st["n_surface_comparable"] == 1 and st["n_string_embedded"] == 1
+    assert st["tokens"]["median"] == 20.0, "the headline uses the comparable pair"
+    assert st["string_embedded"]["tokens"]["median"] == -200.0
