@@ -114,6 +114,23 @@ def python_correspondence(source: str, preamble: str | None = None) -> dict:
     }
 
 
+# rdflib operations that express a triple PATTERN rather than assert a
+# triple: every selector call, and `remove` with a triple argument.  They are
+# the Python counterpart of `-{ }` and `m{ }`, and the denominator a reading
+# or removing region has instead of "per triple".
+_PATTERN_DETAILS = {
+    "remove", "triples", "quads", "subjects", "objects", "predicates",
+    "subject_objects", "subject_predicates", "predicate_objects", "value",
+    "items", "transitive_objects", "transitive_subjects", "triples_choices",
+}
+
+
+def _python_patterns(fa) -> int:
+    return sum(1 for op in fa.ops
+               if op.category in ("graph_read", "graph_write")
+               and op.detail in _PATTERN_DETAILS)
+
+
 def _node_depth(root: ast.AST, target: ast.AST) -> int:
     """Edges from root to target in the AST (0 if root is target)."""
     def dfs(node, depth):
@@ -195,6 +212,7 @@ def measure_pair(py_source: str, ldpy_source: str,
         "constructors": fa.constructors,
         "terms_constructed": fa.terms_constructed,
         "triples_added": fa.triples_added,
+        "patterns_read": _python_patterns(fa),
         "graph_ops": fa.graph_ops,
         "rdf_ops": fa.rdf_ops,
         "category_counts": fa.category_counts,
@@ -209,6 +227,8 @@ def measure_pair(py_source: str, ldpy_source: str,
         "terms": lm.terms,
         "triples_expressed": lm.triples_expressed,
         "triples_semantic": lm.triples_semantic,
+        "patterns_expressed": lm.patterns_expressed,
+        "patterns_semantic": lm.patterns_semantic,
         "scaffolding_tokens": lm.scaffolding_tokens,
         "residual_constructors": residual.constructors,
         "residual_rdf_ops": residual.rdf_ops,
@@ -220,6 +240,11 @@ def measure_pair(py_source: str, ldpy_source: str,
         "corr_constructors_per_triple":
             round(residual.constructors / lm.triples_expressed, 3)
             if lm.triples_expressed else None,
+        # A region that only READS or REMOVES asserts no triple, so every
+        # per-triple ratio above is undefined for it.  Patterns are its unit.
+        "corr_scaffolding_tokens_per_pattern":
+            round(lm.scaffolding_tokens / lm.patterns_expressed, 3)
+            if lm.patterns_expressed else None,
     }
 
     def ratio(a, b):

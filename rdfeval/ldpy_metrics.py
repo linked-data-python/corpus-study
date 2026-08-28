@@ -25,7 +25,15 @@ islands, island_chars, terms, triples_expressed, scaffolding_tokens
     See ``IslandStats``.  ``triples_expressed`` counts explicit
     predicate–object assertions (collection/list expansion triples are NOT
     counted — the Python side's ``triples_added`` counts ``g.add`` calls,
-    which is the comparable notion).
+    which is the comparable notion).  Both islands that ASSERT count:
+    ``g{ }`` and ``+{ }``.
+
+patterns_expressed, patterns_semantic
+    Triple *patterns* — what ``-{ }`` removes and ``m{ }`` matches.  They are
+    counted apart from assertions on purpose: a pattern with a wildcard is
+    not a triple, and pooling the two would corrupt every per-triple ratio.
+    Their Python counterpart is ``g.remove((s, p, None))`` and the selector
+    calls, not ``g.add``.
 
 Failures are explicit: a source the transpiler rejects raises LdpyMetricsError.
 """
@@ -377,7 +385,9 @@ class LdpyMeasure:
     island_chars: int = 0
     terms: int = 0
     triples_expressed: int = 0
-    triples_semantic: int = 0    # tuples in generated _ldpy_.graph(...) calls
+    triples_semantic: int = 0    # tuples in generated graph()/add_to() calls
+    patterns_expressed: int = 0  # patterns of -{ } and m{ }
+    patterns_semantic: int = 0   # tuples in generated remove_from()/match()
     scaffolding_tokens: int = 0
     term_depth_sum: int = 0
     python_tokens: int = 0       # tokens outside islands
@@ -388,21 +398,47 @@ class LdpyMeasure:
         return d
 
 
-def _semantic_triples(generated_code: str) -> int:
-    """Count triple tuples in ``_ldpy_.graph(namespaces, base, *triples)``
-    calls of the transpiled code (collection/bnode expansion included)."""
+# Runtime call -> how many tuples it carries, given its argument list.
+# `graph(namespaces, base, *triples)`, `add_to(g, *triples)`,
+# `remove_from(g, *patterns)`; `match(g, (patterns,), (vars,))` passes its
+# patterns as one tuple literal.
+_ASSERTING = {"graph": 2, "add_to": 1}
+_MATCHING = {"remove_from": 1}
+
+
+def _semantic_counts(generated_code: str) -> tuple[int, int]:
+    """(triples asserted, patterns expressed) in the transpiled code.
+
+    Reading the emitted runtime calls rather than the island text is what
+    makes collection and blank-node expansion count: ``( 1 2 )`` is one
+    written term and five emitted triples.
+    """
     try:
         tree = ast.parse(generated_code)
     except SyntaxError:
-        return 0
-    n = 0
+        return 0, 0
+    triples = patterns = 0
     for node in ast.walk(tree):
-        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-                and node.func.attr == "graph"
+        if not (isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
                 and isinstance(node.func.value, ast.Name)
                 and node.func.value.id == "_ldpy_"):
-            n += max(0, len(node.args) - 2)
-    return n
+            continue
+        name = node.func.attr
+        if name in _ASSERTING:
+            triples += max(0, len(node.args) - _ASSERTING[name])
+        elif name in _MATCHING:
+            patterns += max(0, len(node.args) - _MATCHING[name])
+        elif name == "match" and len(node.args) >= 2:
+            arg = node.args[1]
+            if isinstance(arg, (ast.Tuple, ast.List)):
+                patterns += len(arg.elts)
+    return triples, patterns
+
+
+def _semantic_triples(generated_code: str) -> int:
+    """Kept for callers that only want the assertion count."""
+    return _semantic_counts(generated_code)[0]
 
 
 def measure_ldpy_source(source: str) -> LdpyMeasure:
@@ -413,12 +449,13 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
     m = LdpyMeasure()
     m.loc = len(lines)
     m.chars = len(source)
-    m.triples_semantic = _semantic_triples(r.code)
+    m.triples_semantic, m.patterns_semantic = _semantic_counts(r.code)
 
     # mask islands with placeholders, gather island texts
     masked = source
     stats = IslandStats()
-    graph_bodies: list[str] = []
+    graph_bodies: list[str] = []      # islands that ASSERT triples
+    pattern_bodies: list[str] = []    # islands that express PATTERNS
     offsets = []
     for k, (l0, c0, l1, c1, kind) in enumerate(spans):
         start, end = _offset(idx, l0, c0), _offset(idx, l1, c1)
@@ -426,9 +463,10 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
         m.island_kinds[kind] = m.island_kinds.get(kind, 0) + 1
         text = source[start:end]
         m.island_chars += len(text)
-        if kind in ("island:graph", "island:g"):
-            body = text[text.find("{") + 1:text.rfind("}")]
-            graph_bodies.append(body)
+        if kind in ("island:graph", "island:g", "island:addto"):
+            graph_bodies.append(text[text.find("{") + 1:text.rfind("}")])
+        elif kind in ("island:removefrom", "island:match"):
+            pattern_bodies.append(text[text.find("{") + 1:text.rfind("}")])
         tokenize_island(text, kind, stats)
         if kind.startswith("island:prefix") or kind.startswith("island:base"):
             stats.structures += 1
@@ -448,8 +486,11 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
     m.terms = stats.terms
     for body in graph_bodies:
         m.triples_expressed += count_triples(body)
+    for body in pattern_bodies:
+        m.patterns_expressed += count_triples(body)
     m.syntax_nodes = (py_nodes - m.islands            # placeholders removed
                       + stats.terms + m.triples_expressed
+                      + m.patterns_expressed
                       + stats.structures + stats.interp_py_nodes)
     m.scaffolding_tokens = stats.tokens - stats.term_tokens
     m.term_depth_sum = stats.depth_sum

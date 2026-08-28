@@ -88,3 +88,55 @@ def test_scaffolding_lower_than_python():
     per_triple = m.scaffolding_tokens / m.triples_expressed
     # rdflib needs >= 8 scaffolding tokens per g.add((...)) call
     assert per_triple < 8
+
+
+# --- assertions and patterns are counted apart (study 403) -------------------
+
+MIXED = """\
+@prefix ex: <http://example.org/> .
+@graph as g
++{ ex:a a ex:C ; ex:p 1, 2 }
+-{ ex:a ex:p ?o }
+x = g{ ex:b ex:q 3 }
+rows = m{ ?s a ex:C ; ex:p ?v }
+"""
+
+
+def test_the_statement_islands_assert_triples_too():
+    """`+{ }` asserts exactly like `g{ }`.  Counting only `g{ }` left every
+    per-triple ratio of the construction strata undefined."""
+    from rdfeval.ldpy_metrics import measure_ldpy_source
+    m = measure_ldpy_source(MIXED)
+    assert m.triples_expressed == 4       # 3 in +{ }, 1 in g{ }
+    assert m.triples_semantic == 4
+
+
+def test_patterns_are_not_pooled_with_triples():
+    """A pattern with a wildcard is not a triple: pooling the two would
+    corrupt every per-triple ratio."""
+    from rdfeval.ldpy_metrics import measure_ldpy_source
+    m = measure_ldpy_source(MIXED)
+    assert m.patterns_expressed == 3      # 1 in -{ }, 2 in m{ }
+    assert m.patterns_semantic == 3
+
+
+def test_a_reading_region_has_a_pattern_denominator():
+    """`corr_*_per_triple` is undefined for a region that asserts nothing;
+    it is the pattern count that gives it a unit."""
+    from rdfeval.compare import measure_pair
+    py = ("from rdflib import Graph, Namespace\n"
+          "EX = Namespace('http://example.org/')\n"
+          "g = Graph()\n"
+          "xs = list(g.objects(EX.a, EX.p))\n"
+          "y = g.value(EX.a, EX.q)\n")
+    ld = ("@prefix ex: <http://example.org/> .\n"
+          "@graph as g\n"
+          "xs = list(m{ ex:a ex:p ?o })\n"
+          "y = m{ ex:a ex:q ?v }.first()\n")
+    r = measure_pair(py, ld)
+    assert r["ldpy"]["triples_expressed"] == 0
+    assert r["ldpy"]["corr_scaffolding_tokens_per_triple"] is None
+    assert r["ldpy"]["patterns_expressed"] == 2
+    assert r["ldpy"]["corr_scaffolding_tokens_per_pattern"] is not None
+    assert r["python"]["patterns_read"] == 2
+    assert r["python"]["triples_added"] == 0
