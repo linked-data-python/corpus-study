@@ -27,6 +27,12 @@ term, constructors per triple). All thresholds live in
 `config/evaluation.toml`; every result is stamped with the pipeline
 revision and configuration version.
 
+The complete selection funnel — how 1 188 discovered candidates become 60
+analysed repositories and 140 validated pairs, what is excluded at every level
+(repository, file, region, pair), which criteria are declared but not enforced,
+and which are missing — is documented in [funnel.md](funnel.md), with a
+per-repository table in `results/summary/candidates.csv`.
+
 ## Pipeline stages
 
 ```

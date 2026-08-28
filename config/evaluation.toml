@@ -53,11 +53,39 @@ seed_repositories = [
 ]
 
 [selection]
-# Repository-level inclusion criteria (applied by `rdfeval select`).
+# Repository-level inclusion criteria, first stage: everything that can be
+# decided from GitHub metadata alone, before cloning anything.  This is option
+# B7 of `options_repo_selection.md`, retained on 2026-08-28; `funnel.md` §6
+# records why.  A candidate must satisfy *every* criterion below.
 exclude_forks = true
 exclude_archived = false          # archived projects are still real-world code
+exclude_mirrors = true            # mirrors and templates are not projects
+min_python_bytes = 10_000         # ≈ 250 lines: rules out repos with a stray .py
+min_commits = 10                  # rules out throwaway repositories
+min_size_kb = 50                  # rules out toys
+max_size_kb = 200_000             # rules out data dumps (bioregistry alone: 1.6 GB)
+min_last_commit = "2020-01-01"    # code abandoned before Python 3.8 is not a target
+require_snippet_licence = true    # only repos whose licence allows publishing a snippet
+# Teaching material: one near-identical copy of the same assignment per
+# student, so every shape would be counted as many times as there are students.
+# Matched against the full name, the description and the GitHub topics.
+exclude_teaching = true
+teaching_markers = [
+    "curso", "course", "tutorial", "exercise", "exercice", "homework",
+    "practica", "práctica", "assignment", "workshop", "bootcamp", "lecture",
+    "teaching", "student", "classroom", "vorlesung", "ejercicio", "coursework",
+    "kurs",
+]
+# A repository *named* after the library is the library, not a user of it.
+exclude_library_clones = true
+library_clone_names = ["rdflib", "rdfextras", "sparqlwrapper", "isodate", "owlrl", "pyshacl"]
+# Second stage, decided only after cloning and analysis (`rdfeval analyze`):
+# repositories that satisfy the metadata criteria but turn out to contain no
+# analysable RDF Python are marked `pruned` in the manifest, kept for
+# provenance, and excluded from the census, the surface analysis and sampling.
 min_python_files = 2
 min_rdf_files = 1                 # at least one RDF-relevant file after analysis
+prune_after_analysis = true
 # Licences under which storing extracted snippets in this repository is
 # acceptable. Repositories under other licences stay in the manifest and the
 # aggregate statistics, but no source region is copied out of them.
@@ -67,11 +95,12 @@ snippet_licences = [
     "EPL-2.0", "GPL-3.0", "GPL-2.0", "LGPL-3.0", "LGPL-2.1", "AGPL-3.0",
     "EUPL-1.2", "CC-BY-4.0", "CC-BY-SA-4.0", "W3C-20150513",
 ]
-max_repos = 60                    # cap on cloned repositories
+max_repos = 500                   # safety cap on the manifest size
 
 [acquisition]
 clone_depth = 1                   # shallow clone; the commit SHA is recorded
 corpus_dir = "corpus/repos"
+jobs = 8                          # parallel clones
 
 [analysis]
 # Files larger than this are skipped (generated files, data dumps).
@@ -83,6 +112,17 @@ max_file_bytes = 1_000_000
 exclude_dirs = [".git", ".tox", ".venv", "venv", "env", "env1", "virtualenv",
                 "site-packages", "dist-packages", "node_modules", "build",
                 "dist", "__pycache__", ".eggs", ".mypy_cache", ".pytest_cache"]
+# Third-party libraries copied into the repository *outside* a virtualenv —
+# the `MKLab-ITI/prophet` case, which vendors rdflib at its root and whose RDF
+# code is therefore rdflib's own implementation.  A top-level directory bearing
+# one of these names is skipped **unless it is the repository's own package**:
+# `RDFLib/sparqlwrapper` must keep its `SPARQLWrapper/` tree.
+vendored_dirs = ["rdflib", "rdfextras", "isodate", "html5lib", "pyparsing",
+                 "sparqlwrapper", "owlrl", "pyshacl", "six", "requests",
+                 "dateutil", "chardet", "urllib3"]
+# These are never a project's own package: skipped unconditionally.
+vendored_dirs_always = ["_vendor", "vendor", "vendored", "third_party",
+                        "thirdparty", "externals", "3rdparty"]
 
 [sampling]
 seed = 20260827

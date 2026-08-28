@@ -57,6 +57,30 @@ from .select import load_manifest
 SURFACE_RAW = RESULTS_RAW / "surface.jsonl"
 SURFACE_SUMMARY = RESULTS_SUMMARY / "surface.json"
 
+
+def _excluded_repositories(cfg: dict, manifest: dict) -> dict[str, str]:
+    """Repositories whose shapes must not be counted, and why.
+
+    Three sources, in order of generality: the selection criteria themselves
+    (a repository that no longer satisfies them — course material, a copy of
+    the library, an abandoned project — is out), the post-analysis pruning,
+    and finally an explicit list in ``[surface.excluded]`` for cases no
+    criterion expresses.  Counting a repository's shapes is a stronger claim
+    than keeping it in the corpus: what disqualifies these is not their code
+    but the fact that counting them would break the independence of
+    observations, or that their use of RDFLib is reflexive rather than
+    applicative.
+    """
+    out: dict[str, str] = {}
+    for name, rec in manifest.items():
+        if not rec.get("selection_ok", True):
+            reasons = ", ".join(rec.get("selection_reasons", [])) or "criteria"
+            out[name] = f"does not satisfy the selection criteria ({reasons})"
+        elif rec.get("pruned"):
+            out[name] = f"pruned after analysis ({rec['pruned']})"
+    out.update(cfg.get("surface", {}).get("excluded", {}))
+    return out
+
 # Selection methods that yield *terms* (as opposed to triples/quads).
 TERM_SELECTORS = {
     "subjects", "objects", "predicates", "value",
@@ -885,7 +909,7 @@ def run(cfg=None) -> dict:
     examples: dict[str, list[dict]] = defaultdict(list)
     n_files = 0
 
-    excluded = cfg.get("surface", {}).get("excluded", {})
+    excluded = _excluded_repositories(cfg, manifest)
     skipped: Counter = Counter()
 
     by_repo: dict[str, list[dict]] = defaultdict(list)

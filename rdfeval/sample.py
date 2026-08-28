@@ -75,8 +75,10 @@ def run(config: dict) -> None:
             if r["rdf_ops"] > 0 and not r["error"]]
     # Only files whose repository allows snippet extraction can be translated;
     # others still count in corpus statistics but cannot enter the sample.
+    # Repositories pruned after analysis (no analysable RDF Python) are out too.
     from .select import load_manifest
-    snippet_ok = {m["full_name"] for m in load_manifest() if m.get("snippet_ok")}
+    snippet_ok = {m["full_name"] for m in load_manifest()
+                  if m.get("snippet_ok") and not m.get("pruned")}
     eligible = [r for r in rows if r["repository"] in snippet_ok]
 
     by_band: dict[str, list[dict]] = defaultdict(list)

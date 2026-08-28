@@ -2,7 +2,8 @@
 
 Clones are shallow but fetched at the exact recorded SHA, so the working tree
 is byte-identical to the manifest state regardless of upstream history
-rewrites.  Checkouts live under ``corpus/repos/<owner>__<name>`` (gitignored:
+rewrites.  Cloning runs on a thread pool (``[acquisition] jobs``): the work is
+network-bound and a few hundred repositories take too long one at a time.  Checkouts live under ``corpus/repos/<owner>__<name>`` (gitignored:
 corpus code is never committed to this repository — the manifest suffices to
 re-acquire it).
 """
@@ -11,6 +12,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .config import ROOT
@@ -48,17 +50,25 @@ def run(config: dict) -> None:
     manifest = load_manifest()
     if not manifest:
         raise SystemExit("empty manifest; run `rdfeval select` first")
+    jobs = config["acquisition"].get("jobs", 1)
     failures = 0
-    for rec in manifest:
-        dest = repo_dir(config, rec["full_name"])
-        err = _acquire_one(rec, dest)
-        if err:
-            failures += 1
-            rec["acquire_error"] = err
-            print(f"  ! {rec['full_name']}: {err}")
-        else:
-            rec.pop("acquire_error", None)
-            print(f"  ✓ {rec['full_name']} @ {rec['commit'][:10]}")
+    done = 0
+
+    def work(rec: dict) -> tuple[dict, str | None]:
+        return rec, _acquire_one(rec, repo_dir(config, rec["full_name"]))
+
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        for rec, err in pool.map(work, manifest):
+            done += 1
+            if err:
+                failures += 1
+                rec["acquire_error"] = err
+                print(f"  ! [{done}/{len(manifest)}] {rec['full_name']}: {err}",
+                      flush=True)
+            else:
+                rec.pop("acquire_error", None)
+                print(f"  ✓ [{done}/{len(manifest)}] {rec['full_name']} "
+                      f"@ {rec['commit'][:10]}", flush=True)
     save_manifest(manifest)
     print(f"acquire: {len(manifest) - failures}/{len(manifest)} repositories ready")
     if failures:
