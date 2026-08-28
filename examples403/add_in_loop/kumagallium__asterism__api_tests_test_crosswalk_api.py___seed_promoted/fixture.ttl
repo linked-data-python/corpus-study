@@ -1,4 +1,14 @@
 # Input graph for kumagallium__asterism__api_tests_test_crosswalk_api.py___seed_promoted — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+#
+# _seed_promoted does not read the graph at all (no query, no traversal): it
+# blindly writes rows into a freshly-obtained named graph. driver.py loads
+# this file into an UNRELATED dataset's canonical graph (ds-other, not the
+# ds-a this call promotes) before calling _seed_promoted(ds, ..., "ds-a",
+# rows) -- neighbouring data that the call must leave untouched. The
+# isomorphism check on the whole resulting Dataset (see driver.py) would
+# catch it if the translation somehow disturbed it.
 @prefix ex: <http://example.org/> .
+@prefix comp: <https://kumagallium.github.io/asterism/x/ontology#> .
+
+ex:other1 comp:comp "Other1" .
+ex:other2 comp:comp "Other2" .

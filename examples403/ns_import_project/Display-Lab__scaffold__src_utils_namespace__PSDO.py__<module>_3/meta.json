@@ -10,10 +10,15 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "STRATIFIER FALSE POSITIVE for this site, worth recording precisely: the region is `from src.utils.namespace import AliasingDefinedNamespace` (rdf_ops: 0, categories: {}). AliasingDefinedNamespace is a BASE CLASS -- the tool a repo uses to BUILD a DefinedNamespace whose readable attributes are aliases (verified in corpus/repos/Display-Lab__scaffold/src/utils/namespace/__init__.py: `class AliasingDefinedNamespaceMeta(DefinedNamespaceMeta): ...`). It is not itself a namespace binding -- no `_NS`, no IRI, nothing with a prefix to import. `from projet.ns import brick:, sh:` (this stratum's construction) has nothing to attach to here: there is no namespace object in this import, only the machinery for building one. The neighbouring file that DOES use it, src/utils/namespace/_PSDO.py (same repo, lines 6-100+, outside this region's lineno 3-3 boundary), is a live instance of the DefinedNamespace-with-aliases case already flagged as having NO faithful @prefix rewriting (`PSDO.motivating_information` = `obo:PSDO_0000200`, not `obo:motivating_information` -- see the CPO/PSDO shim at examples403/remove/Display-Lab__scaffold__src_candidate_pudding_candidate_pudding.py__create_candidate/scaffold_context.py, same repo, same finding). That alias risk is real for THIS REPO's namespace layer, but it does not arise IN THIS ONE-LINE REGION, whose boundary is exactly line 3.",
+    "translated.ldpy is byte-identical to original.py apart from the shim import path (src.utils.namespace -> namespace_context, the same fix in both files, restoring an otherwise-unresolvable package import -- `src` is not an installed package here). No colon-suffixed name exists in the import list, so R3 transparency applies: the transpiler passes the statement through completely unchanged (verified: transpile(translated.ldpy).code reproduces the line verbatim). Nothing in the closed construction vocabulary is exercised -- constructions: [] is accurate, not an omission.",
+    "driver is custom, not run_pair(entry=None): with zero graphs and empty stdout on both sides regardless of translation correctness, the generic module-state oracle always reports 'nothing observable to compare' for a bare import-only region -- a driver limitation, not evidence about the translation. AGENT_BATCH's 163-regions-without-a-visible-graph guidance says to restore the binding, not to fabricate content; here the meaningful, non-invented restoration is verifying that the SAME name resolves to an EQUIVALENT object on both sides (both files import from the same context shim, cached once, so it is in fact the same class object) -- checked directly by driver.py rather than assumed. Negative control run: swapping the import for `AliasingDefinedNamespace = None` in one file makes the driver fail as expected.",
+    "classification directly-expressible reflects that the Python is already valid ldpy unmodified -- it is NOT a signal that this region demonstrates the ns_import_project idiom; see the false-positive note above for that."
+  ],
   "draft_sha": "db7ce0beea9bb49b",
   "provenance": {
     "generated_at": "2026-08-28T17:54:57.828181+00:00",
@@ -24,5 +29,6 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

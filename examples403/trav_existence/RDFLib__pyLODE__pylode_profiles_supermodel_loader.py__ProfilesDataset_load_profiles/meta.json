@@ -16,11 +16,29 @@
     "serialize_parse": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, OWL->owl, PROF->prof, RDF->rdf"
+    "prefixes: DCTERMS->dcterms, OWL->owl, PROF->prof, RDF->rdf",
+    "LE cas de la strate : `if new_graph.value(None, RDF.type, PROF.Profile):` -> `if bool(m{ ?s rdf:type prof:Profile }(new_graph)):`. Demontre vrai (fixture.ttl ex:profileB, dont l'artefact recupere EST un prof:Profile -> recursion dans load_profiles) et faux/zero-solution (ex:profileA, artefact ordinaire).",
+    "`graph.subjects(RDF.type, PROF.Profile)` -> `m{ ?profile rdf:type prof:Profile }` : arite 1, les solutions sont les termes -- l'entete `for profile in ...:` ne change pas. Voisinage : ex:notAProfile porte un prof:hasResource mais n'est jamais type prof:Profile, et n'est donc jamais selectionne.",
+    "`profile_graph.objects(None, PROF.hasResource)` -> `m{ ?_rsub prof:hasResource ?prd }(profile_graph)` : le sujet `None` de rdflib (joker) devient une variable non projetee-par-l'usage (?_rsub, ignoree au destructurage) -- portee correctement par construction puisque profile_graph est deja la CBD d'un seul profil.",
+    "trois `profile_graph.value(prof_resource_descriptor, P)` -> `m{ {prof_resource_descriptor} p:P ?v }(profile_graph).first()`.",
+    "quatre `m{ }` different tous de graphe : le premier lit le graphe designe (`@graph graph`), les trois suivants lisent `profile_graph` et le dernier `new_graph`, chacun via le suffixe d'appel explicite `(g)` -- aucune reecriture, chaque lecture cible exactement le meme graphe que dans l'original.",
+    "`graph.cbd(profile)` reste du rdflib brut : ce n'est pas un motif de triplet mais un algorithme (description bornee concise, suit les chaines de blank nodes), hors de portee de m{ } par construction, meme statut que Collection() dans la region prez de ce lot.",
+    "shim de contexte (context_shim.py, identique des deux cotes) : la namespace LODE (recopiee de pylode/profiles/supermodel/namespace.py) et un remplacant de `fetch` (le vrai fait un GET httpx) qui renvoie un contenu Turtle fixe par URL -- aucun acces reseau pendant le pilote. `Loader` remplace l'instance ProfilesDataset ; sa methode `load_profiles` relie la recursion `self.load_profiles(...)` a l'implementation sous test via les globals de l'appelant, pour que la recursion (branche vraie ci-dessus) reste a l'interieur de la version comparee plutot que dans une troisieme copie.",
+    "fixture.ttl couvre : ex:profileA (branche fausse), ex:profileB (branche vraie, avec recursion terminant en un niveau), ex:profileC (mediatype hors de MEDIA_TYPES -- fetch jamais appele) et ex:notAProfile (voisinage du motif de tete). Chaque descripteur de ressource est un blank node (pattern PROF reel) : un descripteur nomme par IRI serait invisible a graph.cbd(), et le pilote l'aurait revele (mediatype/role/artifact tous None).",
+    "harnais demo() (identique des deux cotes, meme convention que l'exemple `remove`) : la region est une methode qui ne renvoie rien -- son seul effet observable est ce qu'elle transmet a self.add_graph. demo() l'execute contre un Loader frais et renvoie les graphes collectes, tries par identifiant."
   ],
   "draft_sha": "208ea7df795a1471",
   "provenance": {
@@ -32,5 +50,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }
