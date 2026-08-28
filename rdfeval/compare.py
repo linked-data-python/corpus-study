@@ -41,6 +41,7 @@ import tokenize
 from .analyze import SIGNIFICANT_TOKENS, analyze_source
 from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .ldpy_metrics import LdpyMetricsError, measure_ldpy_source
+from .study import Study, STUDY_401
 from .validate import iter_examples
 
 PAIRS_PATH = RESULTS_RAW / "pairs.jsonl"
@@ -237,10 +238,10 @@ def measure_pair(py_source: str, ldpy_source: str,
     }
 
 
-def run(config: dict) -> None:
+def run(config: dict, study: Study = STUDY_401) -> None:
     rows = []
     skipped = []
-    for ex_dir, meta in iter_examples():
+    for ex_dir, meta in iter_examples(study):
         if meta.get("translation_status") != "final":
             continue
         if meta.get("classification") in ("not-expressible", "excluded"):
@@ -262,13 +263,18 @@ def run(config: dict) -> None:
             "region_id": meta["region_id"],
             "repository": meta["repository"],
             "path": meta["path"],
-            "band": meta["band"],
+            study.group: meta[study.group],
+            "strata": meta.get("strata", []),
+            "constructions": meta.get("constructions", []),
+            "oracle": meta.get("oracle", "isomorphism"),
+            "review_status": _review_status(ex_dir),
             "classification": meta.get("classification"),
             "validation_status": vstatus or "unvalidated",
             **pair,
         })
-    PAIRS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(PAIRS_PATH, "w") as f:
+    pairs_path = study.path(PAIRS_PATH)
+    pairs_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(pairs_path, "w") as f:
         f.write(json.dumps({"provenance": provenance(config),
                             "skipped": skipped}) + "\n")
         for row in rows:
@@ -280,7 +286,12 @@ def run(config: dict) -> None:
         flat_rows = []
         for r in rows:
             flat = {"region_id": r["region_id"], "repository": r["repository"],
-                    "band": r["band"], "classification": r["classification"],
+                    study.group: r[study.group],
+                    "strata": " ".join(r.get("strata", [])),
+                    "constructions": " ".join(r.get("constructions", [])),
+                    "oracle": r.get("oracle"),
+                    "review_status": r.get("review_status"),
+                    "classification": r["classification"],
                     "subgroup": r.get("subgroup"),
                     "validation_status": r["validation_status"]}
             for side in ("python", "ldpy"):
@@ -292,16 +303,28 @@ def run(config: dict) -> None:
             flat_rows.append(flat)
         fieldnames = sorted({k for fr in flat_rows for k in fr},
                             key=lambda k: (k != "region_id", k))
-        with open(PAIRS_CSV, "w", newline="") as f:
+        with open(study.path(PAIRS_CSV), "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             w.writerows(flat_rows)
     print(f"compare: {len(rows)} pairs measured, {len(skipped)} skipped")
 
 
-def load_pairs() -> list[dict]:
-    if not PAIRS_PATH.exists():
-        raise SystemExit("no pairs; run `rdfeval compare` first")
-    rows = [json.loads(line) for line in PAIRS_PATH.read_text().splitlines()
+def _review_status(ex_dir) -> str:
+    """The human verdict recorded beside the pair (study 403)."""
+    review = ex_dir / "review.json"
+    if not review.exists():
+        return "not-applicable"
+    try:
+        return json.loads(review.read_text()).get("review_status", "unreviewed")
+    except (OSError, json.JSONDecodeError):
+        return "unreadable"
+
+
+def load_pairs(study: Study = STUDY_401) -> list[dict]:
+    path = study.path(PAIRS_PATH)
+    if not path.exists():
+        raise SystemExit(f"no pairs; run `rdfeval compare --study {study.name}` first")
+    rows = [json.loads(line) for line in path.read_text().splitlines()
             if line.strip()]
     return [r for r in rows if "region_id" in r]

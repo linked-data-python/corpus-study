@@ -22,6 +22,7 @@ import statistics as st
 from .compare import load_pairs
 from .config import RESULTS_SUMMARY, provenance
 from .stats import paired_report
+from .study import Study, STUDY_401
 
 METRICS = ("code_loc", "tokens", "chars", "syntax_nodes")
 
@@ -49,12 +50,24 @@ def _reduction(row: dict, metric: str) -> float | None:
     return round(100.0 * (a - b) / a, 3)
 
 
-def run(config: dict) -> None:
-    pairs = load_pairs()
+def run(config: dict, study: Study = STUDY_401) -> None:
+    pairs = load_pairs(study)
+    translated = len(pairs)
+    if study.incremental_review:
+        # Fiche 403: the published aggregates are recomputed on demand over
+        # the APPROVED subset only, and always say over how many.  A draft an
+        # agent produced is a hypothesis, not a measurement.
+        approved = [p for p in pairs if p.get("review_status") == "approved"]
+        print(f"aggregate: {len(approved)} approved of {translated} translated")
+        pairs = approved
     ok = [p for p in pairs if p["validation_status"] == "equivalent"]
     other = [p for p in pairs if p["validation_status"] != "equivalent"]
 
     agg: dict = {"provenance": provenance(config),
+                 "study": study.name,
+                 "pairs_translated": translated,
+                 "pairs_reviewed_basis": ("approved" if study.incremental_review
+                                          else "all final"),
                  "pairs_total": len(pairs),
                  "pairs_equivalent": len(ok),
                  "pairs_other": [
@@ -96,9 +109,9 @@ def run(config: dict) -> None:
                           "corr_constructors_per_triple")},
         }
 
-    bands = sorted({p["band"] for p in ok})
+    bands = sorted({p[study.group] for p in ok})
     for band in bands:
-        sub = [p for p in ok if p["band"] == band]
+        sub = [p for p in ok if p[study.group] == band]
         agg["by_band"][band] = {
             "n": len(sub),
             **{m: _dist([_reduction(p, m) for p in sub]) for m in METRICS},
@@ -124,37 +137,104 @@ def run(config: dict) -> None:
 
     # density vs benefit (the §4 research question)
     agg["density_vs_benefit"] = [
-        {"region_id": p["region_id"], "band": p["band"],
+        {"region_id": p["region_id"], study.group: p[study.group],
          "rdf_ops": p["python"]["rdf_ops"],
          "rdf_op_share": round(p["python"]["rdf_ops"]
                                / max(p["python"]["syntax_nodes"], 1), 5),
          "tokens_reduction_pct": _reduction(p, "tokens")}
         for p in ok]
 
+    if study.incremental_review:
+        agg["by_stratum"] = _by_stratum(ok)
+        agg["by_construction"] = _by_construction(ok)
+        agg["by_oracle"] = {
+            o: len([p for p in ok if p.get("oracle") == o])
+            for o in sorted({p.get("oracle") for p in ok if p.get("oracle")})}
+
     RESULTS_SUMMARY.mkdir(parents=True, exist_ok=True)
-    with open(RESULTS_SUMMARY / "aggregate.json", "w") as f:
+    with open(study.path(RESULTS_SUMMARY / "aggregate.json"), "w") as f:
         json.dump(agg, f, indent=2, ensure_ascii=False)
 
-    _band_csv(agg)
+    _band_csv(agg, study)
     try:
-        _figures(ok, agg)
+        _figures(ok, agg, study)
     except ImportError:
         print("  (matplotlib unavailable: figures skipped)")
+    if not ok:
+        print("aggregate: no equivalent pair yet — nothing to aggregate")
+        return
     print(f"aggregate: {len(ok)} equivalent pairs aggregated; "
           f"medians tokens {agg['by_metric']['tokens']['reduction_pct']}")
 
 
-def _band_csv(agg: dict) -> None:
+def _by_stratum(ok: list[dict]) -> dict:
+    """Coverage and benefit per stratum of use (fiche 403).
+
+    A pair drawn for several strata counts in each: the question is whether
+    the construction proposed for *that* use pays, and one region can answer
+    for several.
+    """
+    out: dict = {}
+    for stratum in sorted({s for p in ok for s in p.get("strata", [])}):
+        sub = [p for p in ok if stratum in p.get("strata", [])]
+        classes: dict[str, int] = {}
+        for p in sub:
+            classes[p.get("classification") or "unclassified"] = \
+                classes.get(p.get("classification") or "unclassified", 0) + 1
+        out[stratum] = {
+            "n": len(sub),
+            "classification": dict(sorted(classes.items())),
+            "expressible": sum(1 for p in sub if p.get("classification") in
+                               ("directly-expressible", "minor-restructuring")),
+            **{m: _dist([_reduction(p, m) for p in sub]) for m in METRICS},
+        }
+    return out
+
+
+def _by_construction(ok: list[dict]) -> dict:
+    """How often each island of the language actually served, and where.
+
+    This is what lets a construction be credited or debited on its own
+    rather than hidden inside a global average.
+    """
+    out: dict = {}
+    for c in sorted({c for p in ok for c in p.get("constructions", [])}):
+        sub = [p for p in ok if c in p.get("constructions", [])]
+        out[c] = {
+            "pairs": len(sub),
+            "repositories": len({p["repository"] for p in sub}),
+            "strata": sorted({s for p in sub for s in p.get("strata", [])}),
+            "tokens_reduction_pct": _dist([_reduction(p, "tokens") for p in sub]),
+        }
+    return out
+
+
+def _band_csv(agg: dict, study: Study = STUDY_401) -> None:
     import csv
-    with open(RESULTS_SUMMARY / "aggregate_bands.csv", "w", newline="") as f:
+    with open(study.path(RESULTS_SUMMARY / "aggregate_bands.csv"), "w",
+              newline="") as f:
         w = csv.writer(f)
-        w.writerow(["band", "n"] + [f"{m}_median_reduction_pct" for m in METRICS])
+        w.writerow([study.group, "n"]
+                   + [f"{m}_median_reduction_pct" for m in METRICS])
         for band, d in agg["by_band"].items():
             w.writerow([band, d["n"]] +
                        [(d[m] or {}).get("median") for m in METRICS])
+    if "by_construction" not in agg:
+        return
+    with open(study.path(RESULTS_SUMMARY / "aggregate_constructions.csv"), "w",
+              newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["construction", "pairs", "repositories",
+                    "tokens_median_reduction_pct", "strata"])
+        for c, d in agg["by_construction"].items():
+            w.writerow([c, d["pairs"], d["repositories"],
+                        (d["tokens_reduction_pct"] or {}).get("median"),
+                        " ".join(d["strata"])])
 
 
-def _figures(ok: list[dict], agg: dict) -> None:
+def _figures(ok: list[dict], agg: dict, study: Study = STUDY_401) -> None:
+    if not ok:
+        return
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -165,6 +245,11 @@ def _figures(ok: list[dict], agg: dict) -> None:
     order = ["inline-construction", "terms-only", "string-embedded",
              "no-source-rdf"]
     subgroups = [s for s in order if any(p.get("subgroup") == s for p in ok)]
+    if not subgroups:
+        # Early in a campaign nothing is classified yet: there is no figure
+        # to draw, and drawing an empty one would be worse than none.
+        print("  (no subgroup classified yet: figures skipped)")
+        return
     fig, axes = plt.subplots(1, len(subgroups), figsize=(2.4 * len(subgroups), 3.4),
                              sharey=True)
     if len(subgroups) == 1:
@@ -182,7 +267,7 @@ def _figures(ok: list[dict], agg: dict) -> None:
                  "the RDF is written", fontsize=9)
     fig.tight_layout()
     for ext in ("pdf", "png"):
-        fig.savefig(RESULTS_SUMMARY / f"fig_reduction.{ext}", dpi=150)
+        fig.savefig(study.path(RESULTS_SUMMARY / f"fig_reduction.{ext}"), dpi=150)
     plt.close(fig)
 
     # 2. triples written in the source vs token reduction
@@ -203,7 +288,7 @@ def _figures(ok: list[dict], agg: dict) -> None:
     ax.legend(fontsize=7)
     fig.tight_layout()
     for ext in ("pdf", "png"):
-        fig.savefig(RESULTS_SUMMARY / f"fig_density_benefit.{ext}", dpi=150)
+        fig.savefig(study.path(RESULTS_SUMMARY / f"fig_density_benefit.{ext}"), dpi=150)
     plt.close(fig)
 
     # 3. correspondence: scaffolding tokens per triple, paired
@@ -219,5 +304,5 @@ def _figures(ok: list[dict], agg: dict) -> None:
     ax.set_ylabel("scaffolding tokens per triple")
     fig.tight_layout()
     for ext in ("pdf", "png"):
-        fig.savefig(RESULTS_SUMMARY / f"fig_correspondence.{ext}", dpi=150)
+        fig.savefig(study.path(RESULTS_SUMMARY / f"fig_correspondence.{ext}"), dpi=150)
     plt.close(fig)

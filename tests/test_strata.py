@@ -144,3 +144,47 @@ def test_every_stratum_appears_in_the_summary():
     result = draw([], SCFG, RCFG, set(), _reader)
     assert list(result["strata"]) == list(STRATA)
     assert all(st["drawn_regions"] == 0 for st in result["strata"].values())
+
+
+# --- the two studies never share a number -----------------------------------
+
+def test_study_output_paths_are_disjoint():
+    from pathlib import Path
+    from rdfeval.study import STUDY_401, STUDY_403, get
+    base = Path("results/raw/pairs.jsonl")
+    assert STUDY_401.path(base).name == "pairs.jsonl"
+    assert STUDY_403.path(base).name == "pairs_403.jsonl"
+    assert get("403").examples_dir.name == "examples403"
+    assert get(None) is STUDY_401
+
+
+def test_only_approved_pairs_enter_the_403_aggregates(tmp_path, monkeypatch):
+    """Fiche 403: the published numbers are recomputed on the approved
+    subset, and always say over how many."""
+    import json
+    from rdfeval import aggregate
+    from rdfeval.study import STUDY_403
+
+    def pair(rid, review):
+        return {"region_id": rid, "repository": "o/r", "stratum": "remove",
+                "strata": ["remove"], "constructions": ["-{ }"],
+                "oracle": "isomorphism", "review_status": review,
+                "classification": "directly-expressible",
+                "validation_status": "equivalent",
+                "python": {"code_loc": 10, "tokens": 100, "chars": 200,
+                           "syntax_nodes": 50, "rdf_ops": 3, "islands": 0},
+                "ldpy": {"code_loc": 6, "tokens": 60, "chars": 120,
+                         "syntax_nodes": 30, "rdf_ops": 3, "islands": 1},
+                "ratios": {}}
+
+    monkeypatch.setattr(aggregate, "load_pairs", lambda study: [
+        pair("a", "approved"), pair("b", "unreviewed"), pair("c", "rejected")])
+    monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
+    aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
+                  STUDY_403)
+    agg = json.loads((tmp_path / "aggregate_403.json").read_text())
+    assert agg["pairs_translated"] == 3
+    assert agg["pairs_total"] == 1
+    assert agg["pairs_reviewed_basis"] == "approved"
+    assert agg["by_stratum"]["remove"]["n"] == 1
+    assert agg["by_construction"]["-{ }"]["pairs"] == 1

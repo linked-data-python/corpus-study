@@ -27,10 +27,15 @@ def main(argv: list[str] | None = None) -> int:
                         help="alternative evaluation.toml")
     parser.add_argument("--limit", type=int, default=None,
                         help="select: cap the number of repositories")
+    parser.add_argument("--study", choices=("401", "403"), default="401",
+                        help="which study validate/compare/aggregate operate "
+                             "on (401: density bands; 403: strata of use)")
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
 
     config = load_config(args.config)
+    from .study import get as get_study
+    study = get_study(args.study)
 
     def dispatch(stage: str) -> None:
         if stage == "discover":
@@ -56,13 +61,13 @@ def main(argv: list[str] | None = None) -> int:
             translate.run(config)
         elif stage == "validate":
             from . import validate
-            validate.run(config)
+            validate.run(config, study)
         elif stage == "compare":
             from . import compare
-            compare.run(config)
+            compare.run(config, study)
         elif stage == "aggregate":
             from . import aggregate
-            aggregate.run(config)
+            aggregate.run(config, study)
         elif stage == "audit":
             from . import audit
             audit.run(config)

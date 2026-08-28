@@ -18,14 +18,16 @@ import subprocess
 import sys
 
 from .config import EXAMPLES_DIR, RESULTS_RAW, provenance
+from .study import Study, STUDY_401
 
 VALIDATION_PATH = RESULTS_RAW / "validation.jsonl"
 
 
-def iter_examples():
-    if not EXAMPLES_DIR.exists():
+def iter_examples(study: Study = STUDY_401):
+    root = study.examples_dir
+    if not root.exists():
         return
-    for band_dir in sorted(EXAMPLES_DIR.iterdir()):
+    for band_dir in sorted(root.iterdir()):
         if not band_dir.is_dir():
             continue
         for ex_dir in sorted(band_dir.iterdir()):
@@ -48,11 +50,11 @@ def _run_driver(ex_dir, timeout: int) -> dict:
             + (proc.stderr.strip()[-500:] or proc.stdout.strip()[-500:])}
 
 
-def run(config: dict) -> None:
+def run(config: dict, study: Study = STUDY_401) -> None:
     timeout = config["validation"]["timeout_seconds"]
     rows = []
     counts = {"equivalent": 0, "not-equivalent": 0, "unresolved": 0, "skipped": 0}
-    for ex_dir, meta in iter_examples():
+    for ex_dir, meta in iter_examples(study):
         rid = meta["region_id"]
         if meta.get("translation_status") != "final":
             counts["skipped"] += 1
@@ -71,8 +73,8 @@ def run(config: dict) -> None:
         else:
             status = "not-equivalent"
         counts[status] += 1
-        row = {"region_id": rid, "band": meta["band"], "status": status,
-               **verdict}
+        row = {"region_id": rid, study.group: meta[study.group],
+               "status": status, **verdict}
         rows.append(row)
         meta["validation"] = {"status": status,
                               "method": verdict.get("method"),
@@ -84,8 +86,9 @@ def run(config: dict) -> None:
         print(f"  {mark} {rid}"
               + (f" — {verdict.get('diffs') or verdict.get('error', '')}"
                  if status != "equivalent" else ""))
-    VALIDATION_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(VALIDATION_PATH, "w") as f:
+    out_path = study.path(VALIDATION_PATH)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w") as f:
         f.write(json.dumps({"provenance": provenance(config)}) + "\n")
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
