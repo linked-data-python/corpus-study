@@ -15,11 +15,24 @@
     "term_constructor": 1,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "@prefix",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "site de la strate : 4 `g.add((x, ...))` CONSECUTIFS sur le meme noeud vide `x` (la reification de la strate `TANN`, cf commentaire d'origine) -> un seul `+{ {x} a {self.annotation_type} ; owl:annotatedSource ... ; owl:annotatedProperty ... ; owl:annotatedTarget ... }`.",
+    "prefixes : owl: est le seul reellement utilise (annotatedSource/Property/Target). rdf: et rdfs: du brouillon ont ete RETIRES : RDF.type devient `a` (jamais ecrit litteralement `rdf:type`), et RDFS n'apparait nulle part dans la region -- deux declarations inutiles auraient fausse le decompte des ilots (meme lecon que Dewberry, ce lot).",
+    "`self.annotation_type` reste interpole (pas de terme litteral) : c'est un attribut Python calcule, pas un nom de vocabulaire ecrit en clair dans la region -- rien a traduire en prefixe ici.",
+    "le `for annotation in self.annotations: t = (...); g.add(t); annotation.TANN(g, t)` qui SUIT le site de la strate est laisse en rdflib : `t` est reutilise tel quel par l'appel recursif `annotation.TANN(g, t)`, donc ce n'est PAS un ajout isole qu'on pourrait juste remplacer par `+{ }` sans y perdre -- et meme en gardant `t = (...)` intact et en ne remplacant QUE le `g.add(t)` par `+{ {t[0]} {t[1]} {t[2]} }`, aucun terme de vocabulaire n'est litteral (tout interpole), donc aucun gain, seulement de la ponctuation en plus. Le sujet EST partage entre iterations (`subj` ne change pas dans la boucle), mais deux predicats/objets differents par tour de boucle ecartent la fusion par ';' : ce n'est pas le patron de cette strate, note plutot que forcee (meme raisonnement que la region FAIRDataTeam de ce lot).",
+    "@graph designe le PARAMETRE `g` de la fonction (pas une variable creee dans le corps) : `@graph` accepte n'importe quelle variable Python existante en portee, parametre inclus.",
+    "shim de contexte (context_shim.py) : clone_subgraph/USE_BNODE_COPIES et les alias de type SUBJ/TRIPLE/PRED/TARG (funowl/base/rdftriple.py) sont copies VERBATIM -- autonomes, sans dependance supplementaire. Annotatable/Annotation sont reduites a ce que TANN lit (.annotations, .annotation_type, .property.to_rdf(g), .value.to_rdf(g)) : les vraies classes sont des dataclasses cablees sur l'ecrivain de syntaxe fonctionnelle de funowl (to_functional, annots...), hors de portee de cette region.",
+    "PIEGE EVITE, digne de note methodologique : `Annotation.TANN` n'est PAS re-liee a la fonction TANN extraite (ni cote original.py ni cote translated.ldpy). Les deux fichiers sont executes dans le MEME processus Python et importent le MEME module context_shim (mis en cache) -- y monkey-patcher Annotation.TANN aurait fait GAGNER la derniere execution (translated.ldpy, execute en second) pour LES DEUX appels, cote original.py inclus, ce qui aurait invalide toute comparaison sur un cas recursif. Le shim porte donc un garde-fou qui leve une exception si jamais invoque avec des annotations imbriquees -- le pilote ne testes que des annotations dont `.annotations` est vide, donc l'appel recursif `annotation.TANN(g, t)` retourne immediatement (garde `if self.annotations:` de TANN lui-meme) sans jamais atteindre ce garde-fou.",
+    "trois appels du pilote : subj non-tuple (le site de reification ne se declenche PAS), subj-tuple avec une annotation, subj-tuple avec deux (la boucle qui suit le site fusionne s'execute deux fois sur le meme sujet reifie)."
   ],
   "draft_sha": "8d8fa5285c1ef3e5",
   "provenance": {
@@ -31,5 +44,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

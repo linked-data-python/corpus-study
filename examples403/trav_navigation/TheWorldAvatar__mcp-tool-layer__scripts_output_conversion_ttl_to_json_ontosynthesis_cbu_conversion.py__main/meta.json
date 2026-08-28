@@ -15,10 +15,22 @@
     "term_constructor": 4
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "excluded, not for a translation problem but a driver one: `main()` takes no arguments, returns nothing, and its only observable effect is writing converted_cbu.json to disk. run_pair's value oracle compares a function's return value and its mutated arguments (corpus/405); a no-arg, no-return entry point gives it nothing to compare, and entry-mode does not check captured stdout either (only module-state mode does). `rdfeval check` reports OK, but that OK is vacuous -- see driver.py's docstring for the full reasoning, and do not read this as a real pass. The two `oracle` values the study defines (isomorphism, values) both assume the region communicates through something run_pair can see; this region communicates through neither, which the pipeline's own `oracle: isomorphism` label on this region (an artefact of the automatic classifier -- there is no module-level graph to compare either) does not capture.",
+    "load_ttl_files is undefined in the extracted region (like process_property_shape in the onto2py region of this same batch) but, unlike there, is NEVER reached in the exercised path: `glob.glob('data/178ef569/cbu_derivation/integrated/*.ttl')` finds nothing in the eval sandbox, so main() prints and returns before the graph is ever built. No context shim was written for it -- Python does not resolve a call's callee name until the call executes, so the region transpiles and runs cleanly regardless. Building a shim plus synthetic data/*.ttl files under this glob path was considered and rejected: it would exercise the m{ } code honestly but would not change what run_pair reports (still nothing comparable), so it would not turn the vacuous green into a real one -- effort with no signal.",
+    "the translation itself is still given in full, because the CODE the driver cannot validate is exactly the stratum's target idiom, and it transpiles cleanly (`python -m ldpy translated.ldpy` succeeds): two ns_def_local instances (`ONTOMOPS = Namespace(...)`, and a LOCAL `RDFS = Namespace(...)` that shadows the module-level `from rdflib import RDFS` import -- both become `@prefix` and the runtime reassignment disappears, per the ns_def_local -> @prefix mapping) around a genuine two-level navigation (mop -> cbu) that matches the stratum's `for s: for o:` shape.",
+    "IMPORTANT NEGATIVE FINDING for 'measure honestly': mop->cbu is a real nested loop with the outer variable feeding the inner selector, but it does NOT fuse into one multi-pattern m{ } the way the other two regions of this batch do. Between the outer and inner loop sits a single-value read (ccdc) with an early `continue`, and the inner loop's body performs per-mop AGGREGATION (collect all cbu_data for this mop, sort, keep the top two) before the entry dict is built. Flattening to `for mop, cbu in m{ ?mop a ontomops:MetalOrganicPolyhedron ; ontomops:hasChemicalBuildingUnit ?cbu }:` would lose the grouping the sort+top-2 logic needs, and rebuilding it (groupby mop) is a structural change the study's own rules forbid ('pas de refactorisation'). So m{ } is applied per selector (`for mop in m{ ?mop a ontomops:MetalOrganicPolyhedron }`, then `for cbu in m{ {mop} ontomops:hasChemicalBuildingUnit ?cbu }`) rather than as one join: still a real, if more modest, win (no more URIRef(str(NS)+\"local\") string-concatenation, no more RDF.type/list()/[0]-or-default boilerplate for the single-value reads), but not the flagship fusion. Not every trav_navigation-sampled region has an outer/inner pair with nothing but the join between them.",
+    "fusing `?mop a ontomops:MetalOrganicPolyhedron ; ontomops:hasCCDCNumber ?ccdc` was also considered and rejected for a different reason: the original takes only ccdc_vals[0] (a single value, via `.first()`-equivalent semantics), so a mop with two or more hasCCDCNumber triples would silently multiply into duplicate procedures under a join, whereas the original and the `.first()` translation both keep exactly one. A rare-in-practice cardinality difference is still a behaviour difference, so it was kept as two separate steps rather than one join."
   ],
   "draft_sha": "b64b999d7ef70180",
   "provenance": {

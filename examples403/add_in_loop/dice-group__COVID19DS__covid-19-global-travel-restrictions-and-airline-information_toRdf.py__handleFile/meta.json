@@ -14,12 +14,17 @@
     "term_constructor": 8,
     "triple_add": 13
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}"],
   "translation_notes": [
-    "prefixes: prov->prov, cvdo->cvdo, ndice->ndice, virtrdf->virtrdf, geo->geo, dowl->dowl, XSD->xsd, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl"
+    "prefixes: prov->prov, cvdo->cvdo, ndice->ndice, virtrdf->virtrdf, geo->geo, dowl->dowl, XSD->xsd, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl",
+    "'for @bindings in' NON utilise ici, deliberement, malgre 'reader' etant un iterable de mappings (chaque ligne CSV). Empiriquement verifie (voir scratchpad) : 'for @bindings as row in reader:' fait entrer CHAQUE valeur de la ligne dans un objet ldpy.runtime.Bindings via node(), donc row['x'] devient un rdflib.Literal des l'entree dans la boucle -- pas une lecture paresseuse au moment ou l'ilot lit '?x'. Or Literal('') != '' vaut True (Literal.__eq__ n'accepte pas un str nu) : la garde 'row[heading] != \"\"' du code original serait toujours vraie, cassee silencieusement. re.sub/.lower()/pycountry.countries.get(alpha_3=...) sur un Literal auraient aussi un comportement different d'un str. Cette region traite value-comme-donnee-Python ET value-comme-terme-RDF avec LA MEME variable dans la meme boucle (traitement par colonne generique 'for heading in row') : le coercement precoce de @bindings n'est pas sans risque ici. Garde 'for row in reader:' Python ordinaire ; aucun besoin de '@bindings' d'ailleurs, car chaque valeur ecrite dans +{ } passe deja par une variable Python explicite (dice, metapredicate, metaobject) avant l'ilot -- couverte par l'interpolation {expr} plutot que par un '?var' lie.",
+    "'ndice[isoitem]' / 'cvdo[strCamelCase]' (Namespace.__getitem__ rdflib sur une variable Python ORDINAIRE, pas un '?var') se traduisent sans piege en 'ndice:{isoitem}' / 'cvdo:{strCamelCase}' -- interpolation de la partie locale d'un nom prefixe, verifiee empiriquement identique a Namespace[...] (concatenation simple, pas de pourcent-encodage). Ce n'est PAS le piege 'ex:{?id}' : ce piege ne frappe que quand l'expression interpolee est elle-meme un '?var' SPARQL (elle s'evalue alors en l'objet Variable('id'), dont str() est 'id', jamais en la valeur liee) ; une variable Python ordinaire s'interpole normalement, meme entre les accolades du nom prefixe.",
+    "shim _context.py : repl/capitalizeWords recopies tels quels des aides de module du vrai fichier (hors des lignes extraites). reader est ecrit a la main : ni pandas ni pycountry ne sont installes dans le venv de l'etude, et surtout le CSV source ('Data WFP Coronavirus ... airline restrictions information.csv') n'est PAS versionne dans le depot au commit epingle (verifie via gh api : le dossier ne contient que README, nuts/, toRdf.py) -- aucune donnee reelle n'est recuperable de toute facon. Couvre : 3 lignes, un iso3 multi-valeurs separe par virgule, un code ISO3 valide et un invalide (les deux branches du lookup pycountry), coordonnees geo presentes/absentes, 'source' avec/sans URL, cellules vides (branche 'row[heading] != \"\"').",
+    "shim pycountry.py (fichier de meme nom que le paquet tiers absent, capte par le 'import pycountry' inchange de original.py car le repertoire de la region est en tete de sys.path) : deux entrees ISO 3166-1 reelles (MEX, FRA), suffisant pour les deux branches exercees par le fixture."
   ],
+  "article_candidate": true,
   "draft_sha": "a4596aeb5cd76c34",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.570019+00:00",

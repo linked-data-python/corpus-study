@@ -12,12 +12,25 @@
   "categories": {
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: SEM->sem, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "Two one-step traversals in this region, both translated: ks = [t for t in ab.objects(i, RDF.type) if t in kind_cls] -> [t for t in m{ {i} rdf:type ?t } if t in kind_cls], and notes = list(ab.objects(i, SEM.instanceKindNote)) -> list(m{ {i} sem:instanceKindNote ?n }). Also translated the subjects()-direction one-step read insts = set(ab.subjects(SEM.hasSourceProvenance, None)) -> set(m{ ?s sem:hasSourceProvenance [] }): a blank node in object position is the 'match but do not project' wildcard (confirmed non-BNode terms, both a URIRef and a Literal, match it in the fixture) -- the direct counterpart of rdflib's object=None.",
+    "SEM[f'Kind{k}'] (bracket indexing on a Namespace, computed local part) becomes sem:{f'Kind{k}'}: terms.md's 'local part may itself be interpolated' form, not seen in the other two regions of this batch.",
+    "categories in this meta.json undercount the region: only 'namespace_term' is listed, but the region reads a graph through two rdflib calls (ab.objects, ab.subjects) plus one more in its immediate context (ab.subjects for insts). Matches the known gap (INSTRUCTIONS_403 SS5, 'lectures sans ilot dedie avant m{ }'): ab is a bare module-level name with no type annotation, so the classifier that produced rdf_ops/categories did not recognise it as a graph.",
+    "meta.oracle is 'isomorphism', and the harness's module-state comparison (rdfeval/harness.py, entry=None) now compares every comparable module-level value, not just graphs -- bad, ks, notes, insts and kind_cls are all directly compared. Checked this is load-bearing (not a hollow green from the untouched `ab` alone) by deliberately mistranslating the ks pattern during review: the verdict failed on bad/ks/stdout together. See driver.py.",
+    "Context-extraction findings, both documented at length in original.py: (1) three of the twelve 'context' lines this region's meta.json context array listed are not really this region's context -- two bare 'bad = []' resets and an os.walk comprehension sit textually AFTER the region in the source file (its own later gates), not before it; (2) the extractor also missed 'from rdflib import Graph, Namespace', despite Graph()/Namespace(...) being used by lines it did keep. Both look like defects in the corpus/404 context-extraction tooling, not a language limitation -- worth a look by whoever maintains it.",
+    "Context shim (semtech_context.py): EC.KIND_DEFNS restored from the real landscape/07-tooling/enrichment_c_v2_0_0.py at the pinned commit (fetched over the network to verify), keeping only the 14 dict keys the region's logic actually reads and dropping their prose definitions. ab now parses this region's own fixture.ttl instead of the source pipeline's external TTL (same restore-the-binding treatment as the other two regions in this batch)."
+  ],
+  "article_candidate": true,
   "draft_sha": "8a0ff6684b351ec6",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.101037+00:00",

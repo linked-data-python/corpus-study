@@ -3,10 +3,7 @@
 # licence of the source repository: see meta.json
 import json
 import sys
-from rdflib import Graph, Namespace, URIRef, RDF, RDFS, Literal
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+from rdflib import Graph, Literal
 
 def main():
     """Main function to build complete CBU JSON."""
@@ -34,31 +31,32 @@ def main():
 
     print(f"Loading {len(expanded_files)} TTL files for hash {hash_value}")
     graph = load_ttl_files(expanded_files)
+    @graph graph
 
     # For integrated TTL files, use direct processing
     print("Processing integrated TTL files directly...")
     procedures = []
 
-    ONTOMOPS = Namespace("https://www.theworldavatar.com/kg/ontomops/")
-    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
+    @prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-    for mop in graph.subjects(rdf:type, URIRef(str(ONTOMOPS) + "MetalOrganicPolyhedron")):
-        ccdc_vals = list(graph.objects(mop, URIRef(str(ONTOMOPS) + "hasCCDCNumber")))
-        ccdc = str(ccdc_vals[0]) if ccdc_vals else "N/A"
+    for mop in m{ ?mop a ontomops:MetalOrganicPolyhedron }:
+        ccdc_val = m{ {mop} ontomops:hasCCDCNumber ?v }.first()
+        ccdc = str(ccdc_val) if ccdc_val is not None else "N/A"
 
         if ccdc == "N/A":
             continue
 
         # Get all CBUs for this MOP
         cbu_data = []
-        for cbu in graph.objects(mop, URIRef(str(ONTOMOPS) + "hasChemicalBuildingUnit")):
+        for cbu in m{ {mop} ontomops:hasChemicalBuildingUnit ?cbu }:
             # Get the formula
-            formula_vals = list(graph.objects(cbu, URIRef(str(ONTOMOPS) + "hasCBUFormula")))
-            formula = str(formula_vals[0]) if formula_vals else "N/A"
+            formula_val = m{ {cbu} ontomops:hasCBUFormula ?v }.first()
+            formula = str(formula_val) if formula_val is not None else "N/A"
 
             # Get names from labels
             names = []
-            for label in graph.objects(cbu, rdfs:label):
+            for label in m{ {cbu} rdfs:label ?label }:
                 names.append(str(label))
 
             cbu_data.append((formula, names))

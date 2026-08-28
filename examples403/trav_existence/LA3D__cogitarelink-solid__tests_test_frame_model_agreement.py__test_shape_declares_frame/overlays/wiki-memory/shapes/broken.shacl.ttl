@@ -1,0 +1,12 @@
+# Synthetic (no counterpart in the source repository): a NodeShape declared
+# the same way as the real ones but missing sub:frameRole entirely -- the
+# FALSE / zero-solution case for `bool(m{ {shape} sub:frameRole ?fr })`,
+# which the three real shape files (page/thing/concept, all TRUE) do not
+# exercise on their own.
+@prefix wiki: <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+wiki:BrokenShape
+    a sh:NodeShape ;
+    rdfs:label "Broken Shape (no frame annotations)" .

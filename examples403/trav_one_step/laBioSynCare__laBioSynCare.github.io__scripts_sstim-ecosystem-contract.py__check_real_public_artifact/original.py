@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV, XSD
+from sstim_context import require
 ECO = Namespace("https://w3id.org/sstim/ecosystem#")
 
 def check_real_public_artifact(artifact: Graph, label: str) -> list[str]:

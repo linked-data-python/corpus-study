@@ -1,4 +1,39 @@
-# Input graph for laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__check_real_public_artifact — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__check_real_public_artifact
+# Covers: several solutions for each of the three one-step type traversals
+# (agents/relationships/activities), a zero-solution instance for the
+# curator/actor traversal (agent2 has no prov:wasAttributedTo), a curator
+# that fails verification (agent3 -> notAnAgent), and neighbouring data that
+# must not match: a differently-typed subject, and a wrong predicate
+# (prov:used) that must not be picked up by the wasAttributedTo traversal.
+@prefix eco:  <https://w3id.org/sstim/ecosystem#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+# agent1: curator is itself, and IS a verified agent -> no error. Also
+# carries two prov:used objects (wrong predicate: must not surface as a
+# wasAttributedTo curator) used by the whole-graph all_nodes() checks below.
+eco:agent1 a eco:EcosystemAgent ;
+    prov:wasAttributedTo eco:agent1 ;
+    prov:used <https://example.org/fixture-thing>,
+              <https://w3id.org/sstim/ecosystem/synthetic-blob> .
+
+# agent2: no prov:wasAttributedTo at all -- the zero-solution case for the
+# one-step curator traversal (the inner for-loop must simply not run).
+eco:agent2 a eco:EcosystemAgent .
+
+# agent3: curator is eco:notAnAgent, which is NOT a verified EcosystemAgent
+# -> triggers the "must be a verified EcosystemAgent" error.
+eco:agent3 a eco:EcosystemAgent ;
+    prov:wasAttributedTo eco:notAnAgent .
+
+# Neighbour: exists, but typed as something else entirely -- must not be
+# picked up by `?s a eco:EcosystemAgent`.
+eco:notAnAgent a eco:SomeOtherType .
+
+eco:rel1 a eco:EcosystemRelationship ;
+    prov:wasAttributedTo eco:agent1 .
+
+eco:act1 a eco:EngagementActivity ;
+    prov:wasAssociatedWith eco:agent2 .
+
+# Exercises the (untranslated, whole-graph) implementation-subject check.
+<https://w3id.org/sstim/implementation/thing1> prov:wasGeneratedBy eco:agent1 .

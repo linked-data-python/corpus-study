@@ -5,17 +5,15 @@ from typing import Union, List, Callable, ClassVar, Tuple, Any
 from rdflib import URIRef, Graph
 from rdflib.namespace import OWL, RDF, RDFS
 from rdflib.term import BNode
-from funowl.base.clone_subgraph import clone_subgraph, USE_BNODE_COPIES
-from funowl.base.rdftriple import SUBJ, TRIPLE, PRED, TARG
+from context_shim import clone_subgraph, USE_BNODE_COPIES, SUBJ, TRIPLE, PRED, TARG
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 
 def TANN(self, g: Graph, subj: Union[SUBJ, TRIPLE]) -> None:
     """
     TANN function as defined in https://www.w3.org/TR/2012/REC-owl2-mapping-to-rdf-20121211/#Translation_of_Annotations
     """
+    @graph g
     # Tuple form means that we are annotating a triple:
     #  T(y) T(AP) T(av) .
     # _:x rdf:type owl:Annotation .
@@ -29,8 +27,7 @@ def TANN(self, g: Graph, subj: Union[SUBJ, TRIPLE]) -> None:
         if isinstance(subj, Tuple):
             # Subj is a triple -- reify it
             x = BNode()
-            g += g{
-                {x} a {self.annotation_type} ;
+            +{ {x} a {self.annotation_type} ;
                    owl:annotatedSource {clone_subgraph(g, subj[0]) if USE_BNODE_COPIES else subj[0]} ;
                    owl:annotatedProperty {subj[1]} ;
                    owl:annotatedTarget {clone_subgraph(g, subj[2]) if USE_BNODE_COPIES else subj[2]}

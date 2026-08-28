@@ -1,0 +1,17 @@
+# Trimmed from LA3D/cogitarelink-solid@49121503ea :
+# overlays/wiki-memory/shapes/thing.shacl.ttl -- real predicates and values
+# for wiki:ThingShape, minus the sh:property / sh:agentInstruction blocks.
+@prefix wiki:   <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix sub:    <https://pod.vardeman.me/vault/ontology/substrate#> .
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+
+wiki:ThingShape
+    a sh:NodeShape ;
+    rdfs:label "Wiki Thing Shape" ;
+    rdfs:comment "Abstract parent shape governing common schema:Thing predicates." ;
+    sh:targetClass schema:Thing ;
+    sub:frameRole "thing" ;
+    sub:governsSubject "<#this>" ;
+    sub:labelProperty schema:name .

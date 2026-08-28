@@ -1,0 +1,18 @@
+# Trimmed from LA3D/cogitarelink-solid@49121503ea :
+# overlays/wiki-memory/shapes/concept.shacl.ttl -- real predicates and
+# values for wiki:ConceptShape, minus the sh:property / sh:agentInstruction
+# blocks.
+@prefix wiki:   <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix sub:    <https://pod.vardeman.me/vault/ontology/substrate#> .
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+
+wiki:ConceptShape
+    a sh:NodeShape ;
+    rdfs:label "Wiki Concept Shape" ;
+    rdfs:comment "SHACL shape governing wiki pages about abstract concepts, theories, and ideas." ;
+    sh:targetClass skos:Concept ;
+    sub:frameRole "concept" ;
+    sub:governsSubject "<#this>" ;
+    sub:labelProperty skos:prefLabel .

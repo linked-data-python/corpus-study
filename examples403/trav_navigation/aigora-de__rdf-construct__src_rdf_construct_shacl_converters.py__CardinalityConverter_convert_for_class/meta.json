@@ -13,12 +13,26 @@
     "graph_read": 14,
     "namespace_term": 16
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, OWL->owl"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}",
+    "prefixed name"
   ],
+  "translation_notes": [
+    "prefixes: RDFS->rdfs, OWL->owl. RDF and XSD stay unused in the region's own body (they are only reached through context_shim's `_is_datatype`), so no @prefix rdf:/xsd: is declared -- an unused prefix would be noise.",
+    "the region's ONE navigation loop is really a hand-written 3-pattern join wearing a `for` + two early `continue`s: `for superclass in source_graph.objects(cls, RDFS.subClassOf)` narrowed by `(superclass, RDF.type, OWL.Restriction) not in source_graph` (an existence check) and then `source_graph.value(superclass, OWL.onProperty)` (a single-value lookup that must also succeed). All three share the variable `superclass`, so they fuse into one `m{ {cls} rdfs:subClassOf ?superclass . ?superclass a owl:Restriction ; owl:onProperty ?on_prop }` yielding (superclass, on_prop) pairs directly -- this IS the stratum's headline gain, just arrived at by recognising a filter-chain as a join rather than starting from two literal nested `for`s.",
+    "the `isinstance(superclass, BNode)` check cannot move into the pattern (m{ } has no term-kind filter) and is kept exactly where Python would run it, now applied per-solution instead of gating a second selector. This does not change which (superclass, on_prop) pairs end up producing a constraint: an owl:Restriction that is not itself a blank node is vanishingly rare in real OWL and either way the original never got to it (isinstance(BNode) fails BEFORE the Restriction/onProperty checks in the original, whereas the joined version checks Restriction/onProperty first and BNode-ness after) -- purely a reordering of two pure, side-effect-free reads, so the OBSERVABLE result is identical; noted rather than silently exploited.",
+    "the eleven subsequent `source_graph.value(superclass, OWL.x)` single-value reads (exact/min/max/qualified/qualified-min/qualified-max cardinality, onClass, onDataRange, someValuesFrom, allValuesFrom) are each the textbook trav_single_value idiom and become `m{ {superclass} owl:x ?v }.first()` -- same construction the stratum table assigns to `g.value`, applied here inside a trav_navigation region because 'always the most specific construction' is per-idiom, not per-stratum.",
+    "fixture.ttl carries ten positive restrictions on ex:Widget (one per branch, including both arms of `_is_datatype`: the XSD-namespace check via someValuesFrom xsd:integer, and the rdfs:Datatype-declaration check via allValuesFrom ex:StatusEnum) and four negative neighbours that each satisfy exactly one or two of the three joined motifs but not all three -- proving the fusion actually joins. A second driver call on ex:Gadget (zero restrictions) exercises the empty-list zero-solution case.",
+    "`self` is a shared, stateless CardinalityConverter-shim instance reused for every call on both sides (see driver.py): a fresh instance per side would fail the harness's default `==` (object identity) for a reason with nothing to do with the translation."
+  ],
+  "article_candidate": true,
   "draft_sha": "c861c5ea2d88d642",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.825720+00:00",

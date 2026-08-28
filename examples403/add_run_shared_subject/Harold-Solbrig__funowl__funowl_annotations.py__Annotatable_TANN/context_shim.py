@@ -14,11 +14,20 @@
 # AnnotationValue / IRI / Literal wrappers behind .property and .value:
 # TANN only ever calls their .to_rdf(g), so that is all this shim
 # reproduces.
-from typing import Dict
+from typing import Dict, Tuple, Union
 
-from rdflib import BNode, Graph, URIRef
+from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import OWL
 from rdflib.term import Node
+
+# funowl/base/rdftriple.py, copied verbatim (self-contained type aliases):
+# needed because `def TANN(self, g, subj: Union[SUBJ, TRIPLE])` evaluates
+# its annotation eagerly at def-time (no `from __future__ import
+# annotations` in the real module either).
+SUBJ = Union[BNode, URIRef]
+PRED = Union[URIRef]
+TARG = Union[SUBJ, Literal]
+TRIPLE = Tuple[SUBJ, PRED, TARG]
 
 USE_BNODE_COPIES = True
 

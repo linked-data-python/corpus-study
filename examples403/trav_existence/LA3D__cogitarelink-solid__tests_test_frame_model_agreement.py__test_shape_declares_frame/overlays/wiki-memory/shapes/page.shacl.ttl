@@ -1,0 +1,30 @@
+# Trimmed from LA3D/cogitarelink-solid@49121503ea :
+# overlays/wiki-memory/shapes/page.shacl.ttl -- real predicates and values
+# for wiki:PageShape, minus the sh:property / sh:agentInstruction blocks the
+# region under test never reads.
+@prefix wiki:   <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix sub:    <https://pod.vardeman.me/vault/ontology/substrate#> .
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix dct:    <http://purl.org/dc/terms/> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+
+wiki:PageShape
+    a sh:NodeShape ;
+    rdfs:label "Wiki Page Shape" ;
+    rdfs:comment "SHACL shape governing the page-resource <> subject in every L3 wiki page's .meta." ;
+    sh:targetClass wiki:Page ;
+    sub:frameRole "page" ;
+    sub:governsSubject "<>" ;
+    sub:labelProperty dct:title .
+
+# Neighbourhood: another shape with the same predicates and a DIFFERENT
+# frameRole. A query that let the subject binding leak (matching any
+# sh:NodeShape instead of the given {shape}) would read this one's "draft"
+# instead of PageShape's "page", and the driver would not notice without it.
+wiki:PageDraftShape
+    a sh:NodeShape ;
+    rdfs:label "Wiki Page Draft Shape" ;
+    sh:targetClass wiki:PageDraft ;
+    sub:frameRole "draft" ;
+    sub:governsSubject "<>" ;
+    sub:labelProperty dct:title .

@@ -1,0 +1,45 @@
+# Input graph for RDFLib__prez__prez_services_query_generation_shacl.py__PropertyShape__parse_property_path
+# written against the region, not against the translation.
+#
+# Each ex:caseN ex:path ... anchors one SHACL path node reachable by a
+# stable IRI (driver.py looks it up fresh per side, since blank node
+# identifiers are not stable across two separate parses of this file).
+#
+# The construction this stratum exists to exercise is
+# `if self.graph.value(pp, RDF.first):` -- "is this blank node the head of
+# an RDF list" -- translated as `if bool(m{ {pp} rdf:first ?x }):`.  case1
+# and case7 give it a TRUE reading (their pp is a list head, built by
+# Turtle's `( ... )` collection syntax); case3 and case4 give it a FALSE /
+# zero-solution reading (a blank node with exactly one predicate-object
+# pair, and no rdf:first at all -- the neighbourhood that must not match).
+@prefix ex: <http://example.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# case1: sequence path as an RDF list -- TRUE branch, and a plain URIRef
+# leaf at each position via the recursive isinstance(pp, URIRef) case.
+ex:case1 ex:path ( ex:p1 ex:p2 ) .
+
+# case2: a bare predicate path -- pp is a URIRef, the graph-reading branch
+# is never reached at all.
+ex:case2 ex:path ex:directProp .
+
+# case3: sh:inversePath -- a single predicate-object blank node, not a list
+# head: FALSE / zero-solution branch of the same existence check.
+ex:case3 ex:path [ sh:inversePath ex:parent ] .
+
+# case4: sh:zeroOrMorePath, same shape as case3 -- another FALSE instance,
+# and the neighbourhood for case1/case7's list-head blank nodes: it has
+# predicates too, but never rdf:first.
+ex:case4 ex:path [ sh:zeroOrMorePath ex:child ] .
+
+# case5: sh:alternativePath over an RDF list -- exercises Collection() and
+# the recursive parse of each alternative.
+ex:case5 ex:path [ sh:alternativePath ( ex:a ex:b ) ] .
+
+# case6: sh:union -- returns None; its members are routed through
+# _add_path_to_shape instead of the return value.
+ex:case6 ex:path [ sh:union ( ex:u1 ex:u2 ) ] .
+
+# case7: a sequence whose second element is itself an inverse path --
+# recursion inside the while loop, with a non-leaf (blank node) list member.
+ex:case7 ex:path ( ex:p3 [ sh:inversePath ex:p4 ] ) .

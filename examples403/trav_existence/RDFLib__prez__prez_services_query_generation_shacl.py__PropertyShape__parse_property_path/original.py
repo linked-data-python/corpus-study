@@ -1,10 +1,16 @@
 # Extracted from RDFLib/prez@421ee0a9fe : prez/services/query_generation/shacl.py
 # region: PropertyShape._parse_property_path (lines 343-413, stratum trav_existence)
 # licence of the source repository: see meta.json
-from rdflib import RDFS, BNode, Graph, URIRef, XSD
+from typing import Dict, Type
+from rdflib import RDFS, BNode, Graph, Namespace, URIRef, XSD
 from rdflib.collection import Collection
 from rdflib.namespace import RDF, SH
 from rdflib.term import Node, Literal
+from context_shim import (
+    SHEXT, PropertyPath, Path, SequencePath, InversePath,
+    ZeroOrMorePath, OneOrMorePath, ZeroOrOnePath, AlternativePath,
+    BNodeDepth, PropertyShapeStub,
+)
 PRED_TO_PATH_CLASS: Dict[URIRef, Type[PropertyPath]] = {
     SH.inversePath: InversePath,
     SH.zeroOrMorePath: ZeroOrMorePath,
@@ -85,3 +91,19 @@ def _parse_property_path(self, pp: Node) -> PropertyPath:
             )
     else:
         raise ValueError(f"Unexpected node type in SHACL path: {type(pp)}")
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# method (`self`) whose result is a PropertyPath tree or None, and whose
+# other observable effect (the sh:union branch) goes through
+# `self._add_path_to_shape` rather than the return value.  `demo` looks up
+# the path node anchored at `ex:{anchor} ex:path`, runs the region against a
+# fresh PropertyShapeStub, and returns both.
+EX = Namespace("http://example.org/")
+
+
+def demo(graph, anchor):
+    pp = graph.value(EX[anchor], EX.path)
+    stub = PropertyShapeStub(graph)
+    result = _parse_property_path(stub, pp)
+    return (result, sorted((str(item), union) for item, union in stub.union_paths))
