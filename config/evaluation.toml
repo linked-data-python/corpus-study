@@ -118,3 +118,22 @@ timeout_seconds = 60
 [userstudy]
 # How many validated pairs are exported as user-study task material.
 max_tasks = 24
+
+[surface]
+# Design-oriented surface analysis (`python -m rdfeval surface`).
+#
+# Repositories excluded from the *surface* analysis, each with its reason.
+# They stay in the corpus and in the analysis of RDF density: what disqualifies
+# them is not their code but the fact that counting their shapes would break
+# the independence of observations, or that their use of RDFLib is reflexive
+# rather than applicative.  No excluded repository contributed any of the 140
+# validated translation pairs, so the main study is unaffected.
+#
+# Format: one "owner/name = reason" line per repository.
+[surface.excluded]
+"FacultadInformatica-LinkedData/Curso2025-2026" = "course repository: one near-identical copy of the same assignment per student, so every shape is counted as many times as there are students"
+"FacultadInformatica-LinkedData/Curso2025-2026-ODKG" = "course repository, and a near-duplicate of Curso2025-2026"
+"FacultadInformatica-LinkedData/Curso2021-2022" = "course repository: per-student copies of the same assignment"
+"FacultadInformatica-LinkedData/Curso2021-2022-ODKG" = "course repository, and a near-duplicate of Curso2021-2022"
+"FacultadInformatica-LinkedData/Curso2023-2024" = "course repository: per-student copies of the same assignment"
+"alcides/rdflib" = "a fork of RDFLib itself: its use of RDFLib is the implementation of the library, not application code written against it"
