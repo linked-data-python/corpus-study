@@ -10,7 +10,7 @@ from .config import load_config
 
 STAGES = ("discover", "select", "acquire", "analyze", "sample", "regions",
           "translate", "validate", "compare", "aggregate", "audit",
-          "surface", "strata", "check", "status", "article",
+          "surface", "strata", "check", "status", "article", "review",
           "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
@@ -30,6 +30,17 @@ def main(argv: list[str] | None = None) -> int:
                         help="alternative evaluation.toml")
     parser.add_argument("--limit", type=int, default=None,
                         help="select: cap the number of repositories")
+    parser.add_argument("--stratum", default=None,
+                        help="review: restrict to one stratum")
+    parser.add_argument("--set", dest="set_to", default=None,
+                        choices=("approved", "rejected", "needs-work",
+                                 "unreviewed"),
+                        help="review: record a verdict without the loop")
+    parser.add_argument("--region", default=None, help="review: with --set")
+    parser.add_argument("-m", "--comment", default=None)
+    parser.add_argument("--reviewer", default=None)
+    parser.add_argument("--list", dest="list_only", action="store_true",
+                        help="review: list what awaits review and stop")
     parser.add_argument("--run-checks", action="store_true",
                         help="status: also run the two machine checks on "
                              "every pair marked final")
@@ -83,6 +94,12 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "strata":
             from . import strata
             strata.run(config)
+        elif stage == "review":
+            from . import review
+            review.run(config, study, stratum=args.stratum,
+                       set_to=args.set_to, region=args.region,
+                       comment=args.comment, reviewer=args.reviewer,
+                       list_only=args.list_only)
         elif stage == "article":
             from . import article
             article.run(config, study)
