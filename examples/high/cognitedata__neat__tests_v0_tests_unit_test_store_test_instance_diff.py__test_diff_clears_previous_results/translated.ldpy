@@ -1,0 +1,37 @@
+# Extracted from cognitedata/neat@4042d3e96d : tests/v0/tests_unit/test_store/test_instance_diff.py
+# region: test_diff_clears_previous_results (lines 65-93, band high)
+# licence of the source repository: see meta.json
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix namedgraph: <http://thisisneat.io/namedgraph/> .
+from rdflib import Literal
+from cognite_neat_shim import NeatInstanceStore
+
+def test_diff_clears_previous_results() -> None:
+    """Test that calling diff twice clears previous results"""
+    store = NeatInstanceStore.from_oxi_local_store()
+    @prefix ex: <http://example.org/> .
+
+    current1, new1 = <urn:current1>, <urn:new1>
+    current2, new2 = <urn:current2>, <urn:new2>
+
+    # First diff
+    store._add_triples([(ex:a, rdf:type, ex:T1)], named_graph=current1)
+    store._add_triples([(ex:b, rdf:type, ex:T1)], named_graph=new1)
+    store.diff(current1, new1)
+
+    assert (ex:b, rdf:type, ex:T1) in store.graph(namedgraph:DIFF_ADD)
+    assert (ex:a, rdf:type, ex:T1) in store.graph(namedgraph:DIFF_DELETE)
+
+    # Second diff - should clear first results
+    store._add_triples([(ex:c, rdf:type, ex:T2)], named_graph=current2)
+    store._add_triples([(ex:d, rdf:type, ex:T2)], named_graph=new2)
+    store.diff(current2, new2)
+
+    add_graph = store.graph(namedgraph:DIFF_ADD)
+    delete_graph = store.graph(namedgraph:DIFF_DELETE)
+    assert len(add_graph) == 1
+    assert len(delete_graph) == 1
+    assert (ex:d, rdf:type, ex:T2) in add_graph
+    assert (ex:c, rdf:type, ex:T2) in delete_graph
+    assert (ex:b, rdf:type, ex:T1) not in add_graph  # Cleared
+    assert (ex:a, rdf:type, ex:T1) not in delete_graph  # Cleared

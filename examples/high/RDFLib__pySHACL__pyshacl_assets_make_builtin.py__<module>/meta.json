@@ -1,0 +1,39 @@
+{
+  "region_id": "RDFLib__pySHACL__pyshacl_assets_make_builtin.py__<module>",
+  "repository": "RDFLib/pySHACL",
+  "commit": "469cca7a22a078b36c167c1e8dadecf5e5ec6c75",
+  "path": "pyshacl/assets/make_builtin.py",
+  "qualname": "<module>",
+  "lineno": 1,
+  "end_lineno": 35,
+  "band": "high",
+  "kind": "file",
+  "rdf_ops": 8,
+  "categories": {
+    "graph_ctor": 4,
+    "term_constructor": 4
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "the four URIRef(\"...\") term constructors become IRI islands <...>; the transpiler emits exactly URIRef('...'), so the change is purely notational",
+    "with the term constructor absorbed by the notation, URIRef is no longer needed: 'from rdflib import Graph, URIRef' becomes 'from rdflib import Graph' (same style as the reference example)",
+    "negative finding: only 4 of the 8 RDF operations are expressible - the four Graph(store=..., identifier=..., bind_namespaces='core').parse(file=f) calls are graph *plumbing* (named graphs over an explicit Memory store, pickled afterwards) that no island form covers; g{ ... } builds a fresh default Graph and cannot be given a store or an identifier",
+    "context shim: pyshacl/ in the example directory is a stub package whose pyshacl/monkey/__init__.py is a verbatim copy of RDFLib/pySHACL@469cca7a22 (its only dependencies are rdflib and packaging); this keeps 'from pyshacl.monkey import apply_patches' unchanged on both sides - no import line was edited",
+    "driver.py copies the four .ttl assets (~1.4 MB, too large to vendor) from the corpus checkout into a scratch directory and runs both representations there, since the region reads ./*.ttl and writes ./*.pickle relative to the current directory; the scratch directory is removed afterwards and the corpus copy is never written to",
+    "driver limitation: module-state comparison observes the graph g (the last of the four, 420 triples) and stdout; the `identifier` URIRefs themselves are not compared by the harness because they are not Graphs, so the four islands are additionally checked by inspecting the transpiler output"
+  ],
+  "draft_sha": "cfb44d23b25abc04",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:22.187735+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
+}

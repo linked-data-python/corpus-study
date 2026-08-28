@@ -1,0 +1,56 @@
+# Extracted from landrs-toolkit/PySOSA@1993668bd7 : PySOSA/Actuator.py
+# region: Actuator.__init__ (lines 22-46, band high)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Literal
+from PySOSA import config as cfg
+from PySOSA.ActuatableProperty import ActuatableProperty
+from PySOSA.Procedure import Procedure
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+obsgraph = cfg.get_graph()
+
+def __init__(self, *args):
+    """ instantiating Actuator object
+       Args:
+           *args (str): label, comment, actuatable property, prdocedure
+       Returns:
+           actuator object: instantiated with actuator  properties
+    """
+    global obsgraph          # `obsgraph += g{ }` would otherwise be a local
+    self.actuator_id = BNode()
+    self.platform_id = BNode()
+    self.label = Literal(args[0])
+    self.comment = Literal(args[1])
+    self.actuatableProperty = (args[2])
+    self.procedure = Literal(args[3])
+
+    obsgraph += g{
+        {self.actuator_id} a sosa:Actuator ;
+            rdfs:comment {self.comment} ;
+            rdfs:label {self.label}
+    }
+    # add list of actuatable properties
+    for act in self.actuatableProperty:
+        if isinstance(act, ActuatableProperty):
+            obsgraph += g{ {self.actuator_id} sosa:observes {act.label} }
+    # add list of procedures
+    for pro in self.procedure:
+        if isinstance(pro, Procedure):
+            obsgraph += g{ {self.sensor_id} sosa:implements {pro.label} }
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region writes into the module-level `obsgraph` and returns nothing, so
+# that graph is the observable.  In this extract __init__ is a plain
+# module-level function; call it on a bare instance.
+class _Instance:
+    pass
+
+
+__init__(_Instance(),
+         "Valve 1",
+         "The main water valve of the demo deployment",
+         [ActuatableProperty("water flow", "the flow the valve actuates"),
+          "not an ActuatableProperty"],
+         "open the valve")

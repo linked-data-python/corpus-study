@@ -1,0 +1,18 @@
+# Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
+# region: TestReplaceBlankNodes.test_replace_blank_nodes_unnamed_bnode (lines 692-699, band high)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
+from nanopub import (
+    Nanopub,
+    NanopubConf,
+    namespaces,
+)
+
+def test_replace_blank_nodes_unnamed_bnode(self):
+    # BNode with 33-character name triggers unnamed branch
+    bname = "N" + "a" * 32
+    g = Dataset()
+    g.add((BNode(bname), URIRef("http://test/p"), Literal("value")))
+    np = Nanopub(conf=NanopubConf())
+    g2 = np._replace_blank_nodes(g)
+    assert len(list(g2.quads((None, None, None, None)))) == 1

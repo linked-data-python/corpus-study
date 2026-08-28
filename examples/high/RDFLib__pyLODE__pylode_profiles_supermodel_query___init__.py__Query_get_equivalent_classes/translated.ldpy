@@ -1,0 +1,88 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/__init__.py
+# region: Query.get_equivalent_classes (lines 950-977, band high)
+# licence of the source repository: see meta.json
+from rdflib import Dataset, Graph, Literal, URIRef
+from rdflib.namespace import (
+    DC,
+    DCTERMS,
+    FOAF,
+    ORG,
+    OWL,
+    PROF,
+    PROV,
+    QB,
+    RDF,
+    RDFS,
+    SDO,
+    SH,
+    SKOS,
+    VANN,
+)
+from pylode.profiles.supermodel.model import (
+    Class,
+    CodedProperty,
+    ComponentModel,
+    ImageObject,
+    MediaObject,
+    Note,
+    Profile,
+    ProfileHierarchyItem,
+    ProfileType,
+    Property,
+    RDFProperty,
+    Resource,
+    SimpleCodedProperty,
+    TextObject,
+)
+from pylode.profiles.supermodel.query.common import (
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+
+    get_class,
+    get_descriptions,
+    get_is_defined_by,
+    get_name,
+    get_subclasses,
+    get_values,
+)
+
+def get_equivalent_classes(
+    self, iri: URIRef, graph: Graph, ignored_classes: list[URIRef]
+) -> list[Class]:
+    """Extract the equivalent classes of a class and return the supermodel
+    representation.
+
+    Args:
+        iri: The IRI of the class whose equivalent classes are being resolved.
+        graph: The profile graph to read the owl:equivalentClass statements from.
+        ignored_classes: Class IRIs to exclude from the result.
+
+    Return:
+        A list of he super model class representations, sorted by name.
+    """
+    equivalent_classes = filter(
+        lambda x: x not in ignored_classes and isinstance(x, URIRef),
+        list(graph.objects(iri, owl:equivalentClass)),
+    )
+    return sorted(
+        [
+            Class(
+                iri=equivalent_class,
+                name=get_name(equivalent_class, graph, self.db),
+            )
+            for equivalent_class in equivalent_classes
+        ],
+        key=lambda x: x.name,
+    )

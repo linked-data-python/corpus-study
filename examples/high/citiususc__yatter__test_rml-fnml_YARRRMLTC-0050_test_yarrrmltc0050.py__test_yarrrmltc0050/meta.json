@@ -1,0 +1,39 @@
+{
+  "region_id": "citiususc__yatter__test_rml-fnml_YARRRMLTC-0050_test_yarrrmltc0050.py__test_yarrrmltc0050",
+  "repository": "citiususc/yatter",
+  "commit": "0b40dff6234fbbee868444d855576ef7626cbf5e",
+  "path": "test/rml-fnml/YARRRMLTC-0050/test_yarrrmltc0050.py",
+  "qualname": "test_yarrrmltc0050",
+  "lineno": 16,
+  "end_lineno": 25,
+  "band": "high",
+  "kind": "function",
+  "rdf_ops": 4,
+  "categories": {
+    "graph_ctor": 2,
+    "serialize_parse": 2
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "identity translation: the region is one of yatter's generated conformance tests -- parse a reference mapping.ttl, run the YARRRML translator, parse its Turtle output, compare by isomorphism. Every RDF term lives in the two data files, none in the Python source, so no island applies and translated.ldpy is byte-identical to original.py",
+    "the band-'high' rdf_ops score comes entirely from Graph()/parse(); it is a good illustration that a high count of RDF operations does not imply any RDF *notation* in the source. The RDF that matters here is data, and ldpy changes nothing about reading data",
+    "one thing the notation could in principle reach is the file-path plumbing (os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mapping.ttl')), but those are file paths, not IRIs, so f<...> would be wrong",
+    "context shim: local yatter.py stand-in (identical for both sides). The real yatter package is not installable here (it requires coloredlogs and pyjelly); the stub's translate() returns the test case's own reference RML re-serialised, so the blank-node labels and statement order differ from mapping.ttl and the region's compare.isomorphic really has to solve an isomorphism over the ten blank nodes of the three triples maps. The YARRRML->RML translation itself is therefore not exercised -- it is library code called by the region, not part of it",
+    "mapping.ttl and mapping.yml copied verbatim from citiususc/yatter@0b40dff623 test/rml-fnml/YARRRMLTC-0050/ (Apache-2.0)",
+    "demo harness added identically to both sides: the region is a pytest test returning None, so a trailing section calls it (its own assertion still fires) and re-exposes the two graphs it builds internally as DEMO_EXPECTED / DEMO_TRANSLATED for the module-state driver"
+  ],
+  "draft_sha": "b143375ffdeb29f5",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:22.201237+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
+}

@@ -1,0 +1,26 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: BooleanClass.serialize (lines 1523-1534, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+from rdflib.collection import Collection
+
+def serialize(self, graph):
+    clonedList = Collection(graph, BNode())
+    for cl in self._rdfList:
+        clonedList.append(cl)
+        CastClass(cl, self.graph).serialize(graph)
+
+    graph.add((self.identifier, self._operator, clonedList.uri))
+
+    for s, p, o in self.graph.triples((self.identifier, None, None)):
+        if p != self._operator:
+            graph.add((s, p, o))
+    self._serialize(graph)

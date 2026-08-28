@@ -1,0 +1,8 @@
+@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: Ontology.setVersion (lines 639-640, band medium)
+# licence of the source repository: see meta.json
+
+def setVersion(self, version):
+    self.graph.set((self.identifier, owl-ns:versionInfo, version))

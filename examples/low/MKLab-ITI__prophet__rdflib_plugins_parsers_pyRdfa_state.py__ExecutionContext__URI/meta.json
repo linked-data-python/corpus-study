@@ -1,0 +1,37 @@
+{
+  "region_id": "MKLab-ITI__prophet__rdflib_plugins_parsers_pyRdfa_state.py__ExecutionContext__URI",
+  "repository": "MKLab-ITI/prophet",
+  "commit": "eee2ab51de0b2ce1281206131a72a0cbc1dd303a",
+  "path": "rdflib/plugins/parsers/pyRdfa/state.py",
+  "qualname": "ExecutionContext._URI",
+  "lineno": 269,
+  "end_lineno": 338,
+  "band": "low",
+  "kind": "function",
+  "rdf_ops": 2,
+  "categories": {
+    "term_constructor": 2
+  },
+  "translation_status": "final",
+  "classification": "awkward",
+  "translation_notes": [
+    "the two RDF ops are URIRef(<runtime string>) with no lexical structure at all; they become formatted-IRI islands f<{val}> / f<{self.base}> and the `from rdflib import URIRef` import is dropped",
+    "finding: the notation brings nothing here -- f<{x}> is exactly URIRef(x) only as long as no @base is in scope, since firi() resolves a relative IRI against the declared base. A mechanical URIRef(x) -> f<{x}> rule is therefore unsafe inside a block that declares @base; here none is declared, so the rewrite is exact",
+    "the rest of the region (urljoin corner cases, URI-scheme warning) is string plumbing that no island can touch -- the RDF layer is only reached at the very last step",
+    "context shim: context.py provides py_v_major/py_v_minor (state.py), err_URI_scheme and uri_schemes (pyRdfa/__init__.py, copied verbatim); the `from . import ...` relative imports and the missing urlsplit/urljoin import are import-line changes only, identical on both sides",
+    "driver exercises all eight return paths of the region with a duck-typed ExecutionContext, including the warning side effect"
+  ],
+  "draft_sha": "ce80444cfcb23ff6",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.450498+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_URI",
+    "diffs": [],
+    "error": null
+  }
+}

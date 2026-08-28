@@ -1,0 +1,105 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/__init__.py
+# region: Query.get_summary_vocabularies (lines 361-420, band high)
+# licence of the source repository: see meta.json
+from collections import defaultdict
+from rdflib.namespace import (
+    DC,
+    DCTERMS,
+    FOAF,
+    ORG,
+    OWL,
+    PROF,
+    PROV,
+    QB,
+    RDF,
+    RDFS,
+    SDO,
+    SH,
+    SKOS,
+    VANN,
+)
+from pylode.profiles.supermodel.model import (
+    Class,
+    CodedProperty,
+    ComponentModel,
+    ImageObject,
+    MediaObject,
+    Note,
+    Profile,
+    ProfileHierarchyItem,
+    ProfileType,
+    Property,
+    RDFProperty,
+    Resource,
+    SimpleCodedProperty,
+    TextObject,
+)
+from pylode.profiles.supermodel.query.common import (
+    get_class,
+    get_descriptions,
+    get_is_defined_by,
+    get_name,
+    get_subclasses,
+    get_values,
+)
+
+def get_summary_vocabularies(self):
+    coded_properties = defaultdict(list)
+
+    for graph in self.db.graphs():
+        props = list(graph.subjects(RDF.type, QB.CodedProperty))
+        for prop in props:
+            codelist = [
+                Resource(
+                    x,
+                    get_name(x, graph),
+                    get_descriptions(x, graph),
+                )
+                for x in graph.objects(prop, QB.codeList)
+            ]
+            simple_coded_property = SimpleCodedProperty(
+                prop,
+                get_name(prop, graph, self.db),
+                get_descriptions(prop, graph),
+                codelist,
+            )
+            if simple_coded_property not in coded_properties[prop]:
+                coded_properties[prop].append(simple_coded_property)
+
+    # Sort by label of the first value.
+    coded_properties = dict(
+        sorted(coded_properties.items(), key=lambda v: v[1][0].name.lower())
+    )
+
+    vocab_class_index = defaultdict(list)
+    for component_model in self.component_models:
+        for cls in component_model.classes:
+            for properties in cls.properties.values():
+                for prop in properties:
+                    if isinstance(prop, CodedProperty):
+                        if prop.belongs_to_class not in vocab_class_index[prop.iri]:
+                            vocab_class_index[prop.iri].append(
+                                prop.belongs_to_class
+                            )
+
+    for vocab in vocab_class_index:
+        vocab_class_index[vocab] = sorted(
+            vocab_class_index[vocab], key=lambda x: x.name
+        )
+
+    # Collapse by combining codelist values.
+    for prop in coded_properties:
+        codelist = []
+        for coded_property in coded_properties[prop]:
+            codelist += coded_property.codelist
+
+        # Copy the codelist values to the first coded property.
+        coded_properties[prop][0].codelist = codelist
+
+        # Add classes to coded property.
+        coded_properties[prop][0].classes = vocab_class_index[prop]
+
+        # Only have one copy that has all the codelist values combined.
+        coded_properties[prop] = [coded_properties[prop][0]]
+
+    return coded_properties

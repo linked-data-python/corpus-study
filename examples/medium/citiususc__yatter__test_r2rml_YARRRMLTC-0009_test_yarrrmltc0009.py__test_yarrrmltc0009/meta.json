@@ -1,0 +1,39 @@
+{
+  "region_id": "citiususc__yatter__test_r2rml_YARRRMLTC-0009_test_yarrrmltc0009.py__test_yarrrmltc0009",
+  "repository": "citiususc/yatter",
+  "commit": "0b40dff6234fbbee868444d855576ef7626cbf5e",
+  "path": "test/r2rml/YARRRMLTC-0009/test_yarrrmltc0009.py",
+  "qualname": "test_yarrrmltc0009",
+  "lineno": 17,
+  "end_lineno": 32,
+  "band": "medium",
+  "kind": "function",
+  "rdf_ops": 4,
+  "categories": {
+    "graph_ctor": 2,
+    "serialize_parse": 2
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "no island applies: translated.ldpy is byte-identical to original.py (ldpy is a superset of Python, so the region is already a valid ldpy program with unchanged meaning); the driver still exercises both sides, which checks that the transpiler passes the region through unaltered",
+    "negative finding: all four RDF operations are I/O - two Graph() constructors and two Graph.parse(data=..., format='ttl') calls over Turtle text read from a file and produced by yatter.translate(). The RDF is never written in the program text, so islands have nothing to bind to",
+    "negative finding: R2RML_URI = 'http://www.w3.org/ns/r2rml#' is an IRI but is passed as yatter's mapping_format *string* and string-compared inside yatter; writing it as the island <http://www.w3.org/ns/r2rml#> would silently change its runtime type from str to URIRef, so it is deliberately left as a Python string",
+    "context shim: yatter is not installed in the evaluation environment - driver.py puts the corpus checkout citiususc/yatter@0b40dff623 (src/) on sys.path, identically for both representations",
+    "context shim: coloredlogs.py in the example directory is a no-op stand-in for the log colouriser imported by yatter.constants (formatting only, no RDF behaviour)",
+    "fixtures mapping.ttl and mapping.yml copied verbatim from test/r2rml/YARRRMLTC-0009 (the region reads them next to __file__); driver.py chdirs to the example directory"
+  ],
+  "draft_sha": "57b1232cc58c0733",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.751800+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_yarrrmltc0009",
+    "diffs": [],
+    "error": null
+  }
+}

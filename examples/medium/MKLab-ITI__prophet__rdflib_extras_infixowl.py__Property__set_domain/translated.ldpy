@@ -1,0 +1,25 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: Property._set_domain (lines 2084-2093, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+from rdflib.term import Identifier
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _set_domain(self, other):
+    if not other:
+        return
+    if isinstance(other, (Individual, Identifier)):
+        self.graph += g{ {self.identifier} rdfs:domain {classOrIdentifier(other)} }
+    else:
+        for dom in other:
+            self.graph += g{ {self.identifier} rdfs:domain {classOrIdentifier(dom)} }

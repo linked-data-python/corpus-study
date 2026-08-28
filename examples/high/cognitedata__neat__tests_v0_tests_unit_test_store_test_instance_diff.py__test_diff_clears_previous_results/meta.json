@@ -1,0 +1,41 @@
+{
+  "region_id": "cognitedata__neat__tests_v0_tests_unit_test_store_test_instance_diff.py__test_diff_clears_previous_results",
+  "repository": "cognitedata/neat",
+  "commit": "4042d3e96d09a715bc06151c48767c4134a6194e",
+  "path": "tests/v0/tests_unit/test_store/test_instance_diff.py",
+  "qualname": "test_diff_clears_previous_results",
+  "lineno": 65,
+  "end_lineno": 93,
+  "band": "high",
+  "kind": "function",
+  "rdf_ops": 35,
+  "categories": {
+    "namespace_ctor": 1,
+    "namespace_term": 30,
+    "term_constructor": 4
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "all 34 term constructions become islands, in ordinary Python operand positions: URIRef(\"urn:current1\") -> <urn:current1>, RDF.type -> rdf:type, NAMED_GRAPH_NAMESPACE[\"DIFF_ADD\"] -> namedgraph:DIFF_ADD, ex.a/ex.T1 -> ex:a/ex:T1 inside tuple, list, assert and keyword-argument contexts",
+    "the function-local 'ex = Namespace(\"http://example.org/\")' is absorbed by a function-body '@prefix ex: <http://example.org/> .' at the same line -- the block scope of @prefix matches the scope of the variable it replaces exactly",
+    "the mechanical draft used the Python variable names as prefixes ('named-graph-namespace:'); a hyphen is legal in a Turtle prefix but unusable in expression position, so it was renamed to 'namedgraph:'. Prefix naming has to be chosen by a human here.",
+    "the data flow is unchanged: the triples stay Python tuples in a list ([(ex:a, rdf:type, ex:T1)]), not a g{...} graph, because _add_triples takes an iterable of triples and the original builds no graph",
+    "imports: RDF, Namespace and URIRef dropped (absorbed by the declarations), NAMED_GRAPH_NAMESPACE dropped (absorbed by @prefix namedgraph:); Literal kept although the extracted region never uses it",
+    "context shim: cognite.neat is not installed; cognite_neat_shim.py provides NAMED_GRAPH_NAMESPACE verbatim and a NeatInstanceStore reduced to __init__/from_oxi_local_store/graph/named_graphs/_add_triples/diff with the upstream bodies (CLEAR SILENT GRAPH updates + the FILTER NOT EXISTS diff query). from_oxi_local_store falls back to an in-memory rdflib Dataset because oxrdflib is absent; the named-graph diff behaviour under test is store-independent. Identical for both sides.",
+    "the eight assertions of the test pass on both sides, so equivalence here also means the rewritten terms are the ones the store actually stores and retrieves"
+  ],
+  "draft_sha": "1408fce6a6e98932",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:22.219798+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_diff_clears_previous_results",
+    "diffs": [],
+    "error": null
+  }
+}

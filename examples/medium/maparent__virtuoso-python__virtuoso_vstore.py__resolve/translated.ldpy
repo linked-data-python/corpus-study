@@ -1,0 +1,91 @@
+# Extracted from maparent/virtuoso-python@eba377e1fa : virtuoso/vstore.py
+# region: resolve (lines 648-727, band medium)
+# licence of the source repository: see meta.json
+from struct import unpack
+from rdflib.term import URIRef, BNode, Literal, Variable
+from rdflib.namespace import XSD, Namespace, NamespaceManager
+import pyodbc
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+log = logging.getLogger(__name__)
+
+def resolve(resolver, args):
+    """
+    Takes the Virtuoso representation of an RDF node and returns
+    an appropriate instance of :class:`rdflib.term.Node`.
+
+    :param resolver: an cursor that can be used for database
+        queries necessary to resolve the value
+    :param args: the tuple returned
+        by :mod:`pyodbc` in case of a SPASQL query.
+    """
+    if not isinstance(args, tuple):
+        # Single number; convert to Literal
+        return Literal(args)
+    (value, dvtype, dttype, flag, lang, dtype) = args
+    if dvtype == pyodbc.VIRTUOSO_DV_IRI_ID:
+        q = (u'SELECT __ro2sq(%s)' % value)
+        resolver.execute(q)
+        iri, = resolver.fetchone()
+        if iri[:9] == "nodeID://":
+            return _nodeid_to_bnode(iri)
+        return URIRef(iri)
+    if dvtype == pyodbc.VIRTUOSO_DV_RDF:
+        if dtype == xsd:gYear.encode("ascii"):
+            value = value[:4]
+        elif dtype == xsd:gMonth.encode("ascii"):
+            value = value[:7]
+        return Literal(value, lang=lang or None, datatype=dtype or None)
+    if dvtype in (pyodbc.VIRTUOSO_DV_STRING, pyodbc.VIRTUOSO_DV_BLOB_WIDE_HANDLE,
+                  pyodbc.VIRTUOSO_DV_WIDE):
+        # TODO: HORRID temporary heuristics, but I get wrong flag values.
+        if flag == 1 and ' ' not in value:
+            if value[:9] == "nodeID://":
+                return _nodeid_to_bnode(value)
+            return URIRef(value)
+        else:
+            if dtype == xsd:gYear.encode("ascii"):
+                value = value[:4]
+            elif dtype == xsd:gMonth.encode("ascii"):
+                value = value[:7]
+            if isinstance(value, bytes):
+                try:
+                    value = value.decode('utf-8')
+                except UnicodeDecodeError:
+                    value = value.decode('iso-8859-1')
+            return Literal(value, lang=lang or None, datatype=dtype or None)
+    if dvtype == pyodbc.VIRTUOSO_DV_LONG_INT:
+        return Literal(int(value))
+    if dvtype == pyodbc.VIRTUOSO_DV_SINGLE_FLOAT:
+        if type(value) is bytearray:
+            value = unpack('f', value[:4])[0]
+        return Literal(value, datatype=xsd:float)
+    if dvtype == pyodbc.VIRTUOSO_DV_DOUBLE_FLOAT:
+        if type(value) is bytearray:
+            value = unpack('d', value[:8])[0]
+        return Literal(value, datatype=xsd:double)
+    if dvtype == pyodbc.VIRTUOSO_DV_NUMERIC:
+        if type(value) is bytearray:
+            llen, rlen = value[0:2]
+            digits = [ chr(48+i) for i in value[4:4+llen+rlen] ]
+            digits.insert(llen, '.')
+            value = ''.join(digits)
+        return Literal(value, datatype=xsd:decimal)
+    if dvtype == pyodbc.VIRTUOSO_DV_DATETIME or dvtype == pyodbc.VIRTUOSO_DV_TIMESTAMP:
+        value = value.replace(" ", "T")
+        if dttype == pyodbc.VIRTUOSO_DT_TYPE_DATE:
+            return Literal(value[:10], datatype=xsd:date)
+        elif dttype == pyodbc.VIRTUOSO_DT_TYPE_TIME:
+            return Literal(value, datatype=xsd:time)
+        elif dttype == pyodbc.VIRTUOSO_DT_TYPE_DATETIME:
+            return Literal(value, datatype=xsd:dateTime)
+        log.warn("Unknown SPASQL DV DT type: %d for %s" % (dttype, value))
+        return Literal(value)
+    if dvtype == pyodbc.VIRTUOSO_DV_DATE:
+        return Literal(value, datatype=xsd:date)
+    if dvtype == pyodbc.VIRTUOSO_DV_TIME:
+        return Literal(value, datatype=xsd:time)
+    if dvtype == pyodbc.VIRTUOSO_DV_DB_NULL:
+        return None
+    log.warn("Unhandled SPASQL DV type: %d for %s" % (dvtype, value))
+    return Literal(value)

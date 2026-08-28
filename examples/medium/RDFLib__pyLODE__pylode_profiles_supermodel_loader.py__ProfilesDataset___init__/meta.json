@@ -1,0 +1,42 @@
+{
+  "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_loader.py__ProfilesDataset___init__",
+  "repository": "RDFLib/pyLODE",
+  "commit": "0d0471fb99b201182db9d3142de13fbcaee393f2",
+  "path": "pylode/profiles/supermodel/loader.py",
+  "qualname": "ProfilesDataset.__init__",
+  "lineno": 148,
+  "end_lineno": 170,
+  "band": "medium",
+  "kind": "function",
+  "rdf_ops": 8,
+  "categories": {
+    "graph_ctor": 4,
+    "graph_read": 1,
+    "namespace_term": 2,
+    "serialize_parse": 1
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "context shim: local httpx.py (httpx is not installed; the region only constructs httpx.Client(follow_redirects=True) and stores it); identical for both sides",
+    "context shim: `from loader_context import super` -- the region is a constructor of ProfilesDataset(Dataset); extracted as a module-level function, CPython's zero-argument super() has no __class__ cell, so the name is shadowed by a stand-in that records super().__init__(default_union=True) on the caller's self; identical for both sides",
+    "RDF.type -> rdf:type, PROF.Profile -> prof:Profile; RDF and PROF dropped from the rdflib import line on the ldpy side (absorbed by the @prefix declarations)",
+    "the mechanical draft declared dcterms/owl/prof/rdf; only prof and rdf are used, so only those two are declared -- DCTERMS/OWL/URIRef stay imported and unused on BOTH sides (extraction artefact)",
+    "PYLODE_CONFIG_GRAPH = \"urn:graph:pylode-config\" left as a Python string: writing it as an IRI island would change its Python type (str -> URIRef) and the region passes it to Graph(identifier=...), so the notation deliberately stops at the module constant",
+    "graph.__iadd__(...) and `graph = graph - cbd` left verbatim: explicit rdflib graph algebra, no island applies",
+    "negative finding: the two @prefix declarations cost two lines to save two dotted-namespace terms, so the notation is line-for-line neutral-to-negative on a region whose RDF work is graph algebra (cbd, difference, named graphs) rather than triple authoring"
+  ],
+  "draft_sha": "ea7b8c9b5959322e",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.740841+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:__init__",
+    "diffs": [],
+    "error": null
+  }
+}

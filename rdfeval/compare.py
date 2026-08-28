@@ -35,6 +35,7 @@ import ast
 import csv
 import io
 import json
+import re
 import tokenize
 
 from .analyze import SIGNIFICANT_TOKENS, analyze_source
@@ -125,6 +126,55 @@ def _node_depth(root: ast.AST, target: ast.AST) -> int:
     return dfs(root, 0) or 0
 
 
+RDF_IN_STRING = re.compile(
+    r"@prefix\s|\bPREFIX\s|^\s*<[^>\s]+>\s|\ba\s+\w+:|\w+:\w+\s+\w+:", re.M)
+
+
+def string_embedded_rdf(source: str) -> dict:
+    """RDF written as text inside Python string literals.
+
+    ``g.parse(data="…turtle…")`` hides a whole RDF document from Python's
+    tokenizer, which sees ONE token.  Translating it to a ``g{ … }`` island
+    makes the same RDF visible (and syntax-checked) but multiplies the token
+    count, so surface-size comparisons are not meaningful for those pairs
+    unless they are analysed separately.  This function reports how much
+    such text a source contains.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return {"literals": 0, "chars": 0, "lines": 0}
+    literals, chars, lines = 0, 0, 0
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
+            continue
+        text = node.value
+        if len(text) < 20 or not RDF_IN_STRING.search(text):
+            continue
+        literals += 1
+        chars += len(text)
+        lines += text.count("\n") + 1
+    return {"literals": literals, "chars": chars, "lines": lines}
+
+
+def subgroup_of(py: dict, ld: dict) -> str:
+    """Where the RDF of a region lives, in the *original* source.
+
+    inline-construction  triples are built with RDFLib calls in the source
+    string-embedded      RDF is written as text inside a Python string
+    no-source-rdf        the source contains no RDF structure at all
+                         (mappings/queries in external files, graph
+                         plumbing, I/O) — the notation cannot apply
+    """
+    if py["triples_added"] > 0:
+        return "inline-construction"
+    if py.get("string_rdf_literals", 0) > 0:
+        return "string-embedded"
+    if py["terms_constructed"] > 0:
+        return "terms-only"
+    return "no-source-rdf"
+
+
 def measure_pair(py_source: str, ldpy_source: str,
                  preamble: str | None = None) -> dict:
     """``preamble``: bindings-only source of the example's context shim
@@ -147,6 +197,7 @@ def measure_pair(py_source: str, ldpy_source: str,
         "graph_ops": fa.graph_ops,
         "rdf_ops": fa.rdf_ops,
         "category_counts": fa.category_counts,
+        **{f"string_rdf_{k}": v for k, v in string_embedded_rdf(py_source).items()},
         **{f"corr_{k}": v for k, v in corr.items()},
     }
     ld = {
@@ -175,6 +226,7 @@ def measure_pair(py_source: str, ldpy_source: str,
 
     return {
         "python": py, "ldpy": ld,
+        "subgroup": subgroup_of(py, ld),
         "ratios": {
             "loc": ratio(py["loc"], ld["loc"]),
             "code_loc": ratio(py["code_loc"], ld["code_loc"]),
@@ -229,6 +281,7 @@ def run(config: dict) -> None:
         for r in rows:
             flat = {"region_id": r["region_id"], "repository": r["repository"],
                     "band": r["band"], "classification": r["classification"],
+                    "subgroup": r.get("subgroup"),
                     "validation_status": r["validation_status"]}
             for side in ("python", "ldpy"):
                 for k, v in r[side].items():

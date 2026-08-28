@@ -1,0 +1,82 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/__init__.py
+# region: Query.get_class_properties_from_schema_domain_includes (lines 762-795, band high)
+# licence of the source repository: see meta.json
+from rdflib import Dataset, Graph, Literal, URIRef
+# context shim (see meta.json): pyLODE is not installed here; the model
+# dataclasses and query helpers live in a local module -- identical for both
+# representations.
+from context import (
+    Class,
+    CodedProperty,
+    ComponentModel,
+    ImageObject,
+    MediaObject,
+    Note,
+    Profile,
+    ProfileHierarchyItem,
+    ProfileType,
+    Property,
+    RDFProperty,
+    Resource,
+    SimpleCodedProperty,
+    TextObject,
+)
+from context import (
+    get_class,
+    get_descriptions,
+    get_is_defined_by,
+    get_name,
+    get_subclasses,
+    get_values,
+)
+
+# the module's `from rdflib.namespace import (...)` block, one @prefix each
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix org:     <http://www.w3.org/ns/org#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix prof:    <http://www.w3.org/ns/dx/prof/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix qb:      <http://purl.org/linked-data/cube#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo:     <https://schema.org/> .
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann:    <http://purl.org/vocab/vann/> .
+
+def get_class_properties_from_schema_domain_includes(
+    self,
+    iri: URIRef,
+    properties: dict[URIRef, list[Property]],
+    ignored_classes: list[URIRef],
+) -> list[Property]:
+    for _graph in self.db.graphs():
+        graph = self.db.get_graph(_graph.identifier)
+
+        schema_domain_includes_iris = graph.subjects(sdo:domainIncludes, iri)
+        for schema_domain_includes_iri in schema_domain_includes_iris:
+            name = get_name(schema_domain_includes_iri, graph)
+            description = get_descriptions(schema_domain_includes_iri, graph)
+            value_class_types = [
+                get_class(c, graph, self.db, ignored_classes)
+                for c in get_values(
+                    schema_domain_includes_iri, graph, [sdo:rangeIncludes]
+                )
+            ]
+
+            properties[schema_domain_includes_iri].append(
+                Property(
+                    iri=schema_domain_includes_iri,
+                    name=name,
+                    description=description,
+                    profile=Profile(
+                        graph.identifier,
+                        get_name(graph.identifier, self.db),
+                    ),
+                    value_class_types=value_class_types,
+                )
+            )
+
+    return properties

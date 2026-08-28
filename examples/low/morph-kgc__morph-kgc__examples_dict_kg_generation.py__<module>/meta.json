@@ -1,0 +1,37 @@
+{
+  "region_id": "morph-kgc__morph-kgc__examples_dict_kg_generation.py__<module>",
+  "repository": "morph-kgc/morph-kgc",
+  "commit": "a2122e88bb19f0e5a1eda9e18870235160483bec",
+  "path": "examples/dict/kg_generation.py",
+  "qualname": "<module>",
+  "lineno": 1,
+  "end_lineno": 75,
+  "band": "low",
+  "kind": "file",
+  "rdf_ops": 1,
+  "categories": {
+    "graph_read": 1
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "translated.ldpy is character-identical to original.py: the region builds no RDF term in Python at all. It hands two plain dicts to morph_kgc.materialize() and iterates the resulting graph with graph.triples((None, None, None)); the RDF knowledge lives in an external RML mapping file, so no island applies.",
+    "notable for the evaluation: the mapping is already Turtle (mapping.rml.ttl) and could in principle be written inline as a g{ ... } island, but morph_kgc.materialize takes a *path* to the mapping, so inlining it would restructure the program and was not done.",
+    "data fixture: mapping.rml.ttl copied from examples/dict/ of the corpus checkout (Apache-2.0, snippet-ok).",
+    "data fixture: the region passes './config.ini' but examples/dict/ ships no such file; config.ini here holds, verbatim, the INI text the region itself assigns to its (otherwise unused) `config` variable. Identical for both representations.",
+    "the driver must run with this directory as cwd, since the region uses relative paths."
+  ],
+  "draft_sha": "ba2f56e9e1a9462b",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.547191+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
+}

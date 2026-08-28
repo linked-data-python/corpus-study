@@ -1,0 +1,53 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: CastClass (lines 850-885, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+
+def CastClass(c, graph=None):
+    graph = graph is None and c.factoryGraph or graph
+    for kind in graph.objects(subject=classOrIdentifier(c),
+                              predicate=rdf:type):
+        if kind == owl-ns:Restriction:
+            kwArgs = {'identifier': classOrIdentifier(c),
+                      'graph': graph}
+            for s, p, o in graph.triples((classOrIdentifier(c),
+                                          None,
+                                          None)):
+                if p != rdf:type:
+                    if p == owl-ns:onProperty:
+                        kwArgs['onProperty'] = o
+                    else:
+                        if p not in Restriction.restrictionKinds:
+                            continue
+                        kwArgs[str(p.split(OWL_NS)[-1])] = o
+            if not set([str(i.split(OWL_NS)[-1])
+                        for i in Restriction.restrictionKinds]
+                       ).intersection(kwArgs):
+                raise MalformedClass("Malformed owl:Restriction")
+            return Restriction(**kwArgs)
+        else:
+            for s, p, o in graph.triples_choices((classOrIdentifier(c),
+                                                  [owl-ns:intersectionOf,
+                                                 owl-ns:unionOf,
+                                                 owl-ns:oneOf],
+                                                  None)):
+                if p == owl-ns:oneOf:
+                    return EnumeratedClass(classOrIdentifier(c), graph=graph)
+                else:
+                    return BooleanClass(
+                        classOrIdentifier(c), operator=p, graph=graph)
+            # assert (classOrIdentifier(c),rdf:type,owl-ns:Class) in graph
+            return Class(
+                classOrIdentifier(c), graph=graph, skipOWLClassMembership=True)

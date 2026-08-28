@@ -1,0 +1,33 @@
+{
+  "region_id": "linkml__linkml__packages_linkml_src_linkml_generators_shacl_shacl_ifabsent_processor.py__<module>",
+  "repository": "linkml/linkml",
+  "commit": "680595df54a9daa633fd6f634c8092ea2d4eaf8c",
+  "path": "packages/linkml/src/linkml/generators/shacl/shacl_ifabsent_processor.py",
+  "qualname": "<module>",
+  "lineno": 1,
+  "end_lineno": 119,
+  "band": "high",
+  "kind": "file",
+  "rdf_ops": 18,
+  "categories": {
+    "term_constructor": 18
+  },
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "translation_notes": [
+    "17 of the 18 term constructors are Literal(value, datatype=ShaclDataType.X.uri_ref): the datatype is a RUNTIME lookup through linkml's ShaclDataType enum, and ldpy has no interpolated-datatype form -- verified: f\"{x}\"^^xsd:time transpiles, but f\"{x}\"^^{dt} is rejected with \"type de donnee attendu apres '^^'\". This is the concrete language gap this example documents",
+    "expressing them would mean inlining the enum (f\"{year}-{month}-{day}\"^^xsd:date and so on), which is rejected as unfaithful: ShaclDataType is a shared domain abstraction and the inlining would erase the STRING / CURIE / NCNAME / JSON_POINTER / JSON_PATH / SPARQL_PATH distinctions, all six of which resolve to xsd:string",
+    "Literal(permissible_value_name) with no datatype also stays Python: bare {expr} coercion only exists inside g{} islands",
+    "the single op the notation does reach: URIRef(self.schema_view.expand_curie(default_value)) -> f<{self.schema_view.expand_curie(default_value)}> (exact, since no @base is in scope); `from rdflib import Literal, URIRef` loses URIRef. Arguably no clearer than the original -- same observation as the pyRdfa _URI example",
+    "no g{} island anywhere: the module is a term factory, it never asserts a triple",
+    "context shim: linkml is not installed; context.py holds ShaclDataType verbatim, a trimmed IfAbsentProcessor base (the class constants + constructor the region reaches), model stand-ins for the annotation-only names, and a DemoSchemaView. Import lines only, identical on both sides",
+    "demo harness added identically to both representations: it calls all 19 literal-producing paths (including both special-case branches of map_uri_or_curie/map_curie/map_uri) into a module-level demo_graph, and prints the tuple-returning and NotImplementedError paths so stdout is compared too"
+  ],
+  "draft_sha": "30f297a592e0dc94",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:22.243123+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  }
+}

@@ -1,0 +1,24 @@
+# Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
+# region: _minimal_valid_nanopub (lines 763-773, band high)
+# licence of the source repository: see meta.json
+from typing import Optional
+from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
+from nanopub import (
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+    Nanopub,
+    NanopubConf,
+    namespaces,
+)
+
+def _minimal_valid_nanopub(conf: Optional[NanopubConf] = None) -> Nanopub:
+    """A nanopub with the bare minimum needed to pass ``is_valid``."""
+    np = Nanopub(conf=conf if conf is not None else NanopubConf())
+    np.assertion += g{ <http://test> {namespaces.HYCL.claims} "test claim" }
+    np.provenance += g{ {np.assertion.identifier} prov:wasAttributedTo <http://someone> }
+    np.pubinfo += g{ {np._metadata.namespace[""]} dc:creator "tester" }
+    return np

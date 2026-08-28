@@ -1,0 +1,19 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/plugins/parsers/pyRdfa/options.py
+# region: ProcessorGraph.add_http_context (lines 101-112, band high)
+# licence of the source repository: see meta.json
+from pyrdfa_ns	import ns_xsd, ns_distill, ns_rdfa
+@prefix ht:   <http://www.w3.org/2006/http#> .
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+
+def add_http_context(self, subj, http_code) :
+	"""
+	Add an additional HTTP context to a message with subject in C{subj}, using the U{<http://www.w3.org/2006/http#>}
+	vocabulary. Typically used to extend an error structure, as created by L{add_triples}.
+
+	@param subj: an RDFLib resource, typically a blank node
+	@param http_code: HTTP status code
+	"""
+	self.graph += g{
+		{subj} rdfa:context [ a ht:Response ;
+		                      ht:responseCode ht:{http_code} ]
+	}

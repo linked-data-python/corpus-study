@@ -1,0 +1,36 @@
+{
+  "region_id": "openphacts__ops-search__src_app.py__render_rdf",
+  "repository": "openphacts/ops-search",
+  "commit": "170caa5881182a10bc5d7bf3b22ddedd6eb6ad8f",
+  "path": "src/app.py",
+  "qualname": "render_rdf",
+  "lineno": 78,
+  "end_lineno": 80,
+  "band": "low",
+  "kind": "function",
+  "rdf_ops": 2,
+  "categories": {
+    "graph_ctor": 1,
+    "serialize_parse": 1
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "context shim: `from bottle import ...` retargeted to a local web_context.py (bottle is not installed; the region only reads request.url as the JSON-LD publicID); identical for both sides",
+    "translated.ldpy is byte-identical to original.py: the region contains no syntactic RDF term at all -- it parses an opaque JSON-LD string and re-serialises it, so no island applies",
+    "negative finding: regions whose rdf_ops are entirely graph_ctor + serialize_parse get zero benefit from the notation (ratio 1.0 by construction), while still being valid ldpy"
+  ],
+  "draft_sha": "300b4d732582dd5d",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.549715+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:render_rdf",
+    "diffs": [],
+    "error": null
+  }
+}

@@ -1,0 +1,33 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/loader.py
+# region: ProfilesDataset.__init__ (lines 148-170, band medium)
+# licence of the source repository: see meta.json
+import httpx
+from rdflib import DCTERMS, OWL, PROF, RDF, Graph, URIRef
+
+from loader_context import super
+
+PYLODE_CONFIG_GRAPH = "urn:graph:pylode-config"
+
+def __init__(self, root_profile_iri: str, data: str):
+    super().__init__(default_union=True)
+    self.root_profile_iri = root_profile_iri
+    self.client = httpx.Client(follow_redirects=True)
+
+    # Tracks what we have loaded so far.
+    self.external_resources = set()
+
+    graph = Graph()
+    graph.parse(data=data)
+    graph = self.load_owl_imports(graph)
+    initial_profiles_graph = Graph()
+    for profile in graph.subjects(RDF.type, PROF.Profile):
+        cbd = graph.cbd(profile)
+        initial_profiles_graph.__iadd__(cbd)
+        graph = graph - cbd
+
+    self.add_graph(Graph(identifier=PYLODE_CONFIG_GRAPH))
+    self.load_profiles(initial_profiles_graph, graph)
+
+    root_graph = Graph(identifier=root_profile_iri)
+    root_graph.__iadd__(graph)
+    self.add_graph(root_graph)

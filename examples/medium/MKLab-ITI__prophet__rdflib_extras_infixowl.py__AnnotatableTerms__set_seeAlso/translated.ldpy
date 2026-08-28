@@ -1,0 +1,21 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: AnnotatableTerms._set_seeAlso (lines 587-591, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+
+def _set_seeAlso(self, seeAlsos):
+    if not seeAlsos:
+        return
+    for s in seeAlsos:
+        self.graph += g{ {self.identifier} rdfs:seeAlso {s} }

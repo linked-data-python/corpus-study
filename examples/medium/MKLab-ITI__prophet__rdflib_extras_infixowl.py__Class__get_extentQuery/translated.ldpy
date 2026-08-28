@@ -1,0 +1,18 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: Class._get_extentQuery (lines 995-996, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+
+def _get_extentQuery(self):
+    return (Variable('CLASS'), rdf:type, self.identifier)

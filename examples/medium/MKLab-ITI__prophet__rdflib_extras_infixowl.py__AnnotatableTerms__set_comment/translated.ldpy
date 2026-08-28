@@ -1,0 +1,25 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: AnnotatableTerms._set_comment (lines 567-574, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+from rdflib.term import Identifier
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _set_comment(self, comment):
+    if not comment:
+        return
+    if isinstance(comment, Identifier):
+        self.graph += g{ {self.identifier} rdfs:comment {comment} }
+    else:
+        for c in comment:
+            self.graph += g{ {self.identifier} rdfs:comment {c} }

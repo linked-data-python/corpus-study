@@ -1,0 +1,40 @@
+{
+  "region_id": "cognitedata__neat__cognite_neat__v0_core__data_model_models_entities__restrictions.py__<module>",
+  "repository": "cognitedata/neat",
+  "commit": "4042d3e96d09a715bc06151c48767c4134a6194e",
+  "path": "cognite/neat/_v0/core/_data_model/models/entities/_restrictions.py",
+  "qualname": "<module>",
+  "lineno": 1,
+  "end_lineno": 230,
+  "band": "low",
+  "kind": "file",
+  "rdf_ops": 1,
+  "categories": {
+    "term_constructor": 1
+  },
+  "translation_status": "final",
+  "classification": "awkward",
+  "translation_notes": [
+    "the region's single RDF operation is RDFLiteral(value_components[0], datatype=DataType.load(value_components[1]).as_xml_uri_ref()) -- a literal whose lexical form AND datatype are both runtime values. It becomes the island f\"{value_components[0]}\"^^f{DataType.load(value_components[1]).as_xml_uri_ref()}, which transpiles to exactly Literal(f\"{...}\", datatype=node(...))",
+    "negative finding: this is the awkward case for the notation. ldpy's typed-literal syntax needs a *lexical* left-hand side, so a runtime string has to be laundered through an f-string (f\"{x}\") before it can carry a ^^ suffix, and the dynamic datatype needs the f{...} escape hatch; the result is not shorter and arguably less readable than the plain rdflib constructor. The forms the notation is good at (\"4\"^^xsd:integer, {v}^^xsd:integer) both require the datatype to be written literally, which this code cannot do because it dispatches on _XSD_TYPES at run time",
+    "semantic nuance: f\"{x}\" stringifies its argument whereas Literal(x) preserves the Python type; here value_components[0] is always a str (a regex group), so the two are identical, but the equivalence is not general",
+    "RDFLiteral stays imported on the ldpy side: it is still needed for the field annotation 'value: RDFLiteral | ConceptEntity | NamedIndividualEntity' and for isinstance() tests, so unlike the pySHACL example the island does not retire the import",
+    "negative finding: everything else in this 230-line module is pydantic/regex plumbing over an RDF-flavoured *string* syntax ('valueConstraint:p(hasValue,4^^integer)') that is parsed by hand; ldpy has nothing to offer such string-level RDF surface syntax",
+    "context shim: neat_shim.py provides behavioural stand-ins for the six names imported from cognite.neat (EntityTypes, _XSD_TYPES, DataType, _PARSE, ConceptEntity/ConceptualEntity, NeatValueError, remove_namespace_from_uri) - the real package pulls in the whole cognite-client SDK. The six import lines were rewritten identically in both representations; the shim is a stand-in, not a copy, and both sides use it identically",
+    "demo harness added identically to both representations: the region only defines models, so nothing is observable at import time. It parses the five restriction shapes (including the datatyped-literal one) and prints the results plus the built Literal, its datatype and its Python value; the driver compares the captured stdout",
+    "the two model_rebuild() calls at the top of the demo harness are a harness accommodation (the driver exec()s the module in a namespace absent from sys.modules, so pydantic cannot resolve the Literal[...] alias annotations on its own); identical on both sides, no behavioural effect"
+  ],
+  "draft_sha": "dc5b52deee8baae6",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.501114+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
+}

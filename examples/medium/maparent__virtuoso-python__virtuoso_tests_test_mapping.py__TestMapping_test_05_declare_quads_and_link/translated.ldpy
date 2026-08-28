@@ -1,0 +1,33 @@
+# Extracted from maparent/virtuoso-python@eba377e1fa : virtuoso/tests/test_mapping.py
+# region: TestMapping.test_05_declare_quads_and_link (lines 173-183, band medium)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from context import Session, A, B  # context shim, see meta.json
+@prefix tst: <http://example.com/test#> .
+
+session = Session(autocommit=False)
+
+def test_05_declare_quads_and_link(self):
+    qs, g, cpe = self.create_qs_graph()
+    print(self.declare_qs_graph(qs))
+    a = A()
+    b = B()
+    b.a = a
+    session.add(b)
+    session.add(a)
+    session.commit()
+    graph = Graph(self.store, identifier=self.graphname)
+    assert list(graph.triples((None, tst:alink, None)))
+
+
+# --- demo harness (not part of the extracted region; added IDENTICALLY to
+# original.py and translated.ldpy so the driver has an observable) ----------
+# The region is a test method that reads the module-level `session`, so it
+# cannot be driven through run_pair(entry=...) with a fixture built outside
+# the module: the harness builds the `self` stand-in here instead.
+from context import TestContext
+
+_CTX = TestContext(session)
+test_05_declare_quads_and_link(_CTX)
+DEMO_GRAPH = Graph(_CTX.store, identifier=_CTX.graphname)
+print(sorted(DEMO_GRAPH.serialize(format="nt").strip().splitlines()))

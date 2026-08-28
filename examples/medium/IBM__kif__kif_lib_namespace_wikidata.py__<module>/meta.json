@@ -1,0 +1,39 @@
+{
+  "region_id": "IBM__kif__kif_lib_namespace_wikidata.py__<module>",
+  "repository": "IBM/kif",
+  "commit": "4ce99d0d9bf2765fcd1681c7b3e30e702f38fa9d",
+  "path": "kif_lib/namespace/wikidata.py",
+  "qualname": "<module>",
+  "lineno": 1,
+  "end_lineno": 251,
+  "band": "medium",
+  "kind": "file",
+  "rdf_ops": 37,
+  "categories": {
+    "namespace_ctor": 19,
+    "namespace_term": 18
+  },
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "translation_notes": [
+    "only 3 of the 37 RDF operations become islands: WIKIBASE.PreferredRank / NormalRank / DeprecatedRank -> wikibase:PreferredRank / wikibase:NormalRank / wikibase:DeprecatedRank under a top-level @prefix wikibase: <http://wikiba.se/ontology#> . (a top-level declaration is in scope inside the class body)",
+    "positive finding: with those three accesses inlined, the 'from wikibase import WIKIBASE' import and the whole hand-written namespace module it points to become dead on the ldpy side and are dropped - the notation replaces a namespace-definition module by one @prefix line",
+    "negative finding (the main one): the 19 Namespace(...) constructors and the namespaces/schema/prefixes lookup tables built from them CANNOT become islands. @prefix is a transpile-time, lexically scoped binding that produces no runtime object, whereas this module's entire purpose is to expose Namespace values that are stored in dicts, compared with 'prefix in prefixes', stringified with str(P) and used as uri.startswith(cls.WIKIDATA). ldpy has no way to say 'give me the prefix binding as a value', so namespace-declaration modules are outside the notation's reach",
+    "negative finding: Namespace(P['qualifier/']) derives one namespace from another; ldpy's @prefix takes a literal IRI only, so even the declarations could not be chained the way the Python code chains them",
+    "context shim: kif_lib's package-relative re-export modules '..rdflib' and '..typing' are replaced by kif_shim.py (same bindings, from IBM/kif@4ce99d0d9b); '.wikibase' by a reduced local wikibase.py. Both import lines were adjusted in original.py; translated.ldpy keeps the kif_shim ones and drops the wikibase one (see above)",
+    "demo harness added identically to both representations: the region only defines namespaces, so nothing is observable at import time. The harness builds demo_graph with the wikidata namespaces and prints the classmethod results plus str(Wikidata.PREFERRED/NORMAL/DEPRECATED), so the driver's stdout comparison actually observes the three island-derived constants"
+  ],
+  "draft_sha": "e88ee7a232a4973f",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.556879+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
+}

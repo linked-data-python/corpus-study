@@ -1,0 +1,29 @@
+# Extracted from maparent/virtuoso-python@eba377e1fa : virtuoso/tests/test_mapping.py
+# region: TestMapping.test_06_conditional_prop (lines 198-216, band medium)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from virtuoso.vmapping import (
+@prefix tst: <http://example.com/test#> .
+
+    VirtuosoQuadMapPattern, VirtuosoPatternIriClass, QuadStorage, VirtuosoGraphQuadMapPattern)
+session = Session(autocommit=False)
+
+def test_06_conditional_prop(self):
+    qs, g, cpe = self.create_qs_graph()
+    tb_iri = cpe.iri_accessor(B)
+    cpe.add_pattern(
+        B, VirtuosoQuadMapPattern(
+            tb_iri.apply(B.id),
+            tst:safe_name,
+            B.name,
+            conditions=(B.name != None,)),
+        g)
+    print(self.declare_qs_graph(qs))
+    b = B(name='name')
+    b2 = B()
+    session.add(b)
+    session.add(b2)
+    session.commit()
+    graph = Graph(self.store, identifier=self.graphname)
+    assert 1 == len(list(graph.triples((None, tst:safe_name, None))))
+    assert 1 == len(list(graph.triples((None, tst:name, None))))

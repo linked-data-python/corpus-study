@@ -1,0 +1,11 @@
+@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: Class._set_equivalentClass (lines 1095-1100, band medium)
+# licence of the source repository: see meta.json
+
+def _set_equivalentClass(self, other):
+    if not other:
+        return
+    for sc in other:
+        self.graph += g{ {self.identifier} owl-ns:equivalentClass {classOrIdentifier(sc)} }

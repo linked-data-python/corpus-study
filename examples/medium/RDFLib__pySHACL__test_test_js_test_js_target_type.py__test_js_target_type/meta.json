@@ -1,0 +1,39 @@
+{
+  "region_id": "RDFLib__pySHACL__test_test_js_test_js_target_type.py__test_js_target_type",
+  "repository": "RDFLib/pySHACL",
+  "commit": "469cca7a22a078b36c167c1e8dadecf5e5ec6c75",
+  "path": "test/test_js/test_js_target_type.py",
+  "qualname": "test_js_target_type",
+  "lineno": 116,
+  "end_lineno": 120,
+  "band": "medium",
+  "kind": "function",
+  "rdf_ops": 2,
+  "categories": {
+    "graph_ctor": 2
+  },
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "translation_notes": [
+    "the two Turtle string constants become g{...} islands at their point of use (44 + 5 triples, isomorphic to the parsed originals); Graph().parse(data=..., format='turtle') disappears",
+    "restructuring: the module-level `shapes_graph` / `data_graph` strings are absorbed into the islands inside test_js_target_type; graphs are still built fresh per call, as the original re-parsed on each call. The two Turtle prologues merge into one module-level @prefix set (union, source order)",
+    "the source's explicit `rdf:type` (rather than `a`) and its mixed tab/space Turtle layout are kept verbatim inside the islands -- whitespace is Turtle's there, not Python's",
+    "finding (ldpy parser gap): the five trailing ';' before ']' in the source's blank-node property lists are legal Turtle 1.1 but rejected by the g{} parser, so they were dropped (no RDF difference). Trailing ';' before '.' at the statement level IS accepted, so the source's ' ;\\n.' idiom survives unchanged",
+    "literals containing braces (sh:labelTemplate \"All persons born in {$country}\") are opaque inside islands -- verified, no interpolation happens",
+    "context shim: pySHACL is not installed (js=True also needs pyduktape2 and a JS file from the pySHACL checkout), so context.validate is a recording double returning conforms=False -- the value the original test asserts. Identical for both sides",
+    "demo harness added identically to both representations: calls the test and exposes the two graphs handed to validate() as module-level variables"
+  ],
+  "draft_sha": "e63dcad3f9bb7186",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.746320+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
+}

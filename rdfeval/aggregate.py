@@ -76,6 +76,26 @@ def run(config: dict) -> None:
                                     [p["ldpy"].get(metric) for p in ok]),
         }
 
+    # --- where the RDF lives in the original source -------------------------
+    # The headline surface numbers mix three very different situations; the
+    # subgroup breakdown is the honest way to read them (see the README).
+    for sg in sorted({p.get("subgroup") for p in ok if p.get("subgroup")}):
+        sub = [p for p in ok if p.get("subgroup") == sg]
+        agg["by_subgroup"] = agg.get("by_subgroup", {})
+        agg["by_subgroup"][sg] = {
+            "n": len(sub),
+            "byte_identical": sum(1 for p in sub if p["ldpy"]["islands"] == 0),
+            **{m: _dist([_reduction(p, m) for p in sub]) for m in METRICS},
+            "correspondence": {
+                m: {"python": _dist([p["python"].get(m) for p in sub]),
+                    "ldpy": _dist([p["ldpy"].get(m) for p in sub]),
+                    "paired": paired_report([p["python"].get(m) for p in sub],
+                                            [p["ldpy"].get(m) for p in sub])}
+                for m in ("corr_scaffolding_tokens_per_triple",
+                          "corr_nesting_per_term",
+                          "corr_constructors_per_triple")},
+        }
+
     bands = sorted({p["band"] for p in ok})
     for band in bands:
         sub = [p for p in ok if p["band"] == band]
@@ -139,30 +159,48 @@ def _figures(ok: list[dict], agg: dict) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    # 1. reduction distributions per metric (box plots)
-    fig, ax = plt.subplots(figsize=(6, 3.2))
-    data = [[_reduction(p, m) for p in ok if _reduction(p, m) is not None]
-            for m in METRICS]
-    ax.boxplot(data, tick_labels=["LOC", "tokens", "chars", "syntax nodes"])
-    ax.axhline(0, color="grey", lw=0.5)
-    ax.set_ylabel("reduction (%)")
-    ax.set_title("LD Python vs RDFLib Python — surface reduction")
+    # 1. reduction per metric, split by where the RDF lives in the original.
+    #    Pooling the subgroups would hide the finding: the notation acts on
+    #    inline construction and is a no-op elsewhere.
+    order = ["inline-construction", "terms-only", "string-embedded",
+             "no-source-rdf"]
+    subgroups = [s for s in order if any(p.get("subgroup") == s for p in ok)]
+    fig, axes = plt.subplots(1, len(subgroups), figsize=(2.4 * len(subgroups), 3.4),
+                             sharey=True)
+    if len(subgroups) == 1:
+        axes = [axes]
+    for ax, sg in zip(axes, subgroups):
+        sub = [p for p in ok if p.get("subgroup") == sg]
+        data = [[_reduction(p, m) for p in sub if _reduction(p, m) is not None]
+                for m in METRICS]
+        ax.boxplot(data, tick_labels=["LOC", "tok", "chr", "AST"])
+        ax.axhline(0, color="grey", lw=0.5)
+        ax.set_title(f"{sg}\n(n={len(sub)})", fontsize=8)
+    axes[0].set_ylabel("reduction (%)")
+    axes[0].set_ylim(-60, 70)
+    fig.suptitle("LD Python vs RDFLib Python — surface reduction by where "
+                 "the RDF is written", fontsize=9)
     fig.tight_layout()
     for ext in ("pdf", "png"):
         fig.savefig(RESULTS_SUMMARY / f"fig_reduction.{ext}", dpi=150)
     plt.close(fig)
 
-    # 2. RDF-op share vs token reduction
+    # 2. triples written in the source vs token reduction
     fig, ax = plt.subplots(figsize=(6, 3.2))
-    pts = agg["density_vs_benefit"]
-    colors = {"low": "tab:blue", "medium": "tab:orange", "high": "tab:red"}
-    for band in ("low", "medium", "high"):
-        xs = [p["rdf_op_share"] for p in pts if p["band"] == band]
-        ys = [p["tokens_reduction_pct"] for p in pts if p["band"] == band]
-        ax.scatter(xs, ys, label=band, color=colors[band], s=18)
-    ax.set_xlabel("RDF operations / syntax node (original)")
+    colors = {"inline-construction": "tab:red", "terms-only": "tab:orange",
+              "string-embedded": "tab:blue", "no-source-rdf": "tab:grey"}
+    for sg, color in colors.items():
+        sub = [p for p in ok if p.get("subgroup") == sg]
+        xs = [p["python"]["triples_added"] for p in sub]
+        ys = [_reduction(p, "tokens") for p in sub]
+        if xs:
+            ax.scatter(xs, ys, label=f"{sg} (n={len(sub)})", color=color, s=20)
+    ax.axhline(0, color="grey", lw=0.5)
+    ax.set_xscale("symlog")
+    ax.set_ylim(-60, 70)
+    ax.set_xlabel("triples constructed in the original source (symlog)")
     ax.set_ylabel("token reduction (%)")
-    ax.legend(title="density band")
+    ax.legend(fontsize=7)
     fig.tight_layout()
     for ext in ("pdf", "png"):
         fig.savefig(RESULTS_SUMMARY / f"fig_density_benefit.{ext}", dpi=150)

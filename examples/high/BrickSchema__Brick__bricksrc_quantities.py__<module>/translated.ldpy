@@ -1,0 +1,533 @@
+# Extracted from BrickSchema/Brick@c12949f236 : bricksrc/quantities.py
+# region: <module> (lines 1-492, band high)
+# licence of the source repository: see meta.json
+from brickschema.graph import Graph
+from rdflib import Literal, URIRef
+from namespaces import SKOS, RDFS, BRICK, QUDTQK, QUDTDV, QUDT, UNIT, XSD  # context shim, see meta.json
+from env import env  # context shim, see meta.json
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix qudtqk: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudtdv: <http://qudt.org/vocab/dimensionvector/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+g = Graph()
+env.import_graph(g, "http://qudt.org/3.3.0/vocab/unit")
+env.import_graph(g, "http://qudt.org/3.3.0/vocab/quantitykind")
+g.bind("qudt", QUDT)
+g.bind("qudtqk", QUDTQK)
+
+
+def get_units(qudt_quantity):
+    """
+    Fetches the QUDT unit and symbol (as a Literal) from the QUDT ontology so
+    in order to avoid having to pull the full QUDT ontology into Brick
+    """
+    return [
+        x[0]
+        for x in g.query(
+            """SELECT ?unit WHERE {{
+                    <{qudt_quantity}> qudt:applicableUnit ?unit .
+                }}""".format(
+                qudt_quantity=qudt_quantity
+            )
+        )
+    ]
+
+
+def all_units():
+    return g.query(
+        """SELECT ?unit ?symbol ?label WHERE {
+        ?unit a qudt:Unit .
+        OPTIONAL { ?unit qudt:symbol ?symbol } .
+        OPTIONAL { ?unit rdfs:label ?label} .
+    }"""
+    )
+
+
+"""
+Each is a qudt:QuantityKind
+"""
+quantity_definitions = {
+    "Air_Quality": {
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:narrower: {
+            "Ammonia_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal("The concentration of Ammonia in a medium"),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+            },
+            "CO_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of carbon monoxide in a medium"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+                skos:narrower: {
+                    "Differential_CO_Concentration": {
+                        qudt:isDeltaQuantity: Literal(True),
+                        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                        qudt:applicableUnit: [unit:PPM, unit:PPB],
+                        skos:definition: Literal(
+                            "The difference in carbon monoxide concentration between two areas"
+                        ),
+                        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                    },
+                },
+            },
+            "CO2_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of carbon dioxide in a medium"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+                skos:narrower: {
+                    "Differential_CO2_Concentration": {
+                        qudt:isDeltaQuantity: Literal(True),
+                        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                        qudt:applicableUnit: [unit:PPM, unit:PPB],
+                        skos:definition: Literal(
+                            "The difference in carbon dioxide concentration between two areas"
+                        ),
+                        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                    },
+                },
+            },
+            "Formaldehyde_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of formaldehyde in a medium"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+            },
+            "Ozone_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal("The concentration of ozone in a medium"),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+            },
+            "Methane_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal("The concentration of methane in a medium"),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+            },
+            "NO2_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of nitrogen dioxide in a medium"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+            },
+            "PM10_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB, UNIT["MicroGM-PER-M3"]],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of particulates with diameter of 10 microns or less in air"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+            },
+            "PM2.5_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB, UNIT["MicroGM-PER-M3"]],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of particulates with diameter of 2.5 microns or less in air"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+            },
+            "PM1_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB, UNIT["MicroGM-PER-M3"]],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of particulates with diameter of 1 microns or less in air"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+            },
+            "Radon_Concentration": {
+                qudt:applicableUnit: [UNIT["BQ-PER-M3"], UNIT["PicoCI-PER-L"]],
+                qudt:hasDimensionVector: QUDTDV["A0E0L-3I0M0H0T-1D0"],
+                skos:definition: Literal(
+                    "The concentration of radioactivity due to Radon in a medium"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:ActivityConcentration,
+            },
+            "TVOC_Concentration": {
+                qudt:applicableUnit: [unit:PPM, unit:PPB, UNIT["MicroGM-PER-M3"]],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "The concentration of total volatile organic compounds in air"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:DimensionlessRatio,
+            },
+        },
+    },
+    "Phasor_Angle": {
+        qudt:applicableUnit: [
+            unit:ARCMIN,
+            unit:ARCSEC,
+            unit:DEG,
+            unit:GON,
+            unit:GRAD,
+            unit:MIL,
+            unit:RAD,
+            unit:MicroRAD,
+            unit:MilliRAD,
+            unit:MilliARCSEC,
+            unit:REV,
+        ],
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:definition: Literal("Angle component of a phasor"),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:PlaneAngle,
+    },
+    "Phasor_Magnitude": {
+        qudt:applicableUnit: [
+            unit:ARCMIN,
+            unit:ARCSEC,
+            unit:DEG,
+            unit:GON,
+            unit:GRAD,
+            unit:MIL,
+            unit:RAD,
+            unit:MicroRAD,
+            unit:MilliRAD,
+            unit:MilliARCSEC,
+            unit:REV,
+        ],
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:definition: Literal("Magnitude component of a phasor"),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+    },
+    "Cloudage": {
+        qudt:applicableUnit: [unit:OKTA],
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:definition: Literal(
+            "The fraction of the sky obscured by clouds when observed from a particular location"
+        ),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Dimensionless,
+    },
+    "Current_Angle": {
+        skos:definition: Literal(
+            "The angle of the phasor representing a measurement of electric current"
+        ),
+        qudt:applicableUnit: [
+            unit:ARCMIN,
+            unit:ARCSEC,
+            unit:DEG,
+            unit:GON,
+            unit:GRAD,
+            unit:MIL,
+            unit:RAD,
+            unit:MicroRAD,
+            unit:MilliRAD,
+            unit:MilliARCSEC,
+            unit:REV,
+        ],
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:definition: Literal("Angle of current phasor"),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: brick:Phasor_Angle,
+    },
+    "Current_Total_Harmonic_Distortion": {
+        skos:definition: Literal(
+            "Measurement of harmonic distortion present in a signal defined as the sum of the powers of all harmonic components to the power of the fundamental frequency. (https://en.wikipedia.org/wiki/Total_harmonic_distortion)"
+        ),
+        qudt:applicableUnit: [unit:PERCENT, unit:DeciB_M],
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Dimensionless,
+    },
+    "Alternating_Current_Frequency": {
+        qudt:applicableUnit: [unit:GigaHZ, unit:MegaHZ, unit:KiloHZ, unit:HZ],
+        skos:definition: Literal(
+            "The frequency of the oscillations of alternating current"
+        ),
+        qudt:hasDimensionVector: QUDTDV["A0E0L0I0M0H0T-1D0"],
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Frequency,
+    },
+    "Voltage_Angle": {
+        skos:definition: Literal(
+            "The angle of the phasor representing a measurement of electric voltage"
+        ),
+        qudt:applicableUnit: [
+            unit:ARCMIN,
+            unit:ARCSEC,
+            unit:DEG,
+            unit:GON,
+            unit:GRAD,
+            unit:MIL,
+            unit:RAD,
+            unit:MicroRAD,
+            unit:MilliRAD,
+            unit:MilliARCSEC,
+            unit:REV,
+        ],
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:definition: Literal("Angle of voltage phasor"),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: brick:Phasor_Angle,
+    },
+    "Direction": {
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:narrower: {
+            "Wind_Direction": {
+                qudt:applicableUnit: [
+                    unit:ARCMIN,
+                    unit:ARCSEC,
+                    unit:DEG,
+                    unit:GON,
+                    unit:GRAD,
+                    unit:MIL,
+                    unit:RAD,
+                    unit:MicroRAD,
+                    unit:MilliRAD,
+                    unit:MilliARCSEC,
+                    unit:REV,
+                ],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal("Direction of wind relative to North"),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+            }
+        },
+    },
+    "Level": {
+        qudt:applicableUnit: [
+            unit:CentiM,
+            unit:DeciM,
+            unit:MilliM,
+            unit:MicroM,
+            unit:KiloM,
+            unit:M,
+            unit:IN,
+            unit:FT,
+            unit:YD,
+        ],
+        qudt:hasDimensionVector: qudtdv:A0E0L1I0M0H0T0D0,
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:definition: Literal(
+            "Amount of substance in a container; typically measured in height"
+        ),
+        skos:broader: qudtqk:Length,
+        skos:narrower: {
+            "Precipitation": {
+                qudt:applicableUnit: [
+                    unit:CentiM,
+                    unit:DeciM,
+                    unit:MilliM,
+                    unit:MicroM,
+                    unit:KiloM,
+                    unit:M,
+                    unit:IN,
+                    unit:FT,
+                    unit:YD,
+                ],
+                skos:definition: Literal(
+                    "Amount of atmospheric water vapor fallen including rain, sleet, snow, and hail (https://project-haystack.dev/doc/lib-phScience/precipitation)"
+                ),
+                qudt:hasDimensionVector: qudtdv:A0E0L1I0M0H0T0D0,
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:Length,
+            },
+        },
+    },
+    "Occupancy": {
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+        skos:narrower: {
+            "Occupancy_Count": {
+                # qudt:applicableUnit: [unit:People],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal("Number of people in an area"),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:Dimensionless,
+            },
+            "Occupancy_Percentage": {
+                qudt:applicableUnit: [unit:PERCENT],
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+                skos:definition: Literal(
+                    "Percent of total occupancy of space that is occupied"
+                ),
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:Dimensionless,
+            },
+        },
+    },
+    "Position": {
+        qudt:applicableUnit: [unit:PERCENT],
+        skos:definition: Literal("The fraction of the full range of motion"),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Dimensionless,
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H0T0D1,
+    },
+    "Differential_Pressure": {
+        qudt:isDeltaQuantity: Literal(True),
+        qudt:hasDimensionVector: QUDTDV["A0E0L-1I0M1H0T-2D0"],
+        skos:narrower: {
+            "Differential_Static_Pressure": {
+                brick:hasQUDTReference: qudtqk:StaticPressure,
+                qudt:hasDimensionVector: QUDTDV["A0E0L-1I0M1H0T-2D0"],
+                qudt:isDeltaQuantity: Literal(True),
+            },
+            "Differential_Dynamic_Pressure": {
+                brick:hasQUDTReference: qudtqk:DynamicPressure,
+                qudt:hasDimensionVector: QUDTDV["A0E0L-1I0M1H0T-2D0"],
+                qudt:isDeltaQuantity: Literal(True),
+            },
+        },
+    },
+    "Solar_Radiance": {
+        qudt:hasDimensionVector: QUDTDV["A0E0L0I0M1H0T-3D0"],
+        qudt:applicableUnit: [UNIT["W-PER-M2-SR"]],
+        skos:definition: Literal(
+            "The amount of light that passes through or is emitted from the sun and falls within a given solid angle in a specified direction",
+        ),
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Radiance,
+    },
+    "Solar_Irradiance": {
+        qudt:hasDimensionVector: QUDTDV["A0E0L0I0M1H0T-3D0"],
+        qudt:applicableUnit: [UNIT["W-PER-M2"]],
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Irradiance,
+    },
+    "Speed": {
+        brick:hasQUDTReference: qudtqk:Speed,
+        qudt:hasDimensionVector: QUDTDV["A0E0L1I0M0H0T-1D0"],
+        skos:narrower: {
+            "Linear_Speed": {
+                qudt:applicableUnit: [
+                    UNIT["M-PER-HR"],
+                    UNIT["KiloM-PER-HR"],
+                    UNIT["FT-PER-HR"],
+                    UNIT["MI-PER-HR"],
+                    UNIT["M-PER-SEC"],
+                    UNIT["KiloM-PER-SEC"],
+                    UNIT["FT-PER-SEC"],
+                    UNIT["MI-PER-SEC"],
+                ],
+                skos:definition: Literal(
+                    "Speed in one dimension (linear)",
+                ),
+                qudt:hasDimensionVector: QUDTDV["A0E0L1I0M0H0T-1D0"],
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: qudtqk:Speed,
+            },
+            "Rotational_Speed": {
+                qudt:applicableUnit: [
+                    UNIT["RAD-PER-HR"],
+                    UNIT["RAD-PER-SEC"],
+                    UNIT["RAD-PER-MIN"],
+                    UNIT["DEG-PER-HR"],
+                    UNIT["DEG-PER-MIN"],
+                    UNIT["DEG-PER-SEC"],
+                ],
+                skos:definition: Literal(
+                    "Rotational speed",
+                ),
+                qudt:hasDimensionVector: QUDTDV["A0E0L1I0M0H0T-1D0"],
+                rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+                skos:broader: [qudtqk:Speed, qudtqk:Frequency],
+            },
+        },
+    },
+    "Differential_Temperature": {
+        brick:hasQUDTReference: qudtqk:Temperature,
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H1T0D0,
+        qudt:isDeltaQuantity: Literal(True),
+    },
+    "Operative_Temperature": {
+        qudt:applicableUnit: [unit:DEG_F, unit:DEG_C, unit:K],
+        skos:definition: Literal(
+            "The uniform temperature of an imaginary black enclosure in which an occupant would exchange the same amount of heat by radiation plus convection as in the actual nonuniform environment (https://en.wikipedia.org/wiki/Operative_temperature)"
+        ),
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H1T0D0,
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Temperature,
+    },
+    "Radiant_Temperature": {
+        qudt:applicableUnit: [unit:DEG_F, unit:DEG_C, unit:K],
+        skos:definition: Literal(
+            "the uniform temperature of an imaginary enclosure in which the radiant heat transfer from the human body is equal to the radiant heat transfer in the actual non-uniform enclosure. (https://en.wikipedia.org/wiki/Mean_radiant_temperature)"
+        ),
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H1T0D0,
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Temperature,
+    },
+    "Dry_Bulb_Temperature": {
+        qudt:applicableUnit: [unit:DEG_F, unit:DEG_C, unit:K],
+        skos:definition: Literal(
+            "The temperature of air measured by a thermometer freely exposed to the air, but shielded from radiation and moisture. (https://en.wikipedia.org/wiki/Dry-bulb_temperature)"
+        ),
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H1T0D0,
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Temperature,
+        skos:narrower: {
+            "Differential_Dry_Bulb_Temperature": {
+                qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H1T0D0,
+                qudt:isDeltaQuantity: Literal(True),
+            },
+        },
+    },
+    "Wet_Bulb_Temperature": {
+        qudt:applicableUnit: [unit:DEG_F, unit:DEG_C, unit:K],
+        skos:definition: Literal(
+            "The temperature read by a thermometer covered in water-soaked cloth (wet-bulb thermometer) over which air is passed. A wet-bulb thermometer indicates a temperature close to the true (thermodynamic) wet-bulb temperature. The wet-bulb temperature is the lowest temperature that can be reached under current ambient conditions by the evaporation of water only.  DBT is the temperature that is usually thought of as air temperature, and it is the true thermodynamic temperature. It indicates the amount of heat in the air and is directly proportional to the mean kinetic energy of the air molecule. (https://en.wikipedia.org/wiki/Wet-bulb_temperature)"
+        ),
+        qudt:hasDimensionVector: qudtdv:A0E0L0I0M0H1T0D0,
+        rdfs:isDefinedBy: URIRef(str(BRICK).strip("#")),
+        skos:broader: qudtqk:Temperature,
+    },
+    # TODO: https://ci.mines-stetienne.fr/seas/WeatherOntology-0.9#AirTemperature ?
+    "Volume": {
+        brick:hasQUDTReference: qudtqk:Volume,
+        qudt:applicableUnit: [unit:M3, unit:FT3, unit:IN3, unit:YD3],
+        qudt:hasDimensionVector: qudtdv:A0E0L3I0M0H0T0D0,
+    },
+}
+
+
+
+# --- demo harness (not part of the extracted region; added IDENTICALLY to
+# original.py and translated.ldpy so the driver has an observable) ----------
+# The region only *declares* the quantity_definitions data structure; Brick's
+# generate_brick.py is what walks it into triples.  This walk is a stripped
+# down define_concept_hierarchy: it materialises every term of the structure
+# so the driver compares all of them.
+DEMO_GRAPH = Graph()
+
+
+def _demo_emit(definitions, graph, parent=None):
+    for name, defn in definitions.items():
+        concept = BRICK[name]
+        if parent is not None:
+            graph.add((concept, SKOS.broader, parent))
+        for prop, value in defn.items():
+            if isinstance(value, dict):
+                _demo_emit(value, graph, concept)
+            elif isinstance(value, list):
+                for item in value:
+                    graph.add((concept, prop, item))
+            else:
+                graph.add((concept, prop, value))
+
+
+_demo_emit(quantity_definitions, DEMO_GRAPH)
+print(len(DEMO_GRAPH), len(set(DEMO_GRAPH.subjects())), len(set(DEMO_GRAPH.predicates())))

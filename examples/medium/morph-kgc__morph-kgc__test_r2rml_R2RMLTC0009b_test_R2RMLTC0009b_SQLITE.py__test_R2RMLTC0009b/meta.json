@@ -1,0 +1,31 @@
+{
+  "region_id": "morph-kgc__morph-kgc__test_r2rml_R2RMLTC0009b_test_R2RMLTC0009b_SQLITE.py__test_R2RMLTC0009b",
+  "repository": "morph-kgc/morph-kgc",
+  "commit": "a2122e88bb19f0e5a1eda9e18870235160483bec",
+  "path": "test/r2rml/R2RMLTC0009b/test_R2RMLTC0009b_SQLITE.py",
+  "qualname": "test_R2RMLTC0009b",
+  "lineno": 16,
+  "end_lineno": 25,
+  "band": "medium",
+  "kind": "function",
+  "rdf_ops": 2,
+  "categories": {
+    "graph_ctor": 1,
+    "serialize_parse": 1
+  },
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "translation_notes": [
+    "translated.ldpy is byte-identical to original.py, and transpiles unchanged: none of the region's RDF operations has an island form. Graph() / g.parse(path) / compare.isomorphic are rdflib API calls the notation does not address, and the whole R2RML mapping is an external mapping.ttl reached through an INI-style configuration f-string (opaque to the lexer, as documented).",
+    "the region is where ldpy would in principle be most valuable (an R2RML materialisation) yet has no surface for it: the RDF lives in data files, not in the Python source",
+    "fixtures copied next to the sources so os.path.dirname(os.path.realpath(__file__)) resolves for both representations: mapping.ttl, output.nq, resource.db from morph-kgc/morph-kgc@a2122e88bb test/r2rml/R2RMLTC0009b (Apache-2.0, ~15 kB total)",
+    "driver cannot establish equivalence in this environment: morph_kgc.materialize on a sqlite:// source imports sqlalchemy, which is absent from the eval venv (ModuleNotFoundError raised identically by both sides). No package was installed; the example is skipped by the validation stage anyway (classification not-expressible)."
+  ],
+  "draft_sha": "345b7a3cab3e8d69",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.801366+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  }
+}

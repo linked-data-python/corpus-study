@@ -1,0 +1,25 @@
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: AnnotatableTerms._set_label (lines 603-610, band medium)
+# licence of the source repository: see meta.json
+from rdflib import (
+    BNode,
+    Literal,
+    Namespace,
+    RDF,
+    RDFS,
+    URIRef,
+    Variable
+)
+from rdflib.term import Identifier
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _set_label(self, label):
+    if not label:
+        return
+    if isinstance(label, Identifier):
+        self.graph += g{ {self.identifier} rdfs:label {label} }
+    else:
+        for l in label:
+            self.graph += g{ {self.identifier} rdfs:label {l} }

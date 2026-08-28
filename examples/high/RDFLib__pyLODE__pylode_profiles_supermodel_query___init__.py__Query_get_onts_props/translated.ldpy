@@ -1,0 +1,52 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/__init__.py
+# region: Query.get_onts_props (lines 509-517, band high)
+# licence of the source repository: see meta.json
+from collections import defaultdict
+from rdflib.namespace import (
+    DC,
+    DCTERMS,
+    FOAF,
+    ORG,
+    OWL,
+    PROF,
+    PROV,
+    QB,
+    RDF,
+    RDFS,
+    SDO,
+    SH,
+    SKOS,
+    VANN,
+)
+from pylode.rdf_elements import (
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix ontpub: <https://linked.data.gov.au/def/ontpub/> .
+
+    AGENT_PROPS,
+    OBJECT_PROPERTY_SUBCLASSES,
+    ONTOLOGY_PROPS,
+    ONTPUB,
+)
+
+def get_onts_props(self) -> dict[str, list]:
+    # get all ONT_PROPS props and their (multiple) values
+    this_onts_props = defaultdict(list)
+    for s_ in self.graph.subjects(predicate=rdf:type, object=prof:Profile):
+        for p_, o in self.graph.predicate_objects(s_):
+            if p_ in ONTOLOGY_PROPS:
+                this_onts_props[p_].append(o)
+
+    return this_onts_props

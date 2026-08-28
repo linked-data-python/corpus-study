@@ -1,0 +1,33 @@
+{
+  "region_id": "mariocosenza__kgsum__src_dataset_preparation.py__<module>",
+  "repository": "mariocosenza/kgsum",
+  "commit": "320b14fc5759c8693c1a57acda719f2c2ca930d9",
+  "path": "src/dataset_preparation.py",
+  "qualname": "<module>",
+  "lineno": 1,
+  "end_lineno": 632,
+  "band": "low",
+  "kind": "file",
+  "rdf_ops": 15,
+  "categories": {
+    "graph_ctor": 1,
+    "serialize_parse": 1,
+    "sparql": 13
+  },
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "translation_notes": [
+    "translated.ldpy is byte-identical to original.py and transpiles unchanged: all 15 RDF operations of the module are opaque to the notation. 13 are SPARQL query strings passed to prepareQuery()/graph.query() (islands do not apply inside Python strings, by design), and the remaining two are Graph() + g.parse(path, format=f) in _guess_format_and_parse.",
+    "the prefix bindings the module does declare are dicts of strings passed as initNs= to prepareQuery ({'dcterms': 'http://purl.org/dc/terms/'}, {'rdf': rdflib.RDF}); ldpy's @prefix cannot feed them, so the same IRI is still written out by hand in each of the ten helpers -- exactly the duplication the notation is meant to remove, but out of its reach here",
+    "select_local_void_subject even builds a query by f-string interpolation of an IRI ('<{ds_uri}> dcterms:subject ?classUri'), where ldpy would want f<...>; inside a query string it cannot help",
+    "context shims (identical for both sides, imports unchanged): local config.py with the single Config.QUERY_LOV setting the region reads (kept at its upstream default True); src/util.py with CATEGORIES and match_file_lod copied verbatim (the rest of upstream util.py loads src/filter/filter.json at import time); src/lov_data_preparation.py stubbed to return [] because find_tags_from_list/find_comments_from_lists are HTTP clients for the LOV API -- the QUERY_LOV branch is still taken",
+    "driver fixture sample_dataset.ttl was written for this evaluation (not taken from the repository); it exercises all thirteen queries through process_file_full_inplace, which is the only module-level entry that reaches them"
+  ],
+  "draft_sha": "42f5ee6d331fb6c2",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.543889+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  }
+}

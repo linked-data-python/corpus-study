@@ -1,0 +1,38 @@
+{
+  "region_id": "MKLab-ITI__prophet__rdflib_plugins_parsers_pyRdfa_state.py__ExecutionContext__CURIEorURI",
+  "repository": "MKLab-ITI/prophet",
+  "commit": "eee2ab51de0b2ce1281206131a72a0cbc1dd303a",
+  "path": "rdflib/plugins/parsers/pyRdfa/state.py",
+  "qualname": "ExecutionContext._CURIEorURI",
+  "lineno": 341,
+  "end_lineno": 386,
+  "band": "low",
+  "kind": "function",
+  "rdf_ops": 2,
+  "categories": {
+    "term_constructor": 2
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "context shim: the three package-relative imports (from . import UnresolvablePrefix, UnresolvableTerm, err_illegal_safe_CURIE, err_no_CURIE_in_safe_CURIE) point to a local pyrdfa_context.py holding the same bindings; identical for both sides",
+    "import fix: `from urllib.parse import urlsplit` added (module-level import of state.py that the extracted region needs); identical for both sides",
+    "URIRef(self.base) -> f<{self.base}> and URIRef(self.base+str(retval)) -> f<{self.base}{retval}>: ldpy's f-IRI concatenates str(part), so the explicit str() is absorbed",
+    "`from rdflib import URIRef` dropped on the ldpy side (term-construction scaffolding absorbed by the f-IRI islands); `BNode` kept, it is still used by an isinstance test",
+    "no graph island: the region builds single terms and never asserts a triple, so only the two f-IRI islands apply",
+    "caveat noted: an f-IRI resolves a relative result against the lexical @base when one is in scope; none is declared here, so f<{...}> is exactly URIRef(...)"
+  ],
+  "draft_sha": "71762ecdda00acd8",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.466850+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_CURIEorURI",
+    "diffs": [],
+    "error": null
+  }
+}

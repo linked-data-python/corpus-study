@@ -1,0 +1,37 @@
+{
+  "region_id": "IBM__kif__kif_lib_model_value_value.py__Value__to_rdflib",
+  "repository": "IBM/kif",
+  "commit": "4ce99d0d9bf2765fcd1681c7b3e30e702f38fa9d",
+  "path": "kif_lib/model/value/value.py",
+  "qualname": "Value._to_rdflib",
+  "lineno": 239,
+  "end_lineno": 259,
+  "band": "low",
+  "kind": "function",
+  "rdf_ops": 6,
+  "categories": {
+    "term_constructor": 6
+  },
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "context shim: the six package-relative imports of the dispatch classes (.entity, .iri, .quantity, .string, .text, .time) point to a local kif_shim.py holding minimal stand-ins with the attributes the region reads; 'from ... import namespace as NS' -> local namespace.py re-exporting rdflib's XSD; 'from ...rdflib import Literal, URIRef' -> 'from rdflib import ...' (that is what kif_lib.rdflib re-exports). Identical for both sides.",
+    "URIRef(expr) -> formatted IRI island f<{expr}> (ldpy's firi does no percent-encoding and no base is declared, so it is exactly URIRef(str(expr)))",
+    "Literal(str(self.amount), datatype=NS.XSD.decimal) -> f\"{self.amount}\"^^xsd:decimal; the f-string replaces str() (identical for Decimal, whose __format__ with an empty spec is str) and the datatype becomes a declared prefixed name. Same for the xsd:dateTime branch.",
+    "two of the six term constructors have no island form and stay plain Python: Literal(self.content, self.language) (the @lang suffix requires a literal tag, a variable tag cannot be written) and Literal(self.content) (outside a g{} island there is no bare-literal notation; f{expr} would be node() coercion, not Literal())",
+    "the namespace import disappears from the ldpy side, absorbed by the @prefix declaration"
+  ],
+  "draft_sha": "091178f0eb683445",
+  "provenance": {
+    "generated_at": "2026-08-28T01:18:21.432270+00:00",
+    "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_to_rdflib",
+    "diffs": [],
+    "error": null
+  }
+}

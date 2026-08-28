@@ -1,0 +1,39 @@
+@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+@prefix ace-ns: <http://attempto.ifi.uzh.ch/ace_lexicon#> .
+
+# Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
+# region: AnnotatableTerms.setupACEAnnotations (lines 529-560, band medium)
+# licence of the source repository: see meta.json
+
+def setupACEAnnotations(self):
+    self.graph.bind('ace', ACE_NS, override=False)
+
+    # PN_sg singular form of a proper name ()
+    self.PN_sgProp = Property(ace-ns:PN_sg,
+                              baseType=owl-ns:AnnotationProperty,
+                              graph=self.graph)
+
+    # CN_sg singular form of a common noun
+    self.CN_sgProp = Property(ace-ns:CN_sg,
+                              baseType=owl-ns:AnnotationProperty,
+                              graph=self.graph)
+
+    # CN_pl plural form of a common noun
+    self.CN_plProp = Property(ace-ns:CN_pl,
+                              baseType=owl-ns:AnnotationProperty,
+                              graph=self.graph)
+
+    # singular form of a transitive verb
+    self.TV_sgProp = Property(ace-ns:TV_sg,
+                              baseType=owl-ns:AnnotationProperty,
+                              graph=self.graph)
+
+    # plural form of a transitive verb
+    self.TV_plProp = Property(ace-ns:TV_pl,
+                              baseType=owl-ns:AnnotationProperty,
+                              graph=self.graph)
+
+    # past participle form a transitive verb
+    self.TV_vbgProp = Property(ace-ns:TV_vbg,
+                               baseType=owl-ns:AnnotationProperty,
+                               graph=self.graph)
