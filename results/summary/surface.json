@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at": "2026-08-28T08:40:07.977015+00:00",
-    "pipeline_revision": "5db2c5614bd418cb5529daefbbc6df7b0e5db855",
+    "generated_at": "2026-08-28T17:39:20.602631+00:00",
+    "pipeline_revision": "92f5c987ad342a1e90c1d5e9eeeddce7fe2e72c2",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
   },
@@ -302,6 +302,9 @@
     "graph_named_access": 370,
     "graph_named_identifier": 198,
     "graphs_distinct": 5265,
+    "literal_computed_typed": 2907,
+    "literal_computed_value": 6174,
+    "literal_constant_typed": 1501,
     "ns_def_class": 116,
     "ns_def_computed_iri": 560,
     "ns_def_local": 1061,
@@ -311,6 +314,12 @@
     "ns_imported_from_project": 1271,
     "ns_imported_relative": 242,
     "ns_term_subscript": 4334,
+    "remove_calls": 728,
+    "remove_triple_pattern": 636,
+    "remove_wildcards_1": 329,
+    "remove_wildcards_2": 41,
+    "remove_wildcards_3": 28,
+    "remove_with_wildcard": 398,
     "sparql_assigned": 578,
     "sparql_consumed_builtin": 158,
     "sparql_consumed_comprehension": 99,
@@ -355,6 +364,9 @@
     "graph_named_access": 93,
     "graph_named_identifier": 129,
     "graphs_distinct": 3377,
+    "literal_computed_typed": 540,
+    "literal_computed_value": 1120,
+    "literal_constant_typed": 278,
     "ns_def_class": 98,
     "ns_def_computed_iri": 251,
     "ns_def_local": 455,
@@ -364,6 +376,12 @@
     "ns_imported_from_project": 563,
     "ns_imported_relative": 108,
     "ns_term_subscript": 491,
+    "remove_calls": 237,
+    "remove_triple_pattern": 202,
+    "remove_wildcards_1": 103,
+    "remove_wildcards_2": 24,
+    "remove_wildcards_3": 18,
+    "remove_with_wildcard": 137,
     "sparql_assigned": 232,
     "sparql_consumed_builtin": 60,
     "sparql_consumed_comprehension": 42,
@@ -408,6 +426,9 @@
     "graph_named_access": 36,
     "graph_named_identifier": 40,
     "graphs_distinct": 358,
+    "literal_computed_typed": 173,
+    "literal_computed_value": 242,
+    "literal_constant_typed": 90,
     "ns_def_class": 20,
     "ns_def_computed_iri": 94,
     "ns_def_local": 156,
@@ -417,6 +438,12 @@
     "ns_imported_from_project": 65,
     "ns_imported_relative": 19,
     "ns_term_subscript": 130,
+    "remove_calls": 93,
+    "remove_triple_pattern": 81,
+    "remove_wildcards_1": 27,
+    "remove_wildcards_2": 21,
+    "remove_wildcards_3": 13,
+    "remove_with_wildcard": 51,
     "sparql_assigned": 107,
     "sparql_consumed_builtin": 25,
     "sparql_consumed_comprehension": 20,
@@ -650,6 +677,78 @@
     "SCHEMA": 221,
     "TEST": 217,
     "TIME": 216
+  },
+  "strata": {
+    "ns_import_project": {
+      "description": "prefix import (013)",
+      "sites": 1271,
+      "repositories": 65
+    },
+    "ns_def_local": {
+      "description": "@prefix per block / import (013)",
+      "sites": 1061,
+      "repositories": 156
+    },
+    "add_isolated": {
+      "description": "+{ } single triple (014)",
+      "sites": 5053,
+      "repositories": 220
+    },
+    "add_in_loop": {
+      "description": "@graph + {} interpolation in a loop (014)",
+      "sites": 3646,
+      "repositories": 208
+    },
+    "add_run_shared_subject": {
+      "description": "+{ } multi-triple, `;` (014)",
+      "sites": 1246,
+      "repositories": 154
+    },
+    "remove": {
+      "description": "-{ }, wildcards (014)",
+      "sites": 636,
+      "repositories": 81
+    },
+    "trav_one_step": {
+      "description": "m{ } arity 1 (016)",
+      "sites": 5235,
+      "repositories": 185
+    },
+    "trav_navigation": {
+      "description": "m{ } multi-pattern join (016)",
+      "sites": 1039,
+      "repositories": 99
+    },
+    "trav_single_value": {
+      "description": ".first() / .one() (016)",
+      "sites": 2252,
+      "repositories": 111
+    },
+    "trav_existence": {
+      "description": "m{ } as a condition, ASK (016)",
+      "sites": 261,
+      "repositories": 43
+    },
+    "sparql_literal": {
+      "description": "s{ } (015)",
+      "sites": 884,
+      "repositories": 99
+    },
+    "sparql_interpolated": {
+      "description": "s{ } with interpolated terms (015)",
+      "sites": 140,
+      "repositories": 21
+    },
+    "bind_initbindings": {
+      "description": "@bindings, inherited prologue (017)",
+      "sites": 333,
+      "repositories": 56
+    },
+    "coercion_datatype": {
+      "description": "Coercion (020)",
+      "sites": 6174,
+      "repositories": 242
+    }
   },
   "examples": {
     "trav_for": [

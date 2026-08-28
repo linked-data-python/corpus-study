@@ -32,7 +32,14 @@ query string to classify its form.
 Outputs::
 
     results/raw/surface.jsonl        one JSON object per RDF-relevant file
+    results/raw/sites.jsonl          one JSON object per *site* of a stratum
     results/summary/surface.json     corpus-level roll-up + examples
+
+A **site** is one located occurrence of a shape — file, line span, enclosing
+function, snippet — recorded for the strata of design record ``corpus/403``.
+The summary keeps a handful of illustrative ``examples`` per kind; the site
+index keeps them *all*, which is what makes the stratified draw of that study
+reproducible from the corpus alone (see :mod:`rdfeval.strata`).
 """
 
 from __future__ import annotations
@@ -55,6 +62,7 @@ from .config import RESULTS_RAW, RESULTS_SUMMARY, load_config, provenance
 from .select import load_manifest
 
 SURFACE_RAW = RESULTS_RAW / "surface.jsonl"
+SITES_RAW = RESULTS_RAW / "sites.jsonl"
 SURFACE_SUMMARY = RESULTS_SUMMARY / "surface.json"
 
 
@@ -163,6 +171,8 @@ class Surface:
     query_text_forms: Counter = field(default_factory=Counter)
     graph_names: Counter = field(default_factory=Counter)
     examples: list[dict] = field(default_factory=list)
+    # Every located occurrence of a stratum shape (corpus/403), uncapped.
+    sites: list[dict] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -182,7 +192,39 @@ class Surface:
             "query_text_forms": dict(sorted(self.query_text_forms.items())),
             "graph_names": dict(sorted(self.graph_names.items())),
             "examples": self.examples,
+            "sites": self.sites,
         }
+
+
+# The strata of design record `corpus/403`: each names a *kind of use* of
+# rdflib, and the ldpy construction whose usefulness it is meant to exercise.
+# The site index carries one record per occurrence, so the study can draw a
+# seeded sample per stratum instead of by file density.
+STRATA = {
+    "ns_import_project":    "prefix import (013)",
+    "ns_def_local":         "@prefix per block / import (013)",
+    "add_isolated":         "+{ } single triple (014)",
+    "add_in_loop":          "@graph + {} interpolation in a loop (014)",
+    "add_run_shared_subject": "+{ } multi-triple, `;` (014)",
+    "remove":               "-{ }, wildcards (014)",
+    "trav_one_step":        "m{ } arity 1 (016)",
+    "trav_navigation":      "m{ } multi-pattern join (016)",
+    "trav_single_value":    ".first() / .one() (016)",
+    "trav_existence":       "m{ } as a condition, ASK (016)",
+    "sparql_literal":       "s{ } (015)",
+    "sparql_interpolated":  "s{ } with interpolated terms (015)",
+    "bind_initbindings":    "@bindings, inherited prologue (017)",
+    "coercion_datatype":    "Coercion (020)",
+}
+
+
+class _Span:
+    """A line span standing in for a node: a *run* of `.add` statements is a
+    site, and no single AST node covers it."""
+
+    def __init__(self, lineno: int, end_lineno: int) -> None:
+        self.lineno = lineno
+        self.end_lineno = end_lineno
 
 
 class _SurfaceVisitor(ast.NodeVisitor):
@@ -201,6 +243,10 @@ class _SurfaceVisitor(ast.NodeVisitor):
         self.counted_queries: set[str] = set()   # query texts already measured
         # Stack of variables bound by `for <vars> in g.<selector>(...)` loops
         self.selector_loop_vars: list[set[str]] = []
+        # (start, end, qualname) of every function, for locating a site: the
+        # add-run pass runs outside the visitor, so the enclosing name cannot
+        # come from a stack.
+        self.func_spans: list[tuple[int, int, str]] = []
 
     # --- helpers -----------------------------------------------------------
 
@@ -223,6 +269,27 @@ class _SurfaceVisitor(ast.NodeVisitor):
             return ast.unparse(expr)
         except Exception:                       # pragma: no cover - defensive
             return "?"
+
+    def _qualname_at(self, line: int) -> str:
+        """Innermost function/class enclosing ``line`` ("<module>" if none)."""
+        best: tuple[int, str] | None = None
+        for lo, hi, qual in self.func_spans:
+            if lo <= line <= hi and (best is None or hi - lo < best[0]):
+                best = (hi - lo, qual)
+        return best[1] if best else "<module>"
+
+    def _site(self, kind: str, node: ast.AST) -> None:
+        """Record one located occurrence of a stratum shape (corpus/403)."""
+        start = getattr(node, "lineno", 1)
+        end = getattr(node, "end_lineno", start) or start
+        snippet_end = min(end, start + 12)
+        self.s.sites.append({
+            "kind": kind,
+            "line": start,
+            "end_line": end,
+            "qualname": self._qualname_at(start),
+            "snippet": "\n".join(self.lines[start - 1:snippet_end])[:600],
+        })
 
     def _example(self, kind: str, node: ast.AST) -> None:
         if sum(1 for e in self.s.examples if e["kind"] == kind) >= self.MAX_EXAMPLES:
@@ -263,6 +330,7 @@ class _SurfaceVisitor(ast.NodeVisitor):
                     if exported:
                         self.s.ns_imported_iris[local] = exported
                     self._example("ns_imported_from_project", node)
+                    self._site("ns_import_project", node)
         self.generic_visit(node)
 
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -296,6 +364,8 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 self.s.ns_defined[t.id] = iri
         if at_module_level:
             self._example("ns_def_module", stmt)
+        else:
+            self._site("ns_def_local", stmt)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         for base in node.bases:
@@ -479,6 +549,20 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 self.s.counts["add_in_run"] += n
                 if n >= 3:
                     self._example("add_run", run[0][2])
+            # Sites of the construction strata (corpus/403).  A *run* is one
+            # site — it is the whole run that becomes one `+{ … ; … }` — and
+            # the strata OVERLAP by design: a run of three adds on one subject
+            # inside a loop exercises the multi-triple form, the interpolation
+            # and the loop at once, so it is a site of each.  The draw dedupes
+            # at the level of the enclosing region.
+            span = _Span(first_line, getattr(last, "end_lineno", first_line)
+                         or first_line)
+            if n == 1:
+                self._site("add_isolated", span)
+            if n > 1 and len(subjects) == 1:
+                self._site("add_run_shared_subject", span)
+            if in_loop:
+                self._site("add_in_loop", span)
             run.clear()
 
         for stmt in body:
@@ -524,6 +608,18 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 if kw.arg == "identifier":
                     self.s.counts["graph_named_identifier"] += 1
                     self._example("graph_named", node)
+        if callee == "Literal" and node.args:
+            value = node.args[0]
+            typed = any(k.arg in ("datatype", "lang") for k in node.keywords)
+            if not isinstance(value, ast.Constant):
+                # A *computed* value entering RDF: the conversion the language
+                # spells `Coercion` (020).  A constant is a plain term.
+                self.s.counts["literal_computed_value"] += 1
+                if typed:
+                    self.s.counts["literal_computed_typed"] += 1
+                self._site("coercion_datatype", node)
+            elif typed:
+                self.s.counts["literal_constant_typed"] += 1
         if callee in ("prepareQuery", "prepareUpdate"):
             self.s.counts["sparql_prepare"] += 1
             self._query_call(node, prepared=True)
@@ -544,6 +640,21 @@ class _SurfaceVisitor(ast.NodeVisitor):
             self._query_consumption(node)
             return
 
+        # --- retraction: the mirror of `.add`, and the same shape ----------
+        if method in ("remove", "remove_context", "remove_graph"):
+            self.s.counts["remove_calls"] += 1
+            if method == "remove" and node.args:
+                arg = node.args[0]
+                if isinstance(arg, ast.Tuple) and len(arg.elts) == 3:
+                    wild = sum(1 for e in arg.elts
+                               if isinstance(e, ast.Constant) and e.value is None)
+                    self.s.counts["remove_triple_pattern"] += 1
+                    if wild:
+                        self.s.counts["remove_with_wildcard"] += 1
+                        self.s.counts[f"remove_wildcards_{wild}"] += 1
+                    self._site("remove", node)
+            return
+
         # --- Q6: named graph access ----------------------------------------
         if method in ("get_context", "graph", "contexts", "graphs"):
             self.s.counts["graph_named_access"] += 1
@@ -553,12 +664,16 @@ class _SurfaceVisitor(ast.NodeVisitor):
         if method in SELECTORS:
             self.s.counts["trav_calls"] += 1
             self.s.selectors[method] += 1
+            if method == "value":
+                self._site("trav_single_value", node)
             if method in TERM_SELECTORS:
                 self.s.counts["trav_term_selector"] += 1
             else:
                 self.s.counts["trav_tuple_selector"] += 1
             self._selector_context(node)
-            self._selector_navigation(node)
+            navigation = self._selector_navigation(node)
+            if not navigation and method in TERM_SELECTORS:
+                self._site("trav_one_step", node)
         elif method in GRAPH_READ_METHODS:
             self.s.counts["trav_other_read"] += 1
 
@@ -585,6 +700,7 @@ class _SurfaceVisitor(ast.NodeVisitor):
                     self.counted_queries.add(text)
                     self.s.counts["sparql_query_lines"] += nlines
                     self.s.counts["sparql_queries_distinct"] += 1
+                self._site("sparql_literal", node)
                 if nlines >= 3:
                     self._example("sparql_literal", node)
             else:
@@ -592,12 +708,15 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 if form in ("fstring", "concat", "percent", "format"):
                     self.s.counts["sparql_interpolated"] += 1
                     self._example("sparql_interpolated", node)
+                    self._site("sparql_interpolated", node)
         for kw in node.keywords:
             if kw.arg == "initBindings":
                 self.s.counts["bind_initbindings"] += 1
                 self._example("bind_initbindings", node)
+                self._site("bind_initbindings", node)
             elif kw.arg == "initNs":
                 self.s.counts["bind_initns"] += 1
+                self._site("bind_initbindings", node)
 
     def _query_consumption(self, node: ast.Call) -> None:
         parent = self.parents.get(id(node))
@@ -627,6 +746,9 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 ctx = parent.func.id
                 if parent.func.id == "next":
                     self.s.counts["trav_single_value"] += 1
+                    self._site("trav_single_value", parent)
+                elif parent.func.id in ("any", "all"):
+                    self._site("trav_existence", parent)
             elif isinstance(parent.func, ast.Attribute) and \
                     parent.func.attr in SELECTORS:
                 ctx = "argument_of_selector"
@@ -634,11 +756,12 @@ class _SurfaceVisitor(ast.NodeVisitor):
             ctx = "assign"
         elif isinstance(parent, (ast.Compare, ast.If, ast.IfExp)):
             ctx = "test"
+            self._site("trav_existence", parent)
         elif isinstance(parent, ast.Return):
             ctx = "return"
         self.s.selector_contexts[ctx] += 1
 
-    def _selector_navigation(self, node: ast.Call) -> None:
+    def _selector_navigation(self, node: ast.Call) -> bool:
         """Does this selector continue a traversal started by an enclosing one?
 
         Two shapes count as navigation, and the second is the common one:
@@ -655,10 +778,11 @@ class _SurfaceVisitor(ast.NodeVisitor):
                     depth = len(self.selector_loop_vars)
                     self.s.counts[f"trav_navigation_depth_{min(depth, 4)}"] += 1
                     self._example("trav_navigation_loop", node)
-                    return
-        self._selector_chaining(node)
+                    self._site("trav_navigation", node)
+                    return True
+        return self._selector_chaining(node)
 
-    def _selector_chaining(self, node: ast.Call) -> None:
+    def _selector_chaining(self, node: ast.Call) -> bool:
         """A selector whose *argument* is itself a selector call: navigation."""
         for arg in list(node.args) + [kw.value for kw in node.keywords]:
             for sub in ast.walk(arg):
@@ -666,7 +790,9 @@ class _SurfaceVisitor(ast.NodeVisitor):
                         and sub.func.attr in SELECTORS and self._is_graph(sub.func.value):
                     self.s.counts["trav_chained"] += 1
                     self._example("trav_chained", node)
-                    return
+                    self._site("trav_navigation", node)
+                    return True
+        return False
 
     # --- Q4: terms interpolated into query text ----------------------------
 
@@ -686,6 +812,23 @@ class _SurfaceVisitor(ast.NodeVisitor):
             self.s.counts["bind_term_interpolated"] += 1
             self._example("bind_term_interpolated", node)
         self.generic_visit(node)
+
+
+def _function_spans(tree: ast.AST) -> list[tuple[int, int, str]]:
+    """(start, end, qualname) for every function and method of the module."""
+    spans: list[tuple[int, int, str]] = []
+
+    def walk(node, prefix: str) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                qual = f"{prefix}{child.name}"
+                spans.append((child.lineno, child.end_lineno or child.lineno, qual))
+                walk(child, qual + ".")
+            elif isinstance(child, ast.ClassDef):
+                walk(child, f"{prefix}{child.name}.")
+
+    walk(tree, "")
+    return spans
 
 
 def _record_parents(tree: ast.AST) -> dict[int, ast.AST]:
@@ -745,6 +888,7 @@ def surface_source(source: str, path: str = "<string>", repo: str = "",
     seed.visit(tree)
 
     v = _SurfaceVisitor(s, seed.b, source.splitlines())
+    v.func_spans = _function_spans(tree)
     v.parents = _record_parents(tree)
     v.str_consts = _string_constants(tree)
     v.resolve_import = resolve_import
@@ -920,8 +1064,13 @@ def run(cfg=None) -> dict:
             continue
         by_repo[repo].append(rec)
 
+    site_counts: Counter = Counter()
+    site_repos: dict[str, set[str]] = defaultdict(set)
     SURFACE_RAW.parent.mkdir(parents=True, exist_ok=True)
-    with SURFACE_RAW.open("w", encoding="utf-8") as out:
+    with SURFACE_RAW.open("w", encoding="utf-8") as out, \
+            SITES_RAW.open("w", encoding="utf-8") as sites_out:
+        sites_out.write(json.dumps({"provenance": provenance(cfg),
+                                    "strata": STRATA}) + "\n")
         for repo, records in sorted(by_repo.items()):
             if repo not in manifest:
                 continue
@@ -960,7 +1109,16 @@ def run(cfg=None) -> dict:
                     bucket = examples[ex["kind"]]
                     if len(bucket) < 12:
                         bucket.append({**ex, "path": s.path})
-                out.write(json.dumps(s.to_dict(), ensure_ascii=False) + "\n")
+                for site in s.sites:
+                    site_counts[site["kind"]] += 1
+                    site_repos[site["kind"]].add(repo)
+                    sites_out.write(json.dumps(
+                        {"repository": repo, "path": rec["path"],
+                         "commit": rec.get("commit"), **site},
+                        ensure_ascii=False) + "\n")
+                record = s.to_dict()
+                record.pop("sites")     # the sites have their own index
+                out.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     # Namespace duplication: the same IRI declared in several files of one
     # repository — the situation an `import ex:` construct would remove.
@@ -1054,6 +1212,10 @@ def run(cfg=None) -> dict:
         },
         "top_namespaces_used": dict(sorted(ns_uses.items(),
                                            key=lambda kv: -kv[1])[:25]),
+        "strata": {kind: {"description": STRATA[kind],
+                          "sites": site_counts.get(kind, 0),
+                          "repositories": len(site_repos.get(kind, ()))}
+                   for kind in STRATA},
         "examples": dict(examples),
     }
     SURFACE_SUMMARY.parent.mkdir(parents=True, exist_ok=True)
@@ -1079,9 +1241,13 @@ def _report(summary: dict) -> None:
     print("  ratios (pooled / median per repository):")
     for key, r in summary["ratios"].items():
         print(f"    {key:24s} {r['pooled']:.3f} / {r['median_per_repo']:.3f}")
+    print("  strata (corpus/403) — sites / repositories:")
+    for kind, st in summary.get("strata", {}).items():
+        print(f"    {kind:24s} {st['sites']:6d} / {st['repositories']:4d}"
+              f"   {st['description']}")
 
 
 def main(argv=None) -> int:
     run(load_config())
-    print(f"written: {SURFACE_RAW}, {SURFACE_SUMMARY}")
+    print(f"written: {SURFACE_RAW}, {SITES_RAW}, {SURFACE_SUMMARY}")
     return 0

@@ -430,3 +430,96 @@ def test_import_resolution_feeds_the_counter(tmp_path):
                        resolve_import=resolve)
     assert s.counts["ns_imported_from_project"] == 1
     assert s.ns_imported_iris == {"EX": "http://example.org/"}
+
+
+# --- the site index of the strata study (design record corpus/403) ----------
+
+STRATA_SOURCE = '''\
+from rdflib import Graph, Namespace, Literal, RDF, XSD, URIRef
+
+EX = Namespace("http://example.org/")
+g = Graph()
+
+def build(rows):
+    LOCAL = Namespace("http://local/")
+    for row in rows:
+        s = URIRef(EX + row["id"])
+        g.add((s, RDF.type, EX.Thing))
+        g.add((s, EX.v, Literal(row["v"], datatype=XSD.integer)))
+    g.add((EX.a, EX.p, EX.b))
+    g.remove((EX.a, None, None))
+
+def read(graph: Graph):
+    label = graph.value(EX.a, EX.name)
+    first = next(graph.subjects(RDF.type, EX.Thing))
+    if any(graph.objects(EX.a, EX.p)):
+        pass
+    for s in graph.subjects(RDF.type, EX.Thing):
+        for o in graph.objects(s, EX.p):
+            print(o)
+    graph.query("SELECT ?s WHERE { ?s a ?c }")
+    graph.query(f"SELECT ?s WHERE {{ ?s <{EX.p}> ?o }}")
+    graph.query("SELECT ?s WHERE { ?s ?p ?o }", initBindings={"p": EX.p})
+    return label, first
+'''
+
+
+def _sites_by_kind(source=STRATA_SOURCE):
+    from collections import Counter
+    from rdfeval.surface import surface_source
+    return Counter(s["kind"] for s in surface_source(source, "t.py", "r/r").sites)
+
+
+def test_every_stratum_has_a_site_producer():
+    """Each stratum of corpus/403 must be reachable: a stratum no shape ever
+    produces would silently sample nothing."""
+    from rdfeval.surface import STRATA
+    kinds = _sites_by_kind()
+    reachable = set(kinds) | {"ns_import_project"}   # needs a project index
+    assert set(STRATA) - reachable == set()
+
+
+def test_site_kinds_on_a_representative_file():
+    k = _sites_by_kind()
+    assert k["ns_def_local"] == 1
+    assert k["add_isolated"] == 1              # g.add((EX.a, EX.p, EX.b))
+    assert k["add_run_shared_subject"] == 1    # the two adds on `s`
+    assert k["add_in_loop"] == 1               # same run, second stratum
+    assert k["remove"] == 1
+    assert k["trav_single_value"] == 2         # .value(...) and next(...)
+    assert k["trav_existence"] == 1            # any(...)
+    assert k["trav_navigation"] == 1           # objects(s, …) inside subjects
+    assert k["sparql_literal"] == 2
+    assert k["sparql_interpolated"] == 1
+    assert k["bind_initbindings"] == 1
+    assert k["coercion_datatype"] == 1         # Literal(row["v"], …)
+
+
+def test_a_site_locates_its_enclosing_function():
+    from rdfeval.surface import surface_source
+    sites = surface_source(STRATA_SOURCE, "t.py", "r/r").sites
+    by_kind = {s["kind"]: s for s in sites}
+    assert by_kind["remove"]["qualname"] == "build"
+    assert by_kind["trav_navigation"]["qualname"] == "read"
+    assert by_kind["remove"]["snippet"].strip().startswith("g.remove(")
+    assert by_kind["add_run_shared_subject"]["end_line"] > \
+        by_kind["add_run_shared_subject"]["line"]
+
+
+def test_remove_counters():
+    from rdfeval.surface import surface_source
+    counts = surface_source(STRATA_SOURCE, "t.py", "r/r").counts
+    assert counts["remove_calls"] == 1
+    assert counts["remove_triple_pattern"] == 1
+    assert counts["remove_with_wildcard"] == 1
+    assert counts["remove_wildcards_2"] == 1
+
+
+def test_a_constant_literal_is_not_a_coercion_site():
+    from rdfeval.surface import surface_source
+    src = ('from rdflib import Graph, Literal, XSD\n'
+           'g = Graph()\n'
+           'x = Literal("1", datatype=XSD.integer)\n')
+    s = surface_source(src, "t.py", "r/r")
+    assert not [site for site in s.sites if site["kind"] == "coercion_datatype"]
+    assert s.counts["literal_constant_typed"] == 1
