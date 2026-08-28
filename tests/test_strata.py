@@ -370,3 +370,27 @@ def test_a_function_region_keeps_bindings_defined_after_it():
     r = region_for_site(src, 3, {"max_region_loc": 120, "min_rdf_ops": 2})
     assert r["kind"] == "function"
     assert "EX = Namespace('http://e/')" in r["context"]
+
+
+def test_status_keeps_the_unevaluable_regions_in_the_denominator(tmp_path, monkeypatch):
+    """A region a translator could not RUN — a live service, a package that
+    will not install — is not evidence that the notation covers it, and must
+    not silently leave the denominator."""
+    from rdfeval import status as status_mod
+    from rdfeval.study import STUDY_403
+
+    def meta(rid, status, classification):
+        return {"region_id": rid, "stratum": "remove", "strata": ["remove"],
+                "translation_status": status, "classification": classification,
+                "constructions": []}
+
+    rows = [(tmp_path, meta("a", "final", "directly-expressible")),
+            (tmp_path, meta("b", "final", "minor-restructuring")),
+            (tmp_path, meta("c", "final", "not-expressible")),
+            (tmp_path, meta("d", "draft", "excluded")),
+            (tmp_path, meta("e", "draft", None))]
+    monkeypatch.setattr(status_mod, "iter_examples", lambda study: iter(rows))
+    data = status_mod.collect(STUDY_403)
+    assert data["outcome"] == {"expressible": 2, "not-expressible": 1,
+                               "attempted, not evaluable": 1,
+                               "not attempted": 1}

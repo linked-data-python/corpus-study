@@ -37,6 +37,11 @@ def collect(study: Study, run_checks: bool = False) -> dict:
     classifications: dict[str, Counter] = defaultdict(Counter)
     constructions: Counter = Counter()
     outside: Counter = Counter()      # labels the vocabulary cannot place
+    # What became of every drawn region.  A region a translator could not
+    # RUN (a live service, a package that will not install) is not evidence
+    # that the notation covers it, and it must not silently leave the
+    # denominator: coverage is a share of what was ATTEMPTED.
+    outcome: Counter = Counter()
     failures: list[tuple[str, str]] = []
     for ex_dir, meta in iter_examples(study):
         group = meta.get(study.group, "?")
@@ -53,6 +58,18 @@ def collect(study: Study, run_checks: bool = False) -> dict:
             credited[stratum] += 1
             if meta.get("translation_status") == "final":
                 credited_final[stratum] += 1
+        status_ = meta.get("translation_status")
+        classification = meta.get("classification")
+        if status_ == "draft" and classification is None:
+            outcome["not attempted"] += 1
+        elif classification in ("excluded",):
+            outcome["attempted, not evaluable"] += 1
+        elif classification in ("directly-expressible", "minor-restructuring"):
+            outcome["expressible"] += 1
+        elif classification in ("awkward", "not-expressible"):
+            outcome[classification] += 1
+        else:
+            outcome["in progress"] += 1
         review = ex_dir / "review.json"
         if review.exists():
             import json
@@ -72,6 +89,7 @@ def collect(study: Study, run_checks: bool = False) -> dict:
             "credited_final": dict(credited_final),
             "classifications": {k: dict(v) for k, v in
                                 sorted(classifications.items())},
+            "outcome": dict(outcome),
             "constructions": dict(constructions.most_common()),
             "outside_vocabulary": dict(outside.most_common()),
             "failures": failures}
@@ -101,6 +119,19 @@ def run(config: dict, study: Study = STUDY_401, run_checks: bool = False) -> Non
           f"{totals['final']:6d} {totals['approved']:8d}"
           + (f" {totals['check-ok']:8d} {totals['check-fail']:5d}"
              if run_checks else ""))
+    attempted = sum(v for k, v in data["outcome"].items()
+                    if k != "not attempted")
+    if attempted:
+        print(f"\nwhat became of every drawn region ({attempted} attempted "
+              f"of {sum(data['outcome'].values())} drawn):")
+        for key in ("expressible", "awkward", "not-expressible",
+                    "attempted, not evaluable", "in progress", "not attempted"):
+            if data["outcome"].get(key):
+                print(f"  {key:26s} {data['outcome'][key]:5d}")
+        evaluable = attempted - data["outcome"].get("attempted, not evaluable", 0)
+        if evaluable:
+            print(f"  -> coverage: {data['outcome'].get('expressible', 0)}"
+                  f"/{evaluable} of the regions that could be evaluated")
     if data["constructions"]:
         print("\nconstructions employed (declared in meta.json):")
         for name, n in data["constructions"].items():
