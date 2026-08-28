@@ -5,6 +5,7 @@ from rdflib import URIRef, BNode, Literal, Namespace, Graph, XSD
 from rdflib.namespace import RDF, RDFS, DCTERMS, OWL
 import re
 import pycountry
+from _context import repl, capitalizeWords, reader
 g = Graph()
 resource = "https://covid-19ds.data.dice-research.org/resource/"
 prov = Namespace("http://www.w3.org/ns/prov#")
@@ -13,7 +14,10 @@ ndice = Namespace("https://covid-19ds.data.dice-research.org/resource/") #cvdr
 virtrdf = Namespace('http://www.openlinksw.com/schemas/virtrdf#')
 geo = Namespace('http://www.opengis.net/ont/geosparql#')
 dowl = Namespace('http://dbpedia.org/ontology/')
-reader = pd.read_csv('Data WFP Coronavirus COVID-19 Travel Restrictions - COVID-19 airline restrictions information.csv', keep_default_na=False).to_dict('records', into=OrderedDict)
+# reader restored from the context shim: no pandas in the study venv, and the
+# source CSV is not committed to the repository at the pinned commit either
+# (see _context.py) -- reader is not the mechanical `pd.read_csv(...)` line
+# from the pipeline draft, it is the missing binding itself.
 g = Graph()
 
 for row in reader:

@@ -12,10 +12,22 @@
   "categories": {
     "graph_read": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "the textbook case for this stratum: three nested selectors (g.subjects(a, SHACL.NodeShape), then g.objects(shape, SHACL.targetClass), then -- only when the middle value passes a Python filter -- g.objects(shape, SHACL.property)) collapse into ONE `m{ }` with three motifs sharing `?shape`. The Python-level filter (`str(target_class) in classes`) cannot move into the pattern (m{ } has no OPTIONAL/FILTER), so it stays a plain `if` in the loop body, now applied to every row of the join instead of gating whether the third selector even runs.",
+    "this changes WHEN the third selector's work happens (always, vs. only for matching target classes) but not WHAT gets called: rows where the filter fails are simply skipped after materialising, same as `continue` would skip them before. No extra process_property_shape call is introduced because that call only ever depended on (shape, target_class, prop_shape) triples that already satisfied all three motifs.",
+    "`SHACL` is a runtime parameter, not a fixed namespace, so the predicate positions use `{SHACL.NodeShape}` / `{SHACL.targetClass}` / `{SHACL.property}` interpolation rather than @prefix -- confirms interpolation works in predicate position inside m{ }, not just object position (the reference's examples only showed the latter).",
+    "context shim `context_shim.py`: ClassInfo, PropertyInfo and process_property_shape are called by the region but defined ~1600 lines away in the same file; reproduced unmodified.",
+    "fixture exercises: a shape with 2 target classes x 2 property shapes (the join's Cartesian product on a shared subject), a target class absent from `classes` (Python filter, not m{ }, excludes it), a shape with a matching target class but zero property shapes (zero-solution case), and two one-motif-only neighbours (a NodeShape with properties but no targetClass, and a targetClass/property-bearing resource that is not a NodeShape) -- neither contributes a call, which is what proves the join joins."
+  ],
+  "article_candidate": true,
   "draft_sha": "04da9f698bb342df",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.609410+00:00",

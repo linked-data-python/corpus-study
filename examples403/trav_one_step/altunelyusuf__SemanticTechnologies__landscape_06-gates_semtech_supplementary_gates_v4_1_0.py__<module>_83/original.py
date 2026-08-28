@@ -1,24 +1,47 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v4_1_0.py
 # region: <module> (lines 83-87, stratum trav_one_step)
 # licence of the source repository: see meta.json
+#
+# The mechanical context extraction pulled in every prior assignment to `bad`
+# and `ab` textually matching those in the source file: three more `bad = …`
+# statements and an `os.walk` comprehension. Checking against the real file
+# (github.com/altunelyusuf/SemanticTechnologies at the pinned commit) two of
+# those `bad = []` resets and the `os.walk` comprehension sit *after* this
+# region (its own later gates G5/G7), not before it — the extractor grabbed
+# lines on the wrong side of the region it was building context for. The
+# other three (`bad = []`, and the G2/G3 list comprehensions) are real prior
+# lines but are causally inert here: `bad` is reset again immediately before
+# this region's own loop (line 82 of the source file), so nothing upstream of
+# that reset can reach it, and reproducing the G2/G3 comprehensions would
+# need stub bindings (nodes, tb, IRI, secnum, edges, sem_classes) invented
+# for lines this region never reads. Both are dropped; see translation_notes.
+#
+# `ab` originally comes from an external TTL the source pipeline builds
+# (f"{HERE}/02-ontology/semtech_abox_v4_1_0.ttl"), and EC from a
+# dynamically-loaded sibling module — neither is reachable here. `ab` now
+# parses this region's own fixture.ttl; EC.KIND_DEFNS is restored by
+# semtech_context.py (see meta.json). `from rdflib import Graph, Namespace`
+# is restored too: the extracted context used Graph()/Namespace(...) without
+# ever importing them (only `from rdflib.namespace import RDF, ...` reached
+# this window).
+from pathlib import Path
+from rdflib import Graph, Namespace
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD
+from semtech_context import EC
 SEM = Namespace("http://example.org/semtech#")
-ab = Graph().parse(f"{HERE}/02-ontology/semtech_abox_v4_1_0.ttl")
-bad = []
-bad = [n["id"] for n in nodes
-       if str(tb.value(IRI[n["id"]], SEM.classCode) or "") != n["id"]
-       or str(tb.value(IRI[n["id"]], SEM.sectionNumber) or "") != secnum[n["id"]]]
-bad = [f"{s}|{o}" for s, p, o in edges if s not in sem_classes or o not in sem_classes]
+ab = Graph().parse(str(Path(__file__).resolve().parent / "fixture.ttl"), format="turtle")
 kind_cls = {SEM[f"Kind{k}"] for k in EC.KIND_DEFNS}
 insts = set(ab.subjects(SEM.hasSourceProvenance, None))
 bad = []
-bad = []
-bad = []
-bad = [f for r, _, fs in os.walk(HERE) for f in fs
-       if "__pycache__" not in r and not pat.match(f)]
-
 for i in insts:
     ks = [t for t in ab.objects(i, RDF.type) if t in kind_cls]
     notes = list(ab.objects(i, SEM.instanceKindNote))
     if len(ks) != 1 or len(notes) != 1 or str(notes[0]) != str(ks[0]).split("#Kind")[-1]:
         bad.append(str(i).split("#")[-1])
+# Driver scaffolding: the region computes `bad` but neither prints it nor
+# mutates a graph, and meta.oracle is "isomorphism" (module-state: graphs +
+# stdout only — see rdfeval/harness.py). Without this, `ab` (parsed
+# identically on both sides, never written to) would be the only observable
+# state, and the comparison would pass whether or not the loop above was
+# translated correctly. Added identically to both representations.
+print(sorted(bad))

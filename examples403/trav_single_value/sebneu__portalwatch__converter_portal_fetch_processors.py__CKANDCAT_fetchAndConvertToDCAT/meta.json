@@ -16,12 +16,25 @@
     "serialize_parse": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, DCAT->dcat"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "suffixe d'appel (g)",
+    "variable"
   ],
+  "translation_notes": [
+    "Le brouillon annoncait des @prefix rdf:/dcat: : SUPPRIMES. rdf:type est ecrit `a` a l'interieur de m{ } ; DCAT et namespaces['hydra'] restent des objets Namespace Python references par interpolation ({DCAT.Dataset}, {namespaces['hydra'].nextPage}) -- namespaces['hydra'] est un acces dict+attribut, aucune construction plus specifique que l'interpolation ne s'applique. DCAT, importe tel quel depuis converter.dataset_converter, aurait pu devenir `from ... import DCAT as dcat:` (idiome ns_import_project) ; non fait ici pour ne pas cumuler les risques sur une region deja chargee (reseau simule, suffixe d'appel, graphe secondaire) et parce que ce n'est pas la strate assignee.",
+    "3 sites `.first()`, pas juste celui flanque par le tirage : `cur = graph.value(predicate=RDF.type, object=namespaces['hydra'].PagedCollection)` (sujet variable, predicat ET objet lies -> m{ ?s a {...} }.first(), arite 1 -> le terme lui-meme) ; `next_page = graph.value(subject=cur, predicate=...)` (le site flanque) ; et, DANS LA BOUCLE, `next_page = g.value(subject=URIRef(next_page), predicate=...)` qui lit un graphe DIFFERENT (g, jetable par page) -- traduit avec le suffixe d'appel `(g)`, qui rebascule un seul ilot sur un autre graphe sans re-designer `@graph` ni sortir de la portee de bloc. Verifie a la main avant traduction (probe2.ldpy) : `m{ P }(g)` lit bien g et pas le graphe courant, meme quand g est construit apres la designation de @graph.",
+    "`for d in graph.subjects(RDF.type, DCAT.Dataset)` (hors site flanque, meme logique que pour swrl2rdf/_parse_atom) devient `for d in m{ ?d a {DCAT.Dataset} }:` -- arite 1, la boucle recoit directement les sujets.",
+    "shim de contexte : deux fichiers. context_shim.py transcrit namespaces['hydra'] et DCAT (converter/dataset_converter.py, les 2 clefs/noms que la region lit -- les 10 autres clefs du vrai dict `namespaces` ne sont jamais touchees et ne sont pas reproduites) ; no_ssl_verification est un no-op (les fixtures sont des fichiers locaux, jamais une vraie requete HTTPS) ; convert_socrata/graph_from_opendatasoft/graph_from_data_gouv_fr/CKANConverter sont des talons qui levent (jamais atteints par le chemin CKAN-via-endpoint-RDF que ce fetchAndConvertToDCAT implemente). quality.py (module top-level separe, car l'original fait `import quality` et non `from converter... import quality`) stub add_quality_measures en no-op : sa vraie logique lit d'autres proprietes DCAT/DCT et ecrit des triplets DQV, sans rapport avec les sites trav_single_value de cette region, et appelee IDENTIQUEMENT des deux cotes -- un no-op ne biaise donc pas la comparaison. import logging restaure directement dans original.py/translated.ldpy (ligne manquante a la fenetre de contexte du tirage, `logger = logging.getLogger(__name__)` etait deja la sans son import).",
+    "le 'reseau' de la region est simule par des fichiers locaux : graph.parse(portal_api, format=format) et g.parse(p, format=format) fonctionnent sans modification avec un chemin de fichier local passe directement (verifie a la main), donc AUCUNE des deux versions n'a besoin d'etre mockee -- portal_api pointe vers fixture_ckan_page1.ttl (ou sa variante _nopagination), et le lien hydra:nextPage d'une page vers l'autre est une IRI Turtle RELATIVE (<fixture_ckan_page2.ttl>) que rdflib resout tout seul contre l'emplacement reel du fichier au moment du parse -- aucun chemin absolu code en dur dans les fixtures.",
+    "driver.py : 2 calls. with_pagination (fixture_ckan_page1.ttl -> fixture_ckan_page2.ttl, un saut de pagination, 2 dcat:Dataset au total) exerce les 3 `.first()` avec chacun une solution. no_pagination (fixture_ckan_page1_nopagination.ttl, un hydra:PagedCollection SANS triplet hydra:nextPage) est le cas zero solution du deuxieme `.first()` -- celui qui decide si la boucle while s'execute -- et de la boucle finale (aucun dcat:Dataset). fixture.ttl (le contenu de `graph` avant l'appel) porte un voisin sans rapport (ex:existing a ex:Note) pour prouver qu'il survit intact et n'interfere pas ; fixture_ckan_page2.ttl porte de meme un ex:noise d'un type sans rapport.",
+    "argument prefix_map-like : ici c'est `graph` lui-meme (arg[1]) qui est mute et compare par isomorphisme (rdfeval.harness._compare_value traite tout argument rdflib.Graph ainsi, pas seulement le graphe designe par entry=) -- portal_ref/snapshot/activity sont des chaines opaques a la region, batties UNE fois par appel et partagees entre les deux cotes comme prefix_map dans la region swrl2rdf voisine (meme categorie de piege potentiel, ici sans consequence puisque ce sont des str comparables par valeur, mais garde la meme forme par coherence)."
+  ],
+  "article_candidate": true,
   "draft_sha": "b8b163cbdce931b0",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.133211+00:00",

@@ -5,8 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
-from ..modules.content_identity import create_content_uuid, resolve_base_uri
-from ..modules.metadata import METADATA, _read_source_project_version
+from context import create_content_uuid, resolve_base_uri, METADATA, _read_source_project_version  # context shim, see meta.json
 DCTERMS = Namespace("http://purl.org/dc/terms/")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 ONTOUML_VOCABULARY_111 = URIRef("https://w3id.org/ontouml/vocabulary/v1.1.1")

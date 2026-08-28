@@ -2,6 +2,7 @@
 # region: extract_shacl_constraints (lines 1697-1714, stratum trav_navigation)
 # licence of the source repository: see meta.json
 import rdflib
+from context_shim import ClassInfo, PropertyInfo, process_property_shape  # context shim -- see meta.json
 
 def extract_shacl_constraints(
     g: rdflib.Graph,

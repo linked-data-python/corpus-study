@@ -1,0 +1,14 @@
+# The last page reached by pagination: no hydra:PagedCollection/nextPage
+# triple at all, so the loop's `g.value(subject=URIRef(next_page),
+# predicate=hydra:nextPage)` on THIS page's throwaway graph comes back None
+# and the while loop stops after one hop. A second dcat:Dataset subject, so
+# the region's final loop sees two solutions once page1 and page2 are both
+# merged into `graph`. ex:noise is neighbouring content of an unrelated type,
+# to prove the dcat:Dataset match does not pick it up.
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix ex: <http://example.org/> .
+
+ex:ds2 a dcat:Dataset ;
+    dcat:title "Second page dataset" .
+
+ex:noise a ex:NotADataset .

@@ -1,0 +1,16 @@
+# The document fetched via `portal_api` (driver.py's with_pagination call):
+# a hydra:PagedCollection whose hydra:nextPage points at
+# fixture_ckan_page2.ttl (a plain relative reference -- rdflib resolves it
+# against this file's own location when it parses, so it works from any
+# checkout path without a hardcoded absolute IRI).  ex:ds1 is the first of
+# two dcat:Dataset subjects the region's final loop should see once both
+# pages have been merged into `graph`.
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix ex: <http://example.org/> .
+
+ex:collection a hydra:PagedCollection ;
+    hydra:nextPage <fixture_ckan_page2.ttl> .
+
+ex:ds1 a dcat:Dataset ;
+    dcat:title "First page dataset" .

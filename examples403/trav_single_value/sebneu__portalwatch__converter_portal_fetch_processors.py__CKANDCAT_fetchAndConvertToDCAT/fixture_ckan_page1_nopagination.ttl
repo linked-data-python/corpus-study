@@ -1,0 +1,11 @@
+# The document fetched via `portal_api` for driver.py's zero-solution call:
+# a hydra:PagedCollection with NO hydra:nextPage triple at all, so
+# `next_page = m{ {cur} {hydra:nextPage} ?v }.first()` must come back None
+# right away -- exactly what `graph.value(subject=cur,
+# predicate=hydra:nextPage)` returns when nothing matches -- and the while
+# loop body never runs. No dcat:Dataset subject either, so the final loop's
+# `m{ ?d a {DCAT.Dataset} }` also has zero solutions.
+@prefix hydra: <http://www.w3.org/ns/hydra/core#> .
+@prefix ex: <http://example.org/> .
+
+ex:collection a hydra:PagedCollection .

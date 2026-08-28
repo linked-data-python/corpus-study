@@ -1,0 +1,38 @@
+# Input graph for altunelyusuf__SemanticTechnologies__landscape_06-gates_semtech_supplementary_gates_v4_1_0.py__<module>_83
+# Stands in for the source pipeline's semtech_abox_v4_1_0.ttl (unavailable
+# here; see original.py). Shaped so the region's own instance-kind gate
+# ("exactly one Kind* rdf:type, exactly one matching instanceKindNote") sees
+# a pass, a duplicate-kind failure, a no-kind failure, and a subject that
+# must not be picked up at all.
+@prefix sem: <http://example.org/semtech#> .
+@prefix ex:  <http://example.org/instances#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# inst1: the one-step traversal's several-solutions case for rdf:type (two
+# types on the subject), filtered down by "in kind_cls" to exactly one
+# (owl:NamedIndividual must NOT count) — passes the gate.
+ex:inst1 sem:hasSourceProvenance ex:source1 ;
+    a sem:KindTool, owl:NamedIndividual ;
+    sem:instanceKindNote "Tool" ;
+    sem:otherField "not-a-note" .   # neighbour predicate: must not be picked
+                                     # up as an instanceKindNote solution
+
+# inst2: two Kind* types (len(ks) != 1) — fails the gate. hasSourceProvenance
+# is a plain literal here (not a URIRef), exercising the wildcard object
+# position of the ab.subjects(SEM.hasSourceProvenance, None) traversal.
+ex:inst2 sem:hasSourceProvenance "manual-review" ;
+    a sem:KindTool, sem:KindLibrary ;
+    sem:instanceKindNote "Tool" .
+
+# inst3: the zero-solution case for the rdf:type one-step traversal — no
+# rdf:type triple at all (len(ks) == 0) — fails the gate.
+ex:inst3 sem:hasSourceProvenance ex:source3 ;
+    sem:instanceKindNote "Something" .
+
+# inst4: neighbour that must NOT be visited — no sem:hasSourceProvenance, so
+# it must be absent from `insts`. Deliberately self-inconsistent (a kind
+# that does not match its own note) so that if the subject/predicate
+# selectivity of `m{ ?s sem:hasSourceProvenance [] }` were wrong and it
+# leaked in anyway, it would show up as an extra, wrong entry in `bad`.
+ex:inst4 a sem:KindPlatform ;
+    sem:instanceKindNote "WRONG" .

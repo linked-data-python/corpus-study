@@ -4,15 +4,12 @@
 import pytest
 from rdflib import Graph, URIRef
 
-from rdflib_orm import models
+from orm_context import models, BASE_URI, base:
 from rdflib.namespace import RDF, OWL
-
-from rdflib_orm.db import Database
-from tests import BASE_URI
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix base: <http://example.com/> .
 
+from orm_context import Database
 
 
 def test_required_field_raises():

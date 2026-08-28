@@ -2,6 +2,7 @@
 # region: extract_shacl_constraints (lines 1697-1714, stratum trav_navigation)
 # licence of the source repository: see meta.json
 import rdflib
+from context_shim import ClassInfo, PropertyInfo, process_property_shape  # context shim -- see meta.json
 
 def extract_shacl_constraints(
     g: rdflib.Graph,
@@ -10,14 +11,16 @@ def extract_shacl_constraints(
     SHACL,
 ):
     """Extract SHACL constraints and apply them to properties"""
+    @graph g
 
-    # Find SHACL shapes
-    for shape in g.subjects(rdflib.RDF.type, SHACL.NodeShape):
-        # Get target class
-        for target_class in g.objects(shape, SHACL.targetClass):
-            if str(target_class) in classes:
-                # Process property shapes
-                for prop_shape in g.objects(shape, SHACL.property):
-                    process_property_shape(
-                        g, prop_shape, classes[str(target_class)], properties, SHACL
-                    )
+    # Find SHACL shapes, their target classes and their property shapes in
+    # one join, instead of three nested g.subjects()/g.objects() loops with
+    # the third loop only entered when the middle one's value passes a
+    # Python-level filter.
+    for shape, target_class, prop_shape in m{ ?shape a {SHACL.NodeShape} ;
+                                                  {SHACL.targetClass} ?target_class ;
+                                                  {SHACL.property} ?prop_shape }:
+        if str(target_class) in classes:
+            process_property_shape(
+                g, prop_shape, classes[str(target_class)], properties, SHACL
+            )

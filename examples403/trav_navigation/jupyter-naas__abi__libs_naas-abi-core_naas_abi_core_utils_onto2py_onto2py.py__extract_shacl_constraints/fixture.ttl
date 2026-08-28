@@ -1,4 +1,47 @@
-# Input graph for jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_utils_onto2py_onto2py.py__extract_shacl_constraints — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for
+# jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_utils_onto2py_onto2py.py__extract_shacl_constraints
+# -- written during translation. Covers, deliberately:
+#  - a shape with TWO target classes and TWO property shapes, so the
+#    (shape, target_class, prop_shape) join fans out to several solutions
+#    for one shape (the Cartesian product a fused m{ } performs);
+#  - a target class that is not in `classes` -- the Python-level filter
+#    still has to run after the join, m{ } cannot know about it;
+#  - a shape with a target class but NO sh:property at all -- the third
+#    motif has zero solutions for that shape (the zero-solution case);
+#  - neighbourhood that satisfies only ONE of the two joined motifs: a
+#    shape with property shapes but no sh:targetClass, and a resource
+#    that carries sh:targetClass/sh:property but is not an sh:NodeShape --
+#    neither must contribute a call.
 @prefix ex: <http://example.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# Shape 1: two target classes (one known to `classes`, one not) and two
+# property shapes sharing the same subject -- the 2x2 cross product the
+# fused m{ } must produce for `properties["name"]` / `properties["age"]`
+# only through the Person branch (Alien is filtered out in Python).
+ex:PersonShape a sh:NodeShape ;
+    sh:targetClass ex:Person, ex:Alien ;
+    sh:property ex:NameShape, ex:AgeShape .
+
+ex:NameShape sh:path ex:name ;
+    sh:minCount 1 .
+
+ex:AgeShape sh:path ex:age ;
+    sh:maxCount 1 .
+
+# Shape 2: a known target class, but no sh:property at all -- the third
+# motif matches nothing for this shape (zero solutions), so it must not
+# call process_property_shape even though shape+targetClass matched.
+ex:OrgShape a sh:NodeShape ;
+    sh:targetClass ex:Organisation .
+
+# Neighbourhood satisfying only the "has properties" half: a NodeShape
+# with a property shape but no sh:targetClass predicate at all.
+ex:UntargetedShape a sh:NodeShape ;
+    sh:property ex:NameShape .
+
+# Neighbourhood satisfying only the "has target class" half, and not even
+# a NodeShape: must not match the first motif (rdf:type sh:NodeShape).
+ex:NotAShape sh:targetClass ex:Person ;
+    sh:property ex:NameShape .

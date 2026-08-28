@@ -5,8 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
-from ..modules.content_identity import create_content_uuid, resolve_base_uri
-from ..modules.metadata import METADATA, _read_source_project_version
+from context import create_content_uuid, resolve_base_uri, METADATA, _read_source_project_version  # context shim, see meta.json
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -25,46 +24,39 @@ def test_embedded_metadata_describes_the_transformation(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     output_file = tmp_path / "cardinality.ttl"
     output_graph = Graph().parse(output_file, format="turtle")
+    @graph output_graph
     output_artifact = get_output_artifact(output_graph)
-    transformation = output_graph.value(output_artifact, prov:wasGeneratedBy)
+    transformation = m{ {output_artifact} prov:wasGeneratedBy ?v }.first()
 
-    assert (output_artifact, rdf:type, prov:Entity) in output_graph
-    assert (output_artifact, dcterms:title, Literal(output_file.name)) in output_graph
-    assert (
-        output_artifact,
-        dcterms:format,
-        URIRef(IANA_MEDIA_TYPES + "text/turtle"),
-    ) in output_graph
-    assert (output_artifact, dcterms:conformsTo, ONTOUML_VOCABULARY_111) in output_graph
-    assert (transformation, rdf:type, prov:Activity) in output_graph
+    assert bool(m{ {output_artifact} a prov:Entity })
+    assert bool(m{ {output_artifact} dcterms:title {output_file.name} })
+    assert bool(m{ {output_artifact} dcterms:format {URIRef(IANA_MEDIA_TYPES + "text/turtle")} })
+    assert bool(m{ {output_artifact} dcterms:conformsTo {ONTOUML_VOCABULARY_111} })
+    assert bool(m{ {transformation} a prov:Activity })
 
-    generation_time = output_graph.value(output_artifact, prov:generatedAtTime)
+    generation_time = m{ {output_artifact} prov:generatedAtTime ?v }.first()
     assert generation_time.datatype == xsd:dateTime
     assert generation_time.toPython().utcoffset().total_seconds() == 0
 
-    software_agents = set(output_graph.objects(transformation, prov:wasAssociatedWith))
+    software_agents = set(m{ {transformation} prov:wasAssociatedWith ?v })
     assert len(software_agents) == 1
     software_agent = next(iter(software_agents))
-    assert (software_agent, rdf:type, prov:SoftwareAgent) in output_graph
-    assert (software_agent, dcterms:title, Literal(METADATA["Name"])) in output_graph
-    assert set(output_graph.objects(software_agent, dcterms:identifier)) == {
+    assert bool(m{ {software_agent} a prov:SoftwareAgent })
+    assert bool(m{ {software_agent} dcterms:title {METADATA["Name"]} })
+    assert set(m{ {software_agent} dcterms:identifier ?v }) == {
         Literal(f"{METADATA['Name']}/{METADATA['Version']}")
     }
 
-    used_entities = set(output_graph.objects(transformation, prov:used))
+    used_entities = set(m{ {transformation} prov:used ?v })
     source_artifact = next(
-        entity for entity in used_entities if (entity, dcterms:title, Literal(input_file.name)) in output_graph
+        entity for entity in used_entities if bool(m{ {entity} dcterms:title {input_file.name} })
     )
-    configuration_entity = next(entity for entity in used_entities if (entity, prov:value, None) in output_graph)
+    configuration_entity = next(entity for entity in used_entities if bool(m{ {entity} prov:value ?o }))
     expected_digest = hashlib.sha256(input_file.read_bytes()).hexdigest()
 
-    assert (source_artifact, rdf:type, prov:Entity) in output_graph
-    assert (source_artifact, dcterms:identifier, Literal(f"sha256:{expected_digest}")) in output_graph
-    assert (
-        source_artifact,
-        dcterms:format,
-        URIRef(IANA_MEDIA_TYPES + "application/json"),
-    ) in output_graph
+    assert bool(m{ {source_artifact} a prov:Entity })
+    assert bool(m{ {source_artifact} dcterms:identifier {f"sha256:{expected_digest}"} })
+    assert bool(m{ {source_artifact} dcterms:format {URIRef(IANA_MEDIA_TYPES + "application/json")} })
 
     configuration = get_recorded_configuration(output_graph)
     expected_base_uri = resolve_base_uri(json.loads(input_file.read_text(encoding="utf-8")))
@@ -83,6 +75,6 @@ def test_embedded_metadata_describes_the_transformation(tmp_path: Path) -> None:
         "transformation_metadata": "embedded",
         "unresolved_model_element_policy": "omit",
     }
-    assert (configuration_entity, dcterms:format, URIRef(IANA_MEDIA_TYPES + "application/json")) in output_graph
-    assert str(tmp_path) not in " ".join(str(value) for value in output_graph.objects(None, None))
+    assert bool(m{ {configuration_entity} dcterms:format {URIRef(IANA_MEDIA_TYPES + "application/json")} })
+    assert str(tmp_path) not in " ".join(str(value) for s, p, value in m{ ?s ?p ?value })
     assert not (tmp_path / "cardinality.provenance.ttl").exists()

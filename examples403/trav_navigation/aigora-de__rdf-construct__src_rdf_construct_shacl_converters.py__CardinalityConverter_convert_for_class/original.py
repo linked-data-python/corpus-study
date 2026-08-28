@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
 from rdflib.namespace import OWL
+from context_shim import PropertyConstraint  # context shim -- see meta.json
 
 def convert_for_class(
     self,
