@@ -41,6 +41,7 @@ import tokenize
 from .analyze import SIGNIFICANT_TOKENS, analyze_source
 from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .ldpy_metrics import LdpyMetricsError, measure_ldpy_source
+from .constructions import normalise as normalise_constructions
 from .study import Study, STUDY_401
 from .validate import iter_examples
 
@@ -273,6 +274,11 @@ def run(config: dict, study: Study = STUDY_401) -> None:
             skipped.append((meta["region_id"], meta.get("classification")))
             continue
         vstatus = (meta.get("validation") or {}).get("status")
+        constructions, unknown = normalise_constructions(
+            meta.get("constructions", []))
+        if unknown:
+            print(f"  ? {meta['region_id']}: construction(s) outside the "
+                  f"vocabulary: {unknown}")
         py_source = (ex_dir / "original.py").read_text()
         ldpy_source = (ex_dir / "translated.ldpy").read_text()
         shims = [p for p in sorted(ex_dir.glob("*.py"))
@@ -290,7 +296,8 @@ def run(config: dict, study: Study = STUDY_401) -> None:
             "path": meta["path"],
             study.group: meta[study.group],
             "strata": meta.get("strata", []),
-            "constructions": meta.get("constructions", []),
+            "constructions": constructions,
+            "constructions_unknown": unknown,
             "oracle": meta.get("oracle", "isomorphism"),
             "review_status": _review_status(ex_dir),
             "classification": meta.get("classification"),

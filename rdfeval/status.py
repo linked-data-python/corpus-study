@@ -18,6 +18,7 @@ import csv
 from collections import Counter, defaultdict
 
 from .config import RESULTS_SUMMARY
+from .constructions import normalise as normalise_constructions
 from .study import Study, STUDY_401
 from .validate import iter_examples
 
@@ -35,6 +36,7 @@ def collect(study: Study, run_checks: bool = False) -> dict:
     credited_final: Counter = Counter()
     classifications: dict[str, Counter] = defaultdict(Counter)
     constructions: Counter = Counter()
+    outside: Counter = Counter()      # labels the vocabulary cannot place
     failures: list[tuple[str, str]] = []
     for ex_dir, meta in iter_examples(study):
         group = meta.get(study.group, "?")
@@ -42,8 +44,11 @@ def collect(study: Study, run_checks: bool = False) -> dict:
         c["regions"] += 1
         c[meta.get("translation_status", "draft")] += 1
         classifications[group][meta.get("classification") or "unclassified"] += 1
-        for construction in meta.get("constructions", []):
+        named, unknown = normalise_constructions(meta.get("constructions", []))
+        for construction in named:
             constructions[construction] += 1
+        for label in unknown:
+            outside[label] += 1
         for stratum in meta.get("strata", []) or [group]:
             credited[stratum] += 1
             if meta.get("translation_status") == "final":
@@ -68,6 +73,7 @@ def collect(study: Study, run_checks: bool = False) -> dict:
             "classifications": {k: dict(v) for k, v in
                                 sorted(classifications.items())},
             "constructions": dict(constructions.most_common()),
+            "outside_vocabulary": dict(outside.most_common()),
             "failures": failures}
 
 
@@ -99,6 +105,11 @@ def run(config: dict, study: Study = STUDY_401, run_checks: bool = False) -> Non
         print("\nconstructions employed (declared in meta.json):")
         for name, n in data["constructions"].items():
             print(f"  {name:24s} {n:5d}")
+    if data["outside_vocabulary"]:
+        print("\noutside the controlled vocabulary (typo, or a construction "
+              "the vocabulary is missing):")
+        for name, n in data["outside_vocabulary"].items():
+            print(f"  {name!r}: {n}")
     for rid, err in data["failures"]:
         print(f"  ! {rid}: {err}")
 

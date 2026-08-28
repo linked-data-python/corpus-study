@@ -271,3 +271,33 @@ def test_article_export_takes_approved_pairs_only(tmp_path, monkeypatch):
     assert "o/r" in page and "abc" in page and "MIT" in page
     assert "# header" not in page          # the provenance is stated in prose
     assert not (tmp_path / "out" / "trav_one_step.md").exists()
+
+
+def test_construction_vocabulary_folds_the_ways_people_write_it():
+    """`by_construction` is a headline measurement, so free text does not do:
+    the first wave wrote one construction four ways."""
+    from rdfeval.constructions import normalise
+    named, unknown = normalise([
+        "nom préfixé", "nom prefixe", "prefixed name",     # one construction
+        "suffixe d'appel (g)", "call suffix (g)",          # one construction
+        "f<...>", "f<…>",                                  # one construction
+        "littéral typé", "litteral type",                  # one construction
+    ])
+    assert named == ["prefixed name", "call suffix (g)", "f<…>", "typed literal"]
+    assert unknown == []
+
+
+def test_an_unplaceable_label_is_reported_not_dropped():
+    """A label outside the vocabulary is a typo to fix or a construction the
+    vocabulary lacks — both must be visible."""
+    from rdfeval.constructions import normalise
+    named, unknown = normalise(["-{ }", "un truc que personne n'a défini"])
+    assert named == ["-{ }"]
+    assert unknown == ["un truc que personne n'a défini"]
+
+
+def test_every_canonical_name_normalises_to_itself():
+    from rdfeval.constructions import CONSTRUCTIONS, normalise
+    named, unknown = normalise(CONSTRUCTIONS)
+    assert unknown == []
+    assert named == list(CONSTRUCTIONS)

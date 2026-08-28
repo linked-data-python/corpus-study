@@ -65,7 +65,7 @@ Correspondance idiome rdflib → construction attendue, par strate du tirage :
 | `trav_existence` | `(s, p, o) in g`, `any(g.objects(…))` | `bool(m{ … })` |
 | `sparql_literal` | `g.query("SELECT …")` | `s{ SELECT … }` |
 | `sparql_interpolated` | requête assemblée par f-string/`+` | `s{ … {expr} … }`, interpolation en position de terme |
-| `bind_initbindings` | `initBindings=`, `initNs=` | terme interpolé dans `s{ }` ; prologue hérité des `@prefix` |
+| `bind_initbindings` | `initBindings=`, `initNs=` | terme interpolé dans `s{ }` **si la variable n'est pas projetée** ; sinon `s{ … }(bindings=…)` ; prologue hérité des `@prefix` |
 | `coercion_datatype` | `Literal(x, datatype=…)` sur une valeur calculée | la coercition du langage, ou `"…"^^xsd:…` si la valeur est constante |
 
 Interdits explicites :
@@ -83,6 +83,16 @@ Interdits explicites :
 
 Pièges connus, à ne pas reproduire :
 
+- **Un motif reçu en DONNÉE est hors d'atteinte, et l'échec est silencieux.**
+  `-{ }` et `m{ }` prennent un motif ÉCRIT ; le joker y est lexical (une
+  variable non liée), pas une valeur. Un `(s, p, o)` avec des `None` reçu en
+  argument — API `Store`, helper `delete(pattern)` — interpolé en
+  `-{ {s} {p} {o} }` donne `Literal('None')` et ne retire **rien, sans
+  erreur**. Gardez `.remove()` et signalez.
+- **`-{ }` multi-motifs JOINT.** Des `remove` indépendants sur un même sujet
+  ne se factorisent pas avec `;` : `-{ ?s a ex:C ; ex:p ?o }` est un
+  `DELETE WHERE`, il n'efface rien si un des motifs manque. Un `remove` par
+  îlot.
 - **`ex:{?v}` ne s'instancie pas.** C'est la seule position de terme où une
   variable ne se substitue pas : vous obtenez l'IRI `ex:v`, sans erreur, à
   chaque tour de boucle. Pour forger une IRI depuis une colonne :
@@ -154,12 +164,24 @@ qu'elle emploie — c'est ce qui permet de créditer chaque îlot séparément :
 }
 ```
 
-Vocabulaire des constructions (celui de la référence, pas le vôtre) :
-`@prefix`, `@base`, `from … import p:`, `@graph`, `@bindings`,
-`for @bindings in`, `g{ }`, `+{ }`, `-{ }`, `m{ }`, `s{ }`, `e{ }`, `e<…>`,
-`f<…>`, `f{ }`, `_:{ }`, `.first()`, `.one()`, `.count()`, `.execute()`,
-suffixe d'appel `(g)`, littéral typé, littéral avec langue, IRI, nom préfixé,
-variable.
+**Vocabulaire des constructions — liste fermée.** Ces chaînes exactes, et
+aucune autre : elles sont la mesure principale de l'étude, et une même
+construction écrite de deux façons devient deux constructions dans le
+tableau. La liste vit dans `rdfeval/constructions.py` (elle normalise les
+variantes courantes, et signale ce qu'elle ne sait pas placer).
+
+```
+@prefix   @base   from … import p:   @graph   @bindings   for @bindings in
+g{ }   +{ }   -{ }   _:{ }
+m{ }   s{ }   .first()   .one()   .count()   .execute()
+e{ }   e<…>   f<…>   f{ }
+IRI   prefixed name   typed literal   language literal   plain literal
+variable   interpolation {expr}
+call suffix (g)   global/nonlocal modifier
+```
+
+Une construction qui manque à cette liste est un signalement, pas une
+licence d'inventer : mettez-la en `translation_notes`.
 
 Classification de la traduction (inchangée depuis 401) :
 `directly-expressible` · `minor-restructuring` · `awkward` ·
