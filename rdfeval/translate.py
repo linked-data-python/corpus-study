@@ -186,11 +186,55 @@ def _namespace_bindings(tree: ast.Module) -> tuple[dict[str, str], set[str]]:
     return ns, type_aliases
 
 
+# Suffixes a project adds to a namespace constant's name and that carry no
+# meaning in a prefix label: `OWL_NS = Namespace(...)` is the OWL namespace.
+_NOISE_SUFFIXES = ("NS", "NAMESPACE", "URI", "IRI", "PREFIX")
+
+
 def _label_for(var: str, taken: set[str]) -> str | None:
-    label = var.lower().rstrip("_").replace("_", "-")
-    if not re.match(r"[a-z][\w-]*$", label) or label in taken:
+    """Prefix label for a namespace constant named ``var``.
+
+    The label must be usable **everywhere**, islands and Python code alike,
+    so it is restricted to the intersection of Python identifiers and
+    Turtle's ``PN_PREFIX``: a hyphen stays subtraction outside an island
+    (reference/language/lexical.md), so ``OWL_NS`` may not become ``owl-ns``.
+    Underscores are dropped, and a trailing noise segment with them.
+    """
+    parts = [p for p in var.split("_") if p]
+    while len(parts) > 1 and parts[-1].upper() in _NOISE_SUFFIXES:
+        parts.pop()
+    label = "".join(parts).lower()
+    if not re.match(r"[a-z][a-z0-9]*$", label) or label in taken:
         return None
     return label
+
+
+def _after_last_toplevel_import(lines: list[str]) -> int:
+    """Index just past the last module-level import statement.
+
+    Bracket depth is tracked so a parenthesised list — ``from rdflib import
+    (\n    Graph,\n)`` — is treated as the single statement it is: inserting
+    a declaration between its lines would not parse.  Indented imports are
+    ignored: a ``@prefix`` is block-scoped, so it never moves inside a body.
+    """
+    insert_at = 0
+    depth = 0
+    in_import = False
+    continued = False
+    for i, line in enumerate(lines):
+        text = line or ""
+        if depth == 0 and not continued:
+            in_import = bool(re.match(r"(import|from)\s", text))
+        stripped = re.sub(r"(?<!\\)#.*$", "", text)
+        depth += (stripped.count("(") + stripped.count("[") + stripped.count("{")
+                  - stripped.count(")") - stripped.count("]")
+                  - stripped.count("}"))
+        depth = max(depth, 0)
+        continued = stripped.rstrip().endswith("\\")
+        if in_import and depth == 0 and not continued:
+            insert_at = i + 1
+            in_import = False
+    return insert_at
 
 
 def draft_translation(source: str, resolve_module=None) -> tuple[str, list[str]]:
@@ -407,11 +451,7 @@ def draft_translation(source: str, resolve_module=None) -> tuple[str, list[str]]
         out_lines[a:b + 1] = [text]
 
     result_lines = [l for l in out_lines if l is not None]
-    # insert prefix declarations after the last import
-    insert_at = 0
-    for i, l in enumerate(result_lines):
-        if re.match(r"\s*(import |from )", l or ""):
-            insert_at = i + 1
+    insert_at = _after_last_toplevel_import(result_lines)
     header = prefix_decls + [""] if prefix_decls else []
     result_lines[insert_at:insert_at] = header
     if d.prefixes:

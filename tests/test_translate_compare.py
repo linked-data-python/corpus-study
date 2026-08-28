@@ -155,3 +155,68 @@ def build(g, name):
     assert "ex:{name}" in draft
     from ldpy.transpiler import transpile
     transpile(draft)
+
+
+PARENTHESISED = """\
+from rdflib import (
+    Graph,
+    Namespace,
+    RDF,
+)
+
+OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
+EX = Namespace("http://example.org/")
+
+g = Graph()
+g.add((EX.a, RDF.type, OWL_NS.Class))
+"""
+
+
+def test_prefix_declarations_land_after_a_parenthesised_import():
+    """A `@prefix` inserted between the lines of `from x import (…)` does
+    not parse; the insertion point must respect bracket depth."""
+    from ldpy.transpiler import transpile
+    draft, _ = draft_translation(PARENTHESISED)
+    lines = draft.splitlines()
+    assert lines[:5] == ["from rdflib import (", "    Graph,", "    Namespace,",
+                         "    RDF,", ")"]
+    assert draft.index("@prefix ex:") > draft.index(")\n")
+    transpile(draft, filename="<parenthesised>")
+
+
+def test_prefix_label_is_usable_outside_islands():
+    """`-` stays subtraction outside an island, so `OWL_NS` may not become
+    `owl-ns:` (reference/language/lexical.md)."""
+    draft, _ = draft_translation(PARENTHESISED)
+    assert "@prefix owl: <http://www.w3.org/2002/07/owl#> ." in draft
+    assert "owl-ns" not in draft
+
+
+def test_prefix_label_keeps_distinct_names_distinct():
+    from rdfeval.translate import _label_for
+    taken: set[str] = set()
+    for var, expected in (("EX", "ex"), ("OWL_NS", "owl"), ("SCHEMA_ORG", "schemaorg"),
+                          ("brick_", "brick"), ("_private", "private"), ("NS2", "ns2")):
+        label = _label_for(var, taken)
+        assert label == expected, (var, label)
+        if label:
+            taken.add(label)
+    assert _label_for("EX", taken) is None       # collision: left to the human
+
+
+def test_indented_import_does_not_move_the_declarations_into_a_body():
+    src = """\
+from rdflib import Graph, Namespace
+
+EX = Namespace("http://example.org/")
+
+def build():
+    import json
+    g = Graph()
+    g.add((EX.a, EX.p, EX.b))
+    return g
+"""
+    from ldpy.transpiler import transpile
+    draft, _ = draft_translation(src)
+    assert draft.splitlines()[1].startswith("@prefix ex:")
+    transpile(draft, filename="<indented>")
