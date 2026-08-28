@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at": "2026-08-27T17:15:40.646654+00:00",
-    "pipeline_revision": "4f2f05f26cce339b600faaae322e3bcfc0327f7f",
+    "generated_at": "2026-08-28T04:38:48.887004+00:00",
+    "pipeline_revision": "18d6518fec9526e665f3703654da7a09b6cfc8e0",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
   },
@@ -21,12 +21,12 @@
     ]
   },
   "population": {
-    "low": 186,
-    "medium": 358,
-    "high": 308
+    "low": 183,
+    "medium": 365,
+    "high": 311
   },
-  "eligible_files": 852,
-  "rdf_files_total": 1628,
+  "eligible_files": 859,
+  "rdf_files_total": 1557,
   "sample": {
     "low": [
       {
@@ -289,8 +289,8 @@
         "repository": "RDFLib/pyLODE",
         "path": "pylode/profiles/supermodel/query/__init__.py",
         "commit": "0d0471fb99b201182db9d3142de13fbcaee393f2",
-        "rdf_node_density": 0.204896,
-        "rdf_ops": 257
+        "rdf_node_density": 0.219532,
+        "rdf_ops": 267
       },
       {
         "repository": "RDFLib/pySHACL",
@@ -401,52 +401,52 @@
   },
   "control": [
     {
-      "repository": "BrickSchema/Brick",
-      "path": "tests/test_shapes.py",
-      "commit": "c12949f2363127c8c24c510490589ad6e33b6974",
-      "rdf_node_density": 0.019837
-    },
-    {
       "repository": "JustlyAI/lmss_entity_extractor",
       "path": "app/lmss_search.py",
       "commit": "6acc4d838918c2025cce18da93deca1b8794ea96",
       "rdf_node_density": 0.048096
     },
     {
-      "repository": "RDFLib/pySHACL",
-      "path": "pyshacl/graph_abstraction.py",
-      "commit": "469cca7a22a078b36c167c1e8dadecf5e5ec6c75",
-      "rdf_node_density": 0.028295
+      "repository": "Nanopublication/nanopub-py",
+      "path": "tests/test_cli.py",
+      "commit": "05022dc4bcbbb1d7ebf6164ff8c1cb9a7ff133b2",
+      "rdf_node_density": 0.024476
     },
     {
       "repository": "RDFLib/pySHACL",
-      "path": "pyshacl/validator_conformance.py",
+      "path": "pyshacl/parameter.py",
       "commit": "469cca7a22a078b36c167c1e8dadecf5e5ec6c75",
-      "rdf_node_density": 0.021603
+      "rdf_node_density": 0.007614
+    },
+    {
+      "repository": "RDFLib/pySHACL",
+      "path": "test/issues/test_298.py",
+      "commit": "469cca7a22a078b36c167c1e8dadecf5e5ec6c75",
+      "rdf_node_density": 0.038095
     },
     {
       "repository": "biopragmatics/bioregistry",
-      "path": "tests/test_data.py",
+      "path": "tests/test_metaregistry.py",
       "commit": "e5481eacb4ffd91fd09b208bf920ffaa6338c564",
-      "rdf_node_density": 0.001402
+      "rdf_node_density": 0.012539
     },
     {
       "repository": "linkml/linkml",
-      "path": "packages/linkml_runtime/src/linkml_runtime/dumpers/rdf_dumper.py",
+      "path": "packages/linkml_runtime/src/linkml_runtime/utils/namespaces.py",
       "commit": "680595df54a9daa633fd6f634c8092ea2d4eaf8c",
-      "rdf_node_density": 0.028112
+      "rdf_node_density": 0.041586
     },
     {
       "repository": "linkml/linkml",
-      "path": "tests/linkml/test_issues/__snapshots__/issue_50.py",
+      "path": "tests/linkml/test_issues/test_linkml_issue_296.py",
       "commit": "680595df54a9daa633fd6f634c8092ea2d4eaf8c",
-      "rdf_node_density": 0.036269
+      "rdf_node_density": 0.030928
     },
     {
       "repository": "linkml/linkml",
-      "path": "tests/linkml_runtime/test_utils/test_context_utils.py",
+      "path": "tests/linkml/test_scripts/test_gen_jsonld.py",
       "commit": "680595df54a9daa633fd6f634c8092ea2d4eaf8c",
-      "rdf_node_density": 0.026163
+      "rdf_node_density": 0.033113
     },
     {
       "repository": "linkml/linkml",
@@ -460,5 +460,10 @@
       "commit": "a2122e88bb19f0e5a1eda9e18870235160483bec",
       "rdf_node_density": 0.039352
     }
-  ]
+  ],
+  "wave_added": {
+    "low": 0,
+    "medium": 0,
+    "high": 0
+  }
 }

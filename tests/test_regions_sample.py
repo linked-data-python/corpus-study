@@ -73,3 +73,52 @@ def test_band_assignment():
     assert band_of(0.05, cfg) == "medium"
     assert band_of(0.35, cfg) == "high"
     assert band_of(1.0, cfg) == "high"
+
+
+# --- échantillonnage par vagues ---------------------------------------------
+
+import random
+
+from rdfeval.sample import draw_wave
+
+
+def _pool(n, repos=3):
+    return [{"repository": f"r{i % repos}", "path": f"f{i}.py"} for i in range(n)]
+
+
+def test_wave_is_a_superset_of_the_previous_one():
+    pool = _pool(40)
+    rng = random.Random(1)
+    first = draw_wave(pool, set(), want=6, cap=10, rng=random.Random(1))
+    already = {(r["repository"], r["path"]) for r in first}
+    second = draw_wave(pool, already, want=12, cap=10, rng=rng)
+    keys = {(r["repository"], r["path"]) for r in second}
+    assert already <= keys              # rien n'est re-tiré
+    assert len(second) == 12
+
+
+def test_wave_respects_the_per_repository_cap_across_waves():
+    pool = _pool(40, repos=2)
+    first = draw_wave(pool, set(), want=4, cap=2, rng=random.Random(2))
+    already = {(r["repository"], r["path"]) for r in first}
+    second = draw_wave(pool, already, want=10, cap=2, rng=random.Random(3))
+    counts = {}
+    for r in second:
+        counts[r["repository"]] = counts.get(r["repository"], 0) + 1
+    assert all(c <= 2 for c in counts.values())
+    assert len(second) == 4             # plafonné par le cap, pas par want
+
+
+def test_wave_is_deterministic():
+    pool = _pool(30)
+    a = draw_wave(pool, set(), want=8, cap=5, rng=random.Random(7))
+    b = draw_wave(pool, set(), want=8, cap=5, rng=random.Random(7))
+    assert a == b
+
+
+def test_wave_keeps_previous_even_if_want_shrinks():
+    pool = _pool(20)
+    first = draw_wave(pool, set(), want=10, cap=10, rng=random.Random(4))
+    already = {(r["repository"], r["path"]) for r in first}
+    second = draw_wave(pool, already, want=3, cap=10, rng=random.Random(5))
+    assert {(r["repository"], r["path"]) for r in second} == already
