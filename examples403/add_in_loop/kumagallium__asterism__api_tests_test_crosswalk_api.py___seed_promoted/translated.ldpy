@@ -10,9 +10,9 @@ PRED = "https://kumagallium.github.io/asterism/x/ontology#comp"
 def _seed_promoted(ds: rdflib.Dataset, registry_root: Path, dataset_id: str, rows) -> None:
     """A promoted dataset: rows in its key graph + control flag + a registry meta."""
     key = substrate.canonical_graph_iri(dataset_id)
-    g = ds.graph(rdflib.URIRef(key))
+    @graph ds.graph(rdflib.URIRef(key))
     for entity, raw in rows:
-        g += g{ {rdflib.URIRef(entity)} {rdflib.URIRef(PRED)} {rdflib.Literal(raw)} }
+        +{ {rdflib.URIRef(entity)} {rdflib.URIRef(PRED)} {rdflib.Literal(raw)} }
     ds.update(
         f"INSERT DATA {{ GRAPH <{substrate.CONTROL_GRAPH_IRI}> {{ "
         f'<{key}> <{substrate.STATUS_PREDICATE}> "promoted" }} }}'

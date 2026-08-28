@@ -64,11 +64,13 @@ def update_schema_and_sanitize_kb(expanded_kb_file, ontology_file, alignment_fil
                 prop_name   = p_str.split('/')[-1]
                 priv_prop   = PRIV[prop_name]
                 is_obj_prop = not isinstance(o, Literal)
-                onto += g{ {priv_prop} a {OWL.ObjectProperty if is_obj_prop else OWL.DatatypeProperty} }
+                @graph onto
+                +{ {priv_prop} a {OWL.ObjectProperty if is_obj_prop else OWL.DatatypeProperty} ;
+                      rdfs:domain owl:Thing }
                 if not is_obj_prop:
-                    onto += g{ {priv_prop} rdfs:range rdfs:Literal }
-                onto += g{ {priv_prop} rdfs:domain owl:Thing }
-                align += g{ {priv_prop} owl:equivalentProperty {URIRef(p_str)} }
+                    +{ {priv_prop} rdfs:range rdfs:Literal }
+                @graph align
+                +{ {priv_prop} owl:equivalentProperty {URIRef(p_str)} }
                 aligned_props[p_str] = priv_prop
                 new_props_count += 1
             translation_map[p_str] = aligned_props[p_str]
@@ -82,8 +84,10 @@ def update_schema_and_sanitize_kb(expanded_kb_file, ontology_file, alignment_fil
         if isinstance(node, URIRef) and node_str.startswith("http://dbpedia.org/resource/"):
             if node_str not in aligned_entities:
                 priv_entity = PRIV[node_str.split('/')[-1]]
-                onto += g{ {priv_entity} a owl:NamedIndividual }
-                align += g{ {priv_entity} owl:sameAs {URIRef(node_str)} }
+                @graph onto
+                +{ {priv_entity} a owl:NamedIndividual }
+                @graph align
+                +{ {priv_entity} owl:sameAs {URIRef(node_str)} }
                 aligned_entities[node_str] = priv_entity
                 new_entities_count += 1
             translation_map[node_str] = aligned_entities[node_str]
@@ -93,11 +97,12 @@ def update_schema_and_sanitize_kb(expanded_kb_file, ontology_file, alignment_fil
     # Phase 4: Privatisation
     print("Step 4/4: Rewriting the entire graph in private vocabulary")
     clean_kb = Graph()
+    @graph clean_kb
     for s, p, o in kb:
         new_s = translation_map.get(str(s), s)
         new_p = translation_map.get(str(p), p)
         new_o = translation_map.get(str(o), o) if isinstance(o, URIRef) else o
-        clean_kb += g{ {new_s} {new_p} {new_o} }
+        +{ {new_s} {new_p} {new_o} }
 
     # Phase 5: Save
     onto.serialize(destination=ontology_expanded_file,  format="turtle")
