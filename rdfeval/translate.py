@@ -92,7 +92,8 @@ class Draft:
             self.notes.append(msg)
 
 
-def _term_to_island(node: ast.expr, d: Draft, src: str) -> str | None:
+def _term_to_island(node: ast.expr, d: Draft, src: str,
+                    predicate: bool = False) -> str | None:
     """Island syntax for a term expression, or None to interpolate."""
     if isinstance(node, ast.Call):
         fn = node.func
@@ -123,7 +124,7 @@ def _term_to_island(node: ast.expr, d: Draft, src: str) -> str | None:
     if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
         pref = d.prefixes.get(node.value.id)
         if pref and PN_LOCAL_OK.match(node.attr):
-            if pref[1] == RDF_NS and node.attr == "type":
+            if predicate and pref[1] == RDF_NS and node.attr == "type":
                 return "a"
             return f"{pref[0]}:{node.attr}"
     if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name):
@@ -138,7 +139,7 @@ def _term_to_island(node: ast.expr, d: Draft, src: str) -> str | None:
                 return f"{pref[0]}:{{{_expr_src(sl, src)}}}"
     if isinstance(node, ast.Name):
         # a name bound to rdf:type (the `A = RDF.type` idiom) is Turtle's `a`
-        if node.id in d.type_aliases:
+        if predicate and node.id in d.type_aliases:
             return "a"
         pref = d.prefixes.get(node.id)
         if pref and pref[2]:            # a bare namespace used as a term
@@ -154,8 +155,14 @@ def _expr_src(node: ast.expr, src: str) -> str:
     return ast.get_source_segment(src, node) or ast.unparse(node)
 
 
-def _term(node: ast.expr, d: Draft, src: str) -> str:
-    island = _term_to_island(node, d, src)
+def _term(node: ast.expr, d: Draft, src: str, predicate: bool = False) -> str:
+    """Render one term of a triple.
+
+    ``predicate``: Turtle's ``a`` abbreviates ``rdf:type`` in the PREDICATE
+    position only.  ``g.add((bn, RDF.first, RDF.type))`` has ``rdf:type`` as
+    its *object*, where `a` is a syntax error.
+    """
+    island = _term_to_island(node, d, src, predicate)
     if island is not None:
         return island
     return "{" + _expr_src(node, src) + "}"
@@ -362,7 +369,8 @@ def draft_translation(source: str, resolve_module=None) -> tuple[str, list[str]]
                 triples = []
                 for stmt in run:
                     s, p, o = stmt.value.args[0].elts
-                    triples.append((_term(s, d, src), _term(p, d, src),
+                    triples.append((_term(s, d, src),
+                                    _term(p, d, src, predicate=True),
                                     _term(o, d, src)))
                 indent = stmt_indent(run[0])
                 # group consecutive same-subject triples with ';'
@@ -470,7 +478,7 @@ def draft_translation(source: str, resolve_module=None) -> tuple[str, list[str]]
 
 HEADER = """\
 # Extracted from {repository}@{commit_short} : {path}
-# region: {qualname} (lines {lineno}-{end_lineno}, band {band})
+# region: {qualname} (lines {lineno}-{end_lineno}, {group_label})
 # licence of the source repository: see meta.json
 """
 
@@ -527,8 +535,48 @@ def _module_resolver(reg: dict, config: dict):
     return resolve
 
 
-def materialise(reg: dict, config: dict) -> str:
-    band_dir = EXAMPLES_DIR / reg["band"]
+READ_DRIVER_TEMPLATE = '''\
+"""Validation driver for {region_id}.
+
+This region READS a graph, so the oracle is not isomorphism but the equality
+of the values both versions produce from the same input graph (design record
+corpus/405).  `fixture.ttl` is parsed fresh for each side.
+
+The fixture is part of the translation: it must hold several solutions of the
+pattern the region reads, the zero-solution case, and neighbouring triples
+that must NOT match.
+"""
+from rdfeval.harness import run_pair
+
+VERDICT = run_pair(
+    __file__,
+    entry={entry!r},
+    fixture="fixture.ttl",
+    # ordered=True only if the region imposes an order (sorted, ORDER BY):
+    # no store promises one, so results are compared as multisets.
+)
+'''
+
+FIXTURE_TEMPLATE = """\
+# Input graph for {region_id} — written during translation.
+# It must cover: several solutions of the pattern the region reads, the
+# zero-solution case, and neighbouring triples that must NOT match.
+@prefix ex: <http://example.org/> .
+"""
+
+# Categories of `rdfeval.analyze` that mean the region reads a graph.
+READ_CATEGORIES = ("graph_read", "sparql")
+
+
+def materialise(reg: dict, config: dict, root=None, group: str = "band") -> str:
+    """Write the example directory of one region.
+
+    ``root``/``group`` place it: the 401 study groups by density band under
+    ``examples/``, the 403 study by stratum under its own root, and the two
+    never share a directory (their aggregates must not mix).
+    """
+    root = root or EXAMPLES_DIR
+    band_dir = root / reg[group]
     ex_dir = band_dir / reg["region_id"]
     meta_path = ex_dir / "meta.json"
     if meta_path.exists():
@@ -542,7 +590,8 @@ def materialise(reg: dict, config: dict) -> str:
 
     context = "\n".join(reg["context"])
     body = _dedent_region(reg)
-    original = HEADER.format(commit_short=reg["commit"][:10], **reg)
+    original = HEADER.format(commit_short=reg["commit"][:10],
+                             group_label=f"{group} {reg[group]}", **reg)
     if context:
         original += context + "\n\n"
     original += body + "\n"
@@ -553,9 +602,19 @@ def materialise(reg: dict, config: dict) -> str:
     (ex_dir / "translated.ldpy").write_text(draft)
 
     entry = reg["qualname"].split(".")[-1] if reg["kind"] == "function" else None
-    (ex_dir / "driver.py").write_text(DRIVER_TEMPLATE.format(
-        region_id=reg["region_id"], entry=entry,
-        calls="[]  # TODO: [(args, kwargs), ...] fixtures" if entry else "None"))
+    reads = entry and any(reg.get("categories", {}).get(c)
+                          for c in READ_CATEGORIES)
+    if reads:
+        (ex_dir / "driver.py").write_text(READ_DRIVER_TEMPLATE.format(
+            region_id=reg["region_id"], entry=entry))
+        fixture = ex_dir / "fixture.ttl"
+        if not fixture.exists():
+            fixture.write_text(FIXTURE_TEMPLATE.format(
+                region_id=reg["region_id"]))
+    else:
+        (ex_dir / "driver.py").write_text(DRIVER_TEMPLATE.format(
+            region_id=reg["region_id"], entry=entry,
+            calls="[]  # TODO: [(args, kwargs), ...] fixtures" if entry else "None"))
 
     meta = {
         "region_id": reg["region_id"],
@@ -564,16 +623,20 @@ def materialise(reg: dict, config: dict) -> str:
         "path": reg["path"],
         "qualname": reg["qualname"],
         "lineno": reg["lineno"], "end_lineno": reg["end_lineno"],
-        "band": reg["band"],
+        group: reg[group],
         "kind": reg["kind"],
         "rdf_ops": reg["rdf_ops"],
         "categories": reg["categories"],
         "translation_status": "draft",
         "classification": None,
+        "constructions": [],
         "translation_notes": notes,
         "draft_sha": _sha(draft),
         "provenance": provenance(config),
     }
+    if "strata" in reg:
+        meta["strata"] = reg["strata"]
+        meta["oracle"] = "values" if reads else "isomorphism"
     meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False))
     return "drafted"
 

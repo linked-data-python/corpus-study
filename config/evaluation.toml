@@ -160,6 +160,9 @@ target_per_stratum = 100
 # At most this many regions from one repository in one stratum: without it a
 # single large project would define what "real use" looks like.
 max_per_repo_per_stratum = 4
+# Write one example directory per drawn region (examples403/<stratum>/<id>/)
+# as part of `rdfeval strata`.
+materialise = true
 
 [regions]
 # A region is a function/method/class or the module top level.

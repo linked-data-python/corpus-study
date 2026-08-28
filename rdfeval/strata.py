@@ -27,6 +27,11 @@ Outputs::
 
     results/raw/strata.json       the drawn regions, with source and context
     results/summary/strata.csv    one row per stratum: population and draw
+    examples403/<stratum>/<id>/   one directory per region, with its draft
+
+The example tree is separate from the 401 study's ``examples/``: the two
+answer different questions with different oracles, and their aggregates must
+never mix under one number.
 """
 
 from __future__ import annotations
@@ -39,7 +44,7 @@ import textwrap
 from collections import defaultdict
 
 from .acquire import repo_dir
-from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
+from .config import EXAMPLES_403_DIR, RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .regions import _functions, _module_context, _names_read, _span
 from .surface import SITES_RAW, STRATA
 
@@ -88,7 +93,7 @@ def region_for_site(source: str, line: int, rcfg: dict) -> dict | None:
     lines = source.splitlines()
     cap = rcfg["max_region_loc"]
     chosen = _region_for_line(tree, lines, line, cap)
-    if chosen is not None and _rdf_ops(chosen) >= rcfg["min_rdf_ops"]:
+    if chosen is not None and chosen["rdf_ops"] >= rcfg["min_rdf_ops"]:
         return chosen
     user = _region_using(tree, lines, line, rcfg)
     return user if user is not None else chosen
@@ -118,7 +123,7 @@ def _region_using(tree, lines, line: int, rcfg: dict) -> dict | None:
         if hi - lo + 1 > rcfg["max_region_loc"] or not (_names_read(node) & names):
             continue
         candidate = _region(lines, tree, lo, hi, qual, node, "function")
-        if _rdf_ops(candidate) < rcfg["min_rdf_ops"]:
+        if candidate["rdf_ops"] < rcfg["min_rdf_ops"]:
             continue
         if best is None or hi - lo < best[1] - best[0]:
             best = (lo, hi, qual, node)
@@ -130,7 +135,7 @@ def _region_using(tree, lines, line: int, rcfg: dict) -> dict | None:
     return region
 
 
-def _rdf_ops(region: dict) -> int:
+def _region_ops(region: dict) -> list:
     """RDF operations a region performs, read the way a reader would.
 
     A region lifted out of a function has no imports of its own, and the
@@ -144,8 +149,8 @@ def _rdf_ops(region: dict) -> int:
         fa = analyze_source(textwrap.dedent(region["source"]),
                             preamble="\n".join(region["context"]) or None)
     except (SyntaxError, ValueError, RecursionError):
-        return 0
-    return len(fa.ops)
+        return []
+    return fa.ops
 
 
 def _region_for_line(tree, lines, line: int, cap: int) -> dict | None:
@@ -194,8 +199,17 @@ def _region(lines, tree, lo, hi, qual, node, kind) -> dict:
     # may be bound by an attribute or a parameter the context lines cannot
     # carry.  It means the translator must restore that binding, so it is
     # recorded rather than silently dropped.
-    region["rdf_ops"] = _rdf_ops(region)
+    ops = _region_ops(region)
+    region["rdf_ops"] = len(ops)
+    region["categories"] = _categories(ops)
     return region
+
+
+def _categories(ops) -> dict:
+    counts: dict[str, int] = {}
+    for op in ops:
+        counts[op.category] = counts.get(op.category, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _region_id(repository: str, path: str, qualname: str, lineno: int) -> str:
@@ -346,6 +360,8 @@ def run(config: dict) -> None:
                         st["drawn_regions"], st["repositories_drawn"],
                         st["undrawable_sites"]])
     _report(out)
+    if config["strata"].get("materialise", True):
+        print("translate:", materialise_all(config))
 
 
 def _report(out: dict) -> None:
@@ -367,6 +383,38 @@ def _report(out: dict) -> None:
           f"units: {dict(kinds)}")
     print(f"  {no_ops} regions carry no RDF operation once extracted "
           f"(a graph bound outside the region: the translator restores it)")
+
+
+def materialise_all(config: dict) -> dict[str, int]:
+    """Write one example directory per drawn region, under ``examples403/``.
+
+    A region is filed under its **first** stratum — the draw order — and its
+    ``meta.json`` carries the full list, so a region serving three strata is
+    written once and counted three times.
+    """
+    from .translate import materialise
+
+    draw_result = load_draw()
+    counts: dict[str, int] = {}
+    for region in draw_result["regions"].values():
+        reg = dict(region)
+        reg["stratum"] = reg["strata"][0]
+        status = materialise(reg, config, root=EXAMPLES_403_DIR,
+                             group="stratum")
+        counts[status] = counts.get(status, 0) + 1
+        review = (EXAMPLES_403_DIR / reg["stratum"] / reg["region_id"]
+                  / "review.json")
+        if not review.exists():
+            # Incremental human review (fiche 403): the aggregates are always
+            # recomputed on the approved subset, never on the drafts.
+            review.write_text(json.dumps({
+                "region_id": reg["region_id"],
+                "review_status": "unreviewed",
+                "reviewer": None,
+                "reviewed_at": None,
+                "comment": None,
+            }, indent=2, ensure_ascii=False), encoding="utf-8")
+    return counts
 
 
 def load_draw() -> dict:

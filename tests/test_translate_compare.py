@@ -328,3 +328,18 @@ def test_solution_order_is_not_meaning_unless_the_driver_says_so():
     assert len(diffs) == 1
     _compare_value([1, 1, 2], [1, 2, 2], "r", diffs, ordered=False)
     assert len(diffs) == 2, "a multiset still counts multiplicity"
+
+
+def test_turtle_a_abbreviates_rdf_type_in_predicate_position_only():
+    """`a` is a predicate abbreviation: `RDF.type` as an OBJECT stays a term."""
+    from ldpy.transpiler import transpile
+    src = ("from rdflib import Graph, BNode, RDF\n"
+           "g = Graph()\n"
+           "bn = BNode()\n"
+           "g.add((bn, RDF.type, RDF.Statement))\n"
+           "g.add((bn, RDF.first, RDF.type))\n")
+    draft, _ = draft_translation(src)
+    assert "rdf:type a" not in draft
+    assert "rdf:first rdf:type" in draft
+    assert "{bn} a rdf:Statement" in draft
+    transpile(draft, filename="<a-position>")
