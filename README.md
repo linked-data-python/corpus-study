@@ -46,7 +46,7 @@ python -m rdfeval userstudy   # draft task material -> ../user_study/config/
 python -m rdfeval all         # the offline stages (analyze..userstudy)
 ```
 
-Install: `pip install -e .[plots,dev]` plus `pip install -e ../semantic_python/ldpy`
+Install: `pip install -e .[plots,dev]` plus `pip install -e ../ldpy`
 (the transpiler; used for translation validation and ldpy-side metrics).
 Tests: `python -m pytest tests/`.
 

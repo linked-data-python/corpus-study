@@ -7,7 +7,7 @@ import subprocess
 import tomllib
 from pathlib import Path
 
-# Repository root = the `github/` evaluation folder (parent of the package).
+# Repository root = the evaluation folder (parent of the package).
 ROOT = Path(__file__).resolve().parent.parent
 
 CONFIG_PATH = ROOT / "config" / "evaluation.toml"
