@@ -18,11 +18,29 @@
     "term_constructor": 12,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "+{ }",
+    "s{ }",
+    "f<…>",
+    "littéral typé",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "strate remove : les quatre formes de la région y passent. g.remove((URIRef(k), None, None)) -> -{ f<{k}> ?p ?o } et g.remove((None, None, URIRef(k))) -> -{ ?s ?p f<{k}> } (jokers sur deux positions, pas la même) ; g.remove((URIRef(k), URIRef(...#label), None)) -> -{ f<{k}> rdfs:label ?old_label }. Les deux premiers sont, ensemble, l'effacement d'une entité — et le pilote montre que la 3e position, prédicat, N'EST PAS couverte : :antibodiesAcc est « caché » mais le triplet qui l'emploie comme prédicat survit, dans les deux versions.",
+    "strate sparql_interpolated : g.query(\"select (count(*) as ?cnt) where { <\" + uri + \"> ?p ?o. }\") -> s{ SELECT (COUNT(*) AS ?cnt) WHERE { {f<{uri}>} ?p ?o } }. La concaténation de chaîne (une injection, littéralement) devient une interpolation en position de terme, c.-à-d. un initBindings. Vérifié que COUNT(*) + initBindings donne le même compte que rdflib, cas zéro solution compris (« ### Unknown uri »).",
+    "m{ f<{uri}> ?p ?o }.count() exprimerait la même chose sans moteur de requête, mais ce serait réécrire une requête SPARQL de l'auteur en BGP : la région est tirée dans sparql_interpolated, s{ } est la traduction fidèle. À noter comme cas où le corpus emploie SPARQL là où m{ } suffirait.",
+    "URIRef(k) -> f<{k}> : sûr ici car aucun @base n'est en portée et les k sont absolus (ils commencent tous par http://nextprot.org/rdf) — piège 2 de how-to/migrate-from-rdflib.md.",
+    "Literal(new_label, datatype=XSD.string) -> {new_label}^^xsd:string (interpolation + suffixe collé), PAS \"...\"^^xsd:string : piège 1. Vérifié : la sérialisation finale des deux versions est octet pour octet identique, 8 littéraux ^^xsd:string.",
+    "URIRef, Literal et XSD ne sont plus référencés une fois les îlots en place : leurs imports disparaissent. Namespace et sys étaient déjà morts dans l'original, ils restent (aucune refactorisation).",
+    "fixture : schema.ttl est engendré par la chaîne neXtProt et absent du dépôt ; fixture.ttl le reconstitue d'après la forme que le script voisin retrieve-schema-labels-comments.py interroge. Les trois TSV de goofiles_fixture/ sont des lignes COPIÉES VERBATIM des vrais fichiers du dépôt (en-tête + statuts Private / private / Public / NEW / vide + une ligne « ### ... » non-http qui doit être sautée), sous leurs noms exacts (espaces compris).",
+    "couverture du fixture : 50 -> 35 triplets ; 4 entités Private effacées en sujet ET en objet ; une URI du goo file absente du graphe (le cas zéro solution de la requête COUNT) ; un label inchangé avec commentaire ajouté ; un :antibodiesAcc conservé en position de prédicat (voisinage qui ne doit pas matcher).",
+    "l'oracle est double : isomorphisme du graphe g ET égalité de la sortie standard, que le script emploie abondamment (compte de triplets après chaque étape, journal des changements)."
   ],
   "draft_sha": "39bcd36ee79c473a",
   "provenance": {
@@ -35,5 +53,6 @@
     "remove",
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

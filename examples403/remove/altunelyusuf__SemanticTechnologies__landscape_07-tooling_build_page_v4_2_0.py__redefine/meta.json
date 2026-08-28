@@ -15,11 +15,26 @@
     "term_constructor": 4,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "+{ }",
+    "nom préfixé",
+    "variable",
+    "littéral avec langue"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "quatre paires remove/add « efface puis repose » : g.remove((iri, RDFS.label, None)) devient -{ {iri} rdfs:label ?o } et g.add((iri, RDFS.label, Literal(label, lang=\"en\"))) devient +{ {iri} rdfs:label f\"{label}\"@en }. Le sujet et la valeur restent des expressions Python interpolées, le prédicat devient un nom préfixé, le littéral étiqueté devient f\"…\"@en",
+    "CONSTAT (le coût principal de cette région) : -{ } et +{ } ne sont acceptés qu'en début de ligne logique à profondeur de crochets nulle (reference/language/lexical.md, « deux formes hors de la règle du sigil »). L'idiome de la source, « if cond: g.remove(...); g.add(...) » sur une seule ligne, est donc impossible : il faut ouvrir un bloc. Instruction pour instruction la traduction est de 1 pour 1, mais face à cette source compressée la région passe de 5 à 13 lignes. Un remove/add ne peut pas non plus s'écrire en expression (ni en lambda, ni en compréhension) : ce sont les deux seuls îlots qui ne sont pas des expressions",
+    "aucune fusion n'a été tentée : -{ ?s a ex:Draft ; ex:body ?b } (le -{ } multi-motifs) supprime par appariement, à la DELETE WHERE, alors que les quatre effacements sont indépendants et gardés dans quatre if séparés. Les fusionner aurait changé la sémantique et refactorisé la région",
+    "@graph g est déclaré au niveau module, juste après la ligne de contexte qui construit g, et porte jusque dans le corps de redefine (portée lexicale de bloc) : les huit opérations de la fonction s'en servent, contre huit répétitions du nom g dans l'original",
+    "from rdflib import Graph, Namespace, URIRef, Literal se réduit à from rdflib import Graph (Literal absorbé par f\"…\"@en, Namespace et URIRef déjà inutilisés dans l'extrait) et from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV disparaît au profit de deux @prefix",
+    "oracle : redefine ne rend rien, tout son effet est sur le graphe de module ; entry=\"redefine\" ne comparerait que la valeur de retour (None) et les arguments, soit un vert vide. Les deux représentations portent donc un banc de démonstration identique mot pour mot (les appels des lignes 61-70 de la source, raccourcis), et l'oracle est l'isomorphisme de g. Ce banc est du remplissage identique des deux côtés : il gonfle les deux surfaces de la même façon",
+    "shim de contexte page_context.py : HERE (ligne 12) et SP (ligne 29) ; HERE pointe sur le répertoire de l'exemple, où 04-page/semtech_page_abox_v4_1_0.ttl est un fixture (l'artefact de build n'est pas dans le dépôt)",
+    "fixture écrit contre la région : sp:Page porte deux rdfs:label et deux skos:note (le joker prend les deux de chaque), sp:ReferencesRegion n'est redéfini que sur skos:definition et doit garder son label et sa note de portée, sp:Doc n'a pas encore de skos:scopeNote (cas zéro appariement, le -{ } ne doit rien faire et le +{ } poser), et sp:W1 porte les quatre mêmes prédicats sans être jamais redéfini (le dernier appel ne passe aucune annotation). 20 triplets en entrée, 19 en sortie, ensembles de triplets identiques des deux côtés"
   ],
   "draft_sha": "50ab4f4ab7420dce",
   "provenance": {
@@ -31,5 +46,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

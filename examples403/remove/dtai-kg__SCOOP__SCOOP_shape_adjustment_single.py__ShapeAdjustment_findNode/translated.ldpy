@@ -1,11 +1,14 @@
 # Extracted from dtai-kg/SCOOP@40c6fc0420 : SCOOP/shape_adjustment_single.py
 # region: ShapeAdjustment.findNode (lines 418-425, stratum remove)
 # licence of the source repository: see meta.json
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
 def findNode(self, node):
-    for s, p, o in self.initial_graph.triples((node, self.shaclNS.node, None)):
+    @graph self.initial_graph
+    for o in m{ {node} sh:node ?o }:
         self.adjusted_shape.append(o)
-        self.initial_graph.remove((o, self.shaclNS.targetClass, None))
-        self.initial_graph.remove((o, self.shaclNS.targetNode, None))
-        self.initial_graph.remove((o, self.shaclNS.targetObjectsOf, None))
-        self.initial_graph.remove((o, self.shaclNS.targetSubjectsOf, None))
+        -{ {o} sh:targetClass ?x }
+        -{ {o} sh:targetNode ?x }
+        -{ {o} sh:targetObjectsOf ?x }
+        -{ {o} sh:targetSubjectsOf ?x }
         self.findNode(o)

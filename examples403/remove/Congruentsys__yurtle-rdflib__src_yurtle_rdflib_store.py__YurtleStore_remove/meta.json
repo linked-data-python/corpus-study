@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "@graph",
+    "-{ }"
+  ],
+  "translation_notes": [
+    "CONFIRMED as flagged: this is rdflib's *Store* remove, not a call to Graph.remove. The pattern arrives as a VALUE -- the parameter 'triple: tuple[Node | None, Node | None, Node | None]' with None as wildcard -- and the method resolves it itself against self.internal_graph. So the region is not an instance of the stratum's idiom in the form -{ } is built for.",
+    "NEGATIVE FINDING (the one this region contributes): ldpy's wildcard is LEXICAL, rdflib's is a VALUE. '-{ s p ?o }' is a wildcard because ?o is written unbound in the island; there is no island form for 'a triple pattern held in a variable'. And the near-miss is SILENT: -{ {s} {p} {o} } with s = p = o = None emits remove_from(g, (node(s), node(p), node(o))), node(None) coerces to Literal('None'), and rdflib removes nothing -- no error, no warning, a no-op. Any code that dispatches on a pattern it received (a Store, a generic delete(pattern) helper, an API endpoint) is out of reach of -{ }, and out of reach quietly.",
+    "for the same reason 'list(self.internal_graph.triples((s, p, o)))' has no m{ } form: m{ } also needs its pattern written. Both reads and writes are affected; it is one gap, not two.",
+    "what IS translatable is the inner deletion, whose three terms are bound: self.internal_graph.remove((match_s, match_p, match_o)) -> '@graph self.internal_graph' + -{ {match_s} {match_p} {match_o} }. It is correct (the driver proves it) but HEAVIER: 2 lines and 72 characters against 1 line and 55, three interpolations for three names, and none of -{ }'s wildcard machinery used. Hence classification 'awkward': the construction applies, and applying it costs.",
+    "worth recording about @graph: '@graph self.internal_graph' emits '_ldpy_g1 = (self.internal_graph)' at the declaration line -- the attribute is read ONCE and snapshotted into a local. Harmless here (remove() never rebinds it) but it is not equivalent to re-reading self.internal_graph at each island, and this store does rebind that attribute elsewhere (in its own clear()).",
+    "driver: 'self' is a stand-in for the enclosing store with the five members the region reads; _resolve_file_for_subject, _uri_to_path and _mark_file_dirty are the upstream bodies, flush() keeps the observable part of upstream's (clears the dirty set, returns a count) without file I/O. It compares by internal graph isomorphism, dirty set and flush count -- everything the region can change. Negative control run: widening the island to -{ {match_s} ?p ?o } makes three of the seven calls differ.",
+    "the driver deliberately does NOT call remove((None, None, None)): the region resolves each match's file AFTER deleting it, so a full wipe makes the set of dirtied files depend on the store's iteration order -- observed varying from run to run. That is the region's own fragility, not the translation's."
+  ],
   "draft_sha": "9a6503365109686d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.647114+00:00",
@@ -24,5 +35,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

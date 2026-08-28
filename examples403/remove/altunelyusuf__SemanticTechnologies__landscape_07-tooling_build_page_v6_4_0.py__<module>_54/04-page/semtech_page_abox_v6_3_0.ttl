@@ -1,0 +1,39 @@
+# Fixture standing in for 04-page/semtech_page_abox_v6_3_0.ttl (see meta.json).
+# Written against the region: the three predicates it wipes carry several
+# values (so the object wildcard is observable), the same subject carries
+# other predicates and another subject carries the same predicates (so a
+# pattern that is too wide is caught), and one predicate of the loop is
+# absent from a neighbouring subject (the zero-match case).
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sem:     <http://example.org/semtech#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+# the ontology the region re-stamps: every triple below on these three
+# predicates must go, whatever its object
+<http://example.org/semtech/page>
+    a owl:Ontology ;
+    owl:versionInfo "6.3.0", "6.2.0" ;
+    owl:versionIRI <http://example.org/semtech/page/6.3.0>,
+                   <http://example.org/semtech/page/6.2.0> ;
+    dcterms:modified "2026-08-01"^^xsd:date, "2026-07-15"^^xsd:date ;
+    rdfs:label "Semantic technology landscape interactive page ABox"@en ;
+    dcterms:created "2026-01-09"^^xsd:date ;
+    prov:wasGeneratedBy sem:Release_v6_3_0 .
+
+# neighbourhood: same predicates, other subjects -- nothing here may move
+<http://example.org/semtech/page/6.3.0>
+    a owl:Ontology ;
+    owl:versionInfo "6.3.0" ;
+    dcterms:modified "2026-08-01"^^xsd:date .
+
+sem:Release_v6_3_0
+    a prov:Activity ;
+    rdfs:label "semtech-landscape v6.3.0 build"@en ;
+    owl:versionInfo "6.3.0" .
+
+# zero match: a subject none of the three predicates reaches
+<http://example.org/semtech/page#Doc>
+    rdfs:label "Semantic technology landscape report"@en .

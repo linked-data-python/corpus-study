@@ -15,10 +15,30 @@
     "graph_write": 2,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "suffixe d'appel (g)",
+    "nom prefixe",
+    "variable",
+    "IRI"
+  ],
+  "translation_notes": [
+    "@graph self.graph designates the attribute directly (no local alias needed), so the ten reads on self.graph become bare m{ }. The five graphs the region BUILDS are local, so every write keeps an explicit receiver: +{ ... }(graphPredicatObjectMap), -{ ... }(graphPredicatObjectMap). This region is a counter-example to the 'one graph at a time' measurement behind @graph: it juggles six graphs at once, and the call suffix is what makes that bearable.",
+    "FINDING (m{ } arity): m{ } projects only the variables, so `for s, p, o in self.graph.triples((sTM, None, None))` becomes `for p, o in m{ {sTM} ?p ?o }` -- the bound position stops being a loop target. Three loop headers lose a target this way. At line 174/180 the object goes further: `for sTM, pTM, oTM in ...triples((None, None, rr:TriplesMap))` becomes `for sTM, pTM in m{ ?sTM ?pTM rr:TriplesMap }`, and the `oTM` that the next line added is rewritten as the constant `rr:TriplesMap` inside the +{ }. Same triples, visibly different statement shapes: hence minor-restructuring rather than directly-expressible.",
+    "The fully bound `for s3, p3, o3 in self.graph.triples((p, self.OJBECT_MAP, sROM))` is an existence test written as a loop. m{ } with no variable yields empty rows (one per match), so `for _ in m{ {p} {self.OJBECT_MAP} {sROM} }` keeps the control flow exactly -- no need to rewrite it as `if bool(m{ ... })`, which would have changed a `for` into an `if`.",
+    "FINDING (the stratum's own construction): BOTH remove sites are FULLY BOUND removals, and on a LOCAL graph -- `graphPredicatObjectMap.remove((s2, p2, o2))` where s2/p2 were just matched. So what -{ } exercises here is the island plus the call suffix, not the joker: `-{ {p} {self.OJBECT_MAP} {o2} }(graphPredicatObjectMap)`. The gain over .remove((s, p, o)) is the disappearance of the tuple-in-a-call, not concision; the joker (`-{ s p ?o }`) never appears in this region.",
+    "self.POM, self.SUBJECT_MAP, self.CONSTANT, self.PREDICATE, self.OJBECT_MAP and self.OBJECT are named term constants of the RML class (RML.__init__, lines 26-38). They are KEPT as Python and interpolated in term position -- {self.CONSTANT}. Only the direct namespace accesses became prefixed names (self.r2rmlNS.TriplesMap -> rr:TriplesMap, self.rmlNS.logicalSource -> rml:logicalSource, and likewise predicateMap, RefObjectMap, parentTriplesMap), which is the rewrite the migration table prescribes. FINDING: @prefix reaches a Namespace, never an alias a project has given one of its terms; a codebase that hides its vocabulary behind self.CONSTANT keeps half of it in Python.",
+    "An upstream bug is translated, not fixed: the RefObjectMap branch tests `(p, self.OJBECT_MAP, sROM)` where `p` holds the PREDICATE rr:predicateObjectMap and not the predicate-object-map node, so it can only fire on a triple whose subject is that IRI itself. fixture.ttl holds exactly such a triple so that both versions execute the branch.",
+    "fixture.ttl is an RML mapping document covering: four subjects matched by (None, None, rr:TriplesMap) -- one of them through a predicate other than rdf:type, since the region leaves the predicate free; a complete triples map with logical source, subject map and four predicate-object maps (rr:predicateMap+rr:constant, the rr:predicate/rr:object shortcuts, a rr:predicateMap with NO rr:constant = zero solutions, and one where the same term sits under rr:predicate and rr:object so that a joker in the predicate position of -{ } would be caught); a triples map with no POM and no subject map; a RefObjectMap nothing points to; and a mapping-shaped node never declared a triples map, which must stay invisible. Mutation-checked: dropping either -{ }, or widening one to a joker, makes the driver FAIL.",
+    "driver.py holds the stand-in RML object (the constants copied from RML.__init__, lines 20-45 of the same commit) because the region is a method and its context lines are only `import rdflib`. Its __eq__ states the oracle explicitly: two runs agree when the list of graph dictionaries appended to self.graphs agrees graph by graph, under the harness's own normalise (RDF isomorphism).",
+    "CONFIRMS the known line-number drift on islands: a deliberate error injected in the island of source line 21 is reported by Python at line 22 -- the transpiler's one-line runtime prelude shifts everything below it."
+  ],
   "draft_sha": "b49b3d09bc55815d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.836349+00:00",
@@ -30,5 +50,6 @@
     "remove",
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

@@ -17,9 +17,23 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": [
+    "@graph",
+    "-{ }",
+    "m{ }",
+    "s{ }",
+    "suffixe d'appel (g)",
+    "variable"
+  ],
+  "translation_notes": [
+    "EXCLUDED, not untranslatable: the translation is written and transpiles, but the driver cannot execute it. The region is the demo script of kglab's own rdflib store plugin (`rdflib.Graph(store=\"kglab\")`), and `kglab/graph.py` needs numpy, chocolate, cryptography and icecream, none of them installed. Standing in for them would mean re-implementing the store the region exercises, so the pair is left unproven rather than proven against a fake. Second obstacle for whoever installs them: the region sits under `if __name__ == \"__main__\":` and the harness runs both modules with `__name__` set to `__original__`/`__translated__`, so the guard would have to be neutralised identically on both sides.",
+    "`graph.remove((s, p, o,))` -> `@graph graph` + `-{ {s} {p} {o} }`, twice. This is the stratum's construction with NO joker: the three terms come from Python variables and are interpolated, so nothing is left unbound. The second call is a no-op on both sides (the triple is already gone) -- `-{ }` removing an absent triple raises nothing, like rdflib's `remove`.",
+    "`graph.query(sparql, initBindings=bindings)` -> `s{ SELECT ... }(bindings=bindings)`, the call suffix with the graph left implicit (`@graph graph` is in scope). Note that the strata table's advice -- interpolate the bound term in the pattern -- does NOT work here: `?surname` is both bound by initBindings and projected by the SELECT, and replacing its occurrence in the WHERE by `{Literal(\"Alice\")}` would drop it from the solutions. The call suffix is the form that keeps initBindings' meaning. The `sparql` string variable disappears into the island; `bindings` stays.",
+    "`for s, p, o in graph:` -> `for s, p, o in m{ ?s ?p ?o }:` -- the same walk over `graph.triples((None, None, None))`, same order. It is also the one rewrite in this region that buys nothing: whole-graph iteration is shorter in rdflib's own protocol.",
+    "the Turtle payload stays a Python string: ldpy never looks inside strings, so `ttl_text` and its `@prefix` lines are untouched and no prefix is declared in the file (the query uses variables only).",
+    "VERIFIED SEPARATELY (since the pair cannot run): the three islands were checked against the region's own ttl_text and bindings on a plain `rdflib.Graph`, transpiled and executed: `s{...}(bindings=bindings)` returns exactly the rows of `graph.query(sparql, initBindings=bindings)` including the projected ?surname; `m{ ?s ?p ?o }` yields the same triples in the same order as `for s, p, o in graph`; `-{ {s} {p} {o} }` removes the same triple as `graph.remove((s, p, o))` and the repeat is a no-op on both sides. Only the kglab store's behaviour under those operations is unproven."
+  ],
   "draft_sha": "43cae2cfd100dd25",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.694585+00:00",
@@ -32,5 +46,6 @@
     "sparql_literal",
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

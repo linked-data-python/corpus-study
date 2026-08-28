@@ -1,6 +1,7 @@
 # Extracted from DataDrivenCPS/acquirium@e3bffb4bed : src/acquirium/Storage/graph_store.py
 # region: OxigraphGraphStore._apply_graph_write (lines 627-647, stratum remove)
 # licence of the source repository: see meta.json
+import logging
 from rdflib import Dataset, Graph, Literal, RDF, URIRef
 _logger = logging.getLogger("acquirium.graph_store")
 

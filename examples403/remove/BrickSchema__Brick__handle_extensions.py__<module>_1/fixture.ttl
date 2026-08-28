@@ -1,0 +1,27 @@
+# Stands in for the generated Brick.ttl the script reads (Brick.ttl is built by
+# generate_brick.py and is not in the repository).  Shaped after the real one:
+# one owl:Ontology for Brick itself, carrying owl:imports, owl:versionInfo and
+# an sh:declare prefix declaration, plus one SPARQL rule pointing its
+# sh:prefixes at an ontology.
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+<https://brickschema.org/schema/1.5/Brick> a owl:Ontology ;
+    owl:imports <http://qudt.org/2.1/schema/facade/qudt> ;
+    owl:versionInfo "1.5.0" ;
+    sh:declare [ sh:namespace "https://brickschema.org/schema/Brick#"^^xsd:anyURI ;
+                 sh:prefix "brick" ] .
+
+brick:Point a owl:Class .
+
+brick:Sensor a owl:Class ;
+    rdfs:subClassOf brick:Point .
+
+brick:hasPointRule a sh:NodeShape ;
+    sh:targetClass brick:Sensor ;
+    sh:rule [ a sh:SPARQLRule ;
+              sh:construct "CONSTRUCT { $this a brick:Point } WHERE { $this a brick:Sensor }" ;
+              sh:prefixes <https://brickschema.org/schema/1.5/Brick> ] .

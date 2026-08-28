@@ -14,10 +14,25 @@
     "sparql": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "variable"
+  ],
+  "translation_notes": [
+    "the stratum's own idiom is here in its purest form: graph.remove((None, None, target_node)) -> -{ ?s ?p {target_node} } and graph.remove((target_node, None, None)) -> -{ {target_node} ?p ?o }. The gain is not length (both are one line) but that the wildcard is NAMED: reading '(None, None, target_node)' means counting commas to know which position is free, while '?s ?p {target_node}' says it. The reference's rule 'an unbound variable in -{ } is a wildcard' holds exactly: checked against the rdflib original, the two forms remove the same triples.",
+    "graph.remove((source_node, old_predicate, target_node)), all three terms bound, becomes -{ {source_node} {old_predicate} {target_node} } -- correct but with no gain at all: three interpolations for three names. -{ } pays where the pattern is partly written and partly interpolated, not where it is entirely interpolated.",
+    "one '@graph graph' at the top of the function body covers the four write islands (the block scope of @graph reaches the nested for/if suites), so the receiver 'graph.' disappears from every one of them.",
+    "graph.add((source_node, predicate, <conditional>)) -> a multi-line +{ } whose object is the untouched Python conditional expression in braces. Five lines of tuple-in-a-call become one pattern; the conditional stays Python, which is the point of the brace escape.",
+    "NOT TRANSLATED, and the reason is a finding: graph.query(query) stays rdflib. The query text is not in the region -- it is a class attribute (_query_template_use_case_a/b) that .format() fills with three IRIs at run time. s{ } needs the query at the island (that is what buys the transpile-time check), and its interpolation is in TERM position (an initBindings), which cannot supply <{target_property}> inside a BIND or the braces of a .format() template. A query assembled outside the region from a string template is outside what s{ } reaches; this confirms, from the other side, the reference's 'string-embedded RDF stays a string'.",
+    "context shim: cognite.neat is not installed (and importing it would pull in cognite-sdk and pydantic). cognite_neat_shim.py copies as_neat_compliant_uri and sentence_or_string_to_camel with their dependencies, bodies verbatim; identical for both sides.",
+    "driver: 'self' is a stand-in for the enclosing transformer, carrying the two query templates verbatim and the six constructor attributes the region reads; it compares by configuration since transform() does not touch it. Four calls cover the four branches (use case A/B x delete_target_node/convert_literal_to_uri).",
+    "fixture: three solutions in use case A (two sources pointing at one target, exercising the multi-triple wildcard remove), the zero-solution case (ex:LonelySource -> ex:NotATarget, wrong type), and neighbourhood that must not match (ex:Decoy of the right type but with no value, ex:Unrelated). Negative control run: replacing -{ ?s ?p {target_node} } by -{ ?s ?p ?o } makes the driver report 'graphs not isomorphic (14 vs 0)', so the oracle does see the wildcards.",
+    "driver quirk worth recording, upstream and not ours: as_neat_compliant_uri calls rdflib's split_uri with split_start=\"#_\", which only ever splits at an underscore, so the use-case-B branch raises ValueError for any namespace without one -- neat's own DEFAULT_NAMESPACE included. The fixture namespace is http://example.org/neat_/ for that reason, and convert_literal_to_uri is exercised on a value without a space (namespace[\"Target Value\"] is a URIRef rdflib refuses to serialise)."
+  ],
   "draft_sha": "e54c3b9af6f4416d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.999144+00:00",
@@ -28,5 +43,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

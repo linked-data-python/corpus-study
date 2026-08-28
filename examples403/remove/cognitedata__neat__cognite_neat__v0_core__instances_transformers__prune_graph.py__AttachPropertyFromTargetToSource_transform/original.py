@@ -3,8 +3,8 @@
 # licence of the source repository: see meta.json
 from typing import Any, cast
 from rdflib import Graph, Namespace, URIRef
-from cognite.neat._v0.core._utils.rdf_ import as_neat_compliant_uri
-from cognite.neat._v0.core._utils.text import sentence_or_string_to_camel
+from cognite_neat_shim import as_neat_compliant_uri
+from cognite_neat_shim import sentence_or_string_to_camel
 
 def transform(self, graph: Graph) -> None:
     nodes_to_delete: list[Any] = []

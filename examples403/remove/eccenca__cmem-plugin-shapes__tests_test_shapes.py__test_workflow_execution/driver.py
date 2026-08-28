@@ -1,19 +1,28 @@
 """Validation driver for eccenca__cmem-plugin-shapes__tests_test_shapes.py__test_workflow_execution.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
+UNRESOLVABLE BY CONSTRUCTION -- kept so the pipeline records why.
 
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+The region is an integration test of the cmem-plugin-shapes workflow plugin.
+Executing it needs, all at once:
+
+  * ``cmem_client``, ``cmem_plugin_base`` and ``cmem_plugin_shapes``, none of
+    which is installed here (``cmem_client`` is what fails first);
+  * a live eccenca Corporate Memory deployment: the ``graph_setup`` pytest
+    fixture skips the whole module unless ``CMEM_BASE_URI`` is set, then
+    shells out to ``cmemc`` to export the store, import two fixture graphs at
+    http://docker.localhost/… and create a project; ``plugin.execute`` writes
+    the generated shapes graph into that store and ``get_graph_content``
+    (a helper of the test module, outside the extracted region) reads it back;
+  * a real clock and a real provenance stamp: the region asserts that the
+    server wrote exactly one ``dcterms:created`` whose lexical form matches
+    ``DATETIME_PATTERN``, then removes it before comparing.
+
+The graph the region reads is therefore an OUTPUT of the deployment, not an
+input a fixture could supply: ``fixture.ttl`` is kept only to say so.  The
+translation was verified by transpilation only -- see meta.json.
+
+Run anyway: the verdict below carries the exact import error.
 """
 from rdfeval.harness import run_pair
 
-VERDICT = run_pair(
-    __file__,
-    entry='test_workflow_execution',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
-)
+VERDICT = run_pair(__file__, entry="test_workflow_execution", calls=[])

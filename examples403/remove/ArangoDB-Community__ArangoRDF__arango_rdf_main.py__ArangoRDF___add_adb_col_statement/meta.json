@@ -14,10 +14,24 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "-{ }",
+    "+{ }",
+    "m{ }",
+    "variable"
+  ],
+  "translation_notes": [
+    "the whole method is one `@graph` declaration plus three islands: `@graph self.__adb_col_statements` names the graph once and the three operations lose their receiver -- `-{ {subject} {self.adb_col_uri} ?o }` (wildcard on the object, the `None` of `remove((s, p, None))`), `bool(m{ ... })` for the `(s, p, None) in g` membership test, `+{ ... {adb_col} }` for the add. This is the clearest before/after of the batch, hence article_candidate",
+    "CONFIRMED CAPABILITY, wider than the reference: `@graph` accepts an ATTRIBUTE reference, not only a bare name -- `@graph self.__adb_col_statements` transpiles to `_ldpy_g1 = (self.__adb_col_statements)`. current-graph.md only documents `@graph g` as \"the existing Python variable g\"; the lexical rule reserves `@graph` followed by `.attr` for the decorator reading, and `@graph self.x` is unambiguous. Worth stating in the reference, because the corpus keeps its graph on `self`",
+    "no @prefix is needed: the predicate is `self.adb_col_uri`, an instance attribute set in ArangoRDF.__init__, so it stays an interpolation. Turning it into `<http://www.arangodb.com/collection>` would hard-code what the original reads from the object",
+    "`Literal(adb_col)` -> `{adb_col}`: a plain str in object position coerces to a plain Literal (coercion.md), the same term",
+    "the docstring is kept verbatim, including `URIRef(\"http://www.arangodb.com/collection\")` inside it -- ldpy never looks inside strings, and the mechanical draft had wrongly rewritten it to `<...>`",
+    "context shim (identical for both sides, excluded from the surface metrics): arango_rdf.typings is stubbed (only RDFTerm is used, as an annotation) and ArangoRDFStub carries the two attributes the region touches. The method is extracted as a top-level function, so `self.__adb_col_statements` is NOT name-mangled and the attribute is literally \"__adb_col_statements\" (the shim sets it with setattr). ArangoRDFStub.__eq__ is the oracle, not original behaviour: the harness compares argument 0 of the two runs, and two graphs built in two namespaces are equal only up to isomorphism",
+    "driver: four calls covering the three branches (add on an empty graph, early return when a statement exists, overwrite over two competing statements, overwrite with a neighbouring predicate and a neighbouring subject that must survive). Mutation-checked: replacing `?o` by `{adb_col}` in `-{ }` leaves the stale statements and the driver reports it; so does dropping the membership test"
+  ],
   "draft_sha": "af8d382ba6f7fd42",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.007117+00:00",
@@ -28,5 +42,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

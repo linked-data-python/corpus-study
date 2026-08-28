@@ -17,10 +17,26 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "m{ }",
+    "f<...>",
+    "nom prefixe",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms"
+    "prefixes: DCTERMS->dcterms",
+    "EXCLUDED for executability, not for notation (AGENT_BATCH case 1): the region is an integration test of the cmem-plugin-shapes workflow plugin. It needs cmem_client, cmem_plugin_base and cmem_plugin_shapes (none installed -- cmem_client is what fails first), a live eccenca Corporate Memory deployment (the graph_setup pytest fixture skips the module unless CMEM_BASE_URI is set, then shells out to cmemc to export the store, import two graphs under http://docker.localhost/ and create a project), and the module-level helper get_graph_content which is outside the extracted region. The driver is kept and its verdict carries the exact import error.",
+    "No fixture.ttl can be written, and that is itself the finding: the graph the region reads is the shapes graph the plugin JUST WROTE into the deployment, read back over HTTP, and the region asserts that its dcterms:created stamp -- produced by the server at execution time -- matches DATETIME_PATTERN before removing it. An input fixture would be validating a double of the plugin, not the region. fixture.ttl is kept holding that statement.",
+    "The translation is two statements and was verified by transpilation, plus a side-by-side execution of both statements alone on a stand-in graph (same count, isomorphic result).",
+    "len(list(result_graph.objects(predicate=DCTERMS.modified))) becomes len(list(m{ [] dcterms:modified ?o })): the anonymous blank node is the non-distinguished variable that keeps the arity at one, so m{ } yields the OBJECTS -- exactly what g.objects(predicate=...) yields -- and not (subject, object) rows. Without it the pattern would need ?s and the list would hold 2-tuples. This is the ldpy spelling of rdflib's 'unbound and unwanted' position, and it deserves to be named alongside the joker of -{ }: same hole, opposite islands, two different notations (`[]` when the term is not wanted, `?x` when it is).",
+    "The stratum's construction: result_graph.remove((URIRef(graph_setup.shapes_iri), DCTERMS.created, None)) becomes -{ f<{graph_setup.shapes_iri}> dcterms:created ?created }. rdflib's None becomes a named joker; the line is not shorter, it is readable.",
+    "@graph result_graph is declared here (and NOT in the sibling region test_prefix_cc_fetching) because two islands share the graph: one @graph line pays for itself at two islands, not at one.",
+    "URIRef(x) -> f<{x}> is safe here (migration trap 2): no @base in scope, and graph_setup.shapes_iri is absolute.",
+    "Not translated, deliberately: `regexp = rf\"<{graph_setup.shapes_iri}> <http://purl.org/dc/terms/created> .* \\\\.\"` is an N-Triples pattern built as a STRING and matched with re.findall against the serialisation. ldpy never looks inside strings, so this stays as it is -- a real occurrence of RDF being handled as text, in the same function that handles it as a graph three lines below."
   ],
   "draft_sha": "9202d55f1a8eb49d",
   "provenance": {
@@ -32,5 +48,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

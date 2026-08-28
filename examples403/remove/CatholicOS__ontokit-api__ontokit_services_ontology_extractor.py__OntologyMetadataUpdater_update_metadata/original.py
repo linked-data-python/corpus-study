@@ -4,6 +4,7 @@
 from pathlib import Path
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DC, DCTERMS, OWL, RDF, RDFS
+from context import OntologyParseError, UnsupportedFormatError  # context shim
 
 def update_metadata(
     self,

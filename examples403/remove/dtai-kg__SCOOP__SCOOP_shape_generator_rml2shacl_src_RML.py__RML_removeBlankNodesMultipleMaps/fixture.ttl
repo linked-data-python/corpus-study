@@ -1,4 +1,65 @@
-# Input graph for dtai-kg__SCOOP__SCOOP_shape_generator_rml2shacl_src_RML.py__RML_removeBlankNodesMultipleMaps — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for dtai-kg__SCOOP__…__RML_removeBlankNodesMultipleMaps —
+# an RML mapping document, written against the region (not against the
+# translation).  It covers:
+#   * several solutions of `(None, None, rr:TriplesMap)` — four subjects;
+#   * every branch of the body: rr:logicalSource, rr:subjectMap, three shapes
+#     of rr:predicateObjectMap, the rr:object shortcut, the RefObjectMap join;
+#   * the zero-solution cases: a triples map with no POM and no subject map,
+#     a rr:predicateMap with no rr:constant, a RefObjectMap nothing points to;
+#   * neighbourhood that must NOT match: a mapping-shaped node that is not
+#     typed rr:TriplesMap at all.
+@prefix rr:   <http://www.w3.org/ns/r2rml#> .
+@prefix rml:  <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql:   <http://semweb.mmlab.be/ns/ql#> .
+@prefix ex:   <http://example.org/> .
+
+# 1 — a complete triples map: logical source, subject map, three POMs.
+ex:PersonMap a rr:TriplesMap ;
+    rml:logicalSource [ rml:source "people.csv" ;
+                        rml:referenceFormulation ql:CSV ;
+                        rml:iterator "$.people[*]" ] ;
+    rr:subjectMap [ rr:template "http://example.org/person/{id}" ;
+                    rr:termType rr:IRI ] ;
+    # POM 0 — rr:predicateMap with rr:constant, and a real rr:objectMap.
+    rr:predicateObjectMap [ rr:predicateMap [ rr:constant ex:name ] ;
+                            rr:objectMap [ rml:reference "name" ;
+                                           rr:termType rr:Literal ] ] ;
+    # POM 1 — the rr:predicate / rr:object shortcuts (no nested map at all).
+    rr:predicateObjectMap [ rr:predicate ex:age ;
+                            rr:object "42" ] ;
+    # POM 2 — a rr:predicateMap with NO rr:constant: the inner match has no
+    # solution, so nothing is written for the predicate side.
+    rr:predicateObjectMap [ rr:predicateMap [ rr:template "http://example.org/p/{k}" ] ;
+                            rr:objectMap [ rr:constant ex:unknown ] ] ;
+    # POM 3 — the same term under rr:predicate and rr:object: the removal of
+    # the rr:object triple must not take the rr:predicate one with it, so a
+    # wildcard in the predicate position of `-{ }` would be caught here.
+    rr:predicateObjectMap [ rr:predicate ex:tag ;
+                            rr:object ex:tag ] .
+
+# 2 — a triples map with a logical source and nothing else: no subject map,
+# no predicate-object map (tel stays 0, no "POM0" key is produced).
+ex:BareMap a rr:TriplesMap ;
+    rml:logicalSource [ rml:source "bare.csv" ] .
+
+# 3 — the region matches (None, None, rr:TriplesMap): the PREDICATE is a
+# wildcard, so this node is visited too, through ex:mentions.
+ex:Note ex:mentions rr:TriplesMap .
+
+# 4 — neighbourhood that must not match: shaped exactly like a mapping, but
+# never in object position of a rr:TriplesMap triple.
+ex:NotAMap rml:logicalSource [ rml:source "ignored.csv" ] ;
+    rr:subjectMap [ rr:template "http://example.org/x/{id}" ] ;
+    rr:predicateObjectMap [ rr:predicate ex:ignored ; rr:object "no" ] .
+
+# 5 — the RefObjectMap branch.  The region tests `(p, rr:objectMap, sROM)`
+# where `p` holds the PREDICATE rr:predicateObjectMap, not the POM node, so
+# the branch fires only on a triple whose subject is that IRI itself.  The
+# fixture holds one, so both versions run the branch.
+rr:predicateObjectMap rr:objectMap ex:JoinROM .
+ex:JoinROM a rr:RefObjectMap ;
+    rr:parentTriplesMap ex:BareMap .
+
+# …and one RefObjectMap that nothing points to: zero solutions.
+ex:OrphanROM a rr:RefObjectMap ;
+    rr:parentTriplesMap ex:PersonMap .

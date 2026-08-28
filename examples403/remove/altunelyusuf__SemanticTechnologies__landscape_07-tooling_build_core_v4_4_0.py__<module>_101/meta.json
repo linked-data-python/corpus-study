@@ -13,11 +13,23 @@
     "graph_write": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "cas le plus pur de la strate : g1.remove((corpus, SKOS.note, None)) devient -{ {corpus} skos:note ?o } — une ligne pour une ligne, le sentinelle None de rdflib devenant un joker nommé ?o",
+    "article_candidate : le gain se lit en trois lignes, mais c'est un gain de notation (plus de tuple, plus de None, nom préfixé) et non de longueur — le décompte de lignes est neutre",
+    "@graph g1 est ajouté juste après la ligne de contexte qui construit g1 : c'est la déclaration de contexte, pas la région. Coût réel : +1 ligne ici, amorti dès la deuxième opération (dans le fichier d'origine g1 porte 9 add et 1 remove de plus). La forme sans déclaration, -{ {corpus} skos:note ?o }(g1), existe et tiendrait en une seule ligne, mais le suffixe d'appel est réservé au cas où le graphe n'est pas celui du bloc",
+    "from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV disparaît côté ldpy : la région n'en tirait que SKOS, absorbé par @prefix skos: — 1 ligne pour 1 ligne",
+    "corpus = SRNS.ResearchCorpus reste inchangé des deux côtés : SRNS est défini à la ligne 96 du fichier d'origine, que l'extraction ne porte pas ; il est donc dans le shim, hors surface mesurée, et le traduire en @prefix srns: aurait fait payer au seul côté ldpy une déclaration que l'original a hors région",
+    "shim de contexte research_context.py : import rdflib (ligne 8), BASEDIR (ligne 11), SRNS (ligne 96) ; BASEDIR pointe sur le répertoire de l'exemple, où 01-research/semtech_research_v4_3_0.ttl est un fixture (l'artefact de build n'est pas dans le dépôt)",
+    "fixture écrit contre la région : le corpus porte deux skos:note (le joker prend les deux) et d'autres prédicats qui restent ; surtout, chaque publication porte elle aussi un skos:note — un motif qui oublierait d'épingler le sujet viderait tout. 16 triplets en entrée, 14 en sortie, 2 notes de publication conservées, des deux côtés"
   ],
   "draft_sha": "79dd354bd3e613db",
   "provenance": {
@@ -29,5 +41,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

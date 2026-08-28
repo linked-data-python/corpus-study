@@ -1,4 +1,50 @@
-# Input graph for dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_double_check — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_double_check.
+# double_check walks every triple of the adjusted identifiers whose IRI carries
+# "NodeShape" and drops the constraint predicates a node shape must not carry.
+# The fixture holds:
+#   * several solutions      - two node shapes, each with several constraints
+#                              among the thirteen of double_check_list;
+#   * the zero-solution case - <NodeShape/Absent> is an adjusted identifier
+#                              with no triple in the graph;
+#   * neighbourhood that must NOT match - the property shape (an adjusted
+#     identifier whose IRI has no "NodeShape"), a node shape that is not an
+#     adjusted identifier at all, the predicates outside the list, and the
+#     sh:in list itself, whose cells survive the removal of its head triple.
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+@base <http://example.com/> .
+
+<NodeShape/Person> a sh:NodeShape ;
+    sh:targetClass schema:Person ;                    # stays
+    sh:property <PropertyShape/name1234> ;            # stays
+    sh:node <NodeShape/Address> ;                     # stays
+    sh:datatype xsd:string ;                          # dropped
+    sh:minCount 1 ;                                   # dropped
+    sh:maxCount 1 ;                                   # dropped
+    sh:pattern "^[A-Z]" ;                             # dropped
+    sh:uniqueLang true ;                              # dropped
+    sh:in ( "fr" "nl" ) .                             # head dropped, cells stay
+
+<NodeShape/Address> a sh:NodeShape ;
+    sh:targetClass schema:PostalAddress ;             # stays
+    sh:nodeKind sh:IRI ;                              # stays
+    sh:minLength 2 ;                                  # dropped
+    sh:maxLength 64 ;                                 # dropped
+    sh:languageIn ( "fr" ) ;                          # dropped
+    sh:minInclusive 0 ;                               # dropped
+    sh:maxInclusive 99 ;                              # dropped
+    sh:minExclusive -1 ;                              # dropped
+    sh:maxExclusive 100 .                             # dropped
+
+# An adjusted identifier, but a property shape: "NodeShape" is not in its IRI,
+# so double_check leaves its constraints alone.
+<PropertyShape/name1234> a sh:PropertyShape ;
+    sh:path schema:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 .
+
+# A node shape that was never adjusted: not in adjusted_identifier.
+<NodeShape/Untouched> a sh:NodeShape ;
+    sh:datatype xsd:string ;
+    sh:maxCount 3 .

@@ -1,4 +1,50 @@
-# Input graph for cognitedata__neat__cognite_neat__v0_core__instances_transformers__prune_graph.py__AttachPropertyFromTargetToSource_transform — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for AttachPropertyFromTargetToSource.transform — written during
+# translation, after the worked example in the transformer's own docstring.
+#
+# It covers:
+#   * TWO solutions of the pattern the region reads (two source/target pairs),
+#     one of them with two incoming edges on the same target node so that the
+#     `remove((None, None, target_node))` wildcard has more than one triple to
+#     take away;
+#   * the ZERO-solution case: ex:LonelySource points at ex:NotATarget, which is
+#     not a ex:TargetType, so no row is produced for it;
+#   * ex:codeValue, a second target property whose values carry no space, so
+#     that the convert_literal_to_uri branch can turn one into an IRI at all;
+#   * NEIGHBOURING triples that must NOT match: ex:Decoy is a ex:TargetType but
+#     carries no ex:propertyWhichValueWeWant, and ex:Unrelated hangs off the
+#     source nodes with a property the query never asks for.
+
 @prefix ex: <http://example.org/> .
+
+ex:SourceNode a ex:SourceType ;
+    ex:sourceProperty ex:TargetNode ;
+    ex:unrelated ex:Unrelated .
+
+ex:OtherSource a ex:SourceType ;
+    ex:sourceProperty ex:TargetNode .
+
+ex:SecondSource a ex:SourceType ;
+    ex:otherProperty ex:SecondTarget .
+
+ex:TargetNode a ex:TargetType ;
+    ex:propertyWhichValueWeWant "Target Value" ;
+    ex:codeValue "targetCode" ;
+    ex:propertyWhichValueWeMightWantAsNameForNewProperty "Property Name" .
+
+ex:SecondTarget a ex:TargetType ;
+    ex:propertyWhichValueWeWant "Second Value" ;
+    ex:codeValue "secondCode" ;
+    ex:propertyWhichValueWeMightWantAsNameForNewProperty "Other Name" .
+
+# zero solution: not a ex:TargetType
+ex:LonelySource a ex:SourceType ;
+    ex:sourceProperty ex:NotATarget .
+
+ex:NotATarget a ex:SomethingElse ;
+    ex:propertyWhichValueWeWant "Invisible Value" .
+
+# neighbourhood: right type, but nothing points at it and it holds no value
+ex:Decoy a ex:TargetType ;
+    ex:someOtherProperty "ignored" .
+
+ex:Unrelated a ex:Noise .

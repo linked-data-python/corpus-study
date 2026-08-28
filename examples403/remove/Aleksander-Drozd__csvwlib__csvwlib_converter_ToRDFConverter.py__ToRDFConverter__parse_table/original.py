@@ -2,7 +2,7 @@
 # region: ToRDFConverter._parse_table (lines 45-66, stratum remove)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
-from csvwlib.utils.rdf.CSVW import CONST_STANDARD_MODE
+from context_shim import CONST_STANDARD_MODE, ToRDFConverter
 CSVW = Namespace('http://www.w3.org/ns/csvw#')
 
 def _parse_table(self, main_node, table_metadata, table_data):
@@ -27,3 +27,21 @@ def _parse_table(self, main_node, table_metadata, table_data):
             self._parse_row(atdm_row, row_node, dummy, table_metadata, property_url, table_data)
             self.graph.remove((dummy, CSVW.describes, row_node))
         self.parse_virtual_columns(row_node, atdm_row, table_metadata)
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a method
+# body extracted from its class, so this entry point rebuilds the converter it
+# needs and hands back the graph it wrote -- the oracle of this pair is RDF
+# isomorphism on that graph.  `neighbourhood` is seeded into the converter's
+# graph before the call: in minimal mode a table contributes nothing but the
+# csvw:describes triple it immediately removes, so without something around it
+# the removal would be checked against an empty graph.
+def demo(mode, table_metadata, table_data, neighbourhood):
+    converter = ToRDFConverter(
+        atdm={'tables': [table_data]},
+        metadata={'@context': 'http://www.w3.org/ns/csvw',
+                  'tables': [table_metadata]})
+    converter.mode = mode
+    converter.graph += neighbourhood
+    _parse_table(converter, BNode(), table_metadata, table_data)
+    return converter.graph

@@ -17,10 +17,28 @@
     "term_constructor": 1,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "IRI",
+    "nom préfixé",
+    "variable"
+  ],
+  "translation_notes": [
+    "les trois idiomes de la strate sont ici : remove((None, p, o)) -> -{ ?s sh:declare {pfx} } (joker en sujet), remove((s, p, o)) exact -> -{ {rule} sh:prefixes {pfxs} }, remove((s, p, None)) -> -{ {ontology} owl:imports ?imported } (joker en objet)",
+    "les trois remove du dernier bloc restent TROIS islands -{ } distincts : les réunir en -{ {ontology} a owl:Ontology ; owl:imports ?i ; owl:versionInfo ?v } changerait le sens (un -{ } multi-motifs joint comme DELETE WHERE) — vérifié : sur une ontologie sans owl:imports ni owl:versionInfo, la forme jointe ne retire rien du tout, alors que les trois remove rdflib en retirent le type",
+    "g.objects(predicate=SH.declare) -> m{ [] sh:declare ?pfx } : le nœud vide en position sujet est une variable non distinguée, donc l'arité du motif reste 1 et la variable de boucle `pfx` est inchangée — sans lui il aurait fallu ?s et déballer une paire (une restructuration)",
+    "g.subject_objects(predicate=SH.prefixes) -> m{ ?rule sh:prefixes ?pfxs } (arité 2, déballée comme dans l'original) ; g.subjects(RDF.type, OWL.Ontology) -> m{ ?ontology a owl:Ontology }",
+    "mutation pendant l'itération : le corps de chaque boucle écrit dans le graphe qu'elle parcourt ; m{ } (boucles imbriquées sur graph.triples()) se comporte comme les sélecteurs rdflib sur ce fixture — même nombre de solutions, même graphe final",
+    "@graph brick_graph désigne le graphe déjà construit par rdflib.Graph() ; aucun préfixe n'est lié sur un graphe seulement désigné, la sérialisation finale est donc inchangée",
+    "fixture : Brick.ttl est engendré par generate_brick.py et absent du dépôt ; fixture.ttl et extensions_fixture/ le reconstituent d'après le vrai extensions/*.ttl (ontologie Brick + deux extensions, dont une sans owl:imports ni owl:versionInfo — le cas zéro — et un owl:versionInfo porté par une classe, voisinage qui doit survivre). Le pilote met en scène un répertoire temporaire pour ne rien écrire dans l'exemple.",
+    "35 triplets en entrée, 30 en sortie : 4 sh:declare déplacés, 2 sh:prefixes réassignés, 2 ontologies effacées, le voisinage intact"
+  ],
   "draft_sha": "968b03c4d9dc8702",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.758978+00:00",
@@ -31,5 +49,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

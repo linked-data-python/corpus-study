@@ -26,6 +26,6 @@ def test_prefix_cc_fetching(graph_setup: GraphSetupFixture, client: Client) -> N
     )
     plugin.execute(inputs=[], context=TestExecutionContext(project_id=graph_setup.project_name))
     result_graph = Graph().parse(data=get_graph_content(client, graph_setup.shapes_iri))
-    result_graph.remove((URIRef(graph_setup.shapes_iri), dcterms:created, None))
+    -{ f<{graph_setup.shapes_iri}> dcterms:created ?created }(result_graph)
     test = Graph().parse(f"{FIXTURE_DIR}/test_shapes.ttl")
     assert isomorphic(result_graph, test)

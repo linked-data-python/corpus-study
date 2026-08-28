@@ -15,11 +15,25 @@
     "term_constructor": 6,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "nom préfixé"
+  ],
   "translation_notes": [
-    "prefixes: CSVW->csvw, RDF->rdf"
+    "prefixes: CSVW->csvw. Le brouillon annoncait aussi RDF->rdf : ce @prefix a ete SUPPRIME, la seule occurrence de RDF.type s'ecrivant `a` dans l'ilot.",
+    "site de la strate : `self.graph.remove((dummy, CSVW.describes, row_node))` -> `-{ {dummy} csvw:describes {row_node} }`, entierement lie (les deux termes sont des BNode fraichement construits). Comme dans merger.py, `-{ }` sert ici sans joker : sur les 3 regions du lot, 3 retraits sur 4 sont entierement lies.",
+    "`@graph self.graph` : la declaration accepte une expression d'attribut, ce qui vaut pour le retrait comme pour les ajouts. C'est le cas que la reference annonce explicitement -- `+{ }` / `-{ }` emettent `add_to` / `remove_from` et non `+=`, donc un attribut (ici en lecture seule du point de vue de l'affectation augmentee) reste ecrivable sans detour.",
+    "les 3 `self.graph.add(...)` consecutifs de l'entete deviennent UN `+{ }` : deux d'entre eux partagent le sujet `table_node` et se replient sur un `;`. Le gain se voit en trois lignes, mais l'exemple publiable de la strate doit montrer un joker, d'ou article_candidate=false ici.",
+    "shim de contexte (context_shim.py, identique des deux cotes) : le constructeur et les quatre collaborateurs que la region appelle (_add_file_metadata, _parse_generic_row, _parse_row, _parse_row_data, parse_virtual_columns), transcrits verbatim du depot. Le paquet csvwlib lui-meme n'est pas importable dans le venv de l'etude : csvwlib.utils.metadata exige la distribution tierce `language_tags`, et le venv est epingle.",
+    "le shim s'arrete franchement ou la region cesse d'etre concernee : la branche par-cellule de _parse_row_data et la branche colonne-virtuelle de parse_virtual_columns tirent six modules utilitaires de plus ; les fixtures donnent a chaque ligne un `cells` vide et aucune colonne virtuelle, et les stand-ins LEVENT une exception au lieu de repondre, pour qu'une fixture future qui y entrerait echoue bruyamment plutot que de diverger en silence. RDFGraphUtils (liaisons de prefixes) est omis : il ne change pas les triplets.",
+    "harnais `demo` ajoute a l'identique dans les deux fichiers : la region est un corps de methode extrait de sa classe ; `demo` reconstruit le convertisseur et rend le graphe ecrit, compare par isomorphisme.",
+    "la fixture est un VOISINAGE, pas une entree : en mode minimal une table ne produit que le triplet csvw:describes que la region retire aussitot, donc le graphe final serait vide et un retrait trop large serait indetectable. fixture.ttl est semee dans le graphe du convertisseur avant l'appel et porte DEUX triplets csvw:describes sur d'autres sujets. Verifie discriminant : supprimer le `-{ }` donne 10 triplets contre 8, l'elargir en `-{ ?s csvw:describes ?o }` en donne 6 contre 8.",
+    "3 appels : mode minimal (le retrait), mode standard (l'entete a trois ajouts), et mode standard sur une table sans '@id' (table_node devient un noeud vide)."
   ],
   "draft_sha": "a4dd7ec95f27a451",
   "provenance": {
@@ -31,5 +45,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

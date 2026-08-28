@@ -3,11 +3,14 @@
 # licence of the source repository: see meta.json
 import glob
 import rdflib
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
 
 # read the base Brick ontology
 brick_graph = rdflib.Graph()
+@graph brick_graph
 brick_graph.parse("Brick.ttl", format="ttl")
-BRICK = rdflib.<https://brickschema.org/schema/1.5/Brick>
+BRICK = <https://brickschema.org/schema/1.5/Brick>
 
 # add extension files to Brick graph
 extension_files = glob.glob("extensions/*.ttl")
@@ -16,23 +19,21 @@ for filename in extension_files:
 
 # remove duplicate ontology definitions and
 # move prefixes onto Brick ontology definition
-for pfx in brick_graph.objects(predicate=rdflib.SH.declare):
-    brick_graph.remove((None, rdflib.SH.declare, pfx))
-    brick_graph += g{ {BRICK} {rdflib.SH.declare} {pfx} }
+for pfx in m{ [] sh:declare ?pfx }:
+    -{ ?s sh:declare {pfx} }
+    +{ {BRICK} sh:declare {pfx} }
 
 # reassign where rules find their prefixees
-for rule, pfxs in brick_graph.subject_objects(predicate=rdflib.SH.prefixes):
-    brick_graph.remove((rule, rdflib.SH.prefixes, pfxs))
-    brick_graph += g{ {rule} {rdflib.SH.prefixes} {BRICK} }
+for rule, pfxs in m{ ?rule sh:prefixes ?pfxs }:
+    -{ {rule} sh:prefixes {pfxs} }
+    +{ {rule} sh:prefixes {BRICK} }
 
 # remove ontology declarations
-for ontology in brick_graph.subjects(
-    predicate=rdflib.RDF.type, object=rdflib.OWL.Ontology
-):
+for ontology in m{ ?ontology a owl:Ontology }:
     if ontology != BRICK:
-        brick_graph.remove((ontology, rdflib.RDF.type, rdflib.OWL.Ontology))
-        brick_graph.remove((ontology, rdflib.OWL.imports, None))
-        brick_graph.remove((ontology, rdflib.OWL.versionInfo, None))
+        -{ {ontology} a owl:Ontology }
+        -{ {ontology} owl:imports ?imported }
+        -{ {ontology} owl:versionInfo ?version }
 
 # serialize Brick with all extensions added
 with open("Brick+extensions.ttl", "w", encoding="utf-8") as fp:

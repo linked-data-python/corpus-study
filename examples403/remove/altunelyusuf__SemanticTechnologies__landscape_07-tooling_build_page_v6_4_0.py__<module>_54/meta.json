@@ -13,11 +13,24 @@
     "graph_write": 1,
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "IRI",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "la région est le cas canonique de la strate : g.remove((ONT, p, None)) devient -{ {ONT} {p} ?o }, où ?o non liée est le joker qui remplace le None de rdflib ; le prédicat reste une variable Python interpolée {p} puisque la boucle le fait varier",
+    "restructuration : le corps de boucle d'une ligne (for ...: g.remove(...)) doit passer sur deux lignes, car -{ } n'est accepté qu'en début de ligne logique à profondeur de crochets nulle (reference/language/lexical.md) ; le gain de notation est ici annulé par ce coût de mise en page — 1 ligne dense devient 2",
+    "URIRef(\"http://example.org/semtech/page\") devient l'îlot IRI <http://example.org/semtech/page> ; aucun @base n'est en portée, la résolution est donc l'identité (piège 2 de how-to/migrate-from-rdflib.md)",
+    "from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV disparaît côté ldpy : la région n'en tirait que OWL et DCTERMS, absorbés par deux @prefix. Le bilan de lignes est neutre (1 import -> 2 déclarations) parce que l'extraction ne montre qu'une région ; dans le fichier complet le même import sert 40 autres lignes",
+    "constat confirmé : from rdflib.namespace import owl: ne marche pas — l'import de préfixes exige que le module exporte __namespaces__, donc un module ldpy ; les vocabulaires standard passent obligatoirement par @prefix (ImportError: cannot import name '__namespaces__' from 'rdflib.namespace')",
+    "shim de contexte page_context.py : l'import rdflib (ligne 9) et HERE (ligne 12) que les lignes de contexte extraites ne portent pas ; HERE pointe sur le répertoire de l'exemple, où 04-page/semtech_page_abox_v6_3_0.ttl est un fixture (l'artefact de build n'est pas dans le dépôt)",
+    "fixture écrit contre la région : les trois prédicats portent plusieurs valeurs (le joker en retire 6 d'un coup), le même sujet porte d'autres prédicats et deux autres sujets portent les mêmes prédicats (un motif trop large se verrait) ; 17 triplets en entrée, 11 en sortie des deux côtés"
   ],
   "draft_sha": "14b32ee14bf3e8d5",
   "provenance": {
@@ -29,5 +42,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

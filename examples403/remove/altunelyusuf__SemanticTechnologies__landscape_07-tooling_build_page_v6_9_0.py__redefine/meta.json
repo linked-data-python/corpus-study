@@ -15,11 +15,25 @@
     "term_constructor": 4,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "nom préfixé",
+    "littéral avec langue",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov (the `from rdflib.namespace import ...` line is a context line of the file, kept verbatim: other regions of build_page_v6_9_0.py use those constants, and removing it would be cleaning)",
+    "the four `g.remove((iri, P, None))` are the textbook case of the stratum: an unbound variable in `-{ }` is the joker, so `g.remove((iri, RDFS.label, None))` becomes `-{ {iri} rdfs:label ?o }`. The stand-in ABox gives semtech:Protege TWO rdfs:label values, so a removal that did not wildcard leaves a stale triple: replacing `?o` by the literal makes the driver report 17 vs 18 triples (mutation checked)",
+    "LIMIT FOUND (new): `+{ }` / `-{ }` are recognised only at the start of a LOGICAL line, and the region writes each pair on the suite of a one-line `if`: `if label is not None: g.remove(...); g.add(...)`. After a `;` both islands are recognised (verified), but after `if ...: ` they are NOT -- the transpiler leaves `-{ {iri} rdfs:label ?o }` untouched and the emitted file fails to compile (`SyntaxError: invalid syntax` on the half-transpiled prefixed name). The failure is loud, not silent, but the translation has to break each one-line `if` into a three-line block. Hence minor-restructuring: same statements, same order, only the layout changes. Extending the capture to the first token of a compound-statement suite would remove the last restructuring in this region",
+    "the module-level `@graph g` is declared once and reaches inside redefine() (block scope), which is what lets the four rewritten pairs drop the `g.` receiver entirely",
+    "`Literal(label, lang=\"en\")` -> `{label}@en` (interpolation with a glued language tag), not `\"label\"@en`: the value is computed",
+    "context shim (identical for both sides, excluded from the surface metrics): the preamble parses `f\"{HERE}/04-page/semtech_page_abox_v6_8_0.ttl\"`, and neither HERE nor that ABox is in the extract. context_shim.py binds HERE to the example directory and 04-page/semtech_page_abox_v6_8_0.ttl is a minimal stand-in (two labels on one subject, a subject without skos:definition, and neighbouring predicates/subjects that must survive). context_shim.replay() holds the calls the module makes to redefine() further down the file -- also outside the region -- so the mutation of the module-level `g` is observable by the isomorphism oracle; the pair itself gains one identical line, `replay(redefine)`",
+    "oracle: entry=None (module state). redefine() returns None and takes no graph argument, so an entry=... driver would compare nothing; the graph it mutates is a module global"
   ],
   "draft_sha": "288ba374cf8cfd0e",
   "provenance": {
@@ -31,5 +45,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

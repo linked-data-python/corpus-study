@@ -1,0 +1,36 @@
+# Fixture standing in for 01-research/semtech_research_v4_3_0.ttl (see
+# meta.json).  Written against the region, which wipes every skos:note of the
+# corpus node before re-stating one: the corpus carries two stale notes (the
+# object wildcard must take both), it carries other predicates that must stay,
+# and -- the trap -- every publication of the corpus carries a skos:note of its
+# own, which the region must not touch.
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ro:      <http://example.org/rdodi/research-ontology#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix srns:    <http://example.org/semtech/research#> .
+
+srns:ResearchCorpus
+    a ro:Corpus ;
+    rdfs:label "Semantic technology research corpus"@en ;
+    skos:note "Quality scorecard v4.1 (4 components): topic coverage, citation strength, methodology compliance, verification disclosure."@en ;
+    skos:note "Quality scorecard v4.0 (superseded)."@en ;
+    dcterms:modified "2026-07-30" ;
+    rdfs:member srns:Pub_walmart_retail_graph, srns:Pub_gql_iso_39075 .
+
+# neighbourhood: skos:note on other subjects -- a pattern that forgot to pin
+# the subject would empty these too
+srns:Pub_walmart_retail_graph
+    a ro:Publication, owl:NamedIndividual ;
+    rdfs:label "Walmart Retail Graph case study"@en ;
+    skos:note "Verification level A: vendor-published case study."@en .
+
+srns:Pub_gql_iso_39075
+    a ro:Publication, owl:NamedIndividual ;
+    rdfs:label "ISO/IEC 39075:2024 (GQL)"@en ;
+    skos:note "Verification level A: ISO catalogue entry."@en .
+
+# zero match: a node with no skos:note at all
+srns:Scorecard
+    rdfs:label "Scorecard components"@en .

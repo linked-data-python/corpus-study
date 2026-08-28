@@ -1,4 +1,44 @@
-# Input graph for dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_findNode — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_findNode.
+# findNode walks sh:node from the shape it is given and strips the four SHACL
+# target declarations from every shape it reaches.  The fixture holds:
+#   * several solutions      - RootShape has two sh:node children;
+#   * recursion              - ChildA has a sh:node child of its own;
+#   * the zero-solution case - ChildB and GrandChild have no sh:node;
+#   * neighbourhood that must NOT match - the targets of RootShape itself (it
+#     is never an object of sh:node), the non-target properties of the shapes
+#     that are reached, and a whole shape the walk never enters.
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+@base <http://example.com/NodeShape/> .
+
+<Person> a sh:NodeShape ;
+    sh:targetClass schema:Person ;             # stays: the root is not an ?o
+    sh:targetNode <http://example.com/data/p1> ;
+    sh:property <http://example.com/PropertyShape/name1234> ;
+    sh:node <Address>, <Employer> .
+
+<Address> a sh:NodeShape ;
+    sh:targetClass schema:PostalAddress ;      # removed
+    sh:targetNode <http://example.com/data/a1> ;
+    sh:targetObjectsOf schema:address ;
+    sh:path schema:address ;                   # stays
+    sh:node <Country> .
+
+<Country> a sh:NodeShape ;
+    sh:targetSubjectsOf schema:addressCountry ;
+    sh:targetObjectsOf schema:addressCountry ;
+    sh:minCount 1 ;                            # stays
+    sh:datatype xsd:string .                   # stays
+
+<Employer> a sh:NodeShape ;
+    sh:targetClass schema:Organization ;
+    sh:path schema:worksFor .                  # stays
+
+# Never reached: nothing links it to <Person>.
+<Untouched> a sh:NodeShape ;
+    sh:targetClass schema:Place ;
+    sh:node <AlsoUntouched> .
+
+<AlsoUntouched> a sh:NodeShape ;
+    sh:targetNode <http://example.com/data/x9> .

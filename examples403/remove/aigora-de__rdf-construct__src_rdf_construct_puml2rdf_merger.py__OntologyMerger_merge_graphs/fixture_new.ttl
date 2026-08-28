@@ -1,0 +1,23 @@
+# The NEWLY GENERATED graph of the merge (first argument of the region).
+#
+# ex:Sensor carries THREE values for one authoritative predicate
+# (rdfs:subClassOf): that is what drives the region into its conflict branch
+# twice, and therefore into `result.graph.remove((s, p, ev))` twice when
+# preserve_existing is False.
+#
+# ex:Actuator rdfs:label is byte-identical to the one preserved from the
+# existing graph, so the `(s, p, o) not in result.graph` test must say "no" --
+# the negative side of the existence check.
+@prefix ex:   <http://example.org/onto#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+ex:Sensor a owl:Class ;
+    rdfs:subClassOf ex:Device, ex:Component, ex:Physical ;
+    rdfs:label "Sensor"@en .
+
+ex:Actuator a owl:Class ;
+    rdfs:label "Actuator"@en .
+
+ex:NewThing a owl:Class ;
+    rdfs:label "Brand new"@en .

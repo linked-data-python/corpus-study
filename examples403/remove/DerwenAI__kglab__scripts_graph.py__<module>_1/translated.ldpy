@@ -38,6 +38,7 @@ if __name__ == "__main__":
     else:
         graph = rdflib.Graph()
 
+    @graph graph
 
     ## load RDF triples
     ttl_text = """
@@ -72,27 +73,23 @@ sota:peep2 a foaf:Person ;
         "surname": rdflib.term.Literal("Alice"),
     }
 
-    sparql = """
-    SELECT ?person ?pred ?surname
+    for row in s{ SELECT ?person ?pred ?surname
       WHERE {
         ?person ?pred ?surname .
       }
-    ORDER BY DESC(?surname)
-    """
-
-    for row in graph.query(sparql, initBindings=bindings):
+    ORDER BY DESC(?surname) }(bindings=bindings):
         r = row.asdict()
         ic(r)
 
 
     ## remove
-    for s, p, o in graph:
+    for s, p, o in m{ ?s ?p ?o }:
         pass
 
-    graph.remove((s, p, o,))
+    -{ {s} {p} {o} }
     ic(len(graph))
 
-    graph.remove((s, p, o,))
+    -{ {s} {p} {o} }
 
     if lpg is not None:
         ic(lpg.digest.finalize().hex())  # type: ignore

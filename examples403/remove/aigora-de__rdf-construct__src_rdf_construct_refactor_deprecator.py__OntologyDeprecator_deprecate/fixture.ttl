@@ -1,4 +1,36 @@
-# Input graph for aigora-de__rdf-construct__src_rdf_construct_refactor_deprecator.py__OntologyDeprecator_deprecate — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for the OntologyDeprecator.deprecate region -- written during
+# translation, against the region and not against the translation.
+#
+# It has to exercise, in one document:
+#   * several solutions of every pattern the region reads (two rdfs:label,
+#     two rdfs:comment, two stale dcterms:isReplacedBy on one subject -- the
+#     wildcard removal must take BOTH of them);
+#   * the zero-solution case (ex:PlainClass has no comment, no isReplacedBy,
+#     no owl:deprecated; ex:Missing is never a subject at all);
+#   * neighbouring triples that must NOT match: the very same predicates,
+#     including a comment that starts with "DEPRECATED", carried by another
+#     subject -- a removal whose subject slot leaked into a wildcard would
+#     wipe them out and the oracle would see it.
+@prefix ex:      <http://example.org/onto#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+ex:OldClass a owl:Class ;
+    rdfs:label "Old class"@en, "Ancienne classe"@fr ;
+    rdfs:comment "A class kept for backwards compatibility."@en,
+                 "DEPRECATED (v0.9): superseded a long time ago."@en ;
+    dcterms:isReplacedBy ex:StaleOne, ex:StaleTwo ;
+    owl:deprecated true .
+
+ex:PlainClass a owl:Class ;
+    rdfs:label "Plain class"@en ;
+    rdfs:seeAlso ex:Missing .
+
+# --- neighbourhood: the same predicates, another subject ------------------
+ex:Untouched a owl:Class ;
+    rdfs:label "Untouched"@en ;
+    rdfs:comment "DEPRECATED: but this one belongs to somebody else."@en ;
+    dcterms:isReplacedBy ex:StaleThree ;
+    owl:deprecated true ;
+    rdfs:seeAlso ex:Missing .

@@ -1,6 +1,8 @@
 # Extracted from DataDrivenCPS/acquirium@e3bffb4bed : src/acquirium/Storage/graph_store.py
 # region: OxigraphGraphStore._replace_query_graph (lines 513-538, stratum remove)
 # licence of the source repository: see meta.json
+import context_shim                                 # context shim -- see meta.json
+import logging
 from pyoxigraph import NamedNode, RdfFormat
 from rdflib import Dataset, Graph, Literal, RDF, URIRef
 from acquirium.internals._log import timed_debug
@@ -33,3 +35,34 @@ def _replace_query_graph(self, graph: Graph, graph_uri: URIRef, *, label: str) -
             format=RdfFormat.N_TRIPLES,
             to_graph=NamedNode(str(graph_uri)),
         )
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The method replaces one named graph of `self.query_dataset` in place, and
+# returns nothing: that graph is the observable.  Two calls, and a second
+# named graph that the clear must not touch.
+_URI = URIRef("http://example.org/derived/inferred")
+_OTHER = URIRef("http://example.org/derived/dependencies")
+
+_store = context_shim.GraphStore()
+_store.query_dataset.graph(_URI).parse(
+    data="<http://example.org/stale> <http://example.org/p> 1 .", format="turtle")
+_store.query_dataset.graph(_OTHER).parse(
+    data="<http://example.org/keep> <http://example.org/p> 2 .", format="turtle")
+_replace_query_graph(
+    _store,
+    Graph().parse(data="<http://example.org/fresh> <http://example.org/p> 3 ."
+                       "<http://example.org/fresh> <http://example.org/q> 4 .",
+                  format="turtle"),
+    _URI,
+    label="inferred data",
+)
+replaced_graph = _store.query_dataset.graph(_URI)
+neighbour_graph = _store.query_dataset.graph(_OTHER)
+
+# the early-return branch: an empty replacement clears and loads nothing
+_store2 = context_shim.GraphStore()
+_store2.query_dataset.graph(_URI).parse(
+    data="<http://example.org/stale> <http://example.org/p> 1 .", format="turtle")
+_replace_query_graph(_store2, Graph(), _URI, label="empty")
+cleared_graph = _store2.query_dataset.graph(_URI)

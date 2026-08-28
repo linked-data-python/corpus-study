@@ -3,13 +3,9 @@
 # licence of the source repository: see meta.json
 from pathlib import Path
 from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DC, DCTERMS, OWL, RDF, RDFS
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS
+from context import OntologyParseError, UnsupportedFormatError  # context shim
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 
 def update_metadata(
     self,
@@ -51,6 +47,7 @@ def update_metadata(
         graph.parse(data=content, format=rdf_format)
     except Exception as e:
         raise OntologyParseError(f"Failed to parse ontology: {e}") from e
+    @graph graph
 
     # Find ontology IRI
     ontology_iri = self._find_ontology_iri(graph)
@@ -64,18 +61,18 @@ def update_metadata(
         title_prop = self.detect_title_property(graph, ontology_iri)
         if title_prop:
             # Remove old triple(s)
-            graph.remove((ontology_iri, title_prop.property_uri, None))
+            -{ {ontology_iri} {title_prop.property_uri} ?old_title }
             # Add new triple with same language tag if it had one
             if title_prop.language:
-                graph += g{ {ontology_iri} {title_prop.property_uri} {Literal(new_title, lang=title_prop.language)} }
+                +{ {ontology_iri} {title_prop.property_uri} {Literal(new_title, lang=title_prop.language)} }
             else:
-                graph += g{ {ontology_iri} {title_prop.property_uri} {Literal(new_title)} }
+                +{ {ontology_iri} {title_prop.property_uri} {new_title} }
             old_val = title_prop.current_value or "(empty)"
             changes.append(f'Title ({title_prop.property_curie}): "{old_val}" → "{new_title}"')
         else:
             # No existing title property - add dc:title
             self._ensure_dc_prefix(graph)
-            graph += g{ {ontology_iri} dc:title {Literal(new_title)} }
+            +{ {ontology_iri} dc:title {new_title} }
             changes.append(f'Title (dc:title): added "{new_title}"')
 
     # Update description if provided
@@ -83,12 +80,12 @@ def update_metadata(
         desc_prop = self.detect_description_property(graph, ontology_iri)
         if desc_prop:
             # Remove old triple(s)
-            graph.remove((ontology_iri, desc_prop.property_uri, None))
+            -{ {ontology_iri} {desc_prop.property_uri} ?old_description }
             # Add new triple with same language tag if it had one
             if desc_prop.language:
-                graph += g{ {ontology_iri} {desc_prop.property_uri} {Literal(new_description, lang=desc_prop.language)} }
+                +{ {ontology_iri} {desc_prop.property_uri} {Literal(new_description, lang=desc_prop.language)} }
             else:
-                graph += g{ {ontology_iri} {desc_prop.property_uri} {Literal(new_description)} }
+                +{ {ontology_iri} {desc_prop.property_uri} {new_description} }
             old_desc = desc_prop.current_value
             if old_desc and len(old_desc) > 50:
                 old_desc = old_desc[:50] + "..."
@@ -96,7 +93,7 @@ def update_metadata(
         else:
             # No existing description property - add dc:description
             self._ensure_dc_prefix(graph)
-            graph += g{ {ontology_iri} dc:description {Literal(new_description)} }
+            +{ {ontology_iri} dc:description {new_description} }
             changes.append("Description (dc:description): added")
 
     # Serialize to Turtle (canonical format), preserving @base directive

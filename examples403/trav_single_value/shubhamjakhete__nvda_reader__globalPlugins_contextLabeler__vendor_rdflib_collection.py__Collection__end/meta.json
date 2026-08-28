@@ -13,11 +13,12 @@
     "namespace_term": 2
   },
   "translation_status": "draft",
-  "classification": null,
+  "classification": "excluded",
   "constructions": [],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "Excluded: this region is not code written against rdflib, it IS rdflib -- an exact vendored copy of rdflib.collection.Collection._end (checked against the installed rdflib source, identical body), copied into globalPlugins/contextLabeler/_vendor/rdflib/collection.py by the host project. Translating it would credit the language with rewriting a library's own internals rather than application code. Left untranslated per the agent brief's instruction for this region."
   ],
+  "article_candidate": false,
   "draft_sha": "528641070a1428dd",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.966582+00:00",

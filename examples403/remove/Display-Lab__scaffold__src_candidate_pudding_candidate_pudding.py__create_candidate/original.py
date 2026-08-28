@@ -4,7 +4,8 @@
 from typing import Optional
 from rdflib import RDF, BNode, Graph, Literal, URIRef
 from rdflib.resource import Resource
-from src.utils.namespace import CPO, IAO, PSDO, RO, SCHEMA, SLOWMO
+from scaffold_context import CPO, IAO, PSDO, RO, SCHEMA, SLOWMO
+from scaffold_context import add_convenience_properties, add_motivating_information
 
 def create_candidate(measure: Resource, template: Resource) -> Optional[Resource]:
     g: Graph = measure.graph

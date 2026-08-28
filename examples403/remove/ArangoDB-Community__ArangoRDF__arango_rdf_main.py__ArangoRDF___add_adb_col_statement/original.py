@@ -2,7 +2,7 @@
 # region: ArangoRDF.__add_adb_col_statement (lines 4132-4155, stratum remove)
 # licence of the source repository: see meta.json
 from rdflib import Literal, URIRef
-from .typings import (
+from context_shim import (  # context shim for arango_rdf.typings, see meta.json
     ADBDocs,
     ADBMetagraph,
     Json,

@@ -12,10 +12,24 @@
   "categories": {
     "graph_read": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "nom préfixé",
+    "variable"
+  ],
+  "translation_notes": [
+    "Ici le `remove` n'a AUCUN joker : les trois termes viennent du parcours (`self.adjusted_graph.remove((s, p, o))`). `-{ {identifier} {p} {o} }` est la forme entièrement interpolée de l'îlot ; la strate `remove` couvre donc aussi ce cas, qui n'exerce pas la variable non liée.",
+    "Le sujet est écrit `{identifier}` et non `{s}` : `m{ {identifier} ?p ?o }` ne projette que `?p` et `?o`, et `s` y était toujours égal à `identifier`. Projeter `?s` aurait demandé d'élargir le motif à `m{ ?s ?p ?o }`, c'est-à-dire de changer la requête.",
+    "`self.shaclNS` (un `Namespace` d'instance) devient `@prefix sh:` ; les treize prédicats de `double_check_list` deviennent des noms préfixés, `self.shaclNS[\"in\"]` compris — `sh:in` se lit sans détour alors que le mot-clé Python `in` interdisait l'attribut.",
+    "`@graph self.adjusted_graph` désigne un attribut ; la déclaration est placée en tête de fonction, aucune ligne n'est réordonnée.",
+    "Suppression pendant l'itération : le motif original (`for s,p,o in g.triples((identifier,None,None))` puis `remove`) est reproduit tel quel par `for p, o in m{ ... }` + `-{ }`. Vérifié sur rdflib 7.2.1 : ni `graph.triples()` ni le `match` paresseux de ldpy ne lèvent sur cette mutation.",
+    "Pilote : `adjusted_identifier` est fourni par le shim (deux node shapes, une absente du graphe, un property shape que le test \"NodeShape\" écarte) ; le second appel passe une liste vide."
+  ],
   "draft_sha": "34dc1e1c5e379dbc",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.844357+00:00",
@@ -26,5 +40,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

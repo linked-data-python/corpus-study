@@ -13,10 +13,24 @@
     "graph_read": 1,
     "graph_write": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "nom préfixé",
+    "variable"
+  ],
+  "translation_notes": [
+    "Les quatre `self.initial_graph.remove((o, self.shaclNS.targetX, None))` deviennent quatre `-{ {o} sh:targetX ?x }` : la variable non liée `?x` est le joker, exactement le `None` de rdflib. C'est le cas d'école de la strate.",
+    "`self.shaclNS` est un `Namespace` d'instance (posé dans `__init__`) : il devient `@prefix sh:` dans le bloc. Le `Namespace` reste dans le shim, l'original s'en sert.",
+    "`@graph self.initial_graph` : le graphe courant peut être un attribut ; il est aliasé une fois à la ligne de déclaration, ce qui convient ici (l'attribut n'est jamais réaffecté).",
+    "`for s, p, o in g.triples((node, self.shaclNS.node, None))` devient `for o in m{ {node} sh:node ?o }` : `s` et `p` n'étaient pas employés, et l'arité 1 de `m{ }` rend les termes eux-mêmes.",
+    "Pilote : la région est une méthode récursive (`self.findNode(o)`). Le shim `scoop_context.py` porte les trois attributs lus (`shaclNS`, `initial_graph`, `adjusted_shape`) ; le pilote sous-classe pour redispatcher la récursion vers le module en cours d'exécution et pour comparer (graphe élagué + liste collectée), `harness.materialise` ne sachant pas parcourir un objet de contexte.",
+    "L'ordre des solutions de `m{ }` est celui de `graph.triples()` : la comparaison de `adjusted_shape` est faite en multi-ensemble, aucun store ne promettant un ordre."
+  ],
   "draft_sha": "d238cd718901d823",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.721330+00:00",
@@ -27,5 +41,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

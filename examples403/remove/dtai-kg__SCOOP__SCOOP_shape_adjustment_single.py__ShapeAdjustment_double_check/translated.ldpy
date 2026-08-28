@@ -1,10 +1,13 @@
 # Extracted from dtai-kg/SCOOP@40c6fc0420 : SCOOP/shape_adjustment_single.py
 # region: ShapeAdjustment.double_check (lines 596-602, stratum remove)
 # licence of the source repository: see meta.json
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
 def double_check(self):
-    double_check_list = [self.shaclNS.datatype, self.shaclNS["in"], self.shaclNS.languageIn, self.shaclNS.minCount, self.shaclNS.maxCount, self.shaclNS.minLength, self.shaclNS.maxLength, self.shaclNS.maxExclusive, self.shaclNS.minExclusive, self.shaclNS.maxInclusive, self.shaclNS.minInclusive, self.shaclNS.pattern, self.shaclNS.uniqueLang]
+    @graph self.adjusted_graph
+    double_check_list = [sh:datatype, sh:in, sh:languageIn, sh:minCount, sh:maxCount, sh:minLength, sh:maxLength, sh:maxExclusive, sh:minExclusive, sh:maxInclusive, sh:minInclusive, sh:pattern, sh:uniqueLang]
     for identifier in self.adjusted_identifier:
         if "NodeShape" in identifier:
-            for s, p, o in self.adjusted_graph.triples((identifier, None, None)):
+            for p, o in m{ {identifier} ?p ?o }:
                 if p in double_check_list:
-                    self.adjusted_graph.remove((s,p,o))
+                    -{ {identifier} {p} {o} }

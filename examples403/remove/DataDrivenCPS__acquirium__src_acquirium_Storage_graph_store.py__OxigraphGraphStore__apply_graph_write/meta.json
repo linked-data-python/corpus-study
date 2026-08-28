@@ -13,11 +13,19 @@
     "bulk_add": 1,
     "graph_write": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "-{ }",
+    "variable",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "target.remove((None, None, None)) -- the 'empty this graph' idiom -- becomes -{ ?s ?p ?o }(target): shorter, and it says which three positions are free instead of leaving the reader to count Nones. The call suffix was preferred to a '@graph target' declaration because this is the function's only island while 'target' is still named by .add() and .bind() below: a declaration would have added a line without removing one.",
+    "NOT TRANSLATED, and it is a finding: 'for triple in incoming: target.add(triple)' stays rdflib. The triple is an opaque 3-tuple that arrives as a value; +{ } takes a written pattern, and the only way to force it would be +{ {triple[0]} {triple[1]} {triple[2]} }(target), which is longer and less clear than the .add() it replaces. Copying already-built triples has no island -- the migration guide covers the whole-graph case ('g += other' unchanged) but not its per-triple form.",
+    "the mechanical draft had added '@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .' because RDF appears in the region's context import line; the region body never uses rdf:, so the declaration was dropped and the import line kept verbatim. A prefix declared for an unused import is noise the surface metrics would have counted.",
+    "restored binding (AGENT_BATCH): the extracted context carried '_logger = logging.getLogger(\"acquirium.graph_store\")' but not 'import logging'; the line is added to original.py, identically on both sides, or neither module runs.",
+    "driver: 'self' is a stand-in carrying the query Dataset the region binds prefixes on, and it compares by those prefixes -- graph isomorphism cannot see a namespace binding, so without this the second half of the region would be unobserved. Three calls: replace=True on a non-empty target, replace=False (merge), replace=True with an empty incoming (the target must end up empty). Negative control run: turning the island into 'pass' makes the driver report 'graphs not isomorphic (5 vs 7)' and '(0 vs 2)'."
   ],
   "draft_sha": "6a8b5e48a1dace6a",
   "provenance": {
@@ -29,5 +37,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

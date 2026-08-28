@@ -16,10 +16,23 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "-{ }",
+    "f<...>",
+    "suffixe d'appel (g)",
+    "nom prefixe",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms"
+    "prefixes: DCTERMS->dcterms",
+    "EXCLUDED for executability, not for notation (AGENT_BATCH case 1): the region is an integration test of the cmem-plugin-shapes workflow plugin. It needs cmem_client, cmem_plugin_base and cmem_plugin_shapes (none installed -- cmem_client is what fails first), a live eccenca Corporate Memory deployment (the graph_setup pytest fixture skips the module unless CMEM_BASE_URI is set, then shells out to cmemc to export the store, import two graphs under http://docker.localhost/ and create a project), the module-level helper get_graph_content which is outside the extracted region, AND the network: this is exactly the test that sets prefix_cc=True, so the plugin fetches https://prefix.cc. The graph the region reads is the plugin's own output read back over HTTP; no fixture can stand in for it without re-implementing the plugin. The driver is kept and its verdict carries the exact import error (No module named 'cmem_client').",
+    "The translation is one statement and was verified by transpilation, plus a side-by-side execution of that statement alone on a stand-in graph (two dcterms:created on the target removed, a dcterms:created on another subject kept): result_graph.remove((URIRef(graph_setup.shapes_iri), DCTERMS.created, None)) becomes -{ f<{graph_setup.shapes_iri}> dcterms:created ?created }(result_graph).",
+    "The stratum's construction in its purest form: rdflib's None becomes the named joker ?created. That is the readability gain -- the wildcard stops being a hole in a tuple and becomes a variable one can name after what it stands for -- and it is the whole gain: the line is not shorter.",
+    "URIRef(x) -> f<{x}> is safe here (migration trap 2): no @base is in scope and graph_setup.shapes_iri is absolute ('http://docker.localhost/my-persons-shapes'), so the two terms coincide.",
+    "The call suffix (result_graph) is preferred to a @graph declaration because the region holds exactly ONE island on that graph: @graph would cost a line to save a parenthesis. Its sibling region test_workflow_execution has two islands on the same graph and takes the other choice -- worth recording as the practical threshold between the two forms.",
+    "URIRef becomes dead in the 'from rdflib import DCTERMS, Graph, URIRef' line, and DCTERMS too; the import block is left exactly as extracted (same convention as the 401 batch)."
   ],
   "draft_sha": "3c209840c25dd211",
   "provenance": {
@@ -31,5 +44,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

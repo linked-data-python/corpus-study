@@ -13,11 +13,30 @@
     "graph_ctor": 1,
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "suffixe d'appel (g)",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "le brouillon annoncait `prefixes: RDF->rdf, RDFS->rdfs` : ces deux @prefix ont ete SUPPRIMES de la traduction. La region n'ecrit aucun terme de vocabulaire en clair -- tous ses termes sont des valeurs Python interpolees, et RDF/RDFS ne servent que dans les constantes de classe (shim). Une declaration inutilisee aurait fausse le decompte des ilots.",
+    "site de la strate : `result.graph.remove((s, p, ev))` -> `-{ {s} {p} {ev} }`, entierement lie (aucun joker). C'est l'autre moitie de la strate : `-{ }` sert aussi bien pour un triplet connu que pour un motif a jokers, et la meme notation couvre les deux.",
+    "OBSERVATION honnete sur le pouvoir discriminant : dans cette region, remplacer `{ev}` par un joker `?any` ne change RIEN au resultat, et le pilote ne le voit pas. Ce n'est pas une faiblesse de la fixture mais une propriete de l'algorithme : au moment du retrait, `result.graph` ne contient jamais qu'UNE valeur pour (s, p) -- la passe 1 a saute les valeurs existantes des que le nouveau graphe en definit, et la passe 2 retire la precedente avant d'ajouter la suivante. Le pilote EST discriminant sur le retrait lui-meme : le supprimer fait passer le graphe de 14 a 16 triplets et le verdict a FAIL.",
+    "`@graph result.graph` : la declaration accepte une expression d'attribut, ce qui supprime les 8 repetitions de `result.graph.` du corps. C'est le gain principal ici, avant meme la notation des triplets.",
+    "les 4 `result.graph.add((s, p, o))` deviennent 4 `+{ {s} {p} {o} }`. La reference insiste sur le point qui compte ici : `+{ }` emet `add_to`, jamais `+=`, donc l'attribut `result.graph` reste ecrivable sans passer par un `__iadd__`.",
+    "`(s, p, o) not in result.graph` -> `not m{ {s} {p} {o} }` : un `m{ }` sans variable est un ASK, et sa valeur de verite s'evalue paresseusement.",
+    "`new_graph.objects(s, p)` -> `m{ {s} {p} ?nv }(new_graph)` : suffixe d'appel, parce que le graphe lu n'est PAS le graphe courant (qui est `result.graph`). Une region qui manipule deux graphes a la fois est exactement le cas ou `@graph` seul ne suffit pas, et le suffixe d'appel le couvre sans rien declarer de plus.",
+    "`result.graph.objects(s, p)` -> `list(m{ {s} {p} ?ev })` : le `list()` de l'original est conserve, il est necessaire des deux cotes puisque la boucle retire des triplets du graphe qu'elle parcourt.",
+    "LIMITE TROUVEE (confirme un constat connu : lectures sans ilot dedie) : `set(new_graph.subjects())` reste en rdflib. `m{ }` projette TOUTES les variables de son motif -- il n'y a ni projection ni DISTINCT -- et le noeud vide, qui est la variable non distinguee, est interdit en position de predicat par la syntaxe Turtle (`m{ ?s [] [] }` -> 'predicat attendu'). La seule ecriture possible serait `{s for s, p, o in m{ ?s ?p ?o }(new_graph)}`, plus longue et plus obscure que l'appel rdflib : degradation, donc non retenue.",
+    "les deux `for s, p, o in graph:` (iteration directe du graphe, pas un selecteur) restent en Python : ce n'est pas un appel de lecture rdflib et `m{ ?s ?p ?o }` ne ferait qu'allonger l'entete de boucle.",
+    "shim de contexte (context_shim.py, identique des deux cotes) : la dataclass MergeResult et les attributs de classe AUTHORITATIVE_PREDICATES / MERGEABLE_PREDICATES / preserve_existing d'OntologyMerger, copies verbatim.",
+    "harnais `demo` ajoute a l'identique dans les deux fichiers : la region rend un MergeResult dont le champ Graph est compare par rdflib sur l'identifiant du store ; `demo` rend le graphe fusionne (compare par isomorphisme) et les 4 compteurs.",
+    "trois fixtures : fixture.ttl (l'ontologie existante), fixture_new.ttl (le graphe genere, avec TROIS rdfs:subClassOf sur un meme sujet -- c'est ce qui declenche le conflit puis le retrait, deux fois) et fixture_empty.ttl (le cas zero solution). Les 4 appels du pilote couvrent preserve_existing False/True (meme conflits, retraits ou non), le graphe neuf vide, et les deux roles echangees."
   ],
   "draft_sha": "194e4a3a71346ba9",
   "provenance": {
@@ -29,5 +48,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

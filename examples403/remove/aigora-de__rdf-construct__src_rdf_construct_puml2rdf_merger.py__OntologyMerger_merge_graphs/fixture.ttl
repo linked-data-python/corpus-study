@@ -1,4 +1,34 @@
-# Input graph for aigora-de__rdf-construct__src_rdf_construct_puml2rdf_merger.py__OntologyMerger_merge_graphs — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# The EXISTING ontology of the merge (second argument of the region).
+# Written during translation, against the region.  Its companions are
+# fixture_new.ttl (the freshly generated graph) and fixture_empty.ttl (the
+# zero-solution case).
+#
+# It covers, on purpose:
+#   * a subject shared with the new graph, carrying an AUTHORITATIVE predicate
+#     the new graph redefines (rdf:type, rdfs:subClassOf -> dropped here,
+#     re-added from the new graph, and that is where the removals happen);
+#   * a shared subject whose authoritative predicate the new graph does NOT
+#     define (ex:Actuator rdfs:domain) -- the "keep existing if not in new"
+#     branch;
+#   * MERGEABLE predicates (rdfs:label, rdfs:comment) and a predicate that is
+#     neither (dcterms:description) -- both preserved, by two different paths;
+#   * a subject that exists only here -- preserved wholesale, and a control
+#     that no removal ever reaches it.
+@prefix ex:      <http://example.org/onto#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+ex:Sensor a owl:Class ;
+    rdfs:subClassOf ex:Device ;
+    rdfs:label "Sensor (hand-written)"@en ;
+    rdfs:comment "Kept from the existing file."@en ;
+    dcterms:description "Neither authoritative nor mergeable."@en .
+
+ex:Actuator a owl:Class ;
+    rdfs:domain ex:System ;
+    rdfs:label "Actuator"@en .
+
+ex:LegacyThing a owl:Class ;
+    rdfs:subClassOf ex:Device ;
+    rdfs:label "Legacy thing"@en .

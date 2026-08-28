@@ -1,0 +1,17 @@
+# Input graph `in_second` for BD2KOnFHIR__fhirtordf__..._fhir_decimal_issue_filter.
+# The region takes three graphs, so the reading oracle needs two input files;
+# see fixture.ttl for what each subject exercises.  obs9 and the blank subject
+# are neighbours with no counterpart in in_first: they must survive untouched.
+@prefix ex:  <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:obs1 ex:value "1.00"^^xsd:decimal .
+ex:obs2 ex:value "2.5"^^xsd:decimal .
+ex:obs3 ex:value "4.0"^^xsd:decimal .
+ex:obs5 ex:count "7"^^xsd:integer .
+ex:obs6 ex:label "a plain literal" .
+ex:obs7 ex:ref   ex:other .
+ex:obs8 ex:value "9.0"^^xsd:decimal .
+ex:obs9 ex:value "10.0"^^xsd:decimal .
+
+[] ex:value "12.0"^^xsd:decimal .

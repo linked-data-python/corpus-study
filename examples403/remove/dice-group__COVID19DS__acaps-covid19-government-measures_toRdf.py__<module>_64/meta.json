@@ -15,11 +15,30 @@
     "term_constructor": 47,
     "triple_add": 28
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "f<...>",
+    "nom prefixe",
+    "IRI",
+    "variable",
+    "litteral type",
+    "litteral avec langue"
+  ],
   "translation_notes": [
-    "prefixes: cvdo->cvdo, cvdr->cvdr, dbpediaOwl->dbpediaowl, dcmi->dcmi, prov->prov, dowl->dowl, RDF->rdf, FOAF->foaf, RDFS->rdfs, OWL->owl, DCTERMS->dcterms, SKOS->skos, XSD->xsd"
+    "prefixes: cvdo->cvdo, cvdr->cvdr, dbpediaOwl->dbpediaowl, dcmi->dcmi, prov->prov, dowl->dowl, RDF->a, RDFS->rdfs, XSD->xsd. dbpediaowl: and dowl: are two prefixes for the same IRI (http://dbpedia.org/ontology/): the aliasing is upstream's, kept 1:1. FOAF, OWL, DCTERMS, SKOS were imported and never used; the whole `from rdflib...` import block becomes dead once Namespace/Literal/URIRef/RDF/RDFS/XSD are absorbed, so both import lines are dropped.",
+    "MAIN FINDING (the stratum's construction): the four `g.remove((None, None, <term>))` become four `-{ ?s ?p <term> }`, one per line, an unbound variable being the joker. They must stay FOUR islands: a single `-{ }` with the four patterns would be a DELETE WHERE, i.e. a join -- it would delete nothing unless all four objects occur on the same subject/predicate. The notation has no union of patterns in `-{ }`, and this region shows that the common rdflib idiom `remove` x N (one per datatype) is a sequence, not a pattern.",
+    "the joker reads better than rdflib's None precisely where it is typed: `-{ ?s ?p \"unknown\"^^xsd:integer }` against `g.remove((None, None, Literal(\"unknown\", datatype=XSD.integer)))`. `URIRef(\"unknown\")` -> `<unknown>` is safe here because no `@base` is in scope (trap 2 of migrate-from-rdflib).",
+    "`Literal(x, datatype=XSD.t)` on a computed cell -> `{x}^^xsd:t` (the coercion form, not the quoted form: trap 1). Checked term by term against rdflib for str/int/date cells, including the ill-typed \"unknown\" ones, which rdflib keeps with their lexical form -- so the removes still match.",
+    "`URIRef(row['LINK'])` -> `f<{row['LINK']}>`, again valid only because there is no `@base`. `URIRef(cvdr[dice])` -> `cvdr:{dice}` (interpolated local part; `dice`/`iso`/`row[\"COUNTRY\"]` are plain Python strings, the enclosing script having already replaced spaces by \"_\").",
+    "the runs of `g.add` on one subject collapse into one `+{ ... ; ... }` per run; the blank lines and the two commented-out `g.add` of the original are kept as Turtle comments so the line-by-line correspondence survives. No reordering.",
+    "context shim `context_shim.py`: the region reads its rows from `pd.read_excel(xls, 'Dataset')`, bound in the enclosing script (line 10 and 47 of toRdf.py); the spreadsheet is not in the repository and pandas is not in the venv. The shim restores `pd` and `xls` with a minimal DataFrame stand-in (fillna/iterrows), imported identically by both representations, and returns a fresh copy per call since the region mutates `row['LINK']`.",
+    "the shim's three rows are chosen against the region, not against the translation: a complete row, a row whose missing cells produce an \"unknown\" of each of the four removed datatypes, a LINK with a space (the quote_plus branch), and both separators of the `Alternative source` column. Mutation check: commenting the four `-{ }` out makes the pair 62 vs 70 triples, so the islands are load-bearing.",
+    "`g = Graph()` (a context line) becomes `@graph as g`; the region's 28 adds then need no receiver. The dead `else` branch of `if altSources:` (re.split never returns an empty list) is preserved verbatim, translated but unreachable."
   ],
   "draft_sha": "389c582c4623556e",
   "provenance": {
@@ -31,5 +50,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

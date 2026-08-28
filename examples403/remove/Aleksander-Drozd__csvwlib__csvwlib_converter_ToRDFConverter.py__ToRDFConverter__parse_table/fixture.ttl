@@ -1,0 +1,20 @@
+# Neighbourhood seeded into the converter's graph before the region runs
+# (see the `demo` harness in original.py / translated.ldpy).
+#
+# In minimal mode a table contributes exactly one triple per row --
+# `csvw:describes` -- which the region removes on the spot, so the graph the
+# region leaves behind is empty and a removal could not be told apart from a
+# removal that took too much.  These triples are what a previous table already
+# put in the store: two of them carry the VERY predicate the region removes,
+# `csvw:describes`, on other subjects.  A removal whose subject or object slot
+# leaked into a wildcard would take them too, and the isomorphism check says so.
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix ex:   <http://example.org/tables/> .
+
+ex:previousTable a csvw:Table ;
+    csvw:url <http://example.org/tables/earlier.csv> ;
+    csvw:row [ a csvw:Row ;
+               csvw:rownum 1 ;
+               csvw:describes [ ex:name "already there" ] ] .
+
+[] csvw:describes ex:previousTable .

@@ -16,11 +16,31 @@
     "term_constructor": 4,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "nom préfixé",
+    "variable",
+    "littéral typé",
+    "littéral avec langue"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, OWL->owl"
+    "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, OWL->owl",
+    "LE cas de la strate : `graph.remove((entity_uri, DCTERMS.isReplacedBy, None))` devient `-{ {entity_uri} dcterms:isReplacedBy ?old }`. Le joker de rdflib (None en position d'objet) et la variable non liee de `-{ }` coincident exactement -- aucune reformulation, aucun changement de portee. Le pilote le prouve : ex:OldClass porte DEUX valeurs isReplacedBy perimees et l'ilot les enleve toutes les deux (16 triplets contre 17 si on borne l'objet).",
+    "second `remove` de la region, entierement lie : `graph.remove((entity_uri, RDFS.comment, existing_deprecated_comment))` -> `-{ {entity_uri} rdfs:comment {existing_deprecated_comment} }`. Les deux formes de `-{ }` -- avec et sans joker -- cohabitent dans la meme region, ce qui est exactement ce que la strate devait montrer.",
+    "les 4 `graph.objects(entity_uri, P)` deviennent `for x in m{ {entity_uri} p:x ?x }` (arite 1 : les solutions sont les termes eux-memes, donc l'entete de boucle est inchangee). Le `list(...)` autour du quatrieme est conserve : `m{ }` est paresseux comme `objects()`, et la region enleve un triplet apres avoir parcouru la liste.",
+    "`graph.add((entity_uri, OWL.deprecated, Literal(True)))` -> `+{ {entity_uri} owl:deprecated true }` : le mot-cle Turtle `true` produit exactement `Literal(True)` (verifie : xsd:boolean, meme forme lexicale), donc le piege `Literal(n, datatype=...)` != `\"n\"^^dt` ne se pose pas ici.",
+    "`Literal(deprecation_msg, lang=\"en\")` -> `{deprecation_msg}@en` : suffixe RDF colle sur une interpolation, c'est la forme prevue pour un litteral calcule.",
+    "`@graph graph` est declare juste apres la docstring et couvre toute la fonction (portee de bloc) ; les 3 `+{ }`, les 2 `-{ }` et les 4 `m{ }` n'ont plus a nommer le graphe. Le parametre s'appelle `graph`, ce qui ne gene pas la declaration.",
+    "CONSEQUENCE CONNUE, confirmee : `DCTERMS = Namespace(\"http://purl.org/dc/terms/\")` devient `@prefix dcterms: <...> .`, mais la region finit par `graph.bind(\"dcterms\", DCTERMS, override=False)` -- un appel qui a besoin d'un objet Namespace a l'execution, que `@prefix` (declaration lexicale) ne fournit pas. Ici l'import `from rdflib.namespace import ... DCTERMS` du contexte le fournit ; sans lui il aurait fallu garder la constante ET la declaration, c'est-a-dire ecrire l'IRI deux fois (cas deja note dans how-to/migrate-from-rdflib.md).",
+    "shim de contexte (context_shim.py, identique des deux cotes) : les trois dataclasses EntityDeprecationInfo / DeprecationStats / DeprecationResult, copiees verbatim du depot. `OntologyDeprecator` n'est pas necessaire : la region ne touche jamais `self` (le pilote passe None).",
+    "harnais `demo` ajoute a l'identique dans les deux fichiers (exclu des metriques de surface au meme titre qu'un shim) : la region rend un DeprecationResult dont le champ Graph est compare par rdflib sur l'identifiant du store, jamais egal entre deux executions ; `demo` expose le graphe mute (compare par isomorphisme) et tous les compteurs.",
+    "fixture ecrite contre la region : plusieurs solutions (2 labels, 2 commentaires, 2 isReplacedBy perimes), le cas zero solution (ex:Missing n'est jamais sujet), et un voisinage qui ne doit pas matcher (ex:Untouched porte les MEMES predicats, y compris un commentaire commencant par DEPRECATED). Verifie discriminant : borner l'objet du `-{ }` ou elargir son sujet a `?any` fait echouer le pilote."
   ],
   "draft_sha": "90e0d668e9510eba",
   "provenance": {
@@ -32,5 +52,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

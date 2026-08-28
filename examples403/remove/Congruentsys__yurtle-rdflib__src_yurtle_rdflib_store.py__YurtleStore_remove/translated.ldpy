@@ -17,13 +17,14 @@ def remove(
         triple: (subject, predicate, object) with None as wildcard
         context: Graph context (unused)
     """
+    @graph self.internal_graph
     s, p, o = triple
 
     # Find all matching triples first
     matching = list(self.internal_graph.triples((s, p, o)))
 
     for match_s, match_p, match_o in matching:
-        self.internal_graph.remove((match_s, match_p, match_o))
+        -{ {match_s} {match_p} {match_o} }
 
         # Mark affected file as dirty
         if isinstance(match_s, URIRef):

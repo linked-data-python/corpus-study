@@ -13,11 +13,20 @@
     "graph_write": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "-{ }",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "the one RDF operation of the region is `target.remove((None, None, None))` -- rdflib's spelling of \"clear this graph\" -- which becomes `@graph target` + `-{ ?s ?p ?o }`: three unbound variables, three jokers. The rest of the method serialises to N-Triples and hands the bytes to the oxigraph loader; there is nothing in the notation for that, and nothing should be.",
+    "COST OBSERVED: `-{ }` reads the current graph, so a one-shot receiver needs a `@graph target` declaration of its own -- one line added for one use, where rdflib wrote the receiver inline. The call suffix `-{ ?s ?p ?o }(target)` avoids the declaration in one line, but the notation then has two spellings for the same removal and the `@graph` form is the documented one; kept `@graph target` and recorded the cost.",
+    "the draft's `@prefix rdf: <...>` was dropped: `RDF` is imported by the enclosing file but not used by the region, so the declaration would have been dead. The rdflib import line itself is context and stays verbatim (`Graph`/`URIRef` are used in the annotations).",
+    "context shim `context_shim.py`: the region is a method (`self.query_dataset`), imports pyoxigraph (a Rust extension absent from the venv) and an acquirium module. The shim carries `timed_debug` verbatim from src/acquirium/internals/_log.py of the same commit, a `NamedNode`/`RdfFormat` stand-in for the two pyoxigraph names the region uses, and a `Dataset`-backed `query_dataset` whose `store._inner.load`/`bulk_load` parse the region's N-Triples into the named graph asked for -- which is what the oxigraph loader does to the dataset. It registers them under the imported module names, so the region's import lines stay as upstream; both representations import it as their first line.",
+    "`import logging` restored in the context: the extraction kept `_logger = logging.getLogger(...)` but not the import, so the region did not execute at all as extracted.",
+    "demo harness added identically to both representations: the method returns nothing and mutates a named graph in place, so the harness exposes `replaced_graph` (cleared, then reloaded from the serialised input), `cleared_graph` (the `if not len(graph): return` branch) and `neighbour_graph`, a second named graph of the same dataset that the clear must NOT touch -- that last one is what proves `-{ ?s ?p ?o }` clears the current graph and not the dataset. Mutation check: replacing the island by `pass` makes the pair 0 vs 1 and 2 vs 3 triples."
   ],
   "draft_sha": "ff0ef238df029684",
   "provenance": {
@@ -29,5 +38,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

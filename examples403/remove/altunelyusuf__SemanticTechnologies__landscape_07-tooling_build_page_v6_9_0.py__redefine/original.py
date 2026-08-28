@@ -1,6 +1,7 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_page_v6_9_0.py
 # region: redefine (lines 61-65, stratum remove)
 # licence of the source repository: see meta.json
+from context_shim import HERE, replay  # context shim, see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
 g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_8_0.ttl")
@@ -10,3 +11,5 @@ def redefine(iri, label=None, defn=None, note=None, scope=None):
     if defn is not None: g.remove((iri, SKOS.definition, None)); g.add((iri, SKOS.definition, Literal(defn, lang="en")))
     if note is not None: g.remove((iri, SKOS.note, None)); g.add((iri, SKOS.note, Literal(note, lang="en")))
     if scope is not None: g.remove((iri, SKOS.scopeNote, None)); g.add((iri, SKOS.scopeNote, Literal(scope, lang="en")))
+
+replay(redefine)  # demo harness in the shim, identical on both sides

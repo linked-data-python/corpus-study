@@ -2,6 +2,7 @@
 # region: OntologyMerger.merge_graphs (lines 102-172, stratum remove)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, RDF, RDFS
+from context_shim import MergeResult, OntologyMerger
 
 def merge_graphs(
     self,
@@ -74,3 +75,14 @@ def merge_graphs(
 
     result.conflicts = conflicts
     return result
+
+
+# Demo harness (identical on both sides, see meta.json): the region returns a
+# MergeResult, a dataclass whose Graph field rdflib compares by store
+# identifier -- never equal across two runs.  This entry point hands back the
+# merged graph itself (compared by isomorphism) and the four statistics the
+# region computed.
+def demo(new_graph, existing, preserve_existing=True):
+    result = merge_graphs(OntologyMerger(preserve_existing), new_graph, existing)
+    return (result.graph, result.added_count, result.updated_count,
+            result.preserved_count, sorted(result.conflicts))

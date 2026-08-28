@@ -1,0 +1,45 @@
+# Fixture standing in for 04-page/semtech_page_abox_v4_1_0.ttl (see meta.json).
+# Written against redefine, which wipes one annotation of one subject before
+# re-stating it: sp:Page carries several values on the predicates it redefines
+# (the object wildcard must take them all), each subject carries annotations
+# that the call leaves alone (only the arguments passed are redefined), and
+# sp:W1 is a neighbour that carries the same predicates and must not move.
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ipo:     <http://example.org/rdodi/interactive-page-ontology#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix sp:      <http://example.org/semtech/page#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+# two stale labels and two stale notes: the wildcard must take both of each
+sp:Page
+    a ipo:Page ;
+    rdfs:label "Interactive landscape page v4.1.0"@en,
+               "Interactive landscape page v4.0.0"@en ;
+    skos:definition "The Stage-4 rendering of the v4.0.0 landscape."@en ;
+    skos:note "Rebuilt by the v4.1.0 builder."@en,
+              "Rebuilt by the v4.0.0 builder."@en ;
+    skos:scopeNote "Covers the fifty-nine class taxonomy."@en ;
+    dcterms:created "2026-01-09"^^xsd:date .
+
+# redefined on skos:definition only -- its label and its scope note must stay
+sp:ReferencesRegion
+    a ipo:Region ;
+    rdfs:label "References region"@en ;
+    skos:definition "The references region lists all ninety-one entries."@en ;
+    skos:scopeNote "Rendered at the foot of every chapter panel."@en .
+
+# redefined on skos:scopeNote only, and it has none yet: the zero-match case
+sp:Doc
+    a ipo:Document ;
+    rdfs:label "Semantic technology landscape report (Stage-3 document)"@en ;
+    skos:definition "The deepened Stage-3 report."@en .
+
+# neighbourhood: same predicates, never an argument of a call -- nothing here
+# may move, and the last call passes no annotation at all
+sp:W1
+    a ipo:Widget ;
+    rdfs:label "Widget 1"@en ;
+    skos:definition "A demo topic widget."@en ;
+    skos:note "Design-test note, checked in DOM smoke v3."@en ;
+    skos:scopeNote "Chapter 1 only."@en .

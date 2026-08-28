@@ -39,8 +39,9 @@ def test_workflow_execution(graph_setup: GraphSetupFixture, client: Client) -> N
     datetime = created[0].split()[-2]
     assert DATETIME_PATTERN.match(datetime)
     result_graph = Graph().parse(data=result_graph_content)
-    assert len(list(result_graph.objects(predicate=dcterms:modified))) == 0
-    result_graph.remove((URIRef(graph_setup.shapes_iri), dcterms:created, None))
+    @graph result_graph
+    assert len(list(m{ [] dcterms:modified ?o })) == 0
+    -{ f<{graph_setup.shapes_iri}> dcterms:created ?created }
     test = Graph().parse(f"{FIXTURE_DIR}/test_shapes.ttl")
     assert isomorphic(result_graph, test)
     with pytest.raises(

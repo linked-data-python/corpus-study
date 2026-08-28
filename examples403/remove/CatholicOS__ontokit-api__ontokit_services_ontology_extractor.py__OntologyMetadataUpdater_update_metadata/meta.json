@@ -17,11 +17,26 @@
     "term_constructor": 6,
     "triple_add": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "+{ }",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, OWL->owl, RDF->rdf, RDFS->rdfs"
+    "idiome de la strate : remplacement d'une valeur de propriété — remove((s, p, None)) puis add. Le joker est -{ {ontology_iri} {title_prop.property_uri} ?old_title } ; le pilote le prouve sur une ontologie qui porte DEUX rdfs:label : le seul -{ } les efface tous les deux, comme le None de rdflib.",
+    "sujet ET prédicat sont calculés ({ontology_iri}, {title_prop.property_uri}) : le gain de -{ } se réduit alors au joker (?old_title au lieu de None) et à la disparition du nom du graphe. C'est le cas où l'îlot rapporte le moins ; d'où article_candidate: false.",
+    "Literal(new_title, lang=title_prop.language) : la balise de langue variable n'a aucune forme d'îlot (limite assumée, how-to/migrate-from-rdflib.md « What not to rewrite »). Conservé en interpolation {Literal(...)} — confirmation d'un constat déjà documenté, pas un défaut nouveau.",
+    "Literal(new_title) sans balise devient l'interpolation nue {new_title} : la coercition d'un str donne un littéral simple, terme identique.",
+    "DC.title / DC.description -> @prefix dc: <http://purl.org/dc/elements/1.1/> . et dc:title / dc:description. L'import de préfixes (from rdflib.namespace import dc:) N'EST PAS utilisable ici : il émet `from rdflib.namespace import __namespaces__`, or rdflib n'est pas un module ldpy — la forme est réservée aux modules de vocabulaire ldpy.",
+    "@graph graph est déclaré après le try/except qui crée le graphe (portée de bloc : le corps de la fonction jusqu'à la fin). Un graphe seulement DÉSIGNÉ ne reçoit aucune liaison de préfixe : la sérialisation Turtle finale est octet pour octet identique — ce que le pilote vérifie, puisque la région renvoie des bytes (oracle plus strict que l'isomorphisme).",
+    "shim de contexte context.py : sous-ensemble verbatim de OntologyMetadataUpdater (FORMAT_MAP, TITLE_PROPERTIES, DESCRIPTION_PROPERTIES, detect_*_property, _find_ontology_iri, _ensure_dc_prefix) + OntologyParseError / UnsupportedFormatError / DetectedMetadataProperty. Seule update_metadata est traduite.",
+    "le pilote partage UN receveur `self` entre les deux côtés : run_pair compare aussi les arguments, et deux instances d'une classe sans __eq__ ne seraient jamais égales. La méthode ne mute pas self.",
+    "5 appels : dc:title avec balise + dcterms:description sans balise ; deux rdfs:label (le joker en efface deux) ; ontologie sans titre ni description (branches else) ; new_title/new_description à None (aucune écriture) ; le même document en RDF/XML (.rdf, FORMAT_MAP). Voisinage : un dc:title porté par une autre ressource, qui doit survivre."
   ],
   "draft_sha": "780a723f48d13bf8",
   "provenance": {
@@ -33,5 +48,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

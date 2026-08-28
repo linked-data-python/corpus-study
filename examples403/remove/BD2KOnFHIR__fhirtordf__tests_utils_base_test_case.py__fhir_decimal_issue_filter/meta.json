@@ -15,11 +15,26 @@
     "namespace_term": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "+{ }",
+    "-{ }",
+    "suffixe d'appel (g)",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "prefixes: XSD->xsd",
+    "three graphs in one function, so no `@graph` can be declared: every island carries the call suffix instead -- `m{ ... }(in_second)`, `+{ ... }(in_both)`, `-{ ... }(in_first)`, `-{ ... }(in_second)`. This is the case the call suffix was made for, and it reads well; the receiver moves from the head of the statement to its tail",
+    "NEGATIVE for the stratum: none of the two `.remove()` here is a wildcard -- both remove a fully ground triple -- so this region exercises `-{ }` but NOT the joker. The stratum's sampling is by call site, not by the presence of a None",
+    "`in_second.value(s, p)` -> `m{ {s} {p} ?o_2 }(in_second).first()` (trav_single_value). Nuance: rdflib's value(any=True) returns an ARBITRARY object when several exist, and .first() the first the store yields -- neither is specified. The fixtures keep every (s, p) functional so the comparison is deterministic; a multi-valued (s, p) would make the region itself ambiguous, not the translation",
+    "`for s, p, o in list(in_first)` -> `for s, p, o in list(m{ ?s ?p ?o }(in_first))`: the most specific construction for a full scan, and it is LONGER than the Python form (three variables the original does not name). Recorded as a cost, not a gain: `m{ }` pays on a selective pattern, not on iterating a whole graph",
+    "oracle values (corpus/405): the region reads AND mutates three graphs, so it needs two Turtle inputs -- fixture.ttl (in_first) and fixture_second.ttl (in_second), in_both starting empty. run_pair(fixture=..., calls=[...]) parses both fresh per side and compares the three graphs left behind by isomorphism (the function returns None)",
+    "the fixtures cover: three decimal pairs to move (equal value, different lexical form -- the bug the filter exists for -- plus one identical pair), a decimal pair whose values DIFFER, the zero-solution case (no (s, p) in in_second, so .value()/.first() must both answer None, once under a URI subject and once under a blank node), and neighbours that must not match: an xsd:integer pair, a plain literal, a URIRef object (isinstance(o, Literal) rejects it), and triples of in_second with no counterpart at all. Mutation-checked: writing {o_2} instead of {o} into in_both, or removing from the wrong graph, is caught"
   ],
   "draft_sha": "d88e9e6144a58182",
   "provenance": {
@@ -32,5 +47,6 @@
     "remove",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

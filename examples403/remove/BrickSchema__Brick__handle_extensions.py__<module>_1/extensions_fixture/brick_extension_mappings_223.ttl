@@ -1,0 +1,14 @@
+# Shaped after extensions/brick_extension_mappings_223.ttl: an owl:Ontology
+# with *neither* owl:imports nor owl:versionInfo — the zero case for the two
+# wildcard removals.
+@prefix brick:       <https://brickschema.org/schema/Brick#> .
+@prefix owl:         <http://www.w3.org/2002/07/owl#> .
+@prefix s223tobrick: <https://brickschema.org/extension/mappings_223#> .
+@prefix sh:          <http://www.w3.org/ns/shacl#> .
+@prefix xsd:         <http://www.w3.org/2001/XMLSchema#> .
+
+<https://brickschema.org/extension/mappings_223> a owl:Ontology ;
+    sh:declare [ sh:namespace "https://brickschema.org/extension/mappings_223#"^^xsd:anyURI ;
+                 sh:prefix "s223tobrick" ] .
+
+s223tobrick:AirFlowSensor s223tobrick:translatesTo brick:Air_Flow_Sensor .

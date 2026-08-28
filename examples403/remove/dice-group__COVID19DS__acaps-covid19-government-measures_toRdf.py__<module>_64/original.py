@@ -6,6 +6,7 @@ from rdflib.namespace import RDF, FOAF, RDFS, OWL, DCTERMS, SKOS, XSD
 import urllib.parse
 import urllib
 import re
+from context_shim import pd, xls   # context shim -- see meta.json
 g = Graph()
 cvdo = Namespace("https://covid-19ds.data.dice-research.org/ontology/")  #(for Object)
 cvdr = Namespace("https://covid-19ds.data.dice-research.org/resource/")  #(for Subject/Resource)

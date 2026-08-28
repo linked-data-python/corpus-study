@@ -4,24 +4,26 @@
 from typing import Optional
 from rdflib import RDF, BNode, Graph, Literal, URIRef
 from rdflib.resource import Resource
-from src.utils.namespace import CPO, IAO, PSDO, RO, SCHEMA, SLOWMO
+from scaffold_context import CPO, IAO, PSDO, RO, SCHEMA, SLOWMO
+from scaffold_context import add_convenience_properties, add_motivating_information
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
+@prefix slowmo: <http://example.com/slowmo#> .
 
 def create_candidate(measure: Resource, template: Resource) -> Optional[Resource]:
     g: Graph = measure.graph
+    @graph g
 
     if not template.value(CPO.has_causal_pathway):
         return None
 
     candidate = g.resource(BNode())
-    candidate[rdf:type] = SLOWMO.Candidate
-    candidate[SLOWMO.RegardingMeasure] = measure
-    candidate[SLOWMO.AncestorTemplate] = template
+    candidate[rdf:type] = slowmo:Candidate
+    candidate[slowmo:RegardingMeasure] = measure
+    candidate[slowmo:AncestorTemplate] = template
     # TODO: Add candidate[SLOWMO.CausalPathway] = causal_pathway, to make it easier for down stream code
 
     if not add_motivating_information(candidate):
-        g.remove((candidate.identifier, None, None))
+        -{ {candidate.identifier} ?p ?o }
         return None
 
     add_convenience_properties(candidate)

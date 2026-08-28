@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, RDFS, OWL, DCTERMS
+from context_shim import DeprecationResult, EntityDeprecationInfo
 DCTERMS = Namespace("http://purl.org/dc/terms/")
 
 def deprecate(
@@ -113,3 +114,22 @@ def deprecate(
     result.success = True
 
     return result
+
+
+# Demo harness (identical on both sides, see meta.json): the region returns a
+# DeprecationResult whose `deprecated_graph` field rdflib compares by store
+# identifier, so the dataclass cannot be compared across two runs.  This entry
+# point exposes what the region actually computed -- the mutated graph, the
+# counters and the entity record -- in a form the oracle can compare.
+def demo(graph, entity, replaced_by=None, message=None, version=None):
+    result = deprecate(None, graph, entity, replaced_by, message, version)
+    info = result.entity_info[-1]
+    return (result.deprecated_graph, result.source_triples,
+            result.result_triples, result.success, result.error,
+            (result.stats.entities_deprecated, result.stats.entities_not_found,
+             result.stats.entities_already_deprecated,
+             result.stats.triples_added),
+            (info.uri, info.found, sorted(info.current_labels),
+             sorted(info.current_comments), info.was_already_deprecated,
+             info.triples_added, info.reference_count, info.replaced_by,
+             info.message))

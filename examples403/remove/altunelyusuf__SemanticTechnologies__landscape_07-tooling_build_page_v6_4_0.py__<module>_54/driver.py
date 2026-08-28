@@ -1,13 +1,12 @@
 """Validation driver for altunelyusuf__SemanticTechnologies__landscape_07-tooling_build_page_v6_4_0.py__<module>_54.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a module-level statement that wipes three version stamps off the
+ontology node, so the oracle is module state: both representations parse the
+same fixture (04-page/semtech_page_abox_v6_3_0.ttl, see meta.json) into a fresh
+graph `g` and the two `g` are compared by RDF isomorphism.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry=None,

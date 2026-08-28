@@ -1,0 +1,24 @@
+# Shaped after extensions/brick_extension_interpret_223.shapes.ttl: an
+# owl:Ontology with owl:imports, owl:versionInfo and several sh:declare, and a
+# rule whose sh:prefixes points at *its own* ontology (the triple the script
+# reassigns).  s223:Concept carries an owl:versionInfo without being an
+# owl:Ontology: neighbourhood that must survive.
+@prefix owl:         <http://www.w3.org/2002/07/owl#> .
+@prefix s223:        <http://data.ashrae.org/standard223#> .
+@prefix s223tobrick: <https://brickschema.org/extension/brick_extension_interpret_223#> .
+@prefix sh:          <http://www.w3.org/ns/shacl#> .
+@prefix xsd:         <http://www.w3.org/2001/XMLSchema#> .
+
+<https://brickschema.org/extension/brick_extension_interpret_223> a owl:Ontology ;
+    owl:imports <http://www.w3.org/ns/shacl#>,
+                <https://brickschema.org/schema/1.5/Brick> ;
+    owl:versionInfo "Created with TopBraid Composer" ;
+    sh:declare [ sh:namespace "http://data.ashrae.org/standard223#"^^xsd:anyURI ;
+                 sh:prefix "s223" ],
+               [ sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ;
+                 sh:prefix "rdf" ] .
+
+s223:Concept owl:versionInfo "on a class, not an ontology" ;
+    sh:rule [ a sh:SPARQLRule ;
+              sh:construct "CONSTRUCT { $this rdf:type ?brickClass } WHERE { $this rdf:type ?c }" ;
+              sh:prefixes <https://brickschema.org/extension/brick_extension_interpret_223> ] .

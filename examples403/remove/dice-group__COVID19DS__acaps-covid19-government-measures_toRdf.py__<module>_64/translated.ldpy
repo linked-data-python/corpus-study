@@ -1,26 +1,19 @@
 # Extracted from dice-group/COVID19DS@7842845de5 : acaps-covid19-government-measures/toRdf.py
 # region: <module> (lines 64-135, stratum remove)
 # licence of the source repository: see meta.json
-from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import RDF, FOAF, RDFS, OWL, DCTERMS, SKOS, XSD
 import urllib.parse
 import urllib
 import re
-@prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .
-@prefix cvdr: <https://covid-19ds.data.dice-research.org/resource/> .
+from context_shim import pd, xls   # context shim -- see meta.json
+@prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .   #(for Object)
+@prefix cvdr: <https://covid-19ds.data.dice-research.org/resource/> .   #(for Subject/Resource)
 @prefix dbpediaowl: <http://dbpedia.org/ontology/> .
 @prefix dcmi: <http://purl.org/dc/terms/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix dowl: <http://dbpedia.org/ontology/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-g = Graph()
+@graph as g
 csv_data = pd.read_excel(xls, 'Dataset')
 csv_data = csv_data.fillna("unknown")
 
@@ -28,36 +21,45 @@ for index, row in csv_data.iterrows():
      dice = str(row['ID'])+'_GovMeasure'
      print(dice)
      iso = row["ISO"]
-     g += g{
-         cvdr:{dice} cvdo:hasISO3 cvdr:{iso} .
-         cvdr:{iso} a cvdo:Iso ;
-            dowl:isoCodeRegion {Literal(row["ISO"], datatype=XSD.string)} .
-         {URIRef(cvdr[dice])} a cvdo:Covid19Measure ;
-            cvdo:hasCountry {URIRef(cvdr[row["COUNTRY"]])} .
-         {URIRef(cvdr[str(row["COUNTRY"])])} rdfs:label {Literal(row["COUNTRY"], lang='en')} ;
-            a dbpediaowl:Country .
-         {URIRef(cvdr[dice])} cvdo:hasRegion {Literal(row["REGION"], datatype=XSD.string)} ;
-            cvdo:hasAdminLevelName {Literal(row['ADMIN_LEVEL_NAME'], datatype=XSD.string)} ;
-            cvdo:hasPCODE {Literal(row['PCODE'], datatype=XSD.integer)} ;
-            cvdo:hasLogType {Literal(row['LOG_TYPE'], datatype=XSD.string)} ;
-            dbpediaowl:category {Literal(row['CATEGORY'], datatype=XSD.string)} ;
-            cvdo:hasMeasure {Literal(row['MEASURE'], datatype=XSD.string)} ;
-            cvdo:targetedPopGroup {Literal(row['TARGETED_POP_GROUP'], datatype=XSD.string)} ;
-            rdfs:comment {Literal(row['COMMENTS'], datatype=XSD.string)} ;
-            cvdo:nonCompliance {Literal(row['NON_COMPLIANCE'], datatype=XSD.string)} ;
-            dcmi:date {Literal(row['DATE_IMPLEMENTED'], datatype=XSD.date)} ;
-            cvdo:hasSource {Literal(row['SOURCE'],lang='en')} ;
-            cvdo:publisher {Literal(row['SOURCE_TYPE'], datatype=XSD.string)}
-     }
+     +{ cvdr:{dice} cvdo:hasISO3 cvdr:{iso} .
+        cvdr:{iso} a cvdo:Iso ;
+            dowl:isoCodeRegion {row["ISO"]}^^xsd:string }
+     # +{ cvdr:{str(row["ID"])} cvdo:hasISO {row["ISO"]}^^xsd:string }
+
+     +{ cvdr:{dice} a cvdo:Covid19Measure }
+     #+{ cvdr:ISO a lgdo:Feature }
+
+     +{ cvdr:{dice} cvdo:hasCountry cvdr:{row["COUNTRY"]} }
+
+     +{ cvdr:{str(row["COUNTRY"])} rdfs:label {row["COUNTRY"]}@en ;
+            a dbpediaowl:Country }
+
+     +{ cvdr:{dice} cvdo:hasRegion {row["REGION"]}^^xsd:string }
+
+     +{ cvdr:{dice} cvdo:hasAdminLevelName {row['ADMIN_LEVEL_NAME']}^^xsd:string }
+
+     +{ cvdr:{dice} cvdo:hasPCODE {row['PCODE']}^^xsd:integer }
+
+     +{ cvdr:{dice} cvdo:hasLogType {row['LOG_TYPE']}^^xsd:string }
+
+     +{ cvdr:{dice} dbpediaowl:category {row['CATEGORY']}^^xsd:string }
+
+     +{ cvdr:{dice} cvdo:hasMeasure {row['MEASURE']}^^xsd:string }
+
+     +{ cvdr:{dice} cvdo:targetedPopGroup {row['TARGETED_POP_GROUP']}^^xsd:string ;
+            rdfs:comment {row['COMMENTS']}^^xsd:string ;
+            cvdo:nonCompliance {row['NON_COMPLIANCE']}^^xsd:string ;
+            dcmi:date {row['DATE_IMPLEMENTED']}^^xsd:date }
+
+     +{ cvdr:{dice} cvdo:hasSource {row['SOURCE']}@en ;
+            cvdo:publisher {row['SOURCE_TYPE']}^^xsd:string }
 
      row['LINK'] = row['LINK'].strip()
      if " " in row['LINK']:
           row['LINK']=urllib.parse.quote_plus(row['LINK'])
 
-     g += g{
-         {URIRef(cvdr[dice])} cvdo:hasSourceLink {URIRef(row['LINK'])} ;
-            cvdo:entryDate {Literal(row['ENTRY_DATE'], datatype=XSD.date)}
-     }
+     +{ cvdr:{dice} cvdo:hasSourceLink f<{row['LINK']}> ;
+            cvdo:entryDate {row['ENTRY_DATE']}^^xsd:date }
 
      # row['Alternative source']=urllib.parse.quote_plus(row['Alternative source'])
      altSources = None
@@ -68,24 +70,22 @@ for index, row in csv_data.iterrows():
      if altSources:
           for a in altSources:
                # if a != 'and' and a != 'AND' and a != '':
-               g += g{ {URIRef(cvdr[dice])} cvdo:alternativeSource {URIRef(a.strip().replace(" ", ""))} }
+               +{ cvdr:{dice} cvdo:alternativeSource f<{a.strip().replace(" ", "")}> }
      else:
           if "http" in row['Alternative source']:
-               g += g{ {URIRef(cvdr[dice])} cvdo:alternativeSource {URIRef(row['Alternative source'].strip())} }
+               +{ cvdr:{dice} cvdo:alternativeSource f<{row['Alternative source'].strip()}> }
           else:
-               g += g{ {URIRef(cvdr[dice])} cvdo:alternativeSource {Literal(row['Alternative source'], datatype=XSD.string)} }
+               +{ cvdr:{dice} cvdo:alternativeSource {row['Alternative source']}^^xsd:string }
 
      # the provenance
-     g += g{
-         cvdr:{dice} prov:hadPrimarySource cvdr:GovMeasuresCovidDataset .
-         cvdr:GovMeasuresCovidDataset a prov:Entity ;
+     +{ cvdr:{dice} prov:hadPrimarySource cvdr:GovMeasuresCovidDataset .
+        cvdr:GovMeasuresCovidDataset a prov:Entity ;
             prov:generatedAtTime "2021-02-22T02:52:02Z"^^xsd:dateTime ;
-            prov:wasDerivedFrom "https://data.humdata.org/dataset/acaps-covid19-government-measures-dataset"^^xsd:string
-     }
+            prov:wasDerivedFrom "https://data.humdata.org/dataset/acaps-covid19-government-measures-dataset"^^xsd:string }
 
 
      # Remove the triples that I marked as "unknown"
-     g.remove((None, None, <unknown>))
-     g.remove((None, None, Literal("unknown",datatype=xsd:string)))
-     g.remove((None, None, Literal("unknown",datatype=xsd:integer)))
-     g.remove((None, None, Literal("unknown",datatype=xsd:date)))
+     -{ ?s ?p <unknown> }
+     -{ ?s ?p "unknown"^^xsd:string }
+     -{ ?s ?p "unknown"^^xsd:integer }
+     -{ ?s ?p "unknown"^^xsd:date }

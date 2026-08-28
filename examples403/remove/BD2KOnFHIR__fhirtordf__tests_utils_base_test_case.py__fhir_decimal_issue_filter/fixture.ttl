@@ -1,4 +1,28 @@
-# Input graph for BD2KOnFHIR__fhirtordf__tests_utils_base_test_case.py__fhir_decimal_issue_filter — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph `in_first` for BD2KOnFHIR__fhirtordf__..._fhir_decimal_issue_filter
+# — written during translation, against the region.  Its counterpart is
+# fixture_second.ttl (`in_second`); `in_both` starts empty.
+#
+# What each subject exercises (see fixture_second.ttl for the other side):
+#   obs1, obs2  xsd:decimal on both sides, equal value, different lexical form
+#               -> the case the filter exists for: moved to in_both, removed here
+#   obs8        xsd:decimal on both sides, identical term -> also moved
+#   obs3        xsd:decimal on both sides, DIFFERENT value -> nothing moves
+#   obs4        no (s, p) at all in in_second -> in_second.value() is None
+#               (the zero-solution case that .first() must answer None too)
+#   obs5        xsd:integer on both sides -> neighbouring datatype, must not match
+#   obs6        plain literal -> must not match
+#   obs7        a URIRef object -> isinstance(o, Literal) must reject it
+#   the bnode   a decimal under a blank subject with no counterpart -> None again
+@prefix ex:  <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:obs1 ex:value "1.0"^^xsd:decimal .
+ex:obs2 ex:value "2.50"^^xsd:decimal .
+ex:obs3 ex:value "3.0"^^xsd:decimal .
+ex:obs4 ex:value "5.0"^^xsd:decimal .
+ex:obs5 ex:count "7"^^xsd:integer .
+ex:obs6 ex:label "a plain literal" .
+ex:obs7 ex:ref   ex:other .
+ex:obs8 ex:value "9.0"^^xsd:decimal .
+
+[] ex:value "11.0"^^xsd:decimal .

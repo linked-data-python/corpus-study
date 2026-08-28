@@ -2,12 +2,10 @@
 # region: <module> (lines 1-112, stratum remove)
 # licence of the source repository: see meta.json
 import rdflib
-from rdflib import URIRef, Literal
 from rdflib.namespace import Namespace
-from rdflib.namespace import XSD
 import sys
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
 
 # input file with possibly new labels and new comments
@@ -26,6 +24,7 @@ new_ttlfile = "schema-new.ttl"
 # load graph from current schema.ttl file
 print("### Reading and loading current graph schema", ttlfile)
 g = rdflib.Graph()
+@graph g
 g.parse(ttlfile)
 print("### Graph triple count before changes", len(g))
 
@@ -62,7 +61,7 @@ for goofile in goofiles:
 
         # check the current uri appears as a subject in the graph
         else:
-            rows = g.query("select (count(*) as ?cnt) where { <" + uri + "> ?p ?o. }")
+            rows = s{ SELECT (COUNT(*) AS ?cnt) WHERE { {f<{uri}>} ?p ?o } }
             cnt = 0
             for r in rows: cnt = int(r.cnt)
             # unknown entities we should not have in the goo files
@@ -86,25 +85,25 @@ for goofile in goofiles:
     # remove entities that should not appear in ontology
     for k in entities_to_hide:
         print("### Removing any triple related to", k)
-        g.remove((URIRef(k), None, None))
-        g.remove((None, None, URIRef(k)))
+        -{ f<{k}> ?p ?o }
+        -{ ?s ?p f<{k}> }
     print("### Graph triple after removals", len(g))
 
     # update label and comments according to content of google doc
     for k in entities_to_change:
         record = entities_to_change[k]
-        g.remove((URIRef(k), <http://www.w3.org/2000/01/rdf-schema#label>, None))
-        g.remove((URIRef(k), <http://www.w3.org/2000/01/rdf-schema#comment>, None))
+        -{ f<{k}> rdfs:label ?old_label }
+        -{ f<{k}> rdfs:comment ?old_comment }
         label = record.get("label")
         new_label = record.get("new_label")
         if label != new_label: print("### Label change in google doc", k, label, "=>", new_label)
         if new_label is not None and len(new_label)>0:
-            g += g{ {URIRef(k)} <http://www.w3.org/2000/01/rdf-schema#label> {Literal(new_label, datatype=XSD.string)} }
+            +{ f<{k}> rdfs:label {new_label}^^xsd:string }
         comment = record.get("comment")
         new_comment = record.get("new_comment")
         if comment != new_comment: print("### Comment change in google doc", k , comment, "=>", new_comment)
         if new_comment is not None and len(new_comment)>0:
-            g += g{ {URIRef(k)} <http://www.w3.org/2000/01/rdf-schema#comment> {Literal(new_comment, datatype=XSD.string)} }
+            +{ f<{k}> rdfs:comment {new_comment}^^xsd:string }
     print("### Graph triple after all changes", len(g))
 
     g.serialize(destination = "schema-tmp." + str(step))
@@ -114,4 +113,3 @@ print("### Saving modified schema", new_ttlfile)
 g.serialize(destination = new_ttlfile)
 
 print("### end")
-
