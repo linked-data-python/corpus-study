@@ -84,3 +84,74 @@ def test_harness_detects_difference(tmp_path):
     import json
     verdict = json.loads(proc.stderr.split("RDFEVAL-VERDICT ", 1)[1].splitlines()[0])
     assert verdict["equivalent"] is False
+
+
+PROJECT_NS = """\
+from rdflib import Namespace, RDF
+
+BRICK = Namespace("https://brickschema.org/schema/Brick#")
+SH = Namespace("http://www.w3.org/ns/shacl#")
+A = RDF.type
+"""
+
+REGION_WITH_PROJECT_NS = """\
+from .namespaces import BRICK, A, SH
+from rdflib import BNode, Literal
+
+
+def build(G):
+    prop = BNode("myprop")
+    G.add((BRICK.Thing, A, SH.NodeShape))
+    G.add((prop, SH.path, BRICK.hasPart))
+    G.add((BRICK.Thing, SH.property, prop))
+"""
+
+
+def _resolver(module, level):
+    return PROJECT_NS if module.endswith("namespaces") else None
+
+
+def test_project_namespaces_become_prefixes():
+    draft, notes = draft_translation(REGION_WITH_PROJECT_NS, resolve_module=_resolver)
+    assert "@prefix brick: <https://brickschema.org/schema/Brick#> ." in draft
+    assert "@prefix sh: <http://www.w3.org/ns/shacl#> ." in draft
+    assert "brick:Thing a sh:NodeShape" in draft      # A alias -> Turtle `a`
+    assert "_:myprop" in draft                        # single-island bnode label
+    assert "BNode(" not in draft.split("def build")[1]
+    from ldpy.transpiler import transpile
+    transpile(draft)
+
+
+def test_bnode_label_kept_as_python_when_shared_across_islands():
+    src = """\
+from rdflib import BNode, Graph, Namespace
+
+EX = Namespace("http://e/")
+
+
+def build(g, other):
+    b = BNode("shared")
+    g.add((EX.a, EX.p, b))
+    other.do_something()
+    g.add((b, EX.q, EX.c))
+"""
+    draft, _ = draft_translation(src)
+    # two separate islands -> the blank node must stay a Python BNode
+    assert "BNode(\"shared\")" in draft or "BNode('shared')" in draft
+    assert "_:shared" not in draft
+
+
+def test_interpolated_local_part():
+    src = """\
+from rdflib import Graph, Namespace
+
+EX = Namespace("http://e/")
+
+
+def build(g, name):
+    g.add((EX[name], EX.p, EX.o))
+"""
+    draft, _ = draft_translation(src)
+    assert "ex:{name}" in draft
+    from ldpy.transpiler import transpile
+    transpile(draft)

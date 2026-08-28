@@ -72,14 +72,20 @@ def well_known_iris() -> dict[str, str]:
 
 # --- the mechanical assistant ----------------------------------------------
 
+RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+
+
 class Draft:
     def __init__(self, source: str):
         self.source = source
         self.lines = source.splitlines()
         self.notes: list[str] = []
-        self.replacements: list[tuple[int, int, int, int, str]] = []
-        # var name -> prefix label
-        self.prefixes: dict[str, tuple[str, str]] = {}   # var -> (label, iri)
+        # var -> (prefix label, namespace IRI, bare_usable)
+        self.prefixes: dict[str, tuple[str, str, bool]] = {}
+        # names bound to rdf:type (the `A = RDF.type` idiom)
+        self.type_aliases: set[str] = set()
+        # var -> blank-node label, for BNode("label") bound to a variable
+        self.bnode_labels: dict[str, str] = {}
 
     def add_note(self, msg: str) -> None:
         if msg not in self.notes:
@@ -117,13 +123,28 @@ def _term_to_island(node: ast.expr, d: Draft, src: str) -> str | None:
     if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
         pref = d.prefixes.get(node.value.id)
         if pref and PN_LOCAL_OK.match(node.attr):
+            if pref[1] == RDF_NS and node.attr == "type":
+                return "a"
             return f"{pref[0]}:{node.attr}"
     if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name):
         pref = d.prefixes.get(node.value.id)
         sl = node.slice
-        if pref and isinstance(sl, ast.Constant) and isinstance(sl.value, str) \
-                and PN_LOCAL_OK.match(sl.value):
-            return f"{pref[0]}:{sl.value}"
+        if pref:
+            if isinstance(sl, ast.Constant) and isinstance(sl.value, str) \
+                    and PN_LOCAL_OK.match(sl.value):
+                return f"{pref[0]}:{sl.value}"
+            # ex:{expr} — prefixed name with an interpolated local part
+            if not isinstance(sl, ast.Slice):
+                return f"{pref[0]}:{{{_expr_src(sl, src)}}}"
+    if isinstance(node, ast.Name):
+        # a name bound to rdf:type (the `A = RDF.type` idiom) is Turtle's `a`
+        if node.id in d.type_aliases:
+            return "a"
+        pref = d.prefixes.get(node.id)
+        if pref and pref[2]:            # a bare namespace used as a term
+            return f"<{pref[1]}>"
+        if node.id in d.bnode_labels:
+            return f"_:{d.bnode_labels[node.id]}"
     if isinstance(node, ast.Constant) and isinstance(node.value, (str, int, float)):
         return json.dumps(node.value) if isinstance(node.value, str) else repr(node.value)
     return None
@@ -140,8 +161,46 @@ def _term(node: ast.expr, d: Draft, src: str) -> str:
     return "{" + _expr_src(node, src) + "}"
 
 
-def draft_translation(source: str) -> tuple[str, list[str]]:
-    """Best-effort mechanical rewrite of an rdflib module into ldpy."""
+def _namespace_bindings(tree: ast.Module) -> tuple[dict[str, str], set[str]]:
+    """Module-level ``X = Namespace("iri")`` bindings and rdf:type aliases."""
+    ns: dict[str, str] = {}
+    type_aliases: set[str] = set()
+    for stmt in ast.walk(tree):
+        if not isinstance(stmt, ast.Assign) or len(stmt.targets) != 1:
+            continue
+        target = stmt.targets[0]
+        if not isinstance(target, ast.Name):
+            continue
+        val = stmt.value
+        if isinstance(val, ast.Call):
+            fn = val.func
+            name = fn.id if isinstance(fn, ast.Name) else (
+                fn.attr if isinstance(fn, ast.Attribute) else None)
+            if name in ("Namespace", "ClosedNamespace") and val.args \
+                    and isinstance(val.args[0], ast.Constant) \
+                    and isinstance(val.args[0].value, str):
+                ns[target.id] = val.args[0].value
+        elif isinstance(val, ast.Attribute) and val.attr == "type" \
+                and isinstance(val.value, ast.Name) and val.value.id == "RDF":
+            type_aliases.add(target.id)
+    return ns, type_aliases
+
+
+def _label_for(var: str, taken: set[str]) -> str | None:
+    label = var.lower().rstrip("_").replace("_", "-")
+    if not re.match(r"[a-z][\w-]*$", label) or label in taken:
+        return None
+    return label
+
+
+def draft_translation(source: str, resolve_module=None) -> tuple[str, list[str]]:
+    """Best-effort mechanical rewrite of an rdflib module into ldpy.
+
+    ``resolve_module(module, level)`` optionally returns the source of an
+    imported module, so namespaces defined in a project's own
+    ``namespaces.py`` (``from .namespaces import BRICK, SH``) become
+    ``@prefix`` declarations instead of interpolations.
+    """
     d = Draft(source)
     try:
         tree = ast.parse(source)
@@ -152,34 +211,73 @@ def draft_translation(source: str) -> tuple[str, list[str]]:
     used = set(re.findall(r"[A-Za-z_][\w]*", source))
     prefix_decls: list[str] = []
     drop_stmts: list[ast.stmt] = []
+    taken: set[str] = set()
 
-    # namespaces: assignments and well-known imports
+    def declare(var: str, iri: str, bare_usable: bool = False) -> bool:
+        if var in d.prefixes:
+            return False
+        label = _label_for(var, taken)
+        if label is None:
+            return False
+        d.prefixes[var] = (label, iri, bare_usable)
+        taken.add(label)
+        decl = f"@prefix {label}: <{iri}> ."
+        if decl not in prefix_decls:
+            prefix_decls.append(decl)
+        return True
+
+    # 1. namespaces defined in this very source
+    local_ns, local_type_aliases = _namespace_bindings(tree)
+    d.type_aliases |= local_type_aliases
+    for stmt in tree.body:
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 \
+                and isinstance(stmt.targets[0], ast.Name) \
+                and stmt.targets[0].id in local_ns:
+            var = stmt.targets[0].id
+            if declare(var, local_ns[var]):
+                drop_stmts.append(stmt)
+
+    # 2. namespaces imported from rdflib (well-known) or from project modules
     for stmt in ast.walk(tree):
-        if isinstance(stmt, ast.Assign) and isinstance(stmt.value, ast.Call):
+        if not isinstance(stmt, ast.ImportFrom):
+            continue
+        module = stmt.module or ""
+        if module.startswith("rdflib"):
+            for alias in stmt.names:
+                var = alias.asname or alias.name
+                if alias.name in wk and var in used:
+                    declare(var, wk[alias.name])
+            continue
+        if resolve_module is None:
+            continue
+        imported_src = resolve_module(module, stmt.level)
+        if not imported_src:
+            continue
+        try:
+            imported_tree = ast.parse(imported_src)
+        except SyntaxError:
+            continue
+        ext_ns, ext_type_aliases = _namespace_bindings(imported_tree)
+        for alias in stmt.names:
+            var = alias.asname or alias.name
+            if alias.name in ext_type_aliases:
+                d.type_aliases.add(var)
+            elif alias.name in ext_ns and var in used:
+                declare(var, ext_ns[alias.name])
+
+    # 3. BNode("label") variables -> _:label
+    for stmt in ast.walk(tree):
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 \
+                and isinstance(stmt.targets[0], ast.Name) \
+                and isinstance(stmt.value, ast.Call):
             fn = stmt.value.func
             name = fn.id if isinstance(fn, ast.Name) else (
                 fn.attr if isinstance(fn, ast.Attribute) else None)
-            if name == "Namespace" and stmt.value.args \
+            if name == "BNode" and len(stmt.value.args) == 1 \
                     and isinstance(stmt.value.args[0], ast.Constant) \
                     and isinstance(stmt.value.args[0].value, str) \
-                    and len(stmt.targets) == 1 \
-                    and isinstance(stmt.targets[0], ast.Name):
-                var = stmt.targets[0].id
-                label = var.lower().rstrip("_")
-                if not re.match(r"[a-z][\w-]*$", label):
-                    continue
-                d.prefixes[var] = (label, stmt.value.args[0].value)
-                prefix_decls.append(f"@prefix {label}: <{stmt.value.args[0].value}> .")
-                drop_stmts.append(stmt)
-        elif isinstance(stmt, ast.ImportFrom) and (stmt.module or "").startswith("rdflib"):
-            for alias in stmt.names:
-                if alias.name in wk and (alias.asname or alias.name) in used:
-                    var = alias.asname or alias.name
-                    label = var.lower()
-                    d.prefixes[var] = (label, wk[alias.name])
-                    decl = f"@prefix {label}: <{wk[alias.name]}> ."
-                    if decl not in prefix_decls:
-                        prefix_decls.append(decl)
+                    and re.match(r"[A-Za-z_][\w-]*$", stmt.value.args[0].value):
+                d.bnode_labels[stmt.targets[0].id] = stmt.value.args[0].value
 
     # collect rewrites over statements (module + function bodies)
     edits: list[tuple[int, int, str]] = []   # (start_line0, end_line0, text)
@@ -200,7 +298,7 @@ def draft_translation(source: str) -> tuple[str, list[str]]:
             return _expr_src(recv, src)
         return None
 
-    def process_body(body: list[ast.stmt]) -> None:
+    def process_body(body: list[ast.stmt], collect_only: bool = False) -> None:
         i = 0
         while i < len(body):
             recv = is_add_call(body[i])
@@ -212,6 +310,10 @@ def draft_translation(source: str) -> tuple[str, list[str]]:
             while j < len(body) and is_add_call(body[j]) == recv:
                 run.append(body[j])
                 j += 1
+            if collect_only:
+                run_spans.append((run[0].lineno, run[-1].end_lineno))
+                i = j
+                continue
             if len(run) >= 1:
                 triples = []
                 for stmt in run:
@@ -244,9 +346,29 @@ def draft_translation(source: str) -> tuple[str, list[str]]:
             for attr in ("body", "orelse", "finalbody"):
                 sub = getattr(stmt, attr, None)
                 if sub:
-                    process_body(sub)
+                    process_body(sub, collect_only)
             for handler in getattr(stmt, "handlers", []) or []:
-                process_body(handler.body)
+                process_body(handler.body, collect_only)
+
+    # First pass: locate the add-runs, so blank-node labels are only used
+    # when every use of the blank node falls inside ONE run — `_:label` is
+    # scoped to a single g{} island and fresh at each evaluation, so a node
+    # shared across two islands must stay a Python BNode.
+    run_spans: list[tuple[int, int]] = []
+    process_body(tree.body, collect_only=True)
+    for var in list(d.bnode_labels):
+        uses = [n.lineno for n in ast.walk(tree)
+                if isinstance(n, ast.Name) and n.id == var
+                and isinstance(n.ctx, ast.Load)]
+        if not uses or not any(lo <= min(uses) and max(uses) <= hi
+                               for lo, hi in run_spans):
+            del d.bnode_labels[var]
+    # the BNode(...) assignments whose label survived are absorbed
+    for stmt in ast.walk(tree):
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 \
+                and isinstance(stmt.targets[0], ast.Name) \
+                and stmt.targets[0].id in d.bnode_labels:
+            drop_stmts.append(stmt)
 
     process_body(tree.body)
 
@@ -261,7 +383,9 @@ def draft_translation(source: str) -> tuple[str, list[str]]:
         if idx in edited_lines:
             continue
         new = line
-        for var, (label, _iri) in d.prefixes.items():
+        for var, (label, iri, _bare) in d.prefixes.items():
+            if iri == RDF_NS:
+                new = re.sub(rf"\b{re.escape(var)}\.type\b", f"{label}:type", new)
             new = re.sub(rf"\b{re.escape(var)}\.([A-Za-z_][\w]*)",
                          rf"{label}:\1", new)
             new = re.sub(rf"\b{re.escape(var)}\[(['\"])([A-Za-z_][\w.-]*)\1\]",
@@ -293,6 +417,12 @@ def draft_translation(source: str) -> tuple[str, list[str]]:
     if d.prefixes:
         d.add_note("prefixes: " + ", ".join(
             f"{v}->{p[0]}" for v, p in d.prefixes.items()))
+    if d.type_aliases:
+        d.add_note("rdf:type aliases rendered as Turtle `a`: "
+                   + ", ".join(sorted(d.type_aliases)))
+    if d.bnode_labels:
+        d.add_note("BNode labels absorbed into island labels (single-island "
+                   "uses only): " + ", ".join(sorted(d.bnode_labels)))
     return "\n".join(result_lines) + "\n", d.notes
 
 
@@ -327,6 +457,36 @@ def _dedent_region(reg: dict) -> str:
     return textwrap.dedent(reg["source"])
 
 
+def _module_resolver(reg: dict, config: dict):
+    """Resolve an import of the region's own project to its source text."""
+    from .acquire import repo_dir
+    root = repo_dir(config, reg["repository"])
+    here = (root / reg["path"]).parent
+
+    def resolve(module: str, level: int) -> str | None:
+        parts = module.split(".") if module else []
+        base = here
+        for _ in range(max(0, level - 1)):
+            base = base.parent
+        candidates = []
+        if level:
+            candidates += [base.joinpath(*parts).with_suffix(".py"),
+                           base.joinpath(*parts, "__init__.py")]
+        else:
+            candidates += [root.joinpath(*parts).with_suffix(".py"),
+                           root.joinpath(*parts, "__init__.py"),
+                           here.joinpath(*parts).with_suffix(".py")]
+        for cand in candidates:
+            try:
+                if cand.is_file() and root in cand.parents:
+                    return cand.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+        return None
+
+    return resolve
+
+
 def materialise(reg: dict, config: dict) -> str:
     band_dir = EXAMPLES_DIR / reg["band"]
     ex_dir = band_dir / reg["region_id"]
@@ -348,7 +508,8 @@ def materialise(reg: dict, config: dict) -> str:
     original += body + "\n"
     (ex_dir / "original.py").write_text(original)
 
-    draft, notes = draft_translation(original)
+    draft, notes = draft_translation(original,
+                                     resolve_module=_module_resolver(reg, config))
     (ex_dir / "translated.ldpy").write_text(draft)
 
     entry = reg["qualname"].split(".")[-1] if reg["kind"] == "function" else None
