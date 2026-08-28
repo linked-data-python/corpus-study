@@ -239,3 +239,35 @@ def test_status_counts_filed_and_credited_separately(tmp_path, monkeypatch):
     assert data["credited"] == {"remove": 1, "add_isolated": 1}
     assert data["per_group"]["remove"]["approved"] == 1
     assert data["constructions"] == {"-{ }": 1, "@graph": 1}
+
+
+def test_article_export_takes_approved_pairs_only(tmp_path, monkeypatch):
+    """Fiche 403: a published example comes from an approved pair — a draft
+    an agent produced is a hypothesis, not something to print."""
+    import json
+    from rdfeval import article as article_mod
+    from rdfeval.study import STUDY_403
+
+    def make(rid, review, stratum="remove"):
+        d = tmp_path / rid
+        d.mkdir()
+        (d / "review.json").write_text(json.dumps({"review_status": review}))
+        (d / "original.py").write_text("# header\n\ng.remove((s, p, None))\n")
+        (d / "translated.ldpy").write_text("# header\n\n-{ {s} {p} ?o }\n")
+        return d, {"region_id": rid, "stratum": stratum, "strata": [stratum],
+                   "repository": "o/r", "commit": "abc", "path": "m.py",
+                   "qualname": "f", "lineno": 1, "end_lineno": 3,
+                   "classification": "directly-expressible",
+                   "constructions": ["-{ }"], "oracle": "isomorphism",
+                   "translation_notes": []}
+
+    examples = [make("ok", "approved"), make("draft", "unreviewed")]
+    monkeypatch.setattr(article_mod, "iter_examples", lambda study: iter(examples))
+    monkeypatch.setattr(article_mod, "ARTICLE_DIR", tmp_path / "out")
+    monkeypatch.setattr(article_mod, "_licence_of", lambda repo: "MIT")
+    article_mod.run({}, STUDY_403)
+    page = (tmp_path / "out" / "remove.md").read_text()
+    assert "-{ {s} {p} ?o }" in page
+    assert "o/r" in page and "abc" in page and "MIT" in page
+    assert "# header" not in page          # the provenance is stated in prose
+    assert not (tmp_path / "out" / "trav_one_step.md").exists()
