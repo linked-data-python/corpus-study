@@ -150,6 +150,17 @@ control_sample = 10
 # (prevents one large project from dominating a band).
 max_per_repo_per_band = 3
 
+[strata]
+# Stratified draw by *type of use* (design record corpus/403).  The strata
+# themselves are `rdfeval.surface.STRATA`; their population is the site index.
+seed = 20260828
+# Regions drawn per stratum when the population allows it (consigne du
+# 2026-08-28).  A stratum with fewer sites contributes all it has.
+target_per_stratum = 100
+# At most this many regions from one repository in one stratum: without it a
+# single large project would define what "real use" looks like.
+max_per_repo_per_stratum = 4
+
 [regions]
 # A region is a function/method/class or the module top level.
 min_rdf_ops = 2                   # regions with fewer RDF operations are not extracted
