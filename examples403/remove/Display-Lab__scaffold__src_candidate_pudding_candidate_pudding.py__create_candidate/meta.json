@@ -14,11 +14,23 @@
     "namespace_term": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "`g.remove((candidate.identifier, None, None))` devient `-{ {candidate.identifier} ?p ?o }` : deux jokers sur trois, la forme la plus large de l'îlot. `@graph g` désigne le graphe déjà nommé par la région (`g = measure.graph`), ce qui coûte une ligne pour un seul retrait — le suffixe d'appel `-{ ... }(g)` l'éviterait ; la déclaration a été gardée par symétrie avec la strate `add_isolated`.",
+    "`RDF.type` et les trois `SLOWMO.*` deviennent des noms préfixés (`rdf:type`, `slowmo:Candidate`, ...) : SLOWMO ne déclare aucun alias, les IRI sont identiques.",
+    "CONSTAT — `CPO.has_causal_pathway` n'est PAS traduisible en `cpo:has_causal_pathway`. CPO (comme PSDO, IAO, RO) est un `AliasingDefinedNamespace` du projet : l'attribut lisible est un alias de l'identifiant obo, `CPO.has_causal_pathway` vaut `obo:cpo_0000056`. Un `@prefix cpo: <http://purl.obolibrary.org/obo/>` donnerait silencieusement `obo:has_causal_pathway`, une autre IRI. `@prefix` ne peut pas exprimer un espace de noms à alias ; la seule forme fidèle serait `obo:cpo_0000056`, qui perd le nom lisible. L'appel est donc laissé tel quel.",
+    "CONSTAT — `from module import cpo:` ne rattrape pas le cas : la forme exige que le module de vocabulaire soit lui-même un module ldpy exportant `__namespaces__` (vérifié : `ImportError: cannot import name '__namespaces__'` sur un module Python ordinaire). Le shim de contexte, lui, doit rester du Python pur puisque `original.py` l'importe sans le crochet d'import.",
+    "Les trois `candidate[X] = y` restent du Python, et ce n'est pas un renoncement : `Resource.__setitem__` appelle `graph.set()` (retire l'existant avant d'ajouter) là où `+{ }` appelle `add`, et il convertit un `Resource` en son identifiant. `+{ }` changerait la sémantique. L'API `Resource` de rdflib n'a pas d'îlot — c'est une lecture/écriture par objet, hors du périmètre annoncé.",
+    "Pilote : le shim `scaffold_context.py` porte les vocabulaires et les deux fonctions voisines appelées par la région (`add_motivating_information`, taillée de son filtrage par `Signal` ; `add_convenience_properties`, verbatim). Deux appels, les deux chemins qui rendent `None` : sans chemin causal (le graphe ne doit pas bouger) et avec chemin causal mais sans information motivante (le candidat est créé puis retiré, le graphe doit revenir à l'identique — c'est le chemin de la strate).",
+    "LIMITE DU PILOTE — le troisième chemin rend le `Resource` candidat, et `harness.materialise` ne sait pas comparer un `Resource` rdflib : `Resource.__iter__` rend des triplets `(s, p, o)` de `Resource`, sujet compris, donc la marche récurse sans fin. Les deux arguments sont passés via un `GraphProbe` (un `Resource` dont l'itération rend le graphe) pour que l'oracle voie le graphe muté ; le chemin du candidat accepté n'est pas exercé."
   ],
   "draft_sha": "5677ba0eecde5f0b",
   "provenance": {
@@ -30,5 +42,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }
