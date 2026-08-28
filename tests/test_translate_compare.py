@@ -343,3 +343,33 @@ def test_turtle_a_abbreviates_rdf_type_in_predicate_position_only():
     assert "rdf:first rdf:type" in draft
     assert "{bn} a rdf:Statement" in draft
     transpile(draft, filename="<a-position>")
+
+
+def test_stdout_of_the_called_region_is_compared(tmp_path):
+    """A region whose whole effect is printing has nothing else to compare:
+    the entry-point path must capture what each side writes."""
+    (tmp_path / "original.py").write_text(
+        "from rdflib import Graph, Namespace\n"
+        "EX = Namespace('http://e/')\n"
+        "def show(g: Graph):\n"
+        "    for o in g.objects(EX.a, EX.p):\n"
+        "        print('seen', o)\n")
+    (tmp_path / "translated.ldpy").write_text(
+        "from rdflib import Graph\n"
+        "@prefix ex: <http://e/> .\n"
+        "def show(g: Graph):\n"
+        "    for o in m{ ex:a ex:p ?o }(g):\n"
+        "        print('SEEN', o)\n")          # deliberately different
+    (tmp_path / "fixture.ttl").write_text(
+        "@prefix ex: <http://e/> .\nex:a ex:p 1 .\n")
+    (tmp_path / "driver.py").write_text(
+        "from rdfeval.harness import run_pair\n"
+        "VERDICT = run_pair(__file__, entry='show', fixture='fixture.ttl')\n")
+    proc = subprocess.run([sys.executable, "driver.py"], cwd=tmp_path,
+                          capture_output=True, text=True, timeout=120)
+    import json
+    verdict = next(json.loads(line[len("RDFEVAL-VERDICT "):])
+                   for line in proc.stderr.splitlines()
+                   if line.startswith("RDFEVAL-VERDICT "))
+    assert not verdict["equivalent"]
+    assert any("stdout differs" in d for d in verdict["diffs"]), verdict["diffs"]

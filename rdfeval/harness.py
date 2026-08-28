@@ -207,14 +207,19 @@ def run_pair(driver_file: str, entry: str | None = None,
             verdict["error"] = "no fixtures: provide calls=[(args, kwargs), …]"
             _emit(verdict)
             return verdict
-        for i, fixture in enumerate(calls):
-            # a fixture is (args, kwargs) — or a callable returning that pair,
+        for i, case in enumerate(calls):
+            # a case is (args, kwargs) — or a callable returning that pair,
             # invoked once per side so mutable arguments (graphs!) stay fresh
             try:
-                args_o, kw_o = fixture() if callable(fixture) else fixture
-                args_t, kw_t = fixture() if callable(fixture) else fixture
-                ro = fo(*args_o, **kw_o)
-                rt = ft(*args_t, **kw_t)
+                args_o, kw_o = case() if callable(case) else case
+                args_t, kw_t = case() if callable(case) else case
+                # A region whose whole effect is printing has nothing else to
+                # compare: capture what each side writes while it runs.
+                buf_o, buf_t = io.StringIO(), io.StringIO()
+                with contextlib.redirect_stdout(buf_o):
+                    ro = fo(*args_o, **kw_o)
+                with contextlib.redirect_stdout(buf_t):
+                    rt = ft(*args_t, **kw_t)
             except Exception:
                 verdict["error"] = traceback.format_exc(limit=8)
                 _emit(verdict)
@@ -225,7 +230,13 @@ def run_pair(driver_file: str, entry: str | None = None,
             for k in kw_o:
                 _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]",
                                diffs, ordered)
+            if buf_o.getvalue() != buf_t.getvalue():
+                diffs.append(f"call[{i}]: stdout differs "
+                             f"({buf_o.getvalue()[:120]!r} vs "
+                             f"{buf_t.getvalue()[:120]!r})")
         verdict["calls"] = len(calls)
+        if out_o != out_t:
+            diffs.append("stdout differs at module level")
     else:
         verdict["method"] = "module-state"
         go, gt = _graphs(ns_o), _graphs(ns_t)

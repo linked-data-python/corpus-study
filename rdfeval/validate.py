@@ -53,6 +53,7 @@ def _run_driver(ex_dir, timeout: int) -> dict:
 def run(config: dict, study: Study = STUDY_401) -> None:
     timeout = config["validation"]["timeout_seconds"]
     rows = []
+    regressions: list[tuple[str, str]] = []
     counts = {"equivalent": 0, "not-equivalent": 0, "unresolved": 0, "skipped": 0}
     for ex_dir, meta in iter_examples(study):
         rid = meta["region_id"]
@@ -93,3 +94,9 @@ def run(config: dict, study: Study = STUDY_401) -> None:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     print(f"validate: {counts}")
+    if regressions:
+        print(f"  !! {len(regressions)} pair(s) that were EQUIVALENT no longer "
+              f"are. Check the environment before trusting this run — a "
+              f"missing dependency looks exactly like this:")
+        for rid, err in regressions[:5]:
+            print(f"     {rid}: {err}")
