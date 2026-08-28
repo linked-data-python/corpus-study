@@ -1,17 +1,14 @@
 # Extracted from LexMalta/recipes@b861b7ccea : recipe-importer/rdflib/tools/defined_namespace_creator.py
 # region: get_target_namespace_elements (lines 69-101, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from rdflib.namespace import DCTERMS, OWL, RDFS, SKOS
+from lexmalta_context import args
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-
 def get_target_namespace_elements(g, target_namespace):
-    namespaces = {"dcterms": DCTERMS, "owl": OWL, "rdfs": RDFS, "skos": SKOS}
-    q = """
-        SELECT DISTINCT ?s ?def
+    elements = []
+    for r in s{ SELECT DISTINCT ?s ?def
         WHERE {
             # all things in the RDF data (anything RDF.type...)
             ?s a ?o .
@@ -22,13 +19,8 @@ def get_target_namespace_elements(g, target_namespace):
             }
 
             # only get results for the target namespace (supplied by user)
-            FILTER STRSTARTS(STR(?s), "xxx")
-        }
-        """.replace(
-        "xxx", target_namespace
-    )
-    elements = []
-    for r in g.query(q, initNs=namespaces):
+            FILTER STRSTARTS(STR(?s), {target_namespace})
+        } }(g):
         elements.append((str(r[0]), str(r[1])))
 
     elements.sort(key=lambda tup: tup[0])

@@ -6,28 +6,23 @@ import rdflib
 import rdflib.namespace
 import rdflib.plugins.sparql
 
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
 def narrower(
     self, concept: str, v: typing.Optional[str] = None, abbreviate: bool = False
 ) -> list[str]:
     concept = self.expand_name(concept)
+    @graph self._g
     if v is None:
-        q = rdflib.plugins.sparql.prepareQuery(
-            VocabularyStore._PFX
-            + """SELECT ?s
+        qres = s{ SELECT ?s
         WHERE {
-            ?s skos:broader ?parent .
-        }"""
-        )
-        qres = self._g.query(q, initBindings={"parent": concept})
+            ?s skos:broader {concept} .
+        }}
     else:
         v = self.expand_name(v)
-        q = rdflib.plugins.sparql.prepareQuery(
-            VocabularyStore._PFX
-            + """SELECT ?s
+        qres = s{ SELECT ?s
         WHERE {
-            ?s skos:inScheme ?vocabulary .
-            ?s skos:broader ?parent .
-        }"""
-        )
-        qres = self._g.query(q, initBindings={"vocabulary": v, "parent": concept})
+            ?s skos:inScheme {v} .
+            ?s skos:broader {concept} .
+        }}
     return self._one_res(qres, abbreviate=abbreviate)

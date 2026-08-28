@@ -1,0 +1,34 @@
+# Input graph for LexMalta__recipes__recipe-importer_rdflib_tools_defined_namespace_creator.py__get_target_namespace_elements
+# Covers: several solutions of the pattern (?s a ?o, OPTIONAL definition),
+# the zero-solution case (a target namespace with no member -- see
+# driver.py's second call), and neighbourhood that must NOT match: a
+# subject outside the target namespace, and a subject inside it with no
+# rdf:type triple at all (the `?s a ?o` pattern excludes it).
+@prefix ex: <http://example.org/ns#> .
+@prefix other: <http://other.example.org/ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:a a ex:Thing ;
+    dcterms:description "Desc A" .
+
+ex:b a ex:Thing ;
+    rdfs:comment "Comment B" .
+
+ex:c a ex:Thing ;
+    skos:definition "Def C" .
+
+# in the target namespace, typed, but no description/comment/definition:
+# the OPTIONAL leaves ?def unbound -- str(None) must survive on both sides.
+ex:d a ex:Thing .
+
+# neighbourhood that must NOT match: outside the target namespace
+# (excluded by FILTER STRSTARTS(STR(?s), target_namespace)).
+other:x a other:Thing ;
+    dcterms:description "Should not appear (wrong namespace)" .
+
+# neighbourhood that must NOT match: inside the target namespace, but
+# never the subject of an `a` triple -- excluded by the `?s a ?o` pattern
+# itself, not by the namespace filter.
+ex:e dcterms:description "Should not appear (untyped)" .

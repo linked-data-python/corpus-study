@@ -3,7 +3,8 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, BNode, URIRef
 from rdflib.collection import Collection
-from bricksrc.namespaces import (
+import brick_context as brickschema
+from brick_context import (
     BRICK,
     BSH,
     REC,
@@ -17,6 +18,7 @@ from bricksrc.namespaces import (
     VCARD,
     SH,
     REF,
+    add_relationships,
 )
 G = brickschema.Graph()
 A = RDF.type

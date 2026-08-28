@@ -1,4 +1,21 @@
-# Input graph for isamplesorg__vocabularies__tools_navocab___init__.py__VocabularyStore_narrower — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for isamplesorg__vocabularies__tools_navocab___init__.py__VocabularyStore_narrower
+# Covers: several solutions of the v=None pattern (Animal has three narrower
+# concepts), the v=<scheme> pattern narrowing that set down to two (Wolf is
+# in a different scheme and must be excluded), the zero-solution case
+# (Rock has no narrower concepts at all), and neighbouring triples that must
+# NOT match: Fish is broader-than Plant not Animal, and Cactus is
+# skos:related (not skos:broader) to Plant.
+@prefix ex:   <http://example.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Animal a skos:Concept .
+ex:Plant  a skos:Concept .
+ex:Rock   a skos:Concept .
+
+ex:Dog  a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabA .
+ex:Cat  a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabA .
+ex:Wolf a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabB .
+
+# neighbourhood that must NOT match a narrower(Animal) query
+ex:Fish   a skos:Concept ; skos:broader ex:Plant ; skos:inScheme ex:VocabA .
+ex:Cactus a skos:Concept ; skos:related ex:Plant ; skos:inScheme ex:VocabA .

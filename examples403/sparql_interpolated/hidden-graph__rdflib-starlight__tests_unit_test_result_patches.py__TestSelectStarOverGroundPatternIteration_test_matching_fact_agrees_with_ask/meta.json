@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "IRI"
+  ],
+  "translation_notes": [
+    "EX_A/EX_B/EX_C are hand-formatted SPARQL/N-Triples IRI TEXT (`\"<http://example/a>\"`, a str), spliced into the query with an f-string. That is precisely the pattern the strate targets, and translating it correctly is NOT a mechanical `s{ ASK { {EX_A} {EX_B} {EX_C} . } }` wrap around the untouched constants: coercion.md is explicit that a plain `str` becomes a PLAIN LITERAL (`f{\"a\"}.datatype is None`), so interpolating the string `\"<http://example/a>\"` as-is would silently bind `Literal('<http://example/a>')` -- a literal whose lexical form happens to look like an IRI -- never matching the graph's actual `URIRef('http://example/a')`. Verified this is a real, silent near-miss (not a raised error) by transpiling the naive version separately: the ASK evaluates to False with no diagnostic.",
+    "the fix is the one-line restructuring INSTRUCTIONS_403 SS2 calls for: EX_A/EX_B/EX_C become real terms -- `<http://example/a>` (ldpy's own bare-IRI notation, terms.md) instead of the string `\"<http://example/a>\"`. Same spelling, minus the quotes; the type changes from str to URIRef. That single change is why this is 'minor-restructuring' rather than 'directly-expressible': the query line itself (`s{ ASK { {EX_A} {EX_B} {EX_C} . } }`) is a direct, unmodified substitution, but it is only correct once the supporting constants are turned into terms.",
+    "the region's own EX_A/EX_B/EX_C (now URIRef) are decoupled from starlight_shim.py's private _EX_A/_EX_B/_EX_C (kept as the original pre-formatted strings, needed verbatim by _graph_with_one_fact's N-Triples `g.parse(data=f\"...\", format=\"nt\")`): the shim is shared, identical, and unaware of how the region chooses to spell its own copies.",
+    "`bool(s{ ASK { ... } })` replaces `qres.askAnswer is True` -- querying.md gives this exact form (`assert bool(s{ ASK { ex:a a ex:Sensor } })`) and it is equivalent to askAnswer for a well-formed ASK.",
+    "@graph g designates the existing graph returned by _graph_with_one_fact(), following current-graph.md's 'designate: no new graph' form -- no @prefix needed since the query uses only bare IRIs, no prefixed names."
+  ],
   "draft_sha": "351791b1b3b7387a",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.992367+00:00",
@@ -24,5 +35,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

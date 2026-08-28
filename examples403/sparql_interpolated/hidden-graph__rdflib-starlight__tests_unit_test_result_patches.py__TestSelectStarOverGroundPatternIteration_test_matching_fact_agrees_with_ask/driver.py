@@ -1,15 +1,16 @@
 """Validation driver for hidden-graph__rdflib-starlight__tests_unit_test_result_patches.py__TestSelectStarOverGroundPatternIteration_test_matching_fact_agrees_with_ask.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region body has no `self` reads (it is a bare test function that
+happens to take an unused `self` parameter), so the driver calls it with a
+placeholder `None`. See meta.json and starlight_shim.py for the resolved
+`_graph_with_one_fact` helper the region depends on.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry='test_matching_fact_agrees_with_ask',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[
+        lambda: ((None,), {}),  # self is unused in the region body
+    ],
 )

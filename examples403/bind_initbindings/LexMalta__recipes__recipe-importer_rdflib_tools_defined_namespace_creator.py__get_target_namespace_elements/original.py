@@ -2,6 +2,7 @@
 # region: get_target_namespace_elements (lines 69-101, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from rdflib.namespace import DCTERMS, OWL, RDFS, SKOS
+from lexmalta_context import args
 
 def get_target_namespace_elements(g, target_namespace):
     namespaces = {"dcterms": DCTERMS, "owl": OWL, "rdfs": RDFS, "skos": SKOS}

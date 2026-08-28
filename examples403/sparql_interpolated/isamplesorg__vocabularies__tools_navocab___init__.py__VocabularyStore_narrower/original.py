@@ -5,6 +5,7 @@ import typing
 import rdflib
 import rdflib.namespace
 import rdflib.plugins.sparql
+from navocab_shim import VocabularyStore  # context shim, see meta.json
 
 def narrower(
     self, concept: str, v: typing.Optional[str] = None, abbreviate: bool = False
