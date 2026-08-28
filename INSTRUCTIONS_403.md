@@ -93,6 +93,12 @@ Pièges connus, à ne pas reproduire :
   ne se factorisent pas avec `;` : `-{ ?s a ex:C ; ex:p ?o }` est un
   `DELETE WHERE`, il n'efface rien si un des motifs manque. Un `remove` par
   îlot.
+- **Fondre une lecture « une seule valeur » dans une jointure change la
+  cardinalité.** `m{ }` multi-motifs est un produit : si le motif ajouté peut
+  matcher plusieurs fois là où l'original ne consommait que la première
+  valeur (`g.value`, `next`), la jointure produit plus de solutions que la
+  boucle d'origine. Ne fondez que si le code traite déjà « la première ou
+  aucune » comme sa sémantique.
 - **`ex:{?v}` ne s'instancie pas.** C'est la seule position de terme où une
   variable ne se substitue pas : vous obtenez l'IRI `ex:v`, sans erreur, à
   chaque tour de boucle. Pour forger une IRI depuis une colonne :

@@ -415,3 +415,24 @@ def test_only_judgeable_values_are_compared():
     assert not _comparable(logging.getLogger("x"))
     assert not _comparable(object())
     assert not _comparable([object()])
+
+
+def test_a_call_that_observes_nothing_is_not_a_green(tmp_path):
+    """A region whose only effect is a file write returns None, mutates no
+    argument and prints nothing: a green would say only "it did not crash"."""
+    for name in ("original.py", "translated.ldpy"):
+        (tmp_path / name).write_text(
+            "def main():\n"
+            "    open('out.txt', 'w').write('x')\n")
+    (tmp_path / "driver.py").write_text(
+        "from rdfeval.harness import run_pair\n"
+        "VERDICT = run_pair(__file__, entry='main', calls=[((), {})])\n")
+    proc = subprocess.run([sys.executable, "driver.py"], cwd=tmp_path,
+                          capture_output=True, text=True, timeout=120)
+    import json
+    verdict = next(json.loads(line[len("RDFEVAL-VERDICT "):])
+                   for line in proc.stderr.splitlines()
+                   if line.startswith("RDFEVAL-VERDICT "))
+    assert not verdict["equivalent"]
+    assert verdict["observed"] is False
+    assert any("nothing observable" in d for d in verdict["diffs"])

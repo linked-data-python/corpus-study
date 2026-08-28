@@ -243,6 +243,7 @@ def run_pair(driver_file: str, entry: str | None = None,
         return verdict
 
     diffs: list[str] = []
+    observed = False
     if entry:
         verdict["method"] = (f"fixture:{fixture} entry:{entry}"
                              if fixture else f"entry:{entry}")
@@ -284,7 +285,17 @@ def run_pair(driver_file: str, entry: str | None = None,
             if so != st_:
                 diffs.append(f"call[{i}]: stdout differs "
                              f"({so[:120]!r} vs {st_[:120]!r})")
+            if ro is not None or rt is not None or args_o or kw_o or so:
+                observed = True
         verdict["calls"] = len(calls)
+        verdict["observed"] = observed
+        if not observed:
+            # The call returned nothing, took nothing to mutate and printed
+            # nothing: a green here says only "it did not crash".  A region
+            # whose whole effect is a file write lands exactly here.
+            diffs.append("nothing observable to compare: the entry point "
+                         "returns None, takes no argument to mutate and "
+                         "prints nothing")
         if _filtered(out_o, stdout_filter) != _filtered(out_t, stdout_filter):
             diffs.append("stdout differs at module level")
     else:
