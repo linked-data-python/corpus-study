@@ -13,12 +13,26 @@
     "graph_read": 3,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "The one-step for-loop (g.objects(coded_entry, FHIR.CodeableConcept.coding)) becomes for codeable_concept in m{ {coded_entry} fhir:CodeableConcept.coding ?o } — arity 1, terms not one-tuples, exactly the target of this stratum.",
+    "Also translated the two g.value(..., any=False) traversals (coded_entry, and the coding's rdf:type) to m{ }.first() (trav_single_value idiom, same region): most-specific construction per INSTRUCTIONS_403 §2, not left as raw rdflib calls.",
+    "any=False adds a uniqueness check (raises if >1 match) that .first() does not reproduce (.first() silently takes the first). The fixture keeps both call sites to at most one match, so this gap is not exercised here; flagged since it is a real, if narrow, semantic gap between g.value(any=False) and .first().",
+    "FHIR's dotted RDF vocabulary (fhir:Coding.system, fhir:CodeableConcept.coding) needs a literal interior dot in the prefixed name's local part. Confirms lexical.md: interior dots are accepted inside islands (m{ }) via Turtle's full PN_CHARS rules. Outside an island the same name would NOT parse this way (dot ends a Python identifier there), which is why value(g, codeable_concept, FHIR.Coding.system) keeps FHIR.Coding.system as plain Python (it addresses the project's own value() helper, not an rdflib traversal) rather than becoming fhir:Coding.system.",
+    "The source repository (BD2KOnFHIR/fhirtordf) is unavailable to this venv: it pins rdflib~=5.0, incompatible with this study's rdflib 7.2.1. Added fhirgraphutils_context.py, a context shim reproducing (from the published 1.3.3 source) the DottedNamespace/DottedURIRef pair that makes FHIR.Coding.system work, plus the value() helper and CodeableConcept class the extracted region calls but does not define; both original.py and translated.ldpy import the same shim.",
+    "predicate: URIRef is a parameter, not a constant vocabulary term, so it is interpolated ({predicate}) rather than written as a prefixed name — same treatment as {subject}."
+  ],
+  "article_candidate": true,
   "draft_sha": "118113ab32c0a6f2",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.128154+00:00",

@@ -1,6 +1,16 @@
 # Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-core/naas_abi_core/utils/validate_bfo_ontology.py
 # region: check_restriction_references (lines 653-716, stratum trav_single_value)
 # licence of the source repository: see meta.json
+#
+# The extracted region had no imports at all: Graph, OWL, RDF, RDFS, URIRef
+# and the five helpers (_short, _label, _own_namespaces, _named_classes,
+# _named_object_properties) are module-level names of
+# validate_bfo_ontology.py that the region's own lines never declare.
+# Restored here -- OWL/RDF/RDFS/URIRef/Graph from rdflib itself, the five
+# helpers from the context shim (see meta.json).
+from rdflib import Graph, OWL, RDF, RDFS, URIRef
+from naas_context import _short, _label, _own_namespaces, _named_classes, _named_object_properties
+
 _VOCAB_PREFIXES_FOR_RESTRICTIONS = (
     "http://purl.obolibrary.org/obo/",
     "http://www.w3.org/2001/XMLSchema#",

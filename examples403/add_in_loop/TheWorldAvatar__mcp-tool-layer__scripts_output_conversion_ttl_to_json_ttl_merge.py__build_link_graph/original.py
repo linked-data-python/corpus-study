@@ -4,6 +4,7 @@
 from typing import Dict, Iterable, List, Tuple, Set
 import hashlib
 from rdflib import BNode, Graph, Namespace, RDF, RDFS, URIRef, Literal
+from _context import _bind_prefixes
 RDF_NS = RDF
 RDFS_NS = RDFS
 ONTOSYN = Namespace("https://www.theworldavatar.com/kg/OntoSyn/")

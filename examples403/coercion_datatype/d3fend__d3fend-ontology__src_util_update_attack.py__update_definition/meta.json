@@ -14,11 +14,25 @@
     "term_constructor": 3,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    ".first()",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: d3fend->d3fend, RDF->rdf, RDFS->rdfs"
+    "prefixes: d3fend->d3fend, RDF->rdf, RDFS->rdfs",
+    "le site coercion_datatype signalé (ligne 461 du fichier source) est Literal(attack_id) dans `(None, None, Literal(attack_id)) in graph` -- une chaîne CALCULÉE (attack_id vient de get_attack_id(...)) sans datatype= explicite, en position de lecture, pas d'écriture. Traduit trav_existence : `bool(m{ ?s ?p {attack_id} })` -- la substitution nue {attack_id} subit la coercition par défaut du langage, qui produit exactement Literal(attack_id) (vérifié à l'exécution : même terme, même .datatype None, même .language None) ; aucun garde-fou de la strate n'était nécessaire, `Literal(x)` -> `{x}` suffit tel quel",
+    "deuxième site du même idiome dans la région (non signalé par le tirage mais dans son périmètre) : Literal(tech[\"description\"].strip().split(\"\\n\")[0].strip()) sur la ligne d'ajout -- même schéma, wrapper retiré, le calcul passe tel quel en position de terme dans +{ }",
+    "graph.value(attack_uri, d3fend[\"definition\"]) -> m{ {attack_uri} d3fend:definition ?v }.first() : trav_single_value, l'idiome mécanique exact de how-to/migrate-from-rdflib.md. Traduit ici bien que hors strate assignée, par cohérence avec §2 (pas de .value() gardé quand m{ }.first() couvre le cas) -- la région entière montre 3 constructions de lecture/écriture, chacune la plus spécifique pour son idiome",
+    "@graph graph désigne le paramètre de la fonction comme graphe courant (forme 'designate', pas 'as') : graph est mutable et déjà fourni par l'appelant, pas créé par la région",
+    "shim d3fend_context.py : get_attack_id est définie ailleurs dans le même fichier source (lignes 98-106), hors région -- reproduite verbatim. _xmlns est plus problématique : le fichier source importe `from build import get_graph, _xmlns as _XMLNS`, mais src/util/build.py (seul build.py du dépôt à ce commit) ne définit `_xmlns` nulle part (vérifié par grep sur tout le fichier) -- dérive/casse en amont, pas une erreur d'extraction. Le shim fournit le namespace d3fend lui-même comme valeur de repli plausible (cohérent avec `d3fend = Namespace(...)` déjà dans le contexte de la région) ; get_graph n'est pas repris, inutilisée par cette région",
+    "pilote : fixture callable (pas un tuple littéral) car `graph` est mutable et partagé par les deux appels sinon -- un graphe frais par côté, une entrée voisine (rdfs:label \"T1055\") qui déclenche le joker ?s ?p sans être elle-même la définition, pas de d3fend:definition préexistante pour que le chemin new=1 s'exécute des deux côtés"
   ],
   "draft_sha": "df16be93f4e91756",
   "provenance": {
@@ -30,5 +44,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

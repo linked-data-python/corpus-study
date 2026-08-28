@@ -1,0 +1,27 @@
+# Input graph for
+# jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_utils_validate_bfo_ontology.py__check_inverse_of_itself.
+#
+# The region walks `g.value(prop, OWL.inverseOf)` for each prop in
+# main_properties (supplied by the driver, not read from this graph).
+#
+#   * SEVERAL solutions of `?p owl:inverseOf ?v` in the graph as a whole:
+#     ex:selfInverse (self-inverse -> flagged), ex:hasPart/ex:partOf (a
+#     genuine pair, not self-inverse -> not flagged).
+#   * ZERO-solution case: ex:noInverse has no owl:inverseOf at all, so
+#     `.value()`/`.first()` must answer None (None != prop, not flagged).
+#   * Neighbourhood that must NOT match: ex:otherSelfInverse is also
+#     self-inverse but is deliberately left out of main_properties by the
+#     driver, so the loop never reaches it.
+@prefix ex:   <http://example.org/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:selfInverse owl:inverseOf ex:selfInverse ;
+    rdfs:label "Self Inverse" .
+
+ex:hasPart owl:inverseOf ex:partOf .
+ex:partOf owl:inverseOf ex:hasPart .
+
+ex:noInverse rdfs:label "No Inverse" .
+
+ex:otherSelfInverse owl:inverseOf ex:otherSelfInverse .

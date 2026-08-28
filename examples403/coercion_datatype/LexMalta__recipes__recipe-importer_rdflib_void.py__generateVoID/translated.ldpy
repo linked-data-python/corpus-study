@@ -6,21 +6,38 @@ from rdflib.namespace import RDF, VOID
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix void: <http://rdfs.org/ns/void#> .
 
+# Driver fixture: in the full function (generateVoID, not extracted here),
+# `classes`/`classCount`/`classProps`/`classObjects` are computed by a first
+# pass over an input graph `g` (lines 62-65 of the source file, before this
+# region starts). This region is just the second pass -- a bare `for` loop
+# over that data -- so it is reproduced here as plain data, faithful to the
+# shapes the source builds (collections.defaultdict(set)/defaultdict(int)):
+# classCount[c] and len(classes[c])/len(classProps[c])/len(classObjects[c])
+# are plain ints, including a zero (class B has no distinguishing props).
+classA = URIRef("http://example.org/ClassA")
+classB = URIRef("http://example.org/ClassB")
+dataset = URIRef("http://example.org/Dataset")
+res = Graph()
+@graph res
+classes = {
+    classA: {URIRef("http://example.org/e1"), URIRef("http://example.org/e2"), URIRef("http://example.org/e3")},
+    classB: {URIRef("http://example.org/e4")},
+}
+classCount = {classA: 5, classB: 0}
+classProps = {classA: {URIRef("http://example.org/p1"), URIRef("http://example.org/p2")}, classB: set()}
+classObjects = {classA: {Literal("v1")}, classB: set()}
+distinctForPartitions = True
 
 for i, c in enumerate(classes):
     part = URIRef(dataset + "_class%d" % i)
-    res += g{
-        {dataset} void:classPartition {part} .
-        {part} a void:Dataset ;
-           void:triples {Literal(classCount[c])} ;
-           void:classes 1 ;
-           void:class {c} ;
-           void:entities {Literal(len(classes[c]))} ;
-           void:distinctSubjects {Literal(len(classes[c]))}
-    }
+    +{ {dataset} void:classPartition {part} .
+       {part} a void:Dataset ;
+          void:triples {classCount[c]} ;
+          void:classes 1 ;
+          void:class {c} ;
+          void:entities {len(classes[c])} ;
+          void:distinctSubjects {len(classes[c])} }
 
     if distinctForPartitions:
-        res += g{
-            {part} void:properties {Literal(len(classProps[c]))} ;
-               void:distinctObjects {Literal(len(classObjects[c]))}
-        }
+        +{ {part} void:properties {len(classProps[c])} ;
+              void:distinctObjects {len(classObjects[c])} }

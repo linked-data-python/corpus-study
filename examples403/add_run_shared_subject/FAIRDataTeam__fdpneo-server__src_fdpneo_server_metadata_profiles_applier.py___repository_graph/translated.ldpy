@@ -3,8 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import RDF
-from fdpneo_server.shared.namespaces import DCAT, DCT, LDP, ODRL, VOID
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import direct_container_config, _service_advertisement, dct:
 
 
 def _repository_graph(
@@ -34,12 +33,12 @@ def _repository_graph(
     """
     subject = URIRef(iri)
     graph = Graph()
-    graph += g{
-        {subject} a {URIRef(type_iri)} ;
-           {DCT.title} {Literal(title)}
+    @graph graph
+    +{ {subject} a {URIRef(type_iri)} ;
+           dct:title {Literal(title)}
     }
     if rights_iri is not None:
-        graph += g{ {subject} {DCT.rights} {URIRef(rights_iri)} }
+        +{ {subject} dct:rights {URIRef(rights_iri)} }
     for triple in direct_container_config(subject, member_relations):
         graph.add(triple)
     for triple in _service_advertisement(subject, iri, search_enabled=search_enabled):

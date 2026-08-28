@@ -4,7 +4,8 @@
 from typing import Union, Optional, Tuple, List
 from rdflib import Graph, BNode, Literal, RDF
 from rdflib.term import Identifier, URIRef, Node
-from fhirtordf.rdfsupport.namespaces import FHIR
+from fhirgraphutils_context import FHIR, value, CodeableConcept
+@prefix fhir: <http://hl7.org/fhir/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 
@@ -33,11 +34,12 @@ def codeable_concept_code(g: Graph, subject: Node, predicate: URIRef, system: Op
     #    ]
     # ];
     rval = []
-    coded_entry = g.value(subject, predicate, any=False)
+    @graph g
+    coded_entry = m{ {subject} {predicate} ?v }.first()
     if coded_entry:
-        for codeable_concept in list(g.objects(coded_entry, FHIR.CodeableConcept.coding)):
+        for codeable_concept in m{ {coded_entry} fhir:CodeableConcept.coding ?o }:
             coding_system = value(g, codeable_concept, FHIR.Coding.system)
             coding_code = value(g, codeable_concept, FHIR.Coding.code)
             if coding_system and coding_code and (system is None or system == coding_system):
-                rval.append(CodeableConcept(coding_system, coding_code, g.value(codeable_concept, rdf:type, any=False)))
+                rval.append(CodeableConcept(coding_system, coding_code, m{ {codeable_concept} rdf:type ?t }.first()))
     return rval

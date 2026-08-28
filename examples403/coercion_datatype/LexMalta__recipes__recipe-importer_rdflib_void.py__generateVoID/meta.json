@@ -14,11 +14,22 @@
     "term_constructor": 7,
     "triple_add": 9
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "nom préfixé",
+    "variable",
+    "littéral typé"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, VOID->void"
+    "prefixes: RDF->rdf, VOID->void",
+    "coeur de la strate : les 7 Literal(...) de la région (VOID.triples, VOID.classes, VOID.entities x2, VOID.distinctSubjects... et les deux du bloc distinctForPartitions) enveloppent des int SANS datatype= explicite -- classCount[c] (un collections.defaultdict(int)), len(classes[c]), len(classProps[c]), len(classObjects[c]), et la constante 1. Vérifié à l'exécution (python -m ldpy) : Literal(classCount[c]) et le terme obtenu par substitution nue {classCount[c]} dans +{ } sont un seul et même terme rdflib (même égalité, même .datatype), y compris pour 0 (classB). Le wrapper Literal(...) est donc entièrement retiré -- la coercition par défaut du langage (node(), même inférence que rdflib) suffit sans Coercion ni ^^xsd:. C'est le cas 'gain maximal, coût nul' de la strate : Literal(x) -> {x}, une substitution de notation pure",
+    "Literal(1) est une valeur CONSTANTE (pas calculée) : traduite en littéral entier nu `1` dans +{ }, qui parse comme un entier Turtle -- vérifié identique à Literal(1) (même terme, même datatype xsd:integer)",
+    "res n'est pas le résultat de @graph as g (il préexiste, passé en 'paramètre' de la fonction dont la région est extraite) : @graph res le désigne comme graphe courant, ce qui permet +{ } directement plutôt que res += g{ ... } -- plus spécifique et plus court ; les deux .add() qui partagent le sujet `part` (et le premier triplet sur `dataset`) tiennent en un seul +{ } avec ';' et '.', l'idiome add_run_shared_subject rencontré en passant",
+    "fixture du pilote : classes/classCount/classProps/classObjects/dataset/res/distinctForPartitions ne sont pas dans la région extraite (calculés par la première passe de generateVoID sur un graphe d'entrée, hors région) -- affectation dans le contexte (comme prévu par AGENT_BATCH §'rendre la région exécutable'), pas un shim de projet : ce sont des données de test, pas du code source tiers. Deux classes, l'une avec compte 0 (classB) pour exercer la coercition de zéro, l'autre avec plusieurs éléments"
   ],
   "draft_sha": "8df11399ae5b72cf",
   "provenance": {
@@ -30,5 +41,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

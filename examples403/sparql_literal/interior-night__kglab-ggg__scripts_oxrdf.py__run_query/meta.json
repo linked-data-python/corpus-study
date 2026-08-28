@@ -10,10 +10,16 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "s{ }", "call suffix (g)", "prefixed name", "variable"],
+  "translation_notes": [
+    "The canonical sparql_literal case: a static, unparametrised query text with its own PREFIX block, assigned to a module constant and passed whole to g.query(). The module constant QUDT_QUERY9 disappears -- its text becomes the s{ } island directly at the g.query() call site, and the four PREFIX lines (BASF_EC_RaMPO, owl, rdfs, rdf) move out of the query text into @prefix declarations at module scope, inherited into the island's prologue (querying.md). Single island in the function, so the call suffix s{ ... }(g) was used rather than a @graph declaration (same threshold as the acquirium remove/_apply_graph_write precedent: a declaration would cost a line to save a parenthesis).",
+    "The query text itself -- two UNION branches, two owl:unionOf/rdf:rest*/rdf:first property paths, an OPTIONAL, five FILTERs -- is copied verbatim into the island with no rewriting: s{ } is all of SPARQL, so nothing here needed simplifying to fit. Its only syntactic risk is the ambiguity between a SPARQL group and an {expr} interpolation, and since none of this query's { ... } blocks are also valid Python expressions, none of them are misread; transpiling this file is itself the demonstrated proof (rdfeval check transpiles before it runs the driver).",
+    "Finding worth flagging: rdflib's g.query(TEXT) evaluates the query EAGERLY, so in the original the printed 'query init time' is where the real cost is measured and 'query exec time' after the for-loop is ~0. s{ } is a lazy prepared query (querying.md: 'the island's value is a lazy prepared query'): the translated program measures ~0 for init and the real cost for exec instead -- same total work, different attribution between the two printed numbers. Confirmed empirically (see driver.py's manual run): original prints init=0.028/exec=0.000, translated prints init=0.000/exec=0.028 on the same fixture. Not a defect -- s{ }'s laziness is documented and intended -- but a program that timed only the 'init' half, or asserted on it, would silently start measuring the wrong half of the work after translation. This is exactly the kind of print-only side effect run_pair's entry/calls path does not capture from stdout (see design record 405): the driver instruments a Probe stand-in for the graph to record the actual consumed ?item values instead, which is what proves the two versions agree on results despite disagreeing on where the printed timings land.",
+    "The graph parameter g arrives as a plain, unannotated positional argument (no missing-binding problem here -- unlike the self.graph cases the 163/1196 note in AGENT_BATCH warns about)."
+  ],
+  "article_candidate": true,
   "draft_sha": "a5f9901836b562bb",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.774218+00:00",

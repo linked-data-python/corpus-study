@@ -10,10 +10,25 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "nom préfixé",
+    "variable"
+  ],
+  "translation_notes": [
+    "the extracted region had NO imports at all: Graph, OWL, RDF, RDFS, URIRef and five helpers (_short, _label, _own_namespaces, _named_classes, _named_object_properties) are module-level names the region's own lines never declare. Restored in original.py -- OWL/RDF/RDFS/URIRef/Graph from rdflib itself, the five helpers from naas_context.py (faithful, reduced copy).",
+    "five distinct rdflib read call sites in one region, all translated, not just the one that earned the stratum: `g.subjects(RDF.type, OWL.DatatypeProperty)` inside a set comprehension -> `m{ ?s a owl:DatatypeProperty }` (trav_one_step idiom, arity 1 yields bare terms); `(iri, RDF.type, None) in g` -> `bool(m{ {iri} a ?x })` (trav_existence idiom, co-located in this trav_single_value region); `g.subjects(RDF.type, OWL.Restriction)` for-loop -> `m{ ?bnode a owl:Restriction }`; `g.value(bnode, OWL.onProperty)` and `g.value(bnode, filler_pred)` -> `m{ {bnode} owl:onProperty ?v }.first()` / `m{ {bnode} {filler_pred} ?v }.first()`. Translating everything, not just the flagged site, is what §2 of INSTRUCTIONS_403 asks for ('créditer ou débiter chaque îlot séparément').",
+    "`g.value(None, RDFS.subClassOf, bnode)` is `.value()` with the SUBJECT unbound and the OBJECT given -- rdflib's positional form finds 'the s such that s p o'. `m{ }` is direction-agnostic, so this becomes `m{ ?owner rdfs:subClassOf {bnode} }.first()` with no special case: the stratum's row (`g.value(s, p)` -> `m{ }.first()`) covers the reversed-argument form too, which was worth confirming since none of the earlier examples exercised it.",
+    "`filler_pred` is a Python loop variable ranging over (owl:allValuesFrom, owl:someValuesFrom), so `g.value(bnode, filler_pred)` needs a variable in PREDICATE position: `m{ {bnode} {filler_pred} ?v }.first()`. graphs.md says interpolation works 'in any term position'; this is the first region in this batch to actually need it in predicate position rather than subject, and it transpiles and runs exactly as documented.",
+    "`OWL.allValuesFrom` / `OWL.someValuesFrom` in the loop's own tuple (not inside an island) were also rewritten to `owl:allValuesFrom` / `owl:someValuesFrom`, per the general 'EX.Thing -> ex:Thing, wherever a Python expression may appear' rewrite in migrate-from-rdflib.md -- not required by the trav_single_value row specifically, but it is the same mechanical rewrite and leaves no OWL.* namespace access behind.",
+    "`_severity` and `_is_known` are closures DEFINED INSIDE check_restriction_references, after `@graph g`; both read `g` themselves through `m{ }`/`bool(m{ })` with no @graph of their own. Empirically verified (not documented explicitly in current-graph.md/declarations.md, which only shows a top-level and a def-vs-def example): a nested `def` written textually inside a block that has an active `@graph` sees it -- block scope follows Python's own nesting, one level of def or several. Confirms rather than contradicts current-graph.md, but is worth recording since it was not obvious from the reference alone.",
+    "fixture: three owl:Restriction bnodes reached from three different owners (r1: onProperty declared/not flagged, allValuesFrom undeclared-but-in-ex's-own-namespace -> WARNING; r2: onProperty undeclared and outside ex: -> ERROR; r3: someValuesFrom is a well-known rdfs: term -> not flagged via the vocab-prefix branch of _is_known), plus r4 with NO rdfs:subClassOf owner at all -- the zero-solution case for `m{ ?owner rdfs:subClassOf {bnode} }.first()`, which must `continue` and append nothing -- and neighbourhood triples (an ordinary subclass edge, an onProperty-shaped triple on an unreached bnode) that must not surface. Ran original.py directly against the fixture to confirm it is not a vacuous pass: 2 issues fire (the WARNING and the ERROR described above), not 0."
+  ],
   "draft_sha": "75332ef17131a43f",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.077803+00:00",
@@ -24,5 +39,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true
 }

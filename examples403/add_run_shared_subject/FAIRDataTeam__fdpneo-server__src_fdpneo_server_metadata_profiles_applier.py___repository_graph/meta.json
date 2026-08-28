@@ -16,11 +16,24 @@
     "term_constructor": 4,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "from … import p:",
+    "IRI",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "site de la strate : `graph.add((subject, RDF.type, URIRef(type_iri)))` puis `graph.add((subject, DCT.title, Literal(title)))` -- meme sujet, aucune condition entre les deux -- deviennent un seul `+{ {subject} a {URIRef(type_iri)} ; dct:title {Literal(title)} }`.",
+    "LIMITE DE LA FUSION, digne d'etre notee : le TROISIEME `graph.add((subject, DCT.rights, ...))` partage aussi `subject`, mais il est garde par `if rights_iri is not None:` -- le fusionner dans le meme `;` aurait rendu le triplet type/title conditionnel a tort. Reste un `+{ }` separe dans son `if`. C'est la frontiere exacte de la strate : sujet partage n'implique fusion QUE si le flot de controle est aussi partage.",
+    "@graph designe une variable locale ordinaire (`graph`, pas `g`) : la regle n'exige pas un nom particulier.",
+    "les deux `for triple in fn(...): graph.add(triple)` (direct_container_config, _service_advertisement) restent en rdflib tel quel : ce ne sont PAS des sites de la strate (le `triple` est un (s, p, o) DEJA assemble par une fonction hors-region, pas des donnees a lier a un patron Turtle). Ecrire `for s, p, o in fn(...): +{ {s} {p} {o} }` transpile et passe, mais n'apporte aucun gain -- meme longueur, aucun terme de vocabulaire litteral puisque s/p/o restent tous interpoles -- et suppose, pour fusionner par ';', de connaitre si les triplets produits partagent un sujet : une propriete de fn() qui vit HORS de la region et que le pilote n'a pas a re-decouvrir. Laisse en `.add()`, note ici plutot que force.",
+    "`from fdpneo_server.shared.namespaces import DCAT, DCT, LDP, ODRL, VOID` (strate ns_import_project) : seul DCT sert de terme litteral DANS la region (dct:title, dct:rights) ; DCAT/LDP/ODRL/VOID ne sont utilises que par les deux fonctions shimmees, hors-region. La traduction n'importe donc que `dct:` en prefixe -- importer les quatre autres aurait produit des prefixes inutilises, meme lecon que la strate remove (cf DESIGN_CHOICES) : une declaration inutile fausse le decompte des ilots.",
+    "shim de contexte (context_shim.py) : DCAT/DCT/LDP/ODRL/VOID sont les vrais Namespace de fdpneo_server/shared/namespaces.py ; RESERVED_API_PATH est la vraie constante de fdpneo_server/shared/reserved.py ; direct_container_config et _service_advertisement sont copiees VERBATIM depuis applier.py -- ce sont les deux fonctions appelees par les boucles ci-dessus, definies dans le MEME fichier source que la region mais hors de ses lignes 451-486. Aucune logique inventee : tout est recopie du depot a ce commit.",
+    "pas de harnais demo() ici : _repository_graph rend directement un Graph (contrairement a la region Dewberry de ce meme lot), donc l'isomorphisme porte sur la valeur de retour telle quelle."
   ],
   "draft_sha": "d2ad234b420fe2b6",
   "provenance": {
@@ -32,5 +45,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

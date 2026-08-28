@@ -4,9 +4,10 @@
 import rdflib
 from rdflib import URIRef
 from rdflib.namespace import RDF
-from utils.ssl_ignore import no_ssl_verification
+from context_shim import no_ssl_verification
+import logging
 logger = logging.getLogger(__name__)
-from converter.dataset_converter import namespaces, DCAT, convert_socrata, graph_from_opendatasoft, \
+from context_shim import namespaces, DCAT, convert_socrata, graph_from_opendatasoft, \
     graph_from_data_gouv_fr, CKANConverter
 import quality
 

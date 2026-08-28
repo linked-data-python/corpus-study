@@ -1,4 +1,8 @@
-# Input graph for sebneu__portalwatch__converter_portal_fetch_processors.py__CKANDCAT_fetchAndConvertToDCAT — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Pre-existing content of `graph` before fetchAndConvertToDCAT is called.
+# graph.parse(...) MERGES into this graph rather than replacing it, so this
+# is neighbouring content that must survive untouched and must not satisfy
+# any of the region's patterns (no hydra:PagedCollection, no dcat:Dataset):
+# the real traversal pattern (hydra pagination, dcat:Dataset subjects) lives
+# in the fetched pages, which driver.py builds per call (see its docstring).
 @prefix ex: <http://example.org/> .
+ex:existing a ex:Note .

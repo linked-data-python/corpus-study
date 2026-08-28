@@ -1,4 +1,57 @@
-# Input graph for RDFLib__pyLODE__pylode_profiles_supermodel_loader.py__ProfilesDataset_load_profiles — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for RDFLib__pyLODE__pylode_profiles_supermodel_loader.py__ProfilesDataset_load_profiles
+# written against the region, not against the translation.
+#
+# Three profiles, each with one prof:hasResource blank-node descriptor (the
+# real PROF pattern -- graph.cbd(profile) only follows blank-node chains, so
+# a resource descriptor must be a blank node to be pulled into profile_graph
+# together with the profile itself):
+#
+#   ex:profileA -- fetched artifact is NOT a prof:Profile: exercises the
+#     FALSE / zero-solution branch of `new_graph.value(None, rdf:type,
+#     prof:Profile)` (-> bool(m{ }) is False, profile_graph.__iadd__).
+#   ex:profileB -- fetched artifact IS a prof:Profile: exercises the TRUE
+#     branch (-> bool(m{ }) is True), recursing into load_profiles.
+#   ex:profileC -- descriptor's dcterms:format is not in MEDIA_TYPES:
+#     neighbourhood that must not reach fetch() at all.
+#
+# ex:notAProfile is neighbourhood for the outer pattern: it carries a
+# prof:hasResource descriptor too, but is not typed prof:Profile, so
+# `graph.subjects(rdf:type, prof:Profile)` must not pick it up.
 @prefix ex: <http://example.org/> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+ex:profileA a prof:Profile ;
+    dcterms:title "Profile A" ;
+    prof:hasResource [
+        a prof:ResourceDescriptor ;
+        dcterms:format "text/turtle" ;
+        prof:hasRole ex:role-other ;
+        prof:hasArtifact <http://example.org/artifacts/other.ttl>
+    ] .
+
+ex:profileB a prof:Profile ;
+    dcterms:title "Profile B" ;
+    prof:hasResource [
+        a prof:ResourceDescriptor ;
+        dcterms:format "text/turtle" ;
+        prof:hasRole ex:role-other ;
+        prof:hasArtifact <http://example.org/artifacts/nested-profile.ttl>
+    ] .
+
+ex:profileC a prof:Profile ;
+    dcterms:title "Profile C" ;
+    prof:hasResource [
+        a prof:ResourceDescriptor ;
+        dcterms:format "application/pdf" ;
+        prof:hasRole ex:role-other ;
+        prof:hasArtifact <http://example.org/artifacts/unused.pdf>
+    ] .
+
+ex:notAProfile a ex:SomethingElse ;
+    dcterms:title "Not a profile" ;
+    prof:hasResource [
+        a prof:ResourceDescriptor ;
+        dcterms:format "text/turtle" ;
+        prof:hasArtifact <http://example.org/artifacts/other.ttl>
+    ] .

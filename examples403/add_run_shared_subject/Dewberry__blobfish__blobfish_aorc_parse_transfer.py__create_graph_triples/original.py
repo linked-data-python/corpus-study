@@ -2,7 +2,7 @@
 # region: create_graph_triples (lines 175-270, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
 from rdflib import RDF, OWL, XSD, DCAT, DCTERMS, PROV, Literal, URIRef, BNode
-from ..pyrdf import AORC
+from context_shim import AORC, AORCFilter, GraphCreator, NodeNamer, CompletedTransferMetadata
 
 def create_graph_triples(
     meta: CompletedTransferMetadata, graph_creator: GraphCreator, node_namer: NodeNamer, filter: AORCFilter | None
@@ -100,3 +100,16 @@ def create_graph_triples(
 
     # Associate precip partition catalog with source dataset it holds
     g.add((precip_partition_uri, DCAT.dataset, source_dataset_node))
+
+
+# Demo harness (identical on both sides, see meta.json): create_graph_triples
+# returns None and writes through graph_creator.get_graph(...), not through a
+# plain Graph argument the driver could compare -- GraphCreator has no
+# __eq__, so comparing the argument itself would compare object identity and
+# always fail.  This wraps the call and hands back the one graph it wrote to,
+# compared by isomorphism as usual.
+def demo(meta):
+    graph_creator = GraphCreator({"dcat": DCAT, "prov": PROV, "dct": DCTERMS, "aorc": AORC})
+    node_namer = NodeNamer()
+    create_graph_triples(meta, graph_creator, node_namer, None)
+    return graph_creator.default_graph

@@ -4,7 +4,7 @@
 from typing import Union, Optional, Tuple, List
 from rdflib import Graph, BNode, Literal, RDF
 from rdflib.term import Identifier, URIRef, Node
-from fhirtordf.rdfsupport.namespaces import FHIR
+from fhirgraphutils_context import FHIR, value, CodeableConcept
 
 def codeable_concept_code(g: Graph, subject: Node, predicate: URIRef, system: Optional[str]=None) \
         -> List[CodeableConcept]:

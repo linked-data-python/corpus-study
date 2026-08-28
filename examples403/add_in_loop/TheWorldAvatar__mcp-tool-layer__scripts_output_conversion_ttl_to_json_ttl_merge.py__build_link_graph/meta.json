@@ -16,12 +16,17 @@
     "term_constructor": 1,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "@graph", "+{ }"],
   "translation_notes": [
-    "prefixes: ONTOSYN->ontosyn, ONTOMOPS->ontomops, ONTOSPECIES->ontospecies, RDF->rdf, RDFS->rdfs"
+    "prefixes: ONTOSYN->ontosyn, ONTOMOPS->ontomops, ONTOSPECIES->ontospecies, RDF->rdf, RDFS->rdfs",
+    "piege 2 (add_in_loop): les quatre boucles de la region iterent sur g.subjects(...)/g.objects(...)/g.triples(...), donc sur des termes ou des 3-uplets, jamais des mappings -- 'for @bindings in' ne s'applique a aucune d'elles. Garde des boucles Python ordinaires ; chaque .add() isole devient un +{ } sous un seul '@graph as lg' (idiome add_isolated repete a l'interieur des boucles, pas add_in_loop au sens de la strate).",
+    "brouillon initial: accumulait via 'lg += g{ ... }' (un gabarit instancie a chaque tour) au lieu de '.add()' ; remplace par '@graph as lg' + '+{ }' statement, qui est la construction prescrite par INSTRUCTIONS_403 (pas de porte-a-faux 'g{ }' pour une simple ecriture).",
+    "shim _context.py: _bind_prefixes() manquait (module-level helper hors de la region extraite) ; recupere fidelement depuis le depot reel via 'gh api' au commit epingle (ne fait que g.bind(...), sans effet sur l'isomorphisme comparee).",
+    "fixture.ttl construit pour couvrir : les 4 types autorises, une connexion directe entre deux noeuds selectionnes, le pont hasChemicalOutput/isRepresentedBy en variante BNode et en variante URIRef, un pont refuse (MOP non selectionne), un noeud selectionne sans aucune connexion (cas zero solution), et du bruit non selectionne qui ne doit pas apparaitre."
   ],
+  "article_candidate": false,
   "draft_sha": "ac9d3fb21bc602bc",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.558335+00:00",

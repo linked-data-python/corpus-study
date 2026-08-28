@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import RDF
-from fdpneo_server.shared.namespaces import DCAT, DCT, LDP, ODRL, VOID
+from context_shim import DCAT, DCT, LDP, ODRL, VOID, direct_container_config, _service_advertisement
 
 def _repository_graph(
     *,

@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "nom préfixé",
+    "variable"
+  ],
+  "translation_notes": [
+    "the extracted region had NO imports at all (rdf_ops: 0, categories: {} -- the stratifier's categoriser missed every graph_read here): Graph, URIRef, OWL and the two helpers _short/_label are module-level names of validate_bfo_ontology.py that the region's own lines never declare. Restored in original.py -- OWL from rdflib itself, _short/_label from the context shim naas_context.py (reduced, faithful copy of the two helpers, since importing the real module needs its own ~1800 lines and its argparse CLI).",
+    "`g.value(prop, OWL.inverseOf)` -> `m{ {prop} owl:inverseOf ?v }.first()`: the textbook case of the stratum, one line, no restructuring.",
+    "fixture: ex:selfInverse (self-inverse, flagged), ex:hasPart/ex:partOf (a genuine inverse pair -- exercises `.first()` returning a real value that is NOT equal to prop, so no issue), ex:noInverse (no owl:inverseOf triple at all -- the zero-solution case, `.value()`/`.first()` both None, `None == prop` is False) and ex:otherSelfInverse, a self-inverse property deliberately left OUT of main_properties -- the neighbourhood exclusion happens on the driver's argument, not in the graph, since main_properties is itself an argument, not something the region reads from g."
+  ],
   "draft_sha": "aa96db8c5a339d9d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.020147+00:00",
@@ -24,5 +35,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true
 }

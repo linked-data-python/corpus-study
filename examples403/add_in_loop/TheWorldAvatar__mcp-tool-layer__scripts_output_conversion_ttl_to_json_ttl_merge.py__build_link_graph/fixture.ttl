@@ -1,4 +1,63 @@
 # Input graph for TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_ttl_merge.py__build_link_graph — written during translation.
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+@prefix ontospecies: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ex: <http://example.org/> .
+
+# --- selected instances (allowed types), several solutions ---
+
+ex:species1 a ontospecies:Species ;
+    rdfs:label "Species One" .
+
+ex:synth1 a ontosyn:ChemicalSynthesis ;
+    rdfs:label "Synthesis One" ;
+    ontosyn:hasChemicalInput ex:input1 ;
+    ontosyn:hasChemicalOutput _:out1 .
+
+ex:mop1 a ontomops:MetalOrganicPolyhedron ;
+    rdfs:label "MOP One" .
+
+ex:cbu1 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "CBU One" .
+
+# direct connections between two selected nodes (must be kept)
+ex:synth1 ex:relatedTo ex:species1 .
+ex:cbu1 ex:partOfMop ex:mop1 .
+
+# ChemicalInput node: not itself an allowed type, gets minimal info only
+ex:input1 a ontosyn:ChemicalInput ;
+    rdfs:label "Input One" .
+
+# bridging pattern: synth1 -[hasChemicalOutput]-> blank node -[isRepresentedBy]-> mop1
+_:out1 ontosyn:isRepresentedBy ex:mop1 .
+
+# --- zero-solution case: a selected synthesis with no input/output/label ---
+ex:synth2 a ontosyn:ChemicalSynthesis .
+
+# --- neighbourhood that must NOT match ---
+
+# non-selected instance type: excluded even though it touches a selected node
+ex:other1 a ex:UnrelatedType ;
+    rdfs:label "Should not appear" ;
+    ex:relatedTo ex:species1 .
+
+# unrelated noise triples, no allowed-type node involved at all
+ex:extra1 a ex:Junk ;
+    ex:randomProp "noise" .
+
+# a chemical output bridging to a non-selected / wrong-type node: must NOT bridge
+ex:synth3 a ontosyn:ChemicalSynthesis ;
+    ontosyn:hasChemicalOutput _:out3 .
+_:out3 ontosyn:isRepresentedBy ex:notAMop .
+ex:notAMop a ex:SomeOtherType .
+
+# a chemical output that is a URIRef (not blank) pointing to a selected MOP:
+# must bridge without skolemization
+ex:synth4 a ontosyn:ChemicalSynthesis ;
+    ontosyn:hasChemicalOutput ex:out4 .
+ex:out4 ontosyn:isRepresentedBy ex:mop2 .
+ex:mop2 a ontomops:MetalOrganicPolyhedron .

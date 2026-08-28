@@ -1,6 +1,19 @@
 # Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-core/naas_abi_core/utils/validate_bfo_ontology.py
 # region: check_restriction_references (lines 653-716, stratum trav_single_value)
 # licence of the source repository: see meta.json
+#
+# The extracted region had no imports at all: Graph, OWL, RDF, RDFS, URIRef
+# and the five helpers (_short, _label, _own_namespaces, _named_classes,
+# _named_object_properties) are module-level names of
+# validate_bfo_ontology.py that the region's own lines never declare.
+# Restored here -- OWL/RDF/RDFS/URIRef/Graph from rdflib itself, the five
+# helpers from the context shim (see meta.json).
+from rdflib import Graph, OWL, RDF, RDFS, URIRef
+from naas_context import _short, _label, _own_namespaces, _named_classes, _named_object_properties
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
 _VOCAB_PREFIXES_FOR_RESTRICTIONS = (
     "http://purl.obolibrary.org/obo/",
     "http://www.w3.org/2001/XMLSchema#",
@@ -12,12 +25,13 @@ _VOCAB_PREFIXES_FOR_RESTRICTIONS = (
 )
 
 def check_restriction_references(g: Graph) -> list[dict]:
+    @graph g
     issues = []
     own_namespaces = _own_namespaces(g)
     declared_classes = set(_named_classes(g))
     declared_properties = set(_named_object_properties(g))
     declared_data_properties = {
-        s for s in g.subjects(RDF.type, OWL.DatatypeProperty) if isinstance(s, URIRef)
+        s for s in m{ ?s a owl:DatatypeProperty } if isinstance(s, URIRef)
     }
 
     def _severity(iri: URIRef) -> str:
@@ -35,13 +49,13 @@ def check_restriction_references(g: Graph) -> list[dict]:
             iri in declared_classes
             or iri in declared_properties
             or iri in declared_data_properties
-            or (iri, RDF.type, None) in g
+            or bool(m{ {iri} a ?x })
         )
 
-    for bnode in g.subjects(RDF.type, OWL.Restriction):
-        on_prop = g.value(bnode, OWL.onProperty)
+    for bnode in m{ ?bnode a owl:Restriction }:
+        on_prop = m{ {bnode} owl:onProperty ?v }.first()
         if isinstance(on_prop, URIRef) and not _is_known(on_prop):
-            owner = g.value(None, RDFS.subClassOf, bnode)
+            owner = m{ ?owner rdfs:subClassOf {bnode} }.first()
             if owner is None:
                 continue
             issues.append(
@@ -56,10 +70,10 @@ def check_restriction_references(g: Graph) -> list[dict]:
                 }
             )
 
-        for filler_pred in (OWL.allValuesFrom, OWL.someValuesFrom):
-            filler = g.value(bnode, filler_pred)
+        for filler_pred in (owl:allValuesFrom, owl:someValuesFrom):
+            filler = m{ {bnode} {filler_pred} ?v }.first()
             if isinstance(filler, URIRef) and not _is_known(filler):
-                owner = g.value(None, RDFS.subClassOf, bnode)
+                owner = m{ ?owner rdfs:subClassOf {bnode} }.first()
                 if owner is None:
                     continue
                 issues.append(

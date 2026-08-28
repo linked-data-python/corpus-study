@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Set
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.collection import Collection
 from rdflib.namespace import Namespace, RDF, RDFS
-from swrl2rdf.model import (
+from context_shim import (
     Atom,
     BuiltinAtom,
     ClassAtom,
@@ -18,11 +18,12 @@ from swrl2rdf.model import (
     SameIndividualAtom,
     Term,
     Variable,
+    PrefixMap,
+    SWRL,
+    _display_iri,
+    _term_from_node,
+    _terms_from_arguments,
 )
-from swrl2rdf.prefixmap import PrefixMap
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 SWRL_ClassAtom = SWRL.ClassAtom
 SWRL_IndividualPropertyAtom = SWRL.IndividualPropertyAtom
 SWRL_DatavaluedPropertyAtom = SWRL.DatavaluedPropertyAtom
@@ -43,35 +44,36 @@ def _parse_atom(
     var_names: Dict[URIRef | BNode, str],
     reverse_mapping: Optional[Dict[str, str]],
 ) -> Optional[Atom]:
-    types = list(graph.objects(atom_node, rdf:type))
+    @graph graph
+    types = list(m{ {atom_node} a ?t })
     if SWRL_ClassAtom in types:
-        cls = graph.value(atom_node, SWRL_classPredicate)
-        arg1 = graph.value(atom_node, SWRL_argument1)
+        cls = m{ {atom_node} {SWRL_classPredicate} ?v }.first()
+        arg1 = m{ {atom_node} {SWRL_argument1} ?v }.first()
         return ClassAtom(
             class_predicate=_display_iri(cls, prefix_map, reverse_mapping),
             argument=_term_from_node(graph, arg1, prefix_map, var_names, reverse_mapping),
         )
     if SWRL_IndividualPropertyAtom in types:
-        prop = graph.value(atom_node, SWRL_propertyPredicate)
-        a1 = graph.value(atom_node, SWRL_argument1)
-        a2 = graph.value(atom_node, SWRL_argument2)
+        prop = m{ {atom_node} {SWRL_propertyPredicate} ?v }.first()
+        a1 = m{ {atom_node} {SWRL_argument1} ?v }.first()
+        a2 = m{ {atom_node} {SWRL_argument2} ?v }.first()
         return IndividualPropertyAtom(
             property_predicate=_display_iri(prop, prefix_map, reverse_mapping),
             argument1=_term_from_node(graph, a1, prefix_map, var_names, reverse_mapping),
             argument2=_term_from_node(graph, a2, prefix_map, var_names, reverse_mapping),
         )
     if SWRL_DatavaluedPropertyAtom in types:
-        prop = graph.value(atom_node, SWRL_propertyPredicate)
-        a1 = graph.value(atom_node, SWRL_argument1)
-        a2 = graph.value(atom_node, SWRL_argument2)
+        prop = m{ {atom_node} {SWRL_propertyPredicate} ?v }.first()
+        a1 = m{ {atom_node} {SWRL_argument1} ?v }.first()
+        a2 = m{ {atom_node} {SWRL_argument2} ?v }.first()
         return DatavaluedPropertyAtom(
             property_predicate=_display_iri(prop, prefix_map, reverse_mapping),
             argument1=_term_from_node(graph, a1, prefix_map, var_names, reverse_mapping),
             argument2=_term_from_node(graph, a2, prefix_map, var_names, reverse_mapping),
         )
     if SWRL_BuiltinAtom in types:
-        builtin = graph.value(atom_node, SWRL_builtin)
-        args_node = graph.value(atom_node, SWRL_arguments)
+        builtin = m{ {atom_node} {SWRL_builtin} ?v }.first()
+        args_node = m{ {atom_node} {SWRL_arguments} ?v }.first()
         terms: List[Term] = []
         if args_node is not None:
             try:

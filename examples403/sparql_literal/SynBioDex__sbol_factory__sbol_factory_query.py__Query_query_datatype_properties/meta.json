@@ -10,10 +10,16 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "@graph", "s{ }", "prefixed name", "variable"],
+  "translation_notes": [
+    "The two g.query(query) calls become two s{ } islands under one @graph self.graph (the function's only two islands, both on the same graph -- past the acquirium remove/_apply_graph_write threshold for preferring a block declaration over repeating the call suffix twice).",
+    "class_uri is a plain str (callers pass str(row[0]) results), and the original query text splices it inside literal angle brackets: '<{}>.'.format(class_uri). s{ }'s {expr} interpolation substitutes a whole TERM via node() coercion, and node() turns a bare str into a plain Literal, not a URIRef -- that would silently change what the pattern matches. The correct, non-degraded spelling is {URIRef(class_uri)}: node() passes an already-URIRef term through unchanged (coercion.md), so this reproduces exactly what the SPARQL IRIREF '<...>' the original text built by hand meant. URIRef(class_uri) is safe here (migrate guide trap 2): no @base is in scope for s{ }, and class_uri is always an absolute IRI string in this codebase.",
+    "The original query text has NO PREFIX lines at all for rdf:/rdfs:/owl: -- it relies on rdflib silently defaulting a query's prologue to the graph's bound namespaces, which as of rdflib 6+ come pre-bound with rdf/rdfs/owl/xsd/... out of the box (verified empirically: a query using owl:/rdfs:/rdf: with no PREFIX and no initNs resolves against a fresh, unconfigured Graph()). ldpy's s{ } prologue is built ONLY from @prefix declarations lexically in scope (querying.md), never from a graph's runtime namespace_manager, so the three prefixes had to be declared explicitly at module scope to reproduce the same resolution -- this makes visible, in the file, a dependency that rdflib was resolving invisibly at runtime.",
+    "Surface win worth flagging for the article: the original had to double every literal '{' and '}' inside the SPARQL group syntax ('{{', '}}') to escape Python's str.format mini-language before the query text could be substituted. s{ } needs no such escaping -- the SPARQL braces are just SPARQL braces -- so the two queries lose four pairs of doubled braces between them with no other change to the query body."
+  ],
+  "article_candidate": true,
   "draft_sha": "dd16df585a2a3ff4",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.855948+00:00",

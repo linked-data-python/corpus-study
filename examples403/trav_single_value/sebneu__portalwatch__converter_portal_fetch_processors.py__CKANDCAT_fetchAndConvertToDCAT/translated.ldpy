@@ -4,23 +4,22 @@
 import rdflib
 from rdflib import URIRef
 from rdflib.namespace import RDF
-from utils.ssl_ignore import no_ssl_verification
+from context_shim import no_ssl_verification
+import logging
 logger = logging.getLogger(__name__)
-from converter.dataset_converter import namespaces, DCAT, convert_socrata, graph_from_opendatasoft, \
+from context_shim import namespaces, DCAT, convert_socrata, graph_from_opendatasoft, \
     graph_from_data_gouv_fr, CKANConverter
 import quality
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix dcat: <http://www.w3.org/ns/dcat#> .
-
 
 def fetchAndConvertToDCAT(self, graph, portal_ref, portal_api, snapshot, activity, format="ttl"):
 
+    @graph graph
     logger.debug('Fetching CKAN portal via RDF endpoint: ' + portal_api)
 
     with no_ssl_verification():
         graph.parse(portal_api, format=format)
-        cur = graph.value(predicate=rdf:type, object=namespaces['hydra'].PagedCollection)
-        next_page = graph.value(subject=cur, predicate=namespaces['hydra'].nextPage)
+        cur = m{ ?s a {namespaces['hydra'].PagedCollection} }.first()
+        next_page = m{ {cur} {namespaces['hydra'].nextPage} ?v }.first()
         page = 0
         while next_page:
             page += 1
@@ -30,11 +29,11 @@ def fetchAndConvertToDCAT(self, graph, portal_ref, portal_api, snapshot, activit
             p = str(next_page)
             g = rdflib.Graph()
             g.parse(p, format=format)
-            next_page = g.value(subject=URIRef(next_page), predicate=namespaces['hydra'].nextPage)
+            next_page = m{ {URIRef(next_page)} {namespaces['hydra'].nextPage} ?v }(g).first()
             graph.parse(p, format=format)
 
         logger.debug('Total pages:' + str(page))
         logger.info('Fetching finished')
 
-        for d in graph.subjects(rdf:type, dcat:Dataset):
+        for d in m{ ?d a {DCAT.Dataset} }:
             quality.add_quality_measures(d, graph, activity)

@@ -14,11 +14,25 @@
     "term_constructor": 23,
     "triple_add": 27
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "from … import p:",
+    "@prefix",
+    "IRI",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, OWL->owl, XSD->xsd, DCAT->dcat, DCTERMS->dcterms, PROV->prov"
+    "33 `g.add((s, p, o))` -> 14 `+{ }`, en fusionnant chaque suite CONSECUTIVE de g.add sur le meme sujet avec ';' (jusqu'a 5 triplets dans un seul ilot, pour source_distribution_uri). Les g.add adjacents mais a sujets DIFFERENTS (ex: type du noeud periode puis dcterms:temporal sur le sujet dataset) sont restes des ilots separes plutot que d'etre fusionnes par '.' : le but du lot est de mesurer precisement le gain du ';' sur sujet partage, pas de compacter tout ce qui est adjacent.",
+    "trois `Literal(...)` intercales entre deux g.add du meme sujet (source_dataset_period_end, rfc_office_alias) ont ete remontes juste avant l'ilot fusionne -- un pur hissage de calcul sans effet de bord, necessaire pour que ';' voie les deux valeurs. Aucune reorganisation de logique.",
+    "prefixes: OWL->owl, XSD->xsd, DCAT->dcat, DCTERMS->dcterms, PROV->prov. rdf: RETIRE du brouillon : jamais utilise (RDF.type devient `a`), une declaration inutile aurait fausse le decompte des ilots.",
+    "`from ..pyrdf import AORC` (namespace de PROJET, la strate ns_import_project) est aussi traduit dans cette region puisque AORC.X apparait comme terme dans la moitie des ilots : `from context_shim import aorc:` plutot que `{AORC.X}` interpole partout. C'est la construction la plus specifique, meme si ns_import_project n'est pas la strate tiree ici -- la degrader en interpolation Python aurait masque la moitie des predicats/types sous des accolades.",
+    "shim de contexte (context_shim.py) : AORC est le vrai Namespace de _AORC.py (https://github.com/Dewberry/blobfish/blob/aorc_refactor/semantics/rdf/aorc.ttl#), verifie sur le depot a ce commit. GraphCreator et NodeNamer sont copies verbatim (moins serialize_graphs, hors de portee). CompletedTransferMetadata est reduite a un conteneur de champs : la vraie dataclass derive mirror_public_uri/ref_end_date/rfc_office_uri dans __post_init__, et la derivation de rfc_office_uri fait un VRAI appel HTTP (weather.gov) -- la region etudiee ne fait que LIRE ces champs deja derives, jamais construire l'objet, donc le pilote les fournit directement, comme n'importe quelle fixture. Aucune logique inventee, seul l'appel reseau n'est pas reproduit.",
+    "`+{ }` n'exige pas d'etre en tete de ligne logique ici : chaque site tombe deja en tete de ligne (aucun `if cond: g.add(...)` d'une seule ligne dans cette region), donc le cout syntaxique documente dans AGENT_BATCH.md ne s'est pas manifeste.",
+    "demo() harness identique des deux cotes (voir driver.py) : create_graph_triples rend None et ecrit via graph_creator.get_graph(...), pas via un argument Graph comparable -- GraphCreator n'a pas de __eq__, comparer l'argument tel quel aurait toujours echoue par identite. demo() encapsule l'appel et rend le graphe ecrit."
   ],
   "draft_sha": "763c34a90e1e6f90",
   "provenance": {
@@ -30,5 +44,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

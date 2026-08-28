@@ -12,11 +12,22 @@
   "categories": {
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "nom préfixé",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, SH->sh"
+    "prefixes: RDF->rdf, SH->sh. RDF is unused in this fragment (it was only imported by the enclosing real function), so the `@prefix rdf:` from the earlier draft is dropped: nothing in the translated lines resolves through it.",
+    "the region is a bare STATEMENT (kind: statement), not a function: kwargs, profile_graph, property_shape, sh_path, db are parameters of the much larger enclosing function get_property_by_property_shape, none of them visible to the extracted lines. Restored as parameters of a small wrapper `compute_name` in both original.py and translated.ldpy -- exactly the 'paramètre annoté' remedy AGENT_BATCH.md prescribes for a graph bound outside the extracted lines.",
+    "the wrapper is not just for executability: it is what makes `name` provable at all. run_pair's module-state path (entry=None) only compares rdflib Graphs and stdout (see rdfeval/harness.py); profile_graph here is read-only, so comparing it would pass vacuously regardless of whether `.value()`/`m{}.first()` was translated correctly. entry='compute_name' compares the actual return value instead. This looks like a genuine gap for the 163 'no visible graph' regions when the missing binding is itself a bare statement (not a function): worth flagging upward, it is not one of the already-known constats.",
+    "`profile_graph.value(property_shape, SH.name)` -> `m{ {property_shape} sh:name ?v }.first()`: textbook case of the stratum, subject given by interpolation, single projected variable so `.first()` yields the term itself, None on the fixture's zero-solution branch (ex:noName) exactly like rdflib's `.value()`.",
+    "get_name(sh_path, profile_graph, db) is the project's own helper (pylode.profiles.supermodel.query.common.get_name); it is NOT part of this region and stays a plain Python call, restored from a context shim (pylode_context.py) rather than transpiled, since pylode itself is not installed in the evaluation venv."
   ],
   "draft_sha": "b8887fc6d0445c88",
   "provenance": {
@@ -28,5 +39,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": false
 }

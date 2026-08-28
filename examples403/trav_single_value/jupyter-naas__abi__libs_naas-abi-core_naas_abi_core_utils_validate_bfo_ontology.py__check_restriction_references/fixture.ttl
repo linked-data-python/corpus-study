@@ -1,0 +1,74 @@
+# Input graph for
+# jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_utils_validate_bfo_ontology.py__check_restriction_references.
+#
+# check_restriction_references walks every owl:Restriction bnode and flags an
+# owl:onProperty / owl:allValuesFrom / owl:someValuesFrom filler that is
+# neither a well-known vocabulary term nor declared in this graph -- but only
+# when the restriction is reachable via rdfs:subClassOf from a named class
+# (an "owner"); an unreachable restriction is skipped (`if owner is None:
+# continue`).
+#
+#   * SEVERAL solutions: three restrictions (r1, r2, r3), each reached from a
+#     different owner class -- exercises the `?bnode a owl:Restriction` scan,
+#     the `?owner rdfs:subClassOf {bnode}` reverse lookup, and both filler
+#     predicates (allValuesFrom / someValuesFrom) in the same pass.
+#   * ZERO-solution cases:
+#       - r1's owl:onProperty is DECLARED (ex:knownProp is an
+#         owl:ObjectProperty), so `_is_known` is True and no issue fires for
+#         it -- `.first()` on `{iri} a ?x` for a declared class/property is
+#         not what is exercised, but the m{}.first() -> None path is
+#         exercised directly by r4 (below) and by ex:orphanRestriction.
+#       - ex:orphanRestriction has NO rdfs:subClassOf owner anywhere in the
+#         graph: `m{ ?owner rdfs:subClassOf {bnode} }.first()` must answer
+#         None, and the region must `continue` without appending anything.
+#   * NEIGHBOURHOOD that must NOT match:
+#       - ex:UnrelatedClass rdfs:subClassOf ex:SomeParent: an ordinary
+#         subclass triple, not a restriction, never scanned as one;
+#       - ex:r1 also carries an unrelated owl:onProperty-shaped predicate
+#         (ex:decoy owl:onProperty ex:unknownProp2) on a DIFFERENT bnode
+#         that is not reached from any owner, so it must not surface either;
+#       - a plain rdfs:subClassOf edge between two named classes (no bnode
+#         object) that must not be mistaken for reaching a restriction.
+@prefix ex:   <http://example.org/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Declared vocabulary: known property/class, so restrictions that reference
+# them must NOT be flagged.
+ex:knownProp a owl:ObjectProperty .
+ex:KnownClass a owl:Class .
+
+# r1: onProperty is declared (ex:knownProp) -> not flagged. allValuesFrom
+# references an undeclared class in this graph's own namespace -> WARNING
+# (not ERROR), because it starts with ex:'s own namespace once ex:Ontology
+# below declares it as "own".
+ex:Ontology a owl:Ontology .
+
+ex:r1 a owl:Restriction ;
+    owl:onProperty ex:knownProp ;
+    owl:allValuesFrom ex:undeclaredSiblingClass .
+ex:OwnerOne rdfs:subClassOf ex:r1 .
+
+# r2: onProperty is undeclared and OUTSIDE ex:'s own namespace -> ERROR.
+ex:r2 a owl:Restriction ;
+    owl:onProperty <http://elsewhere.example/prop> .
+ex:OwnerTwo rdfs:subClassOf ex:r2 .
+
+# r3: someValuesFrom references a well-known OWL/RDFS term -> _is_known via
+# the _VOCAB_PREFIXES_FOR_RESTRICTIONS prefix match -> not flagged.
+ex:r3 a owl:Restriction ;
+    owl:someValuesFrom rdfs:Resource .
+ex:OwnerThree rdfs:subClassOf ex:r3 .
+
+# r4: onProperty is undeclared, but r4 itself has no incoming
+# rdfs:subClassOf edge from any class -- the zero-solution case for
+# `m{ ?owner rdfs:subClassOf {bnode} }.first()` -- so it must be skipped
+# entirely, whether or not it would otherwise be flagged.
+ex:r4 a owl:Restriction ;
+    owl:onProperty ex:orphanUnknownProp .
+
+# Neighbourhood that must not match:
+ex:UnrelatedClass rdfs:subClassOf ex:SomeParent .
+ex:decoy owl:onProperty ex:unknownProp2 .
+ex:OwnerFour rdfs:subClassOf ex:KnownClass .

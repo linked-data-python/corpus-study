@@ -1,0 +1,26 @@
+# Input graph for RDFLib__pyLODE__pylode_profiles_supermodel_query_property_shape.py__get_property_by_property_shape.
+#
+# The region is:
+#   name = (kwargs.get("name") or profile_graph.value(property_shape, SH.name)
+#           or get_name(sh_path, profile_graph, db))
+#
+# `?s sh:name ?v` has SEVERAL solutions in the graph as a whole: ex:hasName is
+# the one read by the "found" call, ex:otherName shows the pattern is not
+# unique to it. ex:noName carries no sh:name at all -- the ZERO-solution case
+# for `.value()`/`.first()` -- so the statement falls through to
+# get_name(sh_path, ...), which reads ex:pathNode's rdfs:label instead.
+# ex:unrelated is NEIGHBOURHOOD that must not match either call.
+@prefix ex:   <http://example.org/shapes/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:hasName sh:name "Given Name" ;
+    sh:description "has a direct sh:name" .
+
+ex:otherName sh:name "Another Name" .
+
+ex:noName sh:description "no sh:name predicate here" .
+
+ex:pathNode rdfs:label "Path Label" .
+
+ex:unrelated sh:name "Should never be read" .

@@ -2,7 +2,7 @@
 # region: update_definition (lines 455-475, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import BNode, URIRef, Literal, RDF, RDFS, Namespace
-from build import get_graph, _xmlns as _XMLNS
+from d3fend_context import get_attack_id, _xmlns as _XMLNS  # context shim, see meta.json
 d3fend = Namespace("http://d3fend.mitre.org/ontologies/d3fend.owl#")
 
 def update_definition(graph, tech, framework):

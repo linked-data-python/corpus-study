@@ -1,8 +1,9 @@
 # Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/loader.py
 # region: ProfilesDataset.load_profiles (lines 101-146, stratum trav_existence)
 # licence of the source repository: see meta.json
+import logging
 from rdflib import DCTERMS, OWL, PROF, RDF, Graph, URIRef
-from pylode.profiles.supermodel.namespace import LODE
+from context_shim import LODE, Loader, fetch
 logger = logging.getLogger(__name__)
 PYLODE_CONFIG_GRAPH = "urn:graph:pylode-config"
 MEDIA_TYPES = {
@@ -57,3 +58,16 @@ def load_profiles(self, graph: Graph, prev_graph: Graph):
                 else:
                     profile_graph.__iadd__(new_graph)
         self.add_graph(profile_graph)
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# method (`self`) that returns nothing -- its only observable effect is the
+# set of graphs it hands to `self.add_graph`. `demo` runs it against a fresh
+# Loader (the context shim's ProfilesDataset stand-in) and returns the
+# graphs collected, sorted by identifier so the oracle sees a fixed order.
+def demo(graph, prev_graph):
+    self = Loader()
+    load_profiles(self, graph, prev_graph)
+    return sorted(
+        ((str(g.identifier), g) for g in self.added), key=lambda pair: pair[0]
+    )

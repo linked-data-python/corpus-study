@@ -14,12 +14,25 @@
     "graph_write": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable"
   ],
+  "translation_notes": [
+    "Le brouillon annoncait des @prefix rdf:/rdfs: : SUPPRIMES. La seule occurrence de RDF.type devient `a` a l'interieur de m{ }, et RDFS n'est pas utilise dans la region ; aucun prefixe n'est donc necessaire cote traduit.",
+    "10 des 11 lectures de la region sont des `graph.value(atom_node, P)` ou P est une constante Python (SWRL_classPredicate, SWRL_argument1, ...) deja liee hors de la region (contexte du fichier) : chacune devient `m{ {atom_node} {P} ?v }.first()`, sujet ET predicat interpoles -- confirme que l'interpolation de m{ } fonctionne en position de predicat, pas seulement de sujet (verifie a la main avant traduction, cf. querying.md qui ne montre que le cas sujet).",
+    "la 11e lecture, `types = list(graph.objects(atom_node, RDF.type))`, n'est pas le site flanque par le tirage (trav_one_step, hors strate) mais reste traduite par la construction la plus specifique disponible : `list(m{ {atom_node} a ?t })`, arite 1 donc liste de termes directement (querying.md #arity-decides-the-shape).",
+    "shim de contexte (context_shim.py, identique des deux cotes) : SWRL = Namespace(...) (swrl2rdf/extractor.py, ligne de module que la fenetre de contexte du tirage n'a pas capturee -- seules les SWRL_xxx = SWRL.xxx qui EN dependent l'ont ete, et restent dans original.py/translated.ldpy) ; les dataclasses de swrl2rdf/model.py (Variable, LiteralTerm, IRITerm, ClassAtom, IndividualPropertyAtom, DatavaluedPropertyAtom, BuiltinAtom, SameIndividualAtom, DifferentIndividualsAtom) ; PrefixMap de swrl2rdf/prefixmap.py (compact()/default_prefix seulement, expand() et set_default_prefix() ne sont jamais atteints par cet appel donc pas transcrits) ; et les trois voisines d'extractor.py que _parse_atom appelle (_display_iri, _term_from_node, _terms_from_arguments) plus _is_variable dont elles dependent -- toutes verbatim, recuperees a la source (raw.githubusercontent.com, meme commit) car le paquet swrl2rdf n'est pas sur PyPI et n'est pas dans le venv de l'etude.",
+    "driver.py : _parse_atom prend 4 arguments au-dela du graphe (atom_node, prefix_map, var_names, reverse_mapping), donc l'appel a un seul argument que fabriquerait `fixture=` seul ne convient pas -- 6 `calls=`, un par branche (les 5 types SWRL reconnus... en fait 4 branches touchees + 1 delegant a _terms_from_arguments non exercitee, + 1 type inconnu). Le graphe est reparse a chaque cote (fixture_graph), mais prefix_map est construit UNE fois par appel et partage entre les deux cotes : PrefixMap n'a pas de __eq__ (fidele a la classe reelle), donc deux instances distinctes mais fonctionnellement egales auraient ete signalees comme divergentes par la comparaison des arguments du harnais -- observe en premiere execution de `rdfeval check`, corrige en partageant l'instance plutot qu'en ajoutant un __eq__ au shim.",
+    "cas zero solution : atom2 n'a AUCUN triplet swrl:classPredicate -> cls = m{ }.first() rend None, exactement ce que rend g.value ; _display_iri(None, ...) le restitue en chaine vide sans lever. atom6 a un rdf:type qui ne correspond a aucune des 6 branches -> aucune des 10 lectures .value() n'est meme executee, la fonction rend None directement (zero solution du tout premier match, `types`).",
+    "voisinage qui ne doit pas matcher : atom7 est un ClassAtom complet avec son propre classPredicate/argument1, cote a cote avec atom1 et atom2 dans le meme graphe -- prouve que chaque `m{ {atom_node} ... }.first()` ne lit que SON atom_node, pas un voisin au hasard.",
+    "constructions non demontrees ici (hors strate) : `.one()` n'a pas de site naturel dans cette region -- aucun des 10 acces ne suppose l'existence garantie d'exactement une solution (le code gere explicitement le cas None a chaque fois via les branches qui suivent, ou via `_display_iri`/`_term_from_node` qui acceptent None)."
+  ],
+  "article_candidate": true,
   "draft_sha": "34a4f04ef62b9966",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.161109+00:00",

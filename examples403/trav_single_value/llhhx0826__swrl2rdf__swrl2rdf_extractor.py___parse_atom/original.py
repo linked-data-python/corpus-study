@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Set
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.collection import Collection
 from rdflib.namespace import Namespace, RDF, RDFS
-from swrl2rdf.model import (
+from context_shim import (
     Atom,
     BuiltinAtom,
     ClassAtom,
@@ -18,8 +18,12 @@ from swrl2rdf.model import (
     SameIndividualAtom,
     Term,
     Variable,
+    PrefixMap,
+    SWRL,
+    _display_iri,
+    _term_from_node,
+    _terms_from_arguments,
 )
-from swrl2rdf.prefixmap import PrefixMap
 SWRL_ClassAtom = SWRL.ClassAtom
 SWRL_IndividualPropertyAtom = SWRL.IndividualPropertyAtom
 SWRL_DatavaluedPropertyAtom = SWRL.DatavaluedPropertyAtom

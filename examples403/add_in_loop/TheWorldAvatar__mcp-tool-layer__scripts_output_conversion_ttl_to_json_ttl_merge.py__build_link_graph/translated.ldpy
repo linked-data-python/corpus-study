@@ -4,6 +4,7 @@
 from typing import Dict, Iterable, List, Tuple, Set
 import hashlib
 from rdflib import BNode, Graph, Namespace, RDF, RDFS, URIRef, Literal
+from _context import _bind_prefixes
 @prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
 @prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
 @prefix ontospecies: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
@@ -30,7 +31,7 @@ def build_link_graph(merged_graph: Graph) -> Graph:
     - Include rdf:type and rdfs:label of selected instance nodes for readability
     """
     g = merged_graph
-    lg = Graph()
+    @graph as lg
     _bind_prefixes(lg)
 
     allowed_types: Tuple[URIRef, ...] = (
@@ -50,25 +51,25 @@ def build_link_graph(merged_graph: Graph) -> Graph:
     for s in selected:
         for t in g.objects(s, RDF_NS.type):
             if t in allowed_types:
-                lg += g{ {s} {RDF_NS.type} {t} }
+                +{ {s} {RDF_NS.type} {t} }
         for lab in g.objects(s, RDFS_NS.label):
-            lg += g{ {s} {RDFS_NS.label} {lab} }
+            +{ {s} {RDFS_NS.label} {lab} }
 
     # Add direct connections among selected nodes
     for (s, p, o) in g.triples((None, None, None)):
         if s in selected and o in selected:
-            lg += g{ {s} {p} {o} }
+            +{ {s} {p} {o} }
 
     # Add bridging synthesis->ChemicalOutput->MOP connections
     for synth in [n for n in selected if (n, RDF_NS.type, ontosyn:ChemicalSynthesis) in g]:
         # Include hasChemicalInput connections for debugging visibility
         for chem_input in g.objects(synth, ontosyn:hasChemicalInput):
-            lg += g{ {synth} ontosyn:hasChemicalInput {chem_input} }
+            +{ {synth} ontosyn:hasChemicalInput {chem_input} }
             # include minimal info for ChemicalInput nodes
             if (chem_input, RDF_NS.type, ontosyn:ChemicalInput) in g:
-                lg += g{ {chem_input} {RDF_NS.type} ontosyn:ChemicalInput }
+                +{ {chem_input} {RDF_NS.type} ontosyn:ChemicalInput }
             for lab in g.objects(chem_input, RDFS_NS.label):
-                lg += g{ {chem_input} {RDFS_NS.label} {lab} }
+                +{ {chem_input} {RDFS_NS.label} {lab} }
 
         for chem_out in g.objects(synth, ontosyn:hasChemicalOutput):
             # Only bridge to MOP if the object is a selected MOP
@@ -83,7 +84,7 @@ def build_link_graph(merged_graph: Graph) -> Graph:
                         skolem_out = URIRef(
                             f"https://www.theworldavatar.com/kg/OntoSyn/instance/ChemicalOutput/{h}"
                         )
-                    lg += g{
+                    +{
                         {synth} ontosyn:hasChemicalOutput {skolem_out} .
                         {skolem_out} ontosyn:isRepresentedBy {mop}
                     }

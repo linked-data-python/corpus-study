@@ -11,9 +11,13 @@
   "rdf_ops": 0,
   "categories": {},
   "translation_status": "draft",
-  "classification": null,
+  "classification": "excluded",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "EXCLUDED (AGENT_BATCH case for this batch, path contains _vendor_): this file is a verbatim vendored copy of rdflib's own test suite, not application code written against rdflib. Checked against rdflib 7.2.1's sdist (test/test_having.py, downloaded and diffed): the module-level fixture (`g = Graph()` plus a `data = \"\"\"...\"\"\"` Turtle string parsed with `g.parse(data=data, format=\"turtle\")`) and all three test functions (test_group_by, test_having_aggregate_eq_literal, test_having_primary_expression_var_neq_iri) are byte-for-byte identical to upstream rdflib. Blackcat-Informatics/purrdf vendored the whole rdflib_suite under bindings/python/tests/rdflib_suite/vendor/ to exercise their own bindings against rdflib's reference behaviour. Translating this region would credit ldpy with rewriting rdflib's own test suite rather than code written by an application against rdflib -- exactly the case the brief says to classify excluded and leave untranslated rather than force.",
+    "Left untranslated (translated.ldpy is the mechanical draft, identical to original.py). Not run through rdfeval check: the extracted region also drops the module-level `data = ...; g.parse(data=data, format=\"turtle\")` statement that populates `g` in the real file (only in the surrounding, non-extracted lines), so `g.query(query)` on the bare `g = Graph()` shown here would in fact return 0 rows, not the 2 the assertion expects -- a further sign this region needs its enclosing test module, not a standalone extraction, to mean anything."
+  ],
+  "article_candidate": false,
   "draft_sha": "089f4349cb4815ba",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.948687+00:00",

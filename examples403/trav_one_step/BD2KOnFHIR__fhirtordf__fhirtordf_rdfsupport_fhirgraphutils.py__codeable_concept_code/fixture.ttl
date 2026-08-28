@@ -1,4 +1,44 @@
-# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__codeable_concept_code — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__codeable_concept_code
+# Shaped after the region's own EXAMPLE comment (fhir:Patient.maritalStatus /
+# fhir:CodeableConcept.coding / fhir:Coding.system / fhir:Coding.code).
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix sct: <http://snomed.info/id/> .
 @prefix ex: <http://example.org/> .
+
+# patient1 / ex:maritalStatus: several solutions of the one-step traversal
+# (fhir:CodeableConcept.coding) — two codings, one with a rdf:type, one
+# without (exercises the zero-solution case of the nested g.value(...,
+# RDF.type) too).
+ex:patient1 ex:maritalStatus [
+    fhir:CodeableConcept.coding
+      [ fhir:index 0 ;
+        a sct:36629006 ;
+        fhir:Coding.system [ fhir:value "http://snomed.info/sct" ] ;
+        fhir:Coding.code [ fhir:value "36629006" ] ;
+        fhir:Coding.display [ fhir:value "Legally married" ] ] ,
+      [ fhir:index 1 ;
+        fhir:Coding.system [ fhir:value "http://hl7.org/fhir/v3/MaritalStatus" ] ;
+        fhir:Coding.code [ fhir:value "M" ] ]
+  ] .
+
+# Neighbour 1: same predicate, different subject — must NOT be returned when
+# the region is called with subject=ex:patient1 (catches a pattern that
+# ignores the subject term).
+ex:patient2 ex:maritalStatus [
+    fhir:CodeableConcept.coding
+      [ fhir:Coding.system [ fhir:value "http://snomed.info/sct" ] ;
+        fhir:Coding.code [ fhir:value "999999" ] ]
+  ] .
+
+# Neighbour 2: same subject, different predicate — must NOT be returned
+# (catches a pattern that ignores the predicate term, i.e. that would treat
+# g.value(subject, predicate) as g.value(subject, ANY)).
+ex:patient1 ex:otherStatus [
+    fhir:CodeableConcept.coding
+      [ fhir:Coding.system [ fhir:value "http://snomed.info/sct" ] ;
+        fhir:Coding.code [ fhir:value "000000" ] ]
+  ] .
+
+# ex:patientX carries no ex:maritalStatus triple at all: the zero-solution
+# case for the top-level g.value(subject, predicate, any=False) traversal —
+# both versions must return coded_entry = None, hence rval = [].

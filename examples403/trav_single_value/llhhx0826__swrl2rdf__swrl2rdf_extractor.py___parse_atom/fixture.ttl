@@ -1,4 +1,62 @@
-# Input graph for llhhx0826__swrl2rdf__swrl2rdf_extractor.py___parse_atom — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for llhhx0826__swrl2rdf__swrl2rdf_extractor.py___parse_atom.
+# Six SWRL atom nodes, one per branch of _parse_atom plus one that matches no
+# branch, and one neighbouring ClassAtom that must not leak into another
+# atom's reading (every m{ }.first() in the region is scoped to {atom_node}).
 @prefix ex: <http://example.org/> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# atom1: ClassAtom, fully populated -- classPredicate present, argument1 a
+# SWRL variable (exercises the Variable branch of _term_from_node).
+ex:atom1 a swrl:ClassAtom ;
+    swrl:classPredicate ex:Person ;
+    swrl:argument1 ex:varX .
+ex:varX a swrl:Variable .
+
+# atom2: ClassAtom with NO swrl:classPredicate triple at all -- the
+# zero-solution case: cls = m{ }.first() must come back None, and
+# _display_iri(None, ...) must render "" rather than raise.
+ex:atom2 a swrl:ClassAtom ;
+    swrl:argument1 ex:individualA .
+ex:individualA a ex:SomeClass .
+
+# atom3: IndividualPropertyAtom, fully populated (URIRef arguments on both
+# sides -> IRITerm branch of _term_from_node for argument2).
+ex:atom3 a swrl:IndividualPropertyAtom ;
+    swrl:propertyPredicate ex:hasParent ;
+    swrl:argument1 ex:varY ;
+    swrl:argument2 ex:individualB .
+ex:varY a swrl:Variable .
+ex:individualB a ex:Person .
+
+# atom4: DatavaluedPropertyAtom, argument2 a typed literal (Literal branch of
+# _term_from_node, with a datatype to compact).
+ex:atom4 a swrl:DatavaluedPropertyAtom ;
+    swrl:propertyPredicate ex:hasAge ;
+    swrl:argument1 ex:varZ ;
+    swrl:argument2 "42"^^xsd:integer .
+ex:varZ a swrl:Variable .
+
+# atom5: BuiltinAtom, two arguments in an RDF collection (a variable and a
+# typed literal) -- exercises Collection(graph, args_node) after args_node
+# comes back from m{ }.first().
+ex:atom5 a swrl:BuiltinAtom ;
+    swrl:builtin swrlb:greaterThan ;
+    swrl:arguments ( ex:varW "10"^^xsd:integer ) .
+ex:varW a swrl:Variable .
+
+# atom6: an rdf:type that matches none of the six SWRL atom classes -- no
+# branch is taken, types = list(m{ {atom6} a ?t }) has one solution but it
+# is not in the `types` membership tests, so _parse_atom returns None
+# without ever calling .first() on classPredicate/argument1/etc.
+ex:atom6 a ex:NotASwrlAtom ;
+    ex:unrelated "noise" .
+
+# atom7: neighbouring ClassAtom with its own classPredicate/argument1 --
+# proves atom1's and atom2's m{ {atom_node} ... }.first() reads only their
+# own atom_node, not this one's.
+ex:atom7 a swrl:ClassAtom ;
+    swrl:classPredicate ex:Animal ;
+    swrl:argument1 ex:individualC .
+ex:individualC a ex:Animal .
