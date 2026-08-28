@@ -19,11 +19,16 @@
     "term_constructor": 2,
     "triple_add": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}", "prefixed name"],
   "translation_notes": [
-    "prefixes: RDF->rdf, OWL->owl, RDFS->rdfs, XSD->xsd"
+    "prefixes: RDF->rdf, OWL->owl, RDFS->rdfs, XSD->xsd",
+    "7 isolated .add() calls across 3 different graphs (onto, align, clean_kb) inside two loops plus one rewrite loop. Each becomes @graph <var> + +{ }, re-declaring @graph whenever the site switches graph (block-scope allows redeclaring @graph mid-suite, takes effect from that line to the end of the enclosing suite per declarations.md).",
+    "Two of onto's three .add() calls on the same iteration (rdf:type and rdfs:domain) share the subject priv_prop unconditionally, so they were merged into one +{ s p1 o1 ; p2 o2 } (add_run_shared_subject shape) rather than kept as two separate +{ } -- this does not fit add_isolated's own definition but is the honest, most-specific translation for that pair. The third (rdfs:range) is conditional on `not is_obj_prop` and stays a separate +{ }: `;` cannot express a conditionally-included predicate-object pair without restructuring, which is forbidden.",
+    "onto.add(...) and align.add(...) never share a subject VALUE across graphs (same Python variable, different target graph), so no further merging applies there.",
+    "Function reads/writes graphs via 6 file-path arguments, not a Graph parameter: fixture.ttl's single-file convention did not fit, so driver.py stages 3 read-only input fixtures (fixture_kb.nt, fixture_ontology.ttl, fixture_alignment.ttl) and one fresh temp dir of output paths per side, then compares the 3 written files by RDF isomorphism -- same oracle (corpus/405), adapted for a file-based entry point instead of a graph-argument one.",
+    "Verified the fixture is not a hollow green: corrupting one predicate in translated.ldpy (rdfs:domain -> rdfs:seeAlso) flips the check to FAIL on ontology_expanded."
   ],
   "draft_sha": "667de7c54ce33513",
   "provenance": {

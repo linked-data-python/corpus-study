@@ -1,0 +1,14 @@
+# Input graph for BBDFrancois__Web_Data_Project_DIA6_Royal_Family__src_m2_kb_construction.py__update_schema_and_sanitize_kb
+# — written during translation. Parsed as N-Triples (format="nt" in the region).
+# Covers: several dbpedia properties/entities to absorb (some new, some already
+# aligned in fixture_alignment.ttl, some reused across two triples), a noisy
+# literal to purge (phase 1), and a neighbouring pair that must NOT be touched
+# by phases 2/3 (non-dbpedia predicate, non-dbr subject/object).
+<http://dbpedia.org/resource/Elizabeth_II> <http://dbpedia.org/ontology/spouse> <http://dbpedia.org/resource/Philip_Mountbatten> .
+<http://dbpedia.org/resource/Elizabeth_II> <http://dbpedia.org/ontology/birthDate> "1926-04-21" .
+<http://dbpedia.org/resource/Elizabeth_II> <http://dbpedia.org/property/reign> "1952-2022" .
+<http://dbpedia.org/resource/Charles_III> <http://dbpedia.org/ontology/knownFor> "King" .
+<http://dbpedia.org/resource/Charles_III> <http://dbpedia.org/ontology/spouse> <http://dbpedia.org/resource/Diana> .
+<http://example.org/misc#thing1> <http://example.org/misc#label> "a small note" .
+<http://example.org/misc#thing2> <http://example.org/misc#big> "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" .
+<http://dbpedia.org/resource/Philip_Mountbatten> <http://dbpedia.org/ontology/spouse> <http://dbpedia.org/resource/Elizabeth_II> .

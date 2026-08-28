@@ -1,0 +1,10 @@
+# Initial `align` graph for the region above — written during translation.
+# Pre-aligns one property and one entity, so the region exercises both the
+# "already aligned" (zero-new) path and the "new" path in the same run.
+@prefix priv: <http://example.org/private#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix dbo:  <http://dbpedia.org/ontology/> .
+@prefix dbr:  <http://dbpedia.org/resource/> .
+
+priv:knownFor owl:equivalentProperty dbo:knownFor .
+priv:Diana owl:sameAs dbr:Diana .

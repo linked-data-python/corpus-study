@@ -10,10 +10,15 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `triple` is a whole ASK graph pattern (potentially several triples, potentially containing SPARQL variables -- see the third driver call, `\"?s a <http://example.org/Sensor>\"`) received as a caller-supplied STRING and spliced into the query text: `\"\"\"ASK {\"\"\" + triple + \"\"\" }\"\"\"`. This is exactly the textual-assembly idiom the strate targets, and it is out of reach by construction: `s{ }` interpolation (`{expr}`) is legal only in TERM position and lowers to `initBindings`, never to a substitution inside the query string. There is no island for 'a pattern held in a variable' -- the same limit noted for `-{ }`/`m{ }` in INSTRUCTIONS_403 SS2, here on the read side and on a query engine rather than a BGP island.",
+    "no partial credit is possible either: `triple` is not decomposable into a fixed number of terms at the call site (it could be one triple or several, ground or with variables), so there is no fixed slot to interpolate even after the fact.",
+    "minimal excerpt showing the limit: `g.query(\"\"\"ASK {\"\"\" + triple + \"\"\" }\"\"\")` where `triple` is an opaque string parameter.",
+    "driver: three calls exercise a ground triple that holds, one that does not, and a pattern with an unbound variable (`?s a <http://example.org/Sensor>`) -- the last one is the point: it proves `triple` is a pattern, not a term, so `s{ }`'s term-position interpolation could never have covered this region even in principle."
+  ],
   "draft_sha": "b6fae18a34d0fcdf",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.051402+00:00",
@@ -24,5 +29,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

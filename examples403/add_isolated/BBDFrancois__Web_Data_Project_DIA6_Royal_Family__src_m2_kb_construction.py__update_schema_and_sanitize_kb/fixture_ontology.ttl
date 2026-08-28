@@ -1,0 +1,8 @@
+# Initial `onto` graph for the region above — written during translation.
+# One pre-existing declaration (matching the pre-aligned priv:knownFor of
+# fixture_alignment.ttl), which both versions must carry through unchanged.
+@prefix priv: <http://example.org/private#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+priv:knownFor rdf:type owl:DatatypeProperty .

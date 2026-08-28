@@ -14,10 +14,18 @@
     "term_constructor": 4,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@graph", "+{ }", "interpolation {expr}"],
+  "translation_notes": [
+    "piege 2 (add_in_loop) : 'rows' est un iterable de TUPLES (entity, raw), pas de mappings -- 'for @bindings in rows:' ne s'applique pas. Garde 'for entity, raw in rows:' Python ordinaire ; le seul .add() isole devient '@graph ds.graph(rdflib.URIRef(key))' (designe le graphe nomme EXISTANT obtenu du Dataset, forme documentee : '@graph <expr>' accepte une expression Python arbitraire, pas seulement un nom simple -- verifie empiriquement) + '+{ }', avec entity/raw/PRED interpoles en {expr} (variables Python ordinaires, aucun piege ex:{?id} puisqu'aucune n'est un '?var').",
+    "'ds.update(f\"INSERT DATA {{ GRAPH <...> {{ ... }} }}\")' (stratum sparql_interpolated, egalement porte par cette region) n'a PAS ete traduit en s{ }.execute() : hors du mandat de ce lot (add_in_loop) et non trivial ici (cible = rdflib.Dataset avec clause GRAPH explicite, pas le @graph courant d'un simple Graph ; s{ } documente son support des UPDATE et de l'interpolation en position de terme mais uniquement contre un Graph). Laisse en Python f-string tel quel -- a reprendre par le lot sparql_interpolated.",
+    "shim asterism.py (nomme pour capter le 'from asterism import crosswalk_runtime, substrate' inchange de original.py, meme mecanisme que pour un paquet tiers absent) : substrate.CONTROL_GRAPH_IRI, substrate.STATUS_PREDICATE et substrate.canonical_graph_iri() recopies fidelement (constantes reelles + regex de validation reelle) depuis ingest/src/asterism/substrate.py au commit epingle (gh api). crosswalk_runtime est un stand-in vide, non reference dans cette region.",
+    "limite du harness rencontree et contournee dans driver.py (pas de fichier hors de la region touche) : rdflib.Dataset EST un rdflib.Graph (ConjunctiveGraph), donc run_pair compare automatiquement l'argument ds par isomorphisme -- mais rdfeval.harness.graphs_isomorphic()/rdflib.compare.to_isomorphic() plante sur un Dataset (itere en quads 4-uplets, to_isomorphic attend des triples 3-uplets ; verifie empiriquement : ValueError 'too many values to unpack'). Contournement local au driver : une classe _FakeDataset duck-type juste .graph()/.update() sur un vrai Dataset interne, n'est PAS une sous-classe de Graph (donc run_pair ne tente plus l'isomorphisme dessus), et implemente __eq__ par egalite exacte de l'ensemble des quads -- suffisant ici car la region ne produit aucun noeud vide (uniquement des URIRef/Literal), donc pas besoin de l'abstraction des bnodes que fournirait l'isomorphisme.",
+    "fixture.ttl charge un graphe canonique VOISIN (ds-other) que l'appel a 'ds-a' ne doit pas toucher ; verifie present et intact dans le resultat compare.",
+    "meta.oracle reste 'values' (non modifie, ce champ appartient au pipeline) bien que la region ne LISE aucun graphe (pas de categorie graph_read) : c'est en realite une mutation d'argument prouvee par egalite de quads, pas une lecture -- signale ici plutot que force dans un des deux moules."
+  ],
+  "article_candidate": true,
   "draft_sha": "c7f7a16efb488cfe",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.856336+00:00",
