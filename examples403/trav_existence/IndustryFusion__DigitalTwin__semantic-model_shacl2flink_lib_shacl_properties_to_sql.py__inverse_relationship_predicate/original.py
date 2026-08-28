@@ -1,0 +1,33 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/shacl2flink/lib/shacl_properties_to_sql.py
+# region: inverse_relationship_predicate (lines 1971-1995, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Graph, RDF, BNode
+from rdflib.collection import Collection
+from rdflib.namespace import SH
+from lib.utils import get_full_path_of_shacl_property, NGSILD, UnsupportedShape
+
+def inverse_relationship_predicate(g, path):
+    """
+    The predicate of a canonical NGSI-LD inverse path, or None.
+
+    Canonical is the two-hop sequence that walks back out of the blank node
+    NGSI-LD stores a relationship in:
+
+        sh:path ( [ sh:inversePath ngsi-ld:hasObject ]
+                  [ sh:inversePath <predicate> ] )
+
+    Anything else -- a bare inverse, a longer sequence, a nested expression
+    in the second hop -- returns None and is reported by unsupported_shapes.
+    """
+    try:
+        steps = list(Collection(g, path))
+    except Exception:
+        return None
+    if len(steps) != 2:
+        return None
+    if g.value(steps[0], SH.inversePath) != NGSILD.hasObject:
+        return None
+    predicate = g.value(steps[1], SH.inversePath)
+    if predicate is None or isinstance(predicate, BNode):
+        return None
+    return predicate

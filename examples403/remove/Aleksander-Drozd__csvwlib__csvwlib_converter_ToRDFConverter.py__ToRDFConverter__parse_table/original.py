@@ -1,0 +1,29 @@
+# Extracted from Aleksander-Drozd/csvwlib@6359de9b32 : csvwlib/converter/ToRDFConverter.py
+# region: ToRDFConverter._parse_table (lines 45-66, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
+from csvwlib.utils.rdf.CSVW import CONST_STANDARD_MODE
+CSVW = Namespace('http://www.w3.org/ns/csvw#')
+
+def _parse_table(self, main_node, table_metadata, table_data):
+    table_node = URIRef(table_metadata['@id']) if '@id' in table_metadata else BNode()
+    property_url = table_metadata['url'] + '#'
+    if 'propertyUrl' in table_metadata['tableSchema']:
+        property_url = table_metadata['tableSchema']['propertyUrl']
+
+    if self.mode == CONST_STANDARD_MODE:
+        self.graph.add((main_node, CSVW.table, table_node))
+        self.graph.add((table_node, RDF.type, CSVW.Table))
+        self.graph.add((table_node, CSVW.url, URIRef(table_metadata['url'])))
+        self._add_file_metadata(table_metadata, table_node)
+
+    for index, atdm_row in enumerate(table_data['rows']):
+        if self.mode == CONST_STANDARD_MODE:
+            row_node = BNode()
+            self._parse_generic_row(atdm_row, table_node, table_metadata, property_url, row_node, table_data)
+        else:
+            dummy = BNode()
+            row_node = BNode()
+            self._parse_row(atdm_row, row_node, dummy, table_metadata, property_url, table_data)
+            self.graph.remove((dummy, CSVW.describes, row_node))
+        self.parse_virtual_columns(row_node, atdm_row, table_metadata)

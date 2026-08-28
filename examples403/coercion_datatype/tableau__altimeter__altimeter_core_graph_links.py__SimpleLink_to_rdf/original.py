@@ -1,0 +1,24 @@
+# Extracted from tableau/altimeter@efe383f3e1 : altimeter/core/graph/links.py
+# region: SimpleLink.to_rdf (lines 60-77, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, RDF, URIRef, XSD
+from altimeter.core.graph.node_cache import NodeCache
+
+def to_rdf(
+    self, subj: BNode, namespace: Namespace, graph: Graph, node_cache: NodeCache
+) -> None:
+    """Graph this link on a BNode in a Graph using a given Namespace to create the full
+    predicate.
+
+    Args:
+         subj: subject portion of triple - graph this link's pred, obj against it.
+         namespace: RDF namespace to use for this triple's predicate
+         graph: RDF graph
+         node_cache: NodeCache to use to find cached nodes.
+    """
+    datatype = None
+    if isinstance(self.obj, int):
+        if self.obj > 2147483647:
+            datatype = XSD.nonNegativeInteger
+    literal = Literal(self.obj, datatype=datatype)
+    graph.add((subj, getattr(namespace, self.pred), literal))

@@ -1,0 +1,136 @@
+# Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/api/trace.py
+# region: StoredTraceMixin.create_obsel (lines 415-531, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from numbers import Integral, Real
+from rdflib import Graph, Literal, RDF, RDFS, URIRef, XSD
+from rdflib.term import Node
+from datetime import datetime
+from rdfrest.util.iso8601 import parse_date, ParseError, UTC
+from rdfrest.util import cache_result, coerce_to_node, coerce_to_uri
+from .obsel import ObselMixin, ObselProxy
+from ..namespace import KTBS
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+_NOW = datetime.now
+
+def create_obsel(self, id=None, type=None, begin=None, end=None, 
+                 subject=None, attributes=None, relations=None, 
+                 inverse_relations=None, source_obsels=None, label=None,
+                 no_return=False):
+    """
+    Creates a new obsel for the stored trace.
+
+    :param id: see :ref:`ktbs-resource-creation`.
+    :param type: Obsel type, defined by the Trace model.
+    :param begin: Begin timestamp of the obsel, can be an int.
+    :param end: End timestamp of the obsel, can be an int.
+    :param subject: Subject of the obsel.
+    :param attributes: explain.
+    :param relations: explain.
+    :param inverse_relations: explain.
+    :param source_obsels: explain.
+    :param label: explain.
+    :param no_return: if True, None will be returned instead of the created obsek;
+        this saves time and (in the case of a remote kTBS) network traffic
+
+    :rtype: `ktbs.client.obsel.Obsel`
+    """
+    # redefining built-in 'id' #pylint: disable=W0622
+
+    # We somehow duplicate Obsel.complete_new_graph and
+    # Obsel.check_new_graph here, but this is required if we want to be
+    # able to set _trust=True below.
+    # Furthermore, the signature of this method makes it significantly
+    # easier to produce a valid graph, so there is a benefit to this
+    # duplication.
+
+    if type is None:
+        raise ValueError("type is mandatory for obsel creation")
+    if begin is None:
+        begin = _NOW(UTC)
+    if end is None:
+        end = begin
+    if subject is None:
+        subject = self.get_default_subject()
+    elif not isinstance(subject, URIRef):
+        subject = Literal(subject)
+
+    trust = False # TODO SOON decide if we can trust anything
+    # this would imply verifying that begin and end are mutually consistent
+    # knowing that they could be heterogeneous (int/datetime)
+    graph = Graph()
+    obs = coerce_to_node(id, self.uri) # return BNode if id is None
+    type_uri = coerce_to_uri(type, self.uri)
+    graph += g{
+        {obs} a {type_uri} ;
+           {KTBS.hasTrace} {self.uri}
+    }
+
+    if isinstance(begin, Integral):
+        graph += g{ {obs} {KTBS.hasBegin} {Literal(int(begin))} }
+    else: # will use KTBS.hasBeginDT
+        begin_dt = begin
+        if isinstance(begin, str):
+            begin_dt = parse_date(begin_dt)
+        elif isinstance(begin, datetime):
+            if begin.tzinfo is None:
+                begin = begin.replace(tzinfo=UTC)
+        else:
+            raise ValueError("Could not interpret begin %s", begin)
+        graph += g{ {obs} {KTBS.hasBeginDT} {Literal(begin_dt)} }
+
+    if isinstance(end, Integral):
+        graph += g{ {obs} {KTBS.hasEnd} {Literal(int(end))} }
+    else: # will use KTBS.hasEndDT
+        end_dt = end
+        if isinstance(end_dt, str):
+            end_dt = parse_date(end_dt)
+        elif isinstance(end, datetime):
+            if end.tzinfo is None:
+                end = end.replace(tzinfo=UTC)
+        else:
+            raise ValueError("Could not interpret end %s", end)
+        graph += g{ {obs} {KTBS.hasEndDT} {Literal(end_dt)} }
+
+    if subject is not None:
+        graph += g{ {obs} {KTBS.hasSubject} {subject} }
+
+    if attributes is not None:
+        for key, val in attributes.items():
+            k_uri = coerce_to_uri(key)
+            if isinstance(val, Node):
+                v_node = val
+            else:
+                v_node = Literal(val)
+                # TODO LATER do something if val is a list
+            graph += g{ {obs} {k_uri} {v_node} }
+
+    if relations is not None:
+        for rtype, other in relations:
+            rtype_uri = coerce_to_uri(rtype)
+            other_uri = coerce_to_uri(other)
+            graph += g{ {obs} {rtype_uri} {other_uri} }
+
+    if inverse_relations is not None:
+        for other, rtype in inverse_relations:
+            other_uri = coerce_to_uri(other)
+            rtype_uri = coerce_to_uri(rtype)
+            graph += g{ {other_uri} {rtype_uri} {obs} }
+
+    if source_obsels is not None:
+        for src in source_obsels:
+            s_uri = coerce_to_uri(src)
+            graph += g{ {obs} {KTBS.hasSourceObsel} {s_uri} }
+
+    if label is not None:
+        graph += g{ {obs} rdfs:label {Literal(label)} }
+
+    uris = self.post_graph(graph, None, trust, obs, KTBS.Obsel)
+    assert len(uris) == 1
+    self.obsel_collection.force_state_refresh()
+    if not no_return:
+        ret = self.factory(uris[0], [KTBS.Obsel])
+        assert isinstance(ret, ObselMixin)
+        return ret

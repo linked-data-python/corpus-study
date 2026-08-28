@@ -1,0 +1,11 @@
+@prefix sem: <http://example.org/semtech#> .
+
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v6_8_0.py
+# region: <module> (lines 54-56, stratum trav_one_step)
+# licence of the source repository: see meta.json
+tb = Graph().parse(f"{HERE}/02-ontology/semtech_tbox_v6_8_0.ttl")
+IRI = {n["id"]: cls_iri(n) for n in nodes}
+
+bad = [n["id"] for n in nodes
+       if str(tb.value(IRI[n["id"]], sem:classCode) or "") != n["id"]
+       or str(tb.value(IRI[n["id"]], sem:sectionNumber) or "") != secnum[n["id"]]]

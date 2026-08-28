@@ -1,0 +1,93 @@
+# Extracted from eliozo/worksheet-generation-with-llms@c065efff55 : scripts/weaviate_utils.py
+# region: WeaviateUtils.ingest_to_weaviate (lines 146-230, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Namespace, RDF
+import sys
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def ingest_to_weaviate(self, filename):
+    print(f'Importing {filename} to  Weaviate')
+    graph = Graph()
+    graph.parse(filename, format="ttl")
+
+    if not self.client.is_ready():
+        print('Weaviate client is not ready!')
+        sys.exit(1)
+
+
+    problemCount = 0
+    for subj in graph.subjects(predicate=rdf:type, 
+                                object=self.eliozoNS.Problem):
+
+        problemID = "NA"
+        olympiadType = "NA"
+        problemGrade = 0
+        problemYear = 0
+
+        try:
+            val = graph.value(subj, self.eliozoNS.problemID)
+            problemID = str(val)
+        except Exception as e:
+            print(f"Error converting problemID={val} for {problemCount}; skipping insert")
+            continue
+        problemCount += 1
+        print(f'Ingesting {problemID}...')
+        # Extract properties that don't require language specification
+
+
+        try:
+            val = graph.value(subj, self.eliozoNS.olympiadType)
+            olympiadType = str(val)
+        except Exception as e:
+            print(f"Error converting olympiadType={val} for {problemCount}; skipping insert")
+            continue
+
+
+        try: 
+            val = graph.value(subj, self.eliozoNS.problemGrade)
+            problemGrade = int(val)
+        except Exception as e:
+            print(f"Error converting problemGrade={val} for {problemCount}; skipping insert")
+            continue
+
+        try: 
+            val = graph.value(subj, self.eliozoNS.problemYear)
+            problemYear = int(val)
+        except Exception as e:
+            print(f"Error converting problemYear={val} for {problemCount}; skipping insert")
+            continue
+
+
+
+        # Initialize the data object with non-language properties
+        data_object = {
+            "problemID": problemID,
+            "problemGrade": problemGrade, 
+            "olympiadType": olympiadType, 
+            "problemYear": problemYear
+        }
+        # print(f'data_object = {data_object}')
+
+
+        for lang in ['lv']:
+            for obj in graph.objects(subj, self.eliozoNS.problemText):
+                if obj.language == lang:
+                    data_object[f"problemText_{lang}"] = str(obj)
+
+            for solution_obj in graph.objects(subj, self.eliozoNS.problemSolution): 
+                for solution_text in graph.objects(solution_obj, self.eliozoNS.solutionText):
+                    if solution_text.language == lang:
+                        if f"solutionText_{lang}" in data_object:
+                            data_object[f"solutionText_{lang}"] = data_object[f"solutionText_{lang}"] + '\n\n' + str(solution_text)
+                        else:
+                            data_object[f"solutionText_{lang}"] = str(solution_text)
+
+        if not self.skipping_mode:
+            olympiads_collection = self.client.collections.get("Problem")
+
+            olympiads_collection.data.insert(
+                properties=data_object,
+                references={}
+            )
+    return (0, {'keyMM':'ingest_to_weaviate'})

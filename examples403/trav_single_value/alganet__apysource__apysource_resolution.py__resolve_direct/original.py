@@ -1,0 +1,47 @@
+# Extracted from alganet/apysource@f800ec97c1 : apysource/resolution.py
+# region: resolve_direct (lines 202-238, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from rdflib.namespace import DCTERMS, RDF, RDFS
+from apysource.http import CachedFetcher, document_url, url_anchor
+from apysource.namespaces import OA, SCHEMA, SV
+from apysource.repos import RepoRegistry
+from apysource.results import FetcherResult, RepoResult, ResolveResult, TextOutcome
+
+def resolve_direct(g: Graph, entity_uri: URIRef, registry: RepoRegistry,
+                    fetcher: CachedFetcher | None = None) -> ResolveResult:
+    """Resolve any entity with schema:url directly on it."""
+    # A Term is required to carry an rdfs:label (the SHACL shapes say so), and
+    # it was being dropped on the floor here — so a Term failure had nothing to
+    # report itself by except its URI.
+    label = str(g.value(entity_uri, RDFS.label) or "")
+    url = str(g.value(entity_uri, SCHEMA.url) or "")
+    location = str(g.value(entity_uri, SV.sourceLocation) or "")
+
+    if not url:
+        return ResolveResult(status="no_url", label=label)
+
+    format_name, locator = _targeting(g, entity_uri, entity_uri)
+    anchor = url_anchor(url)
+
+    repo, key, cache_file, fallback = _resolve_repo(registry, url, location)
+    if repo is not None:
+        return RepoResult(
+            status="resolved", label=label,
+            url=url, location=location, module=repo.NAME,
+            repo=repo, key=key,
+            cache_file=str(cache_file) if cache_file else None,
+            format_name=format_name, locator=locator, anchor=anchor,
+        )
+
+    if fetcher:
+        matched = registry.get_repo(url)
+        return FetcherResult(
+            status="resolved", label=label, url=url, location=location,
+            fetcher=fetcher, format_name=format_name, locator=locator,
+            anchor=anchor,
+            fallback_from=matched.NAME if matched and fallback else "",
+            fallback_reason=fallback,
+        )
+
+    return ResolveResult(status="no_module", label=label, url=url)

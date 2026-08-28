@@ -1,0 +1,103 @@
+# Extracted from BrickSchema/Brick@c12949f236 : generate_brick.py
+# region: define_shape_property_property (lines 463-524, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, BNode, URIRef
+from rdflib.collection import Collection
+from bricksrc.namespaces import (
+    BRICK,
+    BSH,
+    REC,
+    RDF,
+    OWL,
+    RDFS,
+    TAG,
+    SOSA,
+    SKOS,
+    QUDT,
+    VCARD,
+    SH,
+    REF,
+)
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix bsh: <https://brickschema.org/schema/BrickShape#> .
+@prefix rec: <https://w3id.org/rec#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tag: <https://brickschema.org/schema/BrickTag#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
+
+G = brickschema.Graph()
+A = rdf:type
+
+def define_shape_property_property(shape_name, definitions, graph=G):
+    if "or" in definitions:
+        or_list = []
+        for or_node_defn in definitions.pop("or"):
+            or_node_shape = BNode()
+            or_list.append(or_node_shape)
+            define_shape_property_property(or_node_shape, or_node_defn, graph=graph)
+        or_list_name = BNode()
+        graph += g{ {shape_name} sh:or {or_list_name} }
+        Collection(graph, or_list_name, or_list)
+    for prop_name, prop_defn in definitions.items():
+        # check if there is already a property shape for this.
+        # Only do this is if (a) the property is optional for this shape, and
+        # (b) there are no further requirements; the existing property shapes
+        # don't have any min/max counts or additional requirements
+        if prop_defn.get("optional", False) and len(prop_defn.keys()) == 1:
+            prop_exists = list(
+                graph.query(
+                    f"""SELECT ?x {{ ?p sh:property ?p .
+                        ?p sh:path {prop_name.n3()} .
+                        FILTER NOT EXISTS {{ ?p sh:minCount ?mc }}
+                        FILTER NOT EXISTS {{ ?p sh:maxCount ?mc }}
+                    }}"""  # noqa
+                )
+            )
+            if len(prop_exists) > 0:
+                graph += g{ {shape_name} sh:property {prop_exists[0][0]} }
+                continue  # continue to next property
+
+        ps = BNode()
+        graph += g{
+            {shape_name} sh:property {ps} .
+            {ps} a sh:PropertyShape ;
+               sh:path {prop_name}
+        }
+        if "import_from" in prop_defn:
+            fname = prop_defn.pop("import_from")
+            tmpG = Graph()
+            tmpG.parse(fname)
+            res = tmpG.query(f"SELECT ?p ?o WHERE {{ <{prop_name}> ?p ?o }}")  # noqa
+            for p, o in res:
+                graph += g{ {prop_name} {p} {o} }
+        if "optional" in prop_defn:
+            if not prop_defn.pop("optional"):
+                graph += g{ {ps} sh:minCount 1 }
+        else:
+            graph += g{ {ps} sh:minCount 1 }
+
+        if "datatype" in prop_defn:
+            dtype = prop_defn.pop("datatype")
+            graph += g{ {prop_name} a owl:DatatypeProperty }
+            if dtype == bsh:NumericValue:
+                graph += g{ {ps} sh:or bsh:NumericValue }
+            else:
+                graph += g{ {ps} sh:datatype {dtype} }
+        elif "values" in prop_defn:
+            enumeration = BNode()
+            graph += g{
+                {ps} sh:in {enumeration} ;
+                   sh:minCount 1
+            }
+            Collection(graph, enumeration, map(Literal, prop_defn.pop("values")))
+            graph += g{ {prop_name} a owl:DatatypeProperty }
+        else:
+            graph += g{ {prop_name} a owl:ObjectProperty }
+        add_relationships(ps, prop_defn, graph=graph)

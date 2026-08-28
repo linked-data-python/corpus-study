@@ -1,0 +1,12 @@
+# Extracted from Mat-O-Lab/RDFConverter@0d81f4d1ba : rmlmapper.py
+# region: find_object (lines 162-165, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import RDF, Graph, Literal, Namespace, URIRef
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def find_object(graph: Graph, triples_node):
+    pom_node = graph.value(triples_node, rr:predicateObjectMap, any=False)
+    om_node = graph.value(pom_node, rr:objectMap, any=False)
+    return graph.value(om_node, rr:constant, any=False)

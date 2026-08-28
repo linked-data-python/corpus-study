@@ -1,0 +1,31 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v4_1_0.py
+# region: <module> (lines 83-87, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ab = Graph().parse(f"{HERE}/02-ontology/semtech_abox_v4_1_0.ttl")
+bad = []
+bad = [n["id"] for n in nodes
+       if str(tb.value(IRI[n["id"]], sem:classCode) or "") != n["id"]
+       or str(tb.value(IRI[n["id"]], sem:sectionNumber) or "") != secnum[n["id"]]]
+bad = [f"{s}|{o}" for s, p, o in edges if s not in sem_classes or o not in sem_classes]
+kind_cls = {SEM[f"Kind{k}"] for k in EC.KIND_DEFNS}
+insts = set(ab.subjects(sem:hasSourceProvenance, None))
+bad = []
+bad = []
+bad = []
+bad = [f for r, _, fs in os.walk(HERE) for f in fs
+       if "__pycache__" not in r and not pat.match(f)]
+
+for i in insts:
+    ks = [t for t in ab.objects(i, rdf:type) if t in kind_cls]
+    notes = list(ab.objects(i, sem:instanceKindNote))
+    if len(ks) != 1 or len(notes) != 1 or str(notes[0]) != str(ks[0]).split("#Kind")[-1]:
+        bad.append(str(i).split("#")[-1])

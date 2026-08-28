@@ -1,0 +1,69 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-core/naas_abi_core/utils/ontology_checker.py
+# region: _build_shacl_shapes_from_ontology (lines 354-419, stratum trav_navigation)
+# licence of the source repository: see meta.json
+def _build_shacl_shapes_from_ontology(ont_path: str) -> str:
+    try:
+        from rdflib import OWL, RDF, RDFS, BNode, Graph, URIRef
+
+        fmt = detect_format(ont_path)
+        g = Graph()
+        g.parse(ont_path, format=fmt)
+
+        lines = [
+            "@prefix sh:   <http://www.w3.org/ns/shacl#> .",
+            "@prefix owl:  <http://www.w3.org/2002/07/owl#> .",
+            "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
+            "@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .",
+            "",
+        ]
+
+        for cls in g.subjects(RDF.type, OWL.Class):
+            if not isinstance(cls, URIRef):
+                continue
+            props: list[str] = []
+            for parent in g.objects(cls, RDFS.subClassOf):
+                if not isinstance(parent, BNode):
+                    continue
+                if g.value(parent, RDF.type) != OWL.Restriction:
+                    continue
+                on_prop = g.value(parent, OWL.onProperty)
+                if not isinstance(on_prop, URIRef):
+                    continue
+
+                svf = g.value(parent, OWL.someValuesFrom)
+                avf = g.value(parent, OWL.allValuesFrom)
+
+                if isinstance(svf, URIRef):
+                    props.append(
+                        f"    sh:property [\n"
+                        f"        sh:path <{on_prop}> ;\n"
+                        f"        sh:minCount 1 ;\n"
+                        f"        sh:class <{svf}> ;\n"
+                        f"        sh:severity sh:Violation ;\n"
+                        f"        sh:message \"Instance of <{cls}> must have at least "
+                        f"one <{on_prop}> value of type <{svf}>.\" ;\n"
+                        f"    ]"
+                    )
+                elif isinstance(avf, URIRef):
+                    props.append(
+                        f"    sh:property [\n"
+                        f"        sh:path <{on_prop}> ;\n"
+                        f"        sh:class <{avf}> ;\n"
+                        f"        sh:severity sh:Violation ;\n"
+                        f"        sh:message \"All <{on_prop}> values of <{cls}> "
+                        f"instances must be of type <{avf}>.\" ;\n"
+                        f"    ]"
+                    )
+
+            if props:
+                shape_iri = str(cls) + "Shape"
+                lines.append(f"<{shape_iri}> a sh:NodeShape ;")
+                lines.append(f"    sh:targetClass <{cls}> ;")
+                lines.append(" ;\n".join(props) + " .")
+                lines.append("")
+
+        return "\n".join(lines)
+
+    except Exception:  # noqa: BLE001
+        return ""

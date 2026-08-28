@@ -1,0 +1,56 @@
+# Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_is_after.py
+# region: test_is_after (lines 15-59, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from rdflib.namespace import TIME
+@prefix tfun: <https://w3id.org/timefuncs/> .
+@prefix after: <https://w3id.org/timefuncs/testdata/after/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+
+tests_dir = Path(__file__).parent
+
+def test_is_after():
+    g = Graph().parse(str(tests_dir / "data" / "after.ttl"))
+    q = """
+        SELECT ?a ?b
+        WHERE {
+            ?a a time:TemporalEntity .
+            ?b a time:TemporalEntity .
+
+            FILTER tfun:isAfter(?a, ?b)
+        }
+        """        
+    expected = [
+        (str(after:a01), str(after:b01)),
+        (str(after:a02), str(after:b02)),
+        (str(after:a03), str(after:b03)),
+        (str(after:a04), str(after:b04)),
+        (str(after:a05), str(after:b05)),
+        (str(after:a06), str(after:b06)),
+        (str(after:a07), str(after:b07)),
+        (str(after:a07), str(after:b08)),
+        (str(after:a07), str(after:b09)),
+        (str(after:a07), str(after:b10)),
+        (str(after:a08), str(after:b07)),
+        (str(after:a08), str(after:b08)),
+        (str(after:a08), str(after:b09)),
+        (str(after:a08), str(after:b10)),
+        (str(after:a09), str(after:b07)),
+        (str(after:a09), str(after:b08)),
+        (str(after:a09), str(after:b09)),
+        (str(after:a09), str(after:b10)),
+        (str(after:a10), str(after:b07)),
+        (str(after:a10), str(after:b08)),
+        (str(after:a10), str(after:b09)),
+        (str(after:a10), str(after:b10))
+    ]
+
+    actual = sorted([
+        (str(r[0]), str(r[1]))
+        for r in g.query(
+            q,
+            initNs={"time": TIME, "tfun": TFUN}
+        )
+    ])
+
+    assert actual == expected

@@ -1,0 +1,43 @@
+# Extracted from mupparapusamuel/semantica@873e3aa318 : semantica/ingest/ontology_ingestor.py
+# region: OntologyIngestor._add_property (lines 355-386, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from typing import Any, Dict, List, Optional, Union
+import rdflib
+from rdflib import RDF, RDFS, OWL, Graph
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+
+def _add_property(self, graph: Graph, subject: rdflib.term.Node, prop_type: str, properties_dict: Dict):
+    if isinstance(subject, rdflib.BNode):
+        return
+
+    uri = str(subject)
+    if uri in properties_dict:
+        return
+
+    prop_def = {
+        "uri": uri,
+        "name": self._get_local_name(uri),
+        "type": prop_type
+    }
+
+    label = graph.value(subject, rdfs:label)
+    if label:
+        prop_def["label"] = str(label)
+
+    comment = graph.value(subject, rdfs:comment)
+    if comment:
+        prop_def["description"] = str(comment)
+
+    # Domain and Range
+    domain = graph.value(subject, rdfs:domain)
+    if domain and isinstance(domain, rdflib.URIRef):
+        prop_def["domain"] = str(domain)
+
+    range_val = graph.value(subject, rdfs:range)
+    if range_val and isinstance(range_val, rdflib.URIRef):
+        prop_def["range"] = str(range_val)
+
+    properties_dict[uri] = prop_def

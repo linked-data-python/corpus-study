@@ -1,0 +1,55 @@
+# Extracted from steve-bate/firm@4ef546a441 : firm/ld/jsonld_utils.py
+# region: _insert_resource (lines 53-100, stratum add_in_loop)
+# licence of the source repository: see meta.json
+import json
+from typing import Any
+import rdflib
+
+def _insert_resource(g: rdflib.Graph, resource: dict[str, Any]) -> rdflib.URIRef:
+    try:
+        subject = rdflib.URIRef(resource["@id"]) if "@id" in resource else rdflib.BNode()
+        for key, value in resource.items():
+            if key == "@id":
+                continue
+            if key == "@type":
+                for type_ in value:
+                    g.add((subject, rdflib.RDF.type, rdflib.URIRef(type_)))
+            else:
+                for obj in value:
+                    if len(obj) == 1:
+                        if "@list" in obj:
+                            if len(obj["@list"]) > 0:
+                                # TODO This list should be handled differently
+                                # if it's LIFO vs FIFO
+                                # AP OrderedCollection could be either depending on
+                                # the specific collection
+                                # items_uri = list(g.objects(subject, AS2.orderedItems))
+                                # first_item = None
+                                # if len(items_uri) == 0:
+                                #     items_uri = rdflib.BNode()
+                                #     g.add((subject, AS2.orderedItems, items_uri))
+                                # else:
+                                #     items_uri = items_uri[0]
+                                #     first_item = next(g.objects((items_uri,
+                                #         rdflib.RDF.first)))
+                                # c = rdflib.collection.Collection(g, items_uri)
+                                # for item in obj["@list"]:
+                                #     item_uri = item["@id"]
+                                raise Exception("@list not supported")
+                            else:
+                                continue
+                        if "@id" in obj:
+                            obj = rdflib.URIRef(obj["@id"])
+                        elif "@value" in obj:
+                            obj = rdflib.Literal(obj["@value"])
+                        g.add((subject, rdflib.URIRef(key), obj))
+                    else:
+                        if "@value" in obj:
+                            obj = rdflib.Literal(obj["@value"])
+                        else:
+                            obj = _insert_resource(g, obj)
+                        g.add((subject, rdflib.URIRef(key), obj))
+        return subject
+    except:
+        print(json.dumps(resource, indent=2))
+        raise

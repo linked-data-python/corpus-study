@@ -1,0 +1,95 @@
+# Extracted from danilipp17/thesis_code@c2772e3555 : oscin/reader.py
+# region: OntologyReader._read_teams (lines 532-605, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+from oscin.namespaces import (
+    AGENTO,
+    AGENTOSCIN,
+    CALLS_CREW,
+    COORD_CUSTOM,
+    COORD_SEQUENTIAL,
+    HAS_DESCRIPTION,
+    HAS_TITLE,
+)
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix agento: <http://www.w3id.org/agentic-ai/onto#> .
+@prefix agentoscin: <http://www.semanticweb.org/danilippmann/ontologies/2026/3/agentoscin/> .
+
+
+for term_uri in self.g.objects(
+    team_uri, agentoscin:hasTerminationCondition
+):
+    if (term_uri, rdf:type, agentoscin:TurnLimitTermination) in self.g:
+        mt = self._int_value(term_uri, agentoscin:hasMaxTurns)
+        if mt is not None:
+            max_turns = mt
+            termination_conditions.append(
+                {"type": "TurnLimit", "max_turns": mt}
+            )
+    elif (
+        term_uri,
+        rdf:type,
+        agentoscin:EventBasedTermination,
+    ) in self.g:
+        trigger = self._str_value(
+            term_uri, agentoscin:hasTriggerExpression
+        ) or ""
+        termination_conditions.append(
+            {"type": "EventBased", "trigger": trigger}
+        )
+    elif (
+        term_uri,
+        rdf:type,
+        agentoscin:RoutingTermination,
+    ) in self.g:
+        termination_conditions.append({"type": "Routing"})
+    elif (
+        term_uri,
+        rdf:type,
+        agentoscin:CompositeTermination,
+    ) in self.g:
+        operator = (
+            self._str_value(term_uri, agentoscin:hasOperator) or "OR"
+        )
+        sub_conditions: list[dict] = []
+        for sub_uri in self.g.objects(
+            term_uri, agentoscin:hasSubCondition
+        ):
+            if (
+                sub_uri,
+                rdf:type,
+                agentoscin:EventBasedTermination,
+            ) in self.g:
+                trigger = (
+                    self._str_value(
+                        sub_uri, agentoscin:hasTriggerExpression
+                    )
+                    or ""
+                )
+                sub_conditions.append(
+                    {"type": "EventBased", "trigger": trigger}
+                )
+            elif (
+                sub_uri,
+                rdf:type,
+                agentoscin:TurnLimitTermination,
+            ) in self.g:
+                mt = self._int_value(sub_uri, agentoscin:hasMaxTurns)
+                if mt is not None:
+                    sub_conditions.append(
+                        {"type": "TurnLimit", "max_turns": mt}
+                    )
+                    # Promote to team-level so the generator can
+                    # emit the MaxMessageTermination call.
+                    if max_turns is None:
+                        max_turns = mt
+        termination_conditions.append(
+            {
+                "type": "Composite",
+                "operator": operator,
+                "conditions": sub_conditions,
+            }
+        )

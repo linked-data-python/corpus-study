@@ -1,0 +1,30 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v6_9_0.py
+# region: <module> (lines 101-108, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+@prefix srns: <http://example.org/semtech/research#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+eo = load("enrichment_o", "v6_1_0")
+g1 = Graph().parse(f"{BASEDIR}/01-research/semtech_research_v6_8_0.ttl")
+RO_PUB = <http://example.org/rdodi/research-ontology#Publication>
+corpus = srns:ResearchCorpus
+
+for key, e in eo.EXT8.items():
+    pub = SRNS[f"Pub_{key.replace(chr(45), chr(95))}"]
+    g1 += g{
+        {corpus} rdfs:member {pub} .
+        {pub} a {RO_PUB} ;
+           a owl:NamedIndividual ;
+           rdfs:label {Literal(e["cite"][:180], lang="en")} ;
+           dcterms:source {Literal(e["cite"], lang="en")} ;
+           skos:note {Literal(f"Verification level {e['level']}: {e['ev']}", lang="en")} ;
+           rdfs:seeAlso {URIRef(e["url"])}
+    }

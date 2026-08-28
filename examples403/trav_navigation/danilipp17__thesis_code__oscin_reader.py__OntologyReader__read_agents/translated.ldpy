@@ -1,0 +1,31 @@
+# Extracted from danilipp17/thesis_code@c2772e3555 : oscin/reader.py
+# region: OntologyReader._read_agents (lines 257-266, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+from oscin.namespaces import (
+    AGENTO,
+    AGENTOSCIN,
+    CALLS_CREW,
+    COORD_CUSTOM,
+    COORD_SEQUENTIAL,
+    HAS_DESCRIPTION,
+    HAS_TITLE,
+)
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix agento: <http://www.w3id.org/agentic-ai/onto#> .
+@prefix agentoscin: <http://www.semanticweb.org/danilippmann/ontologies/2026/3/agentoscin/> .
+
+
+for rp_uri in self.g.objects(
+    agent_uri, agentoscin:employsReasoningPattern
+):
+    for rp_type in self.g.objects(rp_uri, rdf:type):
+        name = _rp_type_map.get(str(rp_type))
+        if name:
+            reasoning_pattern = name
+            break
+    if reasoning_pattern:
+        break

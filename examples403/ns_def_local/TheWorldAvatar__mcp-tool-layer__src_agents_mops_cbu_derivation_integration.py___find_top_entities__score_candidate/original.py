@@ -1,0 +1,32 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : src/agents/mops/cbu_derivation/integration.py
+# region: _find_top_entities._score_candidate (lines 97-121, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from typing import Dict, List, Optional, Tuple, Union
+from rdflib import Graph, Namespace, Literal
+from rdflib.namespace import RDF, RDFS
+
+def _score_candidate(path: str, expected_label: str) -> Tuple[int, int]:
+    try:
+        g = Graph()
+        g.parse(path, format="turtle")
+    except Exception:
+        return (-1, -1)
+
+    label_matches = 0
+    for synth in g.subjects(RDF.type, Namespace("https://www.theworldavatar.com/kg/OntoSyn/").ChemicalSynthesis):
+        labels = [str(v) for v in g.objects(synth, RDFS.label)]
+        if any(_normalize_label(v) == _normalize_label(expected_label) for v in labels):
+            label_matches += 1
+    if label_matches == 0:
+        for synth, _, lbl in g.triples((None, RDFS.label, None)):
+            if isinstance(lbl, Literal) and "ChemicalSynthesis/" in str(synth):
+                if _normalize_label(str(lbl)) == _normalize_label(expected_label):
+                    label_matches += 1
+
+    mop_facts = 0
+    ontomops = Namespace("https://www.theworldavatar.com/kg/ontomops/")
+    for subj in g.subjects(RDF.type, ontomops.MetalOrganicPolyhedron):
+        mop_facts += 3 + len(list(g.triples((subj, None, None))))
+    for pred in (ontomops.hasCCDCNumber, ontomops.hasMOPFormula, ontomops.hasChemicalBuildingUnit):
+        mop_facts += sum(1 for _ in g.triples((None, pred, None)))
+    return (label_matches, mop_facts)

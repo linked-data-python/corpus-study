@@ -1,0 +1,45 @@
+# Extracted from shihanwan/memonto@65e89eac12 : memonto/stores/triple/jena.py
+# region: ApacheJena._hydrate_triples (lines 57-92, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, Namespace, URIRef
+from SPARQLWrapper import SPARQLWrapper, GET, POST, TURTLE, JSON
+from memonto.utils.namespaces import TRIPLE_PROP
+@prefix tripleprop: <triple:property:> .
+
+
+def _hydrate_triples(
+    self,
+    matched: list,
+    graph_id: str = None,
+) -> Graph:
+    matched_ids = matched.keys()
+    triple_ids = " ".join(f'("{id}")' for id in matched_ids)
+    g_id = f"data-{graph_id}" if graph_id else "data"
+
+    query = f"""
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+    CONSTRUCT {{
+        ?s ?p ?o .
+    }}
+    WHERE {{
+        GRAPH <{g_id}> {{
+            VALUES (?uuid) {{ {triple_ids} }}
+            ?triple_node <{tripleprop:uuid}> ?uuid .
+            ?triple_node rdf:subject ?s ;
+                        rdf:predicate ?p ;
+                        rdf:object ?o .
+        }}
+    }}
+    """
+
+    result = self._query(
+        url=f"{self.connection_url}/sparql",
+        method=GET,
+        query=query,
+    )
+
+    g = Graph()
+    g.parse(data=result, format="turtle")
+
+    return g

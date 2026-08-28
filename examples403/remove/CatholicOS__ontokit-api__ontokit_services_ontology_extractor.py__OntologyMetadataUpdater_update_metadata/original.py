@@ -1,0 +1,114 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : ontokit/services/ontology_extractor.py
+# region: OntologyMetadataUpdater.update_metadata (lines 540-646, stratum remove)
+# licence of the source repository: see meta.json
+from pathlib import Path
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DC, DCTERMS, OWL, RDF, RDFS
+
+def update_metadata(
+    self,
+    content: bytes,
+    filename: str,
+    new_title: str | None = None,
+    new_description: str | None = None,
+) -> tuple[bytes, list[str]]:
+    """
+    Update metadata properties in an ontology file.
+
+    This method:
+    1. Parses the content into an RDF graph
+    2. Detects existing title/description properties
+    3. Updates or adds the properties as needed
+    4. Serializes back to Turtle format
+
+    Args:
+        content: The ontology file content as bytes
+        filename: The original filename (used to determine input format)
+        new_title: New title value (None to skip updating)
+        new_description: New description value (None to skip updating)
+
+    Returns:
+        Tuple of (updated_content_bytes, list_of_changes_made)
+
+    Raises:
+        OntologyParseError: If the content cannot be parsed
+    """
+    extension = Path(filename).suffix.lower()
+    rdf_format = self.FORMAT_MAP.get(extension)
+
+    if rdf_format is None:
+        raise UnsupportedFormatError(f"Unsupported format: {extension}")
+
+    # Parse the graph
+    try:
+        graph = Graph()
+        graph.parse(data=content, format=rdf_format)
+    except Exception as e:
+        raise OntologyParseError(f"Failed to parse ontology: {e}") from e
+
+    # Find ontology IRI
+    ontology_iri = self._find_ontology_iri(graph)
+    if ontology_iri is None:
+        raise OntologyParseError("Cannot update metadata: no owl:Ontology declaration found")
+
+    changes: list[str] = []
+
+    # Update title if provided
+    if new_title is not None:
+        title_prop = self.detect_title_property(graph, ontology_iri)
+        if title_prop:
+            # Remove old triple(s)
+            graph.remove((ontology_iri, title_prop.property_uri, None))
+            # Add new triple with same language tag if it had one
+            if title_prop.language:
+                graph.add(
+                    (
+                        ontology_iri,
+                        title_prop.property_uri,
+                        Literal(new_title, lang=title_prop.language),
+                    )
+                )
+            else:
+                graph.add((ontology_iri, title_prop.property_uri, Literal(new_title)))
+            old_val = title_prop.current_value or "(empty)"
+            changes.append(f'Title ({title_prop.property_curie}): "{old_val}" → "{new_title}"')
+        else:
+            # No existing title property - add dc:title
+            self._ensure_dc_prefix(graph)
+            graph.add((ontology_iri, DC.title, Literal(new_title)))
+            changes.append(f'Title (dc:title): added "{new_title}"')
+
+    # Update description if provided
+    if new_description is not None:
+        desc_prop = self.detect_description_property(graph, ontology_iri)
+        if desc_prop:
+            # Remove old triple(s)
+            graph.remove((ontology_iri, desc_prop.property_uri, None))
+            # Add new triple with same language tag if it had one
+            if desc_prop.language:
+                graph.add(
+                    (
+                        ontology_iri,
+                        desc_prop.property_uri,
+                        Literal(new_description, lang=desc_prop.language),
+                    )
+                )
+            else:
+                graph.add((ontology_iri, desc_prop.property_uri, Literal(new_description)))
+            old_desc = desc_prop.current_value
+            if old_desc and len(old_desc) > 50:
+                old_desc = old_desc[:50] + "..."
+            changes.append(f"Description ({desc_prop.property_curie}): updated")
+        else:
+            # No existing description property - add dc:description
+            self._ensure_dc_prefix(graph)
+            graph.add((ontology_iri, DC.description, Literal(new_description)))
+            changes.append("Description (dc:description): added")
+
+    # Serialize to Turtle (canonical format), preserving @base directive
+    updated_raw = graph.serialize(format="turtle", base=str(ontology_iri))
+    updated_content: bytes = (
+        updated_raw.encode("utf-8") if isinstance(updated_raw, str) else updated_raw
+    )
+
+    return updated_content, changes

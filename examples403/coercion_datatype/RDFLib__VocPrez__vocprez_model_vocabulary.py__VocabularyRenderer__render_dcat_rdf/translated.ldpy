@@ -1,0 +1,71 @@
+# Extracted from RDFLib/VocPrez@ce3c0ea42f : vocprez/model/vocabulary.py
+# region: VocabularyRenderer._render_dcat_rdf (lines 100-155, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from flask import Response, render_template
+from rdflib import Graph, URIRef, Literal, XSD, RDF
+from rdflib.namespace import DCTERMS, OWL, SKOS, Namespace, NamespaceManager
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+def _render_dcat_rdf(self):
+    # get vocab RDF
+    g = Graph()
+    # map nice prefixes to namespaces
+    NamespaceManager(g)
+    DCAT = Namespace("https://www.w3.org/ns/dcat#")
+    g.namespace_manager.bind("dcat", DCAT)
+    g.namespace_manager.bind("dct", DCTERMS)
+    g.namespace_manager.bind("owl", OWL)
+    g.namespace_manager.bind("skos", SKOS)
+    s = URIRef(self.vocab.uri)
+
+    g += g{ {s} a {DCAT.Dataset} }
+    if self.vocab.title:
+        g += g{ {s} dcterms:title {Literal(self.vocab.title)} }
+    if self.vocab.description:
+        g += g{ {s} dcterms:description {Literal(self.vocab.description)} }
+    if self.vocab.creator:
+        if (
+            self.vocab.creator[:7] == "http://"
+            or self.vocab.creator[:7] == "https://"
+        ):  # if url
+            g += g{ {s} dcterms:creator {URIRef(self.vocab.creator)} }
+        else:  # else literal
+            g += g{ {s} dcterms:creator {Literal(self.vocab.creator)} }
+    if self.vocab.created:
+        g += g{ {s} dcterms:created {Literal(self.vocab.created, datatype=XSD.date)} }
+    if self.vocab.modified:
+        g += g{ {s} dcterms:modified {Literal(self.vocab.modified, datatype=XSD.date)} }
+    if self.vocab.versionInfo:
+        g += g{ {s} owl:versionInfo {Literal(self.vocab.versionInfo)} }
+    if self.vocab.accessURL:
+        g += g{ {s} {DCAT.accessURL} {URIRef(self.vocab.accessURL)} }
+    if self.vocab.downloadURL:
+        g += g{ {s} {DCAT.downloadURL} {URIRef(self.vocab.downloadURL)} }
+
+    sp = URIRef(SYSTEM_BASE_URI + "/sparql")
+    g += g{
+        {sp} {DCAT.servesDataset} {s} ;
+           dcterms:title "VocPrez SPARQL Service"
+    }
+    api = URIRef(SYSTEM_BASE_URI)
+    g += g{
+        {api} {DCAT.servesDataset} {s} ;
+           dcterms:title "VocPrez Linked Data API"
+    }
+
+    if self.vocab.other_properties is not None:
+        for prop in self.vocab.other_properties:
+            # other properties from DCAT, DCTERMS only
+            if str(prop.uri).startswith(("https://www.w3.org/ns/dcat#", "http://purl.org/dc/terms/")):
+                g += g{ {s} {URIRef(prop.uri)} {prop.value} }
+
+    # serialise in the appropriate RDF format
+    if self.mediatype in ["application/rdf+json", "application/json"]:
+        return Response(g.serialize(format="json-ld"), mimetype=self.mediatype, headers=self.headers)
+    else:
+        return Response(g.serialize(format=self.mediatype), mimetype=self.mediatype, headers=self.headers)

@@ -1,0 +1,22 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : tests/unit/test_ontology_service.py
+# region: graph_untagged_label (lines 49-55, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import pytest
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, SKOS
+@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+@pytest.fixture
+def graph_untagged_label() -> Graph:
+    """Create an RDF graph with a label that has no language tag."""
+    g = Graph()
+    g += g{
+        ex:Widget a owl:Class ;
+           rdfs:label "Widget"
+    }
+    return g

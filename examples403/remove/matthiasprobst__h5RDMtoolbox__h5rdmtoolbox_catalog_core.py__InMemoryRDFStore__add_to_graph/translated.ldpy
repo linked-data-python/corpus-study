@@ -1,0 +1,28 @@
+# Extracted from matthiasprobst/h5RDMtoolbox@1baa9284dc : h5rdmtoolbox/catalog/core.py
+# region: InMemoryRDFStore._add_to_graph (lines 618-639, stratum remove)
+# licence of the source repository: see meta.json
+import pathlib
+import rdflib
+
+def _add_to_graph(self, filename: pathlib.Path):
+    """Adds the RDF graph from the file to the combined graph."""
+    g = self._graphs.get(filename, None)
+    if not g:
+        g = rdflib.Graph()
+        try:
+            g.parse(filename)
+        except Exception as e:
+            raise ValueError(f"Could not parse file '{filename}'. Error: {e}")
+        for s, p, o in g:
+            if isinstance(s, rdflib.BNode):
+                new_s = rdflib.URIRef(f"https://example.org/{s}")
+            else:
+                new_s = s
+            if isinstance(o, rdflib.BNode):
+                new_o = rdflib.URIRef(f"https://example.org/{o}")
+            else:
+                new_o = o
+            g.remove((s, p, o))
+            g += g{ {new_s} {p} {new_o} }
+        self._graphs[filename] = g
+        self._combined_graph += g

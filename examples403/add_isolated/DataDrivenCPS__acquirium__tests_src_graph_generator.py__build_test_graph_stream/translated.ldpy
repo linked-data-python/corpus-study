@@ -1,0 +1,67 @@
+# Extracted from DataDrivenCPS/acquirium@e3bffb4bed : tests/src/graph_generator.py
+# region: build_test_graph_stream (lines 20-79, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, Literal
+from rdflib.namespace import RDF
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def build_test_graph_stream() -> Graph:
+    num_equipments = 3
+    num_points = 4
+    ex = Namespace("urn:ex/")
+
+    g = Graph()
+    g.bind("ex", ex)
+    g.bind("acq", ACQUIRIUM_NS)
+    g.bind("ref", BRICK_REF)
+    g.bind("s223", S223)
+    g.bind("qudt", QUDT)
+
+    # Equipment classes A B C D E under ACQUIRIUM_NS
+    equip_classes = [
+        ACQUIRIUM_NS.A,
+        ACQUIRIUM_NS.C,
+    ]
+
+    # Create 10 equipments: ex:eq_1 .. ex:eq_10
+    for i in range(1, num_equipments + 1):
+        eq = ex[f"eq_{i+10}"]
+        g += g{ {eq} a {equip_classes[(i - 1) % len(equip_classes)]} }
+
+    g += g{
+        {ex["eq_11"]} {ACQUIRIUM_NS.x} {ex["eq_12"]} .
+        {ex["eq_12"]} {ACQUIRIUM_NS.x} {ex["eq_13"]} .
+        {ex["eq_13"]} {ACQUIRIUM_NS.z} {ex["eq_12"]} .
+        {ex["eq_12"]} {ACQUIRIUM_NS.z} {ex["eq_11"]} .
+        {ex["eq_11"]} {ACQUIRIUM_NS.y} {ex["eq_13"]} .
+        {ex["eq_13"]} {ACQUIRIUM_NS.w} {ex["eq_11"]} .
+        {ex["eq_12"]} {ACQUIRIUM_NS.hasProperty} {ex["point_11"]} ;
+           {ACQUIRIUM_NS.hasProperty} {ex["point_12"]} .
+        {ex["eq_13"]} {ACQUIRIUM_NS.hasProperty} {ex["point_13"]} ;
+           {ACQUIRIUM_NS.hasProperty} {ex["point_14"]}
+    }
+
+    # Create 10 data nodes: ex:point_1 .. ex:point_10
+    for i in range(1, num_points + 1):
+        i=i + 10
+        point = ex[f"point_{i}"]
+        ref = ex[f"point_{i}_mqtt_ref"]
+
+        # Data node
+        g += g{
+            {point} a {ACQUIRIUM_NS.QuantifiableObservableProperty} ;
+               {HAS_EXTERNAL_REFERENCE} {ref} ;
+               {HAS_MEDIUM} {ACQUIRIUM_NS[f"Medium{i//3}"]} ;
+               {OF_SUBSTANCE} {ACQUIRIUM_NS[f"Substance{i//3}"]} ;
+               {HAS_QUANTITY_KIND} {ACQUIRIUM_NS[f"QuantityKind{i//2}"]} ;
+               {HAS_UNIT} {ACQUIRIUM_NS[f"Unit{i}"]} .
+            {ref} a {MQTT_REFERENCE} ;
+               {DATA_SOURCE} "SCADA" ;
+               {MQTT_BROKER} "mosquitto:1883" ;
+               {MQTT_TOPIC} {Literal(f"topic{i-10}")} ;
+               {TIME_KEY} "Timestamp" ;
+               {VALUE_KEY} "Value"
+        }
+
+    return g

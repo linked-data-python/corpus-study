@@ -1,0 +1,69 @@
+# Extracted from sebneu/portalwatch@a514eba7bf : fetch.py
+# region: fetch_portal_to_dir (lines 28-75, stratum remove)
+# licence of the source repository: see meta.json
+import os
+from datetime import datetime
+logger = logging.getLogger(__name__)
+import rdflib
+from rdflib import URIRef, RDF, Namespace, Literal
+from converter import portal_fetch_processors
+from db import ODPW_GRAPH
+from converter.portal_fetch_processors import PROV_ACTIVITY
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix locn: <http://www.w3.org/ns/locn#> .
+@prefix odpw: <http://data.wu.ac.at/ns/odpw#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+PW_AGENT = <https://data.wu.ac.at/portalwatch>
+
+def fetch_portal_to_dir(p, snapshot, path, format='nt', skip_portal=False, remove_geometries=False):
+    try:
+        logger.info("FETCH: " + p['id'])
+        portal_ref = rdflib.URIRef(p['uri'])
+        portal_api = p['apiuri']
+        portal_id = p['id']
+        software = p['software']
+        fp = os.path.join(path, portal_id) + '.' + format
+        # skip portal if exists
+        if skip_portal and os.path.exists(fp):
+            logger.info("File exists, skip portal: " + p['id'])
+            return
+
+        # log execution time
+        start_time = datetime.now()
+        portal_activity = URIRef("https://data.wu.ac.at/portalwatch/portal/" + portal_id + '/' + str(snapshot))
+
+        proc = portal_fetch_processors.getPortalProcessor(software)
+        g = rdflib.Graph()
+        proc.fetchAndConvertToDCAT(g, portal_ref, portal_api, snapshot, portal_activity)
+
+        end_time = datetime.now()
+
+        # prov information
+        g += g{
+            {portal_activity} a prov:Activity ;
+               prov:startedAtTime {Literal(start_time)} ;
+               prov:endedAtTime {Literal(end_time)} ;
+               prov:wasAssociatedWith {PW_AGENT} ;
+               odpw:snapshot {Literal(int(snapshot))}
+        }
+
+        sn_graph = URIRef(ODPW_GRAPH + '/' + str(snapshot))
+        sn_activity = rdflib.URIRef(PROV_ACTIVITY + str(snapshot))
+        g += g{
+            {sn_activity} a prov:Activity ;
+               prov:generated {sn_graph} .
+            {portal_activity} odpw:fetched {portal_ref} .
+            {portal_ref} odpw:wasFetchedBy {portal_activity} .
+            {portal_activity} prov:wasStartedBy {sn_activity}
+        }
+
+        # remove GeoSPARQL geometries
+        if remove_geometries:
+            for s, p, o in g.triples((None, locn:geometry, None)):
+                g.remove((s, p, o))
+
+        # serialize
+        g.serialize(fp, format=format)
+    except Exception as e:
+        logger.exception("Portal fetch error: " + p['id'] + ', ' + str(e))

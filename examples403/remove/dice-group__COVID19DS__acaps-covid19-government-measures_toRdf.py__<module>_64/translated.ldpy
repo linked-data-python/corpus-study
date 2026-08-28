@@ -1,0 +1,91 @@
+# Extracted from dice-group/COVID19DS@7842845de5 : acaps-covid19-government-measures/toRdf.py
+# region: <module> (lines 64-135, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import RDF, FOAF, RDFS, OWL, DCTERMS, SKOS, XSD
+import urllib.parse
+import urllib
+import re
+@prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .
+@prefix cvdr: <https://covid-19ds.data.dice-research.org/resource/> .
+@prefix dbpediaowl: <http://dbpedia.org/ontology/> .
+@prefix dcmi: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dowl: <http://dbpedia.org/ontology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+g = Graph()
+csv_data = pd.read_excel(xls, 'Dataset')
+csv_data = csv_data.fillna("unknown")
+
+for index, row in csv_data.iterrows():
+     dice = str(row['ID'])+'_GovMeasure'
+     print(dice)
+     iso = row["ISO"]
+     g += g{
+         cvdr:{dice} cvdo:hasISO3 cvdr:{iso} .
+         cvdr:{iso} a cvdo:Iso ;
+            dowl:isoCodeRegion {Literal(row["ISO"], datatype=XSD.string)} .
+         {URIRef(cvdr[dice])} a cvdo:Covid19Measure ;
+            cvdo:hasCountry {URIRef(cvdr[row["COUNTRY"]])} .
+         {URIRef(cvdr[str(row["COUNTRY"])])} rdfs:label {Literal(row["COUNTRY"], lang='en')} ;
+            a dbpediaowl:Country .
+         {URIRef(cvdr[dice])} cvdo:hasRegion {Literal(row["REGION"], datatype=XSD.string)} ;
+            cvdo:hasAdminLevelName {Literal(row['ADMIN_LEVEL_NAME'], datatype=XSD.string)} ;
+            cvdo:hasPCODE {Literal(row['PCODE'], datatype=XSD.integer)} ;
+            cvdo:hasLogType {Literal(row['LOG_TYPE'], datatype=XSD.string)} ;
+            dbpediaowl:category {Literal(row['CATEGORY'], datatype=XSD.string)} ;
+            cvdo:hasMeasure {Literal(row['MEASURE'], datatype=XSD.string)} ;
+            cvdo:targetedPopGroup {Literal(row['TARGETED_POP_GROUP'], datatype=XSD.string)} ;
+            rdfs:comment {Literal(row['COMMENTS'], datatype=XSD.string)} ;
+            cvdo:nonCompliance {Literal(row['NON_COMPLIANCE'], datatype=XSD.string)} ;
+            dcmi:date {Literal(row['DATE_IMPLEMENTED'], datatype=XSD.date)} ;
+            cvdo:hasSource {Literal(row['SOURCE'],lang='en')} ;
+            cvdo:publisher {Literal(row['SOURCE_TYPE'], datatype=XSD.string)}
+     }
+
+     row['LINK'] = row['LINK'].strip()
+     if " " in row['LINK']:
+          row['LINK']=urllib.parse.quote_plus(row['LINK'])
+
+     g += g{
+         {URIRef(cvdr[dice])} cvdo:hasSourceLink {URIRef(row['LINK'])} ;
+            cvdo:entryDate {Literal(row['ENTRY_DATE'], datatype=XSD.date)}
+     }
+
+     # row['Alternative source']=urllib.parse.quote_plus(row['Alternative source'])
+     altSources = None
+
+     altSources = re.split(';| \+| AND| and', row['Alternative source'])
+
+
+     if altSources:
+          for a in altSources:
+               # if a != 'and' and a != 'AND' and a != '':
+               g += g{ {URIRef(cvdr[dice])} cvdo:alternativeSource {URIRef(a.strip().replace(" ", ""))} }
+     else:
+          if "http" in row['Alternative source']:
+               g += g{ {URIRef(cvdr[dice])} cvdo:alternativeSource {URIRef(row['Alternative source'].strip())} }
+          else:
+               g += g{ {URIRef(cvdr[dice])} cvdo:alternativeSource {Literal(row['Alternative source'], datatype=XSD.string)} }
+
+     # the provenance
+     g += g{
+         cvdr:{dice} prov:hadPrimarySource cvdr:GovMeasuresCovidDataset .
+         cvdr:GovMeasuresCovidDataset a prov:Entity ;
+            prov:generatedAtTime "2021-02-22T02:52:02Z"^^xsd:dateTime ;
+            prov:wasDerivedFrom "https://data.humdata.org/dataset/acaps-covid19-government-measures-dataset"^^xsd:string
+     }
+
+
+     # Remove the triples that I marked as "unknown"
+     g.remove((None, None, <unknown>))
+     g.remove((None, None, Literal("unknown",datatype=xsd:string)))
+     g.remove((None, None, Literal("unknown",datatype=xsd:integer)))
+     g.remove((None, None, Literal("unknown",datatype=xsd:date)))

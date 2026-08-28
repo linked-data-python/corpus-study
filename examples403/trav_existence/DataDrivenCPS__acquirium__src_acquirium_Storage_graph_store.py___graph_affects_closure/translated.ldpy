@@ -1,0 +1,15 @@
+# Extracted from DataDrivenCPS/acquirium@e3bffb4bed : src/acquirium/Storage/graph_store.py
+# region: _graph_affects_closure (lines 72-76, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Dataset, Graph, Literal, RDF, URIRef
+from rdflib.namespace import XSD, OWL, NamespaceManager
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+
+def _graph_affects_closure(graph: Graph) -> bool:
+    """Return True if *graph* can change owl:imports-driven closure."""
+    return any(graph.triples((None, owl:imports, None))) or any(
+        graph.triples((None, rdf:type, owl:Ontology))
+    )

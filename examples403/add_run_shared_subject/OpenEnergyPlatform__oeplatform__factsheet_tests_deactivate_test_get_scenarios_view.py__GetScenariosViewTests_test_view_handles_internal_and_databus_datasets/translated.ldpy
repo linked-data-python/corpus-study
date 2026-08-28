@@ -1,0 +1,92 @@
+# Extracted from OpenEnergyPlatform/oeplatform@ff28ef6390 : factsheet/tests/deactivate_test_get_scenarios_view.py
+# region: GetScenariosViewTests.test_view_handles_internal_and_databus_datasets (lines 21-105, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import json
+from unittest.mock import patch
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DC, RDF, RDFS
+from factsheet.views import get_scenarios_view
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+@patch("factsheet.views.OekgQuery")  # patch where it is imported/used
+@patch("factsheet.views.oekg")  # patch the global graph in the views module
+def test_view_handles_internal_and_databus_datasets(self, mock_oekg, MockOekgQuery):
+    # Mock study descriptors call to avoid DB/real KG logic
+    MockOekgQuery.return_value.get_bundle_study_descriptors_where_scenario_is_part_of.return_value = (  # noqa: E501
+        []
+    )
+
+    # Build a minimal RDF graph
+    g = Graph()
+    OEO = Namespace("https://openenergyplatform.org/ontology/oeo/")
+    OBO = Namespace("http://purl.obolibrary.org/obo/")
+
+    scenario_uid = "60a682d8-6a41-25d3-c817-e258a90a5d5e"
+    scenario = URIRef(f"https://openenergyplatform.org/scenario/{scenario_uid}")
+
+    g += g{
+        {scenario} a {OEO.OEO_00000365} ;
+           rdfs:label "Scenario A" ;
+           dc:abstract "Scenario abstract"
+    }
+
+    # Provide a study so study_label/study_abstract exist
+    study = <https://openenergyplatform.org/study/study1>
+    g += g{
+        {study} {OBO.BFO_0000051} {scenario} ;
+           rdfs:label "Study A" ;
+           dc:abstract "Study abstract"
+    }
+
+    # Input dataset: internal URL
+    inp = <https://openenergyplatform.org/dataset/inp1>
+    g += g{
+        {scenario} {OEO.OEO_00020437} {inp} .
+        {inp} rdfs:label "Input DS" ;
+           {OEO.OEO_00390094} "database/tables/eu_leg_data_2021_rep_table_3"
+    }
+
+    # Output dataset: databus URL
+    out = <https://openenergyplatform.org/dataset/out1>
+    g += g{
+        {scenario} {OEO.OEO_00020436} {out} .
+        {out} rdfs:label "Output DS" ;
+           {OEO.OEO_00390094} "https://databus.openenergyplatform.org/zl_energie/ZLE/IKT_Input/FinalData_v2"
+    }
+
+    # Make the view use our graph
+    mock_oekg.triples.side_effect = g.triples
+    mock_oekg.value.side_effect = g.value
+
+    # Call the view
+    request = self.factory.get(
+        "/scenario-bundles/get_scenarios/",
+        data={"scenarios_uid": json.dumps([scenario_uid])},
+    )
+    response = get_scenarios_view(request)
+
+    self.assertEqual(response.status_code, 200)
+
+    payload = json.loads(response.content.decode("utf-8"))
+    self.assertEqual(len(payload), 1)
+
+    data = payload[0]["data"]
+
+    # Assert datasets exist
+    self.assertEqual(len(data["input_datasets"]), 1)
+    self.assertEqual(len(data["output_datasets"]), 1)
+
+    # If you return dicts for datasets (recommended)
+    self.assertEqual(data["input_datasets"][0]["kind"], "oep_table")
+    self.assertEqual(
+        data["input_datasets"][0]["table_name"], "eu_leg_data_2021_rep_table_3"
+    )
+
+    self.assertEqual(data["output_datasets"][0]["kind"], "databus")
+    self.assertEqual(
+        data["output_datasets"][0]["external_id"],
+        "zl_energie/ZLE/IKT_Input/FinalData_v2",
+    )

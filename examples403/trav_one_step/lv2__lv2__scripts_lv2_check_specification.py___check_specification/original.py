@@ -1,0 +1,7 @@
+# Extracted from lv2/lv2@3c57dae600 : scripts/lv2_check_specification.py
+# region: _check_specification (lines 153-154, stratum trav_one_step)
+# licence of the source repository: see meta.json
+rdf = rdflib.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+
+for subject in model.subjects(rdf.type, None):
+    typed_subjects.add(subject)

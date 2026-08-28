@@ -1,0 +1,31 @@
+# Extracted from lazlop/semantic_objects@243c5efd8c : src/semantic_objects/exporters.py
+# region: YamlExporter.generate_predicate_turtle_body (lines 98-116, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from .namespaces import PARAM, RDF, RDFS, SH, XSD, bind_prefixes
+from rdflib import Graph, Literal, BNode, URIRef
+@prefix param: <urn:___param___#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+@staticmethod
+def generate_predicate_turtle_body(cls, subject_name="name", target_name="target"):
+    """Generate RDF/Turtle body for Predicate template"""
+    g = Graph()
+    bind_prefixes(g)
+
+    prop_iri = cls._get_iri()
+
+    g += g{ param:{subject_name} {prop_iri} param:{target_name} }
+
+    if cls._domain is not None:
+        domain_iri = cls._domain._get_iri()
+        g += g{ {prop_iri} rdfs:domain {domain_iri} }
+
+    if cls._range is not None:
+        range_iri = cls._range._get_iri()
+        g += g{ {prop_iri} rdfs:range {range_iri} }
+
+    return g.serialize(format='ttl')

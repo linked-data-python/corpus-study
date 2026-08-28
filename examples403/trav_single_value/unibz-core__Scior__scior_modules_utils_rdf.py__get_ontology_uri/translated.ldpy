@@ -1,0 +1,14 @@
+# Extracted from unibz-core/Scior@1d9f010224 : scior/modules/utils_rdf.py
+# region: get_ontology_uri (lines 120-125, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import RDF, OWL, Graph
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+
+def get_ontology_uri(ontology_graph):
+    """ Return the URI of the ontology graph. """
+
+    ontology_uri = ontology_graph.value(predicate=rdf:type, object=owl:Ontology)
+
+    return ontology_uri

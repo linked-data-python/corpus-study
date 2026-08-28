@@ -1,0 +1,56 @@
+# Extracted from MDD4REST/mdd4rest-annotator@c46839aa3d : server/src/rdflib2/plugins/sparql/results/rdfresults.py
+# region: RDFResult.__init__ (lines 15-61, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, RDF, Variable
+from rdflib.query import Result, ResultParser
+@prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def __init__(self, source, **kwargs):
+
+    if not isinstance(source, Graph):
+        graph = Graph()
+        graph.load(source, **kwargs)
+    else:
+        graph = source
+
+    rs = graph.value(predicate=rdf:type, object=rs:ResultSet)
+                     # there better be only one :)
+
+    if rs is None:
+        type_ = 'CONSTRUCT'
+
+        # use a new graph
+        g = Graph()
+        g += graph
+
+    else:
+
+        askAnswer = graph.value(rs, rs:boolean)
+
+        if askAnswer is not None:
+            type_ = 'ASK'
+        else:
+            type_ = 'SELECT'
+
+    Result.__init__(self, type_)
+
+    if type_ == 'SELECT':
+        self.vars = [Variable(v) for v in graph.objects(rs,
+                                                        rs:resultVariable)]
+
+        self.bindings = []
+
+        for s in graph.objects(rs, rs:solution):
+            sol = {}
+            for b in graph.objects(s, rs:binding):
+                sol[Variable(graph.value(
+                    b, rs:variable))] = graph.value(b, rs:value)
+            self.bindings.append(sol)
+    elif type_ == 'ASK':
+        self.askAnswer = askAnswer.value
+        if askAnswer.value == None:
+            raise Exception('Malformed boolean in ask answer!')
+    elif type_ == 'CONSTRUCT':
+        self.graph = g

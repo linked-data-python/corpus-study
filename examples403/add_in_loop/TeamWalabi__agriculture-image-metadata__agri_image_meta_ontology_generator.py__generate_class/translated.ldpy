@@ -1,0 +1,79 @@
+# Extracted from TeamWalabi/agriculture-image-metadata@d34fe77241 : agri_image_meta/ontology/generator.py
+# region: generate_class (lines 69-123, stratum add_in_loop)
+# licence of the source repository: see meta.json
+import inspect
+from rdflib import Graph, RDF, RDFS, OWL, URIRef, Literal, BNode, XSD
+from pydantic import BaseModel
+from agri_image_meta.utils.namespaces import AGIMAGE, SH, DCT, FOAF, SOSA, EXIF
+from agri_image_meta.utils.type_mapping import unwrap_type, python_to_xsd
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix agimage: <https://w3id.org/agri-image/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix exif: <https://exiftool.org/TagNames/EXIF.html#> .
+
+
+def generate_class(g, model):
+    """
+    Generate OWL class definition from Pydantic model.
+
+    If the model's rdf_type maps to an external vocabulary (sosa, foaf, dcat),
+    emits an rdfs:subClassOf triple linking the agimage class to the external class.
+
+    Args:
+        g (Graph): RDF graph to add triples to
+        model: Pydantic model class
+    """
+    class_name = model.__name__.replace("Metadata", "")
+    class_uri = AGIMAGE[class_name]
+
+    g += g{ {class_uri} a owl:Class }
+
+    # Add rdfs:subClassOf when rdf_type points to an external vocabulary
+    rdf_type_default = model.model_fields.get("rdf_type")
+    if rdf_type_default is not None:
+        external_uri = _resolve_rdf_type_uri(rdf_type_default.default)
+        if external_uri is not None:
+            g += g{ {class_uri} rdfs:subClassOf {external_uri} }
+
+    for field_name, field in model.model_fields.items():
+        extra = field.json_schema_extra or {}
+        uri = extra.get("uri")
+
+        if not uri:
+            continue
+
+        prop = URIRef(uri)
+        field_type = unwrap_type(field.annotation)
+
+        # Object property (nested BaseModel)
+        if inspect.isclass(field_type) and issubclass(field_type, BaseModel):
+            range_class = AGIMAGE[field_type.__name__.replace("Metadata", "")]
+            g += g{
+                {prop} a owl:ObjectProperty ;
+                   rdfs:domain {class_uri} ;
+                   rdfs:range {range_class}
+            }
+            generate_class(g, field_type)
+
+        # Datatype property
+        else:
+            g += g{
+                {prop} a owl:DatatypeProperty ;
+                   rdfs:domain {class_uri} ;
+                   rdfs:range {python_to_xsd(field_type)}
+            }
+
+        g += g{ {prop} rdfs:label {Literal(field_name)} }
+        if field.description:
+            g += g{ {prop} rdfs:comment {Literal(field.description)} }
+
+        # Add rdfs:subPropertyOf when parent_uri is specified
+        parent_uri = extra.get("parent_uri")
+        if parent_uri:
+            g += g{ {prop} rdfs:subPropertyOf {URIRef(parent_uri)} }

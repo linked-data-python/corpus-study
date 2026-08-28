@@ -1,0 +1,23 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : scripts/validate_golden_graph.py
+# region: _quantity_matches (lines 56-67, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from typing import Any
+from rdflib import Graph, Namespace, RDF, RDFS
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _quantity_matches(graph: Graph, step: Any, predicate_local: str, value: float, unit_local: str) -> bool:
+    predicate = getattr(ONTOSYN, predicate_local)
+    for quantity in graph.objects(step, predicate):
+        raw_value = next(graph.objects(quantity, om2:hasNumericalValue), None)
+        raw_unit = next(graph.objects(quantity, om2:hasUnit), None)
+        try:
+            numeric_ok = abs(float(raw_value) - float(value)) < 1e-6
+        except Exception:
+            numeric_ok = False
+        if numeric_ok and _local_name(raw_unit) == unit_local:
+            return True
+    return False

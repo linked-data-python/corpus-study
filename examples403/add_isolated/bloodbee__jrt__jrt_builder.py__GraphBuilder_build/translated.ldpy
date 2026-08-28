@@ -1,0 +1,33 @@
+# Extracted from bloodbee/jrt@2c5b072bcb : jrt/builder.py
+# region: GraphBuilder.build (lines 47-63, stratum add_isolated)
+# licence of the source repository: see meta.json
+import warnings
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DC, DCTERMS, FOAF, OWL, RDF, RDFS, SKOS, XSD
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def build(self) -> Graph:
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*is not defined in namespace XSD",
+            category=UserWarning,
+        )
+        self._bind_namespaces()
+        root_subject = self._materialize(self.data)
+        if root_subject is not None:
+            self.graph += g{ {root_subject} a owl:Thing }
+
+        # Add external ontologies if provided
+        if self.ontologies:
+            for onto in self.ontologies:
+                self.graph += onto.graph
+    return self.graph

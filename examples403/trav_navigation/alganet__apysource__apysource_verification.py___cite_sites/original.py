@@ -1,0 +1,22 @@
+# Extracted from alganet/apysource@f800ec97c1 : apysource/verification.py
+# region: _cite_sites (lines 146-160, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, URIRef
+from apysource.namespaces import PROV, SV
+from apysource.results import CheckResult, CiteSite, Failure, FetcherResult, RepoResult
+
+def _cite_sites(g: Graph, urn: str) -> list[CiteSite]:
+    """The places that make this fragment's claim, as the graph holds them."""
+    if not urn:
+        return []
+
+    sites = []
+    for node in g.objects(URIRef(urn), SV.citedBy):
+        file = g.value(node, SV.citingFile)
+        if file is None:
+            continue
+        line = g.value(node, SV.citingLine)
+        sites.append(CiteSite(file=str(file),
+                              line=int(str(line)) if line is not None else None))
+
+    return sorted(sites, key=lambda s: (s.file, s.line if s.line else 0))

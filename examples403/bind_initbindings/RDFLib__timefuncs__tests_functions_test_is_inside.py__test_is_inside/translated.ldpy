@@ -1,0 +1,40 @@
+# Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_is_inside.py
+# region: test_is_inside (lines 15-43, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from rdflib.namespace import TIME
+@prefix tfun: <https://w3id.org/timefuncs/> .
+@prefix inside: <https://w3id.org/timefuncs/testdata/inside/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+
+tests_dir = Path(__file__).parent
+
+def test_is_inside():
+    g = Graph().parse(str(tests_dir / "data" / "is_inside.ttl"))
+    q = """
+        SELECT ?a ?b
+        WHERE {
+            ?a a time:Instant .
+            ?b a time:Interval .
+
+            FILTER tfun:isInside(?a, ?b)
+        }
+        """
+    expected = [
+        (str(inside:a02), str(inside:b02)),
+        (str(inside:a07), str(inside:b07)),
+        (str(inside:a08), str(inside:b07)),
+        (str(inside:a09), str(inside:b09)),
+    ]
+    # print()
+    # for r in g.query(q, initNs={"time": TIME, "tfun": TFUN}):
+    #     print(r)
+    actual = sorted([
+        (str(r[0]), str(r[1]))
+        for r in g.query(
+            q,
+            initNs={"time": TIME, "tfun": TFUN}
+        )
+    ])
+
+    assert actual == expected

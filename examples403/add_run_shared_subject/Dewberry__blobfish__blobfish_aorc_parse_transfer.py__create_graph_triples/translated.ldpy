@@ -1,0 +1,117 @@
+# Extracted from Dewberry/blobfish@db89f34228 : blobfish/aorc/parse_transfer.py
+# region: create_graph_triples (lines 175-270, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import RDF, OWL, XSD, DCAT, DCTERMS, PROV, Literal, URIRef, BNode
+from ..pyrdf import AORC
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+
+def create_graph_triples(
+    meta: CompletedTransferMetadata, graph_creator: GraphCreator, node_namer: NodeNamer, filter: AORCFilter | None
+) -> None:
+    # Apply filter to get distinct graphs depending on metadata properties
+    filter_value = None
+    if filter:
+        if filter.name == "YEAR":
+            filter_value = meta.ref_date[:4]
+        elif filter.name == "RFC":
+            filter_value = meta.rfc_alias
+    g = graph_creator.get_graph(filter_value)
+
+    # Create source dataset instance, properties
+    source_dataset_node = BNode(node_namer.name_source_ds(meta))
+    g += g{ {source_dataset_node} a {AORC.SourceDataset} }
+    source_dataset_period_of_time_node = BNode(node_namer.name_ds_period(meta))
+    g += g{
+        {source_dataset_period_of_time_node} a dcterms:PeriodOfTime .
+        {source_dataset_node} dcterms:temporal {source_dataset_period_of_time_node}
+    }
+    source_dataset_period_start = Literal(meta.ref_date, datatype=xsd:date)
+    g += g{ {source_dataset_period_of_time_node} dcat:startDate {source_dataset_period_start} }
+    source_dataset_period_end = Literal(meta.ref_end_date, datatype=xsd:date)
+    g += g{ {source_dataset_period_of_time_node} dcat:endDate {source_dataset_period_end} }
+
+    # Create source dataset distribution instance, properties
+    source_distribution_uri = URIRef(
+        "".join([meta.aorc_historic_uri, meta.rfc_catalog_uri, meta.precip_partition_uri, meta.source_uri])
+    )
+    g += g{ {source_distribution_uri} a {AORC.SourceDistribution} }
+    source_distribution_byte_size = Literal(meta.source_bytes, datatype=xsd:positiveInteger)
+    g += g{ {source_distribution_uri} dcat:byteSize {source_distribution_byte_size} }
+    source_last_modified = Literal(meta.source_last_modified, datatype=xsd:dateTime)
+    g += g{ {source_distribution_uri} dcterms:modified {source_last_modified} }
+    zip_compression = <https://www.iana.org/assignments/media-types/application/zip>
+    g += g{ {source_distribution_uri} dcat:compressFormat {zip_compression} }
+    netcdf_format = <https://publications.europa.eu/resource/authority/file-type/NETCDF>
+    g += g{ {source_distribution_uri} dcat:packageFormat {netcdf_format} }
+    monthly_frequency = <http://purl.org/cld/freq/monthly>
+    g += g{
+        {source_dataset_node} dcterms:accrualPeriodicity {monthly_frequency} ;
+           dcat:distribution {source_distribution_uri}
+    }
+
+    # Create mirror dataset instance, properties
+    mirror_dataset_uri = URIRef(meta.mirror_uri)
+    g += g{ {mirror_dataset_uri} a {AORC.MirrorDataset} }
+    mirror_last_modified = Literal(meta.mirror_last_modified, datatype=xsd:dateTime)
+    g += g{ {mirror_dataset_uri} dcterms:created {mirror_last_modified} }
+    access_description = Literal(
+        "Access is restricted based on users credentials for AWS bucket holding data", datatype=xsd:string
+    )
+    g += g{
+        {mirror_dataset_uri} owl:Annotation {access_description} ;
+           {AORC.hasSourceDataset} {source_dataset_node}
+    }
+
+    # Create mirror distribution instance, properties
+    mirror_distribution_uri = URIRef(meta.mirror_public_uri)
+    g += g{
+        {mirror_distribution_uri} a {AORC.MirrorDistribution} .
+        {mirror_dataset_uri} dcat:distribution {mirror_distribution_uri}
+    }
+
+    # Create transfer script instance
+    script_node = BNode(meta.mirror_script)
+    g += g{
+        {script_node} a {AORC.TransferScript} ;
+           dcterms:identifier {Literal(meta.mirror_script)}
+    }
+
+    # Create docker image instance, properties
+    docker_image_uri = URIRef(meta.docker_image_url)
+    g += g{
+        {docker_image_uri} a {AORC.DockerImage} ;
+           {AORC.hasTransferScript} {script_node}
+    }
+
+    # Create transfer job activity instance, properties
+    transfer_job_node = BNode(node_namer.name_transfer(meta))
+    g += g{
+        {transfer_job_node} a {AORC.TransferJob} ;
+           {AORC.transferred} {mirror_dataset_uri} ;
+           prov:used {source_dataset_node} ;
+           prov:wasStartedBy {script_node}
+    }
+
+    # Create RFC office instance
+    rfc_office_uri = URIRef(meta.rfc_office_uri)
+    g += g{ {rfc_office_uri} a {AORC.RFC} }
+    rfc_office_title = Literal(meta.rfc_name, datatype=xsd:string)
+    g += g{ {rfc_office_uri} {AORC.hasRFCName} {rfc_office_title} }
+    rfc_office_alias = Literal(meta.rfc_alias, datatype=xsd:string)
+    g += g{ {rfc_office_uri} {AORC.hasRFCAlias} {rfc_office_alias} }
+
+    # Create precip partition catalog instance, properties
+    precip_partition_uri = URIRef("".join([meta.aorc_historic_uri, meta.rfc_catalog_uri, meta.precip_partition_uri]))
+    precip_keyword_uri = Literal("precipitation", datatype=xsd:string)
+    g += g{
+        {precip_partition_uri} a {AORC.PrecipPartition} ;
+           dcat:keyword {precip_keyword_uri} ;
+           {AORC.hasRFC} {rfc_office_uri} ;
+           dcat:dataset {source_dataset_node}
+    }

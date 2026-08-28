@@ -1,0 +1,30 @@
+# Extracted from statnett/KGraphPy@38859be62f : tests/test_header.py
+# region: test_repair_blank_header_subject_dctidentifier (lines 674-688, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import pytest
+from rdflib import Graph, URIRef, Literal, BNode, Node
+from rdflib.namespace import DCAT, DCTERMS, RDF
+from kgraphpy.namespaces import MD
+from kgraphpy.header import CIMMetadataHeader, create_header_attribute
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+@pytest.mark.parametrize(
+        "header_type", [MD.FullModel, dcat:Dataset]
+)
+def test_repair_blank_header_subject_dctidentifier(header_type: Node, caplog: pytest.LogCaptureFixture) -> None:
+    g = Graph()
+    b = BNode()
+    g += g{
+        {b} a {header_type} ;
+           dcterms:identifier "1234"
+    }
+
+    header = CIMMetadataHeader.from_graph(g)
+
+    assert header.subject == <urn:uuid:1234>
+    records = caplog.messages
+    assert len(records) == 1
+    assert "blank node" in records[0]

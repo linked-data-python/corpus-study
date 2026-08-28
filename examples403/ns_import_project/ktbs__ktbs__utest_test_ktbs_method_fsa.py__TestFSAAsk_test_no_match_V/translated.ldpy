@@ -1,0 +1,18 @@
+# Extracted from ktbs/ktbs@4f9f50c770 : utest/test_ktbs_method_fsa.py
+# region: TestFSAAsk.test_no_match_V (lines 327-335, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from json import dumps, loads
+from rdflib import Literal, XSD
+from ktbs.namespace import KTBS, KTBS_NS_URI
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def test_no_match_V(self):
+    ctr = self.base.create_computed_trace("ctr/", KTBS.fsa,
+                                     {"fsa": dumps(self.base_structure),
+                                      "model": self.model_dst.uri,},
+                                     [self.src],)
+    oA1 = self.src.create_obsel("oA1", self.otypeA, 0, attributes={self.atypeV: Literal(42)})
+    assert len(ctr.obsels) == 0
+    oA2 = self.src.create_obsel("oA2", self.otypeA, 1, attributes={self.atypeV: Literal(41)})
+    assert len(ctr.obsels) == 0

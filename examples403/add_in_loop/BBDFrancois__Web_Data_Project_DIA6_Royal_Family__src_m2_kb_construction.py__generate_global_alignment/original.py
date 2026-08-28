@@ -1,0 +1,68 @@
+# Extracted from BBDFrancois/Web_Data_Project_DIA6_Royal_Family@8af66a0d48 : src/m2_kb_construction.py
+# region: generate_global_alignment (lines 373-429, stratum add_in_loop)
+# licence of the source repository: see meta.json
+import re
+import pandas as pd
+from rdflib import Graph, Literal, RDF, URIRef, Namespace
+from rdflib.namespace import OWL, RDFS, XSD
+import pandas as pd
+import re
+from rdflib import Graph, URIRef
+
+def generate_global_alignment(mapping_entity_csv, output_predicate_csv, output_alignment_ttl):
+    """
+    Build the global alignment graph (entities + predicates).
+    - Entities: owl:sameAs links (confidence >= 0.5)
+    - Predicates: owl:equivalentProperty (score >= 0.55) or rdfs:subPropertyOf (score >= 0.4)
+    Outputs a Turtle alignment file.
+    """
+    print("Building global alignment graph (Entities + Predicates)")
+
+    PRIV = Namespace("http://example.org/private#")
+    DBO  = Namespace("http://dbpedia.org/ontology/")
+    DBR  = Namespace("http://dbpedia.org/resource/")
+
+    alignment_graph = Graph()
+    alignment_graph.bind("priv", PRIV)
+    alignment_graph.bind("dbo",  DBO)
+    alignment_graph.bind("dbr",  DBR)
+    alignment_graph.bind("owl",  OWL)
+
+    # 1. Entities
+    df_entities   = pd.read_csv(mapping_entity_csv)
+    entity_count  = 0
+    for _, row in df_entities.iterrows():
+        priv_raw = str(row['Private Entity']).strip()
+        ext_raw  = str(row['External URI']).strip()
+        conf     = float(row['Confidence'])
+        if ext_raw != "NOT_FOUND" and conf >= 0.5:
+            alignment_graph.add((PRIV[priv_raw.lstrip(":")],
+                                  OWL.sameAs,
+                                  URIRef(ext_raw.strip("<>"))))
+            entity_count += 1
+
+    # 2. Predicates
+    df_predicates   = pd.read_csv(output_predicate_csv)
+    predicate_count = 0
+    regex_pattern   = re.compile(r"dbo:([a-zA-Z0-9_]+)\s+\(.*\)\s+\[Score:\s+([0-9.]+)\]")
+    for _, row in df_predicates.iterrows():
+        raw_rel  = str(row['Relation_Brute'])
+        candidat = str(row.get('Candidat_1', '')).strip()
+        if pd.notna(candidat) and candidat:
+            match = regex_pattern.search(candidat)
+            if match:
+                dbo_id     = match.group(1)
+                score      = float(match.group(2))
+                clean_rel  = format_predicate(raw_rel).lstrip(":")
+                if score >= 0.55:
+                    alignment_graph.add((PRIV[clean_rel], OWL.equivalentProperty, DBO[dbo_id]))
+                    predicate_count += 1
+                elif score >= 0.4:
+                    alignment_graph.add((PRIV[clean_rel], RDFS.subPropertyOf, DBO[dbo_id]))
+                    predicate_count += 1
+
+    alignment_graph.serialize(destination=output_alignment_ttl, format="turtle")
+    print(f"Global alignment complete")
+    print(f"- {entity_count} entities aligned (owl:sameAs).")
+    print(f"- {predicate_count} predicates aligned (owl:equivalentProperty).")
+    print(f"- Output: {output_alignment_ttl}")

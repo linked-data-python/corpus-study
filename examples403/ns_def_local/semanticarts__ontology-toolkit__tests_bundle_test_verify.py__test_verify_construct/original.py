@@ -1,0 +1,42 @@
+# Extracted from semanticarts/ontology-toolkit@99a1a00917 : tests/bundle/test_verify.py
+# region: test_verify_construct (lines 64-95, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from onto_tool import onto_tool
+from os.path import isfile
+from pytest import raises
+import re
+from rdflib import Graph
+from rdflib.namespace import Namespace, RDF
+
+def test_verify_construct(caplog, tmp_path):
+    with raises(SystemExit) as wrapped_exit:
+        onto_tool.main([
+            'bundle', '-v', 'output', f'{tmp_path}', 'tests/bundle/verify_construct.yaml'
+        ])
+    assert wrapped_exit.type == SystemExit
+    assert wrapped_exit.value.code == 1
+
+    logs = caplog.text
+    assert re.search(r'Verification query .*verify_label_construct', logs)
+    assert 'http://example.com/unlabeled' in logs
+    assert re.search(r'Verification query .*verify_domain_construct', logs)
+    assert 'http://example.com/nonexistent' in logs
+
+    validation_graph = Graph()
+    validation_graph.parse(
+        f'{tmp_path}/verify_construct_results/verify_label_construct_query.ttl',
+        format='turtle')
+    sh = Namespace('http://www.w3.org/ns/shacl#')
+    errors = [validation_graph.subjects(RDF.type, sh.ValidationResult)]
+    assert len(errors) == 1
+
+    validation_graph = Graph()
+    validation_graph.parse(
+        f'{tmp_path}/verify_construct_results/verify_domain_construct_query.ttl',
+        format='turtle')
+    sh = Namespace('http://www.w3.org/ns/shacl#')
+    errors = [validation_graph.subjects(RDF.type, sh.ValidationResult)]
+    assert len(errors) == 1
+
+    # Should handle a query that generates no errors
+    assert not isfile('test/bundle/verify_construct_results/verify_no_errors_construct_query.ttl')

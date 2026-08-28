@@ -1,0 +1,27 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_frame_model_agreement.py
+# region: test_manifest_installs_narrative_and_exemplars_as_pages (lines 146-160, stratum trav_navigation)
+# licence of the source repository: see meta.json
+OVL = ROOT / "overlays" / "wiki-memory"
+OVERLAY_NS = Namespace("https://pod.vardeman.me/vault/ontology/overlay#")
+EXPECTED_PAGES = [
+    ("wiki/concepts/how-wiki-memory-works.md", "concepts/how-wiki-memory-works.md"),
+    ("wiki/concepts/photosynthesis.md",        "concepts/photosynthesis.md"),
+    ("wiki/concepts/biology.md",               "concepts/biology.md"),
+    ("wiki/people/marie-curie.md",             "people/marie-curie.md"),
+]
+
+def test_manifest_installs_narrative_and_exemplars_as_pages():
+    g = _g(OVL / "manifest.ttl")
+    # collect (targetResource, body, meta) per installsPage bnode
+    entries = []
+    for pi in g.objects(None, OVERLAY_NS.installsPage):
+        tr = g.value(pi, OVERLAY_NS.targetResource)
+        body = g.value(pi, OVERLAY_NS.body)
+        meta = g.value(pi, OVERLAY_NS.meta)
+        entries.append((str(tr) if tr else "", str(body) if body else "", str(meta) if meta else ""))
+    for tr_suf, body_suf in EXPECTED_PAGES:
+        match = [e for e in entries if e[0].endswith(tr_suf)]
+        assert match, f"no installsPage with targetResource ending {tr_suf}; entries={entries}"
+        tr, body, meta = match[0]
+        assert body.endswith(body_suf), f"{tr_suf}: body {body!r} should end {body_suf}"
+        assert meta.endswith(body_suf + ".meta.ttl"), f"{tr_suf}: meta {meta!r} should end {body_suf}.meta.ttl"

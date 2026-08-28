@@ -1,0 +1,4 @@
+# Extracted from mupparapusamuel/semantica@873e3aa318 : semantica/explorer/routes/ontology.py
+# region: _data_graph_turtle_for_uri (lines 2528-2528, stratum ns_def_local)
+# licence of the source repository: see meta.json
+DCT = rdflib.Namespace("http://purl.org/dc/terms/")

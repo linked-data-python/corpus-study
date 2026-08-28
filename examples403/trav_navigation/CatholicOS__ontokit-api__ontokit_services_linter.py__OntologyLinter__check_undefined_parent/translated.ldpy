@@ -1,0 +1,53 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : ontokit/services/linter.py
+# region: OntologyLinter._check_undefined_parent (lines 395-434, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
+from ontokit.models.lint import LintIssueType
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+async def _check_undefined_parent(self, graph: Graph) -> list[LintResult]:
+    """Find classes that reference undefined parent classes."""
+    issues = []
+
+    # Build set of all defined classes
+    defined_classes = {
+        str(c) for c in graph.subjects(rdf:type, owl:Class) if isinstance(c, URIRef)
+    }
+    # Add owl:Thing as it's always implicitly defined
+    defined_classes.add(str(owl:Thing))
+
+    for class_uri in graph.subjects(rdf:type, owl:Class):
+        if not isinstance(class_uri, URIRef):
+            continue
+
+        # Check each parent
+        for parent_uri in graph.objects(class_uri, rdfs:subClassOf):
+            if not isinstance(parent_uri, URIRef):
+                continue
+
+            parent_str = str(parent_uri)
+            if parent_str not in defined_classes:
+                label = self._get_label(graph, class_uri)
+                issues.append(
+                    LintResult(
+                        issue_type=LintIssueType.ERROR.value,
+                        rule_id="undefined-parent",
+                        message="References undefined parent class",
+                        subject_iri=str(class_uri),
+                        subject_type="class",
+                        details={
+                            "local_name": self._get_local_name(class_uri),
+                            "label": label,
+                            "undefined_parent": parent_str,
+                            "undefined_parent_local": self._get_local_name(parent_uri),
+                        },
+                    )
+                )
+
+    return issues

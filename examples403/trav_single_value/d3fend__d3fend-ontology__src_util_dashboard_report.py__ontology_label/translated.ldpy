@@ -1,0 +1,11 @@
+# Extracted from d3fend/d3fend-ontology@cce593d61c : src/util/dashboard_report.py
+# region: ontology_label (lines 571-573, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDFS
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def ontology_label(graph, iri):
+    label = graph.value(URIRef(iri), rdfs:label)
+    return text_value(label) or compact_uri(iri)

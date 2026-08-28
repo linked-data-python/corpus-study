@@ -1,0 +1,24 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
+# region: test_addressbook_managers_assign_container_trees_and_name_their_container (lines 173-182, stratum trav_single_value)
+# licence of the source repository: see meta.json
+import rdflib
+ST = rdflib.Namespace("http://www.w3.org/ns/shapetrees#")
+ABTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/addressbook.tree#"
+AB_MGR_DIR = REPO / "overlays/addressbook/interop/managers"
+AB_MANAGERS = {  # slug -> (ContainerTree localname, managed container URL)
+    "person":       ("PersonContainerTree",       "https://pod.vardeman.me/vault/contacts/Person/"),
+    "organization": ("OrganizationContainerTree", "https://pod.vardeman.me/vault/contacts/Organization/"),
+    "group":        ("GroupContainerTree",        "https://pod.vardeman.me/vault/contacts/Group/"),
+    "membership":   ("MembershipContainerTree",   "https://pod.vardeman.me/vault/contacts/Membership/"),
+}
+
+def test_addressbook_managers_assign_container_trees_and_name_their_container():
+    for slug, (tree_local, ctr_url) in AB_MANAGERS.items():
+        f = AB_MGR_DIR / f"{slug}.shapetree.ttl"
+        assert f.exists(), f"missing addressbook manager {f}"
+        g = rdflib.Graph(); g.parse(f, format="turtle")
+        mgr = next(g.subjects(rdflib.RDF.type, ST.Manager))
+        a = g.value(mgr, ST.hasAssignment)
+        assert a is not None, f"{slug}: no st:hasAssignment"
+        assert g.value(a, ST.assigns) == rdflib.URIRef(ABTREE_NS + tree_local), slug
+        assert g.value(a, ST.manages) == rdflib.URIRef(ctr_url), slug

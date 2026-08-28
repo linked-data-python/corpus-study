@@ -1,0 +1,25 @@
+# Extracted from BD2KOnFHIR/fhirtordf@05b23ba1df : fhirtordf/rdfsupport/rdfcompare.py
+# region: map_node (lines 22-36, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, Graph, OWL, RDF, BNode
+from rdflib.term import Node
+from fhirtordf.rdfsupport.namespaces import FHIR
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def map_node(s: Node, sk_s: URIRef, gin: Graph, gout: Graph) -> None:
+    """
+    Transform the BNode whose subject is s into its equivalent, replacing s with its 'skolemized' equivalent
+    :param s: Actual subject
+    :param sk_s: Equivalent URI of subject in output graph
+    :param gin: Input graph
+    :param gout: Output graph
+    """
+    for p, o in gin.predicate_objects(s):
+        if not isinstance(o, BNode):
+            gout += g{ {sk_s} {p} {o} }
+        else:
+            sk_o = subj_pred_idx_to_uri(sk_s, p, gin.value(o, FHIR.index))
+            gout += g{ {sk_s} {p} {sk_o} }
+            map_node(o, sk_o, gin, gout)

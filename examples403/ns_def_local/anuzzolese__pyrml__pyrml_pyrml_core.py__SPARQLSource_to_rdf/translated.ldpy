@@ -1,0 +1,23 @@
+# Extracted from anuzzolese/pyrml@d18fe2edfc : pyrml/pyrml_core.py
+# region: SPARQLSource.to_rdf (lines 1976-1989, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, Graph, IdentifiedNode
+from rdflib.namespace import RDF, Namespace, XSD
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def to_rdf(self):
+    g: Graph = Graph()
+
+    sd: Namespace = Namespace('http://www.w3.org/ns/sparql-service-description#')
+
+    g += g{ {self} a {sd.Service} }
+
+    if self.endpoint:
+        g += g{ {self} {sd.endpoint} {self.endpoint} }
+
+    if self.result_format:
+        g += g{ {self} {sd.resultFormat} {self.result_format} }
+
+    return g

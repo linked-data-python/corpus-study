@@ -1,0 +1,27 @@
+# Extracted from pyiron/semantikon@cfd1d3ffe5 : semantikon/analysis.py
+# region: identifier_to_uri (lines 50-69, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from typing import Any, cast
+from rdflib import RDFS, Graph, Literal, URIRef
+from rdflib.query import ResultRow
+
+def identifier_to_uri(graph: Graph, identifier: str) -> list[URIRef]:
+    """
+    Convert a local identifier (pmdco:0000128) to its corresponding URIRef in the graph.
+
+    Args:
+        graph (Graph): The RDF graph to query.
+        identifier (str): The local identifier (Python name) to look up.
+
+    Returns:
+        list[URIRef]: The corresponding URIs from the graph.
+    """
+    query = """PREFIX pmdco: <https://w3id.org/pmd/co/PMD_>
+    SELECT DISTINCT ?s
+    WHERE {
+      ?s pmdco:0000128 ?identifier .
+      ?s a owl:Class .
+    }"""
+    result = list(graph.query(query, initBindings={"identifier": Literal(identifier)}))
+    assert len(result) > 0, f"No result found for {identifier}"
+    return [cast(URIRef, cast(ResultRow, r)[0]) for r in result]

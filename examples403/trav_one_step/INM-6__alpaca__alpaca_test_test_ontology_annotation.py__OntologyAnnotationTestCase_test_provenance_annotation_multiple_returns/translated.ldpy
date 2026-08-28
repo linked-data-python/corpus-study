@@ -1,0 +1,104 @@
+# Extracted from INM-6/alpaca@2b8dd34fc6 : alpaca/test/test_ontology_annotation.py
+# region: OntologyAnnotationTestCase.test_provenance_annotation_multiple_returns (lines 539-631, stratum trav_one_step)
+# licence of the source repository: see meta.json
+import io
+from rdflib import Literal, URIRef, Namespace, Graph, RDF, PROV
+from alpaca import activate, deactivate, Provenance, save_provenance
+from alpaca.ontology import ALPACA
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+
+def test_provenance_annotation_multiple_returns(self):
+    activate(clear=True)
+    input_object = InputObject()
+    name, output_object = process_multiple(input_object, 45)
+    deactivate()
+
+    prov_data = save_provenance()
+
+    # Read PROV information as RDF
+    prov_graph = Graph()
+    with io.StringIO(prov_data) as data_stream:
+        prov_graph.parse(data_stream, format='turtle')
+
+    # Check that the annotations exist (1 per class is expected. None
+    # are expected for the classes of `process`)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.Parameter)))
+        ), 1)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.ProcessFunctionMultiple)))
+        ), 1)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.ProcessedDataMultiple)))
+        ), 1)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.InputObject)))
+        ), 1)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.OutputObject)))
+        ), 1)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.ProcessFunction)))
+        ), 0)
+    self.assertEqual(
+        len(list(prov_graph.triples(
+            (None, rdf:type, self.ONTOLOGY.ProcessedData)))
+        ), 0)
+
+    # FunctionExecution is ProcessFunctionMultiple
+    execution_uri = list(
+        prov_graph.subjects(rdf:type, ALPACA.FunctionExecution))[0]
+    self.assertTrue((execution_uri, rdf:type,
+                     self.ONTOLOGY.ProcessFunctionMultiple) in prov_graph)
+
+    # Check parameter name
+    parameter_node = list(
+        prov_graph.subjects(rdf:type, self.ONTOLOGY.Parameter))[0]
+    self.assertTrue((parameter_node,
+                     ALPACA.pairName, Literal("param_1")) in prov_graph)
+    self.assertTrue((parameter_node,
+                     ALPACA.pairValue, Literal(45)) in prov_graph)
+
+    # Check returned value
+    output_node = list(
+        prov_graph.subjects(rdf:type,
+                            self.ONTOLOGY.ProcessedDataMultiple))[0]
+    self.assertTrue((output_node,
+                     prov:wasGeneratedBy, execution_uri) in prov_graph)
+    self.assertTrue((output_node,
+                     rdf:type, ALPACA.DataObjectEntity) in prov_graph)
+    self.assertTrue((output_node,
+                     rdf:type, self.ONTOLOGY.OutputObject) in prov_graph)
+
+    # Check attributes of returned value
+    expected_attributes = {
+        'name': "SpikeTrain#2",
+        'channel': 34,
+    }
+    for attribute in prov_graph.objects(output_node, ALPACA.hasAttribute):
+        name = prov_graph.value(attribute, ALPACA.pairName).toPython()
+        value = prov_graph.value(attribute, ALPACA.pairValue).toPython()
+        self.assertEqual(value, expected_attributes[name])
+
+        # Check if attribute annotation is present for `name`
+        if name == 'name':
+            self.assertTrue((attribute, rdf:type, self.ONTOLOGY.Attribute)
+                            in prov_graph)
+
+    # Check input value
+    input_node = list(
+        prov_graph.subjects(rdf:type, self.ONTOLOGY.InputObject))[0]
+    self.assertTrue((execution_uri,
+                     prov:used, input_node) in prov_graph)
+    self.assertTrue((input_node,
+                     rdf:type, ALPACA.DataObjectEntity) in prov_graph)
+    self.assertTrue((output_node,
+                     prov:wasDerivedFrom, input_node) in prov_graph)

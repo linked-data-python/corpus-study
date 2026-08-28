@@ -1,0 +1,69 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-marketplace/naas_abi_marketplace/applications/naas/workflows/CreateIndividualOntologyYamlWorkflow_test.py
+# region: test_create_individual_ontology_yaml_workflow (lines 36-91, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from naas_abi_marketplace.applications.naas.integrations.NaasIntegration import (
+    NaasIntegration,
+    NaasIntegrationConfiguration,
+)
+from naas_abi_marketplace.applications.naas.workflows.CreateIndividualOntologyYamlWorkflow import (
+    CreateIndividualOntologyYamlWorkflow,
+    CreateIndividualOntologyYamlWorkflowConfiguration,
+    CreateIndividualOntologyYamlWorkflowParameters,
+)
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+naas_module = NaasABIModule.get_instance()
+naas_api_key = naas_module.configuration.naas_api_key
+triple_store_service = NaasABIModule.get_instance().engine.services.triple_store
+sparql_utils = SPARQLUtils(triple_store_service)
+
+def test_create_individual_ontology_yaml_workflow(
+    workflow: CreateIndividualOntologyYamlWorkflow,
+):
+    import time
+    from uuid import uuid4
+
+    from naas_abi_core import logger
+    from rdflib import OWL, RDF, RDFS, Graph, Literal, Namespace, URIRef
+
+    ABI = Namespace("http://ontology.naas.ai/abi/")
+
+    graph = Graph()
+    uri = ABI[str(uuid4())]
+    graph += g{
+        {uri} a <https://www.commoncoreontologies.org/ont00000443> ;
+           a owl:NamedIndividual ;
+           rdfs:label "Naas.ai" ;
+           {ABI.logo} "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9gXMaBLQZ39W6Pk53PRuzFjUvv_6lLRWPoQ&s"
+    }
+    graph_name = <http://ontology.naas.ai/graph/default>
+    triple_store_service.insert(graph, graph_name=graph_name)
+    time.sleep(3)
+
+    # Run workflow
+    ontology_id = workflow.graph_to_yaml(
+        CreateIndividualOntologyYamlWorkflowParameters(individual_uri=str(uri), depth=1)
+    )
+
+    # Check if ontology id is set
+    graph = sparql_utils.get_subject_graph(str(uri), 1)
+    naas_ontology_id = next(iter(graph.triples(
+            (None, <http://ontology.naas.ai/abi/naas_ontology_id>, None)
+        )))[2]
+    assert str(ontology_id) == str(naas_ontology_id), ontology_id
+
+    # Remove graph
+    triple_store_service.remove(graph, graph_name=graph_name)
+
+    # Remove ontology
+    if ontology_id:
+        naas_integration = NaasIntegration(
+            NaasIntegrationConfiguration(api_key=naas_api_key)
+        )
+        result = naas_integration.delete_ontology(
+            workspace_id=naas_module.configuration.workspace_id, ontology_id=ontology_id
+        )
+        logger.info(f"Removed ontology: {result}")
+        assert result is not None, result

@@ -1,0 +1,34 @@
+# Extracted from matthiasprobst/h5RDMtoolbox@1baa9284dc : tests/test_server.py
+# region: test_file_graph_endpoint_uses_large_graph_defaults (lines 1750-1777, stratum add_in_loop)
+# licence of the source repository: see meta.json
+import pytest
+import rdflib
+
+@pytest.mark.skipif(not FASTAPI_AVAILABLE, reason="FastAPI not installed")
+def test_file_graph_endpoint_uses_large_graph_defaults(monkeypatch, hdf_filename):
+    import h5rdmtoolbox.server as server
+
+    monkeypatch.setattr(server, "GRAPH_NODE_LIMIT", 5)
+    monkeypatch.setattr(server, "GRAPH_EDGE_LIMIT", 4)
+    graph = rdflib.Graph()
+    predicate = rdflib.URIRef("https://example.org/linksTo")
+    for index in range(12):
+        graph.add((
+            rdflib.URIRef(f"https://example.org/node-{index}"),
+            predicate,
+            rdflib.URIRef(f"https://example.org/node-{index + 1}"),
+        ))
+    monkeypatch.setattr(server, "get_ld", lambda *args, **kwargs: graph)
+    client = TestClient(server.create_app(hdf_filename))
+    response = client.get("/server_test.h5/graph")
+
+    assert response.status_code == 200
+    assert "Showing 5 of" in response.text
+    assert "edges. Refine the search or raise limits to see more." in response.text
+    assert 'id="graph-detail"' in response.text
+    data_response = client.get("/server_test.h5/graph-data")
+    payload = data_response.json()
+    assert payload["summary"]["limit_nodes"] == 5
+    assert payload["summary"]["shown_nodes"] <= 5
+    assert payload["summary"]["shown_edges"] <= 4
+    assert payload["summary"]["truncated"] is True

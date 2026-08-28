@@ -1,0 +1,98 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : src/agents/scripts_and_prompts_generation/direct_script_generation.py
+# region: parse_ttl_tbox (lines 3874-3965, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from typing import Optional, Dict, List, Set, Tuple, Any
+from rdflib import Graph, Namespace, URIRef, RDF, RDFS, OWL
+
+def parse_ttl_tbox(ontology_path: str) -> Dict[str, any]:
+    """
+    Parse T-Box ontology TTL to extract entity classes, properties, and relationships.
+
+    Returns:
+        Dictionary with:
+        - namespace_uri: Base namespace URI
+        - classes: List of OWL classes (local names)
+        - object_properties: List of object properties with domain/range
+        - datatype_properties: List of datatype properties with domain/range
+        - class_hierarchy: Parent-child relationships
+    """
+    g = Graph()
+    g.parse(ontology_path, format='turtle')
+
+    # Find the main namespace (usually the one with most classes)
+    namespaces = {str(ns): prefix for prefix, ns in g.namespaces()}
+
+    ontology_ns = None
+    max_classes = 0
+    for ns_uri in namespaces.keys():
+        if ns_uri in [str(RDF), str(RDFS), str(OWL), 'http://www.w3.org/XML/1998/namespace']:
+            continue
+        count = len([c for c in g.subjects(RDF.type, OWL.Class) if str(c).startswith(str(ns_uri))])
+        if count > max_classes:
+            max_classes = count
+            ontology_ns = ns_uri
+
+    if ontology_ns is None:
+        # Fallback: use first non-standard namespace
+        for ns_uri in namespaces.keys():
+            if ns_uri not in [str(RDF), str(RDFS), str(OWL)]:
+                ontology_ns = ns_uri
+                break
+
+    # Extract classes
+    classes = []
+    for cls in g.subjects(RDF.type, OWL.Class):
+        if str(cls).startswith(str(ontology_ns)):
+            local_name = str(cls).replace(str(ontology_ns), '')
+            classes.append(local_name)
+
+    # Extract object properties
+    object_properties = []
+    for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+        if str(prop).startswith(str(ontology_ns)):
+            local_name = str(prop).replace(str(ontology_ns), '')
+
+            # Get domain and range
+            domains = [str(d).replace(str(ontology_ns), '') for d in g.objects(prop, RDFS.domain)]
+            ranges = [str(r).replace(str(ontology_ns), '') for r in g.objects(prop, RDFS.range)]
+
+            object_properties.append({
+                'name': local_name,
+                'domains': domains,
+                'ranges': ranges
+            })
+
+    # Extract datatype properties
+    datatype_properties = []
+    for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
+        if str(prop).startswith(str(ontology_ns)):
+            local_name = str(prop).replace(str(ontology_ns), '')
+
+            # Get domain
+            domains = [str(d).replace(str(ontology_ns), '') for d in g.objects(prop, RDFS.domain)]
+
+            datatype_properties.append({
+                'name': local_name,
+                'domains': domains
+            })
+
+    # Extract class hierarchy
+    class_hierarchy = {}
+    for cls in g.subjects(RDF.type, OWL.Class):
+        if str(cls).startswith(str(ontology_ns)):
+            local_name = str(cls).replace(str(ontology_ns), '')
+            parents = []
+            for parent in g.objects(cls, RDFS.subClassOf):
+                if str(parent).startswith(str(ontology_ns)):
+                    parent_name = str(parent).replace(str(ontology_ns), '')
+                    parents.append(parent_name)
+            if parents:
+                class_hierarchy[local_name] = parents
+
+    return {
+        'namespace_uri': ontology_ns,
+        'classes': sorted(classes),
+        'object_properties': object_properties,
+        'datatype_properties': datatype_properties,
+        'class_hierarchy': class_hierarchy
+    }

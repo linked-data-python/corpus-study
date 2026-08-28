@@ -1,0 +1,91 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : scripts/output_conversion_ttl_to_json/ttl_merge.py
+# region: build_link_graph (lines 350-423, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from typing import Dict, Iterable, List, Tuple, Set
+import hashlib
+from rdflib import BNode, Graph, Namespace, RDF, RDFS, URIRef, Literal
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+@prefix ontospecies: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+RDF_NS = RDF
+RDFS_NS = RDFS
+
+def build_link_graph(merged_graph: Graph) -> Graph:
+    """
+    Build a debugging subgraph containing only selected instance types and
+    their direct connections. The selected instance types are:
+    - ontospecies:Species
+    - ontosyn:ChemicalSynthesis
+    - ontomops:MetalOrganicPolyhedron
+    - ontomops:ChemicalBuildingUnit
+
+    Connections preserved:
+    - Any triple where both subject and object are selected instances
+    - For convenience, also include the specific bridging pattern:
+      ChemicalSynthesis --ontosyn:hasChemicalOutput--> _:x --ontosyn:isRepresentedBy--> MetalOrganicPolyhedron
+      (without asserting the type of the blank node)
+    - Include rdf:type and rdfs:label of selected instance nodes for readability
+    """
+    g = merged_graph
+    lg = Graph()
+    _bind_prefixes(lg)
+
+    allowed_types: Tuple[URIRef, ...] = (
+        ontospecies:Species,
+        ontosyn:ChemicalSynthesis,
+        ontomops:MetalOrganicPolyhedron,
+        ontomops:ChemicalBuildingUnit,
+    )
+
+    # Identify selected instance nodes
+    selected: Set = set()
+    for t in allowed_types:
+        for s in g.subjects(RDF_NS.type, t):
+            selected.add(s)
+
+    # Add type and label for selected nodes
+    for s in selected:
+        for t in g.objects(s, RDF_NS.type):
+            if t in allowed_types:
+                lg += g{ {s} {RDF_NS.type} {t} }
+        for lab in g.objects(s, RDFS_NS.label):
+            lg += g{ {s} {RDFS_NS.label} {lab} }
+
+    # Add direct connections among selected nodes
+    for (s, p, o) in g.triples((None, None, None)):
+        if s in selected and o in selected:
+            lg += g{ {s} {p} {o} }
+
+    # Add bridging synthesis->ChemicalOutput->MOP connections
+    for synth in [n for n in selected if (n, RDF_NS.type, ontosyn:ChemicalSynthesis) in g]:
+        # Include hasChemicalInput connections for debugging visibility
+        for chem_input in g.objects(synth, ontosyn:hasChemicalInput):
+            lg += g{ {synth} ontosyn:hasChemicalInput {chem_input} }
+            # include minimal info for ChemicalInput nodes
+            if (chem_input, RDF_NS.type, ontosyn:ChemicalInput) in g:
+                lg += g{ {chem_input} {RDF_NS.type} ontosyn:ChemicalInput }
+            for lab in g.objects(chem_input, RDFS_NS.label):
+                lg += g{ {chem_input} {RDFS_NS.label} {lab} }
+
+        for chem_out in g.objects(synth, ontosyn:hasChemicalOutput):
+            # Only bridge to MOP if the object is a selected MOP
+            for mop in g.objects(chem_out, ontosyn:isRepresentedBy):
+                if mop in selected and (mop, RDF_NS.type, ontomops:MetalOrganicPolyhedron) in g:
+                    # Skolemize blank ChemicalOutput nodes for readability in debug graph
+                    skolem_out = chem_out
+                    if isinstance(chem_out, BNode):
+                        synth_id = str(synth)
+                        mop_id = str(mop)
+                        h = hashlib.sha1((synth_id + "|" + mop_id).encode("utf-8")).hexdigest()
+                        skolem_out = URIRef(
+                            f"https://www.theworldavatar.com/kg/OntoSyn/instance/ChemicalOutput/{h}"
+                        )
+                    lg += g{
+                        {synth} ontosyn:hasChemicalOutput {skolem_out} .
+                        {skolem_out} ontosyn:isRepresentedBy {mop}
+                    }
+
+    return lg

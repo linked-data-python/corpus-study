@@ -1,0 +1,30 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Extracted from Harold-Solbrig/funowl@69e1cbe2f6 : tests/test_project_documentation/test_readme.py
+# region: MyTestCase.test_readme_example2 (lines 17-41, stratum ns_def_local)
+# licence of the source repository: see meta.json
+def test_readme_example2(self):
+    from rdflib import Namespace, XSD, Literal
+    from funowl import Ontology, DataProperty, Class, DataAllValuesFrom, DataOneOf, SubClassOf, DataSomeValuesFrom, \
+        ClassAssertion, OntologyDocument
+
+    EX = Namespace("http://example.org/")
+
+    # Ontology represents the OWLF OntologyDocument production
+    o = Ontology(EX.myOntology, "http://example.org/myOntolology/version/0.1")
+
+    # namedIndividual, objectProperty, class, et. properties add to declarations
+    o.namedIndividuals(EX.a)
+
+    # Declarations can also be added explicitly
+    o.declarations(DataProperty(EX.dp), Class(EX.A))
+
+    # Axioms are added by type
+    o.subClassOf(EX.A, DataAllValuesFrom(EX.dp, DataOneOf(3, Literal(4, datatype=xsd:int))))
+
+    # or as an array
+    o.axioms.append(SubClassOf(EX.A, DataAllValuesFrom(EX.dp, DataOneOf(Literal(2, datatype=xsd:short),
+                                                                        Literal(3, datatype=xsd:int)))))
+    o.axioms.append(ClassAssertion(DataSomeValuesFrom(EX.dp, DataOneOf(3)), EX.a))
+
+    print(str(OntologyDocument(EX, ontology=o).to_functional()))

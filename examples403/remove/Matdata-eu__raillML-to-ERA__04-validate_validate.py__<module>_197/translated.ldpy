@@ -1,0 +1,30 @@
+# Extracted from Matdata-eu/raillML-to-ERA@768c600726 : 04-validate/validate.py
+# region: <module> (lines 197-209, stratum remove)
+# licence of the source repository: see meta.json
+import rdflib
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+shapes_graph = rdflib.Graph()
+unimplemented_functions = [
+    "http://www.opengis.net/def/function/geosparql/distance",
+    "http://www.opengis.net/def/function/geosparql/sfContains",
+    "http://www.opengis.net/def/function/geosparql/sfWithin",
+    # Prefix forms as they appear in Turtle files
+    "geof:distance",
+    "geof:sfContains",
+    "geof:sfWithin",
+]
+
+for constraint in shapes_graph.subjects(rdflib.RDF.type, sh:SPARQLConstraint):
+    for select_query in shapes_graph.objects(constraint, sh:select):
+        query_text = str(select_query)
+        if any(func in query_text for func in unimplemented_functions):
+            # Remove this constraint component
+            for triple in shapes_graph.triples((constraint, None, None)):
+                shapes_graph.remove(triple)
+            # Also remove references to this constraint
+            for s, p, o in list(shapes_graph.triples((None, None, constraint))):
+                shapes_graph.remove((s, p, o))
+            removed_count += 1
+            print(f"  Removed SPARQL constraint using GeoSPARQL function")
+            break

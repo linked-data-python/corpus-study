@@ -1,0 +1,90 @@
+# Extracted from RDFLib/prez@421ee0a9fe : tests/test_property_selection_shacl.py
+# region: test_union (lines 73-146, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import DCTERMS, PROV, RDF, SH, Graph, URIRef, SKOS
+from sparql_grammar_pydantic import (
+    IRI,
+    Filter,
+    GroupOrUnionGraphPattern,
+    OptionalGraphPattern,
+    TriplesSameSubject,
+    TriplesSameSubjectPath,
+    Var,
+)
+from prez.reference_data.prez_ns import REG
+from prez.services.query_generation.shacl import PropertyShape
+
+def test_union():
+    g = Graph().parse(
+        data="""
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX reg: <http://purl.org/linked-data/registry#>
+    PREFIX sh: <http://www.w3.org/ns/shacl#>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
+
+    <http://example-profile> sh:property [
+        sh:path [
+            sh:union (
+              dcterms:publisher
+              reg:status
+              ( prov:qualifiedDerivation prov:hadRole )
+              ( prov:qualifiedDerivation prov:entity )
+            )
+          ]
+        ]
+    .
+
+    """
+    )
+    path_bn = g.value(subject=URIRef("http://example-profile"), predicate=SH.property)
+    ps = PropertyShape(
+        uri=path_bn, graph=g, kind="profile", focus_node=Var(value="focus_node")
+    )
+    assert (
+        TriplesSameSubject.from_spo(
+            subject=Var(value="focus_node"),
+            predicate=IRI(value=PROV.qualifiedDerivation),
+            object=Var(value="prof_1_node_3"),
+        )
+        in ps.tss_list
+    )
+    assert (
+        TriplesSameSubject.from_spo(
+            subject=Var(value="prof_1_node_3"),
+            predicate=IRI(value=PROV.hadRole),
+            object=Var(value="prof_1_node_4"),
+        )
+        in ps.tss_list
+    )
+    assert (
+        TriplesSameSubject.from_spo(
+            subject=Var(value="focus_node"),
+            predicate=IRI(value=PROV.qualifiedDerivation),
+            object=Var(value="prof_1_node_5"),
+        )
+        in ps.tss_list
+    )
+    assert (
+        TriplesSameSubject.from_spo(
+            subject=Var(value="prof_1_node_5"),
+            predicate=IRI(value=PROV.entity),
+            object=Var(value="prof_1_node_6"),
+        )
+        in ps.tss_list
+    )
+    assert (
+        TriplesSameSubject.from_spo(
+            subject=Var(value="focus_node"),
+            predicate=IRI(value=DCTERMS.publisher),
+            object=Var(value="prof_1_node_1"),
+        )
+        in ps.tss_list
+    )
+    assert (
+        TriplesSameSubject.from_spo(
+            subject=Var(value="focus_node"),
+            predicate=IRI(value=REG.status),
+            object=Var(value="prof_1_node_2"),
+        )
+        in ps.tss_list
+    )

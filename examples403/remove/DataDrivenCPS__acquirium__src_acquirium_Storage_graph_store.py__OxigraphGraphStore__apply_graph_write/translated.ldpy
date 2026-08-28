@@ -1,0 +1,29 @@
+# Extracted from DataDrivenCPS/acquirium@e3bffb4bed : src/acquirium/Storage/graph_store.py
+# region: OxigraphGraphStore._apply_graph_write (lines 627-647, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Dataset, Graph, Literal, RDF, URIRef
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+_logger = logging.getLogger("acquirium.graph_store")
+
+def _apply_graph_write(self, incoming: Graph, *, target: Graph, replace: bool) -> Graph:
+    """Apply a parsed graph write to one registered source graph."""
+    if replace:
+        target.remove((None, None, None))
+    for triple in incoming:
+        target.add(triple)
+    # Propagate prefix bindings declared in the incoming Turtle/RDF
+    # (rdflib's parser populates incoming.namespace_manager from
+    # `@prefix` directives) so they survive into the stores that back
+    # the public /namespace/list endpoint.
+    for prefix, ns_uri in incoming.namespaces():
+        try:
+            target.bind(prefix, ns_uri, override=False)
+            self.query_dataset.namespace_manager.bind(
+                prefix, ns_uri, override=False
+            )
+        except Exception:
+            _logger.debug(
+                "namespace bind failed for %s=%s", prefix, ns_uri, exc_info=True
+            )
+    return target

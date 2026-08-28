@@ -1,0 +1,19 @@
+# Extracted from RDFLib/rdflib-leveldb@a0f3386c71 : test/graph_case.py
+# region: GraphTestCase.removeStuff (lines 40-47, stratum remove)
+# licence of the source repository: see meta.json
+michel = <urn:michel>
+tarek = <urn:tarek>
+bob = <urn:bob>
+likes = <urn:likes>
+hates = <urn:hates>
+pizza = <urn:pizza>
+cheese = <urn:cheese>
+
+def removeStuff(self):
+    self.graph.remove((tarek, likes, pizza))
+    self.graph.remove((tarek, likes, cheese))
+    self.graph.remove((michel, likes, pizza))
+    self.graph.remove((michel, likes, cheese))
+    self.graph.remove((bob, likes, cheese))
+    self.graph.remove((bob, hates, pizza))
+    self.graph.remove((bob, hates, michel))  # gasp!

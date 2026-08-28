@@ -1,0 +1,106 @@
+# Extracted from BrickSchema/Brick@c12949f236 : generate_brick.py
+# region: define_relationships (lines 618-684, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, BNode, URIRef
+from rdflib.collection import Collection
+from bricksrc.namespaces import (
+    BRICK,
+    BSH,
+    REC,
+    RDF,
+    OWL,
+    RDFS,
+    TAG,
+    SOSA,
+    SKOS,
+    QUDT,
+    VCARD,
+    SH,
+    REF,
+)
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix bsh: <https://brickschema.org/schema/BrickShape#> .
+@prefix rec: <https://w3id.org/rec#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tag: <https://brickschema.org/schema/BrickTag#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
+
+G = brickschema.Graph()
+A = rdf:type
+
+def define_relationships(definitions, superprop=None, graph=G):
+    """
+    Define BRICK relationships
+    """
+    if len(definitions) == 0:
+        return
+
+    for prop, propdefn in definitions.items():
+        if not isinstance(prop, URIRef):
+            prop = BRICK[prop]
+        if superprop is not None:
+            graph += g{ {prop} rdfs:subPropertyOf {superprop} }
+
+        if prop.startswith(BRICK):
+            graph += g{ {prop} a brick:Relationship }
+
+        # define property types
+        prop_types = propdefn.get(A, [])
+        assert isinstance(prop_types, list)
+        for prop_type in prop_types:
+            graph += g{ {prop} a {prop_type} }
+
+        # define any subproperties
+        subproperties_def = propdefn.get("subproperties", {})
+        assert isinstance(subproperties_def, dict)
+        define_relationships(subproperties_def, prop, graph=graph)
+
+        # generate a SHACL Property Shape for this relationship if it is a Brick property
+        if prop.startswith(BRICK):
+            propshape = BSH[f"{prop[len(BRICK) :]}Shape"]
+            graph += g{
+                {propshape} a sh:PropertyShape ;
+                   sh:path {prop}
+            }
+        if "range" in propdefn.keys():
+            range_defn = propdefn.pop("range")
+            if isinstance(range_defn, (tuple, list)):
+                enumeration = BNode()
+                graph += g{ {propshape} sh:or {enumeration} }
+                constraints = []
+                for cls in range_defn:
+                    constraint = BNode()
+                    graph += g{ {constraint} sh:class {cls} }
+                    constraints.append(constraint)
+                Collection(graph, enumeration, constraints)
+            elif range_defn is not None:
+                graph += g{ {propshape} sh:class {range_defn} }
+
+        if "datatype" in propdefn.keys():
+            dtype_defn = propdefn.pop("datatype")
+            if dtype_defn == bsh:NumericValue:
+                graph += g{ {propshape} sh:or bsh:NumericValue }
+            else:
+                graph += g{ {propshape} sh:datatype {dtype_defn} }
+
+        if "domain" in propdefn.keys():
+            # associate the PropertyShape with all possible subject classes
+            domains = propdefn.pop("domain")
+            if not isinstance(domains, list):
+                domains = [domains]
+            for domain in domains:
+                graph += g{ {domain} sh:property {propshape} }
+
+        # define other properties of the Brick property
+        expected_properties = ["subproperties", A]
+        other_properties = [
+            prop for prop in propdefn.keys() if prop not in expected_properties
+        ]
+        add_relationships(prop, {k: propdefn[k] for k in other_properties}, graph=graph)

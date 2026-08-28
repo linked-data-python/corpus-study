@@ -1,0 +1,45 @@
+# Extracted from cognitedata/neat@4042d3e96d : cognite/neat/_v0/core/_instances/transformers/_classic_cdf.py
+# region: RelationshipAsEdgeTransformer._edge_triples (lines 395-422, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from collections.abc import Callable, Iterable, Iterator
+from typing import cast
+from rdflib import RDF, Graph, Literal, Namespace, URIRef
+from cognite.neat._v0.core._utils.collection_ import iterate_progress_bar
+from cognite.neat._v0.core._utils.rdf_ import (
+    Triple,
+    add_triples_in_batch,
+    get_namespace,
+    remove_instance_ids_in_batch,
+    remove_namespace_from_uri,
+)
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def _edge_triples(
+    self,
+    graph: Graph,
+    source_type: str,
+    target_type: str,
+    instance_count: int,
+    lookup_entity_with_external_id: Callable[[str, str], URIRef],
+) -> Iterable[Triple]:
+    query = self._instances.format(namespace=self._namespace, source_type=source_type, target_type=target_type)
+    total_instance_count = instance_count if self._limit_per_type is None else self._limit_per_type
+
+    converted_relationships: list[URIRef] = []
+    for no, result in enumerate(
+        iterate_progress_bar(graph.query(query), total=total_instance_count, description="Relationships to edges")
+    ):
+        if self._limit_per_type is not None and no >= self._limit_per_type:
+            break
+        relationship_id = cast(URIRef, result[0])  # type: ignore[index, misc]
+        yield from self._relationship_as_edge(
+            graph, relationship_id, source_type, target_type, lookup_entity_with_external_id
+        )
+        converted_relationships.append(relationship_id)
+
+        if len(converted_relationships) >= 1_000:
+            remove_instance_ids_in_batch(graph, converted_relationships)
+            converted_relationships = []
+
+    remove_instance_ids_in_batch(graph, converted_relationships)

@@ -1,0 +1,19 @@
+# Extracted from dfriedenberger/obse@43d0cc1776 : obse/graphwrapper.py
+# region: GraphWrapper.add_labeled_instance (lines 41-47, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, RDF, RDFS, URIRef, BNode, Seq
+from rdflib.namespace import XSD
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def add_labeled_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
+    if unique_name is None:
+        unique_name = name
+    rdf_object = self.create_ref(rdf_type, unique_name)
+    self.graph += g{
+        {rdf_object} a {rdf_type} ;
+           rdfs:label {Literal(name, datatype=XSD.string)}
+    }
+    return rdf_object

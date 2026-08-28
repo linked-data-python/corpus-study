@@ -1,0 +1,50 @@
+# Extracted from MaximeJakubowski/sls_project@58f7d7840f : slsparser/shapels.py
+# region: _extract_shapes (lines 83-119, stratum trav_existence)
+# licence of the source repository: see meta.json
+from typing import Dict, List, Optional, Tuple, Set
+from rdflib import Graph
+from rdflib import SH, RDF, RDFS
+from rdflib.term import URIRef, Literal, BNode, Node
+from rdflib.collection import Collection
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _extract_shapes(graph: Graph) -> Set[Node]:
+    # A shape is:
+    # - instance of NodeShape or PropertyShape
+    # - subject of targetClass, target...
+    # - subject of any constraint component parameter
+    # - object of a constraint component parameter that expects a shape
+
+    # parameters whose object is (or may be) a shape
+    object_parameters = [sh:property, sh:node, sh:qualifiedValueShape, sh:not]
+
+    # parameters whose subject is a shape (constraint components and targets)
+    subject_parameters = [
+        sh:node, sh:qualifiedValueShape, sh:qualifiedMinCount, sh:qualifiedMaxCount,
+        sh:not, sh:class, sh:datatype, sh:nodeKind, sh:minCount, sh:maxCount,
+        sh:minExclusive, sh:minInclusive, sh:maxExclusive, sh:maxInclusive,
+        sh:minLength, sh:maxLength, sh:pattern, sh:languageIn, sh:uniqueLang,
+        sh:equals, sh:disjoint, sh:lessThan, sh:lessThanOrEquals, sh:closed,
+        sh:hasValue, sh:targetClass, sh:targetNode, sh:targetObjectsOf,
+        sh:targetSubjectsOf, sh:property,
+    ]
+
+    shapes: Set[Node] = set()
+    for parameter in object_parameters:
+        shapes.update(graph.objects(predicate=parameter))
+    for parameter in subject_parameters:
+        shapes.update(graph.subjects(predicate=parameter))
+    shapes.update(graph.subjects(rdf:type, sh:NodeShape))
+    shapes.update(graph.subjects(rdf:type, sh:PropertyShape))
+
+    # also members of a shacl list which are objects of sh:and, sh:or, sh:xone
+    for parameter in [sh:or, sh:and, sh:xone]:
+        for llist in graph.objects(predicate=parameter):
+            for shapename in Collection(graph, llist):
+                if sh:path not in graph.predicates(shapename):
+                    shapes.add(shapename)
+
+    return shapes

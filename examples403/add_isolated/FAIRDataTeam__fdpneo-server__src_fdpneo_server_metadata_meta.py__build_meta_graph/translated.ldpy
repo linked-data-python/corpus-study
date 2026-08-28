@@ -1,0 +1,106 @@
+# Extracted from FAIRDataTeam/fdpneo-server@3e72e119ae : src/fdpneo_server/metadata/meta.py
+# region: build_meta_graph (lines 78-161, stratum add_isolated)
+# licence of the source repository: see meta.json
+from datetime import datetime
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import RDF
+from fdpneo_server.metadata.graphs import meta_graph_uri, record_graph_uri
+from fdpneo_server.metadata.states import DEFAULT_STATE, MetadataState, allowed_transitions
+from fdpneo_server.shared.namespaces import (
+    DCT,
+    FDP_ALLOWED_STATE_TRANSITION,
+    FDP_DEFAULT,
+    FDP_METADATA_STATE,
+    FDP_VALIDATED_AGAINST,
+    OWL,
+    PROV,
+)
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+FDP_CREATE_OPERATION = FDP_DEFAULT["CreateOperation"]
+FDP_MODIFY_OPERATION = FDP_DEFAULT["ModifyOperation"]
+
+def build_meta_graph(
+    *,
+    record_iri: str | URIRef,
+    prior: Graph,
+    subject: str | None,
+    now: datetime,
+    initial_state: MetadataState = DEFAULT_STATE,
+    validated_against: str | None = None,
+    created: datetime | None = None,
+    modified: datetime | None = None,
+) -> MetaResult:
+    """Build the next meta graph for ``record_iri``.
+
+    Args:
+        record_iri: The record being written. Used as the meta-graph subject.
+        prior: The current meta graph for the record (empty graph on first write).
+        subject: The current acting principal's URI; ``None`` if anonymous.
+        now: The write timestamp; supplied by the caller for determinism.
+        initial_state: Publication state for a *new* record (ADR-0010). LDP
+            creates default to ``DRAFT``; the profile applier passes
+            ``PUBLISHED`` for seeded records. On MODIFY the prior state is
+            preserved and this argument is ignored — a content edit never
+            changes publication state; only the transition API does.
+        validated_against: The immutable profile *version* IRI the record was
+            validated against at write time (ADR-0019 §3). Stamped as
+            ``fdp-o:validatedAgainst`` when supplied; preserved from ``prior``
+            when not (so a state transition or an unbound write keeps the
+            provenance a content write recorded).
+        created: **Privileged import only** (ADR-0016 §5) — an explicit
+            ``dct:created`` from the source instead of ``now``/prior. Never set on
+            the HTTP path; used by ``fdp backup import`` to carry source provenance.
+        modified: **Privileged import only** — an explicit ``dct:modified`` from
+            the source instead of ``now``.
+
+    Returns:
+        A :class:`MetaResult` whose ``graph`` is ready to replace whatever
+        the triple store currently holds at ``<record>/meta``.
+    """
+    record_subject = record_graph_uri(record_iri)
+    version = _next_version(prior, record_subject)
+    created_at, prior_creator = _extract_creation(prior, record_subject)
+
+    is_creation = created_at is None
+    operation = Operation.CREATE if is_creation else Operation.MODIFY
+    effective_created = created or created_at or now
+    effective_creator = prior_creator if not is_creation else subject
+    # State is server-managed lifecycle metadata: set it on create, preserve
+    # it across content edits. Only the transition API (lifecycle.py) changes
+    # an existing record's state.
+    prior_state = _extract_state(prior, record_subject)
+    effective_state = initial_state if is_creation else (prior_state or initial_state)
+
+    graph = Graph()
+    graph += g{
+        {record_subject} a {PROV.Entity} ;
+           {DCT.created} {Literal(effective_created)}
+    }
+    if effective_creator is not None:
+        graph += g{ {record_subject} {DCT.creator} {URIRef(effective_creator)} }
+    graph += g{
+        {record_subject} {DCT.modified} {Literal(modified or now)} ;
+           {OWL.versionInfo} {Literal(version)} ;
+           {FDP_METADATA_STATE} {Literal(effective_state.value)}
+    }
+
+    # ADR-0019 §3: the exact profile version validated at write time. A content
+    # write supplies it; a bind-less write (or a state transition, which rebuilds
+    # the meta graph without re-validating) preserves whatever the last content
+    # write recorded, so the provenance never silently disappears.
+    effective_binding = validated_against or _extract_validated_against(prior, record_subject)
+    if effective_binding is not None:
+        graph += g{ {record_subject} {FDP_VALIDATED_AGAINST} {URIRef(effective_binding)} }
+
+    activity = BNode()
+    graph += g{
+        {record_subject} {PROV.wasGeneratedBy} {activity} .
+        {activity} a {PROV.Activity} ;
+           a {FDP_CREATE_OPERATION if is_creation else FDP_MODIFY_OPERATION} ;
+           {PROV.atTime} {Literal(now)}
+    }
+    if subject is not None:
+        graph += g{ {activity} {PROV.wasAssociatedWith} {URIRef(subject)} }
+
+    return MetaResult(graph=graph, operation=operation, version=version, state=effective_state)

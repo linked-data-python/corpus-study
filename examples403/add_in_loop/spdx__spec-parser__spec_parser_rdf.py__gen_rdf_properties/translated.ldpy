@@ -1,0 +1,41 @@
+# Extracted from spdx/spec-parser@47ef6b7c04 : spec_parser/rdf.py
+# region: gen_rdf_properties (lines 193-219, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SH, SKOS, XSD
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def gen_rdf_properties(model, g):
+    for fqname, p in model.properties.items():
+        if fqname == "/Core/spdxId":
+            continue
+        node = URIRef(p.iri)
+        if p.summary:
+            g += g{ {node} rdfs:comment {Literal(p.summary, lang="en")} }
+        if p.metadata["Nature"] == "ObjectProperty":
+            g += g{ {node} a owl:ObjectProperty }
+        # to add: g.add((node, rdfs:domain, xxx))
+        elif p.metadata["Nature"] == "DataProperty":
+            g += g{ {node} a owl:DatatypeProperty }
+        rng = p.metadata["Range"]
+        if ":" in rng:
+            t = xsd_range(rng, p.name)
+            if t:
+                g += g{ {node} rdfs:range {t} }
+        else:
+            typename = "" if rng.startswith("/") else f"/{p.ns.name}/"
+            typename += rng
+            if typename in model.datatypes:
+                t = xsd_range(model.datatypes[typename].metadata["SubclassOf"], p.name)
+                if t:
+                    g += g{ {node} rdfs:range {t} }
+            else:
+                dt = model.types[typename]
+                g += g{ {node} rdfs:range {URIRef(dt.iri)} }

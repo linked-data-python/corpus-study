@@ -1,0 +1,29 @@
+# Extracted from Harold-Solbrig/funowl@69e1cbe2f6 : funowl/class_expressions.py
+# region: ObjectMinCardinality.to_rdf (lines 254-269, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, OWL, Graph, RDF
+from rdflib.term import BNode, Literal as RDFLiteral
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def to_rdf(self, g: Graph, emit_type_arc: bool = False) -> BNode:
+    # _:x rdf:type owl:Restriction .
+    # _:x owl:onProperty T(OPE) .
+    # _:x owl:minCardinality "n"^^xsd:nonNegativeInteger .
+    #
+    # _:x owl:minQualifiedCardinality "n"^^xsd:nonNegativeInteger .
+    # _:x owl:onClass T(CE) .
+    x = BNode()
+    g += g{
+        {x} a owl:Restriction ;
+           owl:onProperty {self.objectPropertyExpression.to_rdf(g)}
+    }
+    if self.classExpression:
+        g += g{
+            {x} owl:minQualifiedCardinality {self.min_.to_rdf(g)} ;
+               owl:onClass {self.classExpression.to_rdf(g)}
+        }
+    else:
+        g += g{ {x} owl:minCardinality {self.min_.to_rdf(g)} }
+    return x

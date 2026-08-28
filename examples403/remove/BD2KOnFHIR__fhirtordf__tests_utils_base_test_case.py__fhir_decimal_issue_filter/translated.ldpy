@@ -1,0 +1,20 @@
+# Extracted from BD2KOnFHIR/fhirtordf@05b23ba1df : tests/utils/base_test_case.py
+# region: fhir_decimal_issue_filter (lines 47-59, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, XSD
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def fhir_decimal_issue_filter(in_both: Graph, in_first: Graph, in_second: Graph) -> None:
+    """ FHIR currently requires a non-standard JSON parser that can differentiate between '"x": 1.0' and '"x": 1.00'
+        The filter below treats RDF representation of both as the same, and is used to make decimal values
+        pass unit tests
+    """
+    for s, p, o in list(in_first):
+        o_2 = in_second.value(s, p)
+        if o_2 is not None and isinstance(o_2, Literal) and o_2.datatype == xsd:decimal and \
+                               isinstance(o, Literal) and o.datatype == xsd:decimal:
+            if o.value == o_2.value:
+                in_both += g{ {s} {p} {o} }
+                in_first.remove((s, p, o))
+                in_second.remove((s, p, o_2))

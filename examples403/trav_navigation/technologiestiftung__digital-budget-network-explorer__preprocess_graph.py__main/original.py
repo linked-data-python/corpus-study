@@ -1,0 +1,114 @@
+# Extracted from technologiestiftung/digital-budget-network-explorer@a2c69bf9f4 : preprocess_graph.py
+# region: main (lines 249-353, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, RDF
+from rdflib.namespace import SKOS, OWL, DCTERMS, RDFS
+DH = Namespace(BASE + "ontology#")
+SCHEMA = Namespace("https://schema.org/")
+KEYWORD_PREFIX = BASE + "keyword/"
+
+for s in g.subjects(RDF.type, DH.Haushaltsposten):
+    kw = [
+        local_name(o)
+        for o in g.objects(s, DCTERMS.subject)
+        if str(o).startswith(KEYWORD_PREFIX)
+    ]
+
+    ep_obj = g.value(s, DH.einzelplan)
+    ep = local_name(ep_obj) if ep_obj is not None else None
+
+    ber_obj = g.value(s, DH.bereich)
+    ber = None
+    if ber_obj is not None:
+        ber = local_name(ber_obj)
+        if ber not in bereiche:
+            bereiche[ber] = first_label(g, ber_obj) or ber
+
+    kl_obj = g.value(s, DH.digiKlasse)
+    kl = None
+    if kl_obj is not None:
+        kl = local_name(kl_obj)
+        # "Nicht digital" (Klasse 0) komplett ausschliessen
+        if kl == "0":
+            continue
+        if kl not in klassen:
+            klassen[kl] = first_label(g, kl_obj) or kl
+
+    # --- Gruppe & Hauptgruppe ---
+    grp_obj = g.value(s, DH.gruppe)
+    hg = None
+    if grp_obj is not None:
+        hg_uri = get_top_level(str(grp_obj))
+        hg = local_name(hg_uri)
+        if hg not in hauptgruppen:
+            hauptgruppen[hg] = concept_labels.get(hg_uri, hg)
+
+    # --- Funktion & Hauptfunktion ---
+    fun_obj = g.value(s, DH.funktion)
+    hf = None
+    if fun_obj is not None:
+        hf_uri = get_top_level(str(fun_obj))
+        hf = local_name(hf_uri)
+        if hf not in hauptfunktionen:
+            hauptfunktionen[hf] = concept_labels.get(hf_uri, hf)
+
+    jahr_obj = g.value(s, DH.jahr)
+    jahr = None
+    if jahr_obj is not None:
+        try:
+            jahr = int(str(jahr_obj)[:4])
+            jahre.add(jahr)
+        except ValueError:
+            pass
+
+    titel_obj = g.value(s, DCTERMS.isPartOf)
+    t_id = local_name(titel_obj) if titel_obj is not None else None
+
+    desc = g.value(s, SCHEMA.description)
+    desc_text = str(desc) if desc else ""
+    phrases = extract_phrases(desc_text) if desc else []
+
+    # Store full description text for titel (first posten wins)
+    if t_id and desc_text and t_id not in titel_beschreibung:
+        titel_beschreibung[t_id] = desc_text
+
+    # Ordne die gefundenen Phrasen den Keywords des Postens zu
+    # Einfacher Heuristik: Eine Phrase gehört zu einem Keyword, 
+    # wenn der Label des Keywords als Teilstring in der Phrase vorkommt.
+    kw_phrases = {}
+    for k in kw:
+        lbl = keywords.get(k, {}).get("label", "").lower()
+        if not lbl: continue
+        matched = [p for p in phrases if lbl in p.lower() or k.lower() in p.lower()]
+        if matched:
+            kw_phrases[k] = list(set(matched)) # deduplicate
+
+    def num(pred):
+        v = g.value(s, pred)
+        try:
+            return round(float(v), 3) if v is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    rec = {
+        "t": t_id,
+        "kw": kw,
+        "phrases": kw_phrases,
+        "ep": ep,
+        "jahr": jahr,
+        "ber": ber,
+        "kl": kl,
+        "hg": hg,
+        "hf": hf,
+        "soll": num(DH.soll),
+        "ist": num(DH.ist),
+        "digW": num(DH.istDigitalWeit),
+        "sollEng": num(DH.sollDigitalEng),
+        "istEng": num(DH.istDigitalEng),
+    }
+
+    # Titel mit SOLL-Budget = 0 oder fehlendem Budget direkt herausfiltern
+    if not rec["soll"] or rec["soll"] <= 0:
+        continue
+
+    posten.append(rec)

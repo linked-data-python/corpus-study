@@ -1,0 +1,36 @@
+# Extracted from FAIRDataTeam/fdpneo-server@3e72e119ae : src/fdpneo_server/metadata/meta.py
+# region: add_allowed_state_transitions (lines 289-309, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, URIRef
+from fdpneo_server.metadata.states import DEFAULT_STATE, MetadataState, allowed_transitions
+from fdpneo_server.shared.namespaces import (
+    DCT,
+    FDP_ALLOWED_STATE_TRANSITION,
+    FDP_DEFAULT,
+    FDP_METADATA_STATE,
+    FDP_VALIDATED_AGAINST,
+    OWL,
+    PROV,
+)
+
+def add_allowed_state_transitions(meta_graph: Graph) -> None:
+    """Augment a *served* meta graph in place with ADR-0022 §3 view triples.
+
+    For each ``<record> fdp-o:metadataState "<STATE>"`` present, add one
+    ``<record> fdp-o:allowedStateTransition "<SUCCESSOR>"`` per state the record
+    may move to next, computed from the lifecycle state machine
+    (:func:`~fdpneo_server.metadata.states.allowed_transitions`) at read time.
+
+    These are **view-only**: the caller passes a freshly-fetched graph it will
+    serialize into the response but never store, so the triples are never
+    persisted, never returned by ``fdp dump``, and never seen by the meta-graph
+    SHACL validator (which runs on the write path, over the stored graph). This
+    keeps :class:`MetaWriter` and the meta shape untouched.
+    """
+    for subject, _, value in list(meta_graph.triples((None, FDP_METADATA_STATE, None))):
+        try:
+            current = MetadataState(str(value))
+        except ValueError:
+            continue
+        for successor in allowed_transitions(current):
+            meta_graph.add((subject, FDP_ALLOWED_STATE_TRANSITION, Literal(successor.value)))

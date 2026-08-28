@@ -1,0 +1,28 @@
+# Extracted from EMMC-ASBL/tripper@92cfaedc02 : tests/test_triplestore.py
+# region: test_backend_rdflib_graph (lines 374-396, stratum trav_existence)
+# licence of the source repository: see meta.json
+import pytest
+
+def test_backend_rdflib_graph(
+    get_ontology_path: "Callable[[str], Path]",
+) -> None:
+    """Test rdflib backend, using the `graph` keyword argument to expose an
+    existing rdflib graph with tripper."""
+    pytest.importorskip("rdflib")
+    from rdflib import Graph, URIRef
+
+    from tripper import RDF, RDFS, Triplestore
+
+    graph = Graph()
+    graph.parse(source=get_ontology_path("family"))
+
+    # Test that triples from the original graph are available via tripper
+    ts = Triplestore(backend="rdflib", graph=graph)
+    FAM = ts.bind("fam", "http://onto-ns.com/ontologies/examples/family#")
+    assert ts.value(FAM.Father, RDFS.subClassOf) == FAM.Person
+    assert ts.value(FAM.Dauther, RDFS.subClassOf) == FAM.Person
+
+    # Test that triples added with tripper are available in the original
+    # graph
+    ts.add_triples([(":Nils", RDF.type, FAM.Father)])
+    assert graph.value(URIRef(":Nils"), URIRef(RDF.type)) == URIRef(FAM.Father)

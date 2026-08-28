@@ -1,0 +1,92 @@
+# Extracted from RDFLib/prez@421ee0a9fe : prez/services/query_generation/shacl.py
+# region: PropertyShape._parse_property_path (lines 343-413, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import RDFS, BNode, Graph, URIRef, XSD
+from rdflib.collection import Collection
+from rdflib.namespace import RDF, SH
+from rdflib.term import Node, Literal
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+PRED_TO_PATH_CLASS: Dict[URIRef, Type[PropertyPath]] = {
+    sh:inversePath: InversePath,
+    sh:zeroOrMorePath: ZeroOrMorePath,
+    sh:oneOrMorePath: OneOrMorePath,
+    sh:zeroOrOnePath: ZeroOrOnePath,
+    sh:alternativePath: AlternativePath,
+    SHEXT.bNodeDepth: BNodeDepth,
+}
+
+def _parse_property_path(self, pp: Node) -> PropertyPath:
+    """Recursively parses a SHACL path node (URIRef or BNode) into a PropertyPath object."""
+    if isinstance(pp, URIRef):
+        return Path(value=pp)
+    elif isinstance(pp, BNode):
+        # Check for sequence first (RDF list structure)
+        if self.graph.value(pp, rdf:first):
+            path_elements = []
+            current = pp
+            while current != rdf:nil:
+                first = self.graph.value(current, rdf:first)
+                if first:
+                    path_elements.append(self._parse_property_path(first))
+                else:
+                    raise ValueError(f"Malformed RDF list structure at {current}")
+                current = self.graph.value(current, rdf:rest)
+                if not current:
+                    raise ValueError(
+                        f"Malformed RDF list structure: missing rdf:rest from {pp}"
+                    )
+            return SequencePath(value=path_elements)
+
+        # If not a sequence, check for other SHACL path constructs
+        pred_objects = list(self.graph.predicate_objects(subject=pp))
+        if not pred_objects:
+            raise ValueError(f"BNode {pp} has no predicate-objects in SHACL path.")
+
+        if len(pred_objects) == 1:
+            bn_pred, bn_obj = pred_objects[0]
+
+            if bn_pred == sh:union:
+                # Handle sh:union - process each item and add to union paths
+                # Note: This path itself doesn't return a single PropertyPath object,
+                # instead it triggers processing of its members which are added via _add_path.
+                # We return None here to signal that _process_property_path should not call _add_path for the sh:union BNode itself.
+                union_list = list(Collection(self.graph, bn_obj))
+                for item in union_list:
+                    self._add_path_to_shape(item, union=True)  # Force union=True
+                return None  # Signal that the union BNode itself doesn't represent a single path to add
+            elif bn_pred == sh:alternativePath:
+                alt_list = list(Collection(self.graph, bn_obj))
+                return AlternativePath(
+                    value=[self._parse_property_path(item) for item in alt_list]
+                )
+            elif bn_pred in PRED_TO_PATH_CLASS:
+                path_class = PRED_TO_PATH_CLASS[bn_pred]
+                if path_class == BNodeDepth:
+                    return BNodeDepth(value=bn_obj)  # Assumes bn_obj is Literal
+                elif path_class in [
+                    InversePath,
+                    ZeroOrMorePath,
+                    OneOrMorePath,
+                    ZeroOrOnePath,
+                ]:
+                    # These take another path as their value
+                    inner_path = self._parse_property_path(bn_obj)
+                    return path_class(value=inner_path)
+                else:
+                    raise ValueError(
+                        f"Unhandled path class {path_class} for predicate {bn_pred}"
+                    )
+            else:
+                raise ValueError(
+                    f"Unsupported SHACL path construct for BNode {pp} with predicate {bn_pred}"
+                )
+        else:
+            raise ValueError(
+                f"BNode {pp} has multiple predicate-objects in SHACL path context."
+            )
+    else:
+        raise ValueError(f"Unexpected node type in SHACL path: {type(pp)}")

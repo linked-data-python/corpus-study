@@ -1,0 +1,26 @@
+# Extracted from vemonet/shapes-of-you@cf8efe48ef : etl/index_shapes.py
+# region: process_shapes_file (lines 806-812, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import RDF, ConjunctiveGraph, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DC, DCTERMS, OWL, RDFS, SKOS, VOID, XSD
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix shex: <http://www.w3.org/ns/shex#> .
+@prefix schema: <https://schema.org/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+for shape in g.subjects(rdf:type, shex:ShapeAnd):
+    shape_found = True
+    shapes_graph += g{
+        {file_uri} a schema:SoftwareSourceCode ;
+           a shex:Schema ;
+           rdfs:label {Literal(rdf_file_path.name)} ;
+           schema:codeRepository {URIRef(repo_url)}
+    }
+    shapes_graph = add_shape(g, shapes_graph, file_uri, shape)

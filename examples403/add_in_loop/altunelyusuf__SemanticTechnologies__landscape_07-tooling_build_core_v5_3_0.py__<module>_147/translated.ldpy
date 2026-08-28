@@ -1,0 +1,29 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v5_3_0.py
+# region: <module> (lines 147-155, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v5_2_0.ttl")
+
+for pid, plab, pdef, prange in [
+    ("governsSubject", "governs subject", "This property links a governance role, activity or rule to the taxonomy subject area it governs.", None),
+    ("performsActivity", "performs activity", "This property links a governance role to the activity it performs.", sem:GovernanceActivity),
+    ("appliesRule", "applies rule", "This property links a governance activity to the rule it applies when a change or dispute arises.", sem:GovernanceRule),
+]:
+    p = SEM[pid]
+    g2 += g{
+        {p} a owl:ObjectProperty ;
+           rdfs:label {Literal(plab, lang="en")} ;
+           skos:definition {Literal(pdef, lang="en")} ;
+           dcterms:source {Literal(S("R-TOGAF"), lang="en")}
+    }
+    g2 += g{ {p} rdfs:range {prange} }

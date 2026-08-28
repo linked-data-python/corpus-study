@@ -1,0 +1,133 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/shacl2flink/lib/shacl_properties_to_sql.py
+# region: unsupported_shapes (lines 1998-2115, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, RDF, BNode
+from rdflib.namespace import SH
+from lib.utils import get_full_path_of_shacl_property, NGSILD, UnsupportedShape
+LIST_CONNECTIVES = ((SH['and'], 'AND'), (SH['or'], 'OR'), (SH.xone, 'XONE'))
+VALUE_PATH_ATTRIBUTE_TYPES = {
+    'https://uri.etsi.org/ngsi-ld/hasValue': 'https://uri.etsi.org/ngsi-ld/Property',
+    'https://uri.etsi.org/ngsi-ld/hasValueList': 'https://uri.etsi.org/ngsi-ld/ListProperty',
+    'https://uri.etsi.org/ngsi-ld/hasJSON': 'https://uri.etsi.org/ngsi-ld/JsonProperty',
+    'https://uri.etsi.org/ngsi-ld/hasObject': 'https://uri.etsi.org/ngsi-ld/Relationship',
+}
+NGSILD_VALUE_PATHS = frozenset(VALUE_PATH_ATTRIBUTE_TYPES)
+
+def unsupported_shapes(g, compiled):
+    """
+    Shapes the extractor will not compile, as a list of messages.
+
+    `compiled` is the set of property nodes that produced at least one
+    constraint.
+    """
+    problems = []
+    seen_messages = set()
+
+    # Inverse paths. Two things are checked here, and both exist because the
+    # alternative is a shape that is accepted and never checked.
+    #
+    # First the SPELLING. NGSI-LD stores `filter hasCartridge cartridge` as
+    # two triples through a blank node, so a bare `[ sh:inversePath
+    # hasCartridge ]` has no matches at all -- pyshacl reports nothing for it,
+    # and giving it the meaning the author clearly wanted would make this
+    # compiler disagree with the reference engine about what a shape MEANS.
+    # It is refused, with the spelling that works.
+    #
+    # Then the PARAMETERS. Only count bounds are evaluated, so sh:class on the
+    # referrers, a nodeKind or a value shape would be silently ignored.
+    canonical = ('sh:path ( [ sh:inversePath ngsi-ld:hasObject ] '
+                 '[ sh:inversePath <predicate> ] )')
+    for prop in sorted(g.subjects(SH.path, None), key=str):
+        for path in g.objects(prop, SH.path):
+            bare = g.value(path, SH.inversePath)
+            if bare is not None:
+                problems.append(
+                    f'<{prop}> uses sh:inversePath directly. An NGSI-LD '
+                    f'relationship reaches its target through '
+                    f'ngsi-ld:hasObject, so this path matches nothing and the '
+                    f'shape would never be checked -- by this compiler or by '
+                    f'a standard SHACL engine. Write both hops: {canonical}.')
+                continue
+            steps = [step for step in g.objects(path, RDF.first)]
+            if not steps or not any(g.value(step, SH.inversePath) is not None
+                                    for step in steps):
+                continue
+            inverse = inverse_relationship_predicate(g, path)
+            if inverse is None:
+                problems.append(
+                    f'the inverse path in <{prop}> is not a supported NGSI-LD '
+                    f'inverse relationship. Exactly two hops are compiled, '
+                    f'the second naming a plain predicate: {canonical}.')
+                continue
+            supported = {SH.path, SH.minCount, SH.maxCount, SH.severity,
+                         SH.message, SH.order, SH.name, SH.description,
+                         SH.group, RDF.type}
+            written = {str(p) for p in g.predicates(prop, None)}
+            extra = sorted(written - {str(s) for s in supported})
+            if extra:
+                names = ', '.join(p.rsplit('#', 1)[-1] for p in extra)
+                problems.append(
+                    f'the inverse path shape for <{inverse}> carries '
+                    f'parameters the inverse check does not evaluate: {names}. '
+                    f'Only sh:minCount/sh:maxCount are compiled on an inverse '
+                    f'path, so those parameters would be accepted and never '
+                    f'checked.')
+            if g.value(prop, SH.minCount) is None and \
+                    g.value(prop, SH.maxCount) is None:
+                problems.append(
+                    f'the inverse path shape for <{inverse}> has no '
+                    f'sh:minCount or sh:maxCount. An inverse path constrains '
+                    f'nothing but the number of referring entities, so it '
+                    f'would be accepted and never checked.')
+
+    # NGSI-LD value predicates the data path cannot represent. create_ngsild_
+    # models builds the attributes table from hasValue/hasObject/hasValueList/
+    # hasJSON only, so an attribute carrying one of these produces no attribute
+    # row at all -- the entity row exists and the attribute simply is not
+    # there. A shape constraining one is therefore not merely unchecked: a
+    # count over it reports "Found 0" for an attribute that is present, and any
+    # bound on it can never fire. Rejected until the data path can see them.
+    for value_shape in g.subjects(SH.path, None):
+        for path in g.objects(value_shape, SH.path):
+            path = str(path)
+            if not path.startswith(str(NGSILD) + 'has'):
+                continue
+            if path in VALUE_PATH_ATTRIBUTE_TYPES:
+                continue
+            supported = ', '.join(sorted(
+                p.rsplit('/', 1)[-1] for p in VALUE_PATH_ATTRIBUTE_TYPES))
+            problems.append(
+                f'<{path}> is an NGSI-LD value path the data pipeline does not '
+                f'build attributes for, so a shape using it would report a '
+                f'present attribute as missing rather than checking it. '
+                f'Supported value paths are: {supported}.')
+
+    # The extractor descends one connective on the property shape and one on
+    # the value shape. A connective on a BRANCH is a third level: its members
+    # would contribute nothing, exactly the way a value-level sh:xone used to.
+    for value_shape in g.subjects(SH.path, None):
+        paths = [str(path) for path in g.objects(value_shape, SH.path)]
+        if not any(path in NGSILD_VALUE_PATHS for path in paths):
+            continue
+        for branch in connective_clauses(g, value_shape):
+            for predicate, operation in LIST_CONNECTIVES + ((SH['not'], 'NOT'),):
+                if list(g.objects(branch, predicate)):
+                    problems.append(
+                        f'sh:{operation.lower()} nested inside a branch of the value '
+                        f'shape of <{paths[0]}> is not supported. Connectives are '
+                        f'descended one level on the property shape and one on the '
+                        f'value shape; a third level would contribute no constraint.')
+
+    for nodeshape, prop, path in attribute_shapes(g):
+        # The constraint may be attributed to a sub-attribute rather than to
+        # this shape -- iff:assembly carrying only iff:torque compiles to a
+        # constraint on torque. So the requirement is that the subtree
+        # contributes something, not this exact node.
+        if not any(str(node) in compiled for node in shape_subtree(g, prop)):
+            problems.append(
+                f'the property shape for <{path}> in node shape <{nodeshape}> '
+                f'produced no constraint. It would be accepted and never checked. '
+                f'Check that it has a value shape (sh:property with an ngsi-ld '
+                f'path) and that its parameters are ones the compiler supports.')
+
+    return [p for p in problems if not (p in seen_messages or seen_messages.add(p))]

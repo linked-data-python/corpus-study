@@ -1,0 +1,31 @@
+# Extracted from pyiron/semantikon@cfd1d3ffe5 : semantikon/ontology.py
+# region: _OWLToSHACLConverter._iter_supported_restrictions (lines 1362-1383, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import OWL, RDF, RDFS, BNode, Graph, Literal, Namespace, URIRef
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _iter_supported_restrictions(self):
+    """
+    Yield (base_class, property, restriction_type, value) tuples
+    for supported OWL restrictions.
+    """
+    for r in self.owl_graph.subjects(rdf:type, owl:Restriction):
+        if self.excluded_nodes is not None and r in self.excluded_nodes:
+            continue
+        prop = self.owl_graph.value(r, owl:onProperty)
+        if prop is None:
+            continue
+        for restriction_type in (
+            owl:someValuesFrom,
+            owl:hasValue,
+            owl:allValuesFrom,
+        ):
+            value = self.owl_graph.value(r, restriction_type)
+            if value is None:
+                continue
+
+            for base_cls in self.owl_graph.subjects(rdfs:subClassOf, r):
+                yield base_cls, prop, restriction_type, value

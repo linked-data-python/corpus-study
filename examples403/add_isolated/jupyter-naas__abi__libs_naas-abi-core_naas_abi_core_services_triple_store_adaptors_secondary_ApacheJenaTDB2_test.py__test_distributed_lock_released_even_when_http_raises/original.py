@@ -1,0 +1,27 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-core/naas_abi_core/services/triple_store/adaptors/secondary/ApacheJenaTDB2_test.py
+# region: test_distributed_lock_released_even_when_http_raises (lines 509-526, stratum add_isolated)
+# licence of the source repository: see meta.json
+from unittest.mock import MagicMock, Mock, patch
+import pytest
+import requests
+from naas_abi_core.services.triple_store.TripleStorePorts import Exceptions
+from rdflib import RDF, Graph, Literal, URIRef
+
+def test_distributed_lock_released_even_when_http_raises():
+    """The distributed lock must be released even if the HTTP POST fails."""
+    adapter, mock_kv = _build_adapter_with_kv()
+    adapter.max_retries = 0  # No HTTP retries so the error surfaces immediately.
+
+    err_response = Mock(status_code=500)
+    err_response.text = "Server error (mock)"
+    err_response.raise_for_status.side_effect = requests.HTTPError(response=err_response)
+    adapter._session.post.return_value = err_response
+
+    graph = Graph()
+    graph.add((URIRef("http://example.org/s"), RDF.type, URIRef("http://example.org/C")))
+
+    with pytest.raises(Exceptions.RequestError):
+        adapter.insert(graph)
+
+    # Lock must still be released in the finally block.
+    assert mock_kv.delete_if_value_matches.call_count == 1

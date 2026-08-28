@@ -1,0 +1,42 @@
+# Extracted from SpotlightKid/jack-audio-tools@a64f1f86ba : carla/carxp2lv2presets.py
+# region: create_lv2_preset (lines 48-75, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, BNode, URIRef
+from rdflib.namespace import Namespace, NamespaceManager, RDF, RDFS, XSD
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def create_lv2_preset(label, plugin):
+    graph = get_graph()
+    preset = URIRef('')
+    graph += g{
+        {preset} a {NS.pset.Preset} ;
+           {NS.lv2.appliesTo} {URIRef(plugin.uri)} ;
+           rdfs:label {Literal(label)}
+    }
+
+    for param in plugin.params:
+        port = BNode()
+        graph += g{
+            {port} {NS.lv2.symbol} {Literal(param.symbol)} ;
+               {NS.pset.value} {Literal(param.value)} .
+            {preset} {NS.lv2.port} {port}
+        }
+
+    if plugin.properties:
+        state = BNode()
+
+        for prop in plugin.properties.values():
+            if prop.type == str(NS.atom.Path):
+                value = URIRef(prop.value)
+            else:
+                # XXX: handle other Atom types?
+                value = Literal(prop.value)
+
+            graph += g{ {state} {URIRef(prop.key)} {value} }
+
+        graph += g{ {preset} {NS.state.state} {state} }
+
+    return graph.serialize(format='turtle')

@@ -1,0 +1,18 @@
+# Extracted from RDFLib/rdflib-leveldb@a0f3386c71 : test/test_graph.py
+# region: test_create_db (lines 56-63, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+michel = <urn:michel>
+cheese = <urn:cheese>
+likes = <urn:likes>
+pizza = <urn:pizza>
+
+def test_create_db(getgraph):
+    graph = getgraph
+    graph += g{
+        {michel} {likes} {pizza} ;
+           {likes} {cheese}
+    }
+    graph.commit()
+    assert (
+        len(graph) == 5
+    )  # f"There must be three triples in the graph after the first data chunk parse, not {len(graph)}"

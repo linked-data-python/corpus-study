@@ -1,0 +1,17 @@
+# Extracted from ternaustralia/vocview@006ad7b899 : skos/concept.py
+# region: ConceptRenderer._render_skos_rdf (lines 42-51, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from flask import render_template, Response
+from rdflib import Graph, URIRef, BNode
+from config import Config
+
+def _render_skos_rdf(self):
+    g = Graph()
+
+    for subj, pred, obj in Config.g.triples((URIRef(self.uri), None, None)):
+        g.add((subj, pred, obj))
+        if type(obj) == BNode:
+            for s, p, o in Config.g.triples((obj, None, None)):
+                g.add((s, p, o))
+
+    return Response(g.serialize(format=self.format), mimetype=self.format)

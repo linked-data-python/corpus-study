@@ -1,0 +1,56 @@
+# Extracted from eccenca/cmem-plugin-shapes@52d5b16c05 : tests/test_shapes.py
+# region: test_workflow_execution_with_ignore_types (lines 401-442, stratum remove)
+# licence of the source repository: see meta.json
+from cmem_client.client import Client
+from cmem_plugin_base.testing import TestExecutionContext
+from rdflib import DCTERMS, Graph, URIRef
+from rdflib.compare import isomorphic
+from cmem_plugin_shapes.plugin_shapes import (
+    EXISTING_GRAPH_ADD,
+    EXISTING_GRAPH_REPLACE,
+    EXISTING_GRAPH_STOP,
+    ShapesPlugin,
+)
+
+def test_workflow_execution_with_ignore_types(
+    graph_setup: GraphSetupFixture, client: Client
+) -> None:
+    """Test plugin execution with ignore_types parameter filters correctly"""
+    plugin_baseline = ShapesPlugin(
+        data_graph_iri=graph_setup.dataset_iri,
+        shapes_graph_iri=graph_setup.shapes_iri,
+        existing_graph=EXISTING_GRAPH_REPLACE,
+        import_shapes=False,
+        prefix_cc=False,
+    )
+    plugin_baseline.execute(
+        inputs=[], context=TestExecutionContext(project_id=graph_setup.project_name)
+    )
+    baseline_graph = Graph().parse(data=get_graph_content(client, graph_setup.shapes_iri))
+    baseline_count = plugin_baseline.shapes_count
+
+    plugin_filtered = ShapesPlugin(
+        data_graph_iri=graph_setup.dataset_iri,
+        shapes_graph_iri=graph_setup.shapes_iri,
+        existing_graph=EXISTING_GRAPH_REPLACE,
+        import_shapes=False,
+        prefix_cc=False,
+        ignore_types="http://xmlns.com/foaf/0.1/Person",
+    )
+    plugin_filtered.execute(
+        inputs=[], context=TestExecutionContext(project_id=graph_setup.project_name)
+    )
+    filtered_graph = Graph().parse(data=get_graph_content(client, graph_setup.shapes_iri))
+    filtered_count = plugin_filtered.shapes_count
+
+    assert filtered_count < baseline_count, (
+        f"Expected fewer shapes when filtering types, "
+        f"but got {filtered_count} (filtered) vs {baseline_count} (baseline)"
+    )
+
+    # Verify the filtered graph is not isomorphic to baseline (they should differ)
+    baseline_graph.remove((URIRef(graph_setup.shapes_iri), DCTERMS.created, None))
+    filtered_graph.remove((URIRef(graph_setup.shapes_iri), DCTERMS.created, None))
+    assert not isomorphic(baseline_graph, filtered_graph), (
+        "Expected graphs to differ when using ignore_types filter"
+    )

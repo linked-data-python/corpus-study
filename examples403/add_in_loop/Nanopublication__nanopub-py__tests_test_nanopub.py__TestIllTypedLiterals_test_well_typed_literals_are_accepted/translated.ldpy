@@ -1,0 +1,26 @@
+# Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
+# region: TestIllTypedLiterals.test_well_typed_literals_are_accepted (lines 843-859, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def test_well_typed_literals_are_accepted(self):
+    np = _minimal_valid_nanopub()
+    for i, literal in enumerate([
+        Literal("42", datatype=xsd:integer),
+        Literal(42),
+        Literal("2020-01-01T00:00:00", datatype=xsd:dateTime),
+        Literal("false", datatype=xsd:boolean),
+        Literal("plain string"),
+        "a string"@en,
+        # Unrecognized datatypes cannot be checked, and must not be rejected
+        Literal("whatever", datatype=<http://example.org/myDatatype>),
+    ]):
+        np.assertion += g{ <http://test> {URIRef(f"http://example.org/p{i}")} {literal} }
+    assert np.ill_typed_literals == []
+    assert np.is_valid

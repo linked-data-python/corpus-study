@@ -1,0 +1,36 @@
+# Extracted from pyscal/atomRDF@c9b070e15f : atomrdf/datamodels/defects/grainboundary.py
+# region: GrainBoundary.from_graph (lines 94-102, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, XSD, RDF, RDFS, BNode, URIRef
+from atomrdf.namespace import (
+    CMSO,
+    LDO,
+    PLDO,
+    PODO,
+    CDCO,
+    PROV,
+    Literal,
+    ASMO,
+)
+from atomrdf.utils import get_material
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cmso: <http://purls.helmholtz-metadaten.de/cmso/> .
+@prefix ldo: <http://purls.helmholtz-metadaten.de/cdos/ldo/> .
+@prefix pldo: <http://purls.helmholtz-metadaten.de/cdos/pldo/> .
+@prefix podo: <http://purls.helmholtz-metadaten.de/cdos/podo/> .
+@prefix cdco: <http://purls.helmholtz-metadaten.de/cdos/cdco/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix asmo: <http://purls.helmholtz-metadaten.de/asmo/> .
+
+
+@classmethod
+def from_graph(cls, graph, sample):
+    material = get_material(graph, sample)
+    for triple in graph.triples((material, cdco:hasCrystallographicDefect, None)):
+        plane_defect = triple[2]
+        typev = graph.value(plane_defect, rdf:type)
+        if typev is not None and typev == pldo:GrainBoundary:
+            return cls._read_gb(graph, sample, plane_defect)
+    return None

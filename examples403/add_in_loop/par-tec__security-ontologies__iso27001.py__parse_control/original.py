@@ -1,0 +1,126 @@
+# Extracted from par-tec/security-ontologies@d405f7555e : iso27001.py
+# region: parse_control (lines 206-303, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import DCTERMS, RDF, RDFS, Graph, Literal, Namespace, URIRef
+NS_ISO = Namespace(baseurl + "iso#")
+OPERATIONAL_CAPABILITIES = {
+    "Governance": "Governance",
+    "Asset\nmanagement": "AssetManagement",
+    "Information\nprotection": "InformationProtection",
+    "Human\nresource\nsecurity": "HRSecurity",
+    "Physical\nsecurity": "PhysicalSecurity",
+    "System\nand\nnetwork\nsecurity": "SystemNetworkSecurity",
+    "Application\nsecurity": "ApplicationSecurity",
+    "Secure\nconfiguration": "SecureConfiguration",
+    "Identity\nand\naccess\nmanagement": "IAM",
+    "Threat and\nvulnerability\nmanagement": "ThreatManagement",
+    "Continuity": "Continuity",
+    "Supplier\nrelationships\nsecurity": "SupplierSecurity",
+    "Legal and\ncompliance": "Compliance",
+    "Information security\nevent management and \nInformation security assurance": "EventManangement",
+}
+SECURITY_DOMAINS = {
+    "Governance\nand\nEcosystem": "GovernanceEcosystem",
+    "Protection": "Protection",
+    "Defence": "Defence",
+    "Resilience": "Resilience",
+}
+
+def parse_control(g, control):
+    for k, v in control.items():
+        if k == "#":
+            continue
+        if k == "Control category":
+            control_category, label = parse_control_category(v)
+            g.add((control_category, RDF.type, NS_ISO.ControlCategory))
+            g.add((control_category, RDFS.label, label))
+            continue
+        if k == "Control number":
+            control_id = "27002/2022/control-{}".format(v)
+            uri = URIRef(NS_ISO + control_id)
+            g.add((uri, RDF.type, NS_ISO.Control))
+            g.add((uri, DCTERMS.identifier, Literal(control_id)))
+            g.add(
+                (
+                    uri,
+                    NS_ISO.controlCategory,
+                    control_category,
+                )
+            )
+            continue
+        if k == "Control Title":
+            g.add((uri, DCTERMS.title, Literal(v)))
+            continue
+        if k == "Control Description":
+            g.add((uri, DCTERMS.description, Literal(v)))
+            continue
+        if k == "Control Purpose":
+            g.add((uri, NS_ISO.purpose, Literal(v)))
+            continue
+        if k == "Justification for inclusion/exclusion" and not is_nan(v):
+            g.add((uri, DCTERMS.description, Literal(v)))
+            continue
+        if k == "Correspondence with  ISO/IEC 27002:2013":
+            for controls in v.split(", "):
+                controls_uri = URIRef(
+                    NS_ISO + "27001/2013/control-{}".format(controls.strip("0"))
+                )
+
+                g.add(
+                    (
+                        uri,
+                        NS_ISO.correspondsTo,
+                        controls_uri,
+                    )
+                )
+                g.add(
+                    (
+                        controls_uri,
+                        NS_ISO.correspondsTo,
+                        uri,
+                    )
+                )
+            continue
+        if k in ("Preventive", "Detective", "Corrective"):
+            if v == "x":
+                g.add((uri, NS_ISO.hasControlType, URIRef(NS_ISO + k)))
+            continue
+        if k in ("Confidentiality", "Integrity", "Availability"):
+            if v == "x":
+                g.add((uri, NS_ISO.hasInformationSecurityProperty, URIRef(NS_ISO + k)))
+            continue
+        if k in (
+            "Identify",
+            "Protect",
+            "Detect",
+            "Respond",
+            "Recover",
+        ):
+            if v == "x":
+                g.add((uri, NS_ISO.hasCybersecurityConcept, URIRef(NS_ISO + k)))
+            continue
+        if capability_id := OPERATIONAL_CAPABILITIES.get(k):
+            if v == "x":
+                g.add(
+                    (
+                        uri,
+                        NS_ISO.hasOperationalCapability,
+                        URIRef(NS_ISO + capability_id),
+                    )
+                )
+
+        if security_domain_id := SECURITY_DOMAINS.get(k):
+            if v == "x":
+                g.add(
+                    (uri, NS_ISO.hasSecurityDomain, URIRef(NS_ISO + security_domain_id))
+                )
+        if v and str(v) != "nan" and "Linked controls" == k:
+            for controls in str(v).split():
+                g.add(
+                    (
+                        uri,
+                        NS_ISO.hasRelatedControls,
+                        URIRef(NS_ISO + f"27002/2022/control-{controls}"),
+                    )
+                )
+            continue

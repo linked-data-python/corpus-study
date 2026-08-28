@@ -1,0 +1,20 @@
+# Extracted from comp-rob2b/kindyngen@414ebd52b2 : kindynsyn/synthesizer/graph_factories/dynamics.py
+# region: DynamicsEntities.wrench (lines 12-19, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from rdflib import collection, BNode, Literal, RDF
+from kindynsyn.namespaces import GEOM_ENT, GEOM_REL, GEOM_COORD, RBDYN_ENT, \
+    RBDYN_COORD, RBDYN_OP, QUDT_SCHEMA, QUDT_QKIND, QUDT_UNIT
+from kindynsyn.rdflib_tools.helpers import uuid_ref
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def wrench(self, acts_on, reference_point):
+    id_ = uuid_ref()
+    self.g += g{
+        {id_} rdf:type {RBDYN_ENT["Wrench"]} ;
+           {RBDYN_ENT["acts-on"]} {acts_on} ;
+           {RBDYN_ENT["reference-point"]} {reference_point} ;
+           {QUDT_SCHEMA["quantityKind"]} {QUDT_QKIND["Torque"]} ;
+           {QUDT_SCHEMA["quantityKind"]} {QUDT_QKIND["Force"]}
+    }
+    return id_

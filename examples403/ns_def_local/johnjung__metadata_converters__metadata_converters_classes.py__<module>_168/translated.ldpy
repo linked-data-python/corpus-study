@@ -1,0 +1,80 @@
+# Extracted from johnjung/metadata_converters@36a81d6a97 : metadata_converters/classes.py
+# region: <module> (lines 168-225, stratum ns_def_local)
+# licence of the source repository: see meta.json
+import datetime, getpass, hashlib, jinja2, json, magic, os, \
+       pymarc, random, re, string, sys
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import RDF, DC, DCTERMS, XSD
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix erc: <https://www.dublincore.org/groups/kernel/spec/> .
+@prefix madsrdf: <http://www.loc.gov/mads/rdf/v1#> .
+@prefix mix: <http://www.loc.gov/mix/v20/> .
+@prefix ore: <http://www.openarchives.org/ore/terms/> .
+@prefix premis: <info:lc/xmlns/premis-v2/> .
+@prefix premis2: <http://www.loc.gov/premis/rdf/v1#> .
+@prefix premis3: <http://www.loc.gov/premis/rdf/v3/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+class DigitalCollectionToEDM:
+    MAPS = Namespace('https://repository.lib.uchicago.edu/digital_collections/maps')
+    MAPS_AGG = MAPS['/aggregation']
+    MAPS_CHO = MAPS['']
+    MAPS_REM = MAPS['/rem']
+
+    CHISOC = Namespace('https://repository.lib.uchicago.edu/digital_collections/maps/chisoc')
+    CHISOC_AGG = CHISOC['/aggregation']
+    CHISOC_CHO = CHISOC['']
+    CHISOC_REM = CHISOC['/rem']
+
+    graph = Graph()
+    for prefix, ns in (('bf', BF), ('dc', DC), ('dcterms', DCTERMS),
+                       ('edm', EDM), ('erc', ERC), ('madsrdf', MADSRDF),
+                       ('mix', MIX), ('ore', ORE), ('premis', PREMIS),
+                       ('premis2', PREMIS2), ('premis3', PREMIS3)):
+        graph.bind(prefix, ns)
+
+    def __init__(self):
+        self.graph = Graph()
+        for prefix, ns in (('bf', BF), ('dc', DC), ('dcterms', DCTERMS),
+                           ('edm', EDM), ('erc', ERC), ('madsrdf', MADSRDF),
+                           ('mix', MIX), ('ore', ORE), ('premis', PREMIS),
+                           ('premis2', PREMIS2), ('premis3', PREMIS3)):
+            self.graph.bind(prefix, ns)
+
+        self.now = Literal(datetime.datetime.utcnow(), datatype=xsd:dateTime)
+
+    def agg_graph(self, agg, cho, rem, wbr):
+        for p, o in ((rdf:type,          ore:Aggregation),
+                     (edm:aggregatedCHO, cho),
+                     (edm:dataProvider,  Literal("University of Chicago Library")),
+                     (ore:isDescribedBy, rem),
+                     (edm:isShownAt,     wbr),
+                     (edm:isShownBy,     wbr),
+                     (edm:object,        <http://example.org/>),
+                     (edm:provider,      Literal('University of Chicago Library')),
+                     (edm:rights,        <http://creativecommons.org/licenses/by-nc/4.0/>)):
+            self.graph += g{ {agg} {p} {o} }
+
+    def rem_graph(self, agg, rem, now):
+        # as per CB on 11/6/2020, DCTERMS:creator should be
+        # https://repository.lib.uchicago.edu/ - note https and trailing
+        # slash, while ProvidedCHOs should not include a trailing slash.
+        for p, o in ((rdf:type,         ore:ResourceMap),
+                     (dcterms:modified, now),
+                     (dcterms:creator,  <https://repository.lib.uchicago.edu/>),
+                     (ore:describes,    agg)):
+            self.graph += g{ {rem} {p} {o} }
+
+    @classmethod
+    def triples(self):
+        """Return EDM data as a string.
+
+        Returns:
+            str
+        """
+        return self.graph.serialize(format='turtle', base='ark:/61001/').decode("utf-8")

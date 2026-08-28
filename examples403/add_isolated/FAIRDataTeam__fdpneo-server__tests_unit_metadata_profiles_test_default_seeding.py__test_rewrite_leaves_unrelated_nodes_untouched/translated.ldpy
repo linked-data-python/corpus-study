@@ -1,0 +1,15 @@
+# Extracted from FAIRDataTeam/fdpneo-server@3e72e119ae : tests/unit/metadata/profiles/test_default_seeding.py
+# region: test_rewrite_leaves_unrelated_nodes_untouched (lines 74-80, stratum add_isolated)
+# licence of the source repository: see meta.json
+import pytest
+from rdflib import Graph, URIRef
+from fdpneo_server.metadata.profiles.applier import _rewrite_subject
+from fdpneo_server.shared.namespaces import DCT, ODRL
+
+@pytest.mark.unit
+def test_rewrite_leaves_unrelated_nodes_untouched() -> None:
+    g = Graph()
+    a, b = <urn:a>, <urn:b>
+    g += g{ {a} {DCT.title} {b} }
+    out = _rewrite_subject(g, <urn:x>, <urn:y>)
+    assert (a, DCT.title, b) in out

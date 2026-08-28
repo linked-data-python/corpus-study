@@ -1,0 +1,81 @@
+# Extracted from bloodbee/jrt@2c5b072bcb : jrt/builder.py
+# region: GraphBuilder._materialize (lines 86-158, stratum add_isolated)
+# licence of the source repository: see meta.json
+from typing import Any, Callable, List, Mapping, Optional, Union
+from uuid import NAMESPACE_DNS, uuid4, uuid5
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DC, DCTERMS, FOAF, OWL, RDF, RDFS, SKOS, XSD
+
+def _materialize(
+    self,
+    node: Any,
+    parent: URIRef | None = None,
+    key: str | None = None,
+) -> URIRef | None:
+    """Recursively convert *node* and attach it to *parent* if provided."""
+    if key:
+        rule = self.rules.get(key.lower())
+        if callable(rule):
+            # rule handles dict/list/primitive: must return (key, object) or a triple list
+            result = rule(key, node)
+            if result is not None:
+                if isinstance(result, tuple) and len(result) == 2:
+                    if parent is not None:
+                        predicate = self._predicate_uri(result[0])
+                        self.graph.add((parent, predicate, result[1]))
+                elif isinstance(result, list):
+                    for triple in result:
+                        self.graph.add(triple)
+                return parent
+
+        elif isinstance(rule, (URIRef, Literal)) and parent is not None:
+            predicate = self._predicate_uri(key)
+            self.graph.add((parent, predicate, rule))
+            return parent
+
+    # -------- dict => resource --------------------------------------
+    if isinstance(node, Mapping):
+        subject = self._subject_uri(node)
+        if parent is not None and key is not None:
+            self.graph.add((parent, self._predicate_uri(key), subject))
+
+        for k, v in node.items():
+            self._materialize(v, parent=subject, key=k)
+
+        # add to label index if a label has been set on this resource
+        label = self._extract_label(node)
+        if label:
+            self.label_index.setdefault(label.lower(), subject)
+
+        return subject
+
+    # -------- list ---------------------------------------------------
+    if isinstance(node, list):
+        if parent is not None and key is not None:
+            predicate = self._predicate_uri(key)
+            for item in node:
+                if isinstance(item, Mapping):
+                    child = self._materialize(item)
+                    if child is not None:
+                        self.graph.add((parent, predicate, child))
+                else:
+                    # primitive element -> literal or linked resource
+                    obj = self._literal_or_link(item, predicate)
+                    self.graph.add((parent, predicate, obj))
+            return parent
+        # top‑level list (rare): just iterate
+        for item in node:
+            self._materialize(item, parent=parent, key=key)
+        return parent or URIRef(f"{self.base_uri}{uuid4()}")
+
+    # -------- primitive ---------------------------------------------
+    if parent is not None and key is not None:
+        predicate = self._predicate_uri(key)
+        if predicate == RDF.type and isinstance(node, str):
+            class_uri = self.resolver.resolve(node) or self._search_class_namespaces(node)
+            self.graph.add((parent, predicate, class_uri if class_uri else Literal(node)))
+        else:
+            if str(node) not in ["None", None, ""]:
+                obj = self._literal_or_link(node, predicate)
+                self.graph.add((parent, predicate, obj))
+    return parent or URIRef(f"{self.base_uri}{uuid4()}")

@@ -1,0 +1,37 @@
+# Extracted from statnett/KGraphPy@38859be62f : kgraphpy/cimxml_serializer.py
+# region: CIMXMLSerializer._write_untyped_subject (lines 327-354, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib.term import URIRef, Literal, Node, BNode
+from rdflib.namespace import RDF, DCAT
+from xml.sax.saxutils import quoteattr, escape
+from kgraphpy.qualifiers import UnderscoreQualifier, URNQualifier, NamespaceQualifier, CIMQualifierResolver, is_uuid_qualified
+from typing import Callable, cast
+
+def _write_untyped_subject(self, subject: Node, depth: int) -> None:
+    """Write subjects without rdf:type triple.
+
+    The triples are written with an rdf:Description triple first, with all the predicates and objects listed below.
+
+    Parameters:
+        subject (Node): The untyped subject.
+        depth (int): Size of indentation.
+
+    Raises:
+        AssertionError: If the qualifier resolver is not initialized.
+    """
+    write = cast(Callable[[str], int], self.write)
+    indent = "  " * depth
+
+    if any(self.store.objects(subject, RDF.type)):
+        return
+
+    assert self.qualifier_resolver is not None  # For type checker
+
+    write(f"{indent}<rdf:Description rdf:about={quoteattr(str(subject))}>\n")
+
+    # Write all predicates/objects so the triples are not lost.
+    for p, o in self.store.predicate_objects(subject):
+        use_qualifier = is_uuid_qualified(self.qualifier_resolver, o)
+        self.predicate(p, o, depth + 1, use_qualifier=use_qualifier)
+
+    write(f"{indent}</rdf:Description>\n")

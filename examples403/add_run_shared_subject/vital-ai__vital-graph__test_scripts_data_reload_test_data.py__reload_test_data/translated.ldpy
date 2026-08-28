@@ -1,0 +1,20 @@
+# Extracted from vital-ai/vital-graph@7fb3616c2d : test_scripts/data/reload_test_data.py
+# region: reload_test_data (lines 229-236, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, Namespace, RDF, RDFS, XSD
+@prefix test: <http://example.org/test#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+for entity in union_entities:
+    test_graph += g{
+        {entity["uri"]} a test:UnionTestEntity ;
+           test:hasName {Literal(entity["name"])} ;
+           test:hasCategory {Literal(entity["category"])}
+    }
+
+    # Only add description if the entity has one (for UNION testing)
+    if entity["hasDescription"]:
+        test_graph += g{ {entity["uri"]} test:hasDescription {Literal(entity["description"])} }

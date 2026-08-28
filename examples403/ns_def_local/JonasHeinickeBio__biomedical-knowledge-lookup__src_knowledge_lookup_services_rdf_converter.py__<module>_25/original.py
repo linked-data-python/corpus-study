@@ -1,0 +1,50 @@
+# Extracted from JonasHeinickeBio/biomedical-knowledge-lookup@00477184b3 : src/knowledge_lookup/services/rdf_converter.py
+# region: <module> (lines 25-68, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from typing import Any
+from rdflib import RDF, RDFS, Graph, Literal, Namespace, URIRef
+
+class RDFNamespaces:
+    """Centralized namespace management for AID-PAIS knowledge graph."""
+
+    # Core AID-PAIS namespaces (aligned with existing ontology)
+    AIDPAIS = Namespace("http://www.aid-pais-kg.org/")
+    VOCAB = Namespace("http://www.aid-pais-kg.org/vocab/")
+    SYMPTOM = Namespace("http://www.aid-pais-kg.org/Symptom/")
+
+    # External biomedical namespaces
+    CHEMBL = Namespace("https://www.ebi.ac.uk/chembl/compound/")
+    PUBCHEM = Namespace("https://pubchem.ncbi.nlm.nih.gov/compound/")
+    DRUGBANK = Namespace("https://www.drugbank.ca/drugs/")
+    UNICHEM = Namespace("https://www.ebi.ac.uk/unichem/compoundsources/")
+    UNIPROT = Namespace("https://www.uniprot.org/uniprotkb/")
+    ENSEMBL = Namespace("https://www.ensembl.org/id/")
+    NCBI = Namespace("https://www.ncbi.nlm.nih.gov/")
+    OLS = Namespace("https://www.ebi.ac.uk/ols4/api/ontologies/")
+
+    # Standard RDF namespaces
+    RDF = RDF
+    RDFS = RDFS
+    OWL = Namespace("http://www.w3.org/2002/07/owl#")
+    XSD = XSD
+
+    @classmethod
+    def get_namespace_bindings(cls) -> dict[str, Namespace | Any]:
+        """Get all namespace bindings for RDF graph initialization."""
+        return {
+            "aidpais": cls.AIDPAIS,
+            "vocab": cls.VOCAB,
+            "symptom": cls.SYMPTOM,
+            "chembl": cls.CHEMBL,
+            "pubchem": cls.PUBCHEM,
+            "drugbank": cls.DRUGBANK,
+            "unichem": cls.UNICHEM,
+            "uniprot": cls.UNIPROT,
+            "ensembl": cls.ENSEMBL,
+            "ncbi": cls.NCBI,
+            "ols": cls.OLS,
+            "rdf": cls.RDF,
+            "rdfs": cls.RDFS,
+            "owl": cls.OWL,
+            "xsd": cls.XSD,
+        }

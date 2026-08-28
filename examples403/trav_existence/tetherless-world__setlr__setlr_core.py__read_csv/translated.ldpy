@@ -1,0 +1,22 @@
+# Extracted from tetherless-world/setlr@09baa95fb2 : setlr/core.py
+# region: read_csv (lines 106-119, stratum trav_existence)
+# licence of the source repository: see meta.json
+import rdflib
+import pandas
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+
+
+def read_csv(location, result):
+    args = dict(
+        sep = result.value(csvw:delimiter, default=rdflib.Literal(",")).value,
+        #header = result.value(csvw:headerRow, default=rdflib.Literal(0)).value),
+        skiprows = result.value(csvw:skipRows, default=rdflib.Literal(0)).value,
+        dtype=str,
+        # dtype = object    # Does not seem to play well with future and python2/3 conversion
+    )
+    if result.value(csvw:header):
+        args['header'] = [0]
+    with get_content(location, result) as fo:
+        df = pandas.read_csv(fo, encoding='utf-8', **args)
+        #logger.debug("Loaded %s", location)
+        return df

@@ -1,0 +1,74 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/property_shape.py
+# region: get_properties_by_sh_target_predicate (lines 199-264, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from collections import defaultdict
+from rdflib import RDF, SH, BNode, Dataset, Graph, Literal, URIRef
+from pylode.profiles.supermodel.model import Profile, Property, Resource
+from pylode.profiles.supermodel.query import get_name
+
+def get_properties_by_sh_target_predicate(
+    iri: URIRef,
+    sh_target_predicate: URIRef,
+    nodeshape_property_shapes: dict[str, list[URIRef | BNode]],
+    profile_graph: Graph,
+    db: Dataset,
+) -> dict[str, list[Property]]:
+    """Get the properties by sh:targetObjectsOf or sh:targetSubjectsOf specified by sh_target_predicate.
+
+    Note: the actual node shape or property shape used to extract the property is indicated by the variables
+    that start with an underscore.
+    """
+    properties = defaultdict(list)
+
+    for nodeshape, property_shapes in nodeshape_property_shapes.items():
+        for nodeshape_property_shape in property_shapes:
+            sh_path, sh_path_list = get_sh_path(
+                nodeshape_property_shape, profile_graph, db
+            )
+            if sh_path is None:
+                continue
+
+            # Get node shapes that target the sh_path variable above using sh:targetSubjectsOf.
+            # We get the _profile_graph here because the profile_graph passed into this function is the profile graph for
+            # the property shape.
+            # We now need to get the profile graph for the shapes that target the sh_path with sh:targetSubjectsOf.
+            for profile_iri in db.graphs():
+                _profile_graph = db.graph(profile_iri)
+                for _nodeshape in _profile_graph.subjects(sh_target_predicate, sh_path):
+                    for _property_shape in db.objects(_nodeshape, SH.property):
+                        _sh_path, _sh_path_list = get_sh_path(
+                            _property_shape, _profile_graph, db
+                        )
+                        if sh_target_predicate == SH.targetObjectsOf:
+                            _name = f"{get_name(sh_path, _profile_graph, db)} / {get_name(_sh_path, _profile_graph, db)}"
+                            is_property_path = True
+                            method = "sh:targetObjectsOf"
+                        elif sh_target_predicate == SH.targetSubjectsOf:
+                            _name = None
+                            is_property_path = False
+                            method = "sh:targetSubjectsOf"
+                        else:
+                            _name = None
+                            is_property_path = False
+                            method = get_name(sh_target_predicate, db)
+
+                        property_source = f"Node shape: {nodeshape if isinstance(nodeshape, URIRef) else '(blank node)'} Property shape: {_property_shape if isinstance(_property_shape, URIRef) else '(blank node)'}"
+
+                        property_ = get_property_by_property_shape(
+                            iri,
+                            _property_shape,
+                            _profile_graph,
+                            db,
+                            method,
+                            sh_path=_sh_path,
+                            name=_name,
+                            property_source=property_source,
+                            is_property_path=is_property_path,
+                        )
+
+                        if sh_target_predicate == SH.targetObjectsOf:
+                            properties[sh_path].append(property_)
+                        else:
+                            properties[_sh_path].append(property_)
+
+    return properties

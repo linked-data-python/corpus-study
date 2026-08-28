@@ -1,0 +1,17 @@
+# Extracted from OntoUML/ontouml-json2graph@982f12b9c4 : json2graph/decode.py
+# region: decode_ontouml_json2graph (lines 207-216, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import RDF, Graph
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+if args.ARGUMENTS["model_only"]:
+    for s, _, o in ontouml_graph.triples((None, rdf:type, None)):
+        s_type = s.toPython()
+        o_type = o.fragment
+        # Remove if not a model element and if it is defined by of the ontology being handled
+        if (args.ARGUMENTS["base_uri"] in s_type) and (o_type not in model_elements):
+            ontouml_graph.remove((s, None, None))
+            ontouml_graph.remove((None, None, s))
+    if not args.ARGUMENTS["silent"]:
+        logger.info("All diagrammatic data removed from the output. The output contains only model elements.")

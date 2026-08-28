@@ -1,0 +1,37 @@
+# Extracted from DataDrivenCPS/acquirium@e3bffb4bed : src/acquirium/Storage/graph_store.py
+# region: OxigraphGraphStore._replace_query_graph (lines 513-538, stratum remove)
+# licence of the source repository: see meta.json
+from pyoxigraph import NamedNode, RdfFormat
+from rdflib import Dataset, Graph, Literal, RDF, URIRef
+from acquirium.internals._log import timed_debug
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+_logger = logging.getLogger("acquirium.graph_store")
+_QUERY_LOAD_THRESHOLD_BYTES = 8 * 1024 * 1024
+
+def _replace_query_graph(self, graph: Graph, graph_uri: URIRef, *, label: str) -> None:
+    """Replace one disposable query graph while publication is locked."""
+    target = self.query_dataset.graph(graph_uri)
+    with timed_debug(_logger, "derived publish %s clear", label):
+        target.remove((None, None, None))
+    if not len(graph):
+        return
+    with timed_debug(_logger, "derived publish %s serialize", label):
+        nt = graph.serialize(format="nt", encoding="utf-8")
+    load_method = (
+        self.query_dataset.store._inner.load
+        if len(nt) <= _QUERY_LOAD_THRESHOLD_BYTES
+        else self.query_dataset.store._inner.bulk_load
+    )
+    with timed_debug(
+        _logger,
+        "derived publish %s %s (%d bytes)",
+        label,
+        load_method.__name__,
+        len(nt),
+    ):
+        load_method(
+            input=nt,
+            format=RdfFormat.N_TRIPLES,
+            to_graph=NamedNode(str(graph_uri)),
+        )

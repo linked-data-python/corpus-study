@@ -1,0 +1,21 @@
+# Extracted from FAIRDataTeam/fdpneo-server@3e72e119ae : tests/unit/data/test_distributions.py
+# region: _graph (lines 27-39, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from fdpneo_server.shared.namespaces import DCAT, DCT
+DIST = "https://fdp.example/data/dist-1"
+RIGHTS = "https://fdp.example/offers/public"
+
+def _graph(
+    *, with_download: bool = True, with_access: bool = True, with_rights: bool = True
+) -> Graph:
+    g = Graph()
+    subject = URIRef(DIST)
+    g += g{ {subject} {DCAT.Distribution} <https://example.org/type> }
+    if with_download:
+        g += g{ {subject} {DCAT.downloadURL} <https://files.example.org/d1.csv> }
+    if with_access:
+        g += g{ {subject} {DCAT.accessURL} <https://fdp.example/data/dist-1/sparql> }
+    if with_rights:
+        g += g{ {subject} {DCT.rights} {URIRef(RIGHTS)} }
+    return g

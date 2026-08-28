@@ -1,0 +1,52 @@
+# Extracted from AI-SDC/ACRO@eb1d6e370a : test/test_ontology_handling.py
+# region: _add_full_risks_and_checks (lines 58-93, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import rdflib
+from acro.ontology_handler import (
+    PREFIX,
+    is_uri,
+    make_ischeckedby,
+    make_ismitigatedby,
+    make_save_analyses,
+    make_save_risks,
+    make_save_statbarns,
+    populate_useful_dicts,
+    print_nested_dict,
+)
+
+def _add_full_risks_and_checks(g: rdflib.Graph) -> None:
+    """Add all 7 risks and 8 checks required by make_ismitigatedby/make_ischeckedby."""
+    rdfs = rdflib.Namespace("http://www.w3.org/2000/01/rdf-schema#")
+    dpv_owl = rdflib.Namespace("https://w3id.org/dpv/owl#")
+    skos = rdflib.Namespace("http://www.w3.org/2004/02/skos/core#")
+    p = rdflib.Namespace(PREFIX)
+    for r in [
+        "ClassDisclosure",
+        "LowCount",
+        "LowDOF",
+        "AuxiliaryInformation",
+        "ImplicitTables",
+        "Dominance",
+        "Differencing",
+    ]:
+        uri = p[r]
+        g.add((uri, rdfs.subClassOf, dpv_owl.Risk))
+        g.add((uri, skos.definition, rdflib.Literal(f"{r} def")))
+        g.add((uri, skos.prefLabel, rdflib.Literal(r)))
+    for c in [
+        "RequiredZeroCheck",
+        "PresenceOfZeroCheck",
+        "MinimumThresholdCheck",
+        "MinimumDoFCheck",
+        "StatbarnDataCheck",
+        "NKCheck",
+        "PQCheck",
+        "PresenceOfLinkedTableCheck",
+    ]:
+        g.add(
+            (
+                p[c],
+                rdfs.subClassOf,
+                rdflib.URIRef("https://w3id.org/dpv/risk/owl#RiskEvaluation"),
+            )
+        )

@@ -1,0 +1,93 @@
+# Extracted from sebneu/portalwatch@a514eba7bf : converter/dataset_converter.py
+# region: CKANConverter.graph_from_ckan (lines 684-759, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+import hashlib
+from rdflib import URIRef, BNode, Literal
+from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+for resource_dict in dataset_dict.get('resources', []):
+    distribution = URIRef(self.resource_uri(resource_dict, dataset_dict.get('id')))
+
+    g += g{
+        {dataset_ref} dcat:distribution {distribution} .
+        {distribution} a dcat:Distribution
+    }
+
+    # License
+    if license:
+        g += g{ {distribution} dct:license {license} }
+
+
+    #  Simple values
+    items = [
+        ('name', dct:title, None),
+        ('description', dct:description, None),
+        ('status', adms:status, None),
+        ('rights', dct:rights, None),
+        ('license', dct:license, None),
+    ]
+
+    _add_triples_from_dict(self.g, resource_dict, distribution, items)
+
+    # Format
+    if '/' in resource_dict.get('format', ''):
+        g += g{ {distribution} dcat:mediaType {Literal(resource_dict['format'])} }
+    else:
+        if resource_dict.get('format'):
+            id_string = dataset_ref.n3() + dct:format.n3() + resource_dict['format']
+            bnode_hash = hashlib.sha1(id_string.encode('utf-8'))
+            f = BNode(bnode_hash.hexdigest())
+
+            g += g{
+                {f} a dct:MediaTypeOrExtent ;
+                   rdfs:label {Literal(resource_dict['format'])} .
+                {distribution} dct:format {f}
+            }
+            if resource_dict.get('mimetype'):
+                g += g{ {f} rdf:value {Literal(resource_dict['mimetype'])} }
+
+        if resource_dict.get('mimetype'):
+            g += g{ {distribution} dcat:mediaType {Literal(resource_dict['mimetype'])} }
+
+    # URL
+    url = resource_dict.get('url')
+    download_url = resource_dict.get('download_url')
+    if download_url:
+        download_url = download_url.strip()
+        if is_valid_uri(download_url):
+            g += g{ {distribution} dcat:downloadURL {URIRef(download_url)} }
+        else:
+            g += g{ {distribution} dcat:downloadURL {Literal(download_url)} }
+    if (url and not download_url) or (url and url != download_url):
+        url = url.strip()
+        if is_valid_uri(url):
+            g += g{ {distribution} dcat:accessURL {URIRef(url)} }
+        else:
+            g += g{ {distribution} dcat:accessURL {Literal(url)} }
+    # Dates
+    # metadata-date was added as "most frequent extra key"
+    items = [
+        ('issued', dct:issued, ['created',
+                                'metadata-date']),
+        ('modified', dct:modified, ['last_modified']),
+    ]
+
+    _add_date_triples_from_dict(self.g, resource_dict, distribution, items)
+
+    # Numbers
+    if resource_dict.get('size'):
+        try:
+            g += g{
+                {distribution} dcat:byteSize {Literal(float(resource_dict['size']),
+                           datatype=XSD.decimal)}
+            }
+        except (ValueError, TypeError):
+            g += g{ {distribution} dcat:byteSize {Literal(resource_dict['size'])} }

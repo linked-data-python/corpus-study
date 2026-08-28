@@ -1,0 +1,23 @@
+# Extracted from RDFLib/rdflib-leveldb@a0f3386c71 : test/test_functionality.py
+# region: testUpdateWithInitNs (lines 160-170, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Literal, RDF, RDFS, URIRef, Variable
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+michel = <urn:michel>
+likes = <urn:likes>
+pizza = <urn:pizza>
+graphuri = <urn:graph>
+
+def testUpdateWithInitNs(getgraph):
+    graph = getgraph
+    graph.update(
+        "INSERT DATA { GRAPH ns:graph { ns:michel ns:likes ns:pizza . } }",
+        initNs={"ns": <urn:>},
+    )
+
+    g = graph.get_context(graphuri)
+    assert set(g.triples((None, None, None))) == set(
+        [(michel, likes, pizza)]
+    )  # "only michel likes pizza"

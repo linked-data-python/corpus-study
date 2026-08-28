@@ -1,0 +1,36 @@
+# Extracted from dice-group/COVID19DS@7842845de5 : unified_covid19/toRdf.py
+# region: handleFile (lines 140-156, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, BNode, Literal, Namespace, Graph, XSD
+from rdflib.namespace import RDF, RDFS, DCTERMS, OWL
+@prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .
+@prefix ndice: <https://covid-19ds.data.dice-research.org/resource/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+g = Graph()
+resourse = "https://covid-19ds.data.dice-research.org/resource/"
+g = Graph()
+
+for i in range(0, len(covid19data['ID'])):
+    dice = URIRef(resourse+str(covid19data['ID'][i]))
+    pol = 'Covid19Data_'+str(covid19data['ID'][i])+'_'+ covid19data['Type'][i]+'_'+str(covid19data['Date'][i])
+    g += g{
+        {dice} cvdo:hasCasesPerAgeRecord ndice:{pol} .
+        ndice:{pol} a cvdo:CasesPerAgeRecord ;
+           cvdo:date {Literal(covid19data['Date'][i],datatype=XSD.date)} ;
+           cvdo:type {Literal(covid19data['Type'][i],datatype=XSD.string)}
+    }
+    if not isnan(covid19data['Cases'][i]):
+        g += g{ ndice:{pol} cvdo:cases {Literal(covid19data['Cases'][i],datatype=XSD.nonNegativeInteger)} }
+    if not isnan(covid19data['Cases_New'][i]):
+        g += g{ ndice:{pol} cvdo:casesNew {Literal(covid19data['Cases_New'][i],datatype=XSD.nonNegativeInteger)} }
+    if not isnan(covid19data['Age'][i]):
+        g += g{ ndice:{pol} cvdo:age {Literal(covid19data['Age'][i],datatype=XSD.string)} }
+    if not isnan(covid19data['Sex'][i]):
+        g += g{ ndice:{pol} cvdo:sex {Literal(covid19data['Sex'][i],datatype=XSD.string)} }
+    if not isnan(covid19data['Source'][i]):
+        g += g{ ndice:{pol} cvdo:source {Literal(covid19data['Source'][i],datatype=XSD.string)} }

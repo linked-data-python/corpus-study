@@ -1,0 +1,73 @@
+# Extracted from MaxBerktoldRWTH/BRICKbuilder@28f0710933 : src/app/ifc_populate_window.py
+# region: IfcBrickAnnotator.rebuild_output_graph (lines 484-550, stratum ns_def_local)
+# licence of the source repository: see meta.json
+import rdflib
+from rdflib import Graph, Namespace, RDF
+
+def rebuild_output_graph(self):
+    """Clears and re-serializes components according to active configuration settings mapping definitions."""
+    self.output_graph = Graph()
+
+    # 1. Bind core standard and target custom namespaces
+    self.output_graph.bind("brick", self.BRICK)
+    self.output_graph.bind("ref", self.REF)
+
+    # Consistent prefix generation definitions
+    base_inst = self.settings.value("ns_inst", "http://example.org/project#")
+    if not str(base_inst).endswith(('#', '/')):
+        base_inst = str(base_inst) + '#'
+
+    ifc_inst_ns = Namespace(base_inst + "ifcInst:")
+    brick_inst_ns = Namespace(base_inst + "brickInst:")
+    bacnet_ns = Namespace("http://buildingsmart.org/bacnet#")
+    bldg_ns = Namespace(base_inst + "bldg:")
+
+    self.output_graph.bind("ifcInst", ifc_inst_ns)
+    self.output_graph.bind("brickInst", brick_inst_ns)
+    self.output_graph.bind("bacnet", bacnet_ns)
+    self.output_graph.bind("bldg", bldg_ns)
+
+    ifc_core_ns = Namespace(
+        self.settings.value(
+            "ns_ifc", "http://standards.buildingsmart.org/IFC/RELEASE/IFC4/Ontology#"
+        )
+    )
+    self.output_graph.bind("ifc", ifc_core_ns)
+
+    # 2. Sequential structural iteration over individual items
+    for _key, data in self.annotations_registry.items():
+        eq_uri = ifc_inst_ns[data["eq_guid"]]
+        ifc_type_name = data["ifc_type"] if data.get("ifc_type") else "IfcSensor"
+        self.output_graph.add((eq_uri, RDF.type, ifc_core_ns[ifc_type_name]))
+
+        pt_uri = brick_inst_ns[data["point_id"]]
+        self.output_graph.add((pt_uri, RDF.type, self.BRICK[data["point_type"]]))
+
+        # Link Brick point to physical asset
+        self.output_graph.add((pt_uri, self.BRICK.isPointOf, eq_uri))
+
+        # 3. Handle BACnet nested blank node structures
+        if data.get("bacnet_name"):
+            bacnet_bnode = rdflib.BNode()
+            self.output_graph.add((pt_uri, self.REF.hasExternalReference, bacnet_bnode))
+            self.output_graph.add((bacnet_bnode, RDF.type, self.REF.BACnetReference))
+
+            raw_type = (
+                str(data.get("bacnet_type", ""))
+                .lower()
+                .replace("analoginput", "analog-input")
+                .replace("analogvalue", "analog-value")
+            )
+            obj_id_string = f"{raw_type},{data.get('bacnet_instance')}"
+
+            self.output_graph.add(
+                (
+                    bacnet_bnode,
+                    bacnet_ns["object-identifier"],
+                    rdflib.Literal(obj_id_string, datatype=bacnet_ns.objectIdentifier),
+                )
+            )
+            self.output_graph.add(
+                (bacnet_bnode, bacnet_ns["object-name"], rdflib.Literal(data.get("bacnet_name")))
+            )
+            self.output_graph.add((bacnet_bnode, bacnet_ns["objectOf"], bldg_ns["sample-device"]))

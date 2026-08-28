@@ -1,0 +1,24 @@
+# Extracted from cognitedata/neat@4042d3e96d : cognite/neat/_v0/core/_data_model/exporters/_data_model2semantic_model.py
+# region: OWLClass.title_triples (lines 202-213, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import DCTERMS, OWL, RDF, RDFS, XSD, BNode, Graph, Literal, Namespace, URIRef
+from cognite.neat._v0.core._utils.rdf_ import remove_namespace_from_uri
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+@property
+def title_triples(self) -> list[tuple]:
+    if self.label:
+        return [
+            (
+                self.id_,
+                dcterms:title,
+                Literal(f"{remove_namespace_from_uri(self.id_)} - {self.label}"),
+            )
+        ]
+    else:
+        return []

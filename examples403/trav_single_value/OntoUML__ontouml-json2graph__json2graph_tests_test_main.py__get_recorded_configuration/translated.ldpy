@@ -1,0 +1,21 @@
+# Extracted from OntoUML/ontouml-json2graph@982f12b9c4 : json2graph/tests/test_main.py
+# region: get_recorded_configuration (lines 1744-1753, stratum trav_single_value)
+# licence of the source repository: see meta.json
+import json
+from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def get_recorded_configuration(metadata_graph: Graph) -> dict[str, object]:
+    """Return the canonical JSON configuration used by the transformation."""
+    transformation = metadata_graph.value(get_output_artifact(metadata_graph), prov:wasGeneratedBy)
+    configuration_entities = [
+        entity
+        for entity in metadata_graph.objects(transformation, prov:used)
+        if (entity, prov:value, None) in metadata_graph
+    ]
+    assert len(configuration_entities) == 1
+    return json.loads(str(metadata_graph.value(configuration_entities[0], prov:value)))

@@ -1,0 +1,65 @@
+# Extracted from aigora-de/rdf-construct@670e400ea4 : src/rdf_construct/shacl/converters.py
+# region: PropertyConstraint.to_rdf (lines 88-141, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
+from .namespaces import SH
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+
+def to_rdf(self, shapes_graph: Graph) -> BNode:
+    """Convert constraint to RDF representation.
+
+    Creates a blank node with sh:property predicates.
+
+    Args:
+        shapes_graph: Graph to add triples to.
+
+    Returns:
+        Blank node representing the property shape.
+    """
+    prop_shape = BNode()
+
+    shapes_graph += g{ {prop_shape} sh:path {self.path} }
+
+    if self.node_class:
+        shapes_graph += g{ {prop_shape} sh:class {self.node_class} }
+
+    if self.datatype:
+        shapes_graph += g{ {prop_shape} sh:datatype {self.datatype} }
+
+    if self.min_count is not None:
+        shapes_graph += g{ {prop_shape} sh:minCount {Literal(self.min_count)} }
+
+    if self.max_count is not None:
+        shapes_graph += g{ {prop_shape} sh:maxCount {Literal(self.max_count)} }
+
+    if self.node_kind:
+        shapes_graph += g{ {prop_shape} sh:nodeKind {self.node_kind} }
+
+    if self.name:
+        shapes_graph += g{ {prop_shape} sh:name {Literal(self.name)} }
+
+    if self.description:
+        shapes_graph += g{ {prop_shape} sh:description {Literal(self.description)} }
+
+    if self.in_values:
+        # Create an RDF list for sh:in
+        in_list = _create_rdf_list(shapes_graph, self.in_values)
+        shapes_graph += g{ {prop_shape} sh:in {in_list} }
+
+    if self.pattern:
+        shapes_graph += g{ {prop_shape} sh:pattern {Literal(self.pattern)} }
+
+    if self.min_inclusive is not None:
+        shapes_graph += g{ {prop_shape} sh:minInclusive {self.min_inclusive} }
+
+    if self.max_inclusive is not None:
+        shapes_graph += g{ {prop_shape} sh:maxInclusive {self.max_inclusive} }
+
+    if self.order is not None:
+        shapes_graph += g{ {prop_shape} sh:order {Literal(self.order)} }
+
+    return prop_shape

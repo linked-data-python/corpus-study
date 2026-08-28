@@ -1,0 +1,60 @@
+# Extracted from filipjezek/ndbi046@59b3a45240 : task_4/cube_lib/dimensions.py
+# region: <module> (lines 1-44, stratum ns_import_project)
+# licence of the source repository: see meta.json
+#!/usr/bin/env python3
+from rdflib import Graph, Literal, URIRef
+from .namespaces import NS, NSR, RDFS, SDMX_CON, SDMX_DIM
+from rdflib.namespace import QB, RDF
+@prefix ns: <https://filipjezek.github.io/ontology#> .
+@prefix nsr: <https://filipjezek.github.io/resources/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdmxcon: <http://purl.org/linked-data/sdmx/2009/concept#> .
+@prefix sdmxdim: <http://purl.org/linked-data/sdmx/2009/dimension#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+
+def create_county(collector: Graph) -> URIRef:
+    county = ns:county
+    collector += g{
+        {county} a rdfs:Property ;
+           a qb:DimensionProperty ;
+           rdfs:subPropertyOf sdmxdim:refArea ;
+           qb:concept sdmxcon:refArea ;
+           rdfs:label "Okres"@cs ;
+           rdfs:label "County"@en ;
+           qb:codeList nsr:county ;
+           rdfs:range nsr:County
+    }
+    return county
+
+
+def create_region(collector: Graph) -> URIRef:
+    region = ns:region
+    collector += g{
+        {region} a rdfs:Property ;
+           a qb:DimensionProperty ;
+           rdfs:subPropertyOf sdmxdim:refArea ;
+           qb:concept sdmxcon:refArea ;
+           rdfs:label "Kraj"@cs ;
+           rdfs:label "Region"@en ;
+           qb:codeList nsr:region ;
+           rdfs:range nsr:Region
+    }
+    return region
+
+
+def create_field_of_care(collector: Graph, region: URIRef) -> URIRef:
+    field_of_care = ns:fieldOfCare
+    collector += g{
+        {field_of_care} a rdfs:Property ;
+           a qb:DimensionProperty .
+        {region} rdfs:subPropertyOf sdmxdim:coverageSector ;
+           qb:concept sdmxcon:coverageSector .
+        {field_of_care} rdfs:label "Obor p\u00e9\u010de"@cs ;
+           rdfs:label "Field of care"@en ;
+           qb:codeList nsr:fieldOfCare ;
+           rdfs:range nsr:FieldOfCare
+    }
+    return field_of_care

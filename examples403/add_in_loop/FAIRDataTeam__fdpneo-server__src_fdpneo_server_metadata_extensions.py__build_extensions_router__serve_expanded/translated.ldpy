@@ -1,0 +1,50 @@
+# Extracted from FAIRDataTeam/fdpneo-server@3e72e119ae : src/fdpneo_server/metadata/extensions.py
+# region: build_extensions_router._serve_expanded (lines 179-212, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from fastapi import APIRouter, Depends, Query, Request, Response
+from rdflib import Graph, URIRef
+from fdpneo_server.shared.context import RequestContext
+from fdpneo_server.shared.errors import (
+    BadRequest,
+    Forbidden,
+    NotFound,
+    PolicyViolation,
+    Unauthenticated,
+)
+from fdpneo_server.shared.negotiation import SUPPORTED_TYPES, select_media_type, serialize
+_EXPANDED_MAX_DEPTH = 16
+
+async def _serve_expanded(record_iri: str, ctx: RequestContext, request: Request) -> Response:
+    await _read_authorised(ctx, record_iri)
+    graph = await repo.get_graph(record_iri)
+    if len(graph) == 0:
+        raise NotFound(f"resource not found: {record_iri}")
+    # Walk dct:isPartOf, authorising each ancestor before adding it.
+    # An ancestor the caller cannot read silently drops out of the
+    # response — anonymous probing of unreadable ancestors must not
+    # leak via 200-with-content.
+    visited: set[str] = {record_iri}
+    result = Graph()
+    for s, p, o in graph:
+        result += g{ {s} {p} {o} }
+    frontier: list[str] = list(_extract_ancestors(graph, record_iri))
+    depth = 0
+    while frontier and depth < _EXPANDED_MAX_DEPTH:
+        next_frontier: list[str] = []
+        for parent_iri in frontier:
+            if parent_iri in visited:
+                continue
+            visited.add(parent_iri)
+            try:
+                await _read_authorised(ctx, parent_iri)
+            except (Unauthenticated, Forbidden, PolicyViolation, NotFound):
+                continue
+            parent_graph = await repo.get_graph(parent_iri)
+            for s, p, o in parent_graph:
+                result += g{ {s} {p} {o} }
+            next_frontier.extend(_extract_ancestors(parent_graph, parent_iri))
+        frontier = next_frontier
+        depth += 1
+    media = _negotiate(request)
+    body = serialize(result, media)
+    return Response(content=body, status_code=200, media_type=media)

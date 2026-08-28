@@ -1,0 +1,80 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : scripts/pod_audit.py
+# region: audit_type_index (lines 337-409, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from urllib.parse import urlparse
+from rdflib import Graph, RDF, URIRef
+SOLID  = "http://www.w3.org/ns/solid/terms#"
+
+for reg in ti_g.subjects(RDF.type, URIRef(SOLID + "TypeRegistration")):
+    reg_iri = str(reg)
+
+    # 1. solid:forClass
+    cls_node = ti_g.value(reg, URIRef(SOLID + "forClass"))
+    if cls_node is None:
+        findings.append(finding("WARN", reg_iri, "typeindex:missing-forClass",
+            "TypeRegistration has no solid:forClass.",
+            "Add solid:forClass <ClassName> to the registration."))
+        cls_iri = None
+    elif not isinstance(cls_node, URIRef):
+        findings.append(finding("WARN", reg_iri, "typeindex:forClass-literal",
+            f"solid:forClass value is a literal ({cls_node!r}), expected an IRI.",
+            "Replace the literal with an IRI reference."))
+        cls_iri = None
+    else:
+        cls_iri = str(cls_node)
+
+    # 2. solid:instanceContainer
+    # solid:instance (single-resource) registrations are valid per the Solid Type Index
+    # spec — skip the container checks for those; they are not containers.
+    has_instance = ti_g.value(reg, URIRef(SOLID + "instance")) is not None
+    ctr_node = ti_g.value(reg, URIRef(SOLID + "instanceContainer"))
+    if ctr_node is None:
+        if not has_instance:
+            findings.append(finding("WARN", reg_iri, "typeindex:missing-instanceContainer",
+                "TypeRegistration has no solid:instanceContainer (and no solid:instance).",
+                "Add solid:instanceContainer <container/> or solid:instance <resource> "
+                "to the registration."))
+        continue
+    if not isinstance(ctr_node, URIRef):
+        findings.append(finding("WARN", reg_iri, "typeindex:instanceContainer-literal",
+            f"solid:instanceContainer value is a literal ({ctr_node!r}), expected an IRI.",
+            "Replace the literal with an IRI reference."))
+        continue
+    ctr_iri = str(ctr_node)
+
+    # Check the container is under the storage root.
+    # D100 (L4 extension contract) explicitly allows Type-Index registrations at ANY
+    # container path on the same origin — the agent may register e.g. /biz/equipment/
+    # outside /vault/ and the substrate honors it. So:
+    #   off-origin (different host)   → ERROR  (integrity violation)
+    #   same-origin, outside root     → WARN   (notable per D100, not a violation)
+    # We compare against canon_base (the pim:Storage IRI) and also against pod_base
+    # (the reachable equivalent) so the check passes regardless of which host was used.
+    canon_root = canon_base if canon_base.endswith("/") else canon_base + "/"
+    pod_root   = pod_base   if pod_base.endswith("/")   else pod_base + "/"
+    reachable_ctr = rewrite(ctr_iri, canon_base, pod_base)
+    if not ctr_iri.startswith(canon_root) and not ctr_iri.startswith(pod_root) \
+            and not reachable_ctr.startswith(pod_root):
+        # Distinguish off-origin (different host) from same-origin-outside-root.
+        canon_origin = urlparse(canon_root).netloc
+        ctr_origin   = urlparse(ctr_iri).netloc
+        if ctr_origin and ctr_origin != canon_origin:
+            findings.append(finding("ERROR", reg_iri, "typeindex:container-outside-root",
+                f"instanceContainer {ctr_iri} is on a different origin ({ctr_origin}) "
+                f"from the storage root ({canon_origin}). This is an integrity violation.",
+                "Registration must point only at containers on this Pod's origin."))
+        else:
+            findings.append(finding("WARN", reg_iri, "typeindex:container-outside-root",
+                f"instanceContainer {ctr_iri} is not under the storage root {canon_root} "
+                f"(D100: same-origin L4 extension — notable, not a violation).",
+                "Confirm this is an intentional L4 extension registration (D100). "
+                "If unintentional, move the container under the storage root."))
+        continue
+
+    # 4. Accumulate per-container class list (for dup-container check after the loop)
+    if ctr_iri not in container_classes:
+        container_classes[ctr_iri] = []
+    if cls_iri:
+        container_classes[ctr_iri].append(cls_iri)
+
+    heads.append((reg_iri, reachable_ctr))

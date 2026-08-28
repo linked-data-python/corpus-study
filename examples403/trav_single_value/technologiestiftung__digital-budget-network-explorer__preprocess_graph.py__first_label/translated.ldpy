@@ -1,0 +1,19 @@
+# Extracted from technologiestiftung/digital-budget-network-explorer@a2c69bf9f4 : preprocess_graph.py
+# region: first_label (lines 74-79, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, RDF
+from rdflib.namespace import SKOS, OWL, DCTERMS, RDFS
+@prefix schema: <https://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def first_label(g: Graph, subj) -> str | None:
+    for pred in (skos:prefLabel, schema:name, rdfs:label):
+        val = g.value(subj, pred)
+        if val is not None:
+            return str(val)
+    return None

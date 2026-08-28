@@ -1,0 +1,4 @@
+# Extracted from dtai-kg/SCOOP@40c6fc0420 : SCOOP/shape_integration_all.py
+# region: ShapeIntegrationAll.conflictChecking (lines 208-208, stratum add_isolated)
+# licence of the source repository: see meta.json
+self.SHACL.add((identifier_path_current, constraint_add, constraint_add_value))

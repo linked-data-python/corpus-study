@@ -1,0 +1,42 @@
+# Extracted from spdx/spec-parser@47ef6b7c04 : spec_parser/rdf.py
+# region: gen_rdf_ontology (lines 43-76, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SH, SKOS, XSD
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+URI_BASE = "https://spdx.org/rdf/3/terms/"
+
+def gen_rdf_ontology(model):
+    g = Graph()
+    g.bind("spdx", Namespace(URI_BASE))
+    OMG_ANN = Namespace("https://www.omg.org/spec/Commons/AnnotationVocabulary/")
+    g.bind("omg-ann", OMG_ANN)
+
+    node = URIRef(URI_BASE)
+    g += g{
+        {node} a owl:Ontology ;
+           owl:versionIRI {node} ;
+           rdfs:label "System Package Data Exchange\u2122 (SPDX\u00ae) Ontology"@en ;
+           dcterms:abstract "This ontology defines the terms and relationships used in the SPDX specification to describe system packages"@en ;
+           dcterms:created "2026-01-23"^^xsd:date ;
+           dcterms:creator "SPDX Project"@en ;
+           dcterms:license <https://spdx.org/licenses/Community-Spec-1.0.html> ;
+           dcterms:references <https://spdx.dev/specifications/> ;
+           dcterms:title "System Package Data Exchange (SPDX) Ontology"@en ;
+           {OMG_ANN.copyright} "Copyright (C) 2026 SPDX Project"@en
+    }
+
+    gen_rdf_classes(model, g)
+    gen_rdf_properties(model, g)
+    #     gen_rdf_datatypes(model, g)
+    gen_rdf_vocabularies(model, g)
+    gen_rdf_individuals(model, g)
+
+    return g

@@ -1,0 +1,33 @@
+# Extracted from tmdt-buw/plasma@28a4731aff : auxiliary_services/ARS-R-statistic-recommender/test/test_connect_triple_store.py
+# region: get_semantic_models (lines 30-49, stratum ns_import_project)
+# licence of the source repository: see meta.json
+import os
+import uuid
+from pathlib import Path
+from rdflib import URIRef, Graph, Namespace, Literal, RDF
+from util.namespaces import PLCM, PLSM
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def get_semantic_models() -> Graph:
+    kg: Graph = Graph()
+    count = 1
+    for file in os.listdir("testdata"):
+        g: Graph = Graph()
+        g.parse(Path("testdata", file), format="ttl")
+        model_node: URIRef = URIRef("model-" + str(count), PLSM)
+
+        for s in g.subjects(None, None):
+            g += g{ {model_node} {PLCM.hasNode} {s} }
+
+        g += g{
+            {model_node} {PLCM.cmUuid} {Literal(str(uuid.uuid4()))} ;
+               a {PLCM.SemanticModel}
+        }
+        for namespace in g.namespace_manager.namespaces():
+            kg.namespace_manager.bind(namespace[0], namespace[1])
+
+        kg.__iadd__(g)
+        count += 1
+    print(len(kg))
+    return kg

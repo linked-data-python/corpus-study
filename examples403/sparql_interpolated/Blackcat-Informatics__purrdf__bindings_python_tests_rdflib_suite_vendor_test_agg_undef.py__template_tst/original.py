@@ -1,0 +1,22 @@
+# Extracted from Blackcat-Informatics/purrdf@3aa4ba514e : bindings/python/tests/rdflib_suite/vendor/test_agg_undef.py
+# region: template_tst (lines 19-25, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+from rdflib import RDFS, Graph, Literal, URIRef, Variable
+query_tpl = """
+SELECT ?x (%s(?y_) as ?y) {
+  VALUES (?x ?y_ ?z) {
+    ("x1" undef 1)
+    ("x1" undef 2)
+    ("x2" undef 3)
+    ("x2" 42    4)
+  }
+} GROUP BY ?x ORDER BY ?x
+"""
+
+def template_tst(agg_func, first, second):
+    g = Graph()
+    results = list(g.query(query_tpl % agg_func))
+
+    print("===", results)
+    assert results[0][1] == first, (results[0][1], first)
+    assert results[1][1] == second, (results[1][1], second)

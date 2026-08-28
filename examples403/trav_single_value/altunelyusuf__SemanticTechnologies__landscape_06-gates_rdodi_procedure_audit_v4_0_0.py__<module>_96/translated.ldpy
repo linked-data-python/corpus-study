@@ -1,0 +1,16 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/rdodi_procedure_audit_v4_0_0.py
+# region: <module> (lines 96-96, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+dc = Graph().parse(f"{HERE}/03-document/semtech_document_v4_0_0.ttl")
+doc_secs = {str(s).split("#S_")[-1]: s for cls in ("ReportSection", "ConceptSection")
+            for s in dc.subjects(rdf:type, URIRef(DO + cls))}
+
+nosrc = [k for k, s in doc_secs.items() if not dc.value(s, dcterms:source)]

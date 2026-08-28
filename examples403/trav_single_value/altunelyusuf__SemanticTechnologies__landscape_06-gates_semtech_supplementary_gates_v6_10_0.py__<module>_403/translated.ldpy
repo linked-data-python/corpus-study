@@ -1,0 +1,25 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v6_10_0.py
+# region: <module> (lines 403-410, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ab = Graph().parse(f"{HERE}/02-ontology/semtech_abox_v6_9_0.ttl")
+IRI = {n["id"]: cls_iri(n) for n in nodes}
+EM2 = load("enrichment_m", "v5_4_0")
+hs_detail = []
+
+for miid, mlab, mkind, mcid, mdfn, mrefs in EM2.NEW_INSTANCES:
+    ind = SEM[miid]
+    typed = (ind, rdf:type, IRI[mcid]) in ab and (ind, rdf:type, SEM[f"Kind{mkind}"]) in ab
+    labeled = str(ab.value(ind, rdfs:label) or "") == mlab
+    sourced = bool(ab.value(ind, dcterms:source))
+    prov = (ind, sem:hasSourceProvenance, None) in ab
+    if not (typed and labeled and sourced and prov): hs_ok = False
+    hs_detail.append(mlab)

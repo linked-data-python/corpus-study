@@ -1,0 +1,50 @@
+# Extracted from johnjung/metadata_converters@36a81d6a97 : metadata_converters/mepa_edm.py
+# region: MepaToEDM.build_mepa_collection_triples (lines 351-376, stratum ns_import_project)
+# licence of the source repository: see meta.json
+import datetime
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import RDF, DC, DCTERMS, XSD
+from classes import BASE, BF, EDM, ERC, MADSRDF, MIX, OAI, ORE, PREMIS, PREMIS2, PREMIS3, VRA
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix erc: <https://www.dublincore.org/groups/kernel/spec/> .
+@prefix madsrdf: <http://www.loc.gov/mads/rdf/v1#> .
+@prefix mix: <http://www.loc.gov/mix/v20/> .
+@prefix oai: <http://www.openarchives.org/OAI/2.0/> .
+@prefix ore: <http://www.openarchives.org/ore/terms/> .
+@prefix premis: <info:lc/xmlns/premis-v2/> .
+@prefix premis2: <http://www.loc.gov/premis/rdf/v1#> .
+@prefix premis3: <http://www.loc.gov/premis/rdf/v3/> .
+@prefix vra: <http://purl.org/vra/> .
+
+
+@classmethod
+def build_mepa_collection_triples(self):
+    """Add triples for MEPA, and to connect items with each other. 
+
+    Side Effect:
+        Add triples to self.graph
+    """
+
+    now = Literal(datetime.datetime.utcnow(), datatype=xsd:dateTime)
+
+    # aggregation
+    self.agg_graph(self.MEPA_AGG, self.MEPA_CHO, self.MEPA_REM, MEPA_WBR)
+
+    # cultural heritage object
+    for p, o in ((rdf:type,  edm:ProvidedCHO),
+                 (dc:date,   Literal('2020')),
+                 (dc:title,  Literal('The University of Chicago Library Digital Repository')),
+                 (erc:who,   Literal('University of Chicago Library')),
+                 (erc:what,  Literal('The University of Chicago Library Digital Repository')),
+                 (erc:when,  Literal('2020')),
+                 (erc:where, self.MEPA_CHO),
+                 (edm:year,  Literal('2020'))):
+        self.graph += g{ {self.MEPA_CHO} {p} {o} }
+
+    # resource map
+    self.rem_graph(self.MEPA_AGG, self.MEPA_REM, now)

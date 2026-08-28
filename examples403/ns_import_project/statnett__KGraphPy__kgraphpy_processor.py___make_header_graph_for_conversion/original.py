@@ -1,0 +1,39 @@
+# Extracted from statnett/KGraphPy@38859be62f : kgraphpy/processor.py
+# region: _make_header_graph_for_conversion (lines 449-479, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from kgraphpy.header import create_header_attribute, CIMMetadataHeader
+from kgraphpy.namespaces import update_namespace_in_triples, MD, DCAT_EXT, validate_and_fix_namespaces_by_cimtype
+from rdflib import URIRef, Literal, Graph, IdentifiedNode
+from rdflib.namespace import NamespaceManager, RDF
+
+def _make_header_graph_for_conversion(header: CIMMetadataHeader) -> tuple[str, Graph]:
+    """Make a graph with the correct type for conversion.
+
+    The correct rdf:type triple is added to the graph. 
+
+    Parameters:
+        header (CIMMetadataHeader): The header to be converted.
+
+    Raises:
+        ValueError: If the header is an unknown type.
+
+    Returns:
+        tuple[str, Graph]: The target format and the graph with the correct type triple.
+    """    
+    graph = Graph()
+    types = header.header_type
+
+    has_dataset = DCAT_EXT.Dataset in types
+    has_fullmodel = MD.FullModel in types
+
+    if has_dataset and not has_fullmodel:
+        graph.bind("md", MD)    # Must be bound explicitly because it is not a default namespace in rdflib. 
+        graph.add((header.subject, RDF.type, MD.FullModel))
+        return "md_fullmodel", graph
+
+    if has_fullmodel and not has_dataset:
+        graph.add((header.subject, RDF.type, DCAT_EXT.Dataset))
+        return "dcat_dataset", graph
+
+    types_str = {str(t) for t in types}
+    raise ValueError(f"Ambiguous or unknown header type: {types_str}. Conversion not possible.")

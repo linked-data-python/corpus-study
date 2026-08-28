@@ -1,0 +1,74 @@
+# Extracted from fusion-jena/automatic-KG-creation-with-LLM@10e531728c : Code/create_ontology.py
+# region: create_ontology (lines 54-105, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import os
+from rdflib import Graph, Namespace, RDF, RDFS, OWL, Literal, URIRef, XSD
+@prefix dlprov: <https://w3id.org/dlprov#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ontology_folder = "../Ontology/"
+
+def create_ontology(model_name, concepts, relationships, data_properties, inverse_properties):
+    g = Graph()    
+    g.bind("dlprov", DLPROV)
+    print(f'model_name:{model_name}')
+    print(f'concepts:{concepts}')
+    print(f'relationships:{relationships}')
+
+    # Define classes (concepts) as subclasses of DLPROV:Entity
+    for concept in concepts:
+        concept_uri = DLPROV[concept]
+        print(f'concept_uri:{concept_uri}')
+        g += g{
+            {concept_uri} a owl:Class ;
+               rdfs:subClassOf prov:Entity ;
+               rdfs:label {Literal(concept, datatype=XSD.string)}
+        }
+
+    # Define relationships (object properties)
+    for rel in relationships:
+        rel_uri = DLPROV[rel]
+        print(f'rel_uri:{rel_uri}')
+        g += g{
+            {rel_uri} a owl:ObjectProperty ;
+               rdfs:label {Literal(rel, datatype=XSD.string)}
+        }
+
+    # Define data properties
+    for prop in data_properties:
+        prop_uri = DLPROV[prop]
+        print(f'prop_uri:{prop_uri}')
+        g += g{
+            {prop_uri} a owl:DatatypeProperty ;
+               rdfs:label {Literal(prop, datatype=XSD.string)}
+        }
+
+    # Define inverse properties
+    for inv_prop in inverse_properties:
+        inv_prop_uri = DLPROV[inv_prop]
+        print(f'inv_prop_uri:{inv_prop_uri}')
+        g += g{
+            {inv_prop_uri} a owl:ObjectProperty ;
+               owl:inverseOf {inv_prop_uri} ;
+               rdfs:label {Literal(inv_prop, datatype=XSD.string)}
+        }
+
+    # # Define relationships between concepts and properties (for demonstration)
+    # # These should be replaced with actual relationships from your data
+    # for concept in concepts:
+    #     for rel in relationships:
+    #         g.add((DLPROV[concept], DLPROV[rel], DLPROV[concept + '_' + rel]))
+
+    # Save the ontology to a Turtle file
+    ontology_folder_path = os.path.join(ontology_folder, model_name, 'Ontology')
+    os.makedirs(ontology_folder_path, exist_ok=True)
+    ontology_file = os.path.join(ontology_folder_path, f'dlprov.ttl')
+    print(ontology_file)
+    g.serialize(destination=ontology_file, format='turtle')
+    print(g.serialize(format='turtle'))
+
+    print(f'Ontology for {model_name} created and saved at {ontology_file}')

@@ -1,0 +1,30 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v6_8_0.py
+# region: <module> (lines 212-219, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+el = load("enrichment_l", "v5_3_0")
+IRI = {n["id"]: cls_iri(n) for n in nodes}
+g3 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_abox_v6_7_0.ttl"); bump(g3)
+KINDCLS = {"Role": sem:GovernanceRole, "Activity": sem:GovernanceActivity, "Rule": sem:GovernanceRule}
+
+for iid, lab, kind, defn, refs in el.ALL_ITEMS:
+    ind = SEM[iid]
+    g3 += g{
+        {ind} a {KINDCLS[kind]} ;
+           a owl:NamedIndividual ;
+           rdfs:label {Literal(lab, lang="en")} ;
+           skos:definition {Literal(defn, lang="en")} ;
+           dcterms:source {Literal(S(*refs), lang="en")}
+    }
+    if iid in el.GOVERNS:
+        g3 += g{ {ind} sem:governsSubject {IRI[el.GOVERNS[iid]]} }

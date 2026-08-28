@@ -1,0 +1,35 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
+# region: test_registry_chain_covers_all_apps_every_registration_a_container_tree (lines 59-82, stratum trav_existence)
+# licence of the source repository: see meta.json
+import rdflib
+TREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/wiki-memory.tree#"
+INTEROP = rdflib.Namespace("http://www.w3.org/ns/solid/interop#")
+OWNER = rdflib.URIRef("https://pod.vardeman.me/vault/profile/card#me")
+REG = REPO / "overlays/wiki-memory/interop/registry.ttl"
+ABTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/addressbook.tree#"
+IDTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/id-schemes.tree#"
+
+def test_registry_chain_covers_all_apps_every_registration_a_container_tree():
+    g = rdflib.Graph(); g.parse(REG, format="turtle")
+    rset = g.value(OWNER, INTEROP.hasRegistrySet)
+    assert rset is not None, "owner WebID has no hasRegistrySet"
+    dreg = g.value(rset, INTEROP.hasDataRegistry)
+    assert dreg is not None, "RegistrySet has no DataRegistry"
+    regs = list(g.objects(dreg, INTEROP.hasDataRegistration))
+    assert len(regs) == 12, f"expected 12 DataRegistrations, got {len(regs)}"
+    for r in regs:
+        t = g.value(r, INTEROP.registeredShapeTree)
+        assert t is not None and str(t).endswith("ContainerTree"), \
+            f"{r}: registeredShapeTree must be a ContainerTree, got {t}"
+    REG_NS = rdflib.Namespace("https://pod.vardeman.me/vault/meta/interop/registry#")
+    wiki = [r for r in regs if r not in (REG_NS["id-schemes"], REG_NS["contacts-person"], REG_NS["contacts-organization"], REG_NS["contacts-group"], REG_NS["contacts-membership"])]
+    assert len(wiki) == 7, f"expected 7 wiki-memory registrations, got {len(wiki)}"
+    for r in wiki:
+        assert str(g.value(r, INTEROP.registeredShapeTree)).startswith(TREE_NS), \
+            f"{r}: wiki registration must point into wiki-memory.tree"
+    assert g.value(REG_NS["contacts-person"], INTEROP.registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "PersonContainerTree")
+    assert g.value(REG_NS["contacts-organization"], INTEROP.registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "OrganizationContainerTree")
+    assert g.value(REG_NS["contacts-group"], INTEROP.registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "GroupContainerTree")
+    assert g.value(REG_NS["contacts-membership"], INTEROP.registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "MembershipContainerTree")
+    assert g.value(REG_NS["id-schemes"], INTEROP.registeredShapeTree) == \
+        rdflib.URIRef(IDTREE_NS + "SchemeRecordContainerTree")

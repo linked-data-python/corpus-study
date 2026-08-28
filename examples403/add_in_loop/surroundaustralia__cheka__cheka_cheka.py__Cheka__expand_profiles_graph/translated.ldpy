@@ -1,0 +1,24 @@
+# Extracted from surroundaustralia/cheka@31505e6804 : cheka/cheka.py
+# region: Cheka._expand_profiles_graph (lines 134-146, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Namespace
+from rdflib.namespace import DCTERMS, PROF, RDF, SH
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+
+def _expand_profiles_graph(self, pg: Graph):
+    # type all profiles
+    # dcterms:Standard instances are prof:Profiles instances
+    for s, p, o in pg.triples((None, rdf:type, dcterms:Standard)):
+        pg += g{ {s} a prof:Profile }
+    # anything using prof:isProfileOf is a prof:Profile
+    for s, p, o in pg.triples((None, prof:isProfileOf, None)):
+        pg += g{ {o} a prof:Profile }
+
+    # type all RDs
+    # anything indicated by prof:hasResource is a prof:ResourceDescriptor
+    for s, p, o in pg.triples((None, prof:hasResource, None)):
+        pg += g{ {o} a prof:ResourceDescriptor }

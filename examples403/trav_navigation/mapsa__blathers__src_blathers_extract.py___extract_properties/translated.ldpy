@@ -1,0 +1,40 @@
+# Extracted from mapsa/blathers@cad7822217 : src/blathers/extract.py
+# region: _extract_properties (lines 233-261, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _extract_properties(g: Graph, namespace: str) -> list[ExtractedProperty]:
+    """Extract all OWL properties in the ontology namespace."""
+    props = []
+    prop_types = [
+        (owl:ObjectProperty, "ObjectProperty"),
+        (owl:DatatypeProperty, "DatatypeProperty"),
+        (owl:AnnotationProperty, "AnnotationProperty"),
+    ]
+    seen = set()
+    for rdf_type, type_name in prop_types:
+        for prop_iri in g.subjects(rdf:type, rdf_type):
+            iri_str = str(prop_iri)
+            if not iri_str.startswith(namespace) or iri_str in seen:
+                continue
+            seen.add(iri_str)
+            label = _str_or_none(g.value(prop_iri, rdfs:label))
+            comment = _str_or_none(g.value(prop_iri, rdfs:comment))
+            domain = _str_or_none(g.value(prop_iri, rdfs:domain))
+            range_ = _str_or_none(g.value(prop_iri, rdfs:range))
+            props.append(ExtractedProperty(
+                iri=iri_str,
+                local_name=_local_name(iri_str),
+                label=label,
+                comment=comment,
+                domain=domain,
+                range=range_,
+                prop_type=type_name,
+            ))
+    return props

@@ -1,0 +1,32 @@
+# Extracted from ruirzma/UPTO@6827ed41e5 : utils.py
+# region: add_Street_Individual (lines 83-100, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import RDF, Namespace, URIRef, Literal, OWL ,XSD
+from rdflib.namespace import OWL, RDF, RDFS
+@prefix names: <http://www.urbanpatchtopologyontology.org/upto#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+Street = URIRef(names:Street)
+hasGeometry = URIRef(names:hasGeometry)
+hasArea = URIRef(names:hasArea)
+hasPerimeter = URIRef(names:hasPerimeter)
+
+def add_Street_Individual(graph, Street_Num, street_gdf):
+
+    Street_Num_URI = URIRef(names[Street_Num])
+
+    graph += g{
+        {Street_Num_URI} a owl:NamedIndividual ;
+           a {Street} ;
+           {hasArea} {Literal(list(street_gdf[street_gdf["osmscID"] == Street_Num].Street_area)[0], 
+                    datatype = XSD["decimal"])} ;
+           {hasPerimeter} {Literal(list(street_gdf[street_gdf["osmscID"] == Street_Num].Street_perimeter)[0], 
+                    datatype = XSD["decimal"])}
+    }
+
+    # geometry
+    geom_str = str(list(street_gdf[street_gdf["osmscID"] == Street_Num].geometry)[0])
+    graph += g{ {Street_Num_URI} {hasGeometry} {Literal(geom_str, datatype = XSD["string"])} }

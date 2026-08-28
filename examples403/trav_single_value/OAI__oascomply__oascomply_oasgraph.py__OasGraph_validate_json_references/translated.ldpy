@@ -1,0 +1,89 @@
+# Extracted from OAI/oascomply@9f41627512 : oascomply/oasgraph.py
+# region: OasGraph.validate_json_references (lines 699-777, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, RDFS, XSD
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+logger = logging.getLogger(__name__)
+
+def validate_json_references(self):
+    errors = []
+    for json_ref_node, p, target_node in self._g.triples(
+        (None, self.oas.references, None)
+    ):
+        logger.info(
+            f"Validating reference <{json_ref_node}> to <{target_node}>",
+        )
+        context_node, context_rel, expected = None, None, None
+        if ref_node := self._g.value(
+            None, self.oas['$ref'], json_ref_node,
+        ):
+            if reference_error := self._check_oastype(
+                ref_node, 'Reference', '$ref'
+            ):
+                path_item_error = self._check_oastype(
+                    ref_node, 'PathItem', '$ref'
+                )
+                # TODO: figure out which error to report better
+                #       for now just use Reference as it is more common
+                if path_item_error:
+                    errors.append(reference_error)
+                else:
+                    # "$ref" embedded directy in Path Item node
+                    context_node = ref_node
+
+        elif ref_node := self._g.value(
+            None, self.oas.operationRef, json_ref_node
+        ):
+            errors.extend(
+                self._check_oastype(ref_node, 'Link', 'operationRef')
+            )
+            # operationRef embedded directly in Link node, to Operation
+            context_node = ref_node
+            expected = 'Operation'
+
+        else:
+            errors.append({
+                'location': 'TODO',
+                'error': f'unexpected reference type for {json_ref_node}',
+            })
+
+        if context_node is None:
+            # Reference Objects sit in place of the context node,
+            # so use the target type from the schema annotation.
+            # TODO: This is a bit circular as that annotation type
+            #       is how we choose the validation schema.  Is there
+            #       a better way to check this?
+            parent_node = self._g.value(ref_node, self.oas.parent, None)
+            context_rel = self._g.value(parent_node, None, ref_node)
+            expected = self._g.value(json_ref_node, self.oas.targetType, None)
+        elif expected is None:
+            expected = self._extract_core_type(context_node)
+
+        context = {}
+        if context_rel:
+            context['relation'] = context_rel
+        if context_node:
+            context['node'] = context_node
+
+        actual = self.oas_v[self._extract_core_type(target_node)]
+        expected = self.oas_v[expected]
+        if expected != actual:
+            errors.append({
+                'location': 'TODO',
+                'error': {
+                    'json_reference': json_ref_node,
+                    'reference_context': context,
+                    'reference_target': target_node,
+                    'expected': (
+                            target_node, rdf:type, expected,
+                    ),
+                    'actual': (
+                            target_node, rdf:type, actual,
+                    ),
+                }
+            })
+
+    return errors

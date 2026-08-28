@@ -1,0 +1,47 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : scripts/output_conversion_ttl_to_json/step/chemicalinput_query.py
+# region: query_synthesis_inputs (lines 22-62, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from typing import Dict, List
+from rdflib import Graph, URIRef
+
+def query_synthesis_inputs(graph: Graph, synthesis_uri: str) -> List[Dict[str, any]]:
+    """Find chemicals for a synthesis via direct input links or Add-step links."""
+    query = """
+    PREFIX ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT DISTINCT ?chemical ?label ?amount ?altName
+    WHERE {
+        {
+            ?synthesis ontosyn:hasChemicalInput ?chemical .
+        }
+        UNION
+        {
+            ?synthesis ontosyn:hasSynthesisStep ?step .
+            ?step ontosyn:hasAddedChemicalInput ?chemical .
+        }
+        OPTIONAL { ?chemical rdfs:label ?label }
+        OPTIONAL { ?chemical ontosyn:hasAmount ?amount }
+        OPTIONAL { ?chemical ontosyn:hasAlternativeNames ?altName }
+    }
+    """
+    results = graph.query(query, initBindings={"synthesis": URIRef(synthesis_uri)})
+
+    # Group by chemical URI to collect all alternative names
+    grouped: Dict[str, Dict[str, any]] = {}
+    for row in results:
+        chem_uri = str(row.chemical) if row.chemical else ""
+        if chem_uri not in grouped:
+            grouped[chem_uri] = {
+                "uri": chem_uri,
+                "label": str(row.label) if row.label else "N/A",
+                "amount": str(row.amount) if row.amount else "N/A",
+                "alternative_names": []
+            }
+        # Collect alternative names
+        if row.altName:
+            alt = str(row.altName)
+            if alt and alt not in grouped[chem_uri]["alternative_names"]:
+                grouped[chem_uri]["alternative_names"].append(alt)
+
+    return list(grouped.values())

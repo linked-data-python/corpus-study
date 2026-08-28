@@ -1,0 +1,17 @@
+# Extracted from mapsa/blathers@cad7822217 : tests/validators/test_consistency.py
+# region: _make_graph_missing_label (lines 50-56, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _make_graph_missing_label() -> Graph:
+    """Graph with a class missing rdfs:label."""
+    g = Graph()
+    EX = Namespace("http://example.org/test#")
+    g.bind("ex", EX)
+    g += g{ {EX.NoLabel} a owl:Class }
+    return g

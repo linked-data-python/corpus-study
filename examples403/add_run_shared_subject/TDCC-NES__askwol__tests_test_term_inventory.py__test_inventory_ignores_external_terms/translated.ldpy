@@ -1,0 +1,27 @@
+# Extracted from TDCC-NES/askwol@3534557e8b : tests/test_term_inventory.py
+# region: test_inventory_ignores_external_terms (lines 112-119, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+from askwol.term_inventory import (
+    check_datatypes,
+    check_domains_ranges,
+    check_term_inventory,
+)
+@prefix ex: <https://example.org/ont#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def test_inventory_ignores_external_terms():
+    g = _base_graph()
+    g += g{
+        ex:Person a owl:Class ;
+           rdfs:subClassOf foaf:Agent
+    }
+
+    report = check_term_inventory(g)
+
+    assert all("foaf" not in e.term for e in report.entries)

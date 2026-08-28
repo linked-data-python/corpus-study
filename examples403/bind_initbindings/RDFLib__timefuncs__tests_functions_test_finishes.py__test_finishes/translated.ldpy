@@ -1,0 +1,46 @@
+# Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_finishes.py
+# region: test_finishes (lines 15-49, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from rdflib.namespace import TIME
+@prefix tfun: <https://w3id.org/timefuncs/> .
+@prefix finishes: <https://w3id.org/timefuncs/testdata/finishes/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+
+tests_dir = Path(__file__).parent
+
+def test_finishes():
+    g = Graph().parse(str(tests_dir / "data" / "finishes.ttl"))
+
+    q = """
+        SELECT ?a ?b
+        WHERE {
+            VALUES ?a_type { time:Interval time:ProperInterval }
+            VALUES ?b_type { time:Interval time:ProperInterval }
+
+            ?a a ?a_type .
+            ?b a ?b_type .
+
+            FILTER tfun:finishes(?a, ?b)
+        }
+        """        
+    expected = [
+        (str(finishes:a01), str(finishes:b01)),
+        # (str(finishes:a02), str(finishes:b02)), false
+        (str(finishes:a03), str(finishes:b03)),
+        (str(finishes:a04), str(finishes:b04)),
+        (str(finishes:a05), str(finishes:b05)),
+        (str(finishes:a06), str(finishes:b06)),
+        # (str(finishes:a07), str(finishes:b07)), still working on this
+        (str(finishes:a08), str(finishes:b08)),
+    ]
+
+    actual = sorted([
+        (str(r[0]), str(r[1]))
+        for r in g.query(
+            q,
+            initNs={"time": TIME, "tfun": TFUN}
+        )
+    ])
+
+    assert actual == expected

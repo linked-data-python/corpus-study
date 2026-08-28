@@ -1,0 +1,16 @@
+# Extracted from danilipp17/thesis_code@c2772e3555 : oscin/populator.py
+# region: OntologyPopulator._create_individual (lines 1065-1069, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def _create_individual(self, prefix: str, key: str, owl_class: URIRef) -> URIRef:
+    """Create a URI and declare its RDF:type."""
+    uri = self.EX[f"{prefix}_{self._safe_id(key)}"]
+    self.g += g{ {uri} a {owl_class} }
+    return uri

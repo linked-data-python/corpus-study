@@ -1,0 +1,13 @@
+# Extracted from tetherless-world/setlr@09baa95fb2 : setlr/core.py
+# region: json_transform (lines 681-685, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+import rdflib
+dc = rdflib.Namespace('http://purl.org/dc/terms/')
+shacl = rdflib.Namespace('http://www.w3.org/ns/shacl#')
+logger = None
+
+for shape in transform.objects(dc.conformsTo):
+    if shape[rdflib.RDF.type:shacl.NodeShape] or shape[rdflib.RDF.type:shacl.PropertyShape]:
+        logger.info("Validating against SHACL shape %s", shape.identifier)
+        shape_graph += transform.graph.query(connected_downstream_graph,
+                                             initBindings={"source":shape.identifier})

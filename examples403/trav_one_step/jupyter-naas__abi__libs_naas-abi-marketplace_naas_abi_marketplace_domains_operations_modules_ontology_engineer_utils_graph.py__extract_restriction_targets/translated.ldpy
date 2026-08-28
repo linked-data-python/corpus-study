@@ -1,0 +1,50 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-marketplace/naas_abi_marketplace/domains/operations/modules/ontology_engineer/utils/graph.py
+# region: extract_restriction_targets (lines 147-186, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from typing import List, Optional, Set, Tuple
+from rdflib import OWL, RDF, RDFS, BNode, Graph, URIRef
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def extract_restriction_targets(graph: Graph, restriction: BNode) -> Set[URIRef]:
+    """Extract target classes from an owl:Restriction."""
+    targets = set()
+
+    # Check for owl:allValuesFrom
+    all_values = list(graph.objects(restriction, owl:allValuesFrom))
+    for value in all_values:
+        if isinstance(value, URIRef):
+            targets.add(value)
+        elif isinstance(value, BNode):
+            # Check if it's a union - owl:unionOf points to the list head
+            union_of = list(graph.objects(value, owl:unionOf))
+            if union_of and isinstance(union_of[0], BNode):
+                # union_of[0] is the list head BNode
+                targets.update(extract_classes_from_union(graph, union_of[0]))
+            else:
+                # Check if the BNode itself is a list head (has rdf:first)
+                first = list(graph.objects(value, rdf:first))
+                if first:
+                    # It's a list head, extract from it
+                    targets.update(extract_classes_from_union(graph, value))
+                # Note: BNode class expressions are not added to targets
+                # since targets is Set[URIRef] and only named classes are tracked
+
+    # Check for owl:someValuesFrom
+    some_values = list(graph.objects(restriction, owl:someValuesFrom))
+    for value in some_values:
+        if isinstance(value, URIRef):
+            targets.add(value)
+        elif isinstance(value, BNode):
+            union_of = list(graph.objects(value, owl:unionOf))
+            if union_of and isinstance(union_of[0], BNode):
+                targets.update(extract_classes_from_union(graph, union_of[0]))
+            else:
+                # Check if the BNode itself is a list head
+                first = list(graph.objects(value, rdf:first))
+                if first:
+                    targets.update(extract_classes_from_union(graph, value))
+
+    return targets

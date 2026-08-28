@@ -1,0 +1,72 @@
+# Extracted from pyiron/semantikon@cfd1d3ffe5 : semantikon/ontology.py
+# region: _wf_io_to_graph (lines 885-937, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import OWL, RDF, RDFS, BNode, Graph, Literal, Namespace, URIRef
+from semantikon.flowrep_to_networkx import (
+    IO,
+    Input,
+    Node,
+    Output,
+    SemantikonDiGraph,
+    _get_graph_hash,
+    serialize_and_convert_to_networkx,
+)
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+BASE: Namespace = Namespace("http://pyiron.org/ontology/")
+
+def _wf_io_to_graph(
+    node_name: IO,
+    data: dict,
+    data_node: URIRef,
+    G: SemantikonDiGraph,
+    io_assignment: URIRef,
+    has_specified_io: URIRef,
+    t_box: bool,
+) -> Graph:
+    node = BASE[G.t_ns + node_name] if t_box else BASE[G.a_ns + node_name]
+    g = _get_bound_graph()
+    g += g{ {node} {SNS.local_identifier} {Literal(node_name.port)} }
+    if t_box:
+        g += _to_owl_restriction(node, has_specified_io, data_node)
+        g += g{
+            {node} rdfs:label {Literal(str(node_name))} ;
+               rdfs:subClassOf {io_assignment} .
+            {data_node} rdfs:subClassOf {SNS.value_specification}
+        }
+        if "hash" in data:
+            g += _to_owl_restriction(data_node, SNS.denoted_by, SNS.identifier)
+    else:
+        data_node_name = G._get_data_node(io=node_name)
+        g += g{
+            {data_node} a {BASE[G.t_ns + data_node_name]} ;
+               rdfs:label {Literal(G.a_ns_short + data_node_name)} .
+            {node} rdfs:label {Literal(G.a_ns_short + str(node_name))} ;
+               {has_specified_io} {data_node}
+        }
+        if "value" in data and g.value(data_node, SNS.has_value) is None:
+            g += g{ {data_node} {SNS.has_value} {Literal(data["value"])} }
+        if "hash" in data:
+            hash_bnode = BASE[G.a_ns + data_node_name + "_hash"]
+            g += g{
+                {data_node} {SNS.denoted_by} {hash_bnode} .
+                {hash_bnode} a {SNS.identifier} ;
+                   {SNS.has_value} {Literal(data["hash"])} ;
+                   rdfs:label {Literal(f"{G.a_ns_short}{node_name}_hash")}
+            }
+    triples = data.get("triples", [])
+    if triples != [] and not isinstance(triples[0], list | tuple):
+        triples = [triples]
+    if "derived_from" in data:
+        triples.append(("self", SNS.derives_from, data["derived_from"]))
+    if len(triples) > 0:
+        g += _translate_triples(
+            triples=triples,
+            node_name=node_name,
+            data_node=data_node,
+            G=G,
+            t_box=t_box,
+        )
+    return g

@@ -1,0 +1,29 @@
+# Extracted from kumagallium/asterism@f0977d4d3a : ingest/tests/test_documents.py
+# region: test_structure_sentence_has_offsets_and_prov (lines 79-89, stratum trav_existence)
+# licence of the source repository: see meta.json
+import rdflib
+from asterism.documents import (
+    DOCO,
+    LIT,
+    NIF,
+    ConversionError,
+    JatsDocumentError,
+    convert_docx_to_jats,
+    derive_doc_id,
+    pandoc_version,
+    sentence_spans,
+    structure_jats,
+)
+BASE = "https://kumagallium.github.io/asterism/papers/resource/document/ds/PMC-TEST"
+
+def test_structure_sentence_has_offsets_and_prov() -> None:
+    g = _g()
+    sents = list(g.subjects(rdflib.RDF.type, rdflib.URIRef(DOCO + "Sentence")))
+    assert len(sents) == 3  # 2 in Intro + 1 in the subsection
+    # the subsection sentence carries verbatim + offsets + provenance to the paper.
+    hit = [s for s in sents if "Ar." in str(g.value(s, rdflib.URIRef(NIF + "anchorOf")))]
+    assert hit
+    s = hit[0]
+    assert g.value(s, rdflib.URIRef(NIF + "beginIndex")) is not None
+    quoted = rdflib.<http://www.w3.org/ns/prov#wasQuotedFrom>
+    assert g.value(s, quoted) == rdflib.URIRef(BASE)

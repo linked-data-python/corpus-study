@@ -1,0 +1,59 @@
+# Extracted from RDFLib/prez@421ee0a9fe : prez/services/app_service.py
+# region: create_endpoints_graph (lines 208-252, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import DCTERMS, RDF, SH, BNode, Graph, Literal, URIRef
+from prez.cache import (
+    counts_graph,
+    endpoints_graph_cache,
+    prefix_graph,
+    prez_system_graph,
+)
+from prez.config import settings, get_reference_data_dir
+from prez.reference_data.prez_ns import ONT, PREZ
+log = logging.getLogger(__name__)
+
+async def create_endpoints_graph(app_state):
+    endpoints_root = get_reference_data_dir() / "endpoints"
+    # Custom data endpoints
+    if app_state.settings.custom_endpoints:
+        # first try remote, if endpoints are found, use these
+        g = await get_remote_endpoint_definitions(app_state.repo, ONT.DynamicEndpoint)
+        if g:
+            endpoints_graph_cache.__iadd__(g)
+        else:
+            for f in (endpoints_root / "data_endpoints_custom").glob("*.ttl"):
+                endpoints_graph_cache.parse(f)
+                log.info("Custom endpoints loaded from local file")
+    # Default data endpoints
+    else:
+        for f in (endpoints_root / "data_endpoints_default").glob("*.ttl"):
+            endpoints_graph_cache.parse(f)
+    # Base endpoints
+    for f in (endpoints_root / "base").glob("*.ttl"):
+        endpoints_graph_cache.parse(f)
+    # OGC Features endpoints
+    if app_state.settings.enable_ogc_features:
+        features_g = Graph()
+        updated_hl_g = Graph()
+        # check data repo for any OGC Features endpoint definitions
+        remote_feat_ep_g = await get_remote_endpoint_definitions(
+            app_state.repo, ONT.OGCFeaturesEndpoint
+        )
+        if remote_feat_ep_g:
+            features_g = remote_feat_ep_g
+        else:  # none found, use local defaults in Prez.
+            for f in (endpoints_root / "features").glob("*.ttl"):
+                features_g.parse(f)
+        segments = [
+            seg
+            for seg in app_state.settings.ogc_features_mount_path.strip("/").split("/")
+            if seg.startswith("{")
+        ]
+        mount_delta = len(segments)
+        if mount_delta > 0:
+            for s, p, o in features_g.triples((None, ONT.hierarchyLevel, None)):
+                new_o = Literal(int(str(o)) + mount_delta)
+                features_g.remove((s, p, o))
+                updated_hl_g.add((s, p, new_o))
+        endpoints_graph_cache.__iadd__(features_g)
+        endpoints_graph_cache.__iadd__(updated_hl_g)

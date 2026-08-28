@@ -1,0 +1,93 @@
+# Extracted from philbarker/TAP2SHACL@910ab540e2 : src/ap2shacl/ap2shaclConverter.py
+# region: AP2SHACLConverter.convert_statementTemplates (lines 224-305, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, BNode, Namespace
+from rdflib import SH, RDF, RDFS, XSD, SDO
+from urllib.parse import quote
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sdo: <https://schema.org/> .
+
+
+def convert_statementTemplates(self):
+    """Add the property statements from the application profile to the SHACL graph as property shapes."""
+    # TODO: untangle this : there must be repeats that can be factored out
+    # TODO: fix case when there are > 1 properties in template
+    for ps in self.ap.statementTemplates:
+        if len(ps.properties) > 1:  # Unusual case of alternative property paths
+            print(
+                "# Warning: property template with multiple properties is not fully supported."
+            )
+            ps_ids = []
+            severity = self.convert_severity(ps.severity)
+            for p in ps.properties:
+                # TODO this needs revisting, half the elements aren't processed
+                prop = quote(p.replace("#", "").replace(":", "_"))
+                ps_name = make_property_shape_name(ps) + "_" + prop + "_opt"
+                ps_id = str2URIRef(self.ap.namespaces, ps_name)
+                ps_ids.append(ps_id)
+                ps_opt_uri = str2URIRef(self.ap.namespaces, ps_name)
+                path = str2URIRef(self.ap.namespaces, p)
+                self.sg += g{
+                    {ps_opt_uri} a sh:PropertyShape ;
+                       sh:path {path}
+                }
+                if ps.mandatory:
+                    self.sg += g{ {ps_opt_uri} sh:minCount 1 }
+                if not ps.repeatable:
+                    self.sg += g{ {ps_opt_uri} sh:maxCount 1 }
+                if severity:
+                    self.sg += g{ {ps_opt_uri} sh:severity {severity} }
+            or_list = list2RDFList(self.sg, ps_ids, "URIRef", self.ap.namespaces)
+            for sh in ps.shapes:
+                self.sg += g{ {str2URIRef(self.ap.namespaces, sh)} sh:property {ps_opt_uri} }
+        else:  # Normal case of just one property path
+            ps_name = make_property_shape_name(ps)
+            severity = self.convert_severity(ps.severity)
+            ps_uri = str2URIRef(self.ap.namespaces, ps_name)
+            for sh in ps.shapes:
+                self.sg += g{ {str2URIRef(self.ap.namespaces, sh)} sh:property {ps_uri} }
+            self.sg += g{ {ps_uri} a sh:PropertyShape }
+            for lang in ps.labels:
+                name = Literal(ps.labels[lang], lang=lang)
+                self.sg += g{ {ps_uri} sh:name {name} }
+            for lang in ps.notes:
+                note = Literal(ps.notes[lang], lang=lang)
+                self.sg += g{ {ps_uri} rdfs:comment {note} }
+            for lang in ps.propertyDescriptions:
+                descr = Literal(ps.propertyDescriptions[lang], lang=lang)
+                self.sg += g{ {ps_uri} sh:description {descr} }
+            for property in ps.properties:
+                path = str2URIRef(self.ap.namespaces, property)
+                self.sg += g{ {ps_uri} sh:path {path} }
+            for lang in ps.message:
+                message = Literal(ps.message[lang], lang=lang)
+                self.sg += g{ {ps_uri} sh:message {message} }
+            if severity:
+                self.sg += g{ {ps_uri} sh:severity {severity} }
+            if ps.valueNodeTypes != []:
+                nodeKind = convert_nodeKind(ps.valueNodeTypes)
+                if nodeKind is not None:
+                    self.sg += g{ {ps_uri} sh:nodeKind {nodeKind} }
+            if ps.valueDataTypes != []:
+                (shProp, val) = self.convert_valueDataTypes(ps.valueDataTypes)
+                self.sg += g{ {ps_uri} {shProp} {val} }
+            if ps.valueConstraints != []:
+                constr_dict = self.convert_valConstraints(ps)
+                for constr_type in constr_dict.keys():
+                    for c in constr_dict[constr_type]:
+                        self.sg += g{ {ps_uri} {constr_type} {c} }
+            else:  # no value constraints to add
+                pass
+            if ps.valueShapes != []:
+                (shProp, val) = self.convert_valueShapes(ps.valueShapes)
+                self.sg += g{ {ps_uri} {shProp} {val} }
+            if ps.valueClasses != []:
+                (shProp, val) = self.convert_valueClasses(ps.valueClasses)
+                self.sg += g{ {ps_uri} {shProp} {val} }
+            if ps.mandatory:
+                self.sg += g{ {ps_uri} sh:minCount 1 }
+            if not ps.repeatable:
+                self.sg += g{ {ps_uri} sh:maxCount 1 }

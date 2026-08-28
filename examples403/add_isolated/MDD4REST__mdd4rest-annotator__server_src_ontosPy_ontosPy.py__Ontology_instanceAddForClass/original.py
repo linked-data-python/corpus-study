@@ -1,0 +1,26 @@
+# Extracted from MDD4REST/mdd4rest-annotator@c46839aa3d : server/src/ontosPy/ontosPy.py
+# region: Ontology.instanceAddForClass (lines 1168-1188, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Namespace, exceptions, URIRef, RDFS, RDF, BNode
+
+def instanceAddForClass(self, aClass, anInstance, ns = None):
+	""" 
+	2011-07-26: 
+	Adds or creates a class-instance to the session-graph (and returns the instance).
+	If a URIRef object is passed, that's ok. Also, if a string is passed, we create a URI using the 
+
+	default namespace for the Session graph.
+	p.s. No need to check for duplicates: rdflib does that already!
+	"""
+	if aClass in self.allclasses:
+		if type(anInstance) == URIRef:
+			self.sessionGraph.add((anInstance, RDF.type, aClass))
+			return anInstance
+		elif type(anInstance) == type("string") or type(anInstance) == type(u"unicode"):
+			ns = ns or self.sessionNS  # needed?
+			self.sessionGraph.add((ns[anInstance], RDF.type, aClass))
+			return ns[anInstance]
+		else:
+			raise exceptions.Error("Instance must be a URIRef object or a String")
+	else:
+		raise exceptions.Error("Class is not available in current ontology")

@@ -1,0 +1,75 @@
+# Extracted from OpenEnergyPlatform/oeplatform@ff28ef6390 : ontology/utils.py
+# region: read_oeo_context_information (lines 141-206, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from collections import defaultdict
+from typing import Iterable
+from rdflib import Graph
+from rdflib.query import ResultRow
+from oeplatform.settings import OEO_EXT_NAME, ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME
+
+def read_oeo_context_information(path, file, ontology=None):
+    Ontology_URI = path / file
+    g = Graph()
+    g.parse(Ontology_URI.as_posix())
+
+    q_global = g.query("""
+        SELECT DISTINCT ?s ?o
+        WHERE { ?s rdfs:subClassOf ?o
+        filter(!isBlank(?o))
+        }
+        """)
+
+    q_label: Iterable[ResultRow] = g.query("""
+        SELECT DISTINCT ?s ?o
+        WHERE { ?s rdfs:label ?o }
+        """)  # type: ignore
+
+    q_main_description: Iterable[ResultRow] = g.query("""
+        SELECT ?s ?o
+        WHERE { ?s dc:description ?o }
+        """)  # type: ignore
+
+    classes_name = {}
+    for row in q_label:
+        class_name = row.s.split("/")[-1]
+        classes_name[class_name] = row.o
+
+    ontology_description = ""
+    for row in q_main_description:
+        if row.s.split("/")[-1] == "":
+            ontology_description = row.o
+
+    if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]:
+        q_definition: Iterable[ResultRow] = g.query("""
+            SELECT DISTINCT ?s ?o
+            WHERE { ?s obo:IAO_0000115 ?o }
+            """)  # type: ignore
+
+        q_note: Iterable[ResultRow] = g.query("""
+            SELECT DISTINCT ?s ?o
+            WHERE { ?s obo:IAO_0000116 ?o }
+            """)  # type: ignore
+
+        classes_definitions = defaultdict(list)
+        for row in q_definition:
+            class_name = row.s.split("/")[-1]
+            classes_definitions[class_name].append(row.o)
+
+        classes_notes = defaultdict(list)
+        for row in q_note:
+            class_name = row.s.split("/")[-1]
+            classes_notes[class_name].append(row.o)
+
+    else:
+        classes_definitions = defaultdict(list)
+        classes_notes = defaultdict(list)
+
+    result = {
+        "q_global": q_global,
+        "classes_name": classes_name,
+        "classes_definitions": dict(classes_definitions),
+        "classes_notes": dict(classes_notes),
+        "ontology_description": ontology_description,
+    }
+
+    return result

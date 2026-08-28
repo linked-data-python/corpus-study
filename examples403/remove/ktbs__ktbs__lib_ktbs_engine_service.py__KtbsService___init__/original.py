@@ -1,0 +1,61 @@
+# Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/engine/service.py
+# region: KtbsService.__init__ (lines 103-144, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Graph, RDF, URIRef, Literal
+from rdfrest.cores.local import Service
+from .builtin_method import get_builtin_method_impl, iter_builtin_method_impl
+from .base import Base
+from .data_graph import DataGraph
+from .ktbs_root import KtbsRoot
+from .method import Method
+from .trace import StoredTrace, ComputedTrace
+from .trace_model import TraceModel
+from .trace_obsels import StoredTraceObsels, ComputedTraceObsels
+from .trace_stats import TraceStatistics
+from ..namespace import KTBS
+from .. import __version__ as ktbs_version
+from .. import __commitno__ as ktbs_commit
+LOG = logging.getLogger(__name__)
+
+def __init__(self, service_config=None):
+    """I override `Service.__init__` to update the built-in methods.
+
+    :param service_config: kTBS configuration
+
+    root_uri: the URI of this kTBS
+    store: the rdflib store containing this kTBS data
+    create: whether the store should be initialized with fresh data
+
+    NB: built-in methods may change from one execution to another, so
+    they have to be checked against the store.
+    """
+    classes = [ Base,
+                ComputedTrace,
+                ComputedTraceObsels,
+                DataGraph,
+                KtbsRoot,
+                Method,
+                StoredTrace,
+                StoredTraceObsels,
+                TraceModel,
+                TraceStatistics,
+                ]
+
+    # self.init_ktbs : always give the initialization method
+    Service.__init__(self, classes, service_config, self.init_ktbs)
+
+    assert self.root_uri[-1] == '/', \
+        "kTBS root URI must end with a '/' <%s>" % self.root_uri
+
+    root = self.get(URIRef(self.root_uri), [KTBS.KtbsRoot])
+
+    LOG.debug("updating built-in methods")
+    with root.edit(_trust=True) as graph:
+        # updating hasBuiltinMethod with registered implementations
+        graph.remove((self.root_uri, KTBS.hasBuiltinMethod, None))
+        for bim in iter_builtin_method_impl():
+            graph.add((self.root_uri, KTBS.hasBuiltinMethod, bim.uri))
+        # updating version number
+        graph.set((self.root_uri,
+                   KTBS.hasVersion,
+                   Literal("%s%s" % (ktbs_version, ktbs_commit))))

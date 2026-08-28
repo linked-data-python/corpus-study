@@ -1,0 +1,53 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/lib/owlbuilder.py
+# region: OwlBuilder._copy_class_and_property_layer (lines 745-801, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib.namespace import OWL, RDF, RDFS, XSD, split_uri
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def _copy_class_and_property_layer(self):
+    for s in self.g.subjects(rdf:type, owl:Class):
+        self.out += g{ {s} a owl:Class }
+        for sup in self.g.objects(s, rdfs:subClassOf):
+            self.out += g{ {s} rdfs:subClassOf {sup} }
+        for abstract in self.g.objects(s, self.basens['isAbstract']):
+            self.out += g{ {s} {self.basens['isAbstract']} {abstract} }
+
+    # Structural reference-type properties (HasComponent, Aggregates,
+    # HasChild, HasOrderedComponent, ...) are already explicitly typed
+    # owl:ObjectProperty in the source graph.
+    for s in self.g.subjects(rdf:type, owl:ObjectProperty):
+        self.out += g{ {s} a owl:ObjectProperty }
+        for sup in self.g.objects(s, rdfs:subPropertyOf):
+            self.out += g{ {s} rdfs:subPropertyOf {sup} }
+
+    # The derived semantic-bridge properties (opcua:has<BrowseName>, ~1047 of
+    # them) are NOT: Part 5 only ever asserts
+    # `p rdfs:subPropertyOf base:SemanticBridgeReferenceType` for them, never
+    # `p a owl:ObjectProperty` -- and base:SemanticBridgeReferenceType itself
+    # is never declared as a property either, only ever used as an object.
+    # Left alone, every owl:onProperty this module generates in a restriction
+    # would reference a wholly undeclared entity. That is exactly what made
+    # Protege/the OWL API inject synthetic "ErrorN" placeholder classes (one
+    # per occurrence) instead of the real property when loading the previous
+    # output -- OWL's punning rules require an entity used as a property to
+    # actually be declared as one. Materialize the missing declarations here
+    # so every property used in a restriction is properly typed.
+    semantic_bridge_root = self.basens['SemanticBridgeReferenceType']
+    self.out += g{ {semantic_bridge_root} a owl:ObjectProperty }
+    query = """
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    SELECT ?s ?sup WHERE {
+        ?s rdfs:subPropertyOf+ ?root .
+        ?s rdfs:subPropertyOf ?sup .
+    }
+    """
+    for s, sup in self.g.query(query, initBindings={'root': semantic_bridge_root}):
+        self.out += g{
+            {s} a owl:ObjectProperty ;
+               a owl:FunctionalProperty ;
+               rdfs:subPropertyOf {sup}
+        }

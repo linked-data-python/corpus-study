@@ -1,0 +1,17 @@
+# Extracted from linkml/linkml@680595df54 : tests/linkml/test_issues/test_linkml_issue_384.py
+# region: _contains_restriction (lines 56-61, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def _contains_restriction(g: Graph, c: URIRef, prop: URIRef, pred: URIRef, filler: URIRef) -> bool:
+    for r in g.objects(c, rdfs:subClassOf):
+        if prop in g.objects(r, owl:onProperty):
+            if filler in g.objects(r, pred):
+                return True
+    return False

@@ -1,0 +1,43 @@
+# Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_is_during.py
+# region: test_is_during (lines 15-46, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from rdflib.namespace import TIME
+@prefix tfun: <https://w3id.org/timefuncs/> .
+@prefix id: <https://w3id.org/timefuncs/testdata/isduring/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+
+tests_dir = Path(__file__).parent
+
+def test_is_during():
+    g = Graph().parse(str(tests_dir / "data" / "is_during.ttl"))
+    q = """
+        SELECT ?a ?b
+        WHERE {
+            ?a a time:Interval .
+            ?b a time:Interval .
+
+            FILTER tfun:isDuring(?a, ?b)
+        }
+        """
+    expected = [
+        (str(id:a01), str(id:b01)),
+        (str(id:a02), str(id:b02)),
+        (str(id:a03), str(id:b03)),
+        (str(id:a04), str(id:b04)),
+        (str(id:a05), str(id:b05)),
+        (str(id:a06), str(id:b06)),
+        (str(id:a07), str(id:b07)),
+        (str(id:a08), str(id:b08)),
+        (str(id:a09), str(id:b09)),
+    ]
+
+    actual = sorted([
+        (str(r[0]), str(r[1]))
+        for r in g.query(
+            q,
+            initNs={"time": TIME, "tfun": TFUN}
+        )
+    ])
+
+    assert actual == expected

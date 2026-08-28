@@ -1,0 +1,29 @@
+# Extracted from Haoyu-R/SeLoC-ML@5ecc52c25e : tflite2semantic_parser_xlsx.py
+# region: tflite2semantic (lines 393-411, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, URIRef, Namespace
+@prefix nnet: <https://w3id.org/tinyml-schema/neural-network-schema#> .
+
+g = Graph()
+
+if j == 0:
+    # First layer is input layer
+    inputLayer = URIRef("https://w3id.org/tinyml-schema/neural-network-schema/neuralnetwork/inputLayer_" + idOfNN)
+    g += g{ {neuralNetwork} nnet:inputLayer {inputLayer} }
+    addCommonInfo(inputLayer, input_layer=True)
+    g += g{ {inputLayer} nnet:hasIndex {Literal(j+1)} }
+elif j == (graph.OperatorsLength() - 1):
+    # Last layer is output layer
+    outputLayer = URIRef("https://w3id.org/tinyml-schema/neural-network-schema/neuralnetwork/outputLayer_" + idOfNN)
+    g += g{ {neuralNetwork} nnet:outputLayer {outputLayer} }
+    addCommonInfo(outputLayer, output_layer=True)
+    g += g{ {outputLayer} nnet:hasIndex {Literal(j+1)} }
+else:
+    middleLayer = URIRef("https://w3id.org/tinyml-schema/neural-network-schema/neuralnetwork/middleLayer_" + "{}_".format(j) + idOfNN)
+    g += g{
+        {neuralNetwork} nnet:middleLayer {middleLayer} .
+        {middleLayer} nnet:hasIndex {Literal(j)}
+    }
+    addCommonInfo(middleLayer)
+    # g.add((middleLayer, RDFS.label, Literal("middleLayer_" + idOfNN + "_{}".format(j))))
+    g += g{ {middleLayer} nnet:hasIndex {Literal(j)} }

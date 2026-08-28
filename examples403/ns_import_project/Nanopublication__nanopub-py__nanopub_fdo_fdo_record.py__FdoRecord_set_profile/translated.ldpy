@@ -1,0 +1,17 @@
+# Extracted from Nanopublication/nanopub-py@05022dc4bc : nanopub/fdo/fdo_record.py
+# region: FdoRecord.set_profile (lines 137-139, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from typing import Optional, Union, List
+from rdflib import Graph, URIRef, Literal
+from rdflib.namespace import RDFS, DCTERMS, PROV
+from nanopub.namespaces import FDOF, FDOC
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix fdof: <https://w3id.org/fdof/ontology#> .
+@prefix fdoc: <https://w3id.org/fdoc/o/terms/> .
+
+
+def set_profile(self, uri: Union[str, URIRef], use_fdof: bool = False) -> None:
+    pred = fdoc:hasFdoProfile if use_fdof else dcterms:conformsTo
+    self.tuples[pred] = URIRef(uri)

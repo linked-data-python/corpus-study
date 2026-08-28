@@ -1,0 +1,40 @@
+# Extracted from linkml/linkml@680595df54 : tests/linkml/test_generators/test_shaclgen.py
+# region: test_zero_exact_cardinality_emits_both_counts (lines 661-693, stratum trav_one_step)
+# licence of the source repository: see meta.json
+import rdflib
+from rdflib import RDF, RDFS, SH, Literal, URIRef
+from linkml.generators.shaclgen import ShaclGenerator
+
+def test_zero_exact_cardinality_emits_both_counts(input_path):
+    """Test that exact_cardinality: 0 emits both sh:minCount 0 and sh:maxCount 0.
+
+    Same truthiness bug as maximum_cardinality: `if s.exact_cardinality:`
+    skips value 0 (falsy). The fix uses `is not None` instead.
+    """
+    shacl = ShaclGenerator(input_path("shaclgen/cardinality.yaml"), mergeimports=True).serialize()
+
+    g = rdflib.Graph()
+    g.parse(data=shacl)
+
+    child_uri = URIRef("https://w3id.org/linkml/examples/cardinality/ChildWithZeroExactCard")
+    restricted_slot_uri = URIRef("https://w3id.org/linkml/examples/cardinality/restricted_slot")
+
+    prop_nodes = list(g.objects(child_uri, SH.property))
+    assert prop_nodes, "ChildWithZeroExactCard should have property shapes"
+
+    restricted_prop_node = None
+    for pn in prop_nodes:
+        if (pn, SH.path, restricted_slot_uri) in g:
+            restricted_prop_node = pn
+            break
+    assert restricted_prop_node is not None, "Should have a property shape for restricted_slot"
+
+    XSD_INT = rdflib.term.URIRef("http://www.w3.org/2001/XMLSchema#integer")
+
+    min_count_values = list(g.objects(restricted_prop_node, SH.minCount))
+    assert len(min_count_values) == 1, f"Expected exactly one sh:minCount, got {min_count_values}"
+    assert min_count_values[0] == rdflib.term.Literal(0, datatype=XSD_INT)
+
+    max_count_values = list(g.objects(restricted_prop_node, SH.maxCount))
+    assert len(max_count_values) == 1, f"Expected exactly one sh:maxCount, got {max_count_values}"
+    assert max_count_values[0] == rdflib.term.Literal(0, datatype=XSD_INT)

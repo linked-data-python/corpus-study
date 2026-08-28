@@ -1,0 +1,122 @@
+# Extracted from BrickSchema/Brick@c12949f236 : demo_extension/new_sensors.py
+# region: <module> (lines 1-108, stratum ns_import_project)
+# licence of the source repository: see meta.json
+import rdflib
+from datetime import datetime
+from bricksrc.namespaces import BRICK, SKOS, SH, XSD, RDFS, DCTERMS, RDF, SDO, OWL, TAG
+@prefix demo: <urn:demo_extension#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sdo: <http://schema.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix tag: <https://brickschema.org/schema/BrickTag#> .
+
+
+# define the namespace to hold all of our terms, classes, properties, etc
+
+# this is the ontology metadata dictionary. It MUST be named 'ontology_definition'
+ontology_definition = {
+    # required 'namespace' key for ontology declaration
+    "namespace": DEMO,
+    # optional list of creators (individuals)
+    dcterms:creator: [
+        {
+            rdf:type: sdo:Person,
+            sdo:email: rdflib.Literal("gtfierro@mines.edu"),
+            sdo:name: rdflib.Literal("Gabe Fierro"),
+        },
+    ],
+    # first date of release of extension/ontology
+    dcterms:issued: rdflib.Literal("2023-07-13"),
+    # keep this to ensure the 'modified' date matches when this was last ran
+    dcterms:modified: rdflib.Literal(datetime.now().strftime("%Y-%m-%d")),
+    # a version number for the ontology
+    owl:versionInfo: rdflib.Literal("0.0.1"),
+    # a human-readable label for the extension/ontology
+    rdfs:label: rdflib.Literal("Demo Extension"),
+    # metadata on the publisher of the extension/ontology
+    dcterms:publisher: {
+        # see schema.org for other types, e.g. Consortium or Person
+        rdf:type: sdo:Organization,
+        sdo:legalName: rdflib.Literal("Not a real org"),
+        sdo:sameAs: rdflib.Literal("http://my fake organization website.org"),
+    },
+    # key-value pairs of prefix to URI of ontology being imported. This will
+    # add owl:imports statements to the generated extension
+    "imports": {
+        "shacl": "http://www.w3.org/ns/shacl#",
+    },
+    # namespace declarations for any SHACL rules
+    "decls": {
+        "rdf": RDF,
+        "rdfs": RDFS,
+        "brick": BRICK,
+        "tag": TAG,
+        "owl": OWL,
+        "sh": SH,
+        "demo": DEMO,
+    },
+}
+
+# optional
+# the *first* level of this dictionary should have Brick (or otherwise existing)
+# classes as keys, and class definition dictionaries as values. Anything further
+# nested can follow the normal class dictionary construction.
+# This dictionary MUST be named 'classes'
+classes = {
+    brick:Equipment: {
+        demo:Sensor_Platform: {},
+        demo:PurpleAir_Weather_Station: {
+            "parents": [brick:Weather_Station],
+            "tags": [tag:Purple, tag:Air, tag:Weather, tag:Station, tag:Equipment],
+            rdfs:label: rdflib."PurpleAir Weather Station"@en,
+            skos:definition: rdflib.Literal(
+                "A lavender weather measurement station", lang="en"
+            ),
+        },
+    },
+}
+
+
+# optional
+# this dictionary MUST be named 'entity_properties'
+entity_properties = {
+    demo:manufacturer: {
+        skos:definition: rdflib.Literal("the manufacturer"),
+        sh:datatype: xsd:string,
+        rdfs:label: rdflib.Literal("manufacturer"),
+        "property_of": brick:Equipment,
+    },
+    demo:version: {
+        skos:definition: rdflib.Literal("a MAJOR.MINOR.PATCH version number"),
+        sh:node: demo:VersionShape,
+        rdfs:label: rdflib.Literal("version"),
+        "property_of": brick:Equipment,
+    },
+}
+
+# optional
+# this dictionary MUST be named 'property_value_shapes'
+property_value_shapes = {
+    demo:VersionShape: {
+        "properties": {
+            demo:versionMajor: {
+                skos:definition: rdflib.Literal("Major version"),
+                "datatype": xsd:integer,
+            },
+            demo:versionMinor: {
+                skos:definition: rdflib.Literal("Minor version"),
+                "datatype": xsd:integer,
+            },
+            demo:versionPatch: {
+                skos:definition: rdflib.Literal("Patch version"),
+                "datatype": xsd:integer,
+            },
+        },
+    },
+}

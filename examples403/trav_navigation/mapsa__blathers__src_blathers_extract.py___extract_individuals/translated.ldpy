@@ -1,0 +1,34 @@
+# Extracted from mapsa/blathers@cad7822217 : src/blathers/extract.py
+# region: _extract_individuals (lines 293-315, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _extract_individuals(g: Graph, namespace: str) -> list[ExtractedIndividual]:
+    """Extract all owl:NamedIndividual subjects in the ontology namespace."""
+    individuals = []
+    for ind_iri in g.subjects(rdf:type, owl:NamedIndividual):
+        iri_str = str(ind_iri)
+        if not iri_str.startswith(namespace):
+            continue
+        label = _str_or_none(g.value(ind_iri, rdfs:label))
+        comment = _str_or_none(g.value(ind_iri, rdfs:comment))
+        types = [
+            str(t)
+            for t in g.objects(ind_iri, rdf:type)
+            if isinstance(t, URIRef) and str(t) != str(owl:NamedIndividual)
+        ]
+        individuals.append(ExtractedIndividual(
+            iri=iri_str,
+            local_name=_local_name(iri_str),
+            label=label,
+            comment=comment,
+            types=types,
+            nested_sections=_extract_nested_sections(g, ind_iri),
+        ))
+    return individuals

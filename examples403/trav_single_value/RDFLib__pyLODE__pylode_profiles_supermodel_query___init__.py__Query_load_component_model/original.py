@@ -1,0 +1,96 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/__init__.py
+# region: Query.load_component_model (lines 701-750, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from collections import defaultdict
+from rdflib import Dataset, Graph, Literal, URIRef
+from rdflib.namespace import (
+    DC,
+    DCTERMS,
+    FOAF,
+    ORG,
+    OWL,
+    PROF,
+    PROV,
+    QB,
+    RDF,
+    RDFS,
+    SDO,
+    SH,
+    SKOS,
+    VANN,
+)
+from pylode.profiles.supermodel.model import (
+    Class,
+    CodedProperty,
+    ComponentModel,
+    ImageObject,
+    MediaObject,
+    Note,
+    Profile,
+    ProfileHierarchyItem,
+    ProfileType,
+    Property,
+    RDFProperty,
+    Resource,
+    SimpleCodedProperty,
+    TextObject,
+)
+from pylode.profiles.supermodel.query.common import (
+    get_class,
+    get_descriptions,
+    get_is_defined_by,
+    get_name,
+    get_subclasses,
+    get_values,
+)
+
+def load_component_model(self, iri: URIRef, db: Dataset) -> ComponentModel:
+    name = get_name(iri, db)
+    descriptions = get_descriptions(iri, db)
+    ignored_classes = get_component_model_ignored_classes(iri, db)
+    profile_graph = db.get_graph(iri)
+    classes = self.get_component_model_classes(profile_graph, ignored_classes)
+    top_level_classes = get_top_level_component_classes(classes)
+    examples = get_examples(iri, db)
+    order = db.value(iri, SH.order)
+    annotation_properties = get_rdf_properties(
+        OWL.AnnotationProperty, profile_graph, db
+    )
+    datatype_properties = get_rdf_properties(
+        OWL.DatatypeProperty, profile_graph, db
+    )
+    object_properties = get_rdf_properties(OWL.ObjectProperty, profile_graph, db)
+    ontology_properties = get_rdf_properties(
+        OWL.OntologyProperty, profile_graph, db
+    )
+
+    coded_properties = defaultdict(list)
+    for cls in classes:
+        for properties in cls.properties.values():
+            for prop in properties:
+                if isinstance(prop, CodedProperty):
+                    # Always get the base name, that's why we use properties[-1].name.
+                    _prop = SimpleCodedProperty(
+                        prop.iri,
+                        properties[-1].name,
+                        prop.description,
+                        prop.codelist,
+                    )
+                    if _prop.codelist and _prop not in coded_properties[prop.iri]:
+                        coded_properties[prop.iri].append(_prop)
+
+    return ComponentModel(
+        iri,
+        name,
+        coded_properties,
+        descriptions,
+        classes,
+        top_level_classes,
+        examples,
+        int(order) if order is not None else None,
+        ignored_classes,
+        annotation_properties,
+        datatype_properties,
+        object_properties,
+        ontology_properties,
+    )

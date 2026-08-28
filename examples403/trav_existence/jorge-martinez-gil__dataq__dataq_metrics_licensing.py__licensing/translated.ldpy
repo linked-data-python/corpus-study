@@ -1,0 +1,20 @@
+# Extracted from jorge-martinez-gil/dataq@0808bf5696 : dataq/metrics/licensing.py
+# region: licensing (lines 16-25, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Graph, RDF
+from ..namespaces import DCAT, DCT
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+
+
+def licensing(graph: Graph) -> float:
+    licensed = 0
+    total = 0
+    for subject in graph.subjects(rdf:type, dcat:Dataset):
+        total += 1
+        if any(graph.triples((subject, dct:license, None))):
+            licensed += 1
+    if total == 0:
+        return 0.0
+    return (licensed / total) * 100

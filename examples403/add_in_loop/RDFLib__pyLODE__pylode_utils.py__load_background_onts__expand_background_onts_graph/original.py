@@ -1,0 +1,24 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/utils.py
+# region: load_background_onts._expand_background_onts_graph (lines 435-452, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from itertools import chain
+from rdflib import BNode, Graph, Literal, URIRef
+
+def _expand_background_onts_graph(back_ont: Graph):
+    # make regular titles
+    for s_, o in chain(
+        back_ont.subject_objects(DC.title),
+        back_ont.subject_objects(RDFS.label),
+        back_ont.subject_objects(SKOS.prefLabel),
+        back_ont.subject_objects(SDO.name),
+    ):
+        back_ont.add((s_, DCTERMS.title, o))
+
+    # make regular descriptions
+    for s_, o in chain(
+        back_ont.subject_objects(DC.description),
+        back_ont.subject_objects(RDFS.comment),
+        back_ont.subject_objects(SKOS.definition),
+        back_ont.subject_objects(SDO.description),
+    ):
+        back_ont.add((s_, DCTERMS.description, o))

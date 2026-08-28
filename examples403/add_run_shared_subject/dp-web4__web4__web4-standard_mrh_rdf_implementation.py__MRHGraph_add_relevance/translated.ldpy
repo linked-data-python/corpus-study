@@ -1,0 +1,42 @@
+# Extracted from dp-web4/web4@16038c9d58 : web4-standard/mrh_rdf_implementation.py
+# region: MRHGraph.add_relevance (lines 154-189, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, Literal, URIRef, BNode
+from rdflib.namespace import RDF, XSD
+@prefix mrh: <https://web4.foundation/mrh/v1#> .
+@prefix lct: <https://web4.foundation/lct/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def add_relevance(self, edge: MRHEdge) -> BNode:
+    """Add a relevance relationship to the graph"""
+    relevance_node = BNode()
+
+    # Add type
+    self.graph += g{ {relevance_node} a mrh:Relevance }
+
+    # Add target
+    target_uri = LCT_NS[edge.target_lct]
+    self.graph += g{
+        {relevance_node} mrh:target {target_uri} ;
+           mrh:probability {Literal(edge.probability, datatype=XSD.decimal)}
+    }
+
+    # Add relation
+    rel_uri = MRH[edge.relation.value]
+    self.graph += g{
+        {relevance_node} mrh:relation {rel_uri} ;
+           mrh:distance {Literal(edge.distance, datatype=XSD.integer)} ;
+           mrh:decay_rate {Literal(edge.decay_rate, datatype=XSD.decimal)}
+    }
+
+    # Add conditional dependencies
+    if edge.conditional_on:
+        for condition in edge.conditional_on:
+            self.graph += g{ {relevance_node} mrh:conditional_on lct:{condition} }
+
+    # Store edge for traversal
+    self.edges.append(edge)
+
+    return relevance_node

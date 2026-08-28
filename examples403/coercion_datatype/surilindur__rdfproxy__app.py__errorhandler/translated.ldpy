@@ -1,0 +1,84 @@
+# Extracted from surilindur/rdfproxy@7e8014b1fe : app.py
+# region: errorhandler (lines 292-340, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from logging import getLogger
+from datetime import UTC
+from datetime import datetime
+from flask import g
+from flask import request
+from flask import render_template
+from flask import Response
+from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import default_exceptions
+from rdflib.term import Literal
+from rdflib.graph import Graph
+from rdflib.namespace import RDF
+from rdflib.namespace import SDO
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sdo: <https://schema.org/> .
+
+app = Flask(import_name=__name__)
+mimetype_keywords = OrderedDict(
+    (
+        ("text/turtle", "turtle"),
+        ("text/plain", "turtle"),
+        ("text/n3", "n3"),
+        ("application/n-triples", "nt11"),
+        ("application/rdf+xml", "pretty-xml"),
+        ("application/ld+json", "json-ld"),
+        ("text/html", "html"),
+    )
+)
+
+@app.errorhandler(Exception)
+@app.errorhandler(HTTPException)
+def errorhandler(code_or_exception: type[Exception] | int) -> Response:
+    """Serves an error, either as RDF or using an HTML template."""
+
+    status: int | None = None
+
+    if isinstance(code_or_exception, int) and code_or_exception in default_exceptions:
+        status = code_or_exception
+        code_or_exception = default_exceptions[code_or_exception]
+
+    if isinstance(code_or_exception, HTTPException):
+        status = code_or_exception.code or status
+        error_code = Literal(code_or_exception.code)
+        error_name = Literal(code_or_exception.name)
+        error_description = Literal(code_or_exception.description)
+    else:
+        getLogger("werkzeug").exception(code_or_exception)
+        error_temp = InternalServerError()
+        error_code = Literal(error_temp.code)
+        error_name = Literal(error_temp.name)
+        error_description = Literal(error_temp.description)
+        status = error_temp.code or status
+
+    # See: https://schema.org/Error
+    error_graph = Graph(identifier=request.url)
+    error_graph += g{
+        {error_graph.identifier} a {SDONew.Error} ;
+           {SDONew.errorCode} {error_code} ;
+           sdo:name {error_name} ;
+           sdo:description {error_description}
+    }
+
+    try:
+        charset = g.charset or "utf-8"
+        datetime_now = datetime.now(tz=UTC)
+        if g.mimetype == "text/html":
+            content_string = render_template(
+                template_name_or_list="Error.jinja",
+                timestamp=datetime_now,
+                graph=error_graph,
+            )
+        else:
+            content_string = error_graph.serialize(format=mimetype_keywords[g.mimetype])
+        return Response(
+            status=status,
+            response=content_string.encode(encoding=charset),
+            headers={"Content-Type": f"{g.mimetype}; charset={charset}"},
+        )
+    except:
+        return Response(status=status)

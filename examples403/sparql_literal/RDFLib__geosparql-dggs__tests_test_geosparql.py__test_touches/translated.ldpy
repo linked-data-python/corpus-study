@@ -1,0 +1,22 @@
+# Extracted from RDFLib/geosparql-dggs@1010e92703 : tests/test_geosparql.py
+# region: test_touches (lines 79-93, stratum sparql_literal)
+# licence of the source repository: see meta.json
+g = Graph()
+geom_a = <https://geom-a>
+geom_c = <https://geom-c>
+
+def test_touches():
+    # A touches C
+    # C touches A
+    result = g.query(
+        """PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+    PREFIX dggs: <https://placeholder.com/dggsfuncs/>
+    SELECT ?a ?b {?a geo:hasGeometry ?a_geom .
+                ?b geo:hasGeometry ?b_geom .
+                FILTER dggs:sfTouches(?a_geom, ?b_geom)
+                }"""
+    )
+    result = [{str(k): v for k, v in i.items()} for i in result.bindings]
+    assert len(result) == 2
+    assert {"a": geom_a, "b": geom_c} in result
+    assert {"a": geom_c, "b": geom_a} in result

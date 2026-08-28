@@ -1,0 +1,72 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/dataservice/tests/server/binding_server.py
+# region: parse_rdf_to_mapping (lines 141-200, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from rdflib.namespace import RDF
+import re
+import sys
+@prefix opcua: <http://opcfoundation.org/UA/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+LocalizedText = None
+
+def parse_rdf_to_mapping(rdf_file, base_ns, binding_ns=None, uaentity_ns=None):
+    g = Graph()
+    g.parse(rdf_file, format="turtle")
+
+    # Define the base namespace for the vocabulary
+    BASE = Namespace(base_ns)
+
+    # Check for binding and UA entity namespaces in RDF
+    found_binding_ns = g.namespace_manager.store.namespace("binding")
+    found_uaentity_ns = g.namespace_manager.store.namespace("uaentity")
+
+    if not binding_ns and not found_binding_ns:
+        print("Error: Binding namespace not found in RDF data, and no binding namespace provided.")
+        sys.exit(1)
+    if not uaentity_ns and not found_uaentity_ns:
+        print("Error: UA entity namespace not found in RDF data, and no UA entity namespace provided.")
+        sys.exit(1)
+
+    # Use the found namespaces if not provided
+    binding_ns = binding_ns or found_binding_ns
+    uaentity_ns = uaentity_ns or found_uaentity_ns
+
+    nsu_pattern = re.compile(r'nsu=(.*?);i=(\d+)')
+
+    mapping_data = {}
+    for s, p, o in g.triples((None, rdf:type, BASE.BoundMap)):
+        connector_attribute = g.value(s, BASE.bindsConnectorParameter)
+        datatype_uri = g.value(s, BASE.bindsMapDatatype)
+
+        if connector_attribute and datatype_uri:
+            # Parse namespace and identifier from connector_attribute
+            match = nsu_pattern.match(str(connector_attribute))
+            if match:
+                namespace_uri = match.group(1)
+                node_id = f"i={match.group(2)}"
+            else:
+                namespace_uri = None
+                node_id = str(connector_attribute)
+
+            # Translate RDF Datatype to Python Type
+            if datatype_uri == opcua:Double:
+                datatype = float
+            elif datatype_uri == opcua:Boolean:
+                datatype = bool
+            elif datatype_uri == opcua:Int32:
+                datatype = int
+            elif datatype_uri == opcua:String:
+                datatype = str
+            elif datatype_uri == opcua:LocalizedText:
+                datatype = LocalizedText
+            else:
+                print(f"Warning, could not determine python type for {datatype_uri}. Using default: str.")
+                datatype = str  # Default to string if not recognized
+
+            mapping_data[node_id] = {
+                'namespace': namespace_uri,
+                'datatype': datatype
+            }
+
+    return mapping_data

@@ -1,0 +1,58 @@
+# Extracted from unibz-core/Scior@1d9f010224 : scior/modules/rules/rule_group_cwa.py
+# region: run_RC07 (lines 317-364, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from rdflib import Graph, RDFS, URIRef
+from scior.modules.ontology_dataclassess.dataclass_definitions import OntologyDataClass
+from scior.modules.ontology_dataclassess.dataclass_moving import move_classification_to_not_type, \
+    move_classification_to_is_type
+from scior.modules.utils_dataclass import get_dataclass_by_uri
+LOGGER = initialize_logger()
+
+def run_RC07(ontology_dataclass_list: list[OntologyDataClass], ontology_graph: Graph) -> None:
+    """ Implements rule RC07 from group CWA.
+
+    Definition: ~(E z (Phase(z) ^ subClassOf(x,z) ^ subClassOf(z,y))) ^ PhaseMixin(y) ^ subClassOf(x,y) -> ~Role(x)
+    Description: Contraposition (~Q -> ~P) of rule RS06 (P -> Q). Variation B.
+
+    :param ontology_dataclass_list: List with all OntologyDataClass elements, including their URIs and internal lists.
+    :type ontology_dataclass_list: list[OntologyDataClass]
+    :param ontology_graph: Updated ontology's working (RDFLib) graph on memory to be manipulated.
+    :type ontology_graph: Graph
+    """
+
+    rule_code = "RC07"
+
+    LOGGER.debug(f"Starting rule {rule_code}")
+
+    query_string = """
+        PREFIX gufo: <http://purl.org/nemo/gufo#>
+        SELECT DISTINCT ?class_x ?class_z
+        WHERE {
+            ?class_y rdf:type gufo:PhaseMixin .
+            ?class_x rdfs:subClassOf ?class_y .
+            ?class_x rdfs:subClassOf ?class_z .
+            ?class_z rdfs:subClassOf ?class_y .
+            FILTER(?class_x != ?class_z)
+            FILTER(?class_y != ?class_z)
+            FILTER(?class_x != ?class_y)
+        }
+        """
+
+    query_result = ontology_graph.query(query_string)
+
+    # Setting X as not Role if Z is known to not be (i.e., has in its not_type list) a Phase.
+    for row in query_result:
+
+        class_x = row.class_x.toPython()
+        class_z = row.class_z.toPython()
+
+        if class_x == class_z:
+            continue
+
+        dataclass_x = get_dataclass_by_uri(ontology_dataclass_list, class_x)
+        dataclass_z = get_dataclass_by_uri(ontology_dataclass_list, class_z)
+
+        if "Phase" in dataclass_z.not_type:
+            move_classification_to_not_type(ontology_dataclass_list, dataclass_x, "Role", rule_code)
+
+    LOGGER.debug(f"Rule {rule_code} concluded.")

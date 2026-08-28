@@ -1,0 +1,36 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : src/agents/mops/cbu_derivation/utils/metal_cbu.py
+# region: _score_ontomops_ttl (lines 21-47, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from rdflib.namespace import RDF, RDFS
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _score_ontomops_ttl(path: str, entity_label: str) -> tuple[int, int]:
+    try:
+        g = Graph()
+        g.parse(path, format="turtle")
+    except Exception:
+        return (-1, -1)
+
+    ontosyn = Namespace("https://www.theworldavatar.com/kg/OntoSyn/")
+    ontomops = Namespace("https://www.theworldavatar.com/kg/ontomops/")
+
+    label_matches = 0
+    for synth in g.subjects(rdf:type, ontosyn.ChemicalSynthesis):
+        labels = [str(v) for v in g.objects(synth, rdfs:label)]
+        if any(_normalize_label(v) == _normalize_label(entity_label) for v in labels):
+            label_matches += 1
+    if label_matches == 0:
+        for synth, _, lbl in g.triples((None, rdfs:label, None)):
+            if "ChemicalSynthesis/" in str(synth) and _normalize_label(str(lbl)) == _normalize_label(entity_label):
+                label_matches += 1
+
+    mop_facts = 0
+    for subj in g.subjects(rdf:type, ontomops.MetalOrganicPolyhedron):
+        mop_facts += 3 + len(list(g.triples((subj, None, None))))
+    for pred in (ontomops.hasCCDCNumber, ontomops.hasMOPFormula, ontomops.hasChemicalBuildingUnit):
+        mop_facts += sum(1 for _ in g.triples((None, pred, None)))
+
+    return (label_matches, mop_facts)

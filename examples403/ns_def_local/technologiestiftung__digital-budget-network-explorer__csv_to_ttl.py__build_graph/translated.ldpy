@@ -1,0 +1,32 @@
+# Extracted from technologiestiftung/digital-budget-network-explorer@a2c69bf9f4 : csv_to_ttl.py
+# region: build_graph (lines 459-476, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SKOS, XSD
+@prefix schema: <https://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+if wikidata_links:
+    WD = Namespace("http://www.wikidata.org/entity/")
+    g.bind("wd", WD)
+    for ep, info in wikidata_links.items():
+        qid = info.get("qid")
+        if not qid:
+            continue
+        ep_uri = NS_EP[ep]
+        # Nur verknuepfen, wenn der Einzelplan im Graphen existiert
+        if (ep_uri, rdf:type, schema:GovernmentOrganization) not in g:
+            continue
+        wd_uri = WD[qid]
+        if info.get("thematic"):
+            g += g{ {ep_uri} rdfs:seeAlso {wd_uri} }
+        else:
+            g += g{ {ep_uri} owl:sameAs {wd_uri} }
+        if info.get("label"):
+            g += g{ {wd_uri} rdfs:label {Literal(info["label"], lang="de")} }

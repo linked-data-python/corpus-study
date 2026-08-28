@@ -1,0 +1,50 @@
+# Extracted from brienen/crunch_uml@89e871f729 : crunch_uml/renderers/lodrenderer.py
+# region: LodRenderer.render (lines 433-465, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SH, SKOS, XSD
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+logger = logging.getLogger()
+
+for model in models:
+    modelname, ns = model_ns[model.id]
+    for cls in model.classes:
+        # First set inheritance
+        for subclass in cls.subclasses:
+            super_cls = class_dict.get(cls.id)
+            if subclass.superclass is not None:
+                sub_cls = class_dict.get(subclass.superclass.id)
+
+                if super_cls is not None and sub_cls is not None:
+                    g += g{ {sub_cls} rdfs:subClassOf {super_cls} }
+
+        # Then set associations
+        for assoc in cls.uitgaande_associaties:
+            from_cls = class_dict.get(cls.id)
+            to_cls = class_dict.get(getattr(assoc.dst_class, "id", None))
+            if to_cls is None:
+                logger.warning(f"Doelklasse onbekend voor associatie {assoc.name or assoc.id}")
+                continue
+
+            if from_cls is not None and to_cls is not None:
+                assoc_uri = (
+                    ns[slugify(cls.name) + "/" + slugify(assoc.name)]
+                    if assoc.name
+                    else ns[slugify(cls.name) + "/" + slugify(assoc.id)]
+                )
+                g += g{
+                    {assoc_uri} a owl:ObjectProperty ;
+                       rdfs:domain {from_cls} ;
+                       rdfs:range {to_cls} ;
+                       rdfs:label {Literal(assoc.name)} ;
+                       dcterms:identifier {Literal(assoc.id)}
+                }
+                if assoc.definitie is not None:
+                    g += g{ {assoc_uri} rdfs:comment {Literal(assoc.definitie)} }

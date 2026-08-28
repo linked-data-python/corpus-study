@@ -1,0 +1,107 @@
+# Extracted from calipho-sib/nextprot-scripts@f03504ce5e : src/polish-rdf/pylode/pyLODE-2.13.2/pylode/profiles/base.py
+# region: BaseProfile._make_schemaorg_metadata (lines 372-463, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import SDO, SKOS, OWL, URIRef, RDF, PROF, Literal, XSD, Graph, Namespace, FOAF, Graph
+@prefix sdo: <https://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+
+def _make_schemaorg_metadata(self):
+    uri = URIRef(self.METADATA.get("uri"))
+    name = Literal(self.METADATA.get("title"))
+    publishers = ""
+    creators = ""
+    if self.METADATA.get("created") is not None:
+        date_created = Literal(self.METADATA.get("created"), datatype=xsd:date)
+    if self.METADATA.get("modified") is not None:
+        date_modified = Literal(self.METADATA.get("modified"), datatype=xsd:date)
+    if self.METADATA.get("description") is not None:
+        description = Literal(self.METADATA.get("description"))
+    if self.METADATA.get("license") is not None:
+        if self.outputformat == "md":
+            license = URIRef(self.METADATA.get("license").split('(')[0].strip('[]'))
+        elif self.outputformat == "adoc":
+            license = URIRef(self.METADATA.get("license").replace("link:", "").split("[")[0])
+        else:
+            license = URIRef(self.METADATA.get("license").split('"')[1])
+    else:
+        license = None
+    if self.METADATA.get("rights") is not None:
+        rights = Literal(self.METADATA.get("rights"))
+    copyright_holder = ""
+    if self.METADATA.get("created") is not None:
+        copyright_year = Literal(
+            self.METADATA.get("created").split("-")[0], datatype=xsd:int
+        )
+    if self.METADATA.get("repository") is not None:
+        if self.outputformat == "md":
+            repository = URIRef(self.METADATA.get("repository").split('(')[0].strip('[]'))
+        if self.outputformat == "adoc":
+            repository = URIRef(self.METADATA.get("repository").replace("link:", "").split("[")[0])
+        else:
+            repository = URIRef(self.METADATA.get("repository").split('"')[1])
+
+    """
+    @prefix sdo: <https://schema.org/> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+    <http://linked.data.gov.au/def/crs> a sdo:DigitalDocument ;
+        sdo:name "CRS Ontology" ;
+        sdo:publisher <http://catalogue.linked.data.gov.au/org/naa> ;
+        sdo:creator [
+            sdo:name "Nicholas J. Car" ;
+            sdo:identifier <http://orcid.org/0000-0002-8742-7730> ;
+            sdo:email <nicholas.car@csiro.au> ;
+            sdo:memberOf [
+                sdo:name "CSIRO" ;
+                sdo:identifier <http://catalogue.linked.data.gov.au/org/csiro> ;
+            ] ;
+        ] ;
+        sdo:date_created "2018-09-10"^^xsd:date ;
+        sdo:date_modified "2019-05-31"^^xsd:date ;
+        sdo:license <https://creativecommons.org/licenses/by/4.0/> ;
+
+        sdo:copyrightHolder <http://catalogue.linked.data.gov.au/org/naa> ;
+        sdo:copyright_year "2019"^^xsd:gYear ;
+        sdo:encodingFormat <https://w3id.org/mediatype/text/html> ;
+    .
+
+    <http://catalogue.linked.data.gov.au/org/naa>
+        a sdo:Organization ;
+        sdo:name "National Archives of Australia" ;
+        sdo:identifier <http://catalogue.linked.data.gov.au/org/naa> ;
+    .        
+    """
+    g = Graph()
+    SDO = Namespace("https://schema.org/")
+    g.bind("sdo", SDO)
+    g.bind("xsd", XSD)
+
+    g += g{
+        {uri} a sdo:DefinedTermSet ;
+           sdo:name {name}
+    }
+    # g.add((uri, sdo:publishers, sdo:DigitalDocument))
+    # g.add((uri, sdo:creators, sdo:DigitalDocument))
+    if self.METADATA.get("date_created") is not None:
+        g += g{ {uri} sdo:dateCreated {date_created} }
+    if self.METADATA.get("date_modified") is not None:
+        g += g{ {uri} sdo:dateModified {date_modified} }
+    if self.METADATA.get("description") is not None:
+        g += g{ {uri} sdo:description {description} }
+    if license is not None:
+        g += g{ {uri} sdo:license {license} }
+    if self.METADATA.get("rights") is not None:
+        g += g{ {uri} sdo:rights {rights} }
+    # g.add((uri, sdo:copyrightHolder, copyrightHolder))
+    if self.METADATA.get("copyright_year") is not None:
+        g += g{ {uri} sdo:copyrightYear {copyright_year} }
+    if self.METADATA.get("repository") is not None:
+        g += g{ {uri} sdo:codeRepository {repository} }
+
+    return g.serialize(format="json-ld")

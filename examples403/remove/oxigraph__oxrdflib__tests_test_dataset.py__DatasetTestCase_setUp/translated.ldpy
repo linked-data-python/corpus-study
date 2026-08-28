@@ -1,0 +1,25 @@
+# Extracted from oxigraph/oxrdflib@70b1268a8e : tests/test_dataset.py
+# region: DatasetTestCase.setUp (lines 45-64, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Dataset, URIRef
+
+def setUp(self) -> None:
+    self.graph = Dataset(store="Oxigraph")
+    self.michel = <urn:michel>
+    self.tarek = <urn:tarek>
+    self.bob = <urn:bob>
+    self.likes = <urn:likes>
+    self.hates = <urn:hates>
+    self.pizza = <urn:pizza>
+    self.cheese = <urn:cheese>
+
+    # Use regular URIs because SPARQL endpoints like Fuseki alter short names
+    self.c1 = <urn:context-1>
+    self.c2 = <urn:context-2>
+
+    # delete the graph for each test!
+    self.graph.remove((None, None, None))
+    for c in self.graph.contexts():
+        c.remove((None, None, None))
+        self.assertEqual(len(c), 0)
+        self.graph.remove_graph(c)

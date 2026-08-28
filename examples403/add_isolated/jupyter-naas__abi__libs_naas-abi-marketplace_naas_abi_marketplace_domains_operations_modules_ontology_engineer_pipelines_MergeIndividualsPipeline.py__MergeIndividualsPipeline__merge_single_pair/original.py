@@ -1,0 +1,112 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-marketplace/naas_abi_marketplace/domains/operations/modules/ontology_engineer/pipelines/MergeIndividualsPipeline.py
+# region: MergeIndividualsPipeline._merge_single_pair (lines 126-228, stratum add_isolated)
+# licence of the source repository: see meta.json
+from naas_abi_core import logger
+from rdflib import RDFS, SKOS, Graph, Literal, Namespace, URIRef
+BFO = Namespace("http://purl.obolibrary.org/obo/")
+CCO = Namespace("https://www.commoncoreontologies.org/")
+ABI = Namespace("http://ontology.naas.ai/abi/")
+
+def _merge_single_pair(
+    self, uri_to_keep: str, uri_to_merge: str, output_dir: str
+) -> Graph:
+    """
+    Merge a single pair of individuals.
+
+    Args:
+        uri_to_keep: The URI that will remain and receive the merged triples
+        uri_to_merge: The URI that will be merged into uri_to_keep and then removed
+        output_dir: Directory path for saving output files
+
+    Returns:
+        Graph: The graph of the merged individual (uri_to_keep)
+    """
+    # Get all triples for both URIs
+    keep_results = list(self.get_all_triples_for_uri(uri_to_keep))
+    keep_graph = Graph()
+    for row in keep_results:
+        s, p, o = row
+        keep_graph.add((s, p, o))
+    logger.info(f"Found {len(keep_results)} triples for URI to keep: {uri_to_keep}")
+
+    merge_results = list(self.get_all_triples_for_uri(uri_to_merge))
+    merge_graph = Graph()
+    for row in merge_results:
+        s, p, o = row
+        merge_graph.add((s, p, o))
+    logger.info(
+        f"Found {len(merge_results)} triples for URI to merge: {uri_to_merge}"
+    )
+
+    graph_insert = Graph()
+    graph_insert.bind("bfo", BFO)
+    graph_insert.bind("cco", CCO)
+    graph_insert.bind("abi", ABI)
+    graph_remove = Graph()
+    uri_to_keep_ref = URIRef(uri_to_keep)
+    uri_to_keep_label = keep_graph.value(uri_to_keep_ref, RDFS.label)
+    uri_to_merge_ref = URIRef(uri_to_merge)
+    uri_to_merge_label = merge_graph.value(uri_to_merge_ref, RDFS.label)
+
+    # Process triples from uri_to_merge
+    logger.info(
+        f"Merging '{uri_to_merge_label}' ({uri_to_merge}) into '{uri_to_keep_label}' ({uri_to_keep})"
+    )
+    for row in merge_results:
+        s, p, o = row
+        if s == uri_to_merge_ref and p not in [RDFS.label, ABI.universal_name]:
+            check_properties = keep_graph.triples((uri_to_keep_ref, p, o))
+            if len(list(check_properties)) == 0:
+                if isinstance(o, URIRef):
+                    graph_insert.add((uri_to_keep_ref, URIRef(p), URIRef(o)))
+                elif isinstance(o, Literal):
+                    # Preserve datatype and language tag if present
+                    datatype = o.datatype if hasattr(o, "datatype") else None
+                    lang = o.language if hasattr(o, "language") else None
+                    graph_insert.add(
+                        (
+                            uri_to_keep_ref,
+                            URIRef(p),
+                            Literal(str(o), datatype=datatype, lang=lang),
+                        )
+                    )
+
+        elif s == uri_to_merge_ref and p in [RDFS.label, ABI.universal_name]:
+            datatype = o.datatype if hasattr(o, "datatype") else None
+            lang = o.language if hasattr(o, "language") else None
+            graph_insert.add(
+                (
+                    uri_to_keep_ref,
+                    SKOS.altLabel,
+                    Literal(str(o), datatype=datatype, lang=lang),
+                )
+            )
+
+        elif o == uri_to_merge_ref:
+            check_properties = keep_graph.triples((s, p, uri_to_keep_ref))
+            if len(list(check_properties)) == 0:
+                graph_insert.add((s, p, uri_to_keep_ref))
+
+        # Always add original triple for removal
+        graph_remove.add((s, p, o))
+
+    if len(graph_insert) > 0:
+        logger.info(f"✅ Inserting {len(graph_insert)} triples")
+        logger.info(graph_insert.serialize(format="turtle"))
+        self.__storage_utils.save_triples(
+            graph_insert,
+            output_dir,
+            f"{uri_to_keep_label}_{uri_to_keep.split('/')[-1]}_merged.ttl",
+        )
+        self.__configuration.triple_store.insert(graph_insert)
+    if len(graph_remove) > 0:
+        logger.info(f"✅ Removing {len(graph_remove)} triples")
+        logger.info(graph_remove.serialize(format="turtle"))
+        self.__storage_utils.save_triples(
+            graph_remove,
+            output_dir,
+            f"{uri_to_merge_label}_{uri_to_merge.split('/')[-1]}_removed.ttl",
+        )
+        self.__configuration.triple_store.remove(graph_remove)
+
+    return self.__sparql_utils.get_subject_graph(uri_to_keep)

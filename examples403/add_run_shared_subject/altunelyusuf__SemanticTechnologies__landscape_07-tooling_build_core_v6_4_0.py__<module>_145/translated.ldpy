@@ -1,0 +1,28 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v6_4_0.py
+# region: <module> (lines 145-152, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v6_3_0.ttl")
+
+for cid, clab, cdef in [
+    ("GovernanceRole", "Governance role", "A governance role is a position of accountability for some part of how semantic-technology adoption is governed -- distinct from a taxonomy class or a case-study instance."),
+    ("GovernanceActivity", "Governance activity", "A governance activity is a recurring action a governance role performs to keep the domain's models fit for use."),
+    ("GovernanceRule", "Governance rule", "A governance rule is a decision procedure a governance activity applies when a change or dispute arises."),
+]:
+    c = SEM[cid]
+    g2 += g{
+        {c} a owl:Class ;
+           rdfs:label {Literal(clab, lang="en")} ;
+           skos:definition {Literal(cdef, lang="en")} ;
+           dcterms:source {Literal(S("R-TOGAF", "R-DAMA"), lang="en")}
+    }

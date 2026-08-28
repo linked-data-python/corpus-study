@@ -1,0 +1,22 @@
+# Extracted from gtfierro/rdf-mcp@b6aa50fd53 : rdf_mcp/servers/brick_server.py
+# region: get_brick_tags (lines 85-96, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, Namespace, BRICK, RDFS
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+mcp = FastMCP("GraphDemo", dependencies=["rdflib", "oxrdflib"])
+ontology = Graph().parse("https://brickschema.org/schema/1.4/Brick.ttl")
+
+@mcp.tool()
+def get_brick_tags(term: str) -> list[str]:
+    """Get all tags associated with a Brick class or term"""
+    query = """
+    PREFIX brick: <https://brickschema.org/schema/Brick#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX tag: <https://brickschema.org/schema/BrickTag#>
+    SELECT DISTINCT ?tag WHERE {
+        ?term brick:hasAssociatedTag ?tag .
+    }"""
+    results = ontology.query(query, initBindings={"term": BRICK[term]})
+    return [str(row[0]).split("#")[-1] for row in results]

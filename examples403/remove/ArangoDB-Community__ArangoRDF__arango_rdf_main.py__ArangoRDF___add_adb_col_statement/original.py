@@ -1,0 +1,40 @@
+# Extracted from ArangoDB-Community/ArangoRDF@48cfed903a : arango_rdf/main.py
+# region: ArangoRDF.__add_adb_col_statement (lines 4132-4155, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Literal, URIRef
+from .typings import (
+    ADBDocs,
+    ADBMetagraph,
+    Json,
+    PredicateScope,
+    RDFListData,
+    RDFListHeads,
+    RDFTerm,
+    RDFTermMeta,
+    TypeMap,
+)
+
+def __add_adb_col_statement(
+    self,
+    subject: RDFTerm,
+    adb_col: str,
+    overwrite: bool = False,
+) -> None:
+    """RDF -> ArangoDB: Add a statement to **self.__adb_col_statements**
+
+    :param subject: The RDF Subject.
+    :type subject: URIRef | BNode
+    :param adb_col: The ArangoDB Collection name.
+    :type adb_col: str
+    :param overwrite: If True, delete any existing statements of
+        the form (s, URIRef("http://www.arangodb.com/collection"), None).
+        Defaults to False.
+    :type overwrite: bool
+    """
+    if overwrite:
+        self.__adb_col_statements.remove((subject, self.adb_col_uri, None))
+
+    elif (subject, self.adb_col_uri, None) in self.__adb_col_statements:
+        return
+
+    self.__adb_col_statements.add((subject, self.adb_col_uri, Literal(adb_col)))

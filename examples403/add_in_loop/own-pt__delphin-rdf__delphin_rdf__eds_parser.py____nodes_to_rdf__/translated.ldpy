@@ -1,0 +1,82 @@
+# Extracted from own-pt/delphin-rdf@ea21d53844 : delphin/rdf/_eds_parser.py
+# region: __nodes_to_rdf__ (lines 63-125, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Literal
+from rdflib import RDF
+from rdflib import RDFS
+import delphin.eds
+import delphin.variable
+import delphin.predicate
+@prefix eds: <http://www.delph-in.net/schema/eds#> .
+@prefix erg: <http://www.delph-in.net/schema/erg#> .
+@prefix delph: <http://www.delph-in.net/schema/> .
+@prefix pos: <http://www.delph-in.net/schema/pos#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def __nodes_to_rdf__(e, edsGraph, defaultGraph, EDSI, NODES, PREDS, SORTINFO):
+    """
+    Creates in the graphs the nodes of EDS predications and their properties.
+
+    Args:
+        e: a PyDelphin EDS instance to be converted into RDF format
+        edsGraph: a rdflib Graph where the EDS triples will be put.
+        defaultGraph : the conjunctive graph representing the profile graph.
+        EDSI: the node of the EDS instance being converted
+        NODES: the URI namespace dedicated to EDS predications
+        PREDS: the URI namespace dedicated to predicates
+        SORTINFO: the URI namespace dedicated to the sortinfo (morphosemantic information).
+    """
+    for node in e.nodes:
+        nodeURI = NODES[node.id]
+        predURI = PREDS[node.id]
+        sortinfoURI = SORTINFO[node.id]
+
+        edsGraph += g{
+            {nodeURI} a eds:Node .
+            {EDSI} eds:hasNode {nodeURI} .
+            {nodeURI} delph:hasPredicate {predURI} ;
+               eds:nodeIdentifier {Literal(node.id)} ;
+               rdfs:label {Literal(f"{delphin.predicate.normalize(node.predicate)}<{node.cfrom},{node.cto}>")}
+        }
+        #type:
+        if node.type is not None:
+            edsGraph += g{ {nodeURI} a delph:{node.type} }
+
+        # Information about the predicate
+        edsGraph += g{ {predURI} delph:predText {Literal(delphin.predicate.normalize(node.predicate))} }
+        if delphin.predicate.is_surface(node.predicate):
+            edsGraph += g{ {predURI} a delph:SurfacePredicate }
+        elif delphin.predicate.is_abstract(node.predicate):
+            edsGraph += g{ {predURI} a delph:AbstractPredicate }
+        else: #not surface neither abstract
+            edsGraph += g{ {predURI} a delph:Predicate }
+            print(f"{node.predicate} is an invalid predicate.")
+
+        splittedPredicate = delphin.predicate.split(delphin.predicate.normalize(node.predicate))
+        if splittedPredicate[0] is not None: #is this possible?
+            edsGraph += g{ {predURI} delph:hasLemma {Literal(splittedPredicate[0])} }
+        if splittedPredicate[1] is not None:
+            edsGraph += g{ {predURI} delph:hasPos pos:{splittedPredicate[1]} }
+        if splittedPredicate[2] is not None:
+            edsGraph += g{ {predURI} delph:hasSense {Literal(splittedPredicate[2])} }
+
+        #lnk:
+        if node.cfrom is not None: 
+            edsGraph += g{ {nodeURI} delph:cfrom {Literal(node.cfrom)} }
+        if node.cto is not None:
+            edsGraph += g{ {nodeURI} delph:cto {Literal(node.cto)} }
+
+        # properties
+        if node.properties != {}:
+            edsGraph += g{
+                {nodeURI} delph:hasSortInfo {sortinfoURI} .
+                {sortinfoURI} a delph:SortInfo
+            }
+            for prop in node.properties.items():
+                edsGraph += g{ {sortinfoURI} erg:{prop[0].lower()} {Literal(prop[1].lower())} }
+
+        # carg; review later
+        if node.carg:
+            edsGraph += g{ {nodeURI} delph:carg {Literal(node.carg)} }

@@ -1,0 +1,12 @@
+# Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/check-signal-layer.py
+# region: main (lines 223-226, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, RDF, URIRef
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+bands_with_bounds = sum(
+    1 for b in graph.subjects(rdf:type, sstim:FrequencyBand)
+    if list(graph.objects(b, sstim:hzMin)) and list(graph.objects(b, sstim:hzMax))
+)

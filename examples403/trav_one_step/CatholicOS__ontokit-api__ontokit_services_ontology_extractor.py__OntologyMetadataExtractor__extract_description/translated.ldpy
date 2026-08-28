@@ -1,0 +1,42 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : ontokit/services/ontology_extractor.py
+# region: OntologyMetadataExtractor._extract_description (lines 386-415, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DC, DCTERMS, OWL, RDF, RDFS
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _extract_description(self, graph: Graph, ontology_iri: str | None) -> str | None:
+    """
+    Extract the description from the ontology.
+
+    Priority: dc:description > dcterms:description > rdfs:comment
+    """
+    # Define subjects to check (ontology IRI first)
+    subjects_to_check: list[URIRef | None] = []
+    if ontology_iri:
+        subjects_to_check.append(URIRef(ontology_iri))
+
+    # Priority order for description properties
+    desc_properties = [dc:description, dcterms:description, rdfs:comment]
+
+    for subject in subjects_to_check:
+        for prop in desc_properties:
+            for obj in graph.objects(subject, prop):
+                value = str(obj)
+                if value:
+                    return value
+
+    # If no ontology IRI, search globally for any description on owl:Ontology subjects
+    for ont_subject in graph.subjects(rdf:type, owl:Ontology):
+        for prop in desc_properties:
+            for obj in graph.objects(ont_subject, prop):
+                value = str(obj)
+                if value:
+                    return value
+
+    return None

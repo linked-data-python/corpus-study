@@ -1,0 +1,36 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : tests/unit/test_linter.py
+# region: test_missing_language_tag_plain_literal (lines 555-567, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
+from ontokit.services.linter import (
+    LINT_RULES,
+    LintResult,
+    OntologyLinter,
+    get_available_rules,
+    get_linter,
+)
+@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+PROJECT_ID = uuid4()
+
+async def test_missing_language_tag_plain_literal() -> None:
+    """A plain literal without a language tag triggers missing-language-tag."""
+    g = Graph()
+    g += g{
+        ex:Animal a owl:Class ;
+           rdfs:label "Animal"
+    }
+
+    linter = OntologyLinter(enabled_rules={"missing-language-tag"})
+    issues = await linter.lint(g, PROJECT_ID)
+
+    matches = _results_with_rule(issues, "missing-language-tag")
+    assert len(matches) == 1
+    assert matches[0].issue_type == "warning"
+    assert matches[0].subject_iri == str(ex:Animal)

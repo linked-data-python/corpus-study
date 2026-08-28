@@ -1,0 +1,26 @@
+# Extracted from Haoyu-R/How-to-Manage-TinyML-at-Scale@da05a79f3a : tflite2semantic_parser_xlsx.py
+# region: tflite2semantic (lines 375-388, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, URIRef, Namespace
+from rdflib.namespace import RDF, RDFS, SDO
+@prefix nnet: <http://tinyml-schema.org/networkschema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+
+g = Graph()
+
+def addCommonInfo(layer, input_layer=False, output_layer=False):
+    g += g{ {layer} a nnet:Layer }
+    addTrainable(layer, quantized)
+    addLayer(layer, model.OperatorCodes(op.OpcodeIndex()).BuiltinCode())
+
+    if input_layer:
+        g += g{ {layer} nnet:shapeIn {Literal(interpreter.get_input_details()[0]['shape'])} }
+    if output_layer:
+        g += g{ {layer} nnet:shapeOut {Literal(interpreter.get_output_details()[0]['shape'])} }
+
+    if hasActivation:
+        addActivation(layer, opt.FusedActivationFunction())
+    else:
+        addActivation(layer, 0)

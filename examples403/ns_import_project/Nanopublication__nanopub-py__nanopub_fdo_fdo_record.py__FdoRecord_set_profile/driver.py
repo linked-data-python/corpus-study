@@ -1,0 +1,15 @@
+"""Validation driver for Nanopublication__nanopub-py__nanopub_fdo_fdo_record.py__FdoRecord_set_profile.
+
+Establishes semantic equivalence of original.py and translated.ldpy.
+Filled in during translation review; see rdfeval.harness for helpers.
+"""
+from rdfeval.harness import run_pair
+
+# entry=None executes both modules and compares every rdflib Graph found in
+# the module globals (plus captured stdout).  For function regions, set
+# entry="<function name>" and provide the fixture arguments.
+VERDICT = run_pair(
+    __file__,
+    entry='set_profile',
+    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+)

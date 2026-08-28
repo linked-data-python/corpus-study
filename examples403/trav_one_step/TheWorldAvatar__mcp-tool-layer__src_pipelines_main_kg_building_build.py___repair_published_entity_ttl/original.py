@@ -1,0 +1,34 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : src/pipelines/main_kg_building/build.py
+# region: _repair_published_entity_ttl (lines 1111-1138, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, Namespace
+from rdflib.namespace import RDF, RDFS
+
+if top_entity is not None:
+    for spec in _get_hint_reconciliation_specs(main_entity_policy):
+        if not bool(spec.get("optional")):
+            continue
+        pred_iri = str(spec.get("predicate_iri") or "").strip()
+        target_class_iri = str(spec.get("target_class_iri") or "").strip()
+        if not (pred_iri and target_class_iri):
+            continue
+        pred = URIRef(pred_iri)
+        target_cls = URIRef(target_class_iri)
+        current_targets = [
+            o
+            for o in g.objects(top_entity, pred)
+            if isinstance(o, URIRef) and (o, RDF.type, target_cls) in g
+        ]
+        if current_targets:
+            continue
+        typed_targets = sorted(
+            {s for s in g.subjects(RDF.type, target_cls) if isinstance(s, URIRef)},
+            key=str,
+        )
+        chosen_target = _choose_preferred_typed_target(typed_targets)
+        if chosen_target is not None:
+            g.add((top_entity, pred, chosen_target))
+            messages.append(
+                f"Attached optional singleton {chosen_target} via {pred_iri} "
+                f"from {len(typed_targets)} candidate(s)"
+            )

@@ -1,0 +1,51 @@
+# Extracted from pyiron/semantikon@cfd1d3ffe5 : semantikon/ontology.py
+# region: _DataclassTranslator._emit_abox (lines 1213-1250, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from typing import Any, TypeAlias, cast
+from rdflib import OWL, RDF, RDFS, BNode, Graph, Literal, Namespace, URIRef
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+QUDT: Namespace = Namespace("http://qudt.org/schema/qudt/")
+
+def _emit_abox(
+    self,
+    *,
+    graph: Graph,
+    parent: URIRef,
+    field_node: URIRef,
+    field_class: URIRef,
+    metadata: dict,
+    value: Any,
+) -> None:
+    """
+    Emit ABox assertions for a dataclass field.
+
+    Args:
+        graph: Graph to populate.
+        field_node: Individual representing the field value.
+        field_class: Class of the field.
+        metadata: Parsed annotation metadata.
+        value: Python value of the field.
+    """
+    graph += g{
+        {parent} {SNS.has_part} {field_node} .
+        {field_node} a {field_class} ;
+           rdfs:label {self._to_field_label(field_node)} ;
+           {SNS.local_identifier} {Literal(field_node.split("-")[-1])}
+    }
+
+    units = metadata.get("units", metadata.get("unit"))
+    if units is not None:
+        graph += g{ {field_node} {QUDT.hasUnit} {_units_to_uri(units)} }
+
+    if "uri" in metadata:
+        instance = URIRef(str(field_node) + "_uri")
+        graph += g{
+            {instance} a {metadata["uri"]} .
+            {field_node} {SNS.specifies_value_of} {instance}
+        }
+
+    if value is not None:
+        graph += g{ {field_node} {SNS.has_value} {Literal(value)} }

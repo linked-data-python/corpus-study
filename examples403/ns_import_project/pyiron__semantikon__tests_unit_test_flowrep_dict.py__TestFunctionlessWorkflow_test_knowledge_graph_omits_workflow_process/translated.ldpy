@@ -1,0 +1,26 @@
+# Extracted from pyiron/semantikon@cfd1d3ffe5 : tests/unit/test_flowrep_dict.py
+# region: TestFunctionlessWorkflow.test_knowledge_graph_omits_workflow_process (lines 415-428, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from rdflib import RDF, RDFS
+from semantikon import datastructure, flowrep_dict
+from semantikon.ontology import PMD, get_knowledge_graph
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+PMD_PROCESS = PMD["0000010"]
+PMD_FUNCTION_NAME = PMD["0000100"]
+
+def test_knowledge_graph_omits_workflow_process(self):
+    """ "Simple": a reference-free workflow contributes structure but no process
+    of its own. Only the child atomic appears as a process/function -- a
+    function-bearing workflow would additionally represent the workflow itself
+    (e.g. the diamond workflow yields four such nodes, one per child plus root)."""
+    g = get_knowledge_graph(flowrep_dict._dict_to_workflow_recipe(self._wf_dict()))
+    processes = [s for s, p, o in g if p == rdf:type and o == PMD_PROCESS]
+    function_names = [
+        s for s, p, o in g if p == rdf:type and o == PMD_FUNCTION_NAME
+    ]
+    self.assertEqual(len(processes), 1, "only the child atomic is a process")
+    self.assertEqual(
+        len(function_names), 1, "the workflow root carries no function"
+    )

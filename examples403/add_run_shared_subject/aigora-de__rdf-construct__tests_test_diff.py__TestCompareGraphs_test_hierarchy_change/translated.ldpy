@@ -1,0 +1,48 @@
+# Extracted from aigora-de/rdf-construct@670e400ea4 : tests/test_diff.py
+# region: TestCompareGraphs.test_hierarchy_change (lines 122-142, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, Namespace, RDF, RDFS
+from rdflib.namespace import OWL, XSD
+from rdf_construct.diff import (
+    compare_graphs,
+    filter_diff,
+    parse_filter_string,
+    ChangeType,
+    EntityChange,
+    EntityType,
+    GraphDiff,
+    TripleChange,
+    PredicateCategory,
+)
+@prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def test_hierarchy_change(self):
+    """Detect a change in class hierarchy."""
+    g1 = Graph()
+    g1 += g{
+        ex:ClassA a owl:Class ;
+           rdfs:subClassOf ex:Thing
+    }
+
+    g2 = Graph()
+    g2 += g{
+        ex:ClassA a owl:Class ;
+           rdfs:subClassOf ex:PhysicalEntity
+    }
+
+    diff = compare_graphs(g1, g2)
+
+    assert not diff.is_identical
+    assert len(diff.modified) == 1
+
+    modified = diff.modified[0]
+    # Should have removed old subClassOf and added new one
+    added_preds = [t.predicate for t in modified.added_triples]
+    removed_preds = [t.predicate for t in modified.removed_triples]
+    assert rdfs:subClassOf in added_preds
+    assert rdfs:subClassOf in removed_preds

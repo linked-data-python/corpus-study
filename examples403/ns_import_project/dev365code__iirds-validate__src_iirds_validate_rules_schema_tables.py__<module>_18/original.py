@@ -1,0 +1,4 @@
+# Extracted from dev365code/iirds-validate@4b3f840df8 : src/iirds_validate/rules/schema_tables.py
+# region: <module> (lines 18-18, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from ..model import HOV, IIRDS, MACH, SW, Violation, is_named

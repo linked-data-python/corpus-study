@@ -1,0 +1,11 @@
+# Extracted from BD2KOnFHIR/fhirtordf@05b23ba1df : fhirtordf/rdfsupport/rdfcompare.py
+# region: rdf_compare_split.primary_subjects (lines 126-129, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from typing import Optional, List, Set, Callable, Tuple
+from rdflib import URIRef, Graph, OWL, RDF, BNode
+from rdflib.term import Node
+
+def primary_subjects(g: Graph) -> Set[Node]:
+    anon_subjs = set(anon_s for anon_s in g.subjects()
+                     if isinstance(anon_s, BNode) and len([g.subject_predicates(anon_s)]) == 0)
+    return set(s_ for s_ in g1.subjects() if isinstance(s_, URIRef)).union(anon_subjs)

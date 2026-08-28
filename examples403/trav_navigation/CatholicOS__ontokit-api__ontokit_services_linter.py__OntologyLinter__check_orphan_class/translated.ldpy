@@ -1,0 +1,53 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : ontokit/services/linter.py
+# region: OntologyLinter._check_orphan_class (lines 354-393, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
+from ontokit.models.lint import LintIssueType
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+async def _check_orphan_class(self, graph: Graph) -> list[LintResult]:
+    """Find classes with no parent (other than owl:Thing) and no children."""
+    issues = []
+
+    owl_thing = owl:Thing
+
+    for class_uri in graph.subjects(rdf:type, owl:Class):
+        if not isinstance(class_uri, URIRef):
+            continue
+        if class_uri == owl_thing:
+            continue
+
+        # Get parents (excluding owl:Thing)
+        parents = [
+            p
+            for p in graph.objects(class_uri, rdfs:subClassOf)
+            if isinstance(p, URIRef) and p != owl_thing
+        ]
+
+        # Get children
+        children = list(graph.subjects(rdfs:subClassOf, class_uri))
+
+        # Orphan if no meaningful parents and no children
+        if not parents and not children:
+            label = self._get_label(graph, class_uri)
+            issues.append(
+                LintResult(
+                    issue_type=LintIssueType.WARNING.value,
+                    rule_id="orphan-class",
+                    message="Class has no parent classes and no children",
+                    subject_iri=str(class_uri),
+                    subject_type="class",
+                    details={
+                        "local_name": self._get_local_name(class_uri),
+                        "label": label,
+                    },
+                )
+            )
+
+    return issues

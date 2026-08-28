@@ -1,0 +1,62 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi/naas_abi/workflows/GetObjectPropertiesFromClassWorkflow.py
+# region: GetObjectPropertiesFromClassWorkflow.get_object_properties_from_class (lines 288-340, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import OWL, RDF, RDFS, Graph, URIRef
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def get_object_properties_from_class(
+    self, parameters: GetObjectPropertiesFromClassWorkflowParameters
+) -> dict:
+    """Get all object properties for a given class using sophisticated logic."""
+    # First, validate that the URI is actually a class
+    if not self.is_class(parameters.class_uri):
+        raise ValueError(
+            f"URI {parameters.class_uri} is not a class in the ontology"
+        )
+
+    class_uri = URIRef(parameters.class_uri)
+
+    object_properties: list[dict] = []
+
+    # Query for object properties with domain class_uri or union containing it
+    for s, p, o in self.graph.triples((None, rdf:type, owl:ObjectProperty)):
+        property_data = {
+            "object_property_uri": str(s),
+            "object_property_label": str(self.graph.value(s, rdfs:label) or ""),
+            "domain": [],
+            "range": [],
+        }
+
+        # Collect all domains
+        property_data["domain"] = [
+            str(domain_uri) for domain_uri in self.graph.objects(s, rdfs:domain)
+        ]
+
+        # Collect all ranges
+        property_data["range"] = [
+            str(range_uri) for range_uri in self.graph.objects(s, rdfs:range)
+        ]
+
+        # Apply sophisticated mapping logic from generate_docs
+        property_data = self.map_ranges_domains(property_data)
+
+        # Check if class_uri is in the domain
+        if self._class_matches_domain(str(class_uri), property_data["domain"]):
+            # Process ranges with sophisticated logic
+            processed_ranges = self._process_ranges(property_data["range"])
+
+            object_properties.append(
+                {
+                    "object_property_uri": str(s),
+                    "object_property_label": property_data["object_property_label"],
+                    "ranges": processed_ranges,
+                }
+            )
+
+    return {
+        "class_uri": parameters.class_uri,
+        "object_properties": object_properties,
+    }

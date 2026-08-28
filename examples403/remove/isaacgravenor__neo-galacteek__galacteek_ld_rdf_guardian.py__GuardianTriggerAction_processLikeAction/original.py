@@ -1,0 +1,30 @@
+# Extracted from isaacgravenor/neo-galacteek@e201b39d78 : galacteek/ld/rdf/guardian.py
+# region: GuardianTriggerAction.processLikeAction (lines 51-74, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Graph
+from rdflib import URIRef
+
+async def processLikeAction(self, src: Graph, dst: Graph, s, p, o):
+    lpred = URIRef('ips://galacteek.ld/likes')
+
+    liked = src.value(
+        subject=s,
+        predicate=URIRef('ips://galacteek.ld/object')
+    )
+    agent = src.value(
+        subject=s,
+        predicate=URIRef('ips://galacteek.ld/agent')
+    )
+
+    # Like it or not, you'll only ever like it once
+    dst.remove((
+        agent,
+        lpred,
+        liked
+    ))
+
+    dst.add((
+        agent,
+        lpred,
+        liked
+    ))

@@ -1,0 +1,27 @@
+# Extracted from SoftwareHeritage/swh-indexer@95f3e65462 : swh/indexer/metadata_mapping/github.py
+# region: GitHubMapping.translate_parent (lines 65-83, stratum add_isolated)
+# licence of the source repository: see meta.json
+from typing import Any, Tuple
+from rdflib import RDF, BNode, Graph, Literal, URIRef
+from swh.indexer.namespaces import ACTIVITYSTREAMS, CODEMETA, FORGEFED, SCHEMA, XSD
+from .base import BaseExtrinsicMapping, JsonMapping, produce_terms
+
+@produce_terms(FORGEFED.forkedFrom)
+def translate_parent(self, graph: Graph, root: BNode, v: Any) -> None:
+    """
+
+    >>> graph = Graph()
+    >>> root = URIRef("http://example.org/test-fork")
+    >>> GitHubMapping().translate_parent(
+    ...     graph, root, {"html_url": "http://example.org/test-software"})
+    >>> prettyprint_graph(graph, root)
+    {
+        "@id": "http://example.org/test-fork",
+        "https://forgefed.org/ns#forkedFrom": {
+            "@id": "http://example.org/test-software"
+        }
+    }
+    """
+    if isinstance(v, dict) and isinstance(v.get("html_url"), str):
+        repository = URIRef(v["html_url"])
+        graph.add((root, FORGEFED.forkedFrom, repository))

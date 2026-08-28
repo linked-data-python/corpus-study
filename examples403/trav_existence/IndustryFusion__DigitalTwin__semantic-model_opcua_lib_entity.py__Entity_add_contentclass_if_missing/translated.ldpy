@@ -1,0 +1,12 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/lib/entity.py
+# region: Entity.add_contentclass_if_missing (lines 225-227, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib.namespace import OWL, RDF, RDFS
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def add_contentclass_if_missing(self, g, contentclass):
+    if g.value(contentclass, rdf:type) is not None and self.e.value(contentclass, rdf:type) is None:
+        self.add_enum_class(g, contentclass)

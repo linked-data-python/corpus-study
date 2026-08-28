@@ -1,0 +1,43 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/lib/bindings.py
+# region: Bindings.create_attribute_binding (lines 48-75, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import random
+import string
+from rdflib import Graph, Namespace, Literal, XSD
+from rdflib.namespace import RDF
+import lib.utils as utils
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+randnamelength = 16
+
+def create_attribute_binding(self, parent_node_id,
+                             attribute_iri,
+                             logic_transform=None,
+                             version='0.1',
+                             firmware='firmware'):
+    """
+    Create a binding for an attribute.
+    This function generates a unique binding ID and associates it with the given parent node ID and attribute IRI.
+    Args:
+        parent_node_id (rdflib.term.Identifier): The identifier of the parent node to bind.
+        attribute_iri (rdflib.term.Identifier): The IRI of the attribute to bind.
+        version (str, optional): The version of the binding. Defaults to '0.1'.
+        firmware (str, optional): The firmware associated with the binding. Defaults to 'firmware'.
+
+    Returns:
+        rdflib.term.Identifier: The IRI of the created map.
+    """
+    randname = ''.join(random.choices(string.ascii_uppercase + string.digits, k=randnamelength))
+    bindingiri = self.binding_namespace['binding_' + randname]
+    self.bindingsg += g{
+        {bindingiri} rdf:type {self.basens['Binding']} ;
+           {self.basens['bindsEntity']} {parent_node_id} ;
+           {self.basens['bindingVersion']} {Literal(version)} ;
+           {self.basens['bindsFirmware']} {Literal(firmware)} ;
+           {self.basens['bindsAttributeType']} {utils.NGSILD['Property']}
+    }
+    if logic_transform is not None:
+        self.bindingsg += g{ {bindingiri} {self.basens['bindsLogic']} {Literal(logic_transform)} }
+    self.bindingsg += g{ {attribute_iri} {self.basens['boundBy']} {bindingiri} }
+    return bindingiri

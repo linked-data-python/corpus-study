@@ -1,0 +1,40 @@
+# Extracted from enricocirignaco/infrastructureforsensormanagment@2aa301380c : src/timeseries-parser/app.py
+# region: FusekiClient.insert_sensor_data (lines 198-222, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, RDF, Namespace, XSD, SOSA
+from uuid import uuid4
+from datetime import datetime
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+
+def insert_sensor_data(self, device_id, timestamp, sensor_values):
+    time_str = datetime.fromisoformat(timestamp).isoformat()
+    observation_id = str(uuid4())
+
+    g = Graph()
+    g.bind("sosa", SOSA)
+    g.bind("xsd", XSD)
+    bfh = Namespace("http://data.bfh.ch/")
+    g.bind("bfh", bfh)
+
+    observation_uri = URIRef(f"http://data.bfh.ch/observations/{observation_id}")
+
+    g += g{
+        {observation_uri} a {URIRef(SOSA.Observation)} ;
+           sosa:madeBySensor {URIRef(f"http://data.bfh.ch/sensorNodes/{device_id}")} ;
+           sosa:resultTime {Literal(time_str, datatype=XSD.dateTime)}
+    }
+
+    for key, value in sensor_values.items():
+        result_uri = URIRef(f"http://data.bfh.ch/results/{observation_id}_{key}")
+        g += g{
+            {observation_uri} sosa:hasResult {result_uri} .
+            {result_uri} a {URIRef(SOSA.Result)} ;
+               {bfh.fieldName} {Literal(key)} ;
+               sosa:hasSimpleResult {Literal(value)}
+        }
+
+    query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
+    self._execute_update(query)

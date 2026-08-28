@@ -1,0 +1,100 @@
+# Extracted from ArangoDB-Community/ArangoRDF@48cfed903a : tests/test_main.py
+# region: test_rpt_case_9 (lines 679-757, stratum trav_single_value)
+# licence of the source repository: see meta.json
+import pytest
+from rdflib import RDF, RDFS, BNode
+from rdflib import Graph as RDFGraph
+from rdflib import Literal, Namespace, URIRef
+from .conftest import (
+    adbrdf,
+    arango_restore,
+    db,
+    get_adb_graph_count,
+    get_bnodes,
+    get_literal_statements,
+    get_literals,
+    get_meta_graph,
+    get_rdf_graph,
+    get_uris,
+    subtract_graphs,
+)
+
+@pytest.mark.parametrize(
+    "name, rdf_graph",
+    [("Case_9_RPT", get_rdf_graph("cases/9.ttl"))],
+)
+def test_rpt_case_9(name: str, rdf_graph: RDFGraph) -> None:
+    NUM_TRIPLES = 2
+    NUM_URIREFS = 1
+    NUM_BNODES = 0
+    NUM_LITERALS = 2
+
+    mark = URIRef("http://example.com/mark")
+    age = URIRef("http://example.com/age")
+    age_val = Literal(28)
+    certainty = URIRef("http://example.com/certainty")
+    certainty_val = Literal(1)
+
+    _mark = adbrdf.rdf_id_to_adb_key(str(mark))
+    _28 = adbrdf.rdf_id_to_adb_key(str(age_val))
+    _certainty = adbrdf.rdf_id_to_adb_key("http://example.com/certainty")
+    _1 = adbrdf.rdf_id_to_adb_key(str(certainty_val))
+
+    _mark_age_28 = adbrdf.rdf_id_to_adb_key(
+        str(rdf_graph.value(predicate=RDF.type, object=RDF.Statement))
+    )
+
+    adb_graph = adbrdf.rdf_to_arangodb_by_rpt(
+        name,
+        rdf_graph + RDFGraph(),
+        overwrite_graph=True,
+    )
+
+    URIREF_COL = adb_graph.vertex_collection(f"{name}_URIRef")
+    assert URIREF_COL.has(_mark)
+
+    LITERAL_COL = adb_graph.vertex_collection(f"{name}_Literal")
+    assert LITERAL_COL.has(_1)
+    assert LITERAL_COL.has(_28)
+
+    STATEMENT_COL = adb_graph.edge_collection(f"{name}_Statement")
+    assert STATEMENT_COL.has(_mark_age_28)
+    assert STATEMENT_COL.has(adbrdf.hash(f"{_mark_age_28}-{_certainty}-{_1}"))
+
+    v_count, e_count = get_adb_graph_count(name)
+    assert v_count == NUM_URIREFS + NUM_BNODES + NUM_LITERALS
+    assert e_count == NUM_TRIPLES
+
+    rdf_graph_2 = adbrdf.arangodb_graph_to_rdf(name, type(rdf_graph)())
+
+    statement = rdf_graph_2.value(predicate=RDF.type, object=RDF.Statement)
+    assert (statement, RDF.subject, mark) in rdf_graph_2
+    assert (statement, RDF.predicate, age) in rdf_graph_2
+    assert (statement, RDF.object, age_val) in rdf_graph_2
+    assert (statement, certainty, certainty_val) in rdf_graph_2
+    assert len(rdf_graph_2) == len(rdf_graph)
+
+    edge_key_graph = RDFGraph()
+    edge_key_graph.add((statement, adbrdf.adb_key_uri, Literal(_mark_age_28)))
+
+    db.delete_graph(name, drop_collections=True)
+
+    adb_graph = adbrdf.rdf_to_arangodb_by_rpt(
+        name,
+        rdf_graph_2 + edge_key_graph,
+        overwrite_graph=True,
+    )
+
+    STATEMENT_COL = adb_graph.edge_collection(f"{name}_Statement")
+    assert STATEMENT_COL.has(_mark_age_28)
+    assert STATEMENT_COL.has(adbrdf.hash(f"{_mark_age_28}-{_certainty}-{_1}"))
+
+    v_count, e_count = get_adb_graph_count(name)
+    assert v_count == NUM_URIREFS + NUM_BNODES + NUM_LITERALS
+    assert e_count == NUM_TRIPLES
+
+    rdf_graph_3 = adbrdf.arangodb_graph_to_rdf(name, type(rdf_graph_2)())
+    assert len(subtract_graphs(rdf_graph_3, rdf_graph_2)) == 0
+    assert len(subtract_graphs(rdf_graph_2, rdf_graph_3)) == 0
+
+    db.delete_graph(name, drop_collections=True)

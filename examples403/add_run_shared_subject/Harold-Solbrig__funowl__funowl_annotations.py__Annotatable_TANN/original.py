@@ -1,0 +1,37 @@
+# Extracted from Harold-Solbrig/funowl@69e1cbe2f6 : funowl/annotations.py
+# region: Annotatable.TANN (lines 92-118, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from typing import Union, List, Callable, ClassVar, Tuple, Any
+from rdflib import URIRef, Graph
+from rdflib.namespace import OWL, RDF, RDFS
+from rdflib.term import BNode
+from funowl.base.clone_subgraph import clone_subgraph, USE_BNODE_COPIES
+from funowl.base.rdftriple import SUBJ, TRIPLE, PRED, TARG
+
+def TANN(self, g: Graph, subj: Union[SUBJ, TRIPLE]) -> None:
+    """
+    TANN function as defined in https://www.w3.org/TR/2012/REC-owl2-mapping-to-rdf-20121211/#Translation_of_Annotations
+    """
+    # Tuple form means that we are annotating a triple:
+    #  T(y) T(AP) T(av) .
+    # _:x rdf:type owl:Annotation .
+    # _:x owl:annotatedSource T(y) .
+    # _:x owl:annotatedProperty T(AP) .
+    # _:x owl:annotatedTarget T(av) .
+    # TANN(annotation1, _:x)
+    # ...
+    # TANN(annotationn, _:x)
+    if self.annotations:
+        if isinstance(subj, Tuple):
+            # Subj is a triple -- reify it
+            x = BNode()
+            g.add((x, RDF.type, self.annotation_type))
+            g.add((x, OWL.annotatedSource, clone_subgraph(g, subj[0]) if USE_BNODE_COPIES else subj[0]))
+            g.add((x, OWL.annotatedProperty, subj[1]))
+            g.add((x, OWL.annotatedTarget, clone_subgraph(g, subj[2]) if USE_BNODE_COPIES else subj[2]))
+            subj = x
+
+        for annotation in self.annotations:
+            t = (subj, annotation.property.to_rdf(g), annotation.value.to_rdf(g))
+            g.add(t)
+            annotation.TANN(g, t)

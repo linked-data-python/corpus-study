@@ -1,0 +1,28 @@
+# Extracted from filipjezek/ndbi046@59b3a45240 : task_4/cube_lib/dimensions.py
+# region: create_region (lines 20-30, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, URIRef
+from .namespaces import NS, NSR, RDFS, SDMX_CON, SDMX_DIM
+from rdflib.namespace import QB, RDF
+@prefix ns: <https://filipjezek.github.io/ontology#> .
+@prefix nsr: <https://filipjezek.github.io/resources/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdmxcon: <http://purl.org/linked-data/sdmx/2009/concept#> .
+@prefix sdmxdim: <http://purl.org/linked-data/sdmx/2009/dimension#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def create_region(collector: Graph) -> URIRef:
+    region = ns:region
+    collector += g{
+        {region} a rdfs:Property ;
+           a qb:DimensionProperty ;
+           rdfs:subPropertyOf sdmxdim:refArea ;
+           qb:concept sdmxcon:refArea ;
+           rdfs:label "Kraj"@cs ;
+           rdfs:label "Region"@en ;
+           qb:codeList nsr:region ;
+           rdfs:range nsr:Region
+    }
+    return region

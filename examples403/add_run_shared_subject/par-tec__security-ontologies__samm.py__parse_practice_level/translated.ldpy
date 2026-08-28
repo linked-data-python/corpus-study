@@ -1,0 +1,44 @@
+# Extracted from par-tec/security-ontologies@d405f7555e : samm.py
+# region: parse_practice_level (lines 108-131, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import yaml
+from rdflib import DCAT, DCTERMS, SKOS, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS
+@prefix nsos: <https://owaspsamm.org/model/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+BASEDIR = Path("external/samm-model")
+
+def parse_practice_level(g):
+    # links to practice, maturitylevel
+    #
+    for f in (BASEDIR / "practice_levels").glob("*.yml"):
+        data = yaml.safe_load(f.read_text())
+        id_ = data["id"]
+        name = f.name.replace(".yml", "")
+        uri = URIRef(f"{NS_OS}{id_}")
+        g += g{
+            {uri} a nsos:PracticeLevel ;
+               rdfs:label {Literal(name)} ;
+               skos:altLabel {Literal(name)} ;
+               dcterms:identifier {Literal(id_)} ;
+               dcterms:description {Literal(data["objective"])}
+        }
+
+        maturitylevel_uri = URIRef(NS_OS + data["maturitylevel"])
+        practice_uri = URIRef(NS_OS + data["practice"])
+        g += g{
+            {uri} nsos:hasMaturityLevel {maturitylevel_uri} ;
+               nsos:hasPractice {practice_uri}
+        }
+
+        if maturitylevel := g.value(maturitylevel_uri, skos:altLabel):
+            g += g{ {uri} nsos:maturitylevel {maturitylevel} }
+
+        if practice := g.value(practice_uri, skos:altLabel):
+            g += g{ {uri} nsos:practice {practice} }

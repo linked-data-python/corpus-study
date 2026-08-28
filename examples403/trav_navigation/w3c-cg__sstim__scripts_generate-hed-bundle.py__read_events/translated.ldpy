@@ -1,0 +1,43 @@
+# Extracted from w3c-cg/sstim@39360a81b8 : scripts/generate-hed-bundle.py
+# region: read_events (lines 139-172, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDF
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+S = lambda name: URIRef(SSTIM + name)  # noqa: E731
+
+def read_events(graph: Graph, spec: dict) -> list[dict]:
+    """Every sstim:SessionEvent, ordered by its offset on the session clock."""
+    rows = []
+    for event in graph.subjects(rdf:type, S("SessionEvent")):
+        etype = next(graph.objects(event, S("hasEventType")), None)
+        offset = next(graph.objects(event, S("sessionClockOffsetSeconds")), None)
+        if etype is None or offset is None:
+            raise SystemExit(f"hed-bundle: {event} lacks an event type or clock offset")
+        name = local(etype)
+        entry = spec["events"].get(name)
+        if entry is None:
+            raise SystemExit(f"hed-bundle: no HED mapping for {name}")
+        kind = next(graph.objects(event, S("hasChangedParameter")), None)
+        before = next(graph.objects(event, S("parameterValueBefore")), None)
+        after = next(graph.objects(event, S("parameterValueAfter")), None)
+        row = {
+            "onset": float(offset),
+            "event_id": local(event),
+            "iri": str(event),
+            "type": name,
+            "kind": local(kind) if kind is not None else None,
+            "before": f"{float(before):g}" if before is not None else None,
+            "after": f"{float(after):g}" if after is not None else None,
+        }
+        # HED carries the values when the event has them. The base string stays
+        # the part the event type alone determines, so a reverse lookup still
+        # recovers the type after the detail tags are stripped.
+        if "detailTemplate" in entry and row["kind"] and row["after"] is not None:
+            row["hed"] = fill_detail(spec, entry, row)
+        else:
+            row["hed"] = entry["hed"]
+        rows.append(row)
+    rows.sort(key=lambda r: (r["onset"], r["event_id"]))
+    return rows

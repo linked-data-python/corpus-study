@@ -1,0 +1,96 @@
+# Extracted from danilipp17/thesis_code@c2772e3555 : oscin/reader.py
+# region: OntologyReader._read_flow_steps (lines 711-789, stratum trav_navigation)
+# licence of the source repository: see meta.json
+import json
+from typing import Optional
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+from oscin.namespaces import (
+    AGENTO,
+    AGENTOSCIN,
+    CALLS_CREW,
+    COORD_CUSTOM,
+    COORD_SEQUENTIAL,
+    HAS_DESCRIPTION,
+    HAS_TITLE,
+)
+
+for step_uri in self.g.objects(wp_uri, AGENTO.hasWorkflowStep):
+    name = self._str_value(step_uri, HAS_TITLE) or self._local_name(step_uri)
+    order = self._int_value(step_uri, AGENTO.stepOrder) or 0
+
+    # Determine step type from RDF type
+    is_start = (step_uri, RDF.type, AGENTO.StartStep) in self.g
+    is_conditional = (step_uri, RDF.type, AGENTOSCIN.ConditionalStep) in self.g
+    is_end = (step_uri, RDF.type, AGENTO.EndStep) in self.g
+
+    # A step can be both start and conditional (LangGraph pattern:
+    # entry node with conditional edges). EndStep is mutually
+    # exclusive with StartStep — a start step is never just "end".
+    if is_conditional and not is_start:
+        step_type = "conditional"
+    elif is_start:
+        step_type = "start"
+    elif is_end:
+        step_type = "end"
+    else:
+        step_type = "regular"
+
+    # Read routing logic for any conditional step (including start+conditional)
+    routing_logic = ""
+    if is_conditional:
+        routing_logic = (
+            self._str_value(step_uri, AGENTOSCIN.hasRoutingLogic) or ""
+        )
+
+    # Read edge mapping (label → target node mapping)
+    edge_mapping_json = (
+        self._str_value(step_uri, AGENTOSCIN.hasEdgeMapping) or ""
+    )
+    edge_mapping: dict[str, str] = {}
+    if edge_mapping_json:
+        try:
+            edge_mapping = json.loads(edge_mapping_json)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    # Collect nextStep targets
+    next_names = []
+    for next_uri in self.g.objects(step_uri, AGENTO.nextStep):
+        next_names.append(str(next_uri))
+
+    # Original literal decorator arguments (e.g. CrewAI
+    # @start("wait_next_run")) preserved by the populator. These
+    # are restored ahead of the inferred dependency list.
+    decorator_args: list[str] = []
+    for lit in self.g.objects(step_uri, AGENTOSCIN.hasDecoratorArgument):
+        if isinstance(lit, Literal):
+            decorator_args.append(str(lit))
+
+    # Associated agent (e.g. LangGraph node → LLMAgent)
+    associated_agent_key: Optional[str] = None
+    for agent_uri in self.g.objects(step_uri, AGENTOSCIN.hasAssociatedAgent):
+        key = self._agent_uri_to_key.get(str(agent_uri))
+        if key:
+            associated_agent_key = key
+            break
+    aggregation_combinator = (
+        self._str_value(step_uri, AGENTOSCIN.hasAggregationCombinator) or ""
+    )
+
+    # Per-step crew binding (callsCrew)
+    calls_crew = self._str_value(step_uri, CALLS_CREW)
+
+    step_uri_to_name[str(step_uri)] = name
+    step_info[str(step_uri)] = {
+        "order": order,
+        "name": name,
+        "step_type": step_type,
+        "routing_logic": routing_logic,
+        "edge_mapping": edge_mapping,
+        "next_uris": next_names,
+        "decorator_args": decorator_args,
+        "associated_agent_key": associated_agent_key,
+        "aggregation_combinator": aggregation_combinator,
+        "calls_crew": calls_crew,
+    }

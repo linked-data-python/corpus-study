@@ -1,0 +1,35 @@
+# Extracted from kumagallium/asterism@f0977d4d3a : mcp/tests/test_tools_integration.py
+# region: _cross_dataset_ds (lines 218-237, stratum ns_def_local)
+# licence of the source repository: see meta.json
+import rdflib
+from asterism.substrate import (
+    CANONICAL_GRAPH_BASE,
+    CONTROL_GRAPH_IRI,
+    STATUS_PREDICATE,
+    STATUS_PROMOTED,
+    canonical_graph_iri,
+    draft_graph_iri,
+    ontology_graph_iri,
+)
+SD = DEFAULT_ONTOLOGY
+
+def _cross_dataset_ds() -> rdflib.Dataset:
+    """A sample in dataset A links (sd:fromPaper) to a paper in dataset B.
+
+    Under the old GRAPH-union scope this join could not resolve (the two triples
+    live in different named graphs); FROM-merge merges both canonical graphs into
+    one query dataset so the join across them succeeds.
+    """
+    ds = rdflib.Dataset()
+    sd = rdflib.Namespace(SD)
+    schema = rdflib.Namespace("https://schema.org/")
+    ga = ds.graph(rdflib.URIRef(canonical_graph_iri("a")))
+    gb = ds.graph(rdflib.URIRef(canonical_graph_iri("b")))
+    sample = rdflib.URIRef("https://ex/sample/1")
+    paper = rdflib.URIRef("https://ex/paper/1")
+    ga.add((sample, rdflib.RDF.type, sd.Sample))
+    ga.add((sample, sd.compositionString, rdflib.Literal("SnSe")))
+    ga.add((sample, sd.fromPaper, paper))  # link points into dataset B
+    gb.add((paper, schema.name, rdflib.Literal("Shared paper")))  # lives in dataset B
+    _flag_promoted(ds, canonical_graph_iri("a"), canonical_graph_iri("b"))
+    return ds

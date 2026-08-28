@@ -1,0 +1,49 @@
+# Extracted from openworm/owmeta-core@cd69d77ad0 : tests/BundleInstallTest.py
+# region: test_imports_in_transitive_dependency_not_included (lines 379-416, stratum add_isolated)
+# licence of the source repository: see meta.json
+import pytest
+import rdflib
+from rdflib.term import URIRef
+from owmeta_core.bundle import (Installer, Descriptor, make_include_func, FilesDescriptor,
+                                UncoveredImports, DependencyDescriptor, TargetIsNotEmpty,
+                                Remote, Bundle, BUNDLE_MANIFEST_FILE_NAME)
+from owmeta_core.context_common import CONTEXT_IMPORTS
+
+def test_imports_in_transitive_dependency_not_included(dirs):
+    '''
+    If we have imports and a transitive dependency includes the context, then we should
+    still have an error.
+
+    Versioned bundles are assumed to be immutable, so we won't re-fetch a bundle already
+    in the local index
+    '''
+    imports_ctxid = 'http://example.org/imports'
+    ctxid_1 = 'http://example.org/ctx1'
+    ctxid_2 = 'http://example.org/ctx2'
+
+    # Make a descriptor that includes ctx1 and the imports, but not ctx2
+    d = Descriptor('test')
+    d.includes.add(make_include_func(ctxid_1))
+    d.includes.add(make_include_func(imports_ctxid))
+    d.dependencies.add(DependencyDescriptor('dep'))
+
+    dep_d = Descriptor('dep')
+    dep_d.dependencies.add(DependencyDescriptor('dep_dep'))
+
+    dep_dep_d = Descriptor('dep_dep')
+    dep_dep_d.includes.add(make_include_func(ctxid_2))
+
+    # Add some triples so the contexts aren't empty -- we can't save an empty context
+    g = rdflib.ConjunctiveGraph()
+    cg_1 = g.get_context(ctxid_1)
+    cg_2 = g.get_context(ctxid_2)
+    cg_imp = g.get_context(imports_ctxid)
+    cg_1.add((aURI('a'), aURI('b'), aURI('c')))
+    cg_2.add((aURI('d'), aURI('e'), aURI('f')))
+    cg_imp.add((URIRef(ctxid_1), CONTEXT_IMPORTS, URIRef(ctxid_2)))
+
+    bi = Installer(*dirs, imports_ctx=imports_ctxid, graph=g)
+    bi.install(dep_dep_d)
+    bi.install(dep_d)
+    with pytest.raises(UncoveredImports):
+        bi.install(d)

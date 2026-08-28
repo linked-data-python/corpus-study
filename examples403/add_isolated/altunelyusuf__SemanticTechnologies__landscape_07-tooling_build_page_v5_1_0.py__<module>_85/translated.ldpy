@@ -1,0 +1,27 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_page_v5_1_0.py
+# region: <module> (lines 85-92, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+@prefix ipo: <http://example.org/rdodi/interactive-page-ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v5_0_0.ttl")
+lo15 = SP.LO15
+w20 = SP.W20
+n13 = byid["T1C3"]
+
+for tr in [(rdf:type, ipo:InstructionalWidget), (rdf:type, owl:NamedIndividual),
+           (rdfs:label, "Runnable code panel"@en),
+           (skos:definition, "This panel lets the reader paste, type or upload their own structured (CSV/JSON) or unstructured (free text) content, converts it into RDF/Turtle with a pure-standard-library Python pipeline running in-browser via Pyodide, and runs a triple-pattern query or a minimal SHACL-like shape check over the result — the exact Python source is shown alongside static Turtle/SPARQL/SHACL examples."@en),
+           (dcterms:source, Literal(S(*n13["refs"]) + " | " + S("NR-PYODIDE"), lang="en")),
+           (skos:scopeNote, "Warrant: primitive=hands-on-worked-example, generalized to the reader's own data; discourse feature=the read-convert-run pipeline structure this whole page's own tooling follows."@en),
+           (skos:note, "Design test PASS — content input (paste/upload), run-option dispatch, and Pyodide orchestration are executed in DOM smoke v5.0 with a mocked Pyodide runtime verifying the correct code and arguments are dispatched; live in-browser Python execution is a browser capability outside the Node-based smoke harness."@en),
+           (ipo:coversLearningObjective, lo15)]:
+    g += g{ {w20} {tr[0]} {tr[1]} }

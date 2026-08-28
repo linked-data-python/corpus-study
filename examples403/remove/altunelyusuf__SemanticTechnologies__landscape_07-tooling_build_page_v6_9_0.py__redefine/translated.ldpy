@@ -1,0 +1,20 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_page_v6_9_0.py
+# region: redefine (lines 61-65, stratum remove)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_8_0.ttl")
+
+def redefine(iri, label=None, defn=None, note=None, scope=None):
+    g += g{ {iri} rdfs:label {Literal(label, lang="en")} }
+    g += g{ {iri} skos:definition {Literal(defn, lang="en")} }
+    g += g{ {iri} skos:note {Literal(note, lang="en")} }
+    g += g{ {iri} skos:scopeNote {Literal(scope, lang="en")} }

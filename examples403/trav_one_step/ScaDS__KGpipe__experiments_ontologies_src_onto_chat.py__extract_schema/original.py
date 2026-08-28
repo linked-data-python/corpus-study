@@ -1,0 +1,48 @@
+# Extracted from ScaDS/KGpipe@67ca171cfd : experiments/ontologies/src/onto_chat.py
+# region: extract_schema (lines 75-116, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib import Graph, RDF, RDFS, URIRef
+from rdflib.namespace import OWL
+
+def extract_schema(graph: Graph) -> OntologySchema:
+    """Extract classes and property relations from graph."""
+    classes: set[str] = set()
+    object_edges: list[tuple[str, str, str]] = []
+    datatype_edges: list[tuple[str, str, str]] = []
+
+    for cls in graph.subjects(RDF.type, OWL.Class):
+        if isinstance(cls, URIRef):
+            classes.add(short_name(cls))
+    for cls in graph.subjects(RDF.type, RDFS.Class):
+        if isinstance(cls, URIRef):
+            classes.add(short_name(cls))
+
+    for prop in graph.subjects(RDF.type, OWL.ObjectProperty):
+        if not isinstance(prop, URIRef):
+            continue
+        prop_name = short_name(prop)
+        domains = [d for d in graph.objects(prop, RDFS.domain) if isinstance(d, URIRef)]
+        ranges = [r for r in graph.objects(prop, RDFS.range) if isinstance(r, URIRef)]
+        for domain in domains or [URIRef("UnknownDomain")]:
+            for rng in ranges or [URIRef("UnknownRange")]:
+                src, dst = short_name(domain), short_name(rng)
+                classes.update([src, dst])
+                object_edges.append((src, prop_name, dst))
+
+    for prop in graph.subjects(RDF.type, OWL.DatatypeProperty):
+        if not isinstance(prop, URIRef):
+            continue
+        prop_name = short_name(prop)
+        domains = [d for d in graph.objects(prop, RDFS.domain) if isinstance(d, URIRef)]
+        ranges = [r for r in graph.objects(prop, RDFS.range) if isinstance(r, URIRef)]
+        for domain in domains or [URIRef("UnknownDomain")]:
+            for rng in ranges or [URIRef("Literal")]:
+                src, dst = short_name(domain), short_name(rng)
+                classes.add(src)
+                datatype_edges.append((src, prop_name, dst))
+
+    return OntologySchema(
+        classes=sorted(classes),
+        object_edges=object_edges,
+        datatype_edges=datatype_edges,
+    )

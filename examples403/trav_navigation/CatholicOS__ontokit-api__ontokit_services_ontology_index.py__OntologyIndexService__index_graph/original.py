@@ -1,0 +1,162 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : ontokit/services/ontology_index.py
+# region: OntologyIndexService._index_graph (lines 267-386, stratum trav_navigation)
+# licence of the source repository: see meta.json
+import uuid
+from rdflib import Graph, URIRef
+from rdflib import Literal as RDFLiteral
+from rdflib.namespace import OWL, RDF, RDFS, SKOS
+from ontokit.models.ontology_index import (
+    IndexedAnnotation,
+    IndexedEntity,
+    IndexedHierarchy,
+    IndexedLabel,
+    IndexingStatus,
+    OntologyIndexStatus,
+)
+from ontokit.services.ontology import (
+    ANNOTATION_PROPERTIES,
+    DEFAULT_LABEL_PREFERENCES,
+    LABEL_PROPERTY_MAP,
+)
+BATCH_SIZE = 1000
+ENTITY_TYPE_CLASS = "class"
+RDF_TYPE_MAP: list[tuple[URIRef, str]] = [
+    (OWL.Class, ENTITY_TYPE_CLASS),
+    (RDFS.Class, ENTITY_TYPE_CLASS),
+    (OWL.ObjectProperty, ENTITY_TYPE_OBJECT_PROPERTY),
+    (OWL.DatatypeProperty, ENTITY_TYPE_DATATYPE_PROPERTY),
+    (OWL.AnnotationProperty, ENTITY_TYPE_ANNOTATION_PROPERTY),
+    (RDF.Property, ENTITY_TYPE_OBJECT_PROPERTY),
+    (OWL.NamedIndividual, ENTITY_TYPE_INDIVIDUAL),
+]
+LABEL_PROPERTIES: list[tuple[str, URIRef]] = [
+    (str(RDFS.label), RDFS.label),
+    (str(SKOS.prefLabel), SKOS.prefLabel),
+    (str(SKOS.altLabel), SKOS.altLabel),
+    (str(URIRef("http://purl.org/dc/terms/title")), URIRef("http://purl.org/dc/terms/title")),
+    (
+        str(URIRef("http://purl.org/dc/elements/1.1/title")),
+        URIRef("http://purl.org/dc/elements/1.1/title"),
+    ),
+]
+
+for rdf_type, entity_type in RDF_TYPE_MAP:
+    for subject in graph.subjects(RDF.type, rdf_type):
+        if not isinstance(subject, URIRef):
+            continue
+        if subject == owl_thing:
+            continue
+
+        iri_str = str(subject)
+
+        # Skip if already processed (entity might have multiple types)
+        if iri_str in entity_ids:
+            continue
+
+        entity_id = uuid.uuid4()
+        entity_ids[iri_str] = entity_id
+        local_name = _extract_local_name(iri_str)
+
+        # Check deprecated
+        deprecated = False
+        for obj in graph.objects(subject, OWL.deprecated):
+            if str(obj).lower() in ("true", "1"):
+                deprecated = True
+                break
+
+        entity_rows.append(
+            {
+                "id": entity_id,
+                "project_id": project_id,
+                "branch": branch,
+                "iri": iri_str,
+                "local_name": local_name,
+                "entity_type": entity_type,
+                "deprecated": deprecated,
+            }
+        )
+        entity_count += 1
+
+        # Extract labels
+        for prop_iri_str, prop_uri in LABEL_PROPERTIES:
+            for obj in graph.objects(subject, prop_uri):
+                if isinstance(obj, RDFLiteral):
+                    label_rows.append(
+                        {
+                            "id": uuid.uuid4(),
+                            "entity_id": entity_id,
+                            "property_iri": prop_iri_str,
+                            "value": str(obj),
+                            "lang": obj.language,
+                        }
+                    )
+
+        # Extract hierarchy (only for classes)
+        if entity_type == ENTITY_TYPE_CLASS:
+            for parent in graph.objects(subject, RDFS.subClassOf):
+                if isinstance(parent, URIRef):
+                    hierarchy_rows.append(
+                        {
+                            "id": uuid.uuid4(),
+                            "project_id": project_id,
+                            "branch": branch,
+                            "child_iri": iri_str,
+                            "parent_iri": str(parent),
+                        }
+                    )
+
+        # Extract rdfs:comment as annotation (handled separately from
+        # ANNOTATION_PROPERTIES in ontology.py, but we index it here
+        # so get_class_detail can retrieve comments)
+        for obj in graph.objects(subject, RDFS.comment):
+            if isinstance(obj, RDFLiteral):
+                annotation_rows.append(
+                    {
+                        "id": uuid.uuid4(),
+                        "entity_id": entity_id,
+                        "property_iri": str(RDFS.comment),
+                        "value": str(obj),
+                        "lang": obj.language,
+                        "is_uri": False,
+                    }
+                )
+
+        # Extract annotations (beyond labels)
+        for _prop_label, prop_uri in ANNOTATION_PROPERTIES.items():
+            for obj in graph.objects(subject, prop_uri):
+                if isinstance(obj, RDFLiteral):
+                    annotation_rows.append(
+                        {
+                            "id": uuid.uuid4(),
+                            "entity_id": entity_id,
+                            "property_iri": str(prop_uri),
+                            "value": str(obj),
+                            "lang": obj.language,
+                            "is_uri": False,
+                        }
+                    )
+                elif isinstance(obj, URIRef):
+                    annotation_rows.append(
+                        {
+                            "id": uuid.uuid4(),
+                            "entity_id": entity_id,
+                            "property_iri": str(prop_uri),
+                            "value": str(obj),
+                            "lang": None,
+                            "is_uri": True,
+                        }
+                    )
+
+        # Flush buffers incrementally to avoid unbounded memory growth.
+        # Always flush entities first (labels/annotations have FK to entities).
+        needs_flush = (
+            len(entity_rows) >= BATCH_SIZE
+            or len(label_rows) >= BATCH_SIZE
+            or len(hierarchy_rows) >= BATCH_SIZE
+            or len(annotation_rows) >= BATCH_SIZE
+        )
+        if needs_flush:
+            await self._flush_buffer(IndexedEntity, entity_rows)
+            await self._flush_buffer(IndexedLabel, label_rows)
+            await self._flush_buffer(IndexedHierarchy, hierarchy_rows)
+            await self._flush_buffer(IndexedAnnotation, annotation_rows)

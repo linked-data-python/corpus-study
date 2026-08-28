@@ -1,0 +1,67 @@
+# Extracted from lv2/lv2@3c57dae600 : lv2specgen/lv2docgen.py
+# region: plugin_doc (lines 57-117, stratum trav_single_value)
+# licence of the source repository: see meta.json
+doap = rdflib.Namespace("http://usefulinc.com/ns/doap#")
+lv2 = rdflib.Namespace("http://lv2plug.in/ns/lv2core#")
+
+def plugin_doc(model, plugin, style_uri):
+    uri = str(plugin)
+    name = model.value(plugin, doap.name, None)
+
+    dtd = "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd"
+    html = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" %s>
+<html about="%s"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:lv2="http://lv2plug.in/ns/lv2core#"
+      xml:lang="en">""" % (
+        uri,
+        dtd,
+    )
+
+    html += """<head>
+    <title>%s</title>
+    <meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8" />
+    <meta name="generator" content="lv2docgen" />
+    <link href="%s" rel="stylesheet" type="text/css" />
+  </head>
+  <body>""" % (
+        name,
+        style_uri,
+    )
+
+    html += """
+  <!-- HEADER -->
+  <div id="header">
+    <h1 id="title">%s</h1>
+    <table id="meta">
+      <tr><th>URI</th><td><a href="%s">%s</a></td></tr>
+      <tr><th>Version</th><td>%s</td></tr>
+    </table>
+  </div>
+""" % (
+        name,
+        uri,
+        uri,
+        "0.0.0",
+    )
+
+    html += get_doc(model, plugin)
+
+    ports_html = ""
+    for link in model.triples([plugin, lv2.port, None]):
+        ports_html += port_doc(model, link[2])
+
+    if ports_html:
+        html += (
+            """
+  <h2 class="sec">Ports</h2>
+  <div class="content">
+%s
+  </div>"""
+            % ports_html
+        )
+
+    html += "  </body></html>"
+    return html

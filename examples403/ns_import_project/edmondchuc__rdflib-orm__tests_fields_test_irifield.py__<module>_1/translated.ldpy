@@ -1,0 +1,91 @@
+# Extracted from edmondchuc/rdflib-orm@b278d9699b : tests/fields/test_irifield.py
+# region: <module> (lines 1-84, stratum ns_import_project)
+# licence of the source repository: see meta.json
+import pytest
+from rdflib import Graph, URIRef
+
+from rdflib_orm import models
+from rdflib.namespace import RDF, OWL
+
+from rdflib_orm.db import Database
+from tests import BASE_URI
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix base: <http://example.com/> .
+
+
+
+def test_required_field_raises():
+    class TestModel(models.Model):
+        class_type = models.IRIField(rdf:type, owl:Thing)
+        irifield = models.IRIField(rdf:value, required=True)
+
+    with pytest.raises(models.FieldError):
+        TestModel(uri='test')
+
+
+def test_irifield_create():
+    class TestModel(models.Model):
+        class_type = models.IRIField(rdf:type, owl:Thing)
+        irifield = models.IRIField(rdf:value)
+
+    model = TestModel(uri='test', irifield='123')
+    assert model.irifield == '123'
+
+
+def test_irifield_convert_to_rdf():
+    g = Graph()
+    Database.set_db(g, base_uri=BASE_URI)
+
+    class TestModel(models.Model):
+        class_type = models.IRIField(rdf:type, owl:Thing)
+        irifield = models.IRIField(rdf:value)
+
+    model = TestModel(uri='test', irifield='123')
+    model.save()
+
+    value = g.value(base:test, rdf:value, None)
+    assert value == <123>
+
+
+def test_irifield_convert_to_rdf_none():
+    g = Graph()
+    Database.set_db(g, base_uri=BASE_URI)
+
+    class TestModel(models.Model):
+        class_type = models.IRIField(rdf:type, owl:Thing)
+        irifield = models.IRIField(rdf:value)
+
+    model = TestModel(uri='test', irifield=None)
+    model.save()
+
+    value = g.value(base:test, rdf:value, None)
+    assert value is None
+
+
+def test_irifield_convert_to_rdf_list_value():
+    g = Graph()
+    Database.set_db(g, base_uri=BASE_URI)
+
+    class TestModel(models.Model):
+        class_type = models.IRIField(rdf:type, owl:Thing)
+        irifield = models.IRIField(rdf:value, many=True)
+
+    model = TestModel(uri='test', irifield=['123', '456'])
+    model.save()
+
+    values = g.objects(base:test, rdf:value)
+    assert set(list(values)) == {<123>, <456>}
+
+
+def test_irifield_convert_to_rdf_list_value_raises():
+    g = Graph()
+    Database.set_db(g, base_uri=BASE_URI)
+
+    class TestModel(models.Model):
+        class_type = models.IRIField(rdf:type, owl:Thing)
+        irifield = models.IRIField(rdf:value, many=True)
+
+    model = TestModel(uri='test', irifield='123')
+    with pytest.raises(models.FieldError):
+        model.save()

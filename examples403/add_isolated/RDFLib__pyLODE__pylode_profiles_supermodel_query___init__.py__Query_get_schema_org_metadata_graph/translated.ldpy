@@ -1,0 +1,87 @@
+# Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/query/__init__.py
+# region: Query.get_schema_org_metadata_graph (lines 1040-1082, stratum add_isolated)
+# licence of the source repository: see meta.json
+from itertools import chain
+from rdflib import Dataset, Graph, Literal, URIRef
+from rdflib.namespace import (
+    DC,
+    DCTERMS,
+    FOAF,
+    ORG,
+    OWL,
+    PROF,
+    PROV,
+    QB,
+    RDF,
+    RDFS,
+    SDO,
+    SH,
+    SKOS,
+    VANN,
+)
+from pylode.rdf_elements import (
+    AGENT_PROPS,
+    OBJECT_PROPERTY_SUBCLASSES,
+    ONTOLOGY_PROPS,
+    ONTPUB,
+)
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix ontpub: <https://linked.data.gov.au/def/ontpub/> .
+
+
+def get_schema_org_metadata_graph(self):
+    graph = Graph()
+    for ont_iri in chain(
+        self.graph.subjects(predicate=rdf:type, object=owl:Ontology),
+        self.graph.subjects(predicate=rdf:type, object=skos:ConceptScheme),
+        self.graph.subjects(predicate=rdf:type, object=prof:Profile),
+    ):
+        graph += g{ {ont_iri} a sdo:DefinedTermSet }
+        for p_, o in self.graph.predicate_objects(ont_iri):
+            if p_ == dcterms:title:
+                graph += g{ {ont_iri} sdo:name {o} }
+            elif p_ == dcterms:description:
+                graph += g{ {ont_iri} sdo:description {o} }
+            elif p_ == dcterms:publisher:
+                graph += g{ {ont_iri} sdo:publisher {o} }
+                if not isinstance(o, Literal):
+                    for p2, o2 in self.graph.predicate_objects(o):
+                        if p2 in AGENT_PROPS:
+                            graph += g{ {o} {p2} {o2} }
+            elif p_ == dcterms:creator:
+                graph += g{ {ont_iri} sdo:creator {o} }
+                if not isinstance(o, Literal):
+                    for p2, o2 in self.graph.predicate_objects(o):
+                        if p2 in AGENT_PROPS:
+                            graph += g{ {o} {p2} {o2} }
+            elif p_ == dcterms:contributor:
+                graph += g{ {ont_iri} sdo:contributor {o} }
+                if not isinstance(o, Literal):
+                    for p2, o2 in self.graph.predicate_objects(o):
+                        if p2 in AGENT_PROPS:
+                            graph += g{ {o} {p2} {o2} }
+            elif p_ == dcterms:created:
+                graph += g{ {ont_iri} sdo:dateCreated {o} }
+            elif p_ == dcterms:modified:
+                graph += g{ {ont_iri} sdo:dateModified {o} }
+            elif p_ == dcterms:issued:
+                graph += g{ {ont_iri} sdo:dateIssued {o} }
+            elif p_ == dcterms:license:
+                graph += g{ {ont_iri} sdo:license {o} }
+            elif p_ == dcterms:rights:
+                graph += g{ {ont_iri} sdo:copyrightNotice {o} }
+
+    return graph

@@ -1,0 +1,42 @@
+# Extracted from ScaDS/KGpipe@67ca171cfd : src/kgpipe/evaluation/aspects/semantic.py
+# region: DisjointDomainMetric.compute (lines 267-299, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, RDF, Literal, OWL, RDFS, XSD
+from rdflib.query import Result, ResultRow
+from ...common.models import KG, Data, DataFormat
+from ..base import EvaluationAspect, AspectResult, AspectEvaluator, Metric, MetricResult
+from kgcore.api.ontology import OntologyExtractor, OntologyUtil, Ontology
+
+def compute(self, kg: KG, config: SemanticConfig, **kwargs) -> MetricResult:
+    """Compute disjoint domain score."""
+
+    raw_graph: Graph = kg.get_graph()
+    ontology_graph: Graph = kg.get_ontology_graph()
+    ontology = OntologyUtil.load_ontology_from_graph(ontology_graph)
+    graph = enrich_type_information(raw_graph, ontology)
+
+    for s, p, o in ontology_graph.triples((None, None, None)):
+        graph.add((s, p, o))
+
+    # Get all disjoint domains
+    disjoint_domains_qr: Result = graph.query(
+        """
+        SELECT DISTINCT ?subject
+        WHERE {
+            ?subject a ?disjointDomain1 .
+            ?subject a ?disjointDomain2 .
+            ?disjointDomain1 owl:disjointWith ?disjointDomain2 .
+        }
+        """
+    )
+    subjects_with_disjoint_domains = set([row["subject"] for row in disjoint_domains_qr if isinstance(row, ResultRow)])
+
+    subjects = set([str(s) for s in graph.subjects()])
+
+    return MetricResult(
+        name=self.name,
+        value=len(subjects_with_disjoint_domains),
+        normalized_score=1.0 - (len(subjects_with_disjoint_domains) / len(subjects)),
+        details={"subjects_with_disjoint_domains": len(subjects_with_disjoint_domains), "subjects": len(subjects)},
+        aspect=self.aspect
+    )

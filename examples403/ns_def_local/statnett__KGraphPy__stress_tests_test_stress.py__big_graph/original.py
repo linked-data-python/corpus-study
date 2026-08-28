@@ -1,0 +1,33 @@
+# Extracted from statnett/KGraphPy@38859be62f : stress_tests/test_stress.py
+# region: big_graph (lines 13-36, stratum ns_def_local)
+# licence of the source repository: see meta.json
+import pytest
+from rdflib import Graph, URIRef, Literal, Namespace, RDF
+from kgraphpy.graph import CIMGraph
+from kgraphpy.header import CIMMetadataHeader
+from kgraphpy.namespaces import update_namespace_in_triples, DCAT_EXT
+
+@pytest.fixture(scope="session")
+def big_graph() -> Graph:
+    g = CIMGraph()
+    g.bind("ex", "http://example.org/")
+    g.metadata_header = CIMMetadataHeader.empty(URIRef("h1"))
+    g.metadata_header.add_triple(RDF.type, DCAT_EXT.Dataset)
+
+    NS_SPECIAL = Namespace("http://example.org/special/")
+    NS_OTHER = Namespace("http://example.org/other/")
+
+    # Example: 20% of triples use the special namespace
+    for i in range(5_000_000):
+        if i % 100 < 20:
+            subj = NS_SPECIAL[f"s{i}_special"]
+        else:
+            subj = NS_OTHER[f"s{i}"]
+
+        g.add((subj, RDF.type, DCAT_EXT.Dataset))
+        # g.add((subj, URIRef("http://example.org/p1"), Literal(i)))
+        # g.add((subj, URIRef("http://example.org/p2"), Literal(i)))
+        # g.add((subj, URIRef("http://example.org/p3"), Literal(i)))
+        # g.add((subj, URIRef("http://example.org/p4"), Literal(i)))
+
+    return g

@@ -1,0 +1,17 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v1_0_0.py
+# region: <module> (lines 149-151, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, PROV
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+g_ab  = Graph(); g_ab.parse(f"{H}/02-ontology/semtech_abox_v1_0_0.ttl")
+
+ex_no_prov = [str(s) for s in g_ab.subjects(rdf:type, owl:NamedIndividual)
+              if list(g_ab.objects(s, rdf:type)) and any(str(t).startswith(str(SEM)+"T") for t in g_ab.objects(s, rdf:type))
+              and not g_ab.value(s, sem:hasSourceProvenance)]

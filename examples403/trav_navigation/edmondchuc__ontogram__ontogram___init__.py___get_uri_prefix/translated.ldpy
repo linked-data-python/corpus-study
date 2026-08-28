@@ -1,0 +1,28 @@
+# Extracted from edmondchuc/ontogram@777ea837bc : ontogram/__init__.py
+# region: _get_uri_prefix (lines 85-100, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, BNode
+from rdflib.namespace import RDF, OWL, RDFS, DCTERMS
+from ontogram.curies import CURIES
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+def _get_uri_prefix(uri : str, g):
+    # Get the prefix of the URI.
+    prefix = ''
+    for k, v in CURIES.items():
+        if v == uri:
+            prefix = k
+            return prefix
+
+    # Didn't find a matching prefix in CURIES.
+    # TODO: Do something here e.g. a lookup to prefix.cc or something else.
+    for ontology, _, _ in g.triples((None, rdf:type, owl:Ontology)):
+        for preferred_prefix in g.objects(ontology, <http://purl.org/vocab/vann/preferredNamespacePrefix>):
+            return preferred_prefix
+
+    # Nothing was found, just return an empty string.
+    return prefix

@@ -1,0 +1,95 @@
+# Extracted from Mat-O-Lab/ckanext-csvtocsvw@a8856596aa : ckanext/csvtocsvw/csvw_parser.py
+# region: CSVWtoRDF.add_table_data (lines 287-373, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.collection import Collection
+from rdflib.namespace import CSVW, RDF, XSD
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix oa: <http://www.w3.org/ns/oa#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+XSD_NUMERIC = [xsd:float, xsd:decimal, xsd:integer, xsd:double]
+
+def add_table_data(self, g: Graph) -> Graph:
+    """_summary_
+
+    Args:
+        g (Graph): Grapg to add the table data tripells to
+
+    Returns:
+        Graph: Input Graph return with triples of table added
+    """
+    for table, data in self.tables.items():
+        print("table: {}, about_url: {}".format(table, data["about_url"]))
+        # g.add((table_group,csvw:table, table))
+        g += g{ {table} a csvw:Table }
+        if data["about_url"]:
+            row_uri = data["about_url"]
+        else:
+            row_uri = "table-{TABLE}-gid-{GID}".format(table)
+        columns = list(data["columns"].items())
+        for index, row in enumerate(data["lines"]):
+            # print(index, row)
+            row_node = BNode()
+            values_node = URIRef(row_uri.format(GID=index))
+            g += g{
+                {table} csvw:row {row_node} .
+                {row_node} a csvw:Row ;
+                   csvw:describes {values_node}
+            }
+            row_num = (
+                index
+                + data["dialect"][csvw:skipRows]
+                + data["dialect"][csvw:headerRowCount]
+            )
+            g += g{ {row_node} csvw:url {URIRef("{}/row={}".format(self.csv_url, row_num))} }
+            for cell_index, cell in enumerate(row):
+                # print(self.columns[cell_index])
+                column_data = columns[cell_index][1]
+                if column_data[csvw:name] == Literal("GID"):
+                    continue
+                format = column_data.get(csvw:format, xsd:string)
+                unit = column_data.get(qudt:unit, None)
+                if format == xsd:double and isinstance(cell, str):
+                    cell = cell.replace(".", "")
+                    cell = cell[::-1].replace(",", ".", 1)[::-1]
+
+                if format in XSD_NUMERIC:
+                    value_node = BNode()
+                    g += g{
+                        {value_node} a qudt:QuantityValue ;
+                           qudt:value {Literal(cell)}
+                    }
+                    if unit:
+                        g += g{ {value_node} qudt:unit {unit} }
+                elif format == xsd:anyURI:
+                    # see if its a list of uris
+                    if len(cell.split(" ")) >= 1:
+                        value_node = BNode()
+                        uris = list(map(URIRef, cell.split(" ")))
+                        Collection(g, value_node, uris)
+                    else:
+                        value_node = URIRef(cell)
+                else:
+                    value_node = BNode()
+                    body_node = BNode()
+                    g += g{
+                        {value_node} a oa:Annotation ;
+                           oa:hasBody {body_node} .
+                        {body_node} a oa:TextualBody ;
+                           oa:format "text/plain" ;
+                           oa:value {Literal(cell, datatype=format)}
+                    }
+
+                # if isinstance(column,URIRef) and str(self.meta_root)!='file:///src/': #has proper uri
+                #     g.add((value_node, column, Literal(cell)))
+
+                if csvw:aboutUrl in column_data.keys():
+                    aboutUrl = column_data[csvw:aboutUrl]
+                    g += g{ {values_node} {URIRef(aboutUrl.format(GID=index))} {value_node} }
+                else:
+                    name = column_data[csvw:name]
+                    g += g{ {values_node} {URIRef(name)} {value_node} }
+    return g

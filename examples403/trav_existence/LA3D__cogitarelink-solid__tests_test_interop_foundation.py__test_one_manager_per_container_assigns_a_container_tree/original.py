@@ -1,0 +1,21 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
+# region: test_one_manager_per_container_assigns_a_container_tree (lines 108-120, stratum trav_existence)
+# licence of the source repository: see meta.json
+import rdflib
+ST = rdflib.Namespace("http://www.w3.org/ns/shapetrees#")
+MGR_DIR = REPO / "overlays/wiki-memory/interop/managers"
+CONTAINER_SLUGS = ["concepts", "people", "places", "events", "organizations", "procedures", "working"]
+
+def test_one_manager_per_container_assigns_a_container_tree():
+    for slug in CONTAINER_SLUGS:
+        f = MGR_DIR / f"{slug}.shapetree.ttl"
+        assert f.exists(), f"missing manager {f}"
+        g = rdflib.Graph(); g.parse(f, format="turtle")
+        mgr = next(g.subjects(rdflib.RDF.type, ST.Manager))
+        a = g.value(mgr, ST.hasAssignment)
+        assert a is not None, f"{slug}: no st:hasAssignment"
+        assigned = g.value(a, ST.assigns)
+        assert assigned is not None and str(assigned).endswith("ContainerTree"), f"{slug}: st:assigns must be a ContainerTree"
+        # A container Manager assigns the container tree + names the managed container; the per-resource
+        # validation focus is each contained resource's <#this> (resolved at validation, not pinned here).
+        assert g.value(a, ST.manages) is not None, f"{slug}: st:manages must name the container"

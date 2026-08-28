@@ -1,0 +1,101 @@
+# Extracted from OntoUML/ontouml-json2graph@982f12b9c4 : json2graph/decoder/decode_main.py
+# region: decode_dictionary (lines 27-115, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, RDF, XSD
+from ..modules import arguments as args
+from ..modules.text_values import warn_if_text_value_is_unsupported
+from ..modules.utils_graph import ontouml_ref
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+LOGGER = initialize_logger()
+
+def decode_dictionary(dictionary_data: dict, ontouml_graph: Graph, language: str) -> None:
+    """Receive the full dictionary with the loaded JSON data and decode known allowed values to the OntoUML Graph.
+
+    Recursively evaluates the dictionary to create all possible instances, setting their types and attributes.
+
+    OntoUML-Vocabulary properties that are directly decoded in the general decoder:
+        - description, height, isAbstract, isComplete, isDerived, isDisjoint, isOrdered, isReadOnly, name, width
+
+    Restricted properties (the ones in the restricted_fields list) are not treated in this function.
+
+    :param dictionary_data: Dictionary to have its fields decoded.
+    :type dictionary_data: dict
+    :param ontouml_graph: Knowledge graph that complies with the OntoUML Vocabulary.
+    :type ontouml_graph: Graph
+    :param language: Language tag to be added to the ontology's concepts.
+    :type language: str
+    """
+    restricted_fields = [
+        "aggregationKind",
+        "cardinality",
+        "isExtensional",
+        "isPowertype",
+        "order",
+        "stereotype",
+        "x",
+        "y",
+    ]
+    non_negative_integer_fields = ["width", "height"]
+
+    # Treating Path sub dictionaries
+    if "id" not in dictionary_data:
+        return
+
+    # Creating instance
+    instance_uri = args.ARGUMENTS["base_uri"] + dictionary_data["id"]
+    new_instance = URIRef(instance_uri)
+
+    # Setting instance type
+    instance_type = ontouml_ref(dictionary_data["type"])
+    ontouml_graph += g{ {new_instance} a {instance_type} }
+
+    # Adding other attributes
+    for key in dictionary_data.keys():
+        # if id or type was already treated, skip
+        if key == "id" or key == "type":
+            continue
+
+        # A legacy Text.value field has no equivalent in OntoUML Vocabulary v1.1.1.
+        # Empty values are omitted silently; non-empty values are omitted with a warning.
+        if key == "value" and dictionary_data["type"] == "Text":
+            warn_if_text_value_is_unsupported(dictionary_data)
+            continue
+
+        # If it is of a restricted field, do not add other attributes now
+        if key in restricted_fields:
+            continue
+
+        # Recursively treats sub-dictionaries inside lists
+        if type(dictionary_data[key]) is list:
+            for item in dictionary_data[key]:
+                if type(item) is dict:
+                    decode_dictionary(item, ontouml_graph, language)
+            continue
+
+        # Recursively treats sub-dictionaries
+        if type(dictionary_data[key]) is dict:
+            decode_dictionary(dictionary_data[key], ontouml_graph, language)
+            continue
+
+        # Graph's PREDICATE definition
+        new_predicate = ontouml_ref(key)
+
+        # Graph's OBJECT definition
+        if (key == "name") and language != "":
+            new_object = Literal(dictionary_data[key], lang=language)
+        elif key in non_negative_integer_fields:
+            dimension_value = dictionary_data[key]
+            if type(dimension_value) is not int or dimension_value < 0:
+                LOGGER.error(
+                    f"The object with ID {dictionary_data['id']} has an invalid value for its field '{key}' "
+                    f"and was not transformed (expected a non-negative integer, received {dimension_value!r})."
+                )
+                continue
+            new_object = Literal(dimension_value, datatype=xsd:nonNegativeInteger)
+        else:
+            new_object = Literal(dictionary_data[key])
+
+        # Adding to graph
+        ontouml_graph += g{ {new_instance} {new_predicate} {new_object} }

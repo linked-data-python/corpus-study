@@ -1,0 +1,85 @@
+# Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/methods/hrules.py
+# region: _HRulesMethod.do_compute_obsels (lines 100-171, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from rdflib import Literal, RDF, URIRef, XSD
+from rdfrest.util import check_new
+from .abstract import AbstractMonosourceMethod, NOT_MON, PSEUDO_MON, STRICT_MON
+from .utils import copy_obsel, translate_node
+from ..namespace import KTBS, KTBS_NS_URI
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+LOG = logging.getLogger(__name__)
+
+def do_compute_obsels(self, computed_trace, cstate, monotonicity, diag):
+    """I implement :meth:`.abstract.AbstractMonosourceMethod.do_compute_obsels
+    """
+    source = computed_trace.source_traces[0]
+    source_obsels = source.obsel_collection
+    target_obsels = computed_trace.obsel_collection
+    bgps = cstate["bgps"]
+    last_seen_u = cstate["last_seen_u"]
+    if last_seen_u:
+        last_seen_u = URIRef(last_seen_u)
+    last_seen_b = cstate["last_seen_b"]
+
+    begin = None
+    after = None
+    if monotonicity is NOT_MON:
+        LOG.debug("non-monotonic %s", computed_trace)
+        last_seen_u = last_seen_b = None
+        target_obsels._empty() # friend #pylint: disable=W0212
+    elif monotonicity is STRICT_MON:
+        LOG.debug("strictly temporally monotonic %s", computed_trace)
+        if last_seen_u:
+            after = last_seen_u
+    elif monotonicity is PSEUDO_MON:
+        LOG.debug("pseudo temporally monotonic %s", computed_trace)
+        if last_seen_b is not None:
+            begin = last_seen_b - source.get_pseudomon_range()
+    else:
+        LOG.debug("non-temporally monotonic %s", computed_trace)
+
+    source_uri = source.uri
+    target_uri = computed_trace.uri
+    source_state = source_obsels.state
+    target_contains = target_obsels.state.__contains__
+    target_add_graph = target_obsels.add_obsel_graph
+    check_new_obs = lambda uri, g=target_obsels.state: check_new(g, uri)
+
+    inserted = set()
+    with target_obsels.edit({"add_obsels_only":1}, _trust=True):
+        for _rank, new_type, bgp in bgps:
+            new_type = URIRef(new_type)
+            select = source_obsels.build_select(after=after, bgp=bgp)
+            query_str = "PREFIX ktbs: <%s#> %s" % (KTBS_NS_URI, select)
+            tuples = list(source_obsels.state.query(query_str))
+
+            for obs_uri, in tuples:
+                new_obs_uri = translate_node(obs_uri, computed_trace,
+                                             source_uri, False)
+                if monotonicity is PSEUDO_MON\
+                and target_contains((new_obs_uri, KTBS.hasTrace, target_uri))\
+                or new_obs_uri in inserted:
+                    # could be either because of pseudo-monotony,
+                    # or because a BGP with higher priority already matched
+                    LOG.debug("--- already seen %s", new_obs_uri)
+                    continue # already added
+
+                new_obs_graph = copy_obsel(obs_uri, computed_trace, source,
+                                           new_obs_uri=new_obs_uri,
+                                           check_new_obs=check_new_obs,
+                )
+                new_obs_graph.set((new_obs_uri, rdf:type, new_type))
+                target_add_graph(new_obs_graph)
+                inserted.add(new_obs_uri)
+
+    for obs in source.iter_obsels(begin=begin, reverse=True, limit=1):
+        # iter only once on the last obsel, if any
+        last_seen_u = obs.uri
+        last_seen_b = obs.begin
+
+    if last_seen_u is not None:
+        last_seen_u = str(last_seen_u)
+    cstate["last_seen_u"] = last_seen_u
+    cstate["last_seen_b"] = last_seen_b

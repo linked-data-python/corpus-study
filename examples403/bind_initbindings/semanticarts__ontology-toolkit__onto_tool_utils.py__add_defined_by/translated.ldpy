@@ -1,0 +1,62 @@
+# Extracted from semanticarts/ontology-toolkit@99a1a00917 : onto_tool/utils.py
+# region: add_defined_by (lines 47-96, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+import logging
+from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def add_defined_by(g, ontology_iri, mode='strict', replace=False, versioned=False):
+    """Add rdfs:isDefinedBy to every entity declared by the ontology."""
+    if versioned:
+        version_iri = next(g.objects(ontology_iri, owl:versionIRI), None)
+        if version_iri is not None:
+            ontology_iri = version_iri
+    if mode == 'strict':
+        selector = """
+          FILTER(?dtype IN (
+            owl:Class, owl:ObjectProperty, owl:DatatypeProperty,
+            owl:AnnotationProperty, owl:Thing
+          ))
+        """
+    else:
+        selector = "FILTER(?dtype != owl:Ontology)"
+
+    query = """
+        SELECT distinct ?defined ?label ?defBy WHERE {
+          ?defined a ?dtype .
+          %s
+          FILTER(!ISBLANK(?defined))
+          FILTER EXISTS {
+            ?defined ?anotherProp ?value .
+            FILTER (?anotherProp != rdf:type)
+          }
+          OPTIONAL { ?defined rdfs:isDefinedBy ?defBy }
+        }
+        """ % selector
+
+    definitions = g.query(
+        query,
+        initNs={'owl': OWL, 'rdfs': RDFS, 'skos': SKOS})
+    for d in definitions:
+        if d.defBy:
+            if d.defBy == ontology_iri:
+                logging.debug('%s already defined by %s',
+                              d.defined, ontology_iri)
+            else:
+                if replace:
+                    logging.debug(
+                        'Replaced definedBy for %s to %s',
+                        d.defined, ontology_iri)
+                    g.remove((d.defined, rdfs:isDefinedBy, d.defBy))
+                    g += g{ {d.defined} rdfs:isDefinedBy {ontology_iri} }
+                else:
+                    logging.warning('%s defined by %s instead of %s',
+                                    d.defined, d.defBy, ontology_iri)
+        else:
+            logging.debug('Added definedBy to %s', d.defined)
+            g += g{ {d.defined} rdfs:isDefinedBy {ontology_iri} }

@@ -1,0 +1,26 @@
+# Extracted from mapsa/blathers@cad7822217 : src/blathers/extract.py
+# region: _extract_nested_node (lines 157-170, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+_STRUCTURAL_NS = (str(RDF), str(RDFS), str(OWL), str(SH))
+
+def _extract_nested_node(g: Graph, node: BNode) -> ExtractedNestedNode:
+    """Read a blank node's predicates into labelled rows, in document order."""
+    extracted = ExtractedNestedNode(comment=_str_or_none(g.value(node, rdfs:comment)))
+    rows: dict[URIRef, NestedRow] = {}
+    for pred, value in g.predicate_objects(node):
+        if str(pred).startswith(_STRUCTURAL_NS):
+            continue
+        row = rows.setdefault(pred, NestedRow(
+            property_iri=str(pred),
+            label=_term_label(g, pred),
+        ))
+        row.values.append(str(value))
+    extracted.rows = list(rows.values())
+    return extracted
