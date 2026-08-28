@@ -188,3 +188,31 @@ def test_only_approved_pairs_enter_the_403_aggregates(tmp_path, monkeypatch):
     assert agg["pairs_reviewed_basis"] == "approved"
     assert agg["by_stratum"]["remove"]["n"] == 1
     assert agg["by_construction"]["-{ }"]["pairs"] == 1
+
+
+def test_check_reports_a_pair_that_does_not_transpile(tmp_path):
+    from rdfeval.check import check
+    (tmp_path / "translated.ldpy").write_text("x = ?\n")
+    (tmp_path / "driver.py").write_text("")
+    r = check(tmp_path)
+    assert not r["ok"] and not r["transpiles"]
+    assert "transpile:" in r["error"]
+
+
+def test_check_passes_a_real_pair(tmp_path):
+    from rdfeval.check import check
+    (tmp_path / "original.py").write_text(
+        "from rdflib import Graph, Namespace\n"
+        "EX = Namespace('http://e/')\n"
+        "g = Graph()\n"
+        "g.add((EX.a, EX.p, EX.b))\n")
+    (tmp_path / "translated.ldpy").write_text(
+        "from rdflib import Graph\n"
+        "@prefix ex: <http://e/> .\n"
+        "@graph as g\n"
+        "+{ ex:a ex:p ex:b }\n")
+    (tmp_path / "driver.py").write_text(
+        "from rdfeval.harness import run_pair\nVERDICT = run_pair(__file__)\n")
+    r = check(tmp_path)
+    assert r["transpiles"]
+    assert r["ok"], r["error"]

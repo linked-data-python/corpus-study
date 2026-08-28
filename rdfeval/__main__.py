@@ -10,7 +10,7 @@ from .config import load_config
 
 STAGES = ("discover", "select", "acquire", "analyze", "sample", "regions",
           "translate", "validate", "compare", "aggregate", "audit",
-          "surface", "strata", "userstudy", "all")
+          "surface", "strata", "check", "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
 # acquire) and the human-in-the-loop stage (translate review) stay explicit.
@@ -23,6 +23,8 @@ def main(argv: list[str] | None = None) -> int:
         prog="rdfeval",
         description="Empirical evaluation pipeline: RDFLib corpus vs LD Python")
     parser.add_argument("stage", choices=STAGES)
+    parser.add_argument("targets", nargs="*",
+                        help="check: the example directories to verify")
     parser.add_argument("--config", default=None,
                         help="alternative evaluation.toml")
     parser.add_argument("--limit", type=int, default=None,
@@ -77,6 +79,9 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "strata":
             from . import strata
             strata.run(config)
+        elif stage == "check":
+            from . import check as check_mod
+            raise SystemExit(check_mod.main(args.targets))
         elif stage == "userstudy":
             from . import userstudy
             userstudy.run(config)
