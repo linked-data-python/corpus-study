@@ -74,6 +74,24 @@ python -m rdfeval strata      # seeded draw, 100 regions per stratum, capped
 python -m rdfeval validate    # (as above)
 ```
 
+Driving the campaign:
+
+```
+python -m rdfeval check examples403/<stratum>/<id>   # transpile + run the driver
+python -m rdfeval status --study 403 [--run-checks]  # where the campaign stands
+python -m rdfeval review --study 403                 # the human review, pair by pair
+python -m rdfeval compare --study 403                # pair metrics (final pairs)
+python -m rdfeval aggregate --study 403              # APPROVED pairs only
+python -m rdfeval article --study 403                # one publishable example per stratum
+python scripts/make_batches.py --per-stratum 6       # plan what is LEFT to translate
+```
+
+Translators follow [INSTRUCTIONS_403.md](INSTRUCTIONS_403.md) (what to
+translate into what) and [AGENT_BATCH.md](AGENT_BATCH.md) (how a batch is
+run and verified). The two machine checks are pre-conditions: a pair that
+fails either never reaches a reviewer. **Only approved pairs enter the
+published aggregates**, which always say "n approved of m translated".
+
 The strata overlap by design, so a region drawn for several is translated once
 and credited to each. Regions that **read** a graph are proved equivalent not
 by isomorphism but by the equality of the values both versions produce from a
