@@ -1,4 +1,15 @@
-# Input graph for TDCC-NES__askwol__src_askwol_shacl_runner.py___prepare — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for TDCC-NES__askwol__src_askwol_shacl_runner.py___prepare
+# Covers: several solutions of the pattern the demo's query reads (ex:a,
+# ex:b), the zero-solution case (a second query, in driver.py, against a
+# type with no member), and neighbouring triples that must NOT match
+# (ex:c, wrong type).
 @prefix ex: <http://example.org/> .
+
+ex:a a ex:Thing ;
+    ex:label "A" .
+
+ex:b a ex:Thing ;
+    ex:label "B" .
+
+ex:c a ex:Other ;
+    ex:label "C" .

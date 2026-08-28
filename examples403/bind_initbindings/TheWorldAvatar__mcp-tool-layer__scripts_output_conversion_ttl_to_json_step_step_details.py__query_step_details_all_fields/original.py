@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from typing import Any, Dict, List
 from rdflib import Graph, URIRef
+from step_details_context import _camelize, _local_name, query_step_type_label
 
 def query_step_details_all_fields(graph: Graph, step_uri: str) -> Dict[str, Any]:
     """Collect all direct properties of a step, preferring labels for object IRIs.

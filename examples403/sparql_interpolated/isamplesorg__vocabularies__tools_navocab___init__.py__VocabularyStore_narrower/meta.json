@@ -12,10 +12,22 @@
   "categories": {
     "sparql": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "the query text itself never concatenates a TERM: `concept`/`v` already travel safely via `initBindings={\"parent\": concept}` / `{\"vocabulary\": v, \"parent\": concept}`. What is assembled by `+` is the PROLOGUE: `VocabularyStore._PFX + \"\"\"SELECT ?s WHERE {...}\"\"\"`, a class-attribute PREFIX header string glued onto the query body -- the extractor's sparql_interpolated detector fires on that concatenation, even though the injection-by-splicing risk the strate is chiefly about does not apply here (initBindings already is the safe idiom the strate wants). Recording this because it is a genuine edge of the strata boundary: a query 'assembled by concatenation' that is not a term-injection case.",
+    "translation used the table's own cross-reference (INSTRUCTIONS_403 SS2, row bind_initbindings): `?parent` and `?vocabulary` are NOT projected (only `?s` is in SELECT), so per 'terme interpole dans s{ } si la variable n'est pas projetee', they become direct term interpolations -- `{concept}` in place of `?parent`, `{v}` in place of `?vocabulary` -- rather than a `.first()`/`(bindings=...)` call. This also makes `VocabularyStore._PFX` (and the whole shim class it lives on) unnecessary in translated.ldpy: the prologue is inherited from a single `@prefix skos:` declaration instead of a concatenated 4-line PREFIX header (rdf:/rdfs:/owl: dropped -- unused by these two queries).",
+    "classified minor-restructuring, not directly-expressible: the query line is a direct substitution, but correctness depends on recognising which variables are unprojected (so they may be inlined as terms) and on retiring the _PFX concatenation in favour of @prefix -- a structural change to how the prologue reaches the query, not just a syntax swap.",
+    "s{ } iteration confirmed empirically to yield rdflib ResultRow objects supporting r[0] indexing exactly like g.query(), including for a single-projected-variable SELECT (unlike m{ }, whose arity-1 rule yields bare terms) -- so `self._one_res(qres, ...)`, which does `r[0]` per row, needed no change.",
+    "driver: `_Store` stand-in reproduces the three upstream methods the region reads (expand_name, compact_name, _one_res verbatim from tools/navocab/__init__.py:214-238); navocab_shim.py supplies only `VocabularyStore._PFX` for original.py (translated.ldpy does not import it). Fixture: Animal has three narrower concepts (several solutions), Wolf is in a different skos:inScheme and must be excluded once v is given (the neighbourhood the v-filter exists for), Rock has none (zero solutions), Fish/Cactus are broader-than-Plant/skos:related distractors. NEGATIVE CONTROL run: dropping the skos:inScheme triple from the v-branch query lets Wolf leak into call[1]'s result -- confirms the fixture is not a hollow green."
+  ],
   "draft_sha": "f546399ec817b933",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.071145+00:00",
@@ -26,5 +38,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

@@ -12,10 +12,16 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE, and it is the strate's `prepareQuery` case the batch brief warned about. `_prepare(query_text, init_ns_items, base)` is a generic, module-level `functools.lru_cache`d factory: `query_text` arrives as a plain runtime `str` PARAMETER, called from many sites across the file (verified against the real source: `_cached_query`, a monkey-patch of `Graph.query` installed at import time, calls `_prepare(query_object, init_ns_items, base)` with `query_object` being whatever text any caller anywhere passed to `graph.query(...)`). `s{ }` needs its query text written LITERALLY at the island site -- that is exactly what buys transpile-time validation against rdflib (querying.md) -- so there is no island for 'compile this string I was just handed'. The minimal extract that shows the gap is the whole region: one line, `prepareQuery(query_text, initNs=init_ns, base=base)`, with `query_text` a parameter, not a literal.",
+    "Consequence: translated.ldpy is byte-identical to original.py (down to the added demo harness) -- the 'transparence exacte' case already on record (DESIGN_CHOICES ldpy/012, confirmations): no RDF structure is reachable by the notation here, so none is spent. `constructions` is therefore empty on purpose, not an oversight.",
+    "Worth recording as a second, smaller finding: even in the fully-general case where this WERE inlinable, the two caching models differ. `functools.lru_cache(maxsize=256)` is a true LRU keyed on the full argument tuple. The island's own internal cache (runtime.py `_SPARQL_CACHE`, `_SPARQL_CACHE_MAX = 64`, 'ecrit a la main (pas de lru_cache : fiche 008)') evicts `next(iter(_SPARQL_CACHE))` when full -- insertion order, not recency -- and is keyed on (text, sorted namespace items), with no `base` component at all. A program relying on _which_ query gets evicted under pressure (this one does not) would see different behaviour after translation even where s{ } otherwise applied.",
+    "meta.oracle was already 'values' from the pipeline (categories: sparql:1 correctly detected here) and is kept. fixture.ttl and driver.py were written by hand: `_prepare`'s own return value (a prepared-query object) has no useful __eq__, so run_pair's default entry/calls comparison would report a spurious diff on every run regardless of correctness -- the driver's `demo` harness (added identically to both files, same pattern as the pyLODE precedent in this study) instead compares (a) whether a second call with the same arguments is served from the cache, and (b) the rows the prepared query actually produces against fixture.ttl, covering two solutions, a neighbour of the wrong rdf:type that must not match, and a zero-solution query."
+  ],
+  "article_candidate": true,
   "draft_sha": "d412fae72f6f23dc",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.412536+00:00",

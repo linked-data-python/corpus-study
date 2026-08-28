@@ -10,12 +10,16 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "s{ }", "call suffix (g)", "interpolation {expr}", "prefixed name", "variable"],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, OWL->owl, RDFS->rdfs, SKOS->skos"
+    "Two separate rdflib mechanisms in one call site, both belong to this stratum but translate differently. (1) `initNs=namespaces` (a dict of DCTERMS/OWL/RDFS/SKOS built only to feed initNs) is exactly 'the prologue inherited from @prefix': the dict, and the now-unused `from rdflib.namespace import DCTERMS, OWL, RDFS, SKOS` import, disappear, replaced by @prefix dcterms:/rdfs:/skos: at file scope (OWL dropped too -- it was never used inside the query text, only carried in the initNs dict). (2) The FILTER's `STRSTARTS(STR(?s), \"xxx\")` is not bound through initBindings at all: the original assembles it with `.replace(\"xxx\", target_namespace)`, a textual splice into the quoted string literal -- the exact `sparql_interpolated` trap INSTRUCTIONS_403 SS2 warns against reproducing. Its correct address in s{ } is unrelated to the projected/non-projected question the strate's initBindings guidance turns on (STRSTARTS's second argument is not a SPARQL variable at all): it is simply `FILTER STRSTARTS(STR(?s), {target_namespace})`, {expr} in term (function-argument) position, which the querying.md example already covers for FILTER calls.",
+    "meta.oracle corrected from the pipeline default \"isomorphism\" to \"values\": the automated categoriser recorded rdf_ops=0 / categories={} for this region (it evidently does not recognise `g.query(q, initNs=...)` when q is built through a `.replace()` chain rather than passed as a literal), so the pipeline's reads-heuristic (translate.py) never set the fixture-driven driver template. The region unambiguously reads a graph and returns computed values (elements, elements_strs); fixture.ttl and driver.py were written by hand against the reading oracle (corpus/405): several solutions across all three OPTIONAL branches (dcterms:description / rdfs:comment / skos:definition), one in-namespace member with none of the three (str(None) survives the OPTIONAL's unbound ?def on both sides), a zero-solution namespace, and two neighbours that must NOT match for two different reasons (wrong namespace; right namespace but no `a` triple at all).",
+    "`args.target_namespace`, read in the f-string loop building elements_strs, is a genuine dangling reference to a module-level argparse Namespace that lies outside the extracted region (not in the region's context lines either) -- restored via a mutable shim (lexmalta_context.py) that the driver sets per call, per AGENT_BATCH.md's context-shim protocol. Kept exactly as the source has it (it duplicates the function's own `target_namespace` parameter instead of using it directly), no refactor.",
+    "Single island in the function (one g.query call survives after q_label-style dead code elimination -- there is only one query here), so the call suffix `s{ ... }(g)` was used rather than a @graph declaration, consistent with the acquirium/kglab-ggg threshold already recorded elsewhere: a declaration would cost a line to save a parenthesis."
   ],
+  "article_candidate": true,
   "draft_sha": "4c64ad11ce5088ff",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.410280+00:00",
@@ -26,5 +30,5 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values"
 }

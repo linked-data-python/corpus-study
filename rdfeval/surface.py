@@ -212,6 +212,11 @@ STRATA = {
     "trav_single_value":    ".first() / .one() (016)",
     "trav_existence":       "m{ } as a condition, ASK (016)",
     "sparql_literal":       "s{ } (015)",
+    # NB: counts a query whose TEXT is assembled (f-string, concat, %,
+    # .format) — a concatenated PREFIX prologue included, whose values
+    # may already travel safely through initBindings.  "assembled by
+    # hand" is not "unsafely injected": the narrower claim belongs to
+    # `bind_term_interpolated`.
     "sparql_interpolated":  "s{ } with interpolated terms (015)",
     "bind_initbindings":    "@bindings, inherited prologue (017)",
     "coercion_datatype":    "Coercion (020)",

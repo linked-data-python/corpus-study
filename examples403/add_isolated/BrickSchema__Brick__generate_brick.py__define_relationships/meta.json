@@ -13,12 +13,17 @@
     "graph_write": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}", "prefixed name"],
   "translation_notes": [
     "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref",
-    "rdf:type aliases rendered as Turtle `a`: A"
+    "rdf:type aliases rendered as Turtle `a`: A",
+    "9 .add() call sites on the single parameter `graph` (recursively re-passed): one @graph graph at the top of the function body designates it for the whole suite, and every .add() becomes +{ }. The two adjacent, unconditional, same-subject PropertyShape triples (rdf:type + sh:path) were merged into one +{ propshape a sh:PropertyShape ; sh:path prop } (add_run_shared_subject shape); the other 7 stay separate +{ } statements, each guarded by its own if/for exactly as in the original -- no restructuring.",
+    "BRICK, BSH, SH etc. stay bound as plain rdflib Namespace objects (from the context shim) alongside the @prefix forms, because the function also uses them as Python values outside any island: `prop.startswith(BRICK)`, `BRICK[prop]`, `BSH[f'...']` slicing off len(BRICK). Only the terms actually written into a triple became prefixed names / interpolations.",
+    "Context shim brick_context.py restores: the real IRIs from bricksrc/namespaces.py (package not installed), a plain rdflib.Graph standing in for the heavyweight brickschema.Graph (reached only as define_relationships's *default* graph= value -- irrelevant here since every call passes an explicit graph=), and add_relationships, the sibling top-level function this region calls at its own end (reproduced verbatim from generate_brick.py).",
+    "Driver: entry+calls (isomorphism oracle) comparing the graph= kwarg after the call, since the function mutates it in place and returns nothing; the case is a callable building a fresh `definitions` dict per invocation because the region itself consumes it via propdefn.pop(...).",
+    "Verified the fixture is not a hollow green: corrupting rdfs:subPropertyOf to rdfs:seeAlso in translated.ldpy flips the check to FAIL (33 vs 33 triples, not isomorphic)."
   ],
   "draft_sha": "9f88017ac209cde3",
   "provenance": {

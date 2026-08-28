@@ -44,20 +44,21 @@ def define_relationships(definitions, superprop=None, graph=G):
     if len(definitions) == 0:
         return
 
+    @graph graph
     for prop, propdefn in definitions.items():
         if not isinstance(prop, URIRef):
             prop = BRICK[prop]
         if superprop is not None:
-            graph += g{ {prop} rdfs:subPropertyOf {superprop} }
+            +{ {prop} rdfs:subPropertyOf {superprop} }
 
         if prop.startswith(BRICK):
-            graph += g{ {prop} a brick:Relationship }
+            +{ {prop} a brick:Relationship }
 
         # define property types
         prop_types = propdefn.get(A, [])
         assert isinstance(prop_types, list)
         for prop_type in prop_types:
-            graph += g{ {prop} a {prop_type} }
+            +{ {prop} a {prop_type} }
 
         # define any subproperties
         subproperties_def = propdefn.get("subproperties", {})
@@ -67,7 +68,7 @@ def define_relationships(definitions, superprop=None, graph=G):
         # generate a SHACL Property Shape for this relationship if it is a Brick property
         if prop.startswith(BRICK):
             propshape = BSH[f"{prop[len(BRICK) :]}Shape"]
-            graph += g{
+            +{
                 {propshape} a sh:PropertyShape ;
                    sh:path {prop}
             }
@@ -75,22 +76,22 @@ def define_relationships(definitions, superprop=None, graph=G):
             range_defn = propdefn.pop("range")
             if isinstance(range_defn, (tuple, list)):
                 enumeration = BNode()
-                graph += g{ {propshape} sh:or {enumeration} }
+                +{ {propshape} sh:or {enumeration} }
                 constraints = []
                 for cls in range_defn:
                     constraint = BNode()
-                    graph += g{ {constraint} sh:class {cls} }
+                    +{ {constraint} sh:class {cls} }
                     constraints.append(constraint)
                 Collection(graph, enumeration, constraints)
             elif range_defn is not None:
-                graph += g{ {propshape} sh:class {range_defn} }
+                +{ {propshape} sh:class {range_defn} }
 
         if "datatype" in propdefn.keys():
             dtype_defn = propdefn.pop("datatype")
             if dtype_defn == bsh:NumericValue:
-                graph += g{ {propshape} sh:or bsh:NumericValue }
+                +{ {propshape} sh:or bsh:NumericValue }
             else:
-                graph += g{ {propshape} sh:datatype {dtype_defn} }
+                +{ {propshape} sh:datatype {dtype_defn} }
 
         if "domain" in propdefn.keys():
             # associate the PropertyShape with all possible subject classes
@@ -98,7 +99,7 @@ def define_relationships(definitions, superprop=None, graph=G):
             if not isinstance(domains, list):
                 domains = [domains]
             for domain in domains:
-                graph += g{ {domain} sh:property {propshape} }
+                +{ {domain} sh:property {propshape} }
 
         # define other properties of the Brick property
         expected_properties = ["subproperties", A]
