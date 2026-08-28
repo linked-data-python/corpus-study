@@ -163,8 +163,36 @@ d'entre eux ont fourni des paires validées (`MKLab-ITI/prophet`,
 
 ## 4. Niveau région, traduction, paire
 
-Inchangé depuis la vague 1 — l'échantillon n'a pas été re-tiré, les 151
-traductions revues restent valides.
+**Cet étage date de la vague 1 et n'a pas été rejoué.** L'échantillon a été
+tiré des 60 dépôts d'alors, pas des 376 mesurés aujourd'hui ; les 151
+traductions revues à la main et les 140 paires prouvées équivalentes restent
+valides comme mesures, mais leur population de départ est six fois plus
+étroite que le corpus actuel.
+
+Les artefacts concernés, à ne pas confondre avec des données de la vague 2 —
+tous portent leur révision de pipeline dans leur champ `provenance` :
+
+| artefact | révision | ce qu'il décrit |
+|---|---|---|
+| `results/raw/sample.json` | `18d6518` | 52 fichiers tirés dans 17 dépôts, graine 20260827 |
+| `results/raw/regions.jsonl` | `4f2f05f` | 163 régions extraites de ces fichiers |
+| `examples/<bande>/<id>/` | — | 163 dossiers, dont 151 traductions revues à la main |
+| `results/raw/validation.jsonl` | `e7edab9` | 140 équivalences prouvées, 1 non résolue |
+| `results/raw/pairs.jsonl`, `results/summary/pairs.csv` | `e7edab9` | 141 paires comparées |
+| `results/summary/aggregate.json`, `aggregate_bands.csv`, `fig_*.{png,pdf}` | `e7edab9` | statistiques et figures dérivées de ces paires |
+| `results/summary/audit.json`, `results/raw/audit_{sample,negatives}.jsonl` | `c43f8ff` | précision 0,99 et manque 12 %, jugés à la main sur la vague 1 |
+
+En dépendent, avec les mêmes chiffres : `article/eswc/corpus_study.tex`, et les
+24 tâches de `user_study/config/tasks.generated.json`.
+
+À l'inverse, tout ce qui vient de `analyze` et de `surface`
+(`files_index.jsonl`, `results/raw/analysis/`, `surface.jsonl`, `corpus.json`,
+`surface.json`) porte la révision `5db2c56` ou plus récente et décrit bien les
+444 dépôts.
+
+Ces artefacts sont **conservés** : une vague 2 d'échantillonnage les complète
+(`draw_wave` ajoute sans re-tirer) plutôt que de les refaire, et les
+traductions déjà revues restent valides.
 
 | étape | critère | reste |
 |---|---|---:|
