@@ -20,8 +20,9 @@
     "@prefix",
     "@graph",
     "-{ }",
-    "nom préfixé",
-    "variable"
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "`g.remove((candidate.identifier, None, None))` devient `-{ {candidate.identifier} ?p ?o }` : deux jokers sur trois, la forme la plus large de l'îlot. `@graph g` désigne le graphe déjà nommé par la région (`g = measure.graph`), ce qui coûte une ligne pour un seul retrait — le suffixe d'appel `-{ ... }(g)` l'éviterait ; la déclaration a été gardée par symétrie avec la strate `add_isolated`.",

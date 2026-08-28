@@ -19,8 +19,9 @@
     "@graph",
     "m{ }",
     "-{ }",
-    "nom préfixé",
-    "variable"
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "Ici le `remove` n'a AUCUN joker : les trois termes viennent du parcours (`self.adjusted_graph.remove((s, p, o))`). `-{ {identifier} {p} {o} }` est la forme entièrement interpolée de l'îlot ; la strate `remove` couvre donc aussi ce cas, qui n'exerce pas la variable non liée.",

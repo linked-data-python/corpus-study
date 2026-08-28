@@ -20,8 +20,9 @@
     "@graph",
     "m{ }",
     "-{ }",
-    "nom préfixé",
-    "variable"
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "Les quatre `self.initial_graph.remove((o, self.shaclNS.targetX, None))` deviennent quatre `-{ {o} sh:targetX ?x }` : la variable non liée `?x` est le joker, exactement le `None` de rdflib. C'est le cas d'école de la strate.",
