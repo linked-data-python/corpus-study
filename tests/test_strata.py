@@ -322,3 +322,51 @@ def test_string_embedded_pairs_are_reported_apart_never_pooled():
     assert st["n_surface_comparable"] == 1 and st["n_string_embedded"] == 1
     assert st["tokens"]["median"] == 20.0, "the headline uses the comparable pair"
     assert st["string_embedded"]["tokens"]["median"] == -200.0
+
+
+CTX_SOURCE = ("import os\n"
+              "from rdflib import Graph, Namespace\n\n"
+              "EX = Namespace('http://e/')\n"
+              "bad = []\n"
+              + "".join(f"x{i} = {i}\n" for i in range(60))
+              + "g = Graph()\n"
+                "for s in g.subjects(None, EX.p):\n"
+                "    bad.append(s)\n"
+                "    g.add((s, EX.q, EX.r))\n"
+                "LATER = Namespace('http://later/')\n"
+                "bad = [LATER.z]\n")
+CTX_LINE = CTX_SOURCE.splitlines().index("for s in g.subjects(None, EX.p):") + 1
+CTX_CFG = {"max_region_loc": 20, "min_rdf_ops": 2}
+
+
+def test_a_statement_region_sees_only_what_precedes_it():
+    """A later `bad = [LATER.z]` handed in as context REBINDS a name the
+    region reads: the region would no longer start from the file's state."""
+    r = region_for_site(CTX_SOURCE, CTX_LINE, CTX_CFG)
+    assert r["kind"] == "statement"
+    assert "bad = []" in r["context"]
+    assert not any("LATER" in c for c in r["context"])
+
+
+def test_context_lines_bring_their_own_dependencies():
+    """`EX = Namespace(...)` needs `from rdflib import Namespace`, and the
+    region never names `Namespace` itself."""
+    r = region_for_site(CTX_SOURCE, CTX_LINE, CTX_CFG)
+    assert "from rdflib import Graph, Namespace" in r["context"]
+    assert "import os" not in r["context"]      # needed by nobody
+    assert r["rdf_ops"] > 0, "with its bindings, the region is no longer blind"
+
+
+def test_a_function_region_keeps_bindings_defined_after_it():
+    """Python's own rule: a module-level name defined after a `def` is
+    available when the function is called."""
+    src = ("from rdflib import Graph, Namespace\n"
+           "def build():\n"
+           "    g = Graph()\n"
+           "    g.add((EX.a, EX.p, EX.b))\n"
+           "    g.add((EX.a, EX.q, EX.c))\n"
+           "    return g\n"
+           "EX = Namespace('http://e/')\n")
+    r = region_for_site(src, 3, {"max_region_loc": 120, "min_rdf_ops": 2})
+    assert r["kind"] == "function"
+    assert "EX = Namespace('http://e/')" in r["context"]

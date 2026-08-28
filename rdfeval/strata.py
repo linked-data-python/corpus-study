@@ -45,7 +45,7 @@ from collections import defaultdict
 
 from .acquire import repo_dir
 from .config import EXAMPLES_403_DIR, RESULTS_RAW, RESULTS_SUMMARY, provenance
-from .regions import _functions, _module_context, _names_read, _span
+from .regions import _functions, _names_read, _span
 from .surface import SITES_RAW, STRATA
 
 STRATA_PATH = RESULTS_RAW / "strata.json"
@@ -183,8 +183,63 @@ def _region_for_line(tree, lines, line: int, cap: int) -> dict | None:
     return _region(lines, tree, lo, hi, qual, node, "statement")
 
 
+def _context_for(tree, lines, node, lo: int, kind: str) -> list[str]:
+    """Module-level statements the region needs, resolved to a fixpoint.
+
+    Two corrections over :func:`rdfeval.regions._module_context`, both found
+    by a translator agent on a real region:
+
+    * a **statement** region sees only what precedes it.  A later
+      ``bad = [LATER.z]`` was being handed to it as context, which *rebinds*
+      a name the region reads — the region no longer starts from the state
+      the file gives it.  (A **function** region keeps later bindings: a
+      module-level name defined after a ``def`` is available when it is
+      called, which is Python's rule, not an accident.)
+    * the context lines have needs of their own.  ``EX = Namespace(...)``
+      requires ``from rdflib import Namespace``, and that import was missing
+      whenever the region did not name ``Namespace`` itself.  Names are
+      therefore collected to a fixpoint.
+    """
+    if isinstance(node, ast.Module):
+        return []
+    body = [st for st in tree.body
+            if kind != "statement" or getattr(st, "lineno", 0) < lo]
+    needed = _names_read(node)
+    chosen: list[ast.stmt] = []
+    seen: set[int] = set()
+    for _ in range(8):                       # fixpoint, bounded
+        picked = _binding_statements(body, needed)
+        new = [st for st in picked if id(st) not in seen]
+        if not new:
+            break
+        for st in new:
+            seen.add(id(st))
+        chosen.extend(new)
+        for st in new:
+            needed |= _names_read(st)
+    chosen.sort(key=lambda st: st.lineno)
+    return ["\n".join(lines[st.lineno - 1:st.end_lineno]) for st in chosen]
+
+
+def _binding_statements(body, needed: set[str]) -> list[ast.stmt]:
+    out = []
+    for stmt in body:
+        binds: set[str] = set()
+        if isinstance(stmt, (ast.Import, ast.ImportFrom)):
+            for alias in stmt.names:
+                binds.add((alias.asname or alias.name).split(".")[0])
+        elif isinstance(stmt, ast.Assign):
+            for t in stmt.targets:
+                if isinstance(t, ast.Name):
+                    binds.add(t.id)
+        elif isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name):
+            binds.add(stmt.target.id)
+        if binds & needed:
+            out.append(stmt)
+    return out
+
+
 def _region(lines, tree, lo, hi, qual, node, kind) -> dict:
-    needed = _names_read(node) if not isinstance(node, ast.Module) else set()
     region = {
         "kind": kind,
         "qualname": qual,
@@ -192,7 +247,7 @@ def _region(lines, tree, lo, hi, qual, node, kind) -> dict:
         "end_lineno": hi,
         "loc": hi - lo + 1,
         "source": "\n".join(lines[lo - 1:hi]),
-        "context": _module_context(tree, lines, needed) if needed else [],
+        "context": _context_for(tree, lines, node, lo, kind),
     }
     # Operations the region performs *as extracted*.  Zero does not mean the
     # site was imaginary: the surface pass saw the whole file, where a graph
