@@ -130,3 +130,28 @@ def test_a_bundled_python_runtime_is_vendored(acfg):
     assert is_vendored(("lib", "python3.11", "setuptools", "dist.py"),
                        "any/project", acfg)
     assert not is_vendored(("lib", "helpers.py"), "any/project", acfg)
+
+
+def test_a_vendor_marker_matches_at_any_depth():
+    """A copy of rdflib buried under `_vendor/` is still rdflib: matching the
+    top level only let two reach the 403 draw."""
+    from rdfeval.criteria import is_vendored
+    cfg = {"vendored_dirs": ["rdflib"],
+           "vendored_dirs_always": ["_vendor", "vendor", "third_party"]}
+    assert is_vendored(("globalPlugins", "contextLabeler", "_vendor", "rdflib",
+                        "collection.py"), "shubhamjakhete/nvda_reader", cfg)
+    assert is_vendored(("bindings", "python", "tests", "rdflib_suite", "vendor",
+                        "test_having.py"), "Blackcat-Informatics/purrdf", cfg)
+    assert is_vendored(("_vendor", "rdflib", "x.py"), "o/r", cfg)
+
+
+def test_a_projects_own_package_is_not_vendored():
+    from rdfeval.criteria import is_vendored
+    cfg = {"vendored_dirs": ["rdflib", "sparqlwrapper"],
+           "vendored_dirs_always": ["_vendor", "vendor"]}
+    assert not is_vendored(("SPARQLWrapper", "Wrapper.py"),
+                           "RDFLib/sparqlwrapper", cfg)
+    assert not is_vendored(("myproject", "rdf_helpers.py"), "o/r", cfg)
+    # a directory merely *named* vendor-ish inside a normal tree is the
+    # marker's whole point, so this one IS excluded — documented, not accidental
+    assert is_vendored(("src", "vendor", "util.py"), "o/r", cfg)

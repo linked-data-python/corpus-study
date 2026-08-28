@@ -117,6 +117,15 @@ def is_vendored(rel_parts: tuple[str, ...], repo_name: str, cfg: dict) -> bool:
     directory named after a known library is vendored *unless it is the
     repository's own package* — ``RDFLib/sparqlwrapper`` keeps its
     ``SPARQLWrapper/`` tree, which is its own source.
+
+    The ``vendored_dirs_always`` markers (``_vendor``, ``vendor``,
+    ``third_party``…) match at **any depth**: they are never a project's own
+    package, and a copy of rdflib buried under one is still rdflib.  Matching
+    only the top level let two such copies reach the 403 draw —
+    ``globalPlugins/contextLabeler/_vendor/rdflib/collection.py`` and
+    ``bindings/python/tests/rdflib_suite/vendor/test_having.py`` — where they
+    were caught by hand, as *the library's own implementation* rather than
+    code written against it.
     """
     if not rel_parts:
         return False
@@ -128,9 +137,10 @@ def is_vendored(rel_parts: tuple[str, ...], repo_name: str, cfg: dict) -> bool:
     for a, b in zip(lowered, lowered[1:]):
         if a == "lib" and b.startswith("python"):
             return True
-    top = lowered[0]
-    if top in {d.lower() for d in cfg.get("vendored_dirs_always", [])}:
+    always = {d.lower() for d in cfg.get("vendored_dirs_always", [])}
+    if always.intersection(lowered):
         return True
+    top = lowered[0]
     if top in {d.lower() for d in cfg.get("vendored_dirs", [])}:
         own = repo_name.split("/")[-1].lower().replace("-", "").replace("_", "")
         return top.replace("-", "").replace("_", "") != own
