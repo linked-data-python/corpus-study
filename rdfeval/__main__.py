@@ -10,7 +10,7 @@ from .config import load_config
 
 STAGES = ("discover", "select", "acquire", "analyze", "sample", "regions",
           "translate", "validate", "compare", "aggregate", "audit",
-          "surface", "strata", "check", "userstudy", "all")
+          "surface", "strata", "check", "status", "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
 # acquire) and the human-in-the-loop stage (translate review) stay explicit.
@@ -29,6 +29,9 @@ def main(argv: list[str] | None = None) -> int:
                         help="alternative evaluation.toml")
     parser.add_argument("--limit", type=int, default=None,
                         help="select: cap the number of repositories")
+    parser.add_argument("--run-checks", action="store_true",
+                        help="status: also run the two machine checks on "
+                             "every pair marked final")
     parser.add_argument("--study", choices=("401", "403"), default="401",
                         help="which study validate/compare/aggregate operate "
                              "on (401: density bands; 403: strata of use)")
@@ -79,6 +82,9 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "strata":
             from . import strata
             strata.run(config)
+        elif stage == "status":
+            from . import status
+            status.run(config, study, run_checks=args.run_checks)
         elif stage == "check":
             from . import check as check_mod
             raise SystemExit(check_mod.main(args.targets))

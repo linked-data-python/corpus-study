@@ -216,3 +216,26 @@ def test_check_passes_a_real_pair(tmp_path):
     r = check(tmp_path)
     assert r["transpiles"]
     assert r["ok"], r["error"]
+
+
+def test_status_counts_filed_and_credited_separately(tmp_path, monkeypatch):
+    """A region is filed under its first stratum but credited to each: the
+    directory listing alone would read as a shortfall in the draw."""
+    import json
+    from rdfeval import status as status_mod
+
+    def fake_examples(study):
+        meta = {"region_id": "r1", "stratum": "remove",
+                "strata": ["remove", "add_isolated"],
+                "translation_status": "final", "classification": "awkward",
+                "constructions": ["-{ }", "@graph"]}
+        yield tmp_path, meta
+
+    monkeypatch.setattr(status_mod, "iter_examples", fake_examples)
+    (tmp_path / "review.json").write_text(json.dumps({"review_status": "approved"}))
+    from rdfeval.study import STUDY_403
+    data = status_mod.collect(STUDY_403)
+    assert data["per_group"]["remove"]["regions"] == 1
+    assert data["credited"] == {"remove": 1, "add_isolated": 1}
+    assert data["per_group"]["remove"]["approved"] == 1
+    assert data["constructions"] == {"-{ }": 1, "@graph": 1}
