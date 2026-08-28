@@ -373,3 +373,45 @@ def test_stdout_of_the_called_region_is_compared(tmp_path):
                    if line.startswith("RDFEVAL-VERDICT "))
     assert not verdict["equivalent"]
     assert any("stdout differs" in d for d in verdict["diffs"]), verdict["diffs"]
+
+
+def test_module_state_mode_compares_computed_values_not_just_graphs(tmp_path):
+    """A region that only READS a graph leaves its result in a variable.
+    Comparing graphs alone gives a hollow green: they are equal because
+    nothing touched them."""
+    (tmp_path / "original.py").write_text(
+        "from rdflib import Graph, Namespace, Literal\n"
+        "EX = Namespace('http://e/')\n"
+        "g = Graph()\n"
+        "g.add((EX.a, EX.p, Literal('yes')))\n"
+        "name = g.value(EX.a, EX.p)\n")
+    (tmp_path / "translated.ldpy").write_text(
+        "@prefix ex: <http://e/> .\n"
+        "@graph as g\n"
+        "+{ ex:a ex:p \"yes\" }\n"
+        "name = m{ ex:a ex:q ?v }.first()\n")     # wrong predicate
+    (tmp_path / "driver.py").write_text(
+        "from rdfeval.harness import run_pair\nVERDICT = run_pair(__file__)\n")
+    proc = subprocess.run([sys.executable, "driver.py"], cwd=tmp_path,
+                          capture_output=True, text=True, timeout=120)
+    import json
+    verdict = next(json.loads(line[len("RDFEVAL-VERDICT "):])
+                   for line in proc.stderr.splitlines()
+                   if line.startswith("RDFEVAL-VERDICT "))
+    assert not verdict["equivalent"], "a wrong read must not pass"
+    assert any("value name" in d for d in verdict["diffs"]), verdict["diffs"]
+    assert "name" in verdict["values_compared"]
+
+
+def test_only_judgeable_values_are_compared():
+    """Two runs build two instances: an object without __eq__ compares by
+    identity and would report a difference on every pair."""
+    import logging
+    from rdflib import Literal, URIRef
+    from rdfeval.harness import _comparable
+    assert _comparable(Literal("x")) and _comparable(URIRef("http://e/"))
+    assert _comparable("s") and _comparable(3) and _comparable(None)
+    assert _comparable([Literal(1), "a"]) and _comparable({"k": URIRef("http://e/")})
+    assert not _comparable(logging.getLogger("x"))
+    assert not _comparable(object())
+    assert not _comparable([object()])

@@ -4,8 +4,10 @@ A driver calls :func:`run_pair`, which
 
   1. executes ``original.py`` and ``translated.ldpy`` (through the ldpy
      transpiler) in two fresh module namespaces, capturing stdout;
-  2. either compares *module state* (every rdflib Graph in the globals,
-     paired by variable name, plus non-graph variables both modules define),
+  2. either compares *module state* — every rdflib Graph in the globals,
+     paired by variable name, PLUS every other module-level value both
+     modules define (without which a region that only reads a graph gets a
+     hollow green: its graphs are equal because nothing touched them) —
      or — when ``entry`` names a function — calls it with each fixture in
      ``calls`` and compares the results;
   3. graph comparison is rdflib graph isomorphism (``rdflib.compare``),
@@ -102,6 +104,10 @@ def materialise(value):
     return value
 
 
+def _filtered(text: str, stdout_filter) -> str:
+    return stdout_filter(text) if stdout_filter is not None else text
+
+
 def _multiset(value):
     """A comparison key that ignores order but not multiplicity."""
     return sorted(repr(normalise(v)) for v in value)
@@ -111,6 +117,42 @@ def _graphs(ns: dict) -> dict[str, object]:
     from rdflib import Graph
     return {k: v for k, v in ns.items()
             if isinstance(v, Graph) and not k.startswith("_")}
+
+
+def _comparable(value, depth: int = 0) -> bool:
+    """Is this value something the study can judge equal or not?
+
+    RDF terms, primitives, and containers of those.  Deliberately NOT an
+    arbitrary object: two module executions build two instances, and a class
+    without ``__eq__`` compares by identity, so including them would report a
+    difference on every pair.  A logger, a typing alias, an open file are not
+    results either.
+    """
+    from rdflib.term import Node
+    if depth > 4:
+        return False
+    if value is None or isinstance(value, (str, bytes, bool, int, float, Node)):
+        return True
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return all(_comparable(v, depth + 1) for v in value)
+    if isinstance(value, dict):
+        return all(isinstance(k, (str, bytes, int, float, Node))
+                   and _comparable(v, depth + 1) for k, v in value.items())
+    return False
+
+
+def _values(ns: dict) -> dict[str, object]:
+    """Module-level results worth comparing, other than graphs.
+
+    A region that neither builds nor mutates a graph — a computation over a
+    graph it only reads — leaves its result in a module variable.  Comparing
+    only graphs there gives a HOLLOW GREEN: the graphs are equal because
+    nothing touched them, and a wrong translation passes.
+    """
+    from rdflib import Graph
+    return {k: v for k, v in ns.items()
+            if not k.startswith("_") and not isinstance(v, Graph)
+            and _comparable(v)}
 
 
 def graphs_isomorphic(g1, g2) -> bool:
@@ -159,13 +201,20 @@ def _compare_value(a, b, label: str, diffs: list[str],
 
 def run_pair(driver_file: str, entry: str | None = None,
              calls: list | None = None, fixture: str | None = None,
-             ordered: bool | None = None) -> dict:
+             ordered: bool | None = None, stdout_filter=None) -> dict:
     """Establish that ``original.py`` and ``translated.ldpy`` agree.
 
     ``entry``/``calls``   compare what a function returns and what it mutates
     ``fixture``           a Turtle file, parsed fresh for each side and passed
                           to ``entry`` as its single argument — the reading
                           oracle: same input graph, same values out
+    ``stdout_filter``     a ``str -> str`` applied to BOTH sides' output
+                          before comparing.  Printed output can carry things
+                          that are not the program's meaning — a fresh
+                          ``Graph()`` identifier, a wall-clock duration.  The
+                          driver says explicitly what to drop, in the pair,
+                          where a reader can see it; the harness keeps no
+                          hidden list of exceptions.
     ``ordered``           whether the order of a sequence is part of the
                           region's meaning.  Defaults to True, and to False
                           for a fixture run: no RDF store promises an order,
@@ -230,12 +279,13 @@ def run_pair(driver_file: str, entry: str | None = None,
             for k in kw_o:
                 _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]",
                                diffs, ordered)
-            if buf_o.getvalue() != buf_t.getvalue():
+            so, st_ = _filtered(buf_o.getvalue(), stdout_filter), \
+                _filtered(buf_t.getvalue(), stdout_filter)
+            if so != st_:
                 diffs.append(f"call[{i}]: stdout differs "
-                             f"({buf_o.getvalue()[:120]!r} vs "
-                             f"{buf_t.getvalue()[:120]!r})")
+                             f"({so[:120]!r} vs {st_[:120]!r})")
         verdict["calls"] = len(calls)
-        if out_o != out_t:
+        if _filtered(out_o, stdout_filter) != _filtered(out_t, stdout_filter):
             diffs.append("stdout differs at module level")
     else:
         verdict["method"] = "module-state"
@@ -244,10 +294,15 @@ def run_pair(driver_file: str, entry: str | None = None,
             diffs.append(f"graph variables differ: {sorted(go)} vs {sorted(gt)}")
         for name in sorted(set(go) & set(gt)):
             _compare_value(go[name], gt[name], f"graph {name}", diffs)
-        if out_o != out_t:
+        vo, vt = _values(ns_o), _values(ns_t)
+        shared = sorted(set(vo) & set(vt))
+        for name in shared:
+            _compare_value(vo[name], vt[name], f"value {name}", diffs, ordered)
+        if _filtered(out_o, stdout_filter) != _filtered(out_t, stdout_filter):
             diffs.append("stdout differs")
         verdict["graphs_compared"] = sorted(set(go) & set(gt))
-        if not (go or gt) and out_o == out_t == "":
+        verdict["values_compared"] = shared
+        if not (go or gt) and not shared and out_o == out_t == "":
             diffs.append("nothing observable to compare")
     verdict["diffs"] = diffs
     verdict["equivalent"] = not diffs
