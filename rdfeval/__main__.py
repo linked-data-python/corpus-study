@@ -9,12 +9,13 @@ from . import __version__
 from .config import load_config
 
 STAGES = ("discover", "select", "acquire", "analyze", "sample", "regions",
-          "translate", "validate", "compare", "aggregate", "userstudy", "all")
+          "translate", "validate", "compare", "aggregate", "audit",
+          "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
 # acquire) and the human-in-the-loop stage (translate review) stay explicit.
 ALL_STAGES = ("analyze", "sample", "regions", "validate", "compare",
-              "aggregate", "userstudy")
+              "aggregate", "audit", "userstudy")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -62,6 +63,9 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "aggregate":
             from . import aggregate
             aggregate.run(config)
+        elif stage == "audit":
+            from . import audit
+            audit.run(config)
         elif stage == "userstudy":
             from . import userstudy
             userstudy.run(config)

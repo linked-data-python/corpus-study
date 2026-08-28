@@ -76,8 +76,13 @@ corpus_dir = "corpus/repos"
 [analysis]
 # Files larger than this are skipped (generated files, data dumps).
 max_file_bytes = 1_000_000
-# Directories never analysed inside a repository checkout.
-exclude_dirs = [".git", ".tox", ".venv", "venv", "node_modules", "build", "dist", "__pycache__", ".eggs"]
+# Directories never analysed inside a repository checkout.  `site-packages`
+# and `dist-packages` matter: some repositories commit a whole virtualenv,
+# whose vendored libraries (rdflib itself included) are not project code and
+# would otherwise be counted as real-world RDFLib usage.
+exclude_dirs = [".git", ".tox", ".venv", "venv", "env", "env1", "virtualenv",
+                "site-packages", "dist-packages", "node_modules", "build",
+                "dist", "__pycache__", ".eggs", ".mypy_cache", ".pytest_cache"]
 
 [sampling]
 seed = 20260827

@@ -362,7 +362,51 @@ class _Analyzer(ast.NodeVisitor):
                 self.b.namespace_vars.update(self._targets(node))
             elif kind == "graph":
                 self.b.graph_vars.update(self._targets(node))
+        if self._annotation_is_graph(node.annotation):
+            self.b.graph_vars.update(self._targets(node))
         self.generic_visit(node)
+
+    # --- type annotations ---------------------------------------------------
+
+    def _annotation_is_graph(self, annotation: ast.expr | None) -> bool:
+        """`Graph`, `rdflib.Graph`, `Optional[Graph]`, `"Graph"`…"""
+        if annotation is None:
+            return False
+        if isinstance(annotation, ast.Constant) and isinstance(annotation.value, str):
+            try:
+                annotation = ast.parse(annotation.value, mode="eval").body
+            except SyntaxError:
+                return False
+        if isinstance(annotation, ast.Subscript):    # Optional[...], list[...]
+            return self._annotation_is_graph(annotation.slice)
+        if isinstance(annotation, ast.Tuple):
+            return any(self._annotation_is_graph(e) for e in annotation.elts)
+        if isinstance(annotation, ast.BinOp):        # Graph | None
+            return (self._annotation_is_graph(annotation.left)
+                    or self._annotation_is_graph(annotation.right))
+        name = self.b.rdflib_callee(annotation)
+        if name in GRAPH_CONSTRUCTORS:
+            return True
+        if isinstance(annotation, ast.Name):
+            return annotation.id in self.b.rdflib_names and \
+                self.b.rdflib_names[annotation.id] in GRAPH_CONSTRUCTORS
+        return False
+
+    def _visit_function(self, node) -> None:
+        """Parameters annotated as graphs are graph receivers."""
+        args = node.args
+        for arg in (args.posonlyargs + args.args + args.kwonlyargs
+                    + ([args.vararg] if args.vararg else [])
+                    + ([args.kwarg] if args.kwarg else [])):
+            if self._annotation_is_graph(arg.annotation):
+                self.b.graph_vars.add(arg.arg)
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._visit_function(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._visit_function(node)
 
     # --- DefinedNamespace subclasses ----------------------------------------
 

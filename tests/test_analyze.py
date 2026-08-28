@@ -204,3 +204,48 @@ def test_self_attribute_graph_tracking():
     a = analyze_source(src)
     assert a.category_counts["triple_add"] == 1
     assert a.category_counts["serialize_parse"] == 1
+
+
+def test_graph_typed_parameter_is_a_receiver():
+    """`def f(g: Graph)` makes g a graph receiver (audit finding, 2026-08-28)."""
+    src = (
+        "from rdflib import Graph\n"
+        "def render(content: Graph) -> bytes:\n"
+        "    return content.serialize(format='ttl')\n"
+    )
+    a = analyze_source(src)
+    assert a.category_counts["serialize_parse"] == 1
+
+
+def test_graph_annotation_variants():
+    src = (
+        "import rdflib\n"
+        "from typing import Optional\n"
+        "def f(a: rdflib.Graph, b: Optional[rdflib.Graph], c: 'rdflib.Graph'):\n"
+        "    a.parse('x.ttl')\n"
+        "    b.serialize()\n"
+        "    c.query('SELECT * WHERE {?s ?p ?o}')\n"
+    )
+    a = analyze_source(src)
+    assert a.category_counts["serialize_parse"] == 2
+    assert a.category_counts["sparql"] == 1
+
+
+def test_non_graph_annotation_not_a_receiver():
+    src = (
+        "from rdflib import Graph\n"
+        "def f(items: set):\n"
+        "    items.add((1, 2, 3))\n"
+    )
+    a = analyze_source(src)
+    assert a.rdf_ops == 0
+
+
+def test_annotated_variable_assignment():
+    src = (
+        "from rdflib import Graph\n"
+        "g: Graph = make_graph()\n"
+        "g.parse('x.ttl')\n"
+    )
+    a = analyze_source(src)
+    assert a.category_counts["serialize_parse"] == 1

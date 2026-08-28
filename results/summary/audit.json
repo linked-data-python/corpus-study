@@ -1,0 +1,69 @@
+{
+  "provenance": {
+    "generated_at": "2026-08-28T01:31:14.366115+00:00",
+    "pipeline_revision": "c43f8ff1ceb6a6abfb122ec34b0293dd1a16869f",
+    "config_version": "1.0.0",
+    "metrics_version": "1.0.0"
+  },
+  "sampled_operations": 120,
+  "judged_operations": 120,
+  "precision": 0.9917,
+  "by_category": {
+    "graph_ctor": {
+      "sampled": 29,
+      "judged": 29,
+      "tp": 29,
+      "precision": 1.0
+    },
+    "graph_read": {
+      "sampled": 5,
+      "judged": 5,
+      "tp": 5,
+      "precision": 1.0
+    },
+    "namespace_ctor": {
+      "sampled": 10,
+      "judged": 10,
+      "tp": 10,
+      "precision": 1.0
+    },
+    "namespace_term": {
+      "sampled": 19,
+      "judged": 19,
+      "tp": 18,
+      "precision": 0.9474
+    },
+    "serialize_parse": {
+      "sampled": 26,
+      "judged": 26,
+      "tp": 26,
+      "precision": 1.0
+    },
+    "sparql": {
+      "sampled": 10,
+      "judged": 10,
+      "tp": 10,
+      "precision": 1.0
+    },
+    "term_constructor": {
+      "sampled": 14,
+      "judged": 14,
+      "tp": 14,
+      "precision": 1.0
+    },
+    "triple_add": {
+      "sampled": 7,
+      "judged": 7,
+      "tp": 7,
+      "precision": 1.0
+    }
+  },
+  "uncertain_share": 0.0167,
+  "negative_probe": {
+    "files_importing_rdflib_without_operations": 262,
+    "sampled": 25,
+    "judged": 25,
+    "misses": 3,
+    "file_level_miss_rate": 0.12
+  }
+}
