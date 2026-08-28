@@ -11,6 +11,7 @@ from rdflib import (
     Variable
 )
 from rdflib.collection import Collection
+from infixowl_context import CastClass
 
 def serialize(self, graph):
     clonedList = Collection(graph, BNode())

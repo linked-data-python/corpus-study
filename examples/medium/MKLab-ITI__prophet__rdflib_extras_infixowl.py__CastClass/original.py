@@ -10,6 +10,14 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import (  # context shim, see meta.json
+    BooleanClass,
+    Class,
+    EnumeratedClass,
+    MalformedClass,
+    Restriction,
+    classOrIdentifier,
+)
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def CastClass(c, graph=None):

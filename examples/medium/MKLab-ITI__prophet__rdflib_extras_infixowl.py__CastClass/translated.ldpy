@@ -2,10 +2,6 @@
 # region: CastClass (lines 850-885, band medium)
 # licence of the source repository: see meta.json
 from rdflib import (
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
     BNode,
     Literal,
     Namespace,
@@ -14,19 +10,34 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import (  # context shim, see meta.json
+    BooleanClass,
+    Class,
+    EnumeratedClass,
+    MalformedClass,
+    Restriction,
+    classOrIdentifier,
+)
+# OWL_NS is still needed as a runtime object: the region splits predicate IRIs
+# on it to derive keyword names (p.split(OWL_NS)[-1]).  A @prefix declaration
+# is a transpile-time binding and produces no such object, so the namespace is
+# declared twice, once in each role.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def CastClass(c, graph=None):
     graph = graph is None and c.factoryGraph or graph
     for kind in graph.objects(subject=classOrIdentifier(c),
                               predicate=rdf:type):
-        if kind == owl-ns:Restriction:
+        if kind == owl:Restriction:
             kwArgs = {'identifier': classOrIdentifier(c),
                       'graph': graph}
             for s, p, o in graph.triples((classOrIdentifier(c),
                                           None,
                                           None)):
                 if p != rdf:type:
-                    if p == owl-ns:onProperty:
+                    if p == owl:onProperty:
                         kwArgs['onProperty'] = o
                     else:
                         if p not in Restriction.restrictionKinds:
@@ -39,15 +50,15 @@ def CastClass(c, graph=None):
             return Restriction(**kwArgs)
         else:
             for s, p, o in graph.triples_choices((classOrIdentifier(c),
-                                                  [owl-ns:intersectionOf,
-                                                 owl-ns:unionOf,
-                                                 owl-ns:oneOf],
+                                                  [owl:intersectionOf,
+                                                 owl:unionOf,
+                                                 owl:oneOf],
                                                   None)):
-                if p == owl-ns:oneOf:
+                if p == owl:oneOf:
                     return EnumeratedClass(classOrIdentifier(c), graph=graph)
                 else:
                     return BooleanClass(
                         classOrIdentifier(c), operator=p, graph=graph)
-            # assert (classOrIdentifier(c),rdf:type,owl-ns:Class) in graph
+            # assert (classOrIdentifier(c),RDF.type,OWL_NS.Class) in graph
             return Class(
                 classOrIdentifier(c), graph=graph, skipOWLClassMembership=True)

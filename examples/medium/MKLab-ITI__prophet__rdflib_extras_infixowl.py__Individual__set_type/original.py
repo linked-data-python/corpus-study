@@ -11,6 +11,7 @@ from rdflib import (
     Variable
 )
 from rdflib.term import Identifier
+from infixowl_context import Individual, classOrIdentifier
 
 def _set_type(self, kind):
     if not kind:

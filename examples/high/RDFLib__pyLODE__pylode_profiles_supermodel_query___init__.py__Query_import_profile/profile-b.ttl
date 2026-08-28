@@ -1,0 +1,12 @@
+# Demo artifact for the import_profile harness (see meta.json).
+# Declared as an owl:Ontology, to exercise the second branch of the
+# `profile_iri` lookup.
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:   <https://example.org/> .
+
+ex:profile-b a owl:Ontology ;
+    rdfs:label "Profile B" .
+
+ex:Gadget a rdfs:Class ;
+    rdfs:label "Gadget" .

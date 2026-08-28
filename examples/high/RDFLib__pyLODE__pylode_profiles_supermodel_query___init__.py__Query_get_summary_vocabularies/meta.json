@@ -13,10 +13,14 @@
     "graph_read": 2,
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "context shims: supermodel_model.py = pylode/profiles/supermodel/model.py and supermodel_common.py = pylode/profiles/supermodel/query/common.py from the same commit, vendored verbatim (common.py's intra-package import redirected to the sibling shim); the two absolute package imports of original.py point at them, identically on both sides",
+    "prefixes declared only for the two namespaces the region uses: RDF->rdf, QB->qb (the mechanical draft declared all 14 imported namespaces and inserted the block inside an import parenthesis, which does not parse)",
+    "only 3 tokens change over 60 lines: graph.subjects(rdf:type, qb:CodedProperty) and graph.objects(prop, qb:codeList). The rest is dict/list bookkeeping over model objects — a region classified 'high' by RDF-op density whose RDF surface is in fact three term references (a useful negative data point on the density metric)",
+    "the `from rdflib.namespace import (...)` header stays verbatim on both sides (region context) even though RDF/QB are no longer referenced in the ldpy version",
+    "driver: StubQuery supplies db (a Dataset with one named graph declaring two qb:CodedProperty, one of them with a codelist and a description) and component_models (a ComponentModel whose class carries a CodedProperty, so the vocab_class_index branch is exercised); second fixture is an empty Dataset"
   ],
   "draft_sha": "967cac562b08f795",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_summary_vocabularies",
+    "diffs": [],
+    "error": null
   }
 }

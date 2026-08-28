@@ -1,11 +1,9 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: Class.__repr__ (lines 1231-1294, band medium)
 # licence of the source repository: see meta.json
-from rdflib import (
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+from rdflib import (
     BNode,
     Literal,
     Namespace,
@@ -14,6 +12,7 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import CastClass, Class, classOrIdentifier, manchesterSyntax
 
 def __repr__(self, full=False, normalization=True):
     """
@@ -24,8 +23,8 @@ def __repr__(self, full=False, normalization=True):
     ec = list(self.equivalentClass)
     for boolClass, p, rdfList in self.graph.triples_choices(
         (self.identifier,
-         [owl-ns:intersectionOf,
-          owl-ns:unionOf],
+         [owl:intersectionOf,
+          owl:unionOf],
          None)):
         ec.append(manchesterSyntax(rdfList, self.graph, boolean=p))
     dc = list(self.disjointWith)

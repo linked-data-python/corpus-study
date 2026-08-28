@@ -1,6 +1,7 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: _minimal_valid_nanopub (lines 763-773, band high)
 # licence of the source repository: see meta.json
+import nanopub_shim  # noqa: F401  context shim, see meta.json
 from typing import Optional
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
@@ -20,3 +21,21 @@ def _minimal_valid_nanopub(conf: Optional[NanopubConf] = None) -> Nanopub:
     )
     np.pubinfo.add((np._metadata.namespace[""], DC.creator, Literal("tester")))
     return np
+
+# --- demo harness, added identically to both representations (see meta.json).
+# The region returns a Nanopub, which the harness cannot compare, so the demo
+# calls it and exposes the three named graphs it fills.
+_demo_np = _minimal_valid_nanopub()
+demo_assertion = _demo_np.assertion
+demo_provenance = _demo_np.provenance
+print("is_valid:", _demo_np.is_valid)
+
+# a second call, this time supplying a conf: the Nanopub constructor otherwise
+# stamps pubinfo with a wall-clock prov:generatedAtTime, which no two runs can
+# share, so the pubinfo graph is only compared for this deterministic call.
+_demo_np2 = _minimal_valid_nanopub(NanopubConf(add_prov_generated_time=False,
+                                               add_pubinfo_generated_time=False))
+demo_assertion2 = _demo_np2.assertion
+demo_provenance2 = _demo_np2.provenance
+demo_pubinfo = _demo_np2.pubinfo
+print("is_valid2:", _demo_np2.is_valid)

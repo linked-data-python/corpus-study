@@ -2,7 +2,6 @@
 # region: FeatureOfInterest.get_uri (lines 28-35, band high)
 # licence of the source repository: see meta.json
 from rdflib import Graph, BNode, Literal, RDF, RDFS
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 obsgraph = Graph()
@@ -12,8 +11,11 @@ def get_uri(self):
     get uri of a feature of interest
     """
     return self.feature_of_interest_id
+    # `obsgraph += g{...}` is an augmented assignment, so unlike the
+    # original's `obsgraph.add(...)` it needs `obsgraph` declared global.
+    global obsgraph
     obsgraph += g{
         {self.feature_of_interest_id} a {sosa.FeatureOfInterest} ;
-           rdfs:comment {self.comment} ;
-           rdfs:label {self.label}
+            rdfs:comment {self.comment} ;
+            rdfs:label {self.label}
     }

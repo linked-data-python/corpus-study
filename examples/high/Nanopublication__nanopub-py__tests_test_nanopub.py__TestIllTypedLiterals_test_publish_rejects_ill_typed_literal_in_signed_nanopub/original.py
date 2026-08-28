@@ -10,6 +10,7 @@ from tests.conftest import (
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
 )
+from test_nanopub_context import _minimal_valid_nanopub
 
 def test_publish_rejects_ill_typed_literal_in_signed_nanopub(self, monkeypatch):
     """publish() used to run no validation at all on an already-signed nanopub, such as

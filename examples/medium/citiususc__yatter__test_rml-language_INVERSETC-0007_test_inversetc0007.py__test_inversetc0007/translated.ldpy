@@ -2,10 +2,11 @@
 # region: test_inversetc0007 (lines 17-31, band medium)
 # licence of the source repository: see meta.json
 import os
+import yatter_context  # sys.path for the yatter checkout + coloredlogs stub
 from ruamel.yaml import YAML
 import yatter
 from rdflib.graph import Graph
-from deepdiff import DeepDiff
+from yatter_context import DeepDiff
 
 def test_inversetc0007():
     yaml = YAML(typ='safe', pure=True)

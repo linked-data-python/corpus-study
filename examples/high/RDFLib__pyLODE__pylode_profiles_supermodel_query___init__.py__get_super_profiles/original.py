@@ -18,28 +18,10 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+from supermodel_shim import (  # context shim for pylode, see meta.json
     Class,
-    CodedProperty,
-    ComponentModel,
-    ImageObject,
-    MediaObject,
-    Note,
-    Profile,
     ProfileHierarchyItem,
-    ProfileType,
-    Property,
-    RDFProperty,
-    Resource,
-    SimpleCodedProperty,
-    TextObject,
-)
-from pylode.profiles.supermodel.query.common import (
-    get_class,
-    get_descriptions,
-    get_is_defined_by,
     get_name,
-    get_subclasses,
     get_values,
 )
 

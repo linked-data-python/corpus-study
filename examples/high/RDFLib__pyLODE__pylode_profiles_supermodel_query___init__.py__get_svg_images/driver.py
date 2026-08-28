@@ -1,15 +1,35 @@
-"""Validation driver for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_svg_images.
+"""Validation driver for get_svg_images.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+Pure read: the region filters the ``sdo:image`` objects of one subject down
+to the literal ones.  The fixtures build a graph in which the answer is a
+proper subset of the objects (an IRI-valued image must be dropped) and one
+in which the subject has no image at all.
 """
+from rdflib import Graph, Literal, URIRef
+from rdflib.namespace import SDO
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='get_svg_images',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+EX = "http://example.org/"
+
+
+def _graph():
+    g = Graph()
+    g.add((URIRef(EX + "a"), SDO.image, Literal("<svg id='a'/>")))
+    g.add((URIRef(EX + "a"), SDO.image, URIRef(EX + "a.png")))
+    g.add((URIRef(EX + "a"), SDO.image, Literal("<svg id='a2'/>")))
+    g.add((URIRef(EX + "a"), SDO.name, Literal("A")))
+    g.add((URIRef(EX + "b"), SDO.image, Literal("<svg id='b'/>")))
+    return g
+
+
+def case_documented():
+    return ((URIRef(EX + "a"), _graph()), {})
+
+
+def case_no_image():
+    return ((URIRef(EX + "c"), _graph()), {})
+
+
+VERDICT = run_pair(__file__, entry="get_svg_images",
+                   calls=[case_documented, case_no_image])

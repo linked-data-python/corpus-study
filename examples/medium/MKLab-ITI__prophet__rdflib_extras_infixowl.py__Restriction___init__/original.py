@@ -13,6 +13,8 @@ from rdflib import (
 from rdflib.graph import Graph
 from rdflib.term import Identifier
 from rdflib.util import first
+from infixowl_context import (
+    Class, Restriction, classOrIdentifier, propertyOrIdentifier)
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def __init__(self,

@@ -1,13 +1,14 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: TestSign.test_nanopub_sign_uri2 (lines 516-530, band high)
 # licence of the source repository: see meta.json
+import nanopub_shim  # noqa: F401  context shim, see meta.json
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
     Nanopub,
     NanopubConf,
     namespaces,
 )
-from tests.conftest import (
+from conftest_shim import (
     default_conf,
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,

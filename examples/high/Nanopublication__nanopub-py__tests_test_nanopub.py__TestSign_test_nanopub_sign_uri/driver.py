@@ -1,15 +1,28 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_uri.
+"""Validation driver: the test signs a nanopub and checks its trusty URI.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+This is an unusually strong equivalence witness: the artifact code
+`RAIh8Oq-…` in the region is a cryptographic hash over the whole
+nanopublication, so it only comes out right if the assertion graph built by
+the island is triple-for-triple the one the original built.
+
+The `nanopub` package is not installed in the evaluation venv; it is taken
+from the corpus checkout by appending it to sys.path (appended, not
+prepended, so the example's own `tests` shim package keeps priority over the
+corpus one).  The region does not touch `self`, so the fixture passes None.
 """
-from rdfeval.harness import run_pair
+import sys
+from pathlib import Path
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_nanopub_sign_uri',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+_CORPUS = (Path(__file__).resolve().parents[3]
+           / "corpus" / "repos" / "Nanopublication__nanopub-py")
+if str(_CORPUS) not in sys.path:
+    sys.path.append(str(_CORPUS))
+
+from rdfeval.harness import run_pair  # noqa: E402
+
+
+def no_self():
+    return ((None,), {})
+
+
+VERDICT = run_pair(__file__, entry="test_nanopub_sign_uri", calls=[no_self])

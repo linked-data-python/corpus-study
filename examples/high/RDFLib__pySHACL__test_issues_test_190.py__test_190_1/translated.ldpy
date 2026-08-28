@@ -1,13 +1,12 @@
 # Extracted from RDFLib/pySHACL@469cca7a22 : test/issues/test_190.py
 # region: test_190_1 (lines 128-139, band high)
 # licence of the source repository: see meta.json
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
 import rdflib
 from pyshacl import validate
 from rdflib.namespace import RDF
 from rdflib.namespace import SH
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-
 shacl_file = """\
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix sh:    <http://www.w3.org/ns/shacl#> .

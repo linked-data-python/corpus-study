@@ -18,22 +18,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
-    Class,
-    CodedProperty,
-    ComponentModel,
-    ImageObject,
-    MediaObject,
-    Note,
-    Profile,
-    ProfileHierarchyItem,
-    ProfileType,
-    Property,
-    RDFProperty,
-    Resource,
-    SimpleCodedProperty,
-    TextObject,
-)
+from supermodel_context import ImageObject, get_value
 
 def get_image_object(iri: URIRef, graph: Graph) -> ImageObject:
     name = get_value(iri, SDO.name, graph)

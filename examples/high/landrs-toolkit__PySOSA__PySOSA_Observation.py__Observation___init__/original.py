@@ -8,10 +8,10 @@ obsgraph = Graph()
 
 def __init__(self, label, comment):
     """ instantiating Observation object
-         Args:
-             label, comment (literal): label and comment for the observation carried out
-         Returns:
-             an observation: initialized with observation_id, FOI, dateTime, simple result, label and comment
+         Args:
+             label, comment (literal): label and comment for the observation carried out
+         Returns:
+             an observation: initialized with observation_id, FOI, dateTime, simple result, label and comment
       """
     self.observation_id = BNode()
     self.dateTime = Literal(datetime)
@@ -24,3 +24,14 @@ def __init__(self, label, comment):
     obsgraph.add((self.observation_id, RDFS.comment, self.comment))
     obsgraph.add((self.observation_id, RDFS.label, self.label))
     obsgraph.add((self.observation_id, cfg.sosa.dateTime, self.dateTime))
+
+# --- demo harness, added IDENTICALLY to original.py and translated.ldpy ----
+# The region is a constructor: nothing would call it, and the graph it fills
+# is the module-level `obsgraph`, so the driver compares module state.
+class _Observation(object):
+    pass
+
+_demo1 = _Observation()
+__init__(_demo1, "Air temperature reading", "Taken at noon on the north mast")
+_demo2 = _Observation()
+__init__(_demo2, "Air temperature reading", "Taken at noon on the south mast")

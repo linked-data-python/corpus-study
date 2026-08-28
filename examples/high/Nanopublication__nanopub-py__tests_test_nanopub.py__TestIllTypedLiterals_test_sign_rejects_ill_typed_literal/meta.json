@@ -14,10 +14,16 @@
     "term_constructor": 3,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "the translation itself is a pure notation change; the classification is 'minor-restructuring' only because a demo harness had to be appended (identically) to both sides to make the pytest method observable.",
+    "the whole triple becomes islands in place: URIRef('http://test') -> <http://test>, URIRef('http://example.org/count') -> <http://example.org/count>, Literal('not-a-number', datatype=XSD.integer) -> \"not-a-number\"^^xsd:integer. The .add() call, the tuple, the multi-line layout and the trailing comma are untouched -- the best-fitting case of the batch, because the ill-typed literal is exactly what the ^^ island writes naturally.",
+    "like its sibling test_assertion_accepts_added_triples, this region cannot use 'G += g{ ... }': np.assertion is a read-only @property, so the augmented assignment raises AttributeError. The island terms inside the existing .add() are the faithful alternative.",
+    "@prefix xsd: replaces the XSD import for this use; the rdflib import line is kept as upstream (XSD becomes dead there).",
+    "context shim (identical on both sides): 'from tests.conftest import ...' is replaced by a local conftest_shim.py -- the real conftest imports nanopub_testsuite_connector and downloads the test suite for a signing key. The shim rebuilds profile_test/default_conf with a locally generated RSA key (one shared module instance, so both sides sign with the same key) and copies _minimal_valid_nanopub verbatim from tests/test_nanopub.py lines 763-773. The unused names skip_if_nanopub_server_unavailable/testsuite/testsuite_conf are dropped from the import list.",
+    "demo harness added identically to both representations: the harness shadows _minimal_valid_nanopub with a recording wrapper, runs the test, and republishes the assertion graph as module-level 'demo_assertion'. The test's own pytest.raises(MalformedNanopubError, match='not-a-number') and 'np.source_uri is None' run on both sides.",
+    "the driver puts the corpus checkout of commit 05022dc4bc on sys.path; the region runs entirely offline."
   ],
   "draft_sha": "41bafec722c3444a",
   "provenance": {
@@ -25,5 +31,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

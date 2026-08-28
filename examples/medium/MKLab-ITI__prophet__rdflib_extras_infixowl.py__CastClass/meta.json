@@ -13,10 +13,14 @@
     "graph_read": 1,
     "namespace_term": 8
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "awkward",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "context shim: infixowl_shim.py. The vendored module cannot be imported (python-2 era rdflib copy, `from rdflib import py3compat`), and the modern rdflib.extras.infixowl is a different, rewritten module. The shim copies verbatim classOrIdentifier (lines 237-243), MalformedClass (842-847) and Restriction.restrictionKinds (1604-1608); the four collaborators CastClass may return are constructor-recording stand-ins, since the region only ever constructs them - two stand-ins are equal iff built from the same arguments (graphs by isomorphism).",
+    "the eight namespace terms become prefixed names: RDF.type -> rdf:type (twice), OWL_NS.Restriction/onProperty/intersectionOf/unionOf/oneOf -> owl:...; note that if kind == owl:Restriction: and if p == owl:oneOf: parse correctly, the trailing block colon is not swallowed by the local name",
+    "WHY AWKWARD: the region also does p.split(OWL_NS)[-1], i.e. it uses the namespace as a runtime STRING to derive keyword-argument names. @prefix is a transpile-time binding and produces no runtime object, so the OWL namespace IRI has to be written twice - once as @prefix owl:, once as the surviving OWL_NS = Namespace(...). Any reflective use of a namespace (splitting, prefix stripping, building a term from a computed local name) forces this duplication.",
+    "the commented-out line # assert (classOrIdentifier(c),RDF.type,OWL_NS.Class) in graph is left verbatim, as a comment; the auto-generated draft had rewritten its contents, which faithfulness forbids",
+    "driver covers all four exits of the function - Restriction (including a predicate skipped because it is not a restriction kind), BooleanClass via owl:unionOf, EnumeratedClass via owl:oneOf, and the plain Class fallback"
   ],
   "draft_sha": "3c6a9b9f835d9f5c",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:CastClass",
+    "diffs": [],
+    "error": null
   }
 }

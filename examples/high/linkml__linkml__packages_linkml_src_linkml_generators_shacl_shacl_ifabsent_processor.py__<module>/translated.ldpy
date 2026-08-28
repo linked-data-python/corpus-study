@@ -21,10 +21,10 @@ class ShaclIfAbsentProcessor(IfAbsentProcessor):
         return Literal(permissible_value_name)
 
     def map_string_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(default_value, datatype=ShaclDataType.STRING.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.STRING.uri_ref}
 
     def map_integer_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(default_value, datatype=ShaclDataType.INTEGER.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.INTEGER.uri_ref}
 
     def map_boolean_true_default_value(self, slot: SlotDefinition, cls: ClassDefinition):
         return Literal(True, datatype=ShaclDataType.BOOLEAN.uri_ref)
@@ -33,19 +33,19 @@ class ShaclIfAbsentProcessor(IfAbsentProcessor):
         return Literal(False, datatype=ShaclDataType.BOOLEAN.uri_ref)
 
     def map_float_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(default_value, datatype=ShaclDataType.FLOAT.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.FLOAT.uri_ref}
 
     def map_double_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(default_value, datatype=ShaclDataType.DOUBLE.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.DOUBLE.uri_ref}
 
     def map_decimal_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(default_value, datatype=ShaclDataType.DECIMAL.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.DECIMAL.uri_ref}
 
     def map_time_default_value(self, hour: str, minutes: str, seconds: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(f"{hour}:{minutes}:{seconds}", datatype=ShaclDataType.TIME.uri_ref)
+        return f"{hour}:{minutes}:{seconds}"^^{ShaclDataType.TIME.uri_ref}
 
     def map_date_default_value(self, year: str, month: str, day: str, slot: SlotDefinition, cls: ClassDefinition):
-        return Literal(f"{year}-{month}-{day}", datatype=ShaclDataType.DATE.uri_ref)
+        return f"{year}-{month}-{day}"^^{ShaclDataType.DATE.uri_ref}
 
     def map_datetime_default_value(
         self,
@@ -58,28 +58,28 @@ class ShaclIfAbsentProcessor(IfAbsentProcessor):
         slot: SlotDefinition,
         cls: ClassDefinition,
     ):
-        return Literal(f"{year}-{month}-{day}T{hour}:{minutes}:{seconds}", datatype=ShaclDataType.DATETIME.uri_ref)
+        return f"{year}-{month}-{day}T{hour}:{minutes}:{seconds}"^^{ShaclDataType.DATETIME.uri_ref}
 
     def map_uri_or_curie_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
         if default_value in self.CURIE_SPECIAL_CASES:
             value = self._map_curie_special_case(default_value, slot, cls)
-            return Literal(value, datatype=ShaclDataType.CURIE.uri_ref)
+            return f"{value}"^^{ShaclDataType.CURIE.uri_ref}
         elif default_value in self.URI_SPECIAL_CASES:
             value = self._map_uri_special_case(default_value, slot, cls)
-            return Literal(value, datatype=ShaclDataType.URI.uri_ref)
+            return f"{value}"^^{ShaclDataType.URI.uri_ref}
         else:
             uri = f<{self.schema_view.expand_curie(default_value)}>
-            return Literal(uri, datatype=ShaclDataType.URI.uri_ref)
+            return f"{uri}"^^{ShaclDataType.URI.uri_ref}
 
     def map_curie_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
         if default_value in self.CURIE_SPECIAL_CASES:
             default_value = self._map_curie_special_case(default_value, slot, cls)
-        return Literal(default_value, datatype=ShaclDataType.CURIE.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.CURIE.uri_ref}
 
     def map_uri_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
         if default_value in self.URI_SPECIAL_CASES:
             default_value = self._map_uri_special_case(default_value, slot, cls)
-        return Literal(default_value, datatype=ShaclDataType.URI.uri_ref)
+        return f"{default_value}"^^{ShaclDataType.URI.uri_ref}
 
     def map_nc_name_default_value(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
         raise NotImplementedError()
@@ -122,7 +122,7 @@ class ShaclIfAbsentProcessor(IfAbsentProcessor):
     def _map_default_range_special_case(self, default_value: str, slot: SlotDefinition, cls: ClassDefinition):
         """Return default range as a string Literal."""
         default_range = self.schema_view.schema.default_range or "string"
-        return Literal(default_range, datatype=ShaclDataType.STRING.uri_ref)
+        return f"{default_range}"^^{ShaclDataType.STRING.uri_ref}
 
 
 # --- demo harness (added identically to both representations, see meta.json):

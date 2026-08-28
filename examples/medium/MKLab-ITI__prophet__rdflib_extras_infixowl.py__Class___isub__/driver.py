@@ -1,15 +1,11 @@
-"""Validation driver for MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class___isub__.
+"""Validation driver: the region is Class.__isub__, an in-place operator.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+It mutates the graph behind ``self`` and returns ``self``, an infixowl Class
+that the harness cannot compare, so both files end with an identical demo
+harness (see meta.json) building a three-class hierarchy and retracting one
+rdfs:subClassOf edge through the operator.  Module state comparison then covers
+the resulting graph and the printed list of remaining subclasses.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='__isub__',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

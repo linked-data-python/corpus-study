@@ -13,10 +13,14 @@
     "graph_read": 1,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "RDF.type -> rdf:type and PROF.Profile -> prof:Profile as plain call arguments of graph.subjects(...)",
+    "the mechanical draft had inserted the 14 @prefix lines INSIDE the from rdflib.namespace import ( ... ) parenthesised list, which does not parse; the declarations were moved after the import block and reduced to the two prefixes actually used",
+    "the import block is kept verbatim on both sides (extracted context; a @prefix produces no runtime object so it never replaces an import)",
+    "outside an island there is no a keyword, so rdf:type must be spelled out; the read stays a Python call because ldpy has no island for filtering reads",
+    "driver: fixtures pass a duck-typed holder (graph + root_profile_iri) and cover one declared profile, no profile (fallback to root_profile_iri) and an empty graph"
   ],
   "draft_sha": "ec7f5e46ef7af57d",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_supermodel_iri",
+    "diffs": [],
+    "error": null
   }
 }

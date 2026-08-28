@@ -1,6 +1,7 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: Property.__repr__.canonicalName (lines 2017-2029, band medium)
 # licence of the source repository: see meta.json
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 from rdflib import (
     BNode,
     Literal,
@@ -12,10 +13,9 @@ from rdflib import (
 )
 from rdflib.namespace import XSD as _XSD_NS
 from rdflib.util import first
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+# context shim (see meta.json): classOrIdentifier is a module-level helper of
+# the enclosing infixowl.py, vendored as infixowl_context.py
+from infixowl_context import classOrIdentifier
 
 def canonicalName(term, g):
     normalizedName = classOrIdentifier(term)
@@ -25,8 +25,8 @@ def canonicalName(term, g):
         return str(term)
     elif first(g.triples_choices((
                                  normalizedName,
-                                 [owl-ns:unionOf,
-               owl-ns:intersectionOf], None))):
+                                 [owl:unionOf,
+               owl:intersectionOf], None))):
         return repr(term)
     else:
         return str(term.qname)

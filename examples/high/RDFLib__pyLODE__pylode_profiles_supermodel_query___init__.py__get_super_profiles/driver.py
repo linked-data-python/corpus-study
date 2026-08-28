@@ -1,15 +1,39 @@
-"""Validation driver for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_super_profiles.
+"""Validation driver: get_super_profiles walks a prof:isProfileOf hierarchy.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The fixture graph is parsed from the same Turtle text on both sides, so the
+store's iteration order (which the region's result order follows) is the same;
+the returned ProfileHierarchyItem trees are compared field by field.
 """
+from rdflib import Graph, URIRef
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='get_super_profiles',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+PROFILES = """
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:   <https://example.org/> .
+
+ex:leaf     a prof:Profile ; rdfs:label "Leaf profile" ;
+            prof:isProfileOf ex:middle, ex:sibling .
+ex:middle   a prof:Profile ; rdfs:label "Middle profile" ;
+            prof:isProfileOf ex:root .
+ex:sibling  a prof:Profile ; rdfs:label "Sibling profile" .
+ex:root     a prof:Profile ; rdfs:label "Root profile" .
+"""
+
+
+def fixture_leaf():
+    g = Graph()
+    g.parse(data=PROFILES, format="turtle")
+    return ((URIRef("https://example.org/leaf"), g), {})
+
+
+def fixture_no_super():
+    """A profile with no prof:isProfileOf statement: empty result."""
+    g = Graph()
+    g.parse(data=PROFILES, format="turtle")
+    return ((URIRef("https://example.org/root"), g), {})
+
+
+VERDICT = run_pair(__file__, entry="get_super_profiles",
+                   calls=[fixture_leaf, fixture_no_super])

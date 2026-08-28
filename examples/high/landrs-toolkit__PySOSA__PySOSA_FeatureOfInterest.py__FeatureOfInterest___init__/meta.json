@@ -12,10 +12,13 @@
   "categories": {
     "term_constructor": 3
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "identity translation: none of the three term constructions can become an island. BNode() is a fresh, unlabelled blank node -- ldpy's _:b labels and _:{key} data-keyed nodes both live inside g{ }, and there is no island form for a bare BNode() in expression position. Literal(label) and Literal(comment) wrap *parameters*: outside an island only the suffixed literal forms (\"x\"@en, \"x\"^^t) are islands, and there is no notation for Literal(expr) with no tag and no datatype.",
+    "the two @prefix rdf:/rdfs: declarations of the mechanical draft were dropped: neither namespace appears in the region (RDF/RDFS are used by the sibling method get_uri, outside the extracted lines).",
+    "this is a clean negative data point: a constructor that only stores RDF terms on 'self' is 100% term_constructor by the extractor's count, yet 0% expressible -- the notation pays off on *literal-valued* terms, not on terms built from variables.",
+    "driver: the region is a constructor extracted at module level, so it is called with a bare stand-in object whose equality is the harness's own normalise() over its attribute dict -- the two Literals must match exactly, the two BNodes only have to both be blank nodes. Fixtures: two strings, and (42, None) to exercise Literal's coercion."
   ],
   "draft_sha": "a10d3cb8caa53e0f",
   "provenance": {

@@ -13,14 +13,27 @@
     "graph_ctor": 2,
     "serialize_parse": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "IDENTITY TRANSLATION: translated.ldpy is byte-for-byte original.py. Nothing in the region constructs an RDF term, so no island applies - the four rdf_ops counted here are two Graph() constructions and two parse() calls, none of which ldpy gives a notation for",
+    "RML_URI = 'http://semweb.mmlab.be/ns/rml#' stays a plain Python string: it is passed to yatter.translate(mapping_format=...) as a str, not as a URIRef, and @prefix produces no runtime object that could replace it",
+    "the RML/R2RML vocabulary of this test lives inside mapping.ttl and mapping.yml, i.e. in data files, which is exactly where ldpy has nothing to offer - a useful negative data point for a region the metric puts in the 'high' band",
+    "fixtures: mapping.ttl and mapping.yml (1.2 kB / 0.3 kB, Apache-2.0) copied from the corpus checkout next to the pair, since the region resolves them relative to __file__",
+    "yatter is not installed in the eval venv: the driver puts the corpus checkout on sys.path and stubs coloredlogs (log colouring only); identical for both sides, which run in the same process",
+    "the pair is compared through the test's own assertion (graph isomorphism between the expected and the translated mapping), the function returning None"
+  ],
   "draft_sha": "83bd71643716d8de",
   "provenance": {
     "generated_at": "2026-08-28T01:18:22.203756+00:00",
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_yarrrmltc0037",
+    "diffs": [],
+    "error": null
   }
 }

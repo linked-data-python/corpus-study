@@ -13,14 +13,25 @@
     "graph_ctor": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "translation_notes": [
+    "translated.ldpy is byte-identical to original.py: the region contains no RDF term, no triple pattern and no triple construction, so there is nothing for the notation to change (every valid Python program is a valid ldpy program)",
+    "NEGATIVE FINDING worth keeping: this region scores band high on rdf_ops, but its two ops are graph_ctor (Graph()) and serialize_parse (g.parse(...)); the RML mapping, which is the actual RDF content, lives in an external Turtle file and reaches the code only through an opaque config f-string. Island syntax has zero purchase on RML/morph-kgc style code.",
+    "fixtures copied into the example directory from morph-kgc/morph-kgc@a2122e88bb : test/rml-core/csv/RMLTC0007c/ - mapping.ttl, student.csv, output.nq; the single edit is mapping.ttl rml:source, from the repo-root-relative path test/rml-core/csv/RMLTC0007c/student.csv to student.csv, since morph-kgc resolves it against the working directory. Same files for both sides.",
+    "the region has no return value; its isomorphism assert is the check and runs on both sides"
+  ],
   "draft_sha": "b451a35cbc5af941",
   "provenance": {
     "generated_at": "2026-08-28T01:18:22.248169+00:00",
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_RMLTC0007c",
+    "diffs": [],
+    "error": null
   }
 }

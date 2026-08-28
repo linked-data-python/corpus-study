@@ -10,6 +10,7 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import CastClass, Class, classOrIdentifier, manchesterSyntax
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def __repr__(self, full=False, normalization=True):

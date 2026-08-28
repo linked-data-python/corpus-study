@@ -18,21 +18,10 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
-    Class,
-    CodedProperty,
-    ComponentModel,
-    ImageObject,
+from supermodel_shim import (
     MediaObject,
-    Note,
-    Profile,
-    ProfileHierarchyItem,
-    ProfileType,
-    Property,
-    RDFProperty,
-    Resource,
-    SimpleCodedProperty,
-    TextObject,
+    get_image_object,
+    get_text_object,
 )
 
 def get_examples(iri: URIRef, graph: Graph) -> list[MediaObject]:

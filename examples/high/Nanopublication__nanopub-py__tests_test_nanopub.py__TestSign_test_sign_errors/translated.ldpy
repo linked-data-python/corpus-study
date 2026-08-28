@@ -10,23 +10,21 @@ from nanopub import (
 )
 from nanopub.profile import ProfileError
 from nanopub.utils import MalformedNanopubError
-from tests.conftest import (
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from conftest_context import (
     default_conf,
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
 )
+@prefix hycl: <http://purl.org/petapico/o/hycl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dc:   <http://purl.org/dc/elements/1.1/> .
 
 def test_sign_errors(self, monkeypatch):
     # No profile -> should raise ProfileError
     np = Nanopub(conf=NanopubConf(profile=None))
-    np._assertion += g{ <http://test> {namespaces.HYCL.claims} "test claim" }
-    np._provenance += g{ {np._assertion.identifier} prov:wasAttributedTo <http://someone> }
+    np._assertion += g{ <http://test> hycl:claims "test claim" }
+    np._provenance += g{
+        {np._assertion.identifier} prov:wasAttributedTo <http://someone> }
     np._pubinfo += g{ {np._metadata.namespace[""]} dc:creator "tester" }
 
     with pytest.raises(ProfileError):
@@ -34,8 +32,9 @@ def test_sign_errors(self, monkeypatch):
 
     # Already signed -> should raise MalformedNanopubError
     np2 = Nanopub(conf=NanopubConf(profile=default_conf.profile))
-    np2._assertion += g{ <http://test2> {namespaces.HYCL.claims} "test claim 2" }
-    np2._provenance += g{ {np2._assertion.identifier} prov:wasAttributedTo <http://someone> }
+    np2._assertion += g{ <http://test2> hycl:claims "test claim 2" }
+    np2._provenance += g{
+        {np2._assertion.identifier} prov:wasAttributedTo <http://someone> }
     np2._pubinfo += g{ {np2._metadata.namespace[""]} dc:creator "tester" }
     np2._metadata.signature = True
 

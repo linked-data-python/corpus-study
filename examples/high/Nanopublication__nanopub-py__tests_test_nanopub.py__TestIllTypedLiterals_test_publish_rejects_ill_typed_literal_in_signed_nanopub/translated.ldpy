@@ -6,23 +6,26 @@ import pytest
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub.utils import MalformedNanopubError
 from tests.conftest import (
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
     default_conf,
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
 )
+from test_nanopub_context import _minimal_valid_nanopub
+
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 def test_publish_rejects_ill_typed_literal_in_signed_nanopub(self, monkeypatch):
     """publish() used to run no validation at all on an already-signed nanopub, such as
     one read from a file or fetched from the registry."""
     np = _minimal_valid_nanopub(conf=default_conf)
     np.sign()
-    np.pubinfo += g{ {np._metadata.namespace[""]} <http://example.org/count> "not-a-number"^^xsd:integer }
+    np.pubinfo.add(
+        (
+            np._metadata.namespace[""],
+            <http://example.org/count>,
+            "not-a-number"^^xsd:integer,
+        )
+    )
     # editing the graph after signing breaks the trusty artefact, which is not what
     # this test is about
     monkeypatch.setattr(type(np), "is_valid", property(lambda self: True))

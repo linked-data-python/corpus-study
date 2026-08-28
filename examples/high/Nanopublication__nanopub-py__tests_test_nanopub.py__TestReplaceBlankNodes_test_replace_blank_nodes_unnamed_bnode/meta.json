@@ -15,10 +15,16 @@
     "term_constructor": 3,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "only URIRef(\"http://test/p\") -> <http://test/p> is rewritten; everything else in the triple has to stay Python",
+    "NEGATIVE FINDING: the mechanical draft turned g.add((...)) into 'g += g{ {BNode(bname)} <http://test/p> \"value\" }', which is NOT equivalent here. g is an rdflib Dataset: Dataset.add() puts the triple in the default graph (urn:x-rdflib:default) while Graph.__iadd__ calls addN with the Dataset itself as context, which lands the quad in a fresh anonymous named graph. The g{...} idiom is therefore unusable for Dataset targets, and the island can only supply individual terms",
+    "BNode(bname) cannot become an island either: the label is computed at runtime ('N' + 'a' * 32) and ldpy's _:label is lexical and island-scoped, while _:{expr} is a data-keyed bnode with different identity semantics -- and both only exist inside g{}",
+    "Literal(\"value\") stays Literal(...): outside an island a bare \"value\" is a Python str, and \"value\"^^xsd:string would be a different rdflib term",
+    "the mechanical draft had inserted the @prefix block in the middle of the parenthesised 'from nanopub import (' list, which is not valid ldpy; since no prefixed name is used, all five draft declarations were dropped",
+    "context shim: nanopub_shim.py puts the Nanopublication/nanopub-py@05022dc4bc checkout on sys.path (the package is not installed); one added import line, identical on both sides",
+    "driver: 'self' is unused by the region, so a None stand-in is passed; the region builds its own Dataset and returns None, so the check rests on its own assert (quad count == 1), which fails visibly if the rewritten predicate is not the original one"
   ],
   "draft_sha": "56de7121c3fb9581",
   "provenance": {
@@ -26,5 +32,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_replace_blank_nodes_unnamed_bnode",
+    "diffs": [],
+    "error": null
   }
 }

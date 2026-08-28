@@ -1,15 +1,28 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_object_bnode.
+"""Validation driver for TestSign.test_nanopub_sign_object_bnode.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pytest test method: it returns nothing and keeps the signed
+nanopub in a local.  Both files therefore carry an identical demo harness that
+wraps Nanopub to capture the instance and republish its four named graphs at
+module level, and prints the trusty URI produced by the signature -- so the
+driver compares the four graphs by isomorphism AND the signature/trusty hash
+through stdout.  The region's own assertions (valid signature, no blank node
+left in object position) run on both sides.
+
+The signing profile comes from the local nanopub_context shim (the upstream
+tests/conftest.py needs the online nanopub test suite); it is imported once,
+so both sides sign with the same RSA key.  `nanopub` is made importable by
+putting the corpus checkout of the pinned commit on sys.path (see meta.json).
 """
-from rdfeval.harness import run_pair
+import sys
+from pathlib import Path
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_nanopub_sign_object_bnode',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+sys.dont_write_bytecode = True
+_HERE = Path(__file__).resolve().parent
+_REPO = _HERE.parents[2] / "corpus" / "repos" / "Nanopublication__nanopub-py"
+for _p in (str(_HERE), str(_REPO)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+from rdfeval.harness import run_pair  # noqa: E402
+
+VERDICT = run_pair(__file__, entry=None, calls=None)

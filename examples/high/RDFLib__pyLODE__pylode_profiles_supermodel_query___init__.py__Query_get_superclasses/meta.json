@@ -13,10 +13,14 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "one namespace term becomes a prefixed name in place: RDFS.subClassOf -> rdfs:subClassOf. That is the entire translation -- the filter, the comprehension and the sort are Python.",
+    "only 1 of the 14 drafted @prefix declarations was kept (rdfs); the rdflib.namespace import block is left exactly as upstream even though RDFS becomes dead there.",
+    "FINDING: a read-only region is where ldpy has least to offer. There is no filtering island, so the lambda that drops blank nodes and ignored classes stays Python, and the payoff is a single token. This is the low end of the notation's usefulness -- worth contrasting with the construction-heavy regions of the same batch.",
+    "context shim (identical on both sides): supermodel_shim.py holds a reduced Class dataclass (iri, name + the iri-based __eq__ copied from model.py lines 167-185), because pylode/__init__.py imports 'dominate' and the full dataclass drags in Property/Note/Ontology. Class is needed at def time for the 'list[Class]' return annotation; the 14-name model import is trimmed to it.",
+    "the region was extracted as a module-level function, so the driver passes a stand-in Query whose get_component_model_class returns the shim's Class; fixtures cover a subject with three URIRef superclasses (one of them ignored) plus a blank-node restriction, and a subject with none."
   ],
   "draft_sha": "600198479f1284ae",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_superclasses",
+    "diffs": [],
+    "error": null
   }
 }

@@ -1,15 +1,26 @@
-"""Validation driver for maparent__virtuoso-python__virtuoso_tests_test_mapping.py__TestMapping_test_06_conditional_prop.
+"""Validation driver for maparent__virtuoso-python__…__test_06_conditional_prop.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+NOT EXECUTABLE, by construction — the verdict below is an honest failure, not
+a translation defect.  The region is a SQLAlchemy/Virtuoso integration test:
+running it needs
+
+  * a live Virtuoso server reachable over ODBC (the test module opens
+    ``create_engine(sqla_connection)`` at import time and commits real rows),
+  * sqlalchemy, pyodbc, nose and sqla_rdfbridge (none installed in the eval
+    venv, and virtuoso-python itself is Python-2 era),
+  * the surrounding TestMapping class and the declarative classes A/B/C/D
+    that the quad-map patterns are built from.
+
+Its assertions read triples back out of the *database* after Virtuoso has
+materialised them from SQL rows through the quad-map declaration, so nothing
+short of that server can decide them; standing them in would fabricate the
+result rather than compare the two representations.
+
+run_pair is still called so that a canonical RDFEVAL-VERDICT line is emitted,
+carrying the exact import failure.  The translation itself was checked to
+transpile and to produce the expected URIRefs for tst:safe_name / tst:name.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_06_conditional_prop',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry="test_06_conditional_prop",
+                   calls=[lambda: ((None,), {})])

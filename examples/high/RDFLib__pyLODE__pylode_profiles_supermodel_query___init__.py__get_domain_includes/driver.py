@@ -1,15 +1,55 @@
-"""Validation driver for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_domain_includes.
+"""Validation driver: get_domain_includes reads sdo:domainIncludes.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pure reader, so the fixtures supply the graph and the
+dataset and the harness compares the returned list of model Class objects
+plus the untouched inputs.
 """
+from rdflib import Dataset, Graph, URIRef
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='get_domain_includes',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+PROP = URIRef("https://example.com/prop/hasAddress")
+
+DATA = """
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+
+<https://example.com/prop/hasAddress> a sdo:Property ;
+    sdo:domainIncludes <https://example.com/class/Person> ,
+                       <https://example.com/class/Organisation> .
+
+<https://example.com/class/Person> rdfs:label "Person" .
+<https://example.com/class/Organisation> rdfs:label "Organisation" .
+<https://example.com/class/Employee> rdfs:subClassOf
+    <https://example.com/class/Person> ;
+    rdfs:label "Employee" .
+"""
+
+NO_DOMAIN = """
+@prefix sdo: <https://schema.org/> .
+
+<https://example.com/prop/hasAddress> a sdo:Property .
+"""
+
+
+def _inputs(data):
+    g = Graph()
+    g.parse(data=data, format="turtle")
+    # `db` is only consulted by get_name as a fallback when the profile
+    # graph carries no label; it is passed as None here because the harness
+    # compares every rdflib Graph argument by isomorphism and a Dataset
+    # yields quads, which rdflib.compare cannot ingest.  The region itself
+    # never touches `db` — it forwards it to get_class.
+    return ((PROP, g, None), {})
+
+
+def two_domains():
+    return _inputs(DATA)
+
+
+def no_domain():
+    return _inputs(NO_DOMAIN)
+
+
+VERDICT = run_pair(__file__, entry="get_domain_includes",
+                   calls=[two_domains, no_domain])

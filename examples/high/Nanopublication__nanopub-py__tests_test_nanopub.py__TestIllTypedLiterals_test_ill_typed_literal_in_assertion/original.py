@@ -4,6 +4,7 @@
 import pytest
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub.utils import MalformedNanopubError
+from nanopub_context import _minimal_valid_nanopub   # context shim, see meta.json
 
 def test_ill_typed_literal_in_assertion(self):
     np = _minimal_valid_nanopub()
@@ -17,3 +18,28 @@ def test_ill_typed_literal_in_assertion(self):
     assert [str(o) for o, _ in np.ill_typed_literals] == ["not-a-number"]
     with pytest.raises(MalformedNanopubError, match="not-a-number"):
         np.is_valid
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region is a pytest test method: it returns nothing and keeps the nanopub
+# in a local.  Wrapping the fixture helper captures the instance and
+# republishes its deterministic named graphs at module level, where the driver
+# compares them; the region's own assertions run on both sides as well.
+# pubinfo is left out on purpose: NanopubConf defaults to
+# add_pubinfo_generated_time=True, so it carries a dct:created timestamp that
+# differs between the two executions.
+_captured = []
+_minimal_valid_nanopub_upstream = _minimal_valid_nanopub
+
+
+def _minimal_valid_nanopub(conf=None):
+    _np = _minimal_valid_nanopub_upstream(conf)
+    _captured.append(_np)
+    return _np
+
+
+test_ill_typed_literal_in_assertion(None)
+
+head = _captured[0].head
+assertion = _captured[0].assertion
+provenance = _captured[0].provenance

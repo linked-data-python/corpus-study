@@ -11,6 +11,7 @@ from rdflib import (
     Variable
 )
 from rdflib.util import first
+from infixowl_context import Individual, Property
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def __init__(

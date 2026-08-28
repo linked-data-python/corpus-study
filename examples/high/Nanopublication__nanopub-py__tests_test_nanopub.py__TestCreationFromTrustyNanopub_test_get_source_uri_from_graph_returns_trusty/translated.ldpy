@@ -1,14 +1,13 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: TestCreationFromTrustyNanopub.test_get_source_uri_from_graph_returns_trusty (lines 388-394, band high)
 # licence of the source repository: see meta.json
+#
+# Nothing in this region is written in island notation: it constructs no RDF
+# term and no triple, it parses a TriG document supplied by the test suite
+# and compares a URI to a Python string.  The ldpy file is the original,
+# unchanged.
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
     Nanopub,
     NanopubConf,
     namespaces,

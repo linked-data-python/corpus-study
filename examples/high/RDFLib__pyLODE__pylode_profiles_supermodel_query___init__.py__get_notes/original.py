@@ -18,7 +18,10 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+# context shim (see meta.json): pyLODE is not installed here; the model
+# dataclasses and query helpers live in a local module -- identical for both
+# representations.
+from context import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -34,7 +37,7 @@ from pylode.profiles.supermodel.model import (
     SimpleCodedProperty,
     TextObject,
 )
-from pylode.profiles.supermodel.query.common import (
+from context import (
     get_class,
     get_descriptions,
     get_is_defined_by,

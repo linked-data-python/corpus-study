@@ -13,10 +13,14 @@
     "namespace_term": 2,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "the two graph.add((self.identifier, RDFS.domain, classOrIdentifier(x))) become 'self.graph += g{ {self.identifier} rdfs:domain {classOrIdentifier(x)} }': only the predicate is a literal term, subject and object stay interpolated Python expressions, so the island buys one prefixed name per statement",
+    "the two adds sit in different branches of the same if/else and cannot be merged into one island without changing the control flow",
+    "the region's only namespace use is RDFS.domain, so @prefix rdfs: is the only declaration; RDF/Namespace/BNode/Literal/Variable stay in the source's multi-name rdflib import",
+    "context shim: infixowl_ctx.py re-exports Class/Individual/Property/classOrIdentifier from rdflib.extras.infixowl (upstream of the vendored copy); imported identically by both sides",
+    "demo harness added identically to both sides: _set_domain is called on a real Property with a single term, an iterable and None (all three branches), and the pair is compared on demo_graph + stdout"
   ],
   "draft_sha": "736ffef9565e0d0f",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

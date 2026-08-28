@@ -1,15 +1,10 @@
-"""Validation driver for MKLab-ITI__prophet__rdflib_extras_infixowl.py__ComponentTerms.
+"""Validation driver: ComponentTerms is a generator, so module state is compared.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+Both files end with an identical demo harness (see meta.json) that consumes the
+generator over a small OWL graph covering its three branches -- a named
+superclass plus an anonymous someValuesFrom restriction (recursive), an
+owl:unionOf BooleanClass, and a leaf class -- and prints the identifiers found.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='ComponentTerms',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

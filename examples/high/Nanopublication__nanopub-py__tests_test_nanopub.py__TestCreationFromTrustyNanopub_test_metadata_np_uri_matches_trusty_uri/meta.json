@@ -13,10 +13,14 @@
     "graph_ctor": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "identity translation: the region contains no term construction. It builds a Dataset, parses TriG from a string read off disk, and compares np.metadata.np_uri to a *Python string*. ldpy has no notation for parsing, islands never apply inside strings, and rewriting str(x) == '...' into a term comparison with <...> would change the program.",
+    "the five @prefix declarations of the mechanical draft (dc, rdf, dcterms, prov, xsd) were dropped: not one of them is used anywhere in the region.",
+    "no edit to either file was needed: the pytest 'testsuite' fixture is a parameter of the region, so the driver passes a stand-in whose get_by_nanopub_uri serves the single nanopub the test asks for.",
+    "data file added to the example directory: RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8.trig, 1.9 kB, fetched from its purl (http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8) -- a published nanopublication, used identically by both sides; it replaces the network download performed by nanopub_testsuite_connector.",
+    "the driver's verdict rests on both sides executing the region and passing its own assertions (np_uri matches the trusty URI, np.is_valid); since the translation is the identity this is all there is to check."
   ],
   "draft_sha": "c59b54b68606d98e",
   "provenance": {

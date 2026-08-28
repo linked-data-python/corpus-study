@@ -13,8 +13,14 @@
     "term_constructor": 18
   },
   "translation_status": "final",
-  "classification": "not-expressible",
+  "classification": "awkward",
   "translation_notes": [
+    "2026-08-28 (revision after the interpolated-datatype fix): the gap this example documented is CLOSED. `f\"{v}\"^^{dt}` now transpiles to Literal(f\"{v}\", datatype=dtype(dt)), so the 14 runtime-datatype Literals whose VALUE IS ALREADY A str are now written in notation: string / integer / float / double / decimal / time / date / datetime / curie / uri / the three branches of map_uri_or_curie / _map_default_range_special_case. With the URIRef already in notation that is 15 of the 18 term constructors. Classification raised not-expressible -> awkward; driver re-run, RDFEVAL-VERDICT equivalent (module-state, demo_graph)",
+    "2026-08-28: str-valued is the load-bearing condition, and it holds here -- the base IfAbsentProcessor._map_to_default_value (corpus, packages/linkml/src/linkml/generators/common/ifabsent_processor.py:89-145) regex-matches ifabsent_default_value, so every default_value / hour / year reaching these methods is a str. For a str, `f\"{v}\"` is v itself and Literal(v, datatype=dt) already takes the lexical path, so the two terms are identical -- verified term-by-term with .n3() over all 19 demo values",
+    "2026-08-28: the two boolean branches deliberately STAY Python. Literal(True, datatype=xsd:boolean) has lexical form \"true\" whereas f\"{True}\" is \"True\". Measured: today they still compare equal, because rdflib's boolean lexical parser lowercases and NORMALIZE_LITERALS then rewrites \"True\" back to \"true\" -- but that equality is an artefact of rdflib's normalisation, not of the notation: with rdflib.NORMALIZE_LITERALS = False (a supported global) the rewrite yields \"True\"^^xsd:boolean against the original's \"true\"^^xsd:boolean, i.e. a different term. The str-valued branches above are immune to that switch. Rewriting a Python VALUE as a lexical form is the trap the interpolated-datatype form does not remove",
+    "2026-08-28: Literal(permissible_value_name) (map_enum_default_value) also stays Python -- a bare literal from a runtime value has no out-of-island form; that gap is untouched",
+    "2026-08-28: what the notation buys here is honestly small. `f\"{default_value}\"^^{ShaclDataType.STRING.uri_ref}` is no shorter and no clearer than `Literal(default_value, datatype=ShaclDataType.STRING.uri_ref)`; the module is a term factory that never asserts a triple, so there is no g{} island to amortise the notation. Hence awkward rather than directly-expressible: expressible, but the notation is at best a wash on this code shape",
+    "--- notes from the first review wave (kept for the record; the first one is superseded by the 2026-08-28 revision above) ---",
     "17 of the 18 term constructors are Literal(value, datatype=ShaclDataType.X.uri_ref): the datatype is a RUNTIME lookup through linkml's ShaclDataType enum, and ldpy has no interpolated-datatype form -- verified: f\"{x}\"^^xsd:time transpiles, but f\"{x}\"^^{dt} is rejected with \"type de donnee attendu apres '^^'\". This is the concrete language gap this example documents",
     "expressing them would mean inlining the enum (f\"{year}-{month}-{day}\"^^xsd:date and so on), which is rejected as unfaithful: ShaclDataType is a shared domain abstraction and the inlining would erase the STRING / CURIE / NCNAME / JSON_POINTER / JSON_PATH / SPARQL_PATH distinctions, all six of which resolve to xsd:string",
     "Literal(permissible_value_name) with no datatype also stays Python: bare {expr} coercion only exists inside g{} islands",
@@ -29,5 +35,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

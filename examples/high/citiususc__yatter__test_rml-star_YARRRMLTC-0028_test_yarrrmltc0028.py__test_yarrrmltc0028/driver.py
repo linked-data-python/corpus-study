@@ -1,15 +1,39 @@
-"""Validation driver for citiususc__yatter__test_rml-star_YARRRMLTC-0028_test_yarrrmltc0028.py__test_yarrrmltc0028.
+"""Validation driver for yatter's YARRRMLTC-0028 test.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+Context (identical for both representations):
+
+* ``yatter`` is not installed in the evaluation venv, so the corpus checkout
+  citiususc/yatter@0b40dff623 (its ``src/`` directory) is put on sys.path
+  before either module is executed;
+* ``coloredlogs``, which yatter imports only to colourise its logger, is not
+  installed either and is replaced by a no-op stub module;
+* the region reads ``mapping.ttl`` and ``mapping.yml`` next to its own
+  ``__file__``; both files (1.3 KB / 0.4 KB) were copied from
+  test/rml-star/YARRRMLTC-0028/ of the same checkout into this directory, so
+  both original.py and translated.ldpy find them.
+
+The region takes no argument and returns nothing: it asserts that the
+mapping yatter generates from the YARRRML source is isomorphic to the
+expected RML graph.
 """
-from rdfeval.harness import run_pair
+import sys
+import types
+from pathlib import Path
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_yarrrmltc0028',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+HERE = Path(__file__).resolve().parent
+YATTER_SRC = HERE.parents[2] / "corpus" / "repos" / "citiususc__yatter" / "src"
+if str(YATTER_SRC) not in sys.path:
+    sys.path.insert(0, str(YATTER_SRC))
+if "coloredlogs" not in sys.modules:
+    _stub = types.ModuleType("coloredlogs")
+    _stub.install = lambda *args, **kwargs: None
+    sys.modules["coloredlogs"] = _stub
+
+from rdfeval.harness import run_pair  # noqa: E402
+
+
+def no_args():
+    return ((), {})
+
+
+VERDICT = run_pair(__file__, entry="test_yarrrmltc0028", calls=[no_args])

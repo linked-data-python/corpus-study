@@ -3,6 +3,8 @@
 # licence of the source repository: see meta.json
 from rdflib.graph import Graph
 from rdflib.term import URIRef, BNode, Literal, Variable
+from vstore_ctx import (  # context shim, see vstore_ctx.py
+    FakeVirtuosoStore, _query_bindings)
 
 def contexts(self, statement=None):
     if statement is None and self.quad_storage is None:
@@ -18,3 +20,19 @@ def contexts(self, statement=None):
     with self.cursor() as c:
         for uri, in c.execute(q):
             yield Graph(self, URIRef(uri))
+
+# --- demo harness: identical in original.py and translated.ldpy ---
+# contexts() is a generator method of a store that talks to Virtuoso over
+# ODBC; it is run against the off-line stand-in store, and the pair is
+# compared on what it yields and on the query text it sent (stdout).
+demo_store = FakeVirtuosoStore(
+    ["http://example.com/g1", "http://example.com/g2"])
+demo_qs_store = FakeVirtuosoStore(
+    ["http://example.com/g3"], quad_storage=URIRef("http://example.com/qs"))
+
+print([str(g.identifier) for g in contexts(demo_store)])
+print([str(g.identifier) for g in contexts(
+    demo_store, (URIRef("http://example.com/s"), None, Literal("v")))])
+print([str(g.identifier) for g in contexts(demo_qs_store)])
+print(demo_store.queries)
+print(demo_qs_store.queries)

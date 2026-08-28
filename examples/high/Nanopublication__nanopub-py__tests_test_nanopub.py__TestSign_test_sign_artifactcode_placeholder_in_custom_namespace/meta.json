@@ -15,10 +15,14 @@
     "serialize_parse": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "context shims: nanopub_shim.py puts the Nanopublication/nanopub-py@05022dc4bc checkout on sys.path; conftest_shim.py replaces tests/conftest.py and the nanopub_testsuite_connector testsuite fixture, which download the nanopub test suite from GitHub at import time",
+    "three files copied verbatim from nanopub-testsuite@main (MIT, (c) 2022 Tobias Kuhn): transform/signed/rsa-key1/key/{id_rsa,id_rsa.pub} and transform/plain/artifactcode-1.in.trig, the only transform case the region uses; the shim testsuite object mirrors the connector API the region touches (.plain.name, .plain.read_text)",
+    "the single translatable construct is URIRef(f\"https://example.org/ns/{artifact_code}\") -> f<https://example.org/ns/{artifact_code}>, which is exactly what the formatted-IRI island is for and reads better than the original",
+    "everything else is deliberately Python: the nanopub is built by parsing an opaque trig string (ds.parse(data=..., format=trig)) and inspected with a wildcard quad pattern - neither has an island form, and neither should",
+    "the auto-generated draft prefixes dc/rdf/dcterms/prov/xsd were dropped: unused in the region"
   ],
   "draft_sha": "76bb6d1d298dfb0c",
   "provenance": {
@@ -26,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_sign_artifactcode_placeholder_in_custom_namespace",
+    "diffs": [],
+    "error": null
   }
 }

@@ -10,6 +10,14 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import (
+    BooleanClass,
+    CastClass,
+    Class,
+    Individual,
+    Restriction,
+    classOrIdentifier,
+)
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 CLASS_RELATIONS = set(
     OWL_NS.resourceProperties
@@ -75,3 +83,33 @@ def ComponentTerms(cls):
                         yield _c
                 else:
                     yield innerCls
+
+# --- demo harness, added identically to both representations (see meta.json).
+# ComponentTerms is a generator over infixowl Class objects, which the harness
+# cannot compare directly, so the demo consumes it into observable module state.
+from rdflib import Graph
+from rdflib.namespace import OWL
+
+demo_graph = Graph()
+Individual.factoryGraph = demo_graph
+_ex = Namespace("http://example.org/")
+
+# named superclass + anonymous someValuesFrom restriction (recursive branch)
+_pizza = Class(_ex.Pizza, graph=demo_graph)
+_pizza.subClassOf = [
+    Class(_ex.Food, graph=demo_graph),
+    Restriction(_ex.hasTopping, graph=demo_graph, someValuesFrom=_ex.Cheese),
+]
+print("pizza:", sorted(str(c.identifier) for c in ComponentTerms(_pizza)))
+
+# an owl:unionOf class (BooleanClass branch)
+_union = BooleanClass(operator=OWL.unionOf,
+                      members=[Class(_ex.Beer, graph=demo_graph),
+                               Class(_ex.Wine, graph=demo_graph)],
+                      graph=demo_graph)
+print("union:", sorted(str(c.identifier) for c in ComponentTerms(_union)))
+
+# a leaf class (no component at all)
+print("leaf:", sorted(str(c.identifier)
+                      for c in ComponentTerms(Class(_ex.Water,
+                                                    graph=demo_graph))))

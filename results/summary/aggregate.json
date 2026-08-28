@@ -1,202 +1,207 @@
 {
   "provenance": {
-    "generated_at": "2026-08-28T01:43:24.028582+00:00",
-    "pipeline_revision": "3615f54f73507cd9899038ccd96ddf574a276eb8",
+    "generated_at": "2026-08-28T06:36:50.634987+00:00",
+    "pipeline_revision": "e7edab9ca2078d73ac743fac1684febd4df2eb82",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
   },
-  "pairs_total": 37,
-  "pairs_equivalent": 37,
-  "pairs_other": [],
+  "pairs_total": 141,
+  "pairs_equivalent": 140,
+  "pairs_other": [
+    {
+      "region_id": "morph-kgc__morph-kgc__test_rml-fnml_string_functions_string_starts_endswith_test_string_start_end_with.py__test_string_starts_endswith",
+      "status": "unresolved"
+    }
+  ],
   "by_metric": {
     "code_loc": {
       "reduction_pct": {
-        "n": 37,
-        "mean": 1.4559,
+        "n": 140,
+        "mean": 1.8202,
         "median": 0.0,
-        "q1": -2.788,
-        "q3": 1.312,
-        "min": -14.286,
-        "max": 37.5
+        "q1": -3.846,
+        "q3": 1.7027,
+        "min": -18.519,
+        "max": 78.947
       },
       "ratio": {
-        "n": 37,
-        "mean": 0.9854,
+        "n": 140,
+        "mean": 0.9818,
         "median": 1.0,
-        "q1": 0.9869,
-        "q3": 1.0279,
-        "min": 0.625,
-        "max": 1.1429
+        "q1": 0.983,
+        "q3": 1.0385,
+        "min": 0.2105,
+        "max": 1.1852
       },
       "paired": {
-        "n_pairs": 37,
-        "median_a": 44,
-        "median_b": 40,
-        "median_difference": 0,
+        "n_pairs": 140,
+        "median_a": 28.0,
+        "median_b": 28.0,
+        "median_difference": 0.0,
         "hodges_lehmann_shift": 0.0,
         "difference_ci": {
-          "point": 0,
-          "lo": 0,
-          "hi": 0,
+          "point": 0.0,
+          "lo": -1.0,
+          "hi": 0.0,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 21,
-          "n_zero": 16,
-          "W": 108.0,
-          "W_plus": 123.0,
-          "W_minus": 108.0,
-          "z": -0.2446,
-          "p_two_sided": 0.806795,
+          "n": 100,
+          "n_zero": 40,
+          "W": 2423.5,
+          "W_plus": 2423.5,
+          "W_minus": 2626.5,
+          "z": -0.3527,
+          "p_two_sided": 0.724317,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.0058,
+          "delta": 0.0164,
           "magnitude": "negligible"
         }
       }
     },
     "tokens": {
       "reduction_pct": {
-        "n": 37,
-        "mean": -6.9804,
-        "median": 0.302,
-        "q1": 0.0,
-        "q3": 11.401,
+        "n": 140,
+        "mean": 0.7845,
+        "median": 1.0585,
+        "q1": -0.3653,
+        "q3": 7.3667,
         "min": -434.783,
         "max": 57.096
       },
       "ratio": {
-        "n": 37,
-        "mean": 1.0698,
-        "median": 0.997,
-        "q1": 0.886,
-        "q3": 1.0,
+        "n": 140,
+        "mean": 0.9922,
+        "median": 0.9894,
+        "q1": 0.9263,
+        "q3": 1.0037,
         "min": 0.429,
         "max": 5.3478
       },
       "paired": {
-        "n_pairs": 37,
-        "median_a": 264,
-        "median_b": 249,
-        "median_difference": 3,
-        "hodges_lehmann_shift": 8.5,
+        "n_pairs": 140,
+        "median_a": 164.5,
+        "median_b": 164.0,
+        "median_difference": 3.0,
+        "hodges_lehmann_shift": 4.5,
         "difference_ci": {
-          "point": 3,
-          "lo": 0,
-          "hi": 17,
+          "point": 3.0,
+          "lo": 0.0,
+          "hi": 4.0,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 26,
-          "n_zero": 11,
-          "W": 84.0,
-          "W_plus": 267.0,
-          "W_minus": 84.0,
-          "z": -2.3115,
-          "p_two_sided": 0.020806,
+          "n": 113,
+          "n_zero": 27,
+          "W": 1474.5,
+          "W_plus": 4966.5,
+          "W_minus": 1474.5,
+          "z": -5.0049,
+          "p_two_sided": 1e-06,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.0153,
+          "delta": 0.0256,
           "magnitude": "negligible"
         }
       }
     },
     "chars": {
       "reduction_pct": {
-        "n": 37,
-        "mean": -0.2926,
-        "median": 0.0,
-        "q1": -2.086,
-        "q3": 1.228,
-        "min": -27.529,
-        "max": 20.372
+        "n": 140,
+        "mean": -2.6422,
+        "median": -0.1145,
+        "q1": -4.8655,
+        "q3": 1.3778,
+        "min": -53.046,
+        "max": 24.74
       },
       "ratio": {
-        "n": 37,
-        "mean": 1.0029,
-        "median": 1.0,
-        "q1": 0.9877,
-        "q3": 1.0209,
-        "min": 0.7963,
-        "max": 1.2753
+        "n": 140,
+        "mean": 1.0264,
+        "median": 1.0011,
+        "q1": 0.9863,
+        "q3": 1.0487,
+        "min": 0.7526,
+        "max": 1.5305
       },
       "paired": {
-        "n_pairs": 37,
-        "median_a": 2027,
-        "median_b": 2070,
-        "median_difference": 0,
-        "hodges_lehmann_shift": -3.0,
+        "n_pairs": 140,
+        "median_a": 1324.0,
+        "median_b": 1326.0,
+        "median_difference": -7.0,
+        "hodges_lehmann_shift": -23.0,
         "difference_ci": {
-          "point": 0,
-          "lo": -17,
-          "hi": 1,
+          "point": -7.0,
+          "lo": -32.5,
+          "hi": 0.0,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 27,
-          "n_zero": 10,
-          "W": 159.5,
-          "W_plus": 159.5,
-          "W_minus": 218.5,
-          "z": -0.6968,
-          "p_two_sided": 0.485943,
+          "n": 121,
+          "n_zero": 19,
+          "W": 2290.0,
+          "W_plus": 2290.0,
+          "W_minus": 5091.0,
+          "z": -3.6214,
+          "p_two_sided": 0.000293,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": -0.0073,
+          "delta": -0.0201,
           "magnitude": "negligible"
         }
       }
     },
     "syntax_nodes": {
       "reduction_pct": {
-        "n": 37,
-        "mean": 4.9849,
-        "median": 0.0,
-        "q1": -0.1415,
-        "q3": 15.6565,
+        "n": 140,
+        "mean": 5.4557,
+        "median": 2.8405,
+        "q1": 0.0,
+        "q3": 9.9678,
         "min": -105.0,
         "max": 76.842
       },
       "ratio": {
-        "n": 37,
-        "mean": 0.9501,
-        "median": 1.0,
-        "q1": 0.8435,
-        "q3": 1.0014,
+        "n": 140,
+        "mean": 0.9454,
+        "median": 0.9716,
+        "q1": 0.9003,
+        "q3": 1.0,
         "min": 0.2316,
         "max": 2.05
       },
       "paired": {
-        "n_pairs": 37,
-        "median_a": 153,
-        "median_b": 147,
-        "median_difference": 0,
-        "hodges_lehmann_shift": 5.5,
+        "n_pairs": 140,
+        "median_a": 98.0,
+        "median_b": 91.5,
+        "median_difference": 2.5,
+        "hodges_lehmann_shift": 4.0,
         "difference_ci": {
-          "point": 0,
-          "lo": 0,
-          "hi": 10,
+          "point": 2.5,
+          "lo": 0.0,
+          "hi": 5.0,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 27,
-          "n_zero": 10,
-          "W": 87.5,
-          "W_plus": 290.5,
-          "W_minus": 87.5,
-          "z": -2.4275,
-          "p_two_sided": 0.015204,
+          "n": 113,
+          "n_zero": 27,
+          "W": 1294.0,
+          "W_plus": 5147.0,
+          "W_minus": 1294.0,
+          "z": -5.5212,
+          "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.0665,
+          "delta": 0.044,
           "magnitude": "negligible"
         }
       }
@@ -204,120 +209,120 @@
   },
   "by_band": {
     "high": {
-      "n": 16,
+      "n": 77,
       "code_loc": {
-        "n": 16,
-        "mean": 1.7259,
+        "n": 77,
+        "mean": 2.9241,
         "median": 0.0,
-        "q1": -5.4305,
-        "q3": 2.3385,
-        "min": -14.286,
-        "max": 37.5
+        "q1": -4.881,
+        "q3": 3.084,
+        "min": -18.519,
+        "max": 78.947
       },
       "tokens": {
-        "n": 16,
-        "mean": 14.0029,
-        "median": 10.1625,
-        "q1": 0.0,
-        "q3": 26.417,
+        "n": 77,
+        "mean": 6.4498,
+        "median": 1.932,
+        "q1": -1.067,
+        "q3": 11.3835,
         "min": -18.116,
         "max": 57.096
       },
       "chars": {
-        "n": 16,
-        "mean": -0.1239,
+        "n": 77,
+        "mean": -2.287,
         "median": 0.0,
-        "q1": -6.0035,
-        "q3": 3.1395,
-        "min": -27.529,
-        "max": 20.372
+        "q1": -5.9125,
+        "q3": 1.825,
+        "min": -35.008,
+        "max": 24.74
       },
       "syntax_nodes": {
-        "n": 16,
-        "mean": 18.0536,
-        "median": 15.6565,
-        "q1": 0.0,
-        "q3": 26.7595,
+        "n": 77,
+        "mean": 7.3302,
+        "median": 4.167,
+        "q1": -1.7275,
+        "q3": 13.244,
         "min": -26.897,
         "max": 76.842
       }
     },
     "low": {
-      "n": 9,
+      "n": 11,
       "code_loc": {
-        "n": 9,
-        "mean": 0.6408,
+        "n": 11,
+        "mean": 0.3997,
         "median": 0.0,
         "q1": 0.0,
-        "q3": 1.664,
-        "min": 0.0,
+        "q3": 1.604,
+        "min": -1.37,
         "max": 2.439
       },
       "tokens": {
-        "n": 9,
-        "mean": 3.939,
-        "median": 0.533,
+        "n": 11,
+        "mean": 3.2064,
+        "median": 0.0,
         "q1": 0.0,
-        "q3": 5.4845,
-        "min": 0.0,
+        "q3": 3.413,
+        "min": -0.181,
         "max": 23.392
       },
       "chars": {
-        "n": 9,
-        "mean": 0.4183,
+        "n": 11,
+        "mean": 0.2104,
         "median": 0.0,
         "q1": 0.0,
-        "q3": 1.228,
-        "min": -0.319,
+        "q3": 0.98,
+        "min": -1.461,
         "max": 1.503
       },
       "syntax_nodes": {
-        "n": 9,
-        "mean": 3.3909,
+        "n": 11,
+        "mean": 2.7196,
         "median": 0.0,
         "q1": 0.0,
-        "q3": 4.674,
-        "min": -0.283,
+        "q3": 2.591,
+        "min": -0.602,
         "max": 20.792
       }
     },
     "medium": {
-      "n": 12,
+      "n": 52,
       "code_loc": {
-        "n": 12,
-        "mean": 1.7074,
+        "n": 52,
+        "mean": 0.4861,
         "median": 0.0,
-        "q1": -3.118,
-        "q3": 0.0,
-        "min": -9.091,
+        "q1": -3.5403,
+        "q3": 1.5497,
+        "min": -12.5,
         "max": 20.93
       },
       "tokens": {
-        "n": 12,
-        "mean": -43.1476,
-        "median": 0.0,
-        "q1": -1.018,
-        "q3": 0.2265,
+        "n": 52,
+        "mean": -8.1169,
+        "median": 1.0,
+        "q1": -0.4215,
+        "q3": 4.3323,
         "min": -434.783,
-        "max": 12.308
+        "max": 14.894
       },
       "chars": {
-        "n": 12,
-        "mean": -1.0507,
-        "median": -0.1145,
-        "q1": -4.1158,
-        "q3": 0.0,
-        "min": -8.589,
+        "n": 52,
+        "mean": -3.7717,
+        "median": -1.2925,
+        "q1": -5.269,
+        "q3": 0.7053,
+        "min": -53.046,
         "max": 9.719
       },
       "syntax_nodes": {
-        "n": 12,
-        "mean": -11.2446,
-        "median": 0.0,
-        "q1": -2.948,
-        "q3": 0.0728,
+        "n": 52,
+        "mean": 3.2586,
+        "median": 2.8405,
+        "q1": 0.0,
+        "q3": 8.511,
         "min": -105.0,
-        "max": 9.565
+        "max": 31.034
       }
     }
   },
@@ -371,57 +376,57 @@
       }
     },
     "MKLab-ITI/prophet": {
-      "n": 6,
+      "n": 44,
       "tokens_reduction": {
-        "n": 6,
-        "mean": 13.462,
-        "median": 8.6935,
-        "q1": 2.5597,
-        "q3": 21.147,
-        "min": 0.0,
+        "n": 44,
+        "mean": 3.7879,
+        "median": 2.612,
+        "q1": 0.0,
+        "q3": 7.031,
+        "min": -7.407,
         "max": 47.664
       }
     },
     "Nanopublication/nanopub-py": {
-      "n": 4,
+      "n": 34,
       "tokens_reduction": {
-        "n": 4,
-        "mean": 7.061,
-        "median": 5.5135,
-        "q1": 0.1333,
-        "q3": 15.5362,
-        "min": 0.0,
-        "max": 17.217
+        "n": 34,
+        "mean": 4.8499,
+        "median": 3.367,
+        "q1": 0.0,
+        "q3": 7.495,
+        "min": -4.819,
+        "max": 26.994
       }
     },
     "RDFLib/pyLODE": {
-      "n": 4,
+      "n": 25,
       "tokens_reduction": {
-        "n": 4,
-        "mean": -3.403,
-        "median": -0.866,
-        "q1": -9.0,
-        "q3": -0.343,
+        "n": 25,
+        "mean": 3.02,
+        "median": -1.149,
+        "q1": -2.518,
+        "q3": 1.403,
         "min": -11.61,
-        "max": -0.27
+        "max": 45.714
       }
     },
     "RDFLib/pySHACL": {
-      "n": 3,
+      "n": 5,
       "tokens_reduction": {
-        "n": 3,
-        "mean": -175.3487,
-        "median": -95.652,
-        "q1": -434.783,
-        "q3": 4.389,
+        "n": 5,
+        "mean": -107.1224,
+        "median": -4.878,
+        "q1": -265.2175,
+        "q3": -0.1495,
         "min": -434.783,
         "max": 4.389
       }
     },
     "citiususc/yatter": {
-      "n": 3,
+      "n": 5,
       "tokens_reduction": {
-        "n": 3,
+        "n": 5,
         "mean": 0.0,
         "median": 0.0,
         "q1": 0.0,
@@ -431,27 +436,27 @@
       }
     },
     "cognitedata/neat": {
-      "n": 2,
+      "n": 5,
       "tokens_reduction": {
-        "n": 2,
-        "mean": 13.2755,
-        "median": 13.2755,
-        "q1": -5.8022,
-        "q3": 32.3533,
-        "min": 0.557,
+        "n": 5,
+        "mean": 11.7808,
+        "median": 7.143,
+        "q1": 0.188,
+        "q3": 25.6925,
+        "min": -0.181,
         "max": 25.994
       }
     },
     "landrs-toolkit/PySOSA": {
-      "n": 1,
+      "n": 2,
       "tokens_reduction": {
-        "n": 1,
-        "mean": 9.02,
-        "median": 9.02,
-        "q1": 9.02,
-        "q3": 9.02,
+        "n": 2,
+        "mean": 10.893,
+        "median": 10.893,
+        "q1": 8.0835,
+        "q3": 13.7025,
         "min": 9.02,
-        "max": 9.02
+        "max": 12.766
       }
     },
     "lawlesst/vivo-rdflib-sparqlstore": {
@@ -467,33 +472,33 @@
       }
     },
     "linkml/linkml": {
-      "n": 1,
-      "tokens_reduction": {
-        "n": 1,
-        "mean": 0.0,
-        "median": 0.0,
-        "q1": 0.0,
-        "q3": 0.0,
-        "min": 0.0,
-        "max": 0.0
-      }
-    },
-    "maparent/virtuoso-python": {
-      "n": 1,
-      "tokens_reduction": {
-        "n": 1,
-        "mean": 1.786,
-        "median": 1.786,
-        "q1": 1.786,
-        "q3": 1.786,
-        "min": 1.786,
-        "max": 1.786
-      }
-    },
-    "morph-kgc/morph-kgc": {
       "n": 2,
       "tokens_reduction": {
         "n": 2,
+        "mean": 5.544,
+        "median": 5.544,
+        "q1": -2.772,
+        "q3": 13.86,
+        "min": 0.0,
+        "max": 11.088
+      }
+    },
+    "maparent/virtuoso-python": {
+      "n": 4,
+      "tokens_reduction": {
+        "n": 4,
+        "mean": 2.896,
+        "median": 3.0015,
+        "q1": 0.4465,
+        "q3": 5.24,
+        "min": 0.0,
+        "max": 5.581
+      }
+    },
+    "morph-kgc/morph-kgc": {
+      "n": 4,
+      "tokens_reduction": {
+        "n": 4,
         "mean": 0.0,
         "median": 0.0,
         "q1": 0.0,
@@ -518,44 +523,44 @@
   "correspondence": {
     "corr_scaffolding_tokens_per_triple": {
       "python": {
-        "n": 10,
-        "mean": 9.6125,
-        "median": 9.0,
+        "n": 55,
+        "mean": 10.4932,
+        "median": 11.0,
         "q1": 9.0,
         "q3": 11.0,
         "min": 9.0,
-        "max": 11.0
+        "max": 12.0
       },
       "ldpy": {
-        "n": 10,
-        "mean": 1.0423,
-        "median": 0.9,
-        "q1": 0.5885,
-        "q3": 1.5002,
-        "min": 0.327,
-        "max": 2.0
+        "n": 46,
+        "mean": 1.5979,
+        "median": 1.333,
+        "q1": 0.9723,
+        "q3": 2.0,
+        "min": 0.0,
+        "max": 8.0
       },
       "paired": {
-        "n_pairs": 7,
-        "median_a": 9.125,
-        "median_b": 1.0,
-        "median_difference": 8.647,
-        "hodges_lehmann_shift": 8.736,
+        "n_pairs": 42,
+        "median_a": 11.0,
+        "median_b": 1.5235,
+        "median_difference": 9.0,
+        "hodges_lehmann_shift": 9.0,
         "difference_ci": {
-          "point": 8.647,
-          "lo": 8.2,
-          "hi": 9.286,
+          "point": 9.0,
+          "lo": 8.657,
+          "hi": 9.0,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 7,
+          "n": 42,
           "n_zero": 0,
           "W": 0,
-          "W_plus": 28.0,
+          "W_plus": 903.0,
           "W_minus": 0,
-          "z": -2.2819,
-          "p_two_sided": 0.022494,
+          "z": -5.6614,
+          "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
@@ -566,7 +571,7 @@
     },
     "corr_nesting_per_term": {
       "python": {
-        "n": 10,
+        "n": 55,
         "mean": 3.0,
         "median": 3.0,
         "q1": 3.0,
@@ -575,8 +580,8 @@
         "max": 3.0
       },
       "ldpy": {
-        "n": 27,
-        "mean": 0.0074,
+        "n": 117,
+        "mean": 0.0017,
         "median": 0.0,
         "q1": 0.0,
         "q3": 0.0,
@@ -584,7 +589,7 @@
         "max": 0.2
       },
       "paired": {
-        "n_pairs": 9,
+        "n_pairs": 54,
         "median_a": 3.0,
         "median_b": 0.0,
         "median_difference": 3.0,
@@ -597,13 +602,13 @@
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 9,
+          "n": 54,
           "n_zero": 0,
           "W": 0,
-          "W_plus": 45.0,
+          "W_plus": 1485.0,
           "W_minus": 0,
-          "z": -2.9333,
-          "p_two_sided": 0.003353,
+          "z": -7.3435,
+          "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
@@ -614,140 +619,140 @@
     },
     "corr_constructors_per_triple": {
       "python": {
-        "n": 37,
-        "mean": 4.1168,
-        "median": 2.0,
-        "q1": 1.0,
-        "q3": 2.5,
+        "n": 140,
+        "mean": 2.4605,
+        "median": 1.0,
+        "q1": 0.3345,
+        "q3": 2.4583,
         "min": 0.0,
         "max": 78.0
       },
       "ldpy": {
-        "n": 10,
-        "mean": 0.2167,
-        "median": 0.0295,
+        "n": 46,
+        "mean": 0.4176,
+        "median": 0.0,
         "q1": 0.0,
-        "q3": 0.429,
+        "q3": 0.4467,
         "min": 0.0,
-        "max": 1.0
+        "max": 6.0
       },
       "paired": {
-        "n_pairs": 10,
-        "median_a": 1.125,
-        "median_b": 0.0295,
-        "median_difference": 0.8335,
+        "n_pairs": 46,
+        "median_a": 1.0,
+        "median_b": 0.0,
+        "median_difference": 1.0,
         "hodges_lehmann_shift": 1.0,
         "difference_ci": {
-          "point": 0.8335,
-          "lo": 0.5525,
-          "hi": 2.0,
+          "point": 1.0,
+          "lo": 0.5355,
+          "hi": 1.0,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 10,
-          "n_zero": 0,
+          "n": 33,
+          "n_zero": 13,
           "W": 0,
-          "W_plus": 55.0,
+          "W_plus": 561.0,
           "W_minus": 0,
-          "z": -2.7575,
-          "p_two_sided": 0.005825,
+          "z": -5.0262,
+          "p_two_sided": 1e-06,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.88,
+          "delta": 0.5733,
           "magnitude": "large"
         }
       }
     },
-    "python_staging_assignments_total": 67
+    "python_staging_assignments_total": 89
   },
   "classification_counts": {
-    "awkward": 4,
-    "directly-expressible": 24,
-    "minor-restructuring": 9
+    "awkward": 8,
+    "directly-expressible": 108,
+    "minor-restructuring": 25
   },
   "by_subgroup": {
     "inline-construction": {
-      "n": 10,
+      "n": 55,
       "byte_identical": 1,
       "code_loc": {
-        "n": 10,
-        "mean": 1.4354,
-        "median": -3.48,
-        "q1": -8.0002,
-        "q3": 5.5555,
-        "min": -14.286,
+        "n": 55,
+        "mean": 1.5303,
+        "median": -2.564,
+        "q1": -5.556,
+        "q3": 11.111,
+        "min": -18.519,
         "max": 37.5
       },
       "tokens": {
-        "n": 10,
-        "mean": 20.6168,
-        "median": 13.8555,
-        "q1": 6.8405,
-        "q3": 32.9055,
-        "min": 0.0,
+        "n": 55,
+        "mean": 7.6007,
+        "median": 5.217,
+        "q1": 0.909,
+        "q3": 11.321,
+        "min": -7.407,
         "max": 57.096
       },
       "chars": {
-        "n": 10,
-        "mean": 2.3136,
-        "median": -0.1145,
-        "q1": -6.292,
-        "q3": 7.8193,
-        "min": -7.042,
+        "n": 55,
+        "mean": -0.1579,
+        "median": 0.291,
+        "q1": -4.114,
+        "q3": 4.294,
+        "min": -13.52,
         "max": 20.372
       },
       "syntax_nodes": {
-        "n": 10,
-        "mean": 28.3636,
-        "median": 23.139,
-        "q1": 9.0243,
-        "q3": 47.0288,
-        "min": 0.0,
+        "n": 55,
+        "mean": 15.1497,
+        "median": 10.0,
+        "q1": 5.926,
+        "q3": 23.333,
+        "min": -3.822,
         "max": 76.842
       },
       "correspondence": {
         "corr_scaffolding_tokens_per_triple": {
           "python": {
-            "n": 10,
-            "mean": 9.6125,
-            "median": 9.0,
+            "n": 55,
+            "mean": 10.4932,
+            "median": 11.0,
             "q1": 9.0,
             "q3": 11.0,
             "min": 9.0,
-            "max": 11.0
+            "max": 12.0
           },
           "ldpy": {
-            "n": 7,
-            "mean": 1.1239,
-            "median": 1.0,
-            "q1": 0.667,
-            "q3": 1.714,
-            "min": 0.353,
-            "max": 2.0
+            "n": 42,
+            "mean": 1.6892,
+            "median": 1.5235,
+            "q1": 1.0,
+            "q3": 2.0,
+            "min": 0.0,
+            "max": 8.0
           },
           "paired": {
-            "n_pairs": 7,
-            "median_a": 9.125,
-            "median_b": 1.0,
-            "median_difference": 8.647,
-            "hodges_lehmann_shift": 8.736,
+            "n_pairs": 42,
+            "median_a": 11.0,
+            "median_b": 1.5235,
+            "median_difference": 9.0,
+            "hodges_lehmann_shift": 9.0,
             "difference_ci": {
-              "point": 8.647,
-              "lo": 8.2,
-              "hi": 9.286,
+              "point": 9.0,
+              "lo": 8.657,
+              "hi": 9.0,
               "level": 0.95,
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 7,
+              "n": 42,
               "n_zero": 0,
               "W": 0,
-              "W_plus": 28.0,
+              "W_plus": 903.0,
               "W_minus": 0,
-              "z": -2.2819,
-              "p_two_sided": 0.022494,
+              "z": -5.6614,
+              "p_two_sided": 0.0,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
             "cliffs_delta": {
@@ -758,7 +763,7 @@
         },
         "corr_nesting_per_term": {
           "python": {
-            "n": 10,
+            "n": 55,
             "mean": 3.0,
             "median": 3.0,
             "q1": 3.0,
@@ -767,7 +772,7 @@
             "max": 3.0
           },
           "ldpy": {
-            "n": 9,
+            "n": 54,
             "mean": 0.0,
             "median": 0.0,
             "q1": 0.0,
@@ -776,7 +781,7 @@
             "max": 0.0
           },
           "paired": {
-            "n_pairs": 9,
+            "n_pairs": 54,
             "median_a": 3.0,
             "median_b": 0.0,
             "median_difference": 3.0,
@@ -789,13 +794,13 @@
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 9,
+              "n": 54,
               "n_zero": 0,
               "W": 0,
-              "W_plus": 45.0,
+              "W_plus": 1485.0,
               "W_minus": 0,
-              "z": -2.9333,
-              "p_two_sided": 0.003353,
+              "z": -7.3435,
+              "p_two_sided": 0.0,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
             "cliffs_delta": {
@@ -806,48 +811,48 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 10,
-            "mean": 9.0322,
-            "median": 1.0,
-            "q1": 0.6098,
-            "q3": 2.5003,
-            "min": 0.3,
+            "n": 55,
+            "mean": 3.4632,
+            "median": 1.25,
+            "q1": 0.667,
+            "q3": 3.0,
+            "min": 0.0,
             "max": 78.0
           },
           "ldpy": {
-            "n": 7,
-            "mean": 0.2483,
-            "median": 0.059,
+            "n": 42,
+            "mean": 0.4234,
+            "median": 0.0,
             "q1": 0.0,
-            "q3": 0.429,
+            "q3": 0.4467,
             "min": 0.0,
-            "max": 1.0
+            "max": 6.0
           },
           "paired": {
-            "n_pairs": 7,
+            "n_pairs": 42,
             "median_a": 1.0,
-            "median_b": 0.059,
-            "median_difference": 0.667,
-            "hodges_lehmann_shift": 0.6438,
+            "median_b": 0.0,
+            "median_difference": 1.0,
+            "hodges_lehmann_shift": 0.8335,
             "difference_ci": {
-              "point": 0.667,
-              "lo": 0.438,
+              "point": 1.0,
+              "lo": 0.5,
               "hi": 1.0,
               "level": 0.95,
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 7,
-              "n_zero": 0,
+              "n": 30,
+              "n_zero": 12,
               "W": 0,
-              "W_plus": 28.0,
+              "W_plus": 465.0,
               "W_minus": 0,
-              "z": -2.2901,
-              "p_two_sided": 0.022015,
+              "z": -4.7967,
+              "p_two_sided": 2e-06,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
             "cliffs_delta": {
-              "delta": 0.7959,
+              "delta": 0.5442,
               "magnitude": "large"
             }
           }
@@ -855,10 +860,10 @@
       }
     },
     "no-source-rdf": {
-      "n": 8,
-      "byte_identical": 8,
+      "n": 18,
+      "byte_identical": 18,
       "code_loc": {
-        "n": 8,
+        "n": 18,
         "mean": 0.0,
         "median": 0.0,
         "q1": 0.0,
@@ -867,7 +872,7 @@
         "max": 0.0
       },
       "tokens": {
-        "n": 8,
+        "n": 18,
         "mean": 0.0,
         "median": 0.0,
         "q1": 0.0,
@@ -876,16 +881,16 @@
         "max": 0.0
       },
       "chars": {
-        "n": 8,
-        "mean": 0.0,
+        "n": 18,
+        "mean": -3.0467,
         "median": 0.0,
         "q1": 0.0,
         "q3": 0.0,
-        "min": 0.0,
+        "min": -27.904,
         "max": 0.0
       },
       "syntax_nodes": {
-        "n": 8,
+        "n": 18,
         "mean": 0.0,
         "median": 0.0,
         "q1": 0.0,
@@ -906,8 +911,8 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 8,
-            "mean": 1.5,
+            "n": 18,
+            "mean": 1.4444,
             "median": 1.0,
             "q1": 1.0,
             "q3": 2.0,
@@ -920,41 +925,41 @@
       }
     },
     "string-embedded": {
-      "n": 6,
+      "n": 13,
       "byte_identical": 0,
       "code_loc": {
-        "n": 6,
-        "mean": 8.0562,
-        "median": 7.593,
-        "q1": -2.458,
-        "q3": 18.5802,
-        "min": -3.448,
+        "n": 13,
+        "mean": 4.9634,
+        "median": 1.282,
+        "q1": -2.6285,
+        "q3": 12.775,
+        "min": -3.704,
         "max": 20.93
       },
       "tokens": {
-        "n": 6,
-        "mean": -88.805,
-        "median": -9.058,
-        "q1": -180.4348,
-        "q3": 5.6367,
+        "n": 13,
+        "mean": -41.4452,
+        "median": 0.0,
+        "q1": -11.497,
+        "q3": 1.7365,
         "min": -434.783,
         "max": 12.308
       },
       "chars": {
-        "n": 6,
-        "mean": 0.5577,
-        "median": 0.1235,
-        "q1": -4.7157,
-        "q3": 4.8695,
-        "min": -5.378,
+        "n": 13,
+        "mean": -1.6925,
+        "median": -3.125,
+        "q1": -4.7185,
+        "q3": 0.1235,
+        "min": -6.888,
         "max": 9.719
       },
       "syntax_nodes": {
-        "n": 6,
-        "mean": -21.6938,
-        "median": -1.1595,
-        "q1": -52.5,
-        "q3": 4.3345,
+        "n": 13,
+        "mean": -11.4248,
+        "median": -1.266,
+        "q1": -7.5045,
+        "q3": 0.7555,
         "min": -105.0,
         "max": 9.565
       },
@@ -975,7 +980,7 @@
         "corr_nesting_per_term": {
           "python": null,
           "ldpy": {
-            "n": 6,
+            "n": 13,
             "mean": 0.0,
             "median": 0.0,
             "q1": 0.0,
@@ -987,12 +992,12 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 6,
-            "mean": 2.6667,
+            "n": 13,
+            "mean": 2.4615,
             "median": 2.0,
             "q1": 2.0,
             "q3": 3.0,
-            "min": 2.0,
+            "min": 0.0,
             "max": 6.0
           },
           "ldpy": {
@@ -1036,55 +1041,63 @@
       }
     },
     "terms-only": {
-      "n": 13,
-      "byte_identical": 1,
+      "n": 54,
+      "byte_identical": 4,
       "code_loc": {
-        "n": 13,
-        "mean": -0.6785,
+        "n": 54,
+        "mean": 1.9656,
         "median": 0.0,
-        "q1": -1.7855,
-        "q3": 1.312,
-        "min": -9.091,
-        "max": 2.778
+        "q1": -3.8845,
+        "q3": 0.255,
+        "min": -18.182,
+        "max": 78.947
       },
       "tokens": {
-        "n": 13,
-        "mean": 5.2607,
-        "median": 0.557,
-        "q1": -0.416,
-        "q3": 12.675,
+        "n": 54,
+        "mean": 4.2699,
+        "median": 0.545,
+        "q1": -1.1542,
+        "q3": 5.9715,
         "min": -11.61,
-        "max": 25.994
+        "max": 45.714
       },
       "chars": {
-        "n": 13,
-        "mean": -2.8698,
-        "median": 0.0,
-        "q1": -4.1015,
-        "q3": 1.4895,
-        "min": -27.529,
-        "max": 2.799
+        "n": 54,
+        "mean": -5.2664,
+        "median": -1.8815,
+        "q1": -8.1937,
+        "q3": 0.6697,
+        "min": -53.046,
+        "max": 24.74
       },
       "syntax_nodes": {
-        "n": 13,
-        "mean": 2.3821,
-        "median": 0.661,
-        "q1": -2.08,
-        "q3": 8.5615,
+        "n": 54,
+        "mean": 1.4644,
+        "median": 0.0,
+        "q1": -3.7585,
+        "q3": 5.93,
         "min": -26.897,
-        "max": 20.853
+        "max": 34.286
       },
       "correspondence": {
         "corr_scaffolding_tokens_per_triple": {
           "python": null,
-          "ldpy": null,
+          "ldpy": {
+            "n": 1,
+            "mean": 0.0,
+            "median": 0.0,
+            "q1": 0.0,
+            "q3": 0.0,
+            "min": 0.0,
+            "max": 0.0
+          },
           "paired": null
         },
         "corr_nesting_per_term": {
           "python": null,
           "ldpy": {
-            "n": 12,
-            "mean": 0.0167,
+            "n": 50,
+            "mean": 0.004,
             "median": 0.0,
             "q1": 0.0,
             "q3": 0.0,
@@ -1095,15 +1108,23 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 13,
-            "mean": 2.6154,
-            "median": 2.0,
-            "q1": 0.5,
-            "q3": 4.5,
+            "n": 54,
+            "mean": 1.7778,
+            "median": 1.0,
+            "q1": 0.0,
+            "q3": 2.25,
             "min": 0.0,
-            "max": 8.0
+            "max": 16.0
           },
-          "ldpy": null,
+          "ldpy": {
+            "n": 1,
+            "mean": 1.0,
+            "median": 1.0,
+            "q1": 1.0,
+            "q3": 1.0,
+            "min": 1.0,
+            "max": 1.0
+          },
           "paired": null
         }
       }
@@ -1167,6 +1188,216 @@
       "tokens_reduction_pct": 17.217
     },
     {
+      "region_id": "Nanopublication__nanopub-py__tests_test_fdo_op_validate_unit.py__test_valid_fdo_from_nanopub_network",
+      "band": "high",
+      "rdf_ops": 32,
+      "rdf_op_share": 0.10323,
+      "tokens_reduction_pct": 16.26
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationDefault_test_assertion_accepts_added_triples",
+      "band": "high",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.03571,
+      "tokens_reduction_pct": 1.504
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationDefault_test_head_declares_nanopublication_type",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.04255,
+      "tokens_reduction_pct": -4.819
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationDefault_test_introduces_concept_multiple_error",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.08955,
+      "tokens_reduction_pct": 12.712
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationDefault_test_is_valid_empty_graphs_and_graph_count",
+      "band": "high",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.05926,
+      "tokens_reduction_pct": 1.896
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationDefault_test_no_parameters",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.0303,
+      "tokens_reduction_pct": 1.932
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationFromDataset_test_metadata_matches_graph",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.03448,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationFromTrustyNanopub_test_all_sub_graphs_non_empty",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02632,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationFromTrustyNanopub_test_get_source_uri_from_graph_returns_trusty",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.03774,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationFromTrustyNanopub_test_source_uri_resolved_from_trusty_dataset",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.03571,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestHandleDerivedFrom_test_from_str",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.04167,
+      "tokens_reduction_pct": 3.614
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_ill_typed_literal_in_assertion",
+      "band": "high",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.0463,
+      "tokens_reduction_pct": -3.571
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_ill_typed_literal_in_pubinfo",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.04819,
+      "tokens_reduction_pct": 18.248
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_ill_typed_literal_in_signed_nanopub_only_warns",
+      "band": "high",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.06494,
+      "tokens_reduction_pct": 7.407
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_ill_typed_literal_parsed_from_trig",
+      "band": "high",
+      "rdf_ops": 7,
+      "rdf_op_share": 0.08974,
+      "tokens_reduction_pct": 7.246
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_publish_rejects_ill_typed_literal_in_signed_nanopub",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.0404,
+      "tokens_reduction_pct": 4.094
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_sign_rejects_ill_typed_literal",
+      "band": "high",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.05155,
+      "tokens_reduction_pct": 6.329
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_well_typed_literals_are_accepted",
+      "band": "high",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.14433,
+      "tokens_reduction_pct": 26.994
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestReplaceBlankNodes_test_replace_blank_nodes_unnamed_bnode",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.08219,
+      "tokens_reduction_pct": 2.564
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_bnode",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.0597,
+      "tokens_reduction_pct": 3.448
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_bnode2",
+      "band": "high",
+      "rdf_ops": 7,
+      "rdf_op_share": 0.08861,
+      "tokens_reduction_pct": 11.679
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_object_bnode",
+      "band": "high",
+      "rdf_ops": 9,
+      "rdf_op_share": 0.0625,
+      "tokens_reduction_pct": 5.455
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_uri",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.06154,
+      "tokens_reduction_pct": 7.759
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_uri2",
+      "band": "high",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.04839,
+      "tokens_reduction_pct": 0.909
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_sign_artifactcode_placeholder_in_custom_namespace",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.03053,
+      "tokens_reduction_pct": 3.286
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_sign_errors",
+      "band": "high",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.09474,
+      "tokens_reduction_pct": 5.312
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_specific_file",
+      "band": "high",
+      "rdf_ops": 15,
+      "rdf_op_share": 0.05792,
+      "tokens_reduction_pct": -3.431
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py___make_dataset_from_trig",
+      "band": "high",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.05172,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py___minimal_valid_nanopub",
+      "band": "high",
+      "rdf_ops": 9,
+      "rdf_op_share": 0.06716,
+      "tokens_reduction_pct": -4.286
+    },
+    {
+      "region_id": "Nanopublication__nanopub-py__tests_test_nanopub.py___simple_assertion",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.1,
+      "tokens_reduction_pct": 4.11
+    },
+    {
       "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_class_properties_from_schema_domain_includes",
       "band": "high",
       "rdf_ops": 4,
@@ -1181,6 +1412,153 @@
       "tokens_reduction_pct": -0.27
     },
     {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_component_model_classes",
+      "band": "high",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.03226,
+      "tokens_reduction_pct": -3.509
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_equivalent_classes",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02381,
+      "tokens_reduction_pct": -1.887
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_ns",
+      "band": "high",
+      "rdf_ops": 9,
+      "rdf_op_share": 0.05732,
+      "tokens_reduction_pct": -1.235
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_onts_props",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02941,
+      "tokens_reduction_pct": 23.577
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_schema_org_metadata_graph",
+      "band": "high",
+      "rdf_ops": 50,
+      "rdf_op_share": 0.16181,
+      "tokens_reduction_pct": 2.806
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_summary_vocabularies",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.02479,
+      "tokens_reduction_pct": -0.985
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_superclasses",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02703,
+      "tokens_reduction_pct": -2.113
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_supermodel_iri",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.03922,
+      "tokens_reduction_pct": -6.452
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_get_title",
+      "band": "high",
+      "rdf_ops": 1,
+      "rdf_op_share": 0.02857,
+      "tokens_reduction_pct": 45.714
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_import_profile",
+      "band": "high",
+      "rdf_ops": 17,
+      "rdf_op_share": 0.10429,
+      "tokens_reduction_pct": -2.692
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_load_component_model",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.02778,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_domain_includes",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02469,
+      "tokens_reduction_pct": 20.253
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_examples",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.05882,
+      "tokens_reduction_pct": -1.149
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_image_object",
+      "band": "high",
+      "rdf_ops": 7,
+      "rdf_op_share": 0.07368,
+      "tokens_reduction_pct": -0.599
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_images",
+      "band": "high",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.09722,
+      "tokens_reduction_pct": -0.397
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_notes",
+      "band": "high",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.02907,
+      "tokens_reduction_pct": -8.475
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_range_includes",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02469,
+      "tokens_reduction_pct": -1.899
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_root_profile_iri",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.06452,
+      "tokens_reduction_pct": 18.182
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_super_profiles",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02985,
+      "tokens_reduction_pct": -2.344
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_svg_images",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.04545,
+      "tokens_reduction_pct": -3.448
+    },
+    {
+      "region_id": "RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_text_object",
+      "band": "high",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.0531,
+      "tokens_reduction_pct": 15.764
+    },
+    {
       "region_id": "RDFLib__pySHACL__pyshacl_assets_make_builtin.py__<module>",
       "band": "high",
       "rdf_ops": 8,
@@ -1188,10 +1566,38 @@
       "tokens_reduction_pct": 4.389
     },
     {
+      "region_id": "RDFLib__pySHACL__test_issues_test_190.py__test_190_1",
+      "band": "high",
+      "rdf_ops": 7,
+      "rdf_op_share": 0.08537,
+      "tokens_reduction_pct": -4.688
+    },
+    {
+      "region_id": "RDFLib__pySHACL__test_issues_test_190.py__test_190_2",
+      "band": "high",
+      "rdf_ops": 7,
+      "rdf_op_share": 0.08974,
+      "tokens_reduction_pct": -4.878
+    },
+    {
       "region_id": "citiususc__yatter__test_rml-fnml_YARRRMLTC-0050_test_yarrrmltc0050.py__test_yarrrmltc0050",
       "band": "high",
       "rdf_ops": 8,
       "rdf_op_share": 0.04878,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "citiususc__yatter__test_rml-io_YARRRMLTC-0037_test_yarrrmltc0037.py__test_yarrrmltc0037",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.04444,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "citiususc__yatter__test_rml-star_YARRRMLTC-0028_test_yarrrmltc0028.py__test_yarrrmltc0028",
+      "band": "high",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.04706,
       "tokens_reduction_pct": 0.0
     },
     {
@@ -1202,11 +1608,32 @@
       "tokens_reduction_pct": 25.994
     },
     {
+      "region_id": "cognitedata__neat__tests_v0_tests_unit_test_store_test_instance_diff.py__test_diff_instances",
+      "band": "high",
+      "rdf_ops": 35,
+      "rdf_op_share": 0.22876,
+      "tokens_reduction_pct": 25.391
+    },
+    {
+      "region_id": "cognitedata__neat__tests_v0_tests_unit_test_store_test_instance_diff.py__test_diff_validation",
+      "band": "high",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.06329,
+      "tokens_reduction_pct": 7.143
+    },
+    {
       "region_id": "landrs-toolkit__PySOSA__PySOSA_Actuator.py__Actuator___init__",
       "band": "high",
       "rdf_ops": 11,
       "rdf_op_share": 0.0719,
       "tokens_reduction_pct": 9.02
+    },
+    {
+      "region_id": "landrs-toolkit__PySOSA__PySOSA_Observation.py__Observation___init__",
+      "band": "high",
+      "rdf_ops": 12,
+      "rdf_op_share": 0.1,
+      "tokens_reduction_pct": 12.766
     },
     {
       "region_id": "lawlesst__vivo-rdflib-sparqlstore__example.py__<module>",
@@ -1216,10 +1643,31 @@
       "tokens_reduction_pct": -18.116
     },
     {
+      "region_id": "linkml__linkml__packages_linkml_src_linkml_generators_shacl_shacl_ifabsent_processor.py__<module>",
+      "band": "high",
+      "rdf_ops": 23,
+      "rdf_op_share": 0.02882,
+      "tokens_reduction_pct": 11.088
+    },
+    {
       "region_id": "morph-kgc__morph-kgc__test_issues_issue_81_test_issue_81.py__test_issue_81",
       "band": "high",
       "rdf_ops": 2,
       "rdf_op_share": 0.03077,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "morph-kgc__morph-kgc__test_rml-core_csv_RMLTC0007c_test_RMLTC0007c_CSV.py__test_RMLTC0007c",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.03077,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "morph-kgc__morph-kgc__test_rml-in-memory_json_dictionary_RMLIMTC0000_test_RMLTC0000_DICT.py__test_RMLTC0000",
+      "band": "high",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02632,
       "tokens_reduction_pct": 0.0
     },
     {
@@ -1251,6 +1699,13 @@
       "tokens_reduction_pct": 3.413
     },
     {
+      "region_id": "MKLab-ITI__prophet__rdflib_plugins_sparql_sparql.py__Prologue___init__",
+      "band": "low",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.09091,
+      "tokens_reduction_pct": 0.0
+    },
+    {
       "region_id": "Nanopublication__nanopub-py__nanopub_fdo_validate.py__validate_fdo_record",
       "band": "low",
       "rdf_ops": 2,
@@ -1263,6 +1718,13 @@
       "rdf_ops": 1,
       "rdf_op_share": 0.0011,
       "tokens_reduction_pct": 0.557
+    },
+    {
+      "region_id": "cognitedata__neat__cognite_neat__v0_core__instances_extractors__raw.py__<module>",
+      "band": "low",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.01506,
+      "tokens_reduction_pct": -0.181
     },
     {
       "region_id": "linkml__linkml__tests_linkml_test_compliance_test_compliance.py__<module>",
@@ -1312,6 +1774,265 @@
       "rdf_ops": 17,
       "rdf_op_share": 0.14783,
       "tokens_reduction_pct": 12.308
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__AnnotatableTerms__set_comment",
+      "band": "medium",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.08511,
+      "tokens_reduction_pct": -3.409
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__AnnotatableTerms__set_label",
+      "band": "medium",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.08511,
+      "tokens_reduction_pct": -3.409
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__AnnotatableTerms__set_seeAlso",
+      "band": "medium",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.06897,
+      "tokens_reduction_pct": -7.407
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__AnnotatableTerms_setupACEAnnotations",
+      "band": "medium",
+      "rdf_ops": 15,
+      "rdf_op_share": 0.09146,
+      "tokens_reduction_pct": 7.491
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__BooleanClass___init__",
+      "band": "medium",
+      "rdf_ops": 7,
+      "rdf_op_share": 0.056,
+      "tokens_reduction_pct": 7.653
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__BooleanClass_serialize",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.03614,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__CastClass",
+      "band": "medium",
+      "rdf_ops": 10,
+      "rdf_op_share": 0.05263,
+      "tokens_reduction_pct": 1.942
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class___init__",
+      "band": "medium",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.06107,
+      "tokens_reduction_pct": 4.128
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class___isub__",
+      "band": "medium",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.08,
+      "tokens_reduction_pct": -5.096
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class___repr__",
+      "band": "medium",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.01416,
+      "tokens_reduction_pct": 0.792
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__get_extentQuery",
+      "band": "medium",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.10526,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__get_parents",
+      "band": "medium",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.06364,
+      "tokens_reduction_pct": 1.208
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__set_complementOf",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.10345,
+      "tokens_reduction_pct": 4.167
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__set_disjointWith",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.09677,
+      "tokens_reduction_pct": 7.843
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__set_equivalentClass",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.09375,
+      "tokens_reduction_pct": 11.321
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__set_extent",
+      "band": "medium",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.06061,
+      "tokens_reduction_pct": 4.918
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__set_subClassOf",
+      "band": "medium",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.06061,
+      "tokens_reduction_pct": -6.557
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class_isPrimitive",
+      "band": "medium",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.06494,
+      "tokens_reduction_pct": 3.125
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__ComponentTerms",
+      "band": "medium",
+      "rdf_ops": 27,
+      "rdf_op_share": 0.08282,
+      "tokens_reduction_pct": 4.364
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__DeepClassClear",
+      "band": "medium",
+      "rdf_ops": 20,
+      "rdf_op_share": 0.07663,
+      "tokens_reduction_pct": 0.532
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__EnumeratedClass_serialize",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.03614,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__GetIdentifiedClasses",
+      "band": "medium",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.08333,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Individual__set_sameAs",
+      "band": "medium",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.08621,
+      "tokens_reduction_pct": 2.941
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Individual__set_type",
+      "band": "medium",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.06349,
+      "tokens_reduction_pct": 5.217
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__OWLRDFListProxy___init__",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.03409,
+      "tokens_reduction_pct": -0.662
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Ontology___init__",
+      "band": "medium",
+      "rdf_ops": 13,
+      "rdf_op_share": 0.09489,
+      "tokens_reduction_pct": 2.283
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Ontology__set_imports",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.10345,
+      "tokens_reduction_pct": 14.894
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Ontology_setVersion",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.14286,
+      "tokens_reduction_pct": 8.333
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Property___init__",
+      "band": "medium",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.03623,
+      "tokens_reduction_pct": 1.299
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Property___repr___canonicalName",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.04545,
+      "tokens_reduction_pct": 4.237
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Property__set_domain",
+      "band": "medium",
+      "rdf_ops": 12,
+      "rdf_op_share": 0.09677,
+      "tokens_reduction_pct": -1.463
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Property__set_inverseOf",
+      "band": "medium",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.10345,
+      "tokens_reduction_pct": 12.5
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Property__set_range",
+      "band": "medium",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.07143,
+      "tokens_reduction_pct": -2.885
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Property__set_subPropertyOf",
+      "band": "medium",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.06061,
+      "tokens_reduction_pct": -6.557
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Restriction___init__",
+      "band": "medium",
+      "rdf_ops": 19,
+      "rdf_op_share": 0.08155,
+      "tokens_reduction_pct": 5.651
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__Restriction_serialize",
+      "band": "medium",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.05634,
+      "tokens_reduction_pct": 4.237
+    },
+    {
+      "region_id": "MKLab-ITI__prophet__rdflib_extras_infixowl.py__manchesterSyntax",
+      "band": "medium",
+      "rdf_ops": 21,
+      "rdf_op_share": 0.03697,
+      "tokens_reduction_pct": 2.265
     },
     {
       "region_id": "Nanopublication__nanopub-py__nanopub_trustyuri_rdf_RdfPreprocessor.py__transform",
@@ -1368,6 +2089,27 @@
       "rdf_ops": 6,
       "rdf_op_share": 0.05217,
       "tokens_reduction_pct": 1.786
+    },
+    {
+      "region_id": "maparent__virtuoso-python__virtuoso_vstore.py__Virtuoso_contexts",
+      "band": "medium",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.03268,
+      "tokens_reduction_pct": 0.0
+    },
+    {
+      "region_id": "maparent__virtuoso-python__virtuoso_vstore.py___query_bindings",
+      "band": "medium",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.02899,
+      "tokens_reduction_pct": 5.581
+    },
+    {
+      "region_id": "maparent__virtuoso-python__virtuoso_vstore.py__resolve",
+      "band": "medium",
+      "rdf_ops": 28,
+      "rdf_op_share": 0.0597,
+      "tokens_reduction_pct": 4.217
     }
   ]
 }

@@ -15,10 +15,13 @@
     "namespace_term": 2,
     "serialize_parse": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, SH->sh"
+    "the only island opportunity inside the region proper is the read pattern's terms: report.triples((None, RDF.type, SH.ValidationResult)) -> (None, rdf:type, sh:ValidationResult), with rdf: and sh: declared as prefixes. There is no filtering island for reads, so the tuple and the loop stay Python",
+    "the two Turtle constants shacl_file and data_file2 are module-level *context* (outside the extracted region), so they were deliberately left as Python strings parsed with graph.parse(data=...): rewriting them would restructure code the region does not own",
+    "checked separately, though, and worth recording: the SHACL shape blob transpiles verbatim as a `g{ ... }` island — including the literal \"{?Class2Instance} does not ...\" whose braces are not interpolations, the ''' ... ''' SPARQL string full of braces, and the trailing `;` before `]`. This file is a case where nearly all of ldpy's value would sit in the surrounding constants rather than in the measured region",
+    "no shim needed: pyshacl is installed in the evaluation venv and the region is self-contained"
   ],
   "draft_sha": "464ec0b06d8775bc",
   "provenance": {
@@ -26,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_190_2",
+    "diffs": [],
+    "error": null
   }
 }

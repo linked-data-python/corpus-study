@@ -18,7 +18,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+from pylode_model_shim import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -34,7 +34,7 @@ from pylode.profiles.supermodel.model import (
     SimpleCodedProperty,
     TextObject,
 )
-from pylode.profiles.supermodel.query.common import (
+from pylode_common_shim import (
     get_class,
     get_descriptions,
     get_is_defined_by,

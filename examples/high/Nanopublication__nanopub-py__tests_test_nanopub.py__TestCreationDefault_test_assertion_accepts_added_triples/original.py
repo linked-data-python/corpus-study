@@ -13,3 +13,22 @@ def test_assertion_accepts_added_triples(self):
     np = Nanopub(conf=NanopubConf())
     np.assertion.add((URIRef("http://another"), namespaces.HYCL.claims, Literal("hello")))
     assert len(np.assertion) == 1
+
+
+# --- demo harness, added identically to both representations -----------------
+# The region is a pytest test: it keeps its nanopub in a local and returns
+# nothing, so module-state comparison would see nothing.  Wrap Nanopub to
+# record the instance the test builds, run the test, and republish its
+# assertion graph at module level for the isomorphism check.
+_Nanopub = Nanopub
+_CAPTURED = []
+
+
+def Nanopub(*args, **kwargs):  # noqa: F811 - deliberate shadow, see above
+    np = _Nanopub(*args, **kwargs)
+    _CAPTURED.append(np)
+    return np
+
+
+test_assertion_accepts_added_triples(None)
+demo_assertion = _CAPTURED[-1].assertion

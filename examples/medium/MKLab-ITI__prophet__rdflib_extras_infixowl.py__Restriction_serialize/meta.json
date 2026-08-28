@@ -13,10 +13,16 @@
     "graph_read": 1,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns"
+    "OWL_NS = Namespace('http://www.w3.org/2002/07/owl#') absorbed into `@prefix owl: <...> .`; the two namespace terms of the region become owl:allValuesFrom / owl:someValuesFrom inside a list literal, an operand position where the island is recognised. The mechanical draft's owl-ns: prefix was renamed to owl: -- a hyphenated prefix is usable inside g{} islands only, never in expression position.",
+    "IMPORTANT: the mechanical draft rewrote OWL_NS.DatatypeProperty into owl-ns:DatatypeProperty INSIDE THE DOCSTRING. That is wrong -- string contents are opaque to ldpy, and rewriting them changes the doctest text. The docstring is kept byte-identical to the original (verified: both sides produce the same __doc__ after the decorator).",
+    "graph.add((s, p, o)) in the copy loop is left as Python: all three terms come from a triple pattern read, so an island would only add braces (same call as in the sibling regions BooleanClass.serialize / EnumeratedClass.serialize)",
+    "context shim: `import py3compat` replaces `from rdflib import py3compat`. The decorator @py3compat.format_doctest_out is a Python-2/3 helper rdflib dropped long ago; the local py3compat.py copies _modify_str_or_docstring and the PY3 branch of format_doctest_out verbatim from rdflib/py3compat.py of the same commit. Identical for both sides.",
+    "context shim: `from rdflib.extras.infixowl import CastClass, Property` -- both are module-level names of the same vendored file, which cannot be imported (its own `from rdflib import py3compat`); the installed rdflib still ships infixowl and both functions are unchanged there. Same approach as the finalised AllProperties sibling. Identical for both sides.",
+    "import shim: `from rdflib import Namespace` added -- the extracted region uses Namespace on its first line but the extract's preamble did not import it (the enclosing module does)",
+    "driver: a stand-in `self` supplies onProperty/graph/identifier and the target graph is passed as the second argument, so it is compared by isomorphism. Three fixtures: someValuesFrom and allValuesFrom (the branch that follows the filler class through CastClass) and maxCardinality (the branch that must not)."
   ],
   "draft_sha": "ccf0c64f72f5e568",
   "provenance": {
@@ -24,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:serialize",
+    "diffs": [],
+    "error": null
   }
 }

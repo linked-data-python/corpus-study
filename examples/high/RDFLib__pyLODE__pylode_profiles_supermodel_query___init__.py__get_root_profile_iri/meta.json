@@ -13,10 +13,14 @@
     "graph_read": 2,
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "RDF.type / PROF.Profile / OWL.Ontology become rdf:type / prof:Profile / owl:Ontology; the region is a read-only lookup, so nothing else changes",
+    "the source's 14-name 'from rdflib.namespace import (...)' is namespace scaffolding for the whole file and is replaced by the three @prefix declarations the region uses; 'from rdflib import Dataset, Graph, Literal, URIRef' is kept, Graph and URIRef being used in the signature",
+    "the draft placed the @prefix lines inside the parenthesised import list, which is not a statement position; they are moved out",
+    "the error messages mention prof:Profile and owl:Ontology inside f-strings: string contents stay opaque to the island parser, so those stay plain text (checked: both sides raise the identical ValueError message)",
+    "driver: only the two returning branches are exercised, the harness aborting on any exception; the two raising branches were checked separately to produce identical ValueError messages on both sides"
   ],
   "draft_sha": "1d1d35b489b04ca6",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_root_profile_iri",
+    "diffs": [],
+    "error": null
   }
 }

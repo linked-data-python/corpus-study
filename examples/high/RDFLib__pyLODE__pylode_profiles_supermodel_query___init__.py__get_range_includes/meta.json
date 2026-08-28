@@ -13,10 +13,15 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "the region's single RDF operation, SDO.rangeIncludes, becomes sdo:rangeIncludes in call-argument position; nothing else changes",
+    "the draft inserted the 14 @prefix statements INSIDE the parenthesised 'from pylode...query.common import (...)' list; moved above the imports and reduced to the one prefix the region uses. The Python import lists are left untouched",
+    "context shims: pylode_model_shim reproduces pylode/profiles/supermodel/model.py verbatim (240 lines, standard library + rdflib only) and pylode_common_shim reproduces query/common.py verbatim apart from its single import line, redirected to the model shim; pyLODE is not installable in the evaluation venv and its package __init__ imports `dominate`. Both are imported identically by the two sides; only the two import lines in the region changed",
+    "the driver passes a plain Graph for the 'db' union-graph argument instead of a Dataset: the region only forwards it to get_class -> get_name, which uses it through .objects(), and rdflib's isomorphism helper (used by the harness on every Graph-typed argument) cannot consume the quads a Dataset yields",
+    "equivalence is established on the returned list of supermodel Class objects; note that their dataclass __eq__ compares only the iri field, so the comparison certifies which terms sdo:rangeIncludes selected, not the whole object tree",
+    "finding: worst ratio of the set -- 1 island for 8 lines and 45 lines of import preamble. The region reads the graph and builds Python objects, and ldpy has nothing to offer a read except a shorter term"
   ],
   "draft_sha": "06626c7917e2f195",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_range_includes",
+    "diffs": [],
+    "error": null
   }
 }

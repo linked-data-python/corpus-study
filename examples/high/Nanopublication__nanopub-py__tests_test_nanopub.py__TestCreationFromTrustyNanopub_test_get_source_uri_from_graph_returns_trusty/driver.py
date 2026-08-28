@@ -1,15 +1,30 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationFromTrustyNanopub_test_get_source_uri_from_graph_returns_trusty.
+"""Validation driver: the test asserts that a trusty nanopub's source URI is
+read back from its head graph.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The `nanopub` package is not installed in the evaluation venv; it is taken
+from the corpus checkout by appending it to sys.path (appended, not
+prepended, so the example's own shim modules keep priority).  The
+`testsuite` fixture is supplied offline by the local
+nanopub_testsuite_connector shim.
 """
-from rdfeval.harness import run_pair
+import sys
+from pathlib import Path
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_get_source_uri_from_graph_returns_trusty',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+_CORPUS = (Path(__file__).resolve().parents[3]
+           / "corpus" / "repos" / "Nanopublication__nanopub-py")
+if str(_CORPUS) not in sys.path:
+    sys.path.append(str(_CORPUS))
+
+from nanopub_testsuite_connector import NanopubTestSuite  # noqa: E402
+from rdfeval.harness import run_pair  # noqa: E402
+
+TESTSUITE = NanopubTestSuite.get_local()
+
+
+def trusty_nanopub():
+    # (self, testsuite): the region does not touch `self`.
+    return ((None, TESTSUITE), {})
+
+
+VERDICT = run_pair(__file__, entry="test_get_source_uri_from_graph_returns_trusty",
+                   calls=[trusty_nanopub])

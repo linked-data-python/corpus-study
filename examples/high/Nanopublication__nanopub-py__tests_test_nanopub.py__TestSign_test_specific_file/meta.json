@@ -17,10 +17,20 @@
     "term_constructor": 4,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "three graph.add() calls become two islands: the provenance one-liner and the pubinfo pair, whose two subjects are separated by `.` inside a single island. PROV.hadPrimarySource -> prov:hadPrimarySource, DCTERMS.conformsTo -> dcterms:conformsTo, URIRef('https://w3id.org/biolink/vocab/') -> <...>, Literal('3.1.0') -> \"3.1.0\".",
+    "PAV = Namespace('http://purl.org/pav/') -> `@prefix pav: <http://purl.org/pav/> .` kept at the very place the assignment stood, inside the function body (block scope); PAV.version -> pav:version. Legitimate because PAV is not used as a runtime object elsewhere.",
+    "URIRef(source), with source a whole URL in a variable, becomes the formatted IRI f<{source}>; checked that the interpolation leaves the '?' and '=' of the query string alone, so the term is identical to URIRef(source)",
+    "IMPORTANT negative finding (recurring in this file): Nanopub.provenance and Nanopub.pubinfo are READ-ONLY properties, so the natural `G += g{...}` is impossible and the translation must write `np.provenance.__iadd__(g{...})`. ldpy has no non-assigning mutation form.",
+    "notation hazard worth recording: the region's local parsed graph is named `g`, and `g{` is ldpy's graph island. They coexist thanks to the strict-adjacency rule (`g.parse(...)`, `assertion=g` are untouched), but the file now contains both `g` the variable and `g{` the island a few lines apart, which is not easy on the eye.",
+    "the json.loads / json.dumps round-trip, the JSON-LD parse, the with-open, and np.provenance.parse(...) stay Python untouched: islands do not apply inside strings or to parsed data",
+    "context shim: `from tests.conftest import default_conf, profile_test, skip_if_nanopub_server_unavailable, testsuite, testsuite_conf` replaced by `from nanopub_context import profile_test` -- the upstream conftest fetches a signing key from the online nanopub test suite (network + nanopub_testsuite_connector); the shim builds the same Profile with a locally generated RSA key. Imported once, so both sides sign with the same key. Identical for both sides.",
+    "data shim: tests/resources/many_bnodes_with_annotations.json (5 KB, Apache-2.0, snippet_ok) copied into the example directory at the same relative path, and the driver chdir's there, so the region's `open(\"./tests/resources/...\")` line is left verbatim",
+    "demo harness added identically to both representations: a Nanopub subclass snapshots the four named graphs immediately before sign(), and republishes them at module level for isomorphism comparison",
+    "the signed output is deliberately NOT compared: the JSON-LD file's many blank nodes get fresh random ids at each parse and nanopub's _replace_blank_nodes() renumbers them in store iteration order, so two runs of the SAME original.py already give different trusty URIs (measured). The driver freezes nanopub.nanopub.datetime as well, since the region asks for both generated-time fields; both measures live in the driver, so neither representation is favoured.",
+    "on the ldpy side URIRef, Literal, Namespace, DCTERMS and PROV become dead names in the rdflib import line, which is left untouched (shared preamble of the source file)"
   ],
   "draft_sha": "001fc78f1158e51d",
   "provenance": {
@@ -28,5 +38,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

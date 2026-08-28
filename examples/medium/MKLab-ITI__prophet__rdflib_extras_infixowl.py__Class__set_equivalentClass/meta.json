@@ -13,10 +13,14 @@
     "namespace_term": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns"
+    "OWL_NS = Namespace('http://www.w3.org/2002/07/owl#') becomes @prefix owl: <...> ; the draft's prefix name owl-ns was replaced by owl (a hyphenated prefix is legal inside islands but is not a Python identifier, so it can never be used outside one)",
+    "dropping the OWL_NS variable is safe here because the region is the only user; a module that re-exported OWL_NS would have to keep it, since @prefix creates no runtime object",
+    "graph.add((s, OWL_NS.equivalentClass, o)) -> `self.graph += g{ {self.identifier} owl:equivalentClass {classOrIdentifier(sc)} }`",
+    "context shim: infixowl_context.py carries classOrIdentifier verbatim (lines 237-243) plus reduced Property/Class placeholders, because rdflib/extras/infixowl.py cannot be imported (its first statement is `from rdflib import py3compat`); the placeholder gets a value __eq__ so the driver can compare the arguments it passed. Identical for both sides",
+    "original.py: added `from rdflib import Namespace` (the extracted region used Namespace without importing it) and the shim import"
   ],
   "draft_sha": "e9d8e73fec21bbf3",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_set_equivalentClass",
+    "diffs": [],
+    "error": null
   }
 }

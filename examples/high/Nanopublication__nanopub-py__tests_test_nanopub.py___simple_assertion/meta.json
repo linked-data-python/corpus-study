@@ -14,10 +14,13 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "context shim: nanopub_shim.py puts the Nanopublication/nanopub-py@05022dc4bc checkout on sys.path (the package is not installed); one added import line, identical on both sides",
+    "prefix hycl: declared for nanopub.namespaces.HYCL, so namespaces.HYCL.claims becomes hycl:claims",
+    "g.add((URIRef(...), ..., Literal(...))) becomes g += g{ <http://test> hycl:claims \"test claim\" } - pure notation change, no restructuring",
+    "the auto-generated draft prefixes (dc, rdf, dcterms, prov, xsd) were dropped: none of them is used in the region"
   ],
   "draft_sha": "d478794cf9823429",
   "provenance": {
@@ -25,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_simple_assertion",
+    "diffs": [],
+    "error": null
   }
 }

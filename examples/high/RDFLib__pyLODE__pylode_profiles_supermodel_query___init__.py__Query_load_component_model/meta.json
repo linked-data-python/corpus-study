@@ -12,10 +12,17 @@
   "categories": {
     "namespace_term": 5
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "the region is long but touches RDF in exactly five places: SH.order -> sh:order and four OWL.<X>Property -> owl:<X>Property, all as plain Python call arguments; everything else is untouched Python",
+    "the mechanical draft had inserted the 14 @prefix lines INSIDE the from pylode.profiles.supermodel.query.common import ( ... ) parenthesised list, which does not parse; the declarations were moved after the rdflib.namespace import block and reduced to the two prefixes actually used (owl:, sh:)",
+    "the rdflib.namespace import block is kept verbatim on both sides (a @prefix produces no runtime object, so it never replaces an import; OWL/SH simply stop being read on the ldpy side)",
+    "context shim pylode_context.py: the region imports two groups of pyLODE names and additionally calls four helpers that were plain siblings in the same source module and therefore have no import line at all (get_component_model_ignored_classes, get_examples, get_rdf_properties, get_top_level_component_classes) - an import line for those was added, identically on both sides",
+    "the shim runs the REAL pyLODE code from the corpus checkout: pylode/__init__.py and pylode/utils.py are bypassed by registering namespace packages and inert stubs for absent third-party deps (dominate, jinja2, markdown, httpx, tqdm, kurra) plus a pylode.version stub; no code path the region uses is stubbed",
+    "driver: only self.get_component_model_classes is supplied by a holder (constructing a real Query would need a network profile load); it returns real pylode Class objects and records its arguments. db.value(iri, sh:order) and the four get_rdf_properties(owl:...) calls run against a real Dataset (default_union=True, as pyLODE own ProfilesDataset uses), so a wrong IRI changes the returned ComponentModel",
+    "driver: TripleIterDataset overrides __iter__ to yield triples, because the harness compares Graph arguments with rdflib.compare, which cannot consume the quads a Dataset yields; nothing in the region iterates the dataset",
+    "negative control run: replacing owl:DatatypeProperty by owl:AnnotationProperty, or sh:order by a wrong IRI, makes the driver report equivalent=false - the fixtures do discriminate on the translated terms"
   ],
   "draft_sha": "87990b73df760736",
   "provenance": {
@@ -23,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:load_component_model",
+    "diffs": [],
+    "error": null
   }
 }

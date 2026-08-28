@@ -10,6 +10,14 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import (
+    BooleanClass,
+    CastClass,
+    Class,
+    Individual,
+    classOrIdentifier,
+    some,
+)
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def DeepClassClear(classToPrune):
@@ -80,3 +88,32 @@ def DeepClassClear(classToPrune):
         classToPrune.graph.remove((classToPrune.identifier,
                                    classToPrune._operator,
                                    None))
+
+# --- demo harness, added identically to both representations (see meta.json).
+# DeepClassClear reads Individual.factoryGraph, a module-level attribute shared
+# by both runs, so it cannot be set up from a driver fixture (the harness builds
+# both fixtures before calling either side).  The scenario below is the one from
+# the region's own docstring; it leaves the pruned graph in a module-level
+# variable the harness can compare.
+from rdflib import Graph
+
+EX = Namespace('http://example.com/')
+demo_graph = Graph()
+demo_graph.bind('ex', EX, override=False)
+Individual.factoryGraph = demo_graph
+classB = Class(EX.B)
+classC = Class(EX.C)
+classD = Class(EX.D)
+classE = Class(EX.E)
+classF = Class(EX.F)
+anonClass = EX.someProp @ some @ classD
+classF += anonClass
+classA = classE | classF | anonClass
+classB += classA
+classA.equivalentClass = [Class(EX.G)]
+classB.subClassOf = [EX.someProp @ some @ classC]
+print('before', len(demo_graph))
+DeepClassClear(classA)
+print('after', len(demo_graph))
+print(repr(classB))
+print(sorted(str(p) for p in set(demo_graph.predicates())))

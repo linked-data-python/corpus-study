@@ -13,10 +13,16 @@
     "namespace_term": 12,
     "term_constructor": 16
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "context shims: pyodbc_constants.py (imported as `pyodbc` on both sides) holds the Virtuoso DV_*/DT_* codes transcribed from the project's own pyodbc-2.1.12.patch — virtuoso-python needs a patched pyodbc, which is not installable here, but the region only reads integer constants off the module; vstore_context.py carries _nodeid_to_bnode verbatim from vstore.py",
+    "`import logging` added to both sides (the extracted region uses logging.getLogger but the extractor did not carry the import)",
+    "prefix XSD->xsd; 12 datatype references become prefixed names, including XSD['gYear'].encode('ascii') -> xsd:gYear.encode('ascii') (a prefixed name followed by attribute access transpiles correctly: the local part stops before the dot, per the outside-island charset rule)",
+    "`from rdflib.namespace import XSD, ...` stays in the header of both sides (region context)",
+    "NEGATIVE FINDING: the 16 term_constructor ops counted for this region are all Literal(<runtime value>) calls and none becomes an island. Three reasons, all structural: (a) `Literal(expr)` bare is not expressible outside an island; (b) `Literal(value, lang=lang or None, datatype=dtype or None)` picks language OR datatype at run time, and a variable language tag has no ldpy form (^^{dt} alone would not do); (c) `Literal(value, datatype=xsd:float)` receives a Python float/bytearray, not a lexical string, so rewriting it as f\"{value}\"^^xsd:float would change how the term is built. Only the datatype IRIs improve. This is the archetypal 'generic RDF plumbing' region: high rdf_ops, near-zero notation gain.",
+    "driver: 23 fixtures, one per branch of the dvtype dispatch (IRI id, nodeID bnode, DV_RDF typed/lang, string-as-IRI/bnode/literal, wide and latin-1 bytes, long int, single/double float from a bytearray, numeric, the three datetime sub-types plus an unknown one, date, time, DB_NULL, and an unhandled type); the resolver cursor is a recording stub whose recorded queries are compared too",
+    "the xsd:gYear / xsd:gMonth truncation branches cannot be reached under rdflib 7: they require a *bytes* dtype, which makes rdflib's Literal() raise (Python-2 era code). The fixtures pass a str dtype, so the comparison itself is evaluated — identically on both sides — but the truncation never fires."
   ],
   "draft_sha": "441894095c7b3d2c",
   "provenance": {
@@ -24,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:resolve",
+    "diffs": [],
+    "error": null
   }
 }

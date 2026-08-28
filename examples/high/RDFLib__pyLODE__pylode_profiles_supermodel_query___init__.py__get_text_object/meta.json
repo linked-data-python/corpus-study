@@ -12,10 +12,14 @@
   "categories": {
     "namespace_term": 6
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "the six SDO./DCTERMS./SH. namespace terms become prefixed names (sdo:name, dcterms:source, sh:order, ...): a pure notation change, and the whole region is read-only, so no g{} island appears",
+    "the `from rdflib.namespace import (DC, DCTERMS, ..., VANN)` block is replaced by @prefix declarations for the three namespaces the region actually uses; the eleven others were imported by the enclosing module but unused here",
+    "the draft declared all fourteen prefixes and left the import block in place; both were kept minimal instead",
+    "context shim: supermodel_model.py is a verbatim copy of pylode/profiles/supermodel/model.py (BSD 3-Clause) so the region's import list resolves; supermodel_query.py carries get_value verbatim (the module-local helper the extraction dropped). Only the module path of the import changed; identical for both sides",
+    "driver fixtures parse two sdo:TextObject descriptions (full and minimal) and compare the returned TextObject dataclass plus the untouched input graph"
   ],
   "draft_sha": "9a850679c28347e6",
   "provenance": {
@@ -23,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_text_object",
+    "diffs": [],
+    "error": null
   }
 }

@@ -19,7 +19,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+from pylode_context import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -35,13 +35,20 @@ from pylode.profiles.supermodel.model import (
     SimpleCodedProperty,
     TextObject,
 )
-from pylode.profiles.supermodel.query.common import (
+from pylode_context import (
     get_class,
     get_descriptions,
     get_is_defined_by,
     get_name,
     get_subclasses,
     get_values,
+)
+# siblings of the region in the same source module (no import line there):
+from pylode_context import (
+    get_component_model_ignored_classes,
+    get_examples,
+    get_rdf_properties,
+    get_top_level_component_classes,
 )
 
 def load_component_model(self, iri: URIRef, db: Dataset) -> ComponentModel:

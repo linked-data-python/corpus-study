@@ -10,6 +10,7 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import classOrIdentifier
 
 def _set_extent(self, other):
     if not other:

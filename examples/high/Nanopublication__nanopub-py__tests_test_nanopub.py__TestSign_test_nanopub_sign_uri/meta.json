@@ -14,10 +14,15 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "`assertion = Graph()` followed by a six-line assertion.add((URIRef(...), namespaces.HYCL.claims, Literal(...))) becomes a single `assertion = g{ <http://test> hycl:claims \"This is a test of nanopub-python\" }`; the graph constructor and the add collapse into the island",
+    "namespaces.HYCL -> @prefix hycl: <http://purl.org/petapico/o/hycl#> . Same trade-off as elsewhere in this file: the ldpy version restates the namespace IRI instead of reading it from the nanopub package, because @prefix produces no runtime object",
+    "the DC/RDF/DCTERMS/PROV/XSD namespaces imported by the test module are unused in the region, so no prefixes are declared for them (the draft declared all five, injected inside the `from tests.conftest import (` statement, which does not parse)",
+    "context shims (identical for both sides): tests/conftest.py is an offline stand-in for the upstream conftest, whose NanopubTestSuite.get_latest() downloads the test suite from GitHub and which probes the nanopub server over HTTP; the NanopubConf values and the profile.yml construction are verbatim, and the rsa-key1 key pair is vendored under testsuite/ (nanopub-testsuite, MIT). nanopub_testsuite_connector.py is the offline connector stand-in",
+    "the nanopub package is not installed in the evaluation venv; driver.py appends the corpus checkout to sys.path, after the example directory, so the local `tests` package wins over the corpus one",
+    "equivalence evidence is strong here: the region's own asserts check the signature and the trusty artifact code RAIh8Oq-29dIVTZDhETpJ6f8oxxrILbZ3gSxkyAQY4220, a cryptographic hash over the whole nanopublication - it only matches if the island built exactly the original assertion graph"
   ],
   "draft_sha": "9cb994b64a10a1b7",
   "provenance": {
@@ -25,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_nanopub_sign_uri",
+    "diffs": [],
+    "error": null
   }
 }

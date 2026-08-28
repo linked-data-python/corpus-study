@@ -2,8 +2,8 @@
 # region: test_diff_instances (lines 9-42, band high)
 # licence of the source repository: see meta.json
 from rdflib import RDF, Literal, Namespace, URIRef
-from cognite.neat._v0.core._constants import NAMED_GRAPH_NAMESPACE
-from cognite.neat._v0.core._store import NeatInstanceStore
+from cognite_neat_shim import NAMED_GRAPH_NAMESPACE
+from cognite_neat_shim import NeatInstanceStore
 
 def test_diff_instances() -> None:
     store = NeatInstanceStore.from_oxi_local_store()

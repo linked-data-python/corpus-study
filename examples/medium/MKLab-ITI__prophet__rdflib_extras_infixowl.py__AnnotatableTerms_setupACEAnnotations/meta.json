@@ -12,10 +12,15 @@
   "categories": {
     "namespace_term": 12
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, ACE_NS->ace-ns"
+    "the twelve namespace_term reads become islands in argument/keyword-argument position: ACE_NS.PN_sg -> ace:PN_sg, OWL_NS.AnnotationProperty -> owl:AnnotationProperty; no triple is built by the region itself (Property() does that), so no g{} island applies",
+    "OWL_NS = Namespace(...) is absorbed by '@prefix owl: ...' - it was pure term-construction scaffolding",
+    "ACE_NS = Namespace(...) is KEPT although '@prefix ace: ...' declares the same IRI: the first statement of the region is self.graph.bind('ace', ACE_NS, override=False), and a @prefix declaration produces no runtime object to hand to bind(). The IRI therefore appears twice in the ldpy version - the clearest instance in this batch of the notation not covering the Namespace-as-value role",
+    "the mechanical draft named the prefixes after the Python variables (owl-ns:, ace-ns:); a hyphen is legal in a Turtle prefix but is silently NOT recognised in expression position (the transpiler emits 'ace-ns:PN_sg' verbatim, i.e. invalid Python), so they were renamed owl:/ace:",
+    "imports: 'from rdflib import Graph, Namespace' added (the extract used Namespace without importing it, and the demo harness needs Graph) - identical on both sides",
+    "demo harness added identically to both sides: the region is a method lifted out of AnnotatableTerms, so it is attached to a tiny _Annotatable object over a fresh graph; the printed output covers the six Property identifiers and the 'ace' prefix binding, the compared demo_graph covers the six rdf:type owl:AnnotationProperty triples"
   ],
   "draft_sha": "b9005e7e2edd0e37",
   "provenance": {
@@ -23,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

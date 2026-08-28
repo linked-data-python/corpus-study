@@ -1,6 +1,7 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: TestCreationDefault.test_is_valid_empty_graphs_and_graph_count (lines 135-157, band high)
 # licence of the source repository: see meta.json
+import nanopub_shim  # noqa: F401  context shim, see meta.json
 import pytest
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (

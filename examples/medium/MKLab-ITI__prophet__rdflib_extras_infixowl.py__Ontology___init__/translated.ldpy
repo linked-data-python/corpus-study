@@ -2,10 +2,6 @@
 # region: Ontology.__init__ (lines 631-637, band medium)
 # licence of the source repository: see meta.json
 from rdflib import (
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
     BNode,
     Literal,
     Namespace,
@@ -14,11 +10,31 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_ctx import Individual, Ontology  # context shim, see infixowl_ctx.py
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 def __init__(self,
              identifier=None, imports=None, comment=None, graph=None):
     super(Ontology, self).__init__(identifier, graph)
     self.imports = imports and imports or []
     self.comment = comment and comment or []
-    if (self.identifier, rdf:type, owl-ns:Ontology) not in self.graph:
-        self.graph += g{ {self.identifier} a owl-ns:Ontology }
+    if (self.identifier, rdf:type, owl:Ontology) not in self.graph:
+        self.graph += g{ {self.identifier} a owl:Ontology }
+
+# --- demo harness: identical in original.py and translated.ldpy ---
+# The region is a constructor: it is run on a bare Ontology instance and the
+# graph it fills is what the two sides are compared on.
+from rdflib import Graph
+
+Individual.factoryGraph = Graph()
+demo_graph = Graph()
+onto = Ontology.__new__(Ontology)
+__init__(onto,
+         URIRef("http://example.com/onto"),
+         imports=[URIRef("http://example.com/other")],
+         comment=[Literal("an ontology")],
+         graph=demo_graph)
+# second call: the rdf:type triple is already there, exercising the guard
+__init__(onto, URIRef("http://example.com/onto"), graph=demo_graph)
+print(len(demo_graph), sorted(str(p) for p in set(demo_graph.predicates())))

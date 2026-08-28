@@ -12,6 +12,8 @@ from rdflib import (
     Variable
 )
 from rdflib.util import first
+from infixowl_ctx import (  # context shim, see infixowl_ctx.py
+    Class, Individual, OWLRDFListProxy)
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def _get_parents(self):
@@ -64,3 +66,24 @@ def _get_parents(self):
         for member in OWLRDFListProxy([rdfList], graph=self.factoryGraph):
             if isinstance(member, URIRef):
                 yield Class(member, skipOWLClassMembership=True)
+
+# --- demo harness: identical in original.py and translated.ldpy ---
+# _get_parents is a generator over a graph; the demo rebuilds the situation of
+# its own docstring (a union class and an intersection class) and compares the
+# pair on demo_graph + stdout.
+from rdflib import Graph
+
+demo_graph = Graph()
+Individual.factoryGraph = demo_graph
+exNs = Namespace('http://example.com/')
+brother = Class(exNs.Brother)
+sister = Class(exNs.Sister)
+sibling = brother | sister
+sibling.identifier = exNs.Sibling
+parent = Class(exNs.Parent)
+male = Class(exNs.Male)
+father = parent & male
+father.identifier = exNs.Father
+brother.subClassOf = [Class(exNs.Person)]
+print(sorted(str(p.identifier) for p in _get_parents(brother)))
+print(sorted(str(p.identifier) for p in _get_parents(father)))

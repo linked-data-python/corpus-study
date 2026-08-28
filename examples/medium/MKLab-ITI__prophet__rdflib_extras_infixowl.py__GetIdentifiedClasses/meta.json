@@ -12,10 +12,15 @@
   "categories": {
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "RDF.type / OWL_NS.Class become rdf:type / owl:Class; the region is read-only so the notation only replaces term construction",
+    "the draft's 'owl-ns' prefix (mechanically derived from the OWL_NS variable name) is not usable outside islands (a hyphen stays subtraction in Python); declared as owl: instead",
+    "the OWL_NS = Namespace(...) binding is dropped, absorbed by @prefix owl:. NOTE: in the full infixowl module OWL_NS is also exported and used by other code, so a whole-file translation would have to keep the Namespace object next to the @prefix declaration (@prefix produces no runtime object)",
+    "unused-after-translation names (RDF, RDFS, Namespace) are left in the source's multi-name rdflib import, which the extract shares with the rest of the file",
+    "context shim: infixowl_ctx.py re-exports Class/Individual from rdflib.extras.infixowl (upstream of the vendored copy) so the extracted function can run; imported identically by both sides",
+    "demo harness added identically to both sides: the region is a generator, so it is exercised over a fixed Turtle document and the outcome compared as module state (demo_graph + stdout)"
   ],
   "draft_sha": "85cc5ec8c115dcba",
   "provenance": {
@@ -23,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

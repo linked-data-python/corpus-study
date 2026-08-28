@@ -11,13 +11,12 @@ from rdflib import (
     Variable
 )
 from rdflib.util import first
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+from infixowl_context import Individual, Property
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 
 def __init__(
-    self, identifier=None, graph=None, baseType=owl-ns:ObjectProperty,
+    self, identifier=None, graph=None, baseType=owl:ObjectProperty,
     subPropertyOf=None, domain=None, range=None, inverseOf=None,
     otherType=None, equivalentProperty=None,
     comment=None,

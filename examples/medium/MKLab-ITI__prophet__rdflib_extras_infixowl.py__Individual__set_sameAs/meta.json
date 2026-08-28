@@ -13,10 +13,15 @@
     "namespace_term": 2,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns"
+    "OWL_NS = Namespace('http://www.w3.org/2002/07/owl#') absorbed into '@prefix owl: <...> .'; OWL_NS.sameAs -> owl:sameAs, and each graph.add((s, p, o)) -> 'self.graph += g{ {self.identifier} owl:sameAs {classOrIdentifier(term)} }'",
+    "the mechanical draft named the prefix after the Python variable (owl-ns:); a hyphen is not a Python identifier character, so that prefix would only have worked inside g{} islands -- renamed to owl:",
+    "the object stays an interpolation, {classOrIdentifier(term)}: the term is computed by a helper, which is exactly the case the notation absorbs with {expr} rather than eliminating",
+    "context shim: infixowl_shim re-exports Individual and classOrIdentifier from rdflib.extras.infixowl (rdflib 7.2.1), the maintained descendant of the vendored rdflib 3.x copy the region comes from -- the vendored copy imports rdflib.py3compat and no longer loads; imported identically by both sides",
+    "import shim: 'from rdflib import Namespace' added to original.py (the extract used Namespace without importing it); kept in translated.ldpy for symmetry although @prefix makes it unused",
+    "'self.graph += g{...}' rebinds the attribute (Graph.__iadd__ returns self) where the original called self.graph.add(...) in place; observationally identical here"
   ],
   "draft_sha": "a75f6f9b2509d071",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_set_sameAs",
+    "diffs": [],
+    "error": null
   }
 }

@@ -2,23 +2,7 @@
 # region: get_domain_includes (lines 226-233, band high)
 # licence of the source repository: see meta.json
 from rdflib import Dataset, Graph, Literal, URIRef
-from rdflib.namespace import (
-    DC,
-    DCTERMS,
-    FOAF,
-    ORG,
-    OWL,
-    PROF,
-    PROV,
-    QB,
-    RDF,
-    RDFS,
-    SDO,
-    SH,
-    SKOS,
-    VANN,
-)
-from pylode.profiles.supermodel.model import (
+from supermodel_model import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -34,22 +18,7 @@ from pylode.profiles.supermodel.model import (
     SimpleCodedProperty,
     TextObject,
 )
-from pylode.profiles.supermodel.query.common import (
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix org: <http://www.w3.org/ns/org#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix prof: <http://www.w3.org/ns/dx/prof/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix qb: <http://purl.org/linked-data/cube#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix sdo: <https://schema.org/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix vann: <http://purl.org/vocab/vann/> .
-
+from supermodel_query_common import (
     get_class,
     get_descriptions,
     get_is_defined_by,
@@ -57,6 +26,8 @@ from pylode.profiles.supermodel.query.common import (
     get_subclasses,
     get_values,
 )
+
+@prefix sdo: <https://schema.org/> .
 
 def get_domain_includes(iri: URIRef, graph: Graph, db: Dataset) -> list[Class]:
     domain_includes_iris = graph.objects(iri, sdo:domainIncludes)

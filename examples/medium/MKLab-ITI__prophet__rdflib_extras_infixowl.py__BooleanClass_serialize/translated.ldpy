@@ -1,6 +1,12 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: BooleanClass.serialize (lines 1523-1534, band medium)
 # licence of the source repository: see meta.json
+#
+# Nothing in this region is written in island notation, on purpose: every
+# term it asserts is computed at run time (the predicate is self._operator,
+# the copy loop republishes triples read from another graph), and the RDF
+# list is grown one member at a time, which the `( … )` collection syntax
+# cannot express.  Islands would only add `{ }` around names.
 from rdflib import (
     BNode,
     Literal,
@@ -11,9 +17,7 @@ from rdflib import (
     Variable
 )
 from rdflib.collection import Collection
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+from infixowl_context import CastClass
 
 def serialize(self, graph):
     clonedList = Collection(graph, BNode())
@@ -21,9 +25,9 @@ def serialize(self, graph):
         clonedList.append(cl)
         CastClass(cl, self.graph).serialize(graph)
 
-    graph += g{ {self.identifier} {self._operator} {clonedList.uri} }
+    graph.add((self.identifier, self._operator, clonedList.uri))
 
     for s, p, o in self.graph.triples((self.identifier, None, None)):
         if p != self._operator:
-            graph += g{ {s} {p} {o} }
+            graph.add((s, p, o))
     self._serialize(graph)

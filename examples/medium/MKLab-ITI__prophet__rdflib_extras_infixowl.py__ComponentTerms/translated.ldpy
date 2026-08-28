@@ -1,11 +1,10 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: ComponentTerms (lines 721-769, band medium)
 # licence of the source repository: see meta.json
-from rdflib import (
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+from rdflib import (
     BNode,
     Literal,
     Namespace,
@@ -14,33 +13,41 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import (
+    BooleanClass,
+    CastClass,
+    Class,
+    Individual,
+    Restriction,
+    classOrIdentifier,
+)
 CLASS_RELATIONS = set(
-    owl-ns:resourceProperties
-).difference([owl-ns:onProperty,
-              owl-ns:allValuesFrom,
-              owl-ns:hasValue,
-              owl-ns:someValuesFrom,
-              owl-ns:inverseOf,
-              owl-ns:imports,
-              owl-ns:versionInfo,
-              owl-ns:backwardCompatibleWith,
-              owl-ns:incompatibleWith,
-              owl-ns:unionOf,
-              owl-ns:intersectionOf,
-              owl-ns:oneOf])
+    owl:resourceProperties
+).difference([owl:onProperty,
+              owl:allValuesFrom,
+              owl:hasValue,
+              owl:someValuesFrom,
+              owl:inverseOf,
+              owl:imports,
+              owl:versionInfo,
+              owl:backwardCompatibleWith,
+              owl:incompatibleWith,
+              owl:unionOf,
+              owl:intersectionOf,
+              owl:oneOf])
 
 def ComponentTerms(cls):
     """
     Takes a Class instance and returns a generator over the classes that
     are involved in its definition, ignoring unamed classes
     """
-    if owl-ns:Restriction in cls.type:
+    if owl:Restriction in cls.type:
         try:
             cls = CastClass(cls, Individual.factoryGraph)
             for s, p, innerClsId in cls.factoryGraph.triples_choices(
                 (cls.identifier,
-                 [owl-ns:allValuesFrom,
-                  owl-ns:someValuesFrom],
+                 [owl:allValuesFrom,
+                  owl:someValuesFrom],
                  None)):
                 innerCls = Class(innerClsId, skipOWLClassMembership=True)
                 if isinstance(innerClsId, BNode):
@@ -78,3 +85,33 @@ def ComponentTerms(cls):
                         yield _c
                 else:
                     yield innerCls
+
+# --- demo harness, added identically to both representations (see meta.json).
+# ComponentTerms is a generator over infixowl Class objects, which the harness
+# cannot compare directly, so the demo consumes it into observable module state.
+from rdflib import Graph
+from rdflib.namespace import OWL
+
+demo_graph = Graph()
+Individual.factoryGraph = demo_graph
+_ex = Namespace("http://example.org/")
+
+# named superclass + anonymous someValuesFrom restriction (recursive branch)
+_pizza = Class(_ex.Pizza, graph=demo_graph)
+_pizza.subClassOf = [
+    Class(_ex.Food, graph=demo_graph),
+    Restriction(_ex.hasTopping, graph=demo_graph, someValuesFrom=_ex.Cheese),
+]
+print("pizza:", sorted(str(c.identifier) for c in ComponentTerms(_pizza)))
+
+# an owl:unionOf class (BooleanClass branch)
+_union = BooleanClass(operator=OWL.unionOf,
+                      members=[Class(_ex.Beer, graph=demo_graph),
+                               Class(_ex.Wine, graph=demo_graph)],
+                      graph=demo_graph)
+print("union:", sorted(str(c.identifier) for c in ComponentTerms(_union)))
+
+# a leaf class (no component at all)
+print("leaf:", sorted(str(c.identifier)
+                      for c in ComponentTerms(Class(_ex.Water,
+                                                    graph=demo_graph))))

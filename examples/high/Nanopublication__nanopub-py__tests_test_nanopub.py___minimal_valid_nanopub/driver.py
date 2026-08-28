@@ -1,15 +1,11 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py___minimal_valid_nanopub.
+"""Validation driver: _minimal_valid_nanopub returns a Nanopub object.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+A Nanopub is not comparable by the harness, so both files end with an
+identical demo harness (see meta.json) that calls the helper once and binds
+its three named graphs (assertion, provenance, pubinfo) to module-level
+variables; module-state comparison then checks the three graphs by
+isomorphism plus the printed ``is_valid`` verdict.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='_minimal_valid_nanopub',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

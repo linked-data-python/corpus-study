@@ -13,10 +13,14 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "SDO.domainIncludes -> sdo:domainIncludes; that single namespace term is the region's only RDF notation, and the region is read-only, so no g{} island appears",
+    "the `from rdflib.namespace import (DC, DCTERMS, ..., VANN)` block is replaced by a single @prefix sdo: declaration; the thirteen other namespaces were imported by the enclosing module but are unused in the region (the draft declared all fourteen and kept the import block)",
+    "context shims: supermodel_model.py (verbatim copy of pylode/profiles/supermodel/model.py, BSD 3-Clause) and supermodel_query_common.py (verbatim copy of query/common.py, with its model import retargeted at the local shim) so the region's two import lists resolve; only module paths changed, identical for both sides",
+    "driver passes db=None: the region forwards the Dataset to get_class without touching it, and the harness compares any rdflib Graph argument by isomorphism, which rdflib.compare cannot do on a quad-yielding Dataset",
+    "note: model.Class.__eq__ only compares iri, so the returned list is compared on IRIs; the graph arguments are additionally compared by isomorphism"
   ],
   "draft_sha": "83d26149735cda24",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_domain_includes",
+    "diffs": [],
+    "error": null
   }
 }

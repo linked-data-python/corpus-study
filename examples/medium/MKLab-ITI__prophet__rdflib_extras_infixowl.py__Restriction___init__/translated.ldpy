@@ -13,10 +13,10 @@ from rdflib import (
 from rdflib.graph import Graph
 from rdflib.term import Identifier
 from rdflib.util import first
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
+from infixowl_context import (
+    Class, Restriction, classOrIdentifier, propertyOrIdentifier)
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 
 def __init__(self,
              onProperty,
@@ -32,17 +32,17 @@ def __init__(self,
                                       graph=graph,
                                       skipOWLClassMembership=True)
     if (self.identifier,
-        owl-ns:onProperty,
+        owl:onProperty,
             propertyOrIdentifier(onProperty)) not in graph:
-        graph += g{ {self.identifier} owl-ns:onProperty {propertyOrIdentifier(onProperty)} }
+        graph += g{ {self.identifier} owl:onProperty {propertyOrIdentifier(onProperty)} }
     self.onProperty = onProperty
     restrTypes = [
-        (allValuesFrom, owl-ns:allValuesFrom),
-        (someValuesFrom, owl-ns:someValuesFrom),
-        (value, owl-ns:hasValue),
-        (cardinality, owl-ns:cardinality),
-        (maxCardinality, owl-ns:maxCardinality),
-        (minCardinality, owl-ns:minCardinality)]
+        (allValuesFrom, owl:allValuesFrom),
+        (someValuesFrom, owl:someValuesFrom),
+        (value, owl:hasValue),
+        (cardinality, owl:cardinality),
+        (maxCardinality, owl:maxCardinality),
+        (minCardinality, owl:minCardinality)]
     validRestrProps = [(i, oTerm) for (i, oTerm) in restrTypes if i]
     assert len(validRestrProps)
     restrictionRange, restrictionType = validRestrProps.pop()
@@ -59,6 +59,6 @@ def __init__(self,
             self.restrictionRange) not in self.graph:
         self.graph += g{ {self.identifier} {restrictionType} {self.restrictionRange} }
     assert self.restrictionRange is not None, Class(self.identifier)
-    if (self.identifier, rdf:type, owl-ns:Restriction) not in self.graph:
-        self.graph += g{ {self.identifier} a owl-ns:Restriction }
-        self.graph.remove((self.identifier, rdf:type, owl-ns:Class))
+    if (self.identifier, rdf:type, owl:Restriction) not in self.graph:
+        self.graph += g{ {self.identifier} a owl:Restriction }
+        self.graph.remove((self.identifier, rdf:type, owl:Class))

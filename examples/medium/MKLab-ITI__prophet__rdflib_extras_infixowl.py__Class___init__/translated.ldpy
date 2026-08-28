@@ -2,10 +2,6 @@
 # region: Class.__init__ (lines 946-969, band medium)
 # licence of the source repository: see meta.json
 from rdflib import (
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
     BNode,
     Literal,
     Namespace,
@@ -14,6 +10,9 @@ from rdflib import (
     URIRef,
     Variable
 )
+from rdflib.extras.infixowl import Class   # context shim, see meta.json
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 def __init__(self, identifier=None, subClassOf=None, equivalentClass=None,
              disjointWith=None, complementOf=None, graph=None,
@@ -27,11 +26,11 @@ def __init__(self, identifier=None, subClassOf=None, equivalentClass=None,
     if nounAnnotations:
         self.setupNounAnnotations(nounAnnotations)
     if not skipOWLClassMembership \
-            and (self.identifier, rdf:type, owl-ns:Class) \
+            and (self.identifier, rdf:type, owl:Class) \
             not in self.graph and \
-            (self.identifier, rdf:type, owl-ns:Restriction) \
+            (self.identifier, rdf:type, owl:Restriction) \
             not in self.graph:
-        self.graph += g{ {self.identifier} a owl-ns:Class }
+        self.graph += g{ {self.identifier} a owl:Class }
 
     self.subClassOf = subClassOf and subClassOf or []
     self.equivalentClass = equivalentClass and equivalentClass or []

@@ -2,18 +2,20 @@
 # region: TestIllTypedLiterals.test_ill_typed_literal_in_pubinfo (lines 796-809, band high)
 # licence of the source repository: see meta.json
 import pytest
-from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub.utils import MalformedNanopubError
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from nanopub_ctx import _minimal_valid_nanopub  # context shim, see nanopub_ctx.py
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 
 def test_ill_typed_literal_in_pubinfo(self):
     np = _minimal_valid_nanopub()
-    np.pubinfo += g{ {np._metadata.namespace[""]} dcterms:created "yesterday"^^xsd:dateTime }
+    np.pubinfo.add(
+        (
+            np._metadata.namespace[""],
+            dcterms:created,
+            "yesterday"^^xsd:dateTime,
+        )
+    )
     literals = np.ill_typed_literals
     assert [str(o) for o, _ in literals] == ["yesterday"]
     assert str(literals[0][1]) == str(np.pubinfo.identifier)

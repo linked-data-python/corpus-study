@@ -7,10 +7,8 @@ from nanopub import (
     NanopubConf,
     namespaces,
 )
-from tests.conftest import (
+from nanopub_context import (      # context shim for tests.conftest, see meta.json
     default_conf,
-    profile_test,
-    skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
 )
 
 def test_nanopub_sign_object_bnode(self):
@@ -34,3 +32,29 @@ def test_nanopub_sign_object_bnode(self):
     assert np.has_valid_signature
     # The object blank node was replaced by a concrete URI, none remain.
     assert not any(isinstance(o, BNode) for o in np.rdf.objects())
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region is a pytest test method: it returns nothing and keeps the signed
+# nanopub in a local.  Wrapping Nanopub captures the instance and republishes
+# its four named graphs at module level, where the driver compares them; the
+# trusty URI the signature produces is printed, so the driver's stdout check
+# covers the signature itself.  `default_conf` switches both generated-time
+# fields off, so nothing here is time-dependent.
+_captured = []
+_Nanopub = Nanopub
+
+
+def Nanopub(*args, **kwargs):
+    _np = _Nanopub(*args, **kwargs)
+    _captured.append(_np)
+    return _np
+
+
+test_nanopub_sign_object_bnode(None)
+
+head = _captured[0].head
+assertion = _captured[0].assertion
+provenance = _captured[0].provenance
+pubinfo = _captured[0].pubinfo
+print(_captured[0].source_uri)

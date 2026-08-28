@@ -1,15 +1,12 @@
-"""Validation driver for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_import_profile.
-
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+"""Validation driver: Query.import_profile is a method, and it is recursive
+(`self.import_profile(...)`), so it cannot be called through the harness's
+`entry=` path -- `self` would have to know which of the two modules it came
+from.  Both files therefore end with the same small `__demo__` section that
+binds the function onto the shim's DemoQuery, runs it from the root profile,
+and leaves the result as module state: `imported_graph` (compared by
+isomorphism) and a printed report of every quad with its graph name plus the
+imported_profiles list (compared as stdout).
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='import_profile',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

@@ -14,10 +14,13 @@
     "term_constructor": 3,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "context shim: nanopub_shim.py puts the Nanopublication/nanopub-py@05022dc4bc checkout on sys.path and carries _minimal_valid_nanopub verbatim from tests/test_nanopub.py lines 763-773 (context of the region, not part of it); identical import on both sides",
+    "URIRef(...)/Literal(..., datatype=XSD.integer) become <http://test>, <http://example.org/count> and \"not-a-number\"^^xsd:integer inside the same np.assertion.add((s, p, o)) call - statement structure untouched",
+    "finding: the g += g{...} idiom is NOT usable here because np.assertion is a read-only property (augmented assignment needs a setter); islands in operand position inside the original .add tuple are the faithful form, and read just as well",
+    "driver supplies a minimal caplog stand-in (at_level + .text) since pytest is not driving; its __eq__ compares the captured log text, so the harness also checks both sides logged the same ill-typed-literal warning"
   ],
   "draft_sha": "3d225c090b44a275",
   "provenance": {
@@ -25,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_ill_typed_literal_in_signed_nanopub_only_warns",
+    "diffs": [],
+    "error": null
   }
 }

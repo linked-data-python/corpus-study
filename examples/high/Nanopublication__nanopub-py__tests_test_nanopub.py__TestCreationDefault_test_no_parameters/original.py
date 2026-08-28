@@ -15,3 +15,29 @@ def test_no_parameters(self):
     assert len(list(np.head.triples((None, RDF.type, namespaces.NP.Nanopublication)))) == 1
     assert len(list(np.head.triples((None, namespaces.NP.hasProvenance, None)))) == 1
     assert len(list(np.head.triples((None, namespaces.NP.hasPublicationInfo, None)))) == 1
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region is a pytest test method: it returns nothing and keeps the nanopub
+# it builds in a local, so on its own it offers the driver nothing beyond "it
+# did not raise".  Wrapping Nanopub captures the instance and republishes its
+# three deterministic named graphs at module level, where the driver compares
+# them; the region's own three counting assertions run on both sides as well.
+# pubinfo is left out on purpose: NanopubConf defaults to
+# add_pubinfo_generated_time=True, so it carries a dct:created timestamp that
+# differs between the two executions.
+_captured = []
+_Nanopub = Nanopub
+
+
+def Nanopub(*args, **kwargs):
+    _np = _Nanopub(*args, **kwargs)
+    _captured.append(_np)
+    return _np
+
+
+test_no_parameters(None)
+
+head = _captured[0].head
+assertion = _captured[0].assertion
+provenance = _captured[0].provenance

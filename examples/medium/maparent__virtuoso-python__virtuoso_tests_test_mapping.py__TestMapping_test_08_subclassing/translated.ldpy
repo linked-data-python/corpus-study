@@ -3,10 +3,10 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace
 from virtuoso.vmapping import (
-@prefix tst: <http://example.com/test#> .
-
     VirtuosoQuadMapPattern, VirtuosoPatternIriClass, QuadStorage, VirtuosoGraphQuadMapPattern)
 session = Session(autocommit=False)
+
+@prefix tst: <http://example.com/test#> .
 
 def test_08_subclassing(self):
     qs, g, cpe = self.create_qs_graph()

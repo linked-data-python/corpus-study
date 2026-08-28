@@ -1,15 +1,29 @@
-"""Validation driver for MKLab-ITI__prophet__rdflib_plugins_sparql_sparql.py__Prologue___init__.
+"""Validation driver: Prologue.__init__ sets up a namespace manager.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a plain method body, so the driver supplies a bare stand-in
+``self``.  Its ``__eq__`` compares the two observable effects of the region:
+the ``base`` attribute and the prefix bindings held by the created
+``NamespaceManager``.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='__init__',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+
+class _Prologue:
+    """Stand-in for the SPARQL ``Prologue`` instance being initialised."""
+
+    def __eq__(self, other):
+        if not isinstance(other, _Prologue):
+            return NotImplemented
+        return (
+            self.__dict__.keys() == other.__dict__.keys()
+            and self.base == other.base
+            and sorted(self.namespace_manager.namespaces())
+            == sorted(other.namespace_manager.namespaces())
+        )
+
+
+def bare_prologue():
+    return ((_Prologue(),), {})
+
+
+VERDICT = run_pair(__file__, entry="__init__", calls=[bare_prologue])

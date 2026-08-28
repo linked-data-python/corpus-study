@@ -1,15 +1,17 @@
-"""Validation driver for morph-kgc__morph-kgc__test_rml-fnml_string_functions_string_starts_endswith_test_string_start_end_with.py__test_string_starts_endswith.
+"""Validation driver: the region is a pytest test taking no argument.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+mapping.yarrrml, rmlmapperoutput.ttl and cars.csv (all tiny, Apache-2.0) were
+copied next to the example.  The two first ones resolve, because the region
+looks them up in dirname(realpath(__file__)) — the example directory, shared
+by original.py and translated.ldpy.  The CSV does NOT: the region computes it
+as dirname(dirname(realpath(__file__))), i.e. one directory ABOVE the example
+(in the corpus, test/rml-fnml/string_functions/cars.csv, shared by ~18 sibling
+tests), and morph-kgc reads exactly that path from the `file_path` config key.
+Copying cars.csv to ../cars.csv makes both sides pass; this review was scoped
+to the example directory, so the verdict stays "unresolved" — identically for
+both representations, which fail with the same FileNotFoundError.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_string_starts_endswith',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry="test_string_starts_endswith",
+                   calls=[lambda: ((), {})])

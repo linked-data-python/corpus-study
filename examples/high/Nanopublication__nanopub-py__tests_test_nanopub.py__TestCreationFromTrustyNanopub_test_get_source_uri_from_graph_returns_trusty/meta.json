@@ -13,10 +13,15 @@
     "graph_ctor": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "the region constructs no RDF term and no triple - it parses a TriG document from the test suite and compares a URI to a Python string - so translated.ldpy is the original with only an explanatory comment added; no island appears",
+    "no @prefix declared: the DC/RDF/DCTERMS/PROV/XSD namespaces imported by the enclosing test module are unused in the region (the draft declared all five, and injected them in the middle of the `from nanopub import (` statement, which does not even parse)",
+    "the nanopub package is not installed in the evaluation venv; driver.py appends the corpus checkout to sys.path (appended, so the example's own shims keep priority). All its runtime dependencies are already present in the venv",
+    "context shim: nanopub_testsuite_connector.py is an offline stand-in for the nanopub-testsuite-connector package, whose NanopubTestSuite.get_latest() downloads the suite from GitHub; the driver builds the `testsuite` fixture from it. Identical for both sides",
+    "vendored data: testsuite/valid/trusty/example3.trig, the entry the real get_by_nanopub_uri(...) returns for RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8, from nanopub-testsuite (MIT, see testsuite/LICENSE)",
+    "equivalence evidence is the test's own assertion (both sides parse the trusty nanopub and read the same source URI back); the region returns None, so the harness has no other value to compare"
   ],
   "draft_sha": "962600e39be6fa2d",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_get_source_uri_from_graph_returns_trusty",
+    "diffs": [],
+    "error": null
   }
 }

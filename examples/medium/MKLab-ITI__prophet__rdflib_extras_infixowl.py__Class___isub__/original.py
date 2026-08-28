@@ -10,9 +10,24 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import Class, classOrIdentifier
 
 def __isub__(self, other):
     assert isinstance(other, Class)
     self.graph.remove(
         (classOrIdentifier(other), RDFS.subClassOf, self.identifier))
     return self
+
+# --- demo harness, added identically to both representations (see meta.json).
+# The region is an in-place operator of Class, so the demo builds a small
+# class hierarchy and retracts one of the two rdfs:subClassOf edges through it.
+from rdflib import Graph
+
+demo_graph = Graph()
+_a = Class(URIRef("http://example.org/A"), graph=demo_graph)
+_b = Class(URIRef("http://example.org/B"), graph=demo_graph)
+_c = Class(URIRef("http://example.org/C"), graph=demo_graph)
+_b.subClassOf = [_a]
+_c.subClassOf = [_a]
+_a = __isub__(_a, _b)
+print(sorted(str(s) for s in demo_graph.subjects(RDFS.subClassOf, _a.identifier)))

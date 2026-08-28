@@ -13,10 +13,15 @@
     "graph_write": 4,
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "OWL_NS = Namespace('http://www.w3.org/2002/07/owl#') absorbed into '@prefix owl: <...> .'; the three namespace terms become prefixed names inside the graph.remove() tuples: RDFS.subClassOf -> rdfs:subClassOf, OWL_NS.equivalentClass -> owl:equivalentClass, OWL_NS.complementOf -> owl:complementOf",
+    "the mechanical draft named the prefix after the Python variable (owl-ns:), which is unusable outside g{} islands, and inserted the @prefix statements INSIDE the parenthesised 'from rdflib import (...)' list; both fixed by hand",
+    "only the prefixes actually used are declared; the draft also declared rdf: (unused in this region) merely because RDF is in the import list",
+    "context shim: infixowl_shim re-exports BooleanClass, CastClass, Class, Individual, classOrIdentifier and some from rdflib.extras.infixowl (rdflib 7.2.1), the maintained descendant of the vendored rdflib 3.x copy the region comes from -- the vendored copy imports rdflib.py3compat and no longer loads; imported identically by both sides",
+    "demo harness added identically to both sides: the region reads Individual.factoryGraph, a class-level attribute shared by the two runs, so it cannot be prepared by a driver fixture (run_pair builds both fixtures before calling either side); the harness replays the region's own docstring scenario at module level and leaves demo_graph for comparison. The docstring itself is kept verbatim, doctest markers included",
+    "finding: this region only *deletes* triples. graph.remove((s, p, None)) is a pattern-matching erase, and ldpy has no island for filtering or removal, so the statements keep their Python shape entirely -- the notation buys three prefixed names and nothing else. A g{}-shaped delete (or a removal pattern island) is the natural extension this example argues for"
   ],
   "draft_sha": "825456a19f6226f0",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

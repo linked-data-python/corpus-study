@@ -13,10 +13,15 @@
     "graph_read": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "translated.ldpy is byte-identical to original.py below the header: neither of the region's two RDF operations has an island form",
+    "the term constructor is BNode(\"concept1\"), a labelled blank node built as a plain Python value and passed to a method. ldpy has _:label only INSIDE a g{} island (fresh at every evaluation, scoped to that island) and _:{expr} only as a data-keyed node in a graph; there is no blank-node term island in expression position -- verified: 'b = _:concept1' and 'b = _:{\"concept1\"}' are both syntax errors. Writing f{BNode(\"concept1\")} would transpile but is strictly worse than the Python",
+    "the graph operation is np.pubinfo.triples((None, None, None)), a wildcard read; ldpy has no filtering or pattern island, so reads keep their Python form",
+    "the draft proposed five prefixes (dc, rdf, dcterms, prov, xsd) from the 'from rdflib import ...' line and inserted them INSIDE the parenthesised 'from nanopub import (...)' list; none of those namespaces is used anywhere in the region, so all five are dropped",
+    "context shim: nanopub_shim re-exports the real Nanopub, NanopubConf and namespaces, putting the corpus checkout on sys.path when the package is not installed (the evaluation venv does not have it). Nothing is stubbed and the region runs offline -- no profile, no signing key, no network. Imported identically by both sides; only the import line changed",
+    "equivalence rests on the region's own assertion (the pubinfo graph is non-empty) holding on both sides: it returns None and takes an unused self, and its pubinfo graph carries a prov:generatedAtTime stamped at call time, so it could not be compared across runs"
   ],
   "draft_sha": "342acb02572f45f4",
   "provenance": {

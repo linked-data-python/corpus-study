@@ -1,15 +1,11 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py___make_dataset_from_trig.
+"""Validation driver: _make_dataset_from_trig parses a TriG test file.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region returns a Dataset, which the harness cannot compare directly
+(rdflib.compare.to_isomorphic ingests triples, a Dataset yields quads), so
+both files end with an identical small demo harness that calls the region
+and flattens the result into a module-level Graph.  The driver therefore
+compares module state: `demo_union` on each side, plus stdout.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='_make_dataset_from_trig',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

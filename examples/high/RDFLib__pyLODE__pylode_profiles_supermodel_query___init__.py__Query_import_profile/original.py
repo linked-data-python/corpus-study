@@ -18,7 +18,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.namespace import LODE
+from supermodel_shim import LODE, DemoQuery  # context shim for pylode, see meta.json
 
 def import_profile(self, iri: str):
     db = self.db
@@ -44,3 +44,11 @@ def import_profile(self, iri: str):
                 self.add_to_graph(graph, node)
 
                 self.import_profile(profile_iri)
+
+
+# --- demo harness, identical in both representations (see meta.json) -------
+DemoQuery.import_profile = import_profile
+demo = DemoQuery()
+demo.import_profile(demo.root_profile_iri)
+imported_graph = demo.flatten()
+print(demo.report())

@@ -1,6 +1,7 @@
 # Extracted from maparent/virtuoso-python@eba377e1fa : virtuoso/tests/test_mapping.py
 # region: TestMapping.test_07_conditional_link (lines 218-241, band medium)
 # licence of the source repository: see meta.json
+@prefix tst: <http://example.com/test#> .
 from nose.tools import assert_raises
 from rdflib import Graph, Namespace
 from virtuoso.vmapping import (
@@ -30,6 +31,4 @@ def test_07_conditional_link(self):
     assert 1 == len(list(graph.triples((None, tst:safe_alink, None))))
     q = graph.triples((None, tst:alink, None))
     from pyodbc import DataError
-@prefix tst: <http://example.com/test#> .
-
     assert_raises(DataError, list, q)

@@ -13,10 +13,16 @@
     "namespace_term": 6,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "OWL_NS = Namespace('http://www.w3.org/2002/07/owl#') absorbed into `@prefix owl: <...> .`; the six namespace terms become owl:Class / owl:Restriction / rdf:type, four of them inside the membership TEST (a tuple in a `not in self.graph` expression), which reads well: (self.identifier, rdf:type, owl:Class) not in self.graph",
+    "the mechanical draft named the prefix after the Python variable (owl-ns:) and put the @prefix statements inside the parenthesised `from rdflib import (...)` list. Both were fixed by hand: a hyphenated prefix is usable inside g{} islands only, never in expression position, so a Python-identifier prefix name is mandatory here -- the same correction as the already-finalised AllClasses sibling.",
+    "the single graph.add() becomes `self.graph += g{ {self.identifier} a owl:Class }`; self.graph is a plain attribute of infixowl's Individual, so the augmented assignment is available (Graph.__iadd__ returns self, so the attribute is rebound to the same object)",
+    "the five property assignments at the end (subClassOf/equivalentClass/disjointWith/complementOf/comment) are untouched: they are Python attribute writes whose RDF effect happens in infixowl's setters, outside the region",
+    "context shim: `from rdflib.extras.infixowl import Class` -- the region's `super(Class, self)` needs the enclosing class, which is defined 60 lines further down the same vendored module (and drags in AnnotatableTerms/Individual/Property). rdflib still ships infixowl and its Class/AnnotatableTerms.__init__ signatures are unchanged at this point, so the library class is used as the shim. Same approach as the already-finalised AllProperties sibling; identical for both sides.",
+    "driver: `self` is an uninitialised subclass instance of that Class, which the region then initialises. Every fixture passes an explicit fresh graph -- with graph=None infixowl falls back to the CLASS-LEVEL Individual.factoryGraph, which the two executions would share and which would make the region's `not in self.graph` test see the other side's triples. Six fixtures: plain, anonymous (BNode identifier), skipOWLClassMembership, graph already declaring the subject an owl:Restriction, graph already declaring it an owl:Class, and all five axiom arguments at once.",
+    "on the ldpy side RDF, RDFS, Namespace, Literal, URIRef, BNode, Variable all become dead names; the shared import preamble is left untouched"
   ],
   "draft_sha": "c0d3ac401bf44445",
   "provenance": {
@@ -24,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:__init__",
+    "diffs": [],
+    "error": null
   }
 }

@@ -12,10 +12,14 @@
   "categories": {
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "context shim: infixowl_context.py is rdflib/extras/infixowl.py from the same commit, vendored verbatim except its dead `from rdflib import py3compat` import (replaced by a no-op stand-in); imported identically by both sides for the module-level helper manchesterSyntax",
+    "prefixes: RDF->rdf, OWL_NS->owl (the mechanical draft proposed `owl-ns`, which is unusable outside islands: a hyphen stays subtraction in Python context)",
+    "OWL_NS = Namespace(...) is dropped in the ldpy version: the namespace is only ever used to build terms, so @prefix owl: replaces it entirely",
+    "RDFS/Namespace/Literal/... stay in the import header of both sides (region context as extracted), even though the ldpy side no longer uses Namespace",
+    "driver: the method was extracted out of class Class, so a StubClass supplies the four attributes it reads (identifier, graph, equivalentClass, complementOf); 5 fixtures cover the Restriction, equivalentClass, intersectionOf (which does call manchesterSyntax) and complementOf branches"
   ],
   "draft_sha": "807f86798013a167",
   "provenance": {
@@ -23,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:isPrimitive",
+    "diffs": [],
+    "error": null
   }
 }

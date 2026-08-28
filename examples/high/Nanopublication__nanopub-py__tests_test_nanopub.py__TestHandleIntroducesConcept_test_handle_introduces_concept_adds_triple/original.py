@@ -2,7 +2,7 @@
 # region: TestHandleIntroducesConcept.test_handle_introduces_concept_adds_triple (lines 733-738, band high)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
-from nanopub import (
+from nanopub_shim import (
     Nanopub,
     NanopubConf,
     namespaces,

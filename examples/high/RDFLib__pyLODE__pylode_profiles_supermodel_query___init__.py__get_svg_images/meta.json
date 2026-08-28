@@ -13,10 +13,15 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "SDO.image -> sdo:image; the only RDF term in the region",
+    "the mechanical draft had inserted the 14 @prefix lines INSIDE the from rdflib.namespace import ( ... ) parenthesised list, which does not parse; the declarations were moved after the import block",
+    "only the prefix actually used (sdo:) is declared: a @prefix produces no runtime object, so it neither replaces nor duplicates the imports, and declaring the 13 unused ones would be noise",
+    "the import block is kept verbatim on both sides (it is extracted context: Graph, Literal and URIRef are still used in the signature and the isinstance test)",
+    "the read itself (graph.objects(...) plus an isinstance filter) stays plain Python: ldpy has no island for filtering reads, so only the predicate term benefits",
+    "driver: two fixtures, one where the answer is a strict subset of the sdo:image objects (an IRI-valued image must be filtered out) and one where the subject has no image"
   ],
   "draft_sha": "865f364ee84956ab",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_svg_images",
+    "diffs": [],
+    "error": null
   }
 }

@@ -12,10 +12,14 @@
   "categories": {
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "context shim: infixowl_context.py is rdflib/extras/infixowl.py from the same commit, vendored verbatim except its dead `from rdflib import py3compat` import (replaced by a no-op stand-in); imported identically by both sides for classOrIdentifier, and by the driver for Class",
+    "prefixes: OWL_NS->owl; the mechanical draft's `owl-ns` prefix is unusable outside islands (a hyphen stays subtraction in Python context), and rdf:/rdfs: were dropped as unused in this region",
+    "OWL_NS = Namespace(...) is dropped: here the namespace only builds owl:unionOf / owl:intersectionOf",
+    "`from rdflib.namespace import XSD as _XSD_NS` must stay: normalizedName.startswith(_XSD_NS) uses the namespace as a *value* (a prefix string), and @prefix declares no runtime object — a bare `xsd:` is not an ldpy island (documented limitation)",
+    "driver: 4 fixtures, one per branch (BNode, XSD datatype, owl:unionOf boolean class, named class); infixowl.Class is used where the real caller passes a Property, because Property compares by identity and the harness could not otherwise compare the two runs' arguments"
   ],
   "draft_sha": "21ba9b958c45774b",
   "provenance": {
@@ -23,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:canonicalName",
+    "diffs": [],
+    "error": null
   }
 }

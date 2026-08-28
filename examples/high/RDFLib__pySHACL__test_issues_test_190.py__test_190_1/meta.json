@@ -15,10 +15,14 @@
     "namespace_term": 2,
     "serialize_parse": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, SH->sh"
+    "RDF.type -> rdf:type and SH.ValidationResult -> sh:ValidationResult inside the report.triples((None, ..., ...)) pattern; that is the region's entire translatable surface",
+    "the draft placed the two @prefix statements between the imports and the first string constant; moved above the imports, right after the header comments",
+    "original.py runs as extracted (pyshacl is installed in the evaluation venv); no shim needed",
+    "finding: the two big Turtle documents (the SHACL shapes and the data) are Python *string constants* parsed at run time -- precisely the pattern g{} exists to replace, and the biggest available notation win in this example. Inlining them would restructure parse-into-graph as construct-a-graph, which the faithfulness rule forbids, so they stay strings and the win is left on the table. Two of them would also resist a naive move: sh:message contains '{?Class2Instance}', which g{} would read as an interpolation, and sh:select holds a triple-quoted SPARQL query",
+    "finding: run_pair can only compare the return value (None) and the arguments (none), so equivalence rests on the region's own assertion, len(result_list) == 2, holding on both sides -- a real check (a mis-resolved sh:ValidationResult yields an empty list and an AssertionError), but a narrower one than a graph comparison"
   ],
   "draft_sha": "38d091e43a49e645",
   "provenance": {
@@ -26,5 +30,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_190_1",
+    "diffs": [],
+    "error": null
   }
 }

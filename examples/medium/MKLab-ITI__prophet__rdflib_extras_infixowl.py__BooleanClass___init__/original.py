@@ -1,7 +1,9 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: BooleanClass.__init__ (lines 1493-1513, band medium)
 # licence of the source repository: see meta.json
+from rdflib import Namespace
 from rdflib.collection import Collection
+from infixowl_context import Class, OWLRDFListProxy
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def __init__(self, identifier=None, operator=OWL_NS.intersectionOf,

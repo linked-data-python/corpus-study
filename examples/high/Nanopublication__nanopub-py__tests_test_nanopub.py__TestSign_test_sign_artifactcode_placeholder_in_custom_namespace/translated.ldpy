@@ -1,6 +1,7 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: TestSign.test_sign_artifactcode_placeholder_in_custom_namespace (lines 532-555, band high)
 # licence of the source repository: see meta.json
+import nanopub_shim  # noqa: F401  context shim, see meta.json
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
     Nanopub,
@@ -8,13 +9,7 @@ from nanopub import (
     namespaces,
 )
 from nanopub.definitions import NP_PREFIX
-from tests.conftest import (
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from conftest_shim import (  # context shim for tests.conftest, see meta.json
     default_conf,
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
@@ -40,7 +35,7 @@ def test_sign_artifactcode_placeholder_in_custom_namespace(self, testsuite):
     # The concept minted in the custom namespace must carry the nanopub's
     # trusty code, and the placeholder must be gone everywhere.
     artifact_code = str(np.source_uri).removeprefix(NP_PREFIX)
-    concept = URIRef(f"https://example.org/ns/{artifact_code}")
+    concept = f<https://example.org/ns/{artifact_code}>
     terms = {term for quad in np.rdf.quads((None, None, None, None)) for term in quad}
     assert concept in terms
     assert all("~~~ARTIFACTCODE~~~" not in str(term) for term in terms)

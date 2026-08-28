@@ -12,10 +12,14 @@
   "categories": {
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "OWL_NS = Namespace('http://www.w3.org/2002/07/owl#') absorbed into '@prefix owl: <...> .'; the four namespace terms become prefixed names: OWL_NS.intersectionOf/OWL_NS.unionOf inside a list literal (an operand context, so the islands are recognised), RDFS.label and RDFS.comment in call-argument position",
+    "the mechanical draft named the prefix after the Python variable (owl-ns:), which is unusable outside g{} islands, and inserted the @prefix statements INSIDE the parenthesised 'from rdflib import (...)' list; both fixed by hand",
+    "only the prefixes actually used are declared; the draft also declared rdf: (unused in this region) merely because RDF is in the import list",
+    "context shim: infixowl_shim re-exports CastClass, Class, classOrIdentifier and manchesterSyntax from rdflib.extras.infixowl (rdflib 7.2.1), the maintained descendant of the vendored rdflib 3.x copy the region comes from -- the vendored copy imports rdflib.py3compat and no longer loads; imported identically by both sides",
+    "finding: the region is a serialiser, so ~60 of its 64 lines are Python string plumbing that the notation has nothing to say about; only the 4 term constructions change. No triple is written, so no g{} island appears at all -- graph *reads* (triples_choices, objects) keep their Python call form, ldpy having no filtering island"
   ],
   "draft_sha": "697dc5c98d6223b1",
   "provenance": {
@@ -23,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:__repr__",
+    "diffs": [],
+    "error": null
   }
 }

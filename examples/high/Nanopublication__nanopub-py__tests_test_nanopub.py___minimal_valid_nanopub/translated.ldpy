@@ -1,24 +1,45 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: _minimal_valid_nanopub (lines 763-773, band high)
 # licence of the source repository: see meta.json
+import nanopub_shim  # noqa: F401  context shim, see meta.json
 from typing import Optional
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
     Nanopub,
     NanopubConf,
     namespaces,
 )
 
+@prefix dc:   <http://purl.org/dc/elements/1.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix hycl: <http://purl.org/petapico/o/hycl#> .
+
 def _minimal_valid_nanopub(conf: Optional[NanopubConf] = None) -> Nanopub:
     """A nanopub with the bare minimum needed to pass ``is_valid``."""
     np = Nanopub(conf=conf if conf is not None else NanopubConf())
-    np.assertion += g{ <http://test> {namespaces.HYCL.claims} "test claim" }
-    np.provenance += g{ {np.assertion.identifier} prov:wasAttributedTo <http://someone> }
-    np.pubinfo += g{ {np._metadata.namespace[""]} dc:creator "tester" }
+    np.assertion.__iadd__(
+        g{ <http://test> hycl:claims "test claim" }
+    )
+    np.provenance.__iadd__(
+        g{ {np.assertion.identifier} prov:wasAttributedTo <http://someone> }
+    )
+    np.pubinfo.__iadd__(g{ {np._metadata.namespace[""]} dc:creator "tester" })
     return np
+
+# --- demo harness, added identically to both representations (see meta.json).
+# The region returns a Nanopub, which the harness cannot compare, so the demo
+# calls it and exposes the three named graphs it fills.
+_demo_np = _minimal_valid_nanopub()
+demo_assertion = _demo_np.assertion
+demo_provenance = _demo_np.provenance
+print("is_valid:", _demo_np.is_valid)
+
+# a second call, this time supplying a conf: the Nanopub constructor otherwise
+# stamps pubinfo with a wall-clock prov:generatedAtTime, which no two runs can
+# share, so the pubinfo graph is only compared for this deterministic call.
+_demo_np2 = _minimal_valid_nanopub(NanopubConf(add_prov_generated_time=False,
+                                               add_pubinfo_generated_time=False))
+demo_assertion2 = _demo_np2.assertion
+demo_provenance2 = _demo_np2.provenance
+demo_pubinfo = _demo_np2.pubinfo
+print("is_valid2:", _demo_np2.is_valid)

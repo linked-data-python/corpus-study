@@ -1,15 +1,12 @@
-"""Validation driver for morph-kgc__morph-kgc__test_rml-in-memory_json_dictionary_RMLIMTC0000_test_RMLTC0000_DICT.py__test_RMLTC0000.
+"""Validation driver: the region is a pytest test taking no argument.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+mapping.ttl and output.nq (both tiny, Apache-2.0) were copied next to the
+example so that os.path.dirname(os.path.realpath(__file__)) resolves for both
+representations, which live in the same directory.  The test materialises a
+python dictionary through morph-kgc and asserts isomorphism with the expected
+output; calling it once on each side compares the assertion outcome.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_RMLTC0000',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry="test_RMLTC0000",
+                   calls=[lambda: ((), {})])

@@ -8,10 +8,8 @@ from nanopub import (
     NanopubConf,
     namespaces,
 )
-from tests.conftest import (
-    default_conf,
+from nanopub_context import (      # context shim for tests.conftest, see meta.json
     profile_test,
-    skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
 )
 
 def test_specific_file(self):
@@ -62,3 +60,42 @@ def test_specific_file(self):
             )
         )
     np.sign()
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region is a pytest test method: it returns nothing and keeps the signed
+# nanopub in a local.  Signing is NOT reproducible for this input: the JSON-LD
+# parse gives the file's many blank nodes fresh random identifiers, and
+# nanopub's _replace_blank_nodes() numbers them in store iteration order, so
+# two runs of one and the same file already yield different trusty URIs.  The
+# harness therefore snapshots the four named graphs immediately BEFORE sign(),
+# where blank nodes are still blank nodes and isomorphism applies; sign() then
+# runs as the region wrote it.
+_snapshots = {}
+_Nanopub = Nanopub
+
+
+def _copy_graph(_g):
+    _out = Graph()
+    for _t in _g:
+        _out.add(_t)
+    return _out
+
+
+class _CapturingNanopub(_Nanopub):
+    def sign(self):
+        for _name in ("head", "assertion", "provenance", "pubinfo"):
+            _snapshots.setdefault(_name, _copy_graph(getattr(self, _name)))
+        return _Nanopub.sign(self)
+
+
+def Nanopub(*args, **kwargs):
+    return _CapturingNanopub(*args, **kwargs)
+
+
+test_specific_file(None)
+
+head = _snapshots["head"]
+assertion = _snapshots["assertion"]
+provenance = _snapshots["provenance"]
+pubinfo = _snapshots["pubinfo"]

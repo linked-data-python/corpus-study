@@ -13,10 +13,14 @@
     "namespace_term": 2,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "RDFS.comment -> rdfs:comment, and each graph.add((s, p, o)) -> 'self.graph += g{ {self.identifier} rdfs:comment {comment} }'; the two adds sit in different branches, so nothing is merged",
+    "only the prefix actually used is declared; the draft also declared rdf: (unused in this region) merely because RDF is in the import list",
+    "the draft inserted the @prefix statements after the imports; moved above them so the declaration precedes every use (block scope is lexical)",
+    "'self.graph += g{...}' rebinds the attribute (Graph.__iadd__ returns self), where the original called self.graph.add(...) in place; observationally identical for any object with a plain 'graph' attribute, which is what infixowl's Individual has",
+    "original.py runs as extracted: the region's whole context is rdflib.term.Identifier plus the RDFS namespace, both already imported"
   ],
   "draft_sha": "e5ebd8dd0121c4fb",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_set_comment",
+    "diffs": [],
+    "error": null
   }
 }

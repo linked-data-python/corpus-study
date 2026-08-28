@@ -10,6 +10,9 @@ from rdflib import (
     URIRef,
     Variable
 )
+# context shim (see meta.json): manchesterSyntax is a module-level helper of
+# the enclosing infixowl.py, vendored as infixowl_context.py
+from infixowl_context import manchesterSyntax
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def isPrimitive(self):

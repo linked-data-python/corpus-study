@@ -1,7 +1,9 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: Restriction.serialize (lines 1657-1687, band medium)
 # licence of the source repository: see meta.json
-from rdflib import py3compat
+import py3compat                                        # context shim, see meta.json
+from rdflib import Namespace
+from rdflib.extras.infixowl import CastClass, Property   # context shim, see meta.json
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 @py3compat.format_doctest_out

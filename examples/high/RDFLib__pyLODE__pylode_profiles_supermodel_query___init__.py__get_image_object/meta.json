@@ -12,10 +12,14 @@
   "categories": {
     "namespace_term": 7
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "the region is pure term naming: the seven SDO./DCTERMS./SH. attribute accesses become sdo:/dcterms:/sh: prefixed names, one for one, and nothing else changes",
+    "only the three namespaces the region actually uses are declared as prefixes; the draft declared all fourteen names of the context import (dc, foaf, org, owl, prof, prov, qb, rdf, rdfs, skos, vann are never used here) and had spliced them into the middle of the `from pylode... import (` statement, which does not parse",
+    "the `from rdflib.namespace import (...)` context import is kept verbatim on both sides even though the ldpy version no longer reads SDO/DCTERMS/SH from it",
+    "context shim: pylode cannot be imported in the evaluation venv (pylode/__init__.py pulls in dominate, httpx, kurra), so get_value (a helper defined 40 lines above the region in the same file) and the MediaObject/ImageObject dataclasses were copied verbatim into supermodel_context.py; the region's long `from pylode.profiles.supermodel.model import (...)` line is replaced by an import of the two names it actually uses. Identical on both sides",
+    "no graph is written here, so `g{}` never appears: this region shows the plain-naming end of the notation's value"
   ],
   "draft_sha": "75058195772383cd",
   "provenance": {
@@ -23,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_image_object",
+    "diffs": [],
+    "error": null
   }
 }

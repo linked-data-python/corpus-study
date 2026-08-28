@@ -12,6 +12,9 @@ from rdflib import (
 )
 from rdflib.namespace import XSD as _XSD_NS
 from rdflib.util import first
+# context shim (see meta.json): classOrIdentifier is a module-level helper of
+# the enclosing infixowl.py, vendored as infixowl_context.py
+from infixowl_context import classOrIdentifier
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 
 def canonicalName(term, g):

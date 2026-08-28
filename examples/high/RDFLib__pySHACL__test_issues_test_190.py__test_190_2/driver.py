@@ -1,15 +1,17 @@
-"""Validation driver for RDFLib__pySHACL__test_issues_test_190.py__test_190_2.
+"""Validation driver for pySHACL's test_190_2.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region takes no argument and returns nothing: it parses the two Turtle
+constants defined above it, runs pyshacl's ``validate`` over them, walks the
+validation report for ``sh:ValidationResult`` subjects and asserts that the
+data conforms.  Running it on both sides therefore exercises the whole
+pipeline; the ldpy side differs only in how ``RDF.type`` and
+``SH.ValidationResult`` are written.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_190_2',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+
+def no_args():
+    return ((), {})
+
+
+VERDICT = run_pair(__file__, entry="test_190_2", calls=[no_args])

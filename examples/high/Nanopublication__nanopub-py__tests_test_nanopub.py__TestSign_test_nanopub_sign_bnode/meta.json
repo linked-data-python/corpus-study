@@ -14,10 +14,14 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "context shim: nanopub_shim.py puts the Nanopublication/nanopub-py@05022dc4bc checkout on sys.path; conftest_shim.py replaces tests/conftest.py, whose real version downloads the nanopub test suite from GitHub at import time via nanopub-testsuite-connector (not installed, not reproducible)",
+    "the rsa-key1 key pair (id_rsa, id_rsa.pub, 1 kB total) was copied verbatim from nanopub-testsuite@main:transform/signed/rsa-key1/key/ (MIT, (c) 2022 Tobias Kuhn) so the region runs offline; checked: it reproduces exactly the expected trusty artifact code RAcU1AR3dS0ricV5G_ENcpUCk40XuCvFW3tVFqxNEQzT4",
+    "the add becomes assertion += g{ {BNode(\"test\")} hycl:claims \"This is a test of nanopub-python\" }",
+    "KEY FINDING: the obvious idiomatic form _:test is WRONG here. An ldpy _:label is a blank node fresh at each evaluation, whose rdflib label is a random Nxxxx id, whereas BNode(\"test\") carries the label test - and the label is observable: nanopub folds it into the trusty artifact code, so _:test produced a different (and therefore failing) source_uri. The blank node label had to stay a Python BNode(...) interpolation.",
+    "the region has no return value; its own asserts (valid signature + expected trusty code, which hashes every triple) are the check and they run on both sides"
   ],
   "draft_sha": "21b0fa3d7c56544e",
   "provenance": {
@@ -25,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_nanopub_sign_bnode",
+    "diffs": [],
+    "error": null
   }
 }

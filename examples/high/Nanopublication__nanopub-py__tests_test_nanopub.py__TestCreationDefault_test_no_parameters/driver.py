@@ -1,15 +1,25 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestCreationDefault_test_no_parameters.
+"""Validation driver for TestCreationDefault.test_no_parameters.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pytest test method: it returns nothing and keeps the nanopub
+in a local.  Both files therefore carry an identical demo harness that wraps
+Nanopub to capture the instance and republish head/assertion/provenance at
+module level; the driver compares them by isomorphism (pubinfo is left out:
+it carries a generation timestamp).  The region's own assertions
+(source_uri is None, head non-empty, exactly one np:Nanopublication /
+np:hasProvenance / np:hasPublicationInfo triple) run on both sides.
+
+The region's imports are left exactly as upstream; `nanopub` is made importable
+by putting the corpus checkout of the pinned commit on sys.path (see meta.json).
 """
-from rdfeval.harness import run_pair
+import sys
+from pathlib import Path
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_no_parameters',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+sys.dont_write_bytecode = True
+_REPO = (Path(__file__).resolve().parents[3]
+         / "corpus" / "repos" / "Nanopublication__nanopub-py")
+if str(_REPO) not in sys.path:
+    sys.path.insert(0, str(_REPO))
+
+from rdfeval.harness import run_pair  # noqa: E402
+
+VERDICT = run_pair(__file__, entry=None, calls=None)

@@ -13,10 +13,14 @@
     "namespace_term": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns"
+    "context shim: infixowl_shim.py carries classOrIdentifier verbatim (rdflib/extras/infixowl.py lines 237-243 of MKLab-ITI/prophet@eee2ab51de) plus the two marker classes its isinstance test needs. The vendored module itself cannot be imported: it is a python-2 era rdflib copy (from rdflib import py3compat) and the modern rdflib.extras.infixowl is a different, rewritten module.",
+    "original.py needed one added import line (from rdflib import Namespace): the extracted region carried the OWL_NS = Namespace(...) context line but not the import it needs",
+    "OWL_NS = Namespace(\"http://www.w3.org/2002/07/owl#\") becomes @prefix owl: <...> . - the textbook mapping; nothing else in the region uses OWL_NS as a runtime object, so the Python binding disappears cleanly",
+    "self.graph.add((self.identifier, OWL_NS.complementOf, classOrIdentifier(other))) becomes self.graph += g{ {self.identifier} owl:complementOf {classOrIdentifier(other)} }; both subject and object are computed by Python code and are interpolated, so only the predicate really gains from the notation - a fair picture of what island syntax buys in library code, where terms come from the caller",
+    "driver covers all four paths: other as a URIRef, other as an infixowl Class (classOrIdentifier unwraps it), a blank-node subject, and the falsy-other early return"
   ],
   "draft_sha": "7961acbdf37846e4",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_set_complementOf",
+    "diffs": [],
+    "error": null
   }
 }

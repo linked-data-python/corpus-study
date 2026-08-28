@@ -1,15 +1,12 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestReplaceBlankNodes_test_replace_blank_nodes_unnamed_bnode.
+"""Validation driver: the region is a pytest method whose only argument is self.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+It builds a one-quad Dataset around a 33-character BNode name, runs
+Nanopub._replace_blank_nodes over it and asserts the quad count.  The Dataset
+is created inside the region, so the comparison rests on the region's own
+assert (an assertion failure on either side surfaces as an error in the
+verdict); `self` is unused, so a None stand-in is passed.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_replace_blank_nodes_unnamed_bnode',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry="test_replace_blank_nodes_unnamed_bnode",
+                   calls=[lambda: ((None,), {})])

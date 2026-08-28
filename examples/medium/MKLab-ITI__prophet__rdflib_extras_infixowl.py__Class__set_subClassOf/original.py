@@ -10,6 +10,7 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_context import classOrIdentifier
 
 def _set_subClassOf(self, other):
     if not other:

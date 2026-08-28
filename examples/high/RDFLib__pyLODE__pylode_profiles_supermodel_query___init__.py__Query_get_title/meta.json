@@ -13,10 +13,13 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "the whole region is one term: DCTERMS.title becomes dcterms:title",
+    "the source's 14-name 'from rdflib.namespace import (...)' is pure namespace scaffolding (nothing else in the two-line region uses it) and is replaced by the single @prefix dcterms: declaration the region needs",
+    "the draft placed the @prefix lines inside the parenthesised import list, which is not a statement position; they are moved out",
+    "driver: the Query object is stood in for by a SimpleNamespace holding the graph, since the region only touches self.graph; three fixtures cover a match, a dc:title-only subject and an unknown subject (returns None)"
   ],
   "draft_sha": "7817b0afcd9d7cf2",
   "provenance": {
@@ -24,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_title",
+    "diffs": [],
+    "error": null
   }
 }

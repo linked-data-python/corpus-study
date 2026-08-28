@@ -11,6 +11,9 @@ from rdflib import (
     Variable
 )
 from rdflib.collection import Collection
+# context shim (see meta.json): classOrIdentifier is a module-level helper of
+# the enclosing infixowl.py, vendored as infixowl_context.py
+from infixowl_context import classOrIdentifier
 
 def __init__(self, rdfList, members=None, graph=None):
     if graph:

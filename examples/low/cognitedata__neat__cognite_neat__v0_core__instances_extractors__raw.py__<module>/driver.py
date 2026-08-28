@@ -1,15 +1,15 @@
-"""Validation driver for cognitedata__neat__cognite_neat__v0_core__instances_extractors__raw.py__<module>.
+"""Validation driver for cognitedata__neat__…__raw.py__<module>.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+A module-level region: importing it defines the RAWExtractor class and
+nothing else, so both sides end with an identical demo harness that runs the
+extractor over a canned RAW table; the harness then compares module state
+(``demo_graph`` + stdout).
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # neat_ctx shim
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry=None,
-    calls=None,
-)
+VERDICT = run_pair(__file__, entry=None, calls=None)

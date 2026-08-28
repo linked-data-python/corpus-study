@@ -156,7 +156,7 @@ class ConceptPropertyValueConstraint(ConceptPropertyRestriction):
         # scenario 2: Datatype as value restriction
         elif "^^" in raw_value:
             if len(value_components := raw_value.split("^^")) == 2 and value_components[1] in _XSD_TYPES:
-                value = f"{value_components[0]}"^^f{DataType.load(value_components[1]).as_xml_uri_ref()}
+                value = f"{value_components[0]}"^^{DataType.load(value_components[1]).as_xml_uri_ref()}
             else:
                 raise NeatValueError(f"Invalid value format for datatype: {raw_value}")
 

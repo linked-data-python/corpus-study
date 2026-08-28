@@ -1,10 +1,14 @@
 # Extracted from maparent/virtuoso-python@eba377e1fa : virtuoso/vstore.py
 # region: resolve (lines 648-727, band medium)
 # licence of the source repository: see meta.json
+import logging
 from struct import unpack
 from rdflib.term import URIRef, BNode, Literal, Variable
 from rdflib.namespace import XSD, Namespace, NamespaceManager
-import pyodbc
+# context shims (see meta.json): the Virtuoso type codes exported by
+# virtuoso-python's patched pyodbc, and vstore.py's own _nodeid_to_bnode
+import pyodbc_constants as pyodbc
+from vstore_context import _nodeid_to_bnode
 log = logging.getLogger(__name__)
 
 def resolve(resolver, args):

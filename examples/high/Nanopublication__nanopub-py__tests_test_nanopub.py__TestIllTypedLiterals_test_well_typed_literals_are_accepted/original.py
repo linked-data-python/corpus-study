@@ -2,6 +2,7 @@
 # region: TestIllTypedLiterals.test_well_typed_literals_are_accepted (lines 843-859, band high)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
+from region_context import _minimal_valid_nanopub, last_nanopub
 
 def test_well_typed_literals_are_accepted(self):
     np = _minimal_valid_nanopub()
@@ -20,3 +21,10 @@ def test_well_typed_literals_are_accepted(self):
         )
     assert np.ill_typed_literals == []
     assert np.is_valid
+
+# --- demo harness (identical in original.py and translated.ldpy, see
+# meta.json): the region is a pytest test that returns nothing, so it is run
+# once here and the assertion graph it filled is exposed under a module-level
+# name for the driver to compare.
+test_well_typed_literals_are_accepted(None)
+demo_assertion = last_nanopub().assertion

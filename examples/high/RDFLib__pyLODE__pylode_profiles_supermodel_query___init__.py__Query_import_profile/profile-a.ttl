@@ -1,0 +1,10 @@
+# Demo artifact for the import_profile harness (see meta.json).
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:   <https://example.org/> .
+
+ex:profile-a a prof:Profile ;
+    rdfs:label "Profile A" .
+
+ex:Widget a rdfs:Class ;
+    rdfs:label "Widget" .

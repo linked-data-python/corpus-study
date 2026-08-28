@@ -13,10 +13,14 @@
     "namespace_term": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "prefix declared for the RDFS namespace imported from rdflib (RDFS -> rdfs); the rdf: prefix the draft declared is unused in this region and was dropped",
+    "graph.add((s, p, o)) -> `self.graph += g{ {self.identifier} rdfs:subPropertyOf {classOrIdentifier(sP)} }`; subject and object stay interpolations because they are computed values",
+    "context shim: classOrIdentifier (a module-level helper of the same vendored file) copied verbatim into infixowl_context.py; Class/Property, which its isinstance test needs, are imported from rdflib.extras.infixowl (upstream of the vendored copy) because the vendored module starts with `from rdflib import py3compat`, removed in rdflib 6. Identical import on both sides",
+    "the `from rdflib import (...)` context import is kept verbatim in both versions even though the ldpy side no longer uses RDFS",
+    "structurally identical to the Class._set_subClassOf region of the same file (only the predicate differs)"
   ],
   "draft_sha": "d4dff152b33c0c9a",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_set_subPropertyOf",
+    "diffs": [],
+    "error": null
   }
 }

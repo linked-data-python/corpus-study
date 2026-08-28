@@ -19,7 +19,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+from supermodel_model import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -35,6 +35,7 @@ from pylode.profiles.supermodel.model import (
     SimpleCodedProperty,
     TextObject,
 )
+from supermodel_query import get_value
 
 def get_text_object(iri: URIRef, graph: Graph) -> TextObject:
     name = get_value(iri, SDO.name, graph)

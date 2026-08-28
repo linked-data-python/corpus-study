@@ -1,15 +1,12 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestSign_test_nanopub_sign_uri2.
+"""Validation driver: the region is a pytest method whose only argument is self.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+It builds a nanopub over the test-suite RSA key, signs it, and asserts both
+that the signature verifies and that the resulting Trusty URI carries the
+expected artifact code.  That code is a hash of the serialised nanopub, so the
+assert is a strong check on the translation: any difference in the assertion
+triple would change it.  `self` is unused, so a None stand-in is passed.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_nanopub_sign_uri2',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry="test_nanopub_sign_uri2",
+                   calls=[lambda: ((None,), {})])

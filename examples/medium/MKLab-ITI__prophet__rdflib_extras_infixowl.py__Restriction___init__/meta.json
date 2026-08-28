@@ -15,10 +15,18 @@
     "namespace_term": 14,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "context shim infixowl_context.py: the region is one method of a vendored copy of rdflib.extras.infixowl; Class, Restriction (needed by super(Restriction, self)), classOrIdentifier and propertyOrIdentifier are re-exported from the installed rdflib.extras.infixowl (identical names/signatures); imported identically by both sides",
+    "prefix owl: declared instead of the mechanical owl-ns:: a hyphenated prefix is usable inside islands only, and here owl: terms appear OUTSIDE islands (the not-in membership test and the restrTypes table)",
+    "OWL_NS = Namespace(...) dropped on the ldpy side: @prefix absorbs all eight of its uses",
+    "the six-entry restrTypes table reads much better as prefixed names in a plain Python list: (allValuesFrom, owl:allValuesFrom), ... - notation gain outside any island",
+    "the three graph.add(...) become graph += g{ ... }; one of them has a run-time predicate, written {restrictionType} in predicate position",
+    "graph.remove((s, rdf:type, owl:Class)) stays a Python call: there is no removal/filtering island, only the terms benefit from the notation",
+    "the two not-in guards stay Python tuple membership tests for the same reason",
+    "driver: Probe is a Restriction subclass with an inert constructor so the lifted __init__ can be called on a real Restriction instance; six fixtures cover someValuesFrom, a Class range, a cardinality Literal, the read-back-from-graph else branch, the fully-populated no-op path and the path where the trailing remove actually deletes rdf:type owl:Class",
+    "fixtures always pass graph explicitly: the region default graph=Graph() is a shared mutable default, which would otherwise accumulate differently on the two sides"
   ],
   "draft_sha": "2e1c53887eeff0d2",
   "provenance": {
@@ -26,5 +34,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:__init__",
+    "diffs": [],
+    "error": null
   }
 }

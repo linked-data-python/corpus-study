@@ -13,10 +13,15 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "URIRef('http://another') -> <http://another> and namespaces.HYCL.claims -> hycl:claims (with @prefix hycl: <http://purl.org/petapico/o/hycl#> .); the tuple and the .add() call keep their exact shape.",
+    "NEGATIVE FINDING: the flagship 'G += g{ ... }' form is unusable here. np.assertion is a read-only @property of Nanopub, and 'np.assertion += g{...}' compiles to a STORE_ATTR, so it raises AttributeError: property 'assertion' of 'Nanopub' object has no setter. Adding to a library graph reached through a property therefore needs either a local alias or, as here, the plain .add() call with island terms.",
+    "SECOND LIMITATION: Literal('hello') survives untouched. Outside an island a bare \"hello\" is a Python str, and rdflib's Graph.add() rejects it; only the suffixed literal forms (\"x\"@en, \"x\"^^t) are islands outside g{ }. So a plain, untyped, untagged literal is exactly the case the notation cannot shorten in argument position.",
+    "'from nanopub import namespaces' becomes dead on the ldpy side (the ontology IRI is inlined in the @prefix), the same trade-off already recorded for the siblings of this file: @prefix produces no runtime object and so does not track the library's own constant. The import line is kept as upstream.",
+    "demo harness added identically to both representations: the region is a pytest test that keeps its nanopub in a local and returns nothing, so the harness shadows Nanopub with a recording wrapper, runs the test, and republishes the assertion graph as module-level 'demo_assertion' for the isomorphism comparison. The test's own 'assert len(np.assertion) == 1' runs on both sides.",
+    "the driver puts the corpus checkout of commit 05022dc4bc on sys.path (sys.dont_write_bytecode) so the region's nanopub imports stay as upstream; no network is needed for this region."
   ],
   "draft_sha": "530bbb099885eace",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

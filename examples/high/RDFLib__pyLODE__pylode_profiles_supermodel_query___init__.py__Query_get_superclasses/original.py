@@ -18,21 +18,8 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+from supermodel_shim import (
     Class,
-    CodedProperty,
-    ComponentModel,
-    ImageObject,
-    MediaObject,
-    Note,
-    Profile,
-    ProfileHierarchyItem,
-    ProfileType,
-    Property,
-    RDFProperty,
-    Resource,
-    SimpleCodedProperty,
-    TextObject,
 )
 
 def get_superclasses(

@@ -1,15 +1,41 @@
-"""Validation driver for MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__set_equivalentClass.
+"""Validation driver: Class._set_equivalentClass writes owl:equivalentClass.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a method body, so the driver supplies a stand-in ``self``
+carrying the two attributes it touches (``graph`` and ``identifier``).
+Fixtures cover both arms of ``classOrIdentifier``: bare identifiers and
+wrapped infixowl class objects, plus the falsy early return.
 """
-from rdfeval.harness import run_pair
+from rdflib import BNode, Graph, URIRef
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='_set_equivalentClass',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+from infixowl_context import Class
+from rdfeval.harness import graphs_isomorphic, run_pair
+
+
+class _Term:
+    """Stand-in for the infixowl Class instance being mutated."""
+
+    def __init__(self):
+        self.graph = Graph()
+        self.identifier = URIRef("http://example.org/Pizza")
+
+    def __eq__(self, other):
+        if not isinstance(other, _Term):
+            return NotImplemented
+        return (self.identifier == other.identifier
+                and graphs_isomorphic(self.graph, other.graph))
+
+
+def identifiers():
+    return ((_Term(), [URIRef("http://example.org/Pie"), BNode("b1")]), {})
+
+
+def class_objects():
+    return ((_Term(), [Class(URIRef("http://example.org/Pie"))]), {})
+
+
+def empty():
+    return ((_Term(), []), {})
+
+
+VERDICT = run_pair(__file__, entry="_set_equivalentClass",
+                   calls=[identifiers, class_objects, empty])

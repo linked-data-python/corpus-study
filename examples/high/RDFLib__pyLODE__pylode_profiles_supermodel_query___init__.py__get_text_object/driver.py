@@ -1,15 +1,54 @@
-"""Validation driver for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_text_object.
+"""Validation driver: get_text_object reads an sdo:TextObject description.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pure reader — it only *looks up* terms — so the fixtures
+supply the graph and the harness compares the returned TextObject (a
+dataclass, hence value equality) as well as the untouched input graph.
 """
+from rdflib import DCTERMS, SDO, SH, Graph, Literal, URIRef
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='get_text_object',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+EXAMPLE = URIRef("https://example.com/example/1")
+
+FULL = """
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sdo: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.com/example/1> a sdo:TextObject ;
+    sdo:name "A Turtle example" ;
+    sdo:description "How to state an address" ;
+    sdo:encodingFormat "text/turtle" ;
+    dcterms:source <https://example.com/spec> ;
+    sh:order 2 ;
+    sdo:text \"\"\"
+        ex:addr a ex:Address ;
+            ex:street "1 Main St" .
+    \"\"\" .
+"""
+
+MINIMAL = """
+@prefix sdo: <https://schema.org/> .
+
+<https://example.com/example/1> a sdo:TextObject ;
+    sdo:text "ex:addr a ex:Address ." .
+"""
+
+
+def _graph(data):
+    g = Graph()
+    g.parse(data=data, format="turtle")
+    return g
+
+
+def full_example():
+    return ((EXAMPLE, _graph(FULL)), {})
+
+
+def minimal_example():
+    return ((EXAMPLE, _graph(MINIMAL)), {})
+
+
+VERDICT = run_pair(__file__, entry="get_text_object",
+                   calls=[full_example, minimal_example])

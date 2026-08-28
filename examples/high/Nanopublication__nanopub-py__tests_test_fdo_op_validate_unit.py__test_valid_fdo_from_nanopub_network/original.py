@@ -64,3 +64,35 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
 
     assert result.is_valid is True
     assert result.errors == []
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region is a pytest test: it returns nothing and keeps both graphs in
+# locals, so on its own it offers the driver nothing beyond "it did not raise".
+# Wrapping MagicMock captures the two assertion graphs it builds and
+# republishes them at module level, where the driver compares them.
+_captured = []
+_MagicMock = MagicMock
+
+
+def MagicMock(*args, **kwargs):
+    _mock = _MagicMock(*args, **kwargs)
+    _captured.append(_mock)
+    return _mock
+
+
+def _assertion_graph_of(_mock):
+    # MagicMock rejects attribute names starting with "assert" unless they
+    # were explicitly set, so a plain getattr is not enough here.
+    try:
+        _value = _mock.assertion
+    except AttributeError:
+        return None
+    return _value if isinstance(_value, Graph) else None
+
+
+test_valid_fdo_from_nanopub_network()
+
+record_graph, profile_graph = [
+    _g for _g in map(_assertion_graph_of, _captured) if _g is not None
+]

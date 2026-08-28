@@ -12,9 +12,16 @@
   "categories": {
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "translation_notes": [
+    "identity translation (the two files are byte-identical apart from nothing at all): this region is a SPARQL engine's *runtime* term resolver, i.e. exactly the dynamic counterpart of what ldpy does at transpile time, and none of its three constructions can be an island.",
+    "self.resolvePName(iri.prefix, iri.localname): the prefix is a runtime string looked up in the query's own namespace manager. ldpy's ex:{expr} requires 'ex' to be declared by an in-scope @prefix at transpile time, so a runtime prefix table is out of reach.",
+    "URIRef(iri, base=self.base): the base comes from the parsed query's BASE clause at runtime; ldpy's @base is resolved at transpile time and produces no runtime object.",
+    "Literal(iri.string, lang=iri.lang, datatype=self.absolutize(iri.datatype)): the lexical form, the language tag AND the datatype are all runtime values, and one call covers both the tagged and the typed case. The new ^^{expr} interpolated datatype would cover the typed half (f\"{iri.string}\"^^{dt}), but a *variable language tag* has no notation, so splitting the call in two would change the program. Left as is.",
+    "context shim (identical on both sides): parserutils.py holds CompValue copied from prophet's rdflib/plugins/sparql/parserutils.py lines 136-176 -- the vendored rdflib in that repository is Python 2 and the module cannot be imported (except SPARQLError, e). Only CompValue is reproduced; its _value/value path is unreachable because ctx is never set here.",
+    "driver: the region was extracted at module level, so it is called with a stand-in Prologue copied from the same source file (lines 341-359). Its absolutize() re-enters the caller's own module globals so the recursive datatype step really exercises the code under test. Six fixtures cover pname, literal+lang, literal+typed datatype (recursion), an absolute IRI, a relative IRI resolved against BASE, and a value returned untouched."
+  ],
   "draft_sha": "9039aec4883bef2c",
   "provenance": {
     "generated_at": "2026-08-28T01:18:21.473026+00:00",

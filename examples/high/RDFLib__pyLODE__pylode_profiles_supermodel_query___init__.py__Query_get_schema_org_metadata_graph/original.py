@@ -19,7 +19,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.rdf_elements import (
+from pylode_shim import (
     AGENT_PROPS,
     OBJECT_PROPERTY_SUBCLASSES,
     ONTOLOGY_PROPS,

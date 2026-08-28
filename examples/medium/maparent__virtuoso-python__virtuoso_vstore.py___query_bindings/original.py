@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib.graph import Graph
 from rdflib.term import URIRef, BNode, Literal, Variable
+from vstore_shim import _bnode_to_nodeid
 
 def _query_bindings(triple, g=None, to_n3=True):
     (s, p, o) = triple

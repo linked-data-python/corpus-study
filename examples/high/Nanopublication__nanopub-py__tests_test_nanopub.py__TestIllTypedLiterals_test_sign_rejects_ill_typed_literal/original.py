@@ -4,10 +4,10 @@
 import pytest
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub.utils import MalformedNanopubError
-from tests.conftest import (
+from conftest_shim import (
     default_conf,
     profile_test,
-    skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,
+    _minimal_valid_nanopub,
 )
 
 def test_sign_rejects_ill_typed_literal(self):
@@ -22,3 +22,22 @@ def test_sign_rejects_ill_typed_literal(self):
     with pytest.raises(MalformedNanopubError, match="not-a-number"):
         np.sign()
     assert np.source_uri is None
+
+
+# --- demo harness, added identically to both representations -----------------
+# The region is a pytest test: it keeps its nanopub in a local and returns
+# nothing, so module-state comparison would see nothing.  Wrap the fixture
+# factory to record the nanopub the test builds, run the test, and republish
+# its assertion graph at module level for the isomorphism check.
+_minimal_valid_nanopub_orig = _minimal_valid_nanopub
+_CAPTURED = []
+
+
+def _minimal_valid_nanopub(*args, **kwargs):  # noqa: F811 - deliberate shadow
+    np = _minimal_valid_nanopub_orig(*args, **kwargs)
+    _CAPTURED.append(np)
+    return np
+
+
+test_sign_rejects_ill_typed_literal(None)
+demo_assertion = _CAPTURED[-1].assertion

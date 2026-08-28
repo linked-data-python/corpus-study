@@ -14,10 +14,17 @@
     "term_constructor": 10,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "literal islands replace five of the seven Literal(...) calls: Literal(\"42\", datatype=XSD.integer) -> \"42\"^^xsd:integer, Literal(\"a string\", lang=\"en\") -> \"a string\"@en, and Literal(\"whatever\", datatype=URIRef(\"http://example.org/myDatatype\")) -> \"whatever\"^^<http://example.org/myDatatype> (datatype written as a full IRI island)",
+    "Literal(42) and Literal(\"plain string\") must stay as calls: outside a g{} island a bare 42 or \"plain string\" is a Python int/str, and a plain (untagged, untyped) literal has no island form there. This is exactly the documented `Literal(expr) nu hors ilot` limitation, and it shows up inside a list of literals where its five neighbours *did* become islands",
+    "URIRef(f\"http://example.org/p{i}\") -> f<http://example.org/p{i}>; URIRef(\"http://test\") -> <http://test>",
+    "NEGATIVE FINDING: `np.assertion += g{ ... }` does not work here. np.assertion is a read-only property of Nanopub, and Python's augmented assignment rebinds the target, so the transpiled `np.assertion = np.assertion.__iadd__(...)` raises AttributeError. The add() call is therefore kept and the islands sit in term positions inside the triple tuple — which also keeps the region's structure intact. The `+=` idiom is only available when the graph is reachable through an assignable name (as np._assertion is in the TestSign.test_sign_errors region of the same file)",
+    "prefix declared for XSD only; the draft's dc/rdf/dcterms/prov prefixes are unused in this region and were dropped (they had also been spliced into the middle of the import list)",
+    "context shim: _minimal_valid_nanopub (tests/test_nanopub.py lines 763-773, called by the region but not carried over by the extractor) copied verbatim into region_context.py, plus a one-line bookkeeping list so the demo harness can reach the nanopub it built",
+    "demo harness added identically to both sides: the region is a pytest test returning nothing, so it is called once at module level and the assertion graph is exposed as `demo_assertion`, which the driver compares by isomorphism",
+    "context (driver-side, identical for both representations): the nanopub package is not installed in the venv, so the corpus checkout Nanopublication/nanopub-py@05022dc4bc is put on sys.path before either module is executed"
   ],
   "draft_sha": "91487afaa4df97dd",
   "provenance": {
@@ -25,5 +32,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

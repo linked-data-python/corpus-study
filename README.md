@@ -53,25 +53,26 @@ Tests: `python -m pytest tests/`.
 ## Results as of 2026-08-28
 
 60 repositories pinned, 5 812 Python files analysed, 1 557 RDF-relevant,
-47 323 RDF operations. 52 sampled files → 163 regions → 40 reviewed
-translations → **37 pairs proved semantically equivalent** (0 failures).
+47 323 RDF operations. 52 sampled files → 163 regions → 151 reviewed
+translations → **140 pairs proved semantically equivalent** (0 found
+non-equivalent, 1 unresolved).
 
-The pooled median token reduction is 0.3 %, and that number is meaningless
+The pooled median token reduction is 1.1 %, and that number is meaningless
 on its own: it pools four situations distinguished by **where the RDF of the
 original actually lives**. That split is the study's main result.
 
 | where the RDF lives | n | byte-identical | LOC | tokens | AST nodes |
 |---|---:|---:|---:|---:|---:|
-| inline construction (`g.add((s,p,o))`) | 10 | 1 | −3.5 % | **+13.9 %** | **+23.1 %** |
-| terms only (terms mentioned, no triple asserted) | 13 | 1 | 0.0 % | +0.6 % | +0.7 % |
-| string-embedded (Turtle inside a Python string) | 6 | 0 | +7.6 % | −9.1 % | −1.2 % |
-| no RDF in source (external mapping/query, plumbing) | 8 | **8** | 0.0 % | 0.0 % | 0.0 % |
+| inline construction (`g.add((s,p,o))`) | 55 | 1 | −2.6 % | **+5.2 %** | **+10.0 %** |
+| terms only (terms mentioned, no triple asserted) | 54 | 4 | 0.0 % | +0.5 % | 0.0 % |
+| string-embedded (Turtle inside a Python string) | 13 | 0 | +1.3 % | 0.0 % | −1.3 % |
+| no RDF in source (external mapping/query, plumbing) | 18 | **18** | 0.0 % | 0.0 % | 0.0 % |
 
 (positive = LD Python smaller)
 
 - Where triples are written in the program text, the notation removes about
-  a quarter of the syntax nodes.
-- Where no RDF structure appears in the source, all eight translations are
+  a tenth of the syntax nodes.
+- Where no RDF structure appears in the source, all eighteen translations are
   byte-identical: the notation is an exact no-op, costing nothing.
 - The string-embedded rows are a **measurement artefact, not a regression**:
   Python's tokenizer counts a whole embedded Turtle document as one token,
@@ -83,14 +84,34 @@ Wilcoxon; p-values are descriptive, effect sizes carry the argument):
 
 | metric | RDFLib | LD Python | n | p | Cliff's δ |
 |---|---:|---:|---:|---:|---:|
-| scaffolding tokens per triple | 9.0 | 1.0 | 7 | 0.02 | 1.00 |
-| syntactic nesting per term | 3.0 | 0.0 | 9 | 0.003 | 1.00 |
-| RDFLib constructors per triple | 2.0 | 0.03 | 10 | 0.006 | 0.88 |
+| scaffolding tokens per triple | 11.0 | 1.3 | 42 | <1e-5 | **1.00** |
+| syntactic nesting per term | 3.0 | 0.0 | 54 | <1e-5 | **1.00** |
+| RDFLib constructors per triple | 1.0 | 0.0 | 46 | <1e-5 | 0.57 |
+
+A Cliff's δ of 1.00 is complete separation: every translated region needs
+less scaffolding per triple, and shallower nesting per term, than every
+original.
+
+Translation classes over the 151 reviewed regions: 108 directly
+expressible, 25 minor restructuring, 8 awkward, 7 not expressible, 3
+excluded (live database or network service required).
 
 Analyser validity (measured, not assumed — `rdfeval audit`): precision
 **0.99** on 120 hand-judged operations; **12 %** file-level miss rate on 25
 hand-judged files that import rdflib with no detected operation. Densities
 are therefore lower bounds — a bias against the study's own hypothesis.
+
+### Two language defects found and fixed
+
+The study fed back into the language, and was then re-run against it:
+surplus Turtle 1.1 semicolons (`[ ex:a 1 ; ]`, `ex:p 1 ;; ex:q 2`) were
+rejected by the island parser, and a run-time-computed datatype could not be
+interpolated. Both are fixed. The example that motivated the second moved
+from *not expressible* to *awkward* (15 of 18 term constructions became
+islands); the remaining three stay in Python because RDFLib normalises the
+lexical form of typed literals built from Python values, so
+`Literal(True, datatype=XSD.boolean)` is `"true"` while `f"{True}"` is
+`"True"` — the mechanical rewrite is unsound unless the value is a string.
 
 ## Key definitions
 

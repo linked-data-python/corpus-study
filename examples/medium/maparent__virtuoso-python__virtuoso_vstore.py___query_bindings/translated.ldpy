@@ -3,15 +3,16 @@
 # licence of the source repository: see meta.json
 from rdflib.graph import Graph
 from rdflib.term import URIRef, BNode, Literal, Variable
+from vstore_shim import _bnode_to_nodeid
 
 def _query_bindings(triple, g=None, to_n3=True):
     (s, p, o) = triple
     if isinstance(g, Graph):
         g = g.identifier
-    if s is None: s = Variable("S")
-    if p is None: p = Variable("P")
-    if o is None: o = Variable("O")
-    if g is None: g = Variable("G")
+    if s is None: s = ?S
+    if p is None: p = ?P
+    if o is None: o = ?O
+    if g is None: g = ?G
     if isinstance(s, BNode):
         s = _bnode_to_nodeid(s)
     if isinstance(p, BNode):

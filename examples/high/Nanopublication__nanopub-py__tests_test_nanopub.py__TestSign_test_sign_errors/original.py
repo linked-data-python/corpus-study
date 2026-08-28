@@ -10,7 +10,7 @@ from nanopub import (
 )
 from nanopub.profile import ProfileError
 from nanopub.utils import MalformedNanopubError
-from tests.conftest import (
+from conftest_context import (
     default_conf,
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,

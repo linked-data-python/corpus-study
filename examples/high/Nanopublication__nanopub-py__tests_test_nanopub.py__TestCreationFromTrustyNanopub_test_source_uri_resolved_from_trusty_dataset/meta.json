@@ -13,10 +13,14 @@
     "graph_ctor": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "no island opportunity in this region: it builds an empty Dataset and parses TriG text obtained from a file, so translated.ldpy is the Python source verbatim (ldpy is a superset of Python). The prefix declarations the draft inserted were unused — and had been spliced into the middle of the `from nanopub import (` statement, which does not parse — so they were removed",
+    "the nanopub URI 'http://purl.org/np/RA1sViVmXf-...' stays a Python string on both sides: it is passed to a str-typed lookup API and compared with `np.source_uri`, a str; an `<...>` island would make it a URIRef, and rdflib's URIRef never compares equal to a plain str",
+    "context (driver-side, identical for both representations): the nanopub package is not installed in the venv, so the corpus checkout Nanopublication/nanopub-py@05022dc4bc is put on sys.path before either module is executed; original.py itself is unmodified",
+    "context: the region's `testsuite` fixture normally downloads the nanopub test suite from GitHub at import time. The single entry it needs, valid/trusty/example4.trig from Nanopublication/nanopub-testsuite@main (MIT), was copied into the example directory and is served by a stand-in defined in driver.py",
+    "equivalence is therefore trivial here (the two files are byte-identical); the driver still executes both sides end to end, including the in-test assertions"
   ],
   "draft_sha": "c3ee25f6c7f3fe37",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_source_uri_resolved_from_trusty_dataset",
+    "diffs": [],
+    "error": null
   }
 }

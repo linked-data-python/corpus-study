@@ -2,16 +2,13 @@
 # region: test_valid_fdo_from_nanopub_network (lines 138-179, band high)
 # licence of the source repository: see meta.json
 from unittest.mock import patch, MagicMock
-from rdflib import URIRef, Graph, Literal, BNode
-from rdflib.namespace import DCTERMS, RDF, SH, XSD
+from rdflib import Graph
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo.validate import validate_fdo_record
-from nanopub.namespaces import FDOF
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix fdof: <https://w3id.org/fdof/ontology#> .
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix fdof:    <https://w3id.org/fdof/ontology#> .
 
 HANDLE_METADATA = {
     "responseCode": 1,
@@ -35,8 +32,8 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
     subject = <https://example.org/fdo/1>
     record_graph += g{
         {subject} a fdof:FAIRDigitalObject ;
-           <https://example.org/predicate> "Value" ;
-           dcterms:conformsTo <https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab>
+            <https://example.org/predicate> "Value" ;
+            dcterms:conformsTo <https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab>
     }
     fdo_record_nanopub = MagicMock()
     fdo_record_nanopub.assertion = record_graph
@@ -44,16 +41,12 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
     profile_graph = Graph()
     profile_uri = <https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab>
 
-    shape = BNode()
-    property_bnode = BNode()
-
     profile_graph += g{
-        {shape} a sh:NodeShape ;
-           sh:targetClass fdof:FAIRDigitalObject ;
-           sh:property {property_bnode} .
-        {property_bnode} sh:path <https://example.org/predicate> ;
-           sh:minCount {Literal(1, datatype=XSD.integer)} ;
-           sh:maxCount {Literal(1, datatype=XSD.integer)}
+        _:shape a sh:NodeShape ;
+            sh:targetClass fdof:FAIRDigitalObject ;
+            sh:property [ sh:path     <https://example.org/predicate> ;
+                          sh:minCount "1"^^xsd:integer ;
+                          sh:maxCount "1"^^xsd:integer ]
     }
 
     fdo_profile_nanopub = MagicMock()
@@ -74,3 +67,35 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
 
     assert result.is_valid is True
     assert result.errors == []
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# The region is a pytest test: it returns nothing and keeps both graphs in
+# locals, so on its own it offers the driver nothing beyond "it did not raise".
+# Wrapping MagicMock captures the two assertion graphs it builds and
+# republishes them at module level, where the driver compares them.
+_captured = []
+_MagicMock = MagicMock
+
+
+def MagicMock(*args, **kwargs):
+    _mock = _MagicMock(*args, **kwargs)
+    _captured.append(_mock)
+    return _mock
+
+
+def _assertion_graph_of(_mock):
+    # MagicMock rejects attribute names starting with "assert" unless they
+    # were explicitly set, so a plain getattr is not enough here.
+    try:
+        _value = _mock.assertion
+    except AttributeError:
+        return None
+    return _value if isinstance(_value, Graph) else None
+
+
+test_valid_fdo_from_nanopub_network()
+
+record_graph, profile_graph = [
+    _g for _g in map(_assertion_graph_of, _captured) if _g is not None
+]

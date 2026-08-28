@@ -1,15 +1,15 @@
 """Validation driver for maparent__virtuoso-python__virtuoso_vstore.py__Virtuoso_contexts.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a generator method of the Virtuoso store; it is exercised
+against the off-line stand-in store of vstore_ctx.py by an identical demo
+harness at the end of both sides, and compared on stdout (the graph
+identifiers it yields and the query text it sent to the cursor).
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # vstore_ctx shim
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='contexts',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry=None, calls=None)

@@ -1,8 +1,9 @@
 # Extracted from RDFLib/pyLODE@0d0471fb99 : pylode/profiles/supermodel/loader.py
 # region: ProfilesDataset.load_profiles (lines 101-146, band medium)
 # licence of the source repository: see meta.json
+import logging
 from rdflib import DCTERMS, OWL, PROF, RDF, Graph, URIRef
-from pylode.profiles.supermodel.namespace import LODE
+from supermodel_context import LODE, fetch
 logger = logging.getLogger(__name__)
 PYLODE_CONFIG_GRAPH = "urn:graph:pylode-config"
 MEDIA_TYPES = {

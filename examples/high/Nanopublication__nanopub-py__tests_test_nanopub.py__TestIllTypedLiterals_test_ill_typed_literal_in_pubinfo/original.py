@@ -4,6 +4,7 @@
 import pytest
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub.utils import MalformedNanopubError
+from nanopub_ctx import _minimal_valid_nanopub  # context shim, see nanopub_ctx.py
 
 def test_ill_typed_literal_in_pubinfo(self):
     np = _minimal_valid_nanopub()

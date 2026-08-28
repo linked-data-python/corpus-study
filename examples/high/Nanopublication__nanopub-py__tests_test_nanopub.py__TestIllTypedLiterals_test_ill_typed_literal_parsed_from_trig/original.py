@@ -2,6 +2,9 @@
 # region: TestIllTypedLiterals.test_ill_typed_literal_parsed_from_trig (lines 829-841, band high)
 # licence of the source repository: see meta.json
 import pytest
+# sibling helper of the region in the same test module (no import line there),
+# plus the sys.path entry for the nanopub checkout:
+from nanopub_context import _minimal_valid_nanopub
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
     Nanopub,

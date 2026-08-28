@@ -1,9 +1,10 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: Restriction.serialize (lines 1657-1687, band medium)
 # licence of the source repository: see meta.json
-from rdflib import py3compat
-@prefix owl-ns: <http://www.w3.org/2002/07/owl#> .
-
+import py3compat                                        # context shim, see meta.json
+from rdflib import Namespace
+from rdflib.extras.infixowl import CastClass, Property   # context shim, see meta.json
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 @py3compat.format_doctest_out
 def serialize(self, graph):
@@ -16,10 +17,10 @@ def serialize(self, graph):
     >>> namespace_manager = NamespaceManager(g2)
     >>> namespace_manager.bind('ex', EX, override=False)
     >>> Individual.factoryGraph = g1
-    >>> prop = Property(EX.someProp, baseType=owl-ns:DatatypeProperty)
+    >>> prop = Property(EX.someProp, baseType=OWL_NS.DatatypeProperty)
     >>> restr1 = (Property(
     ...    EX.someProp,
-    ...    baseType=owl-ns:DatatypeProperty)) | some | (Class(EX.Foo))
+    ...    baseType=OWL_NS.DatatypeProperty)) | some | (Class(EX.Foo))
     >>> restr1 #doctest: +SKIP
     ( ex:someProp SOME ex:Foo )
     >>> restr1.serialize(g2)
@@ -33,6 +34,6 @@ def serialize(self, graph):
     Property(
         self.onProperty, graph=self.graph, baseType=None).serialize(graph)
     for s, p, o in self.graph.triples((self.identifier, None, None)):
-        graph += g{ {s} {p} {o} }
-        if p in [owl-ns:allValuesFrom, owl-ns:someValuesFrom]:
+        graph.add((s, p, o))
+        if p in [owl:allValuesFrom, owl:someValuesFrom]:
             CastClass(o, self.graph).serialize(graph)

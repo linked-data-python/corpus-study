@@ -15,10 +15,18 @@
     "term_constructor": 10,
     "triple_add": 9
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, RDF->rdf, SH->sh, XSD->xsd, FDOF->fdof"
+    "sibling of test_invalid_fdo_from_nanopub_network in the same source file; the same conventions were applied so the two translations stay comparable",
+    "the 9 graph.add() calls become 2 islands: URIRef('...') -> <...>, RDF.type -> a, SH.x -> sh:x, DCTERMS.conformsTo -> dcterms:conformsTo, FDOF.FAIRDigitalObject -> fdof:FAIRDigitalObject, Literal('Value') -> \"Value\".",
+    "the six profile_graph.add() calls merge into ONE island: `shape` becomes the island-scoped label _:shape and `property_bnode`, used once as the object of sh:property and carrying three properties, becomes an inline [ ... ] property list. The two BNode() calls therefore disappear -- pure term-construction scaffolding that nothing else read.",
+    "Literal(1, datatype=XSD.integer) -> \"1\"^^xsd:integer (kept explicit rather than Turtle's bare 1, to mirror the source's explicit datatype); the terms are identical.",
+    "record_graph and profile_graph are function locals, so `graph += g{ }` needs no `global` declaration.",
+    "the @patch(\"nanopub.fdo.validate.requests.get\") decorator arguments stay opaque Python strings, as intended: islands do not apply inside strings.",
+    "same trade-off as the sibling: `from nanopub.namespaces import FDOF` is dropped and the ontology IRI inlined in `@prefix fdof: <https://w3id.org/fdof/ontology#> .`, so the ldpy file no longer tracks the library's own constant. DCTERMS/RDF/SH/XSD and URIRef/Literal/BNode imports likewise become dead; only `from rdflib import Graph` survives (still needed by the demo harness).",
+    "demo harness added identically to both representations: the region is a pytest test that returns nothing and keeps both graphs in locals. The harness wraps MagicMock to capture the two assertion graphs and republishes them at module level for isomorphism comparison; it needs a try/except around `mock.assertion` because MagicMock rejects attribute names starting with 'assert' unless explicitly set. The test's own assertions (is_valid is True, errors == []) run on both sides.",
+    "the region's imports of nanopub are left as upstream; the driver puts the corpus checkout of commit 05022dc4bc on sys.path (sys.dont_write_bytecode). requests.get is mocked with the handle metadata, so the JSON-schema-to-SHACL path runs offline through pyshacl; profile_graph is only fixture data on this branch."
   ],
   "draft_sha": "720a775bba7523da",
   "provenance": {
@@ -26,5 +34,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

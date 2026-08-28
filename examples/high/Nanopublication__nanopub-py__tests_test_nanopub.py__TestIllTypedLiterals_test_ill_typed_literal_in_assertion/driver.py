@@ -1,15 +1,27 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_ill_typed_literal_in_assertion.
+"""Validation driver for TestIllTypedLiterals.test_ill_typed_literal_in_assertion.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pytest test method: it returns nothing and keeps the nanopub
+in a local.  Both files therefore carry an identical demo harness that wraps
+the ``_minimal_valid_nanopub`` fixture helper (context shim) to capture the
+instance and republish head/assertion/provenance at module level; the driver
+compares them by isomorphism (pubinfo is left out: it carries a generation
+timestamp).  The region's own assertions -- the ill-typed literal is reported,
+and ``is_valid`` raises MalformedNanopubError mentioning it -- run on both
+sides.
+
+`nanopub` is made importable by putting the corpus checkout of the pinned
+commit on sys.path (see meta.json).
 """
-from rdfeval.harness import run_pair
+import sys
+from pathlib import Path
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_ill_typed_literal_in_assertion',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+sys.dont_write_bytecode = True
+_HERE = Path(__file__).resolve().parent
+_REPO = _HERE.parents[2] / "corpus" / "repos" / "Nanopublication__nanopub-py"
+for _p in (str(_HERE), str(_REPO)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+from rdfeval.harness import run_pair  # noqa: E402
+
+VERDICT = run_pair(__file__, entry=None, calls=None)

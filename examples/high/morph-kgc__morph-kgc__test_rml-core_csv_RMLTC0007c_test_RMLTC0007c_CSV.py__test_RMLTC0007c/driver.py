@@ -1,15 +1,10 @@
-"""Validation driver for morph-kgc__morph-kgc__test_rml-core_csv_RMLTC0007c_test_RMLTC0007c_CSV.py__test_RMLTC0007c.
+"""Validation driver: the region is a pytest function taking no arguments.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+It materialises the RMLTC0007c mapping with morph-kgc and asserts the result
+is isomorphic to the expected output.nq; that assert is the check and it runs
+on both sides.  The mapping/CSV/expected-output files live in this directory
+(see meta.json), and the region resolves them relative to __file__.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_RMLTC0007c',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry="test_RMLTC0007c", calls=[lambda: ((), {})])

@@ -14,10 +14,16 @@
     "graph_write": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "awkward",
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "translated.ldpy is byte-identical to original.py apart from an added comment: the region asserts no constant term at all, so island notation buys nothing here",
+    "graph.add((self.identifier, self._operator, clonedList.uri)) has a run-time predicate; g{ {a} {b} {c} } is legal ldpy but strictly longer and less readable than the rdflib call, so the faithful translation keeps the call",
+    "the copy loop `graph.add((s, p, o))` republishes triples read from another graph - the same situation",
+    "the RDF list is grown one member at a time (Collection.append, interleaved with CastClass(...).serialize), which the island `( … )` collection syntax cannot express: it needs all members at once. This is the notable negative finding of this region",
+    "no @prefix declared: RDF/RDFS/Namespace are imported by the enclosing module but the region uses none of them",
+    "context shim: infixowl_context.py supplies the module-level CastClass, reduced to the plain-Class branch (an object whose .serialize copies the member's triples, infixowl.Class.serialize lines 927-930); rdflib/extras/infixowl.py itself cannot be imported (`from rdflib import py3compat`). Identical for both sides",
+    "driver supplies a stand-in `self` with a no-op _serialize (the real Class._serialize walks subClassOf/equivalentClass/disjointWith/complementOf, all empty in the fixture) and passes the target graph as an argument so it is compared by isomorphism"
   ],
   "draft_sha": "07749338abdf9495",
   "provenance": {
@@ -25,5 +31,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:serialize",
+    "diffs": [],
+    "error": null
   }
 }

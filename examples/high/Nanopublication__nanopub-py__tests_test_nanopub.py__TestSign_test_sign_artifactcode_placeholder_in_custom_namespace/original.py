@@ -1,6 +1,7 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : tests/test_nanopub.py
 # region: TestSign.test_sign_artifactcode_placeholder_in_custom_namespace (lines 532-555, band high)
 # licence of the source repository: see meta.json
+import nanopub_shim  # noqa: F401  context shim, see meta.json
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
     Nanopub,
@@ -8,7 +9,7 @@ from nanopub import (
     namespaces,
 )
 from nanopub.definitions import NP_PREFIX
-from tests.conftest import (
+from conftest_shim import (  # context shim for tests.conftest, see meta.json
     default_conf,
     profile_test,
     skip_if_nanopub_server_unavailable, testsuite, testsuite_conf,

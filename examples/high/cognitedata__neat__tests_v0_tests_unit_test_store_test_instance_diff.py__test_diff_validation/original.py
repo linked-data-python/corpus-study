@@ -3,8 +3,8 @@
 # licence of the source repository: see meta.json
 import pytest
 from rdflib import RDF, Literal, Namespace, URIRef
-from cognite.neat._v0.core._issues.errors import NeatValueError
-from cognite.neat._v0.core._store import NeatInstanceStore
+from neat_context import NeatValueError
+from neat_context import NeatInstanceStore
 
 def test_diff_validation() -> None:
     store = NeatInstanceStore.from_oxi_local_store()
@@ -24,3 +24,12 @@ def test_diff_validation() -> None:
 
     with pytest.raises(NeatValueError, match="New named graph not found"):
         store.diff(existing, nonexistent)
+
+# --- demo harness, added IDENTICALLY to original.py and translated.ldpy ----
+# The region's own assertions only observe named-graph existence; running it
+# here and exposing the store contents as a module-level Graph lets the
+# driver compare the triple it wrote as well.
+from neat_context import last_store_triples
+
+test_diff_validation()
+recorded = last_store_triples()

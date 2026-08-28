@@ -12,10 +12,13 @@
   "categories": {
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "identity translation: the region has no term construction at all. It reads with graph.triples() on data-derived patterns, deletes with graph.remove(), re-adds with graph.addN() over quads built by comprehension, then calls compute_qname. ldpy islands express *construction of known terms*; there is no island form for a triple pattern read, for remove(), or for addN() quads, so nothing in the region changes.",
+    "the two @prefix rdf:/rdfs: declarations of the mechanical draft were dropped as pointless: neither namespace is used.",
+    "the region was extracted at module level, so 'self.__identifier' is NOT name-mangled (no enclosing class); the driver's stand-in owner therefore uses setattr(self, '__identifier', ...).",
+    "driver fixtures: rename to a URIRef (both incoming and outgoing statements move), rename to a BNode (skips the qname branch), and rename to the same identifier (no-op branch)."
   ],
   "draft_sha": "105408333dc7e7df",
   "provenance": {

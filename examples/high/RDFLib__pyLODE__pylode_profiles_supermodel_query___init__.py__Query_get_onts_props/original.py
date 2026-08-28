@@ -18,7 +18,7 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.rdf_elements import (
+from rdf_elements import (  # context shim for pylode.rdf_elements
     AGENT_PROPS,
     OBJECT_PROPERTY_SUBCLASSES,
     ONTOLOGY_PROPS,

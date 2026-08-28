@@ -1,15 +1,15 @@
-"""Validation driver for cognitedata__neat__tests_v0_tests_unit_test_store_test_instance_diff.py__test_diff_validation.
+"""Validation driver for test_diff_validation.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+Module-state comparison: the demo harness at the end of both files runs the
+region (whose own ``pytest.raises`` assertions check that the two named
+graph IRIs land in the right guard) and exposes what the store ended up
+holding as the module-level Graph ``recorded``, which the harness compares
+by isomorphism.
+
+``NeatInstanceStore`` / ``NeatValueError`` are the stand-ins from
+``neat_context`` -- see that module for why the real ``cognite.neat``
+cannot run here.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_diff_validation',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

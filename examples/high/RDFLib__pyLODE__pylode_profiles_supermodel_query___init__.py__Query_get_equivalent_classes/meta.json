@@ -13,10 +13,14 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "context shim: supermodel_shim.py carries verbatim copies of ProfileHierarchyItem, Class, get_values, get_name and LODE from RDFLib/pyLODE@0d0471fb99; `import pylode` is impossible here because pylode/__init__.py pulls in the HTML profiles, which need `dominate`. The two pylode import blocks were retargeted to the shim and trimmed to the names it provides - identical on both sides.",
+    "the single translatable construct is OWL.equivalentClass -> owl:equivalentClass; everything else (a filter over a lambda, a sorted list comprehension building supermodel dataclasses) is Python and stays Python",
+    "the auto-generated draft had inserted the @prefix block INSIDE the from ... import ( parenthesised list, which does not parse; the prefixes now follow the imports and only the used one is kept",
+    "driver covers the branchy parts: an ignored IRI, a blank node filtered out by the isinstance(x, URIRef) test, and the name-based sort; plus a call with no equivalent class at all",
+    "observation: this is a graph-READ region. The notation only shortens the predicate term - ldpy has no island form for a triple pattern, so the read stays graph.objects(...)."
   ],
   "draft_sha": "57fba4637dea6302",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_equivalent_classes",
+    "diffs": [],
+    "error": null
   }
 }

@@ -2,9 +2,6 @@
 # region: Class._set_extent (lines 977-981, band medium)
 # licence of the source repository: see meta.json
 from rdflib import (
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
     BNode,
     Literal,
     Namespace,
@@ -13,6 +10,7 @@ from rdflib import (
     URIRef,
     Variable
 )
+from infixowl_shim import classOrIdentifier
 
 def _set_extent(self, other):
     if not other:

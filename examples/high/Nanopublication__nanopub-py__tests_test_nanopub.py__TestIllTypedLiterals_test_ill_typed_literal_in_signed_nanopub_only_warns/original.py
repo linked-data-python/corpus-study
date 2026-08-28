@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 import logging
 from unittest.mock import MagicMock, patch
+from nanopub_shim import _minimal_valid_nanopub  # context shim, see meta.json
 from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD
 from nanopub import (
     Nanopub,

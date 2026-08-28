@@ -1,15 +1,14 @@
-"""Validation driver for landrs-toolkit__PySOSA__PySOSA_Observation.py__Observation___init__.
+"""Validation driver for Observation.__init__.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a constructor writing into the module-level ``obsgraph``, so
+the driver compares module state: ``run_pair`` with ``entry=None`` pairs
+every rdflib Graph in the two module namespaces and compares it by
+isomorphism (the fresh ``BNode()`` per observation differs between the two
+runs, which is exactly what isomorphism absorbs).
+
+The two observations built by the demo harness at the end of both files
+exercise the blank-node identity: two distinct subjects, one shared label.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='__init__',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__)

@@ -13,10 +13,15 @@
     "graph_read": 2,
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "four namespace terms become prefixed names in place: SDO.workExample -> sdo:workExample, RDF.type -> rdf:type, SDO.TextObject -> sdo:TextObject, SDO.ImageObject -> sdo:ImageObject. Everything else (the loop, the membership tests, the sort) is Python and is untouched.",
+    "only 2 of the 14 drafted @prefix declarations were kept (rdf, sdo); the other twelve namespaces are imported by the source file but unused in the region. The rdflib.namespace import block is left exactly as upstream.",
+    "FINDING: the region is a *read* path, and that is all ldpy can do for it -- there is no island for a triple-pattern read or for the 'is this class type present' test, so 'graph.objects(iri, sdo:workExample)' is as far as the notation goes. Note also that outside g{ } there is no 'a' shorthand, so RDF.type has to be spelled rdf:type.",
+    "SIDE OBSERVATION: SDO.TextObject makes rdflib emit 'UserWarning: Code: TextObject is not defined in namespace SDO' (DefinedNamespace validation), while sdo:TextObject resolves at transpile time to the same URIRef with no warning. Same term, but the island silently loses rdflib's typo checking on closed namespaces.",
+    "context shim (identical on both sides): supermodel_shim.py, because pylode/__init__.py imports 'dominate'. It copies MediaObject/ImageObject/TextObject (model.py lines 9-42) and get_value/get_text_object/get_image_object (query/__init__.py lines 68-135, module-level siblings that the region calls by name). The 14-name model import is trimmed to the single name the region uses (MediaObject) plus the two sibling functions.",
+    "driver fixtures: a container carrying one sdo:ImageObject and one sdo:TextObject example (the shape documented in the source file's own get_images docstring), and a subject with no example at all."
   ],
   "draft_sha": "af49e4449bce5c77",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_examples",
+    "diffs": [],
+    "error": null
   }
 }

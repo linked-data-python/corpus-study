@@ -11,6 +11,7 @@ from rdflib import (
     Variable
 )
 from rdflib.term import Identifier
+from infixowl_shim import Individual, classOrIdentifier
 
 def _set_range(self, ranges):
     if not ranges:

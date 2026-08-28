@@ -13,10 +13,13 @@
     "namespace_term": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns"
+    "the single graph.add() becomes one island: OWL_NS.inverseOf -> owl:inverseOf, the two data-derived terms stay interpolations.",
+    "OWL_NS = Namespace(...) disappears from the ldpy side, replaced by @prefix owl: <http://www.w3.org/2002/07/owl#> . -- the mechanical draft's 'owl-ns' prefix was renamed to the conventional 'owl'. This is the known asymmetry: @prefix produces no runtime object, so a module that re-exported OWL_NS could not drop it; here nothing else in the region reads it.",
+    "context shim (identical on both sides): infixowl_shim.py holds classOrIdentifier copied verbatim from infixowl.py lines 237-243, with Class/Property reduced to the marker classes the isinstance test needs; original.py also gains 'from rdflib import Namespace', absent from the extracted region.",
+    "driver fixtures cover the three branches: other=Property instance, other=URIRef, other=None (early return)."
   ],
   "draft_sha": "3680aff1980ca1b5",
   "provenance": {
@@ -24,5 +27,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_set_inverseOf",
+    "diffs": [],
+    "error": null
   }
 }

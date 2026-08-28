@@ -8,3 +8,11 @@ def _make_dataset_from_trig(testsuite) -> Dataset:
     ds = Dataset()
     ds.parse(testsuite.get_valid(TestSuiteSubfolder.PLAIN)[0].path, format="trig")
     return ds
+
+# --- demo harness (added identically to both representations, see meta.json)
+from nanopub_testsuite_connector import NanopubTestSuite
+
+_demo_ds = _make_dataset_from_trig(NanopubTestSuite.get_local())
+demo_union = Graph()
+for _ctx in _demo_ds.contexts():
+    demo_union += _ctx

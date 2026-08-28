@@ -13,10 +13,15 @@
     "graph_read": 4,
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: OWL_NS->owl-ns, RDF->rdf, RDFS->rdfs"
+    "RDF.first/RDF.rest/OWL_NS.unionOf/OWL_NS.intersectionOf become rdf:first/rdf:rest/owl:unionOf/owl:intersectionOf; the region only reads the graph, so nothing else changes",
+    "the draft's 'owl-ns' prefix (mechanically derived from the OWL_NS variable name) is not usable outside islands (a hyphen is subtraction in Python); declared as owl: instead",
+    "the OWL_NS = Namespace(...) binding is dropped, absorbed by @prefix owl:. NOTE: this region's own doctest still calls namespace_manager.bind('owl', OWL_NS, ...) and the full module exports OWL_NS, so a whole-file translation would have to keep the Namespace object next to the @prefix declaration (@prefix produces no runtime object)",
+    "the graph traversal itself (subjects/transitive_subjects/objects, RDF list walking through OWLRDFListProxy) has no island form: ldpy offers no query/filter island, so 40 of the region's 45 lines are untouched Python",
+    "context shim: infixowl_ctx.py re-exports Class/Individual/OWLRDFListProxy from rdflib.extras.infixowl (upstream of the vendored copy); imported identically by both sides",
+    "demo harness added identically to both sides: the docstring's own scenario (a union class and an intersection class) is rebuilt and the pair compared on demo_graph + stdout"
   ],
   "draft_sha": "3ff53db98eb6a895",
   "provenance": {
@@ -24,5 +29,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

@@ -1,6 +1,7 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: Property._set_range (lines 2106-2115, band medium)
 # licence of the source repository: see meta.json
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 from rdflib import (
     BNode,
     Literal,
@@ -11,9 +12,7 @@ from rdflib import (
     Variable
 )
 from rdflib.term import Identifier
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+from infixowl_shim import Individual, classOrIdentifier
 
 def _set_range(self, ranges):
     if not ranges:

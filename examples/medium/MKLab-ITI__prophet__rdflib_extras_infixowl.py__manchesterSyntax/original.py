@@ -1,6 +1,7 @@
 # Extracted from MKLab-ITI/prophet@eee2ab51de : rdflib/extras/infixowl.py
 # region: manchesterSyntax (lines 254-356, band medium)
 # licence of the source repository: see meta.json
+import logging
 from rdflib import (
     BNode,
     Literal,
@@ -12,6 +13,9 @@ from rdflib import (
 )
 from rdflib.collection import Collection
 from rdflib.util import first
+# context shim (see meta.json): Class is defined further down in the enclosing
+# infixowl.py, vendored as infixowl_context.py
+from infixowl_context import Class
 logger = logging.getLogger(__name__)
 OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
 nsBinds = {

@@ -1,15 +1,14 @@
 """Validation driver for MKLab-ITI__prophet__rdflib_extras_infixowl.py__Class__get_parents.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a generator over an infixowl Class, so both sides end with an
+identical demo harness rebuilding the docstring's situation; the graph it
+builds (``demo_graph``) plus stdout is what gets compared.
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # infixowl_ctx shim
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='_get_parents',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry=None, calls=None)

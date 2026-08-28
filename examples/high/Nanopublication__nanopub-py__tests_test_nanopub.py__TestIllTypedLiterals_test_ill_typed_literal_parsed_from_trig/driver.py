@@ -1,15 +1,19 @@
-"""Validation driver for Nanopublication__nanopub-py__tests_test_nanopub.py__TestIllTypedLiterals_test_ill_typed_literal_parsed_from_trig.
+"""Validation driver for TestIllTypedLiterals.test_ill_typed_literal_parsed_from_trig.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pytest method; its ``self`` is unused, so the single
+fixture passes ``None``.  The assertion is inside the region itself: it
+requires ``MalformedNanopubError`` to be raised with "not-a-number" in the
+message, which only happens if the ill-typed literal really carries
+``xsd:integer``.  A wrong datatype (or a well-typed value) makes
+``pytest.raises`` fail, the harness catches it and the verdict is not
+equivalent -- checked by a negative control.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='test_ill_typed_literal_parsed_from_trig',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+
+def case_pytest_self():
+    return ((None,), {})
+
+
+VERDICT = run_pair(__file__, entry="test_ill_typed_literal_parsed_from_trig",
+                   calls=[case_pytest_self])

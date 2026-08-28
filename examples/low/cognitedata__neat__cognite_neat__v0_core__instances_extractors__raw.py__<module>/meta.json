@@ -13,10 +13,14 @@
     "namespace_ctor": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "the entire notation change is one token in 67 lines: 'yield identifier, RDF.type, self._rdf_type' becomes 'yield identifier, rdf:type, self._rdf_type', with @prefix rdf: declared after the imports and RDF dropped from the rdflib import (Namespace and URIRef are still used)",
+    "the other two term constructions resist the notation, and they are the interesting ones: self.namespace = namespace or Namespace(DEFAULT_RAW_URI) is a runtime-configurable namespace (a constructor parameter, defaulting to a constant imported from another module), and self.namespace[urllib.parse.quote(key)] indexes it with a percent-encoded RAW row key. Neither can be a prefixed name - @prefix produces no runtime object and a local part cannot be computed - so an extractor that mints IRIs from data keeps its Namespace object",
+    "this matches the region's 'low' band (namespace_ctor + namespace_term): data-driven extractors are where the island notation has least to say",
+    "context shim: neat_ctx.py supplies the eight names the module imports (Triple, DEFAULT_RAW_URI, DEFAULT_EMPTY_VALUES/DictExtractor and string_to_ideal_type copied from the corpus checkout; BaseExtractor reduced to the abstract extract; Row/RowList/SequenceNotStr/NeatClient as stand-ins for the Cognite SDK, replaying a canned client.raw.rows result). The two package-relative imports (._base, ._dict) are redirected to it, as are the four absolute cognite imports; identical on both sides",
+    "demo harness added identically to both sides: importing the module is observably empty, so the extractor is run over a canned RAW table (a plain Row and a RowList, i.e. both branches of extract(), with a foreign key, a nested json value and a list value) and the pair is compared on demo_graph + stdout"
   ],
   "draft_sha": "53679abe552a3368",
   "provenance": {
@@ -24,5 +28,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
   }
 }

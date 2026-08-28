@@ -14,10 +14,17 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "directly-expressible",
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, DCTERMS->dcterms, PROV->prov, XSD->xsd"
+    "DCTERMS.created becomes dcterms:created and Literal(\"yesterday\", datatype=XSD.dateTime) becomes the literal island \"yesterday\"^^xsd:dateTime; the ill-typed literal the test is about is written exactly as it would be in Turtle, which is the clearest win of this region",
+    "the graph.add((s, p, o)) call is KEPT as-is rather than turned into 'np.pubinfo += g{ ... }': Nanopub.pubinfo is a read-only property (verified: 'property pubinfo of Nanopub object has no setter'), so the g{}/+= idiom recommended for runs of adds is unavailable whenever the target graph is exposed through a getter - a real limitation of the += form, not of the island itself",
+    "the subject np._metadata.namespace[\"\"] stays a Python expression (a runtime Namespace indexed with the empty local name, which no prefixed name can denote)",
+    "'from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV, XSD' is dropped in the ldpy version: after the two term constructors become islands, nothing in the region uses it (in the full test module it is of course still needed)",
+    "the draft's dc/rdf/prov prefixes are unused by this region and are not declared",
+    "context shim: nanopub_ctx.py holds _minimal_valid_nanopub, copied verbatim from the source test module (tests/test_nanopub.py lines 763-773); imported identically by both sides",
+    "the nanopub package is not installed in the eval venv, so the driver puts the corpus checkout on sys.path (it imports as-is)",
+    "the region is a pytest method that never uses self, so the driver calls it with self=None; the test is self-validating (its assertions read back the literal it just added), so an incorrect term on either side would surface as an AssertionError"
   ],
   "draft_sha": "32e3825f341c237a",
   "provenance": {
@@ -25,5 +32,11 @@
     "pipeline_revision": "696b121e93ebaf942f72854a13f15acd836b32ac",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_ill_typed_literal_in_pubinfo",
+    "diffs": [],
+    "error": null
   }
 }
