@@ -1,12 +1,36 @@
 {
   "provenance": {
-    "generated_at": "2026-08-28T07:38:14.197668+00:00",
-    "pipeline_revision": "3138cc418f03c7651f3e29258728c32eb7267d09",
+    "generated_at": "2026-08-28T08:40:07.977015+00:00",
+    "pipeline_revision": "5db2c5614bd418cb5529daefbbc6df7b0e5db855",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
   },
-  "files_analysed": 994,
+  "files_analysed": 5190,
   "excluded_repositories": {
+    "BaratiLab/AugLiChem": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "BrickSchema/py-brickschema": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 19
+    },
+    "ChrisDelClea/streamlit-agraph": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "Coleridge-Data-For-Impact/adrf-onto": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000)",
+      "rdf_files_skipped": 1
+    },
+    "DerwenAI/kuzu-rdflib": {
+      "reason": "does not satisfy the selection criteria (size<50kb)",
+      "rdf_files_skipped": 2
+    },
+    "Ebiquity/crystalia-collector": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 7
+    },
     "FacultadInformatica-LinkedData/Curso2021-2022": {
       "reason": "course repository: per-student copies of the same assignment",
       "rdf_files_skipped": 65
@@ -27,510 +51,872 @@
       "reason": "course repository, and a near-duplicate of Curso2025-2026",
       "rdf_files_skipped": 178
     },
+    "G-Node/python-odml": {
+      "reason": "does not satisfy the selection criteria (licence=BSD-4-Clause)",
+      "rdf_files_skipped": 8
+    },
+    "HDFGroup/h5ld": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000, commits<10, size<50kb, licence=NOASSERTION)",
+      "rdf_files_skipped": 1
+    },
+    "JoelBender/BACpypes3": {
+      "reason": "does not satisfy the selection criteria (licence=none)",
+      "rdf_files_skipped": 6
+    },
+    "MKLab-ITI/prophet": {
+      "reason": "does not satisfy the selection criteria (inactive_since<2020-01-01)",
+      "rdf_files_skipped": 0
+    },
+    "NatLabRockies/BuildingMOTIF": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 38
+    },
+    "NatLibFi/Annif": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 4
+    },
+    "RDFLib/OWL-RL": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 21
+    },
+    "RDFLib/rdflib-rdfstar": {
+      "reason": "does not satisfy the selection criteria (library_itself)",
+      "rdf_files_skipped": 179
+    },
+    "RDFLib/sparqlwrapper": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 5
+    },
+    "SteveBlackbeard/CHRONOLITH-by-Ethernium": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "ThomazRossito/data-agents": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "aevum-labs/aevum": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "ag-sc/lemon.dbpedia": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000, inactive_since<2020-01-01, licence=none)",
+      "rdf_files_skipped": 0
+    },
     "alcides/rdflib": {
       "reason": "a fork of RDFLib itself: its use of RDFLib is the implementation of the library, not application code written against it",
       "rdf_files_skipped": 64
+    },
+    "aperture-data/aperturedb-python": {
+      "reason": "does not satisfy the selection criteria (licence=NOASSERTION)",
+      "rdf_files_skipped": 1
+    },
+    "bbartling/py-bacnet-stacks-playground": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "biopragmatics/bioregistry": {
+      "reason": "does not satisfy the selection criteria (size>200000kb)",
+      "rdf_files_skipped": 11
+    },
+    "cc-archive/rdfadict": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "cdisc-org/COSMoS": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "clld/clldutils": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "cnschema/kgtool": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "cottas-rdf/pycottas": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "daniakalomiris/university-chatbot": {
+      "reason": "does not satisfy the selection criteria (licence=none)",
+      "rdf_files_skipped": 3
+    },
+    "dbpedia-spotlight/dbpedia-spotlight-model": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "dbpedia/list-extractor": {
+      "reason": "does not satisfy the selection criteria (inactive_since<2020-01-01)",
+      "rdf_files_skipped": 0
+    },
+    "diging/tethne": {
+      "reason": "does not satisfy the selection criteria (size>200000kb)",
+      "rdf_files_skipped": 2
+    },
+    "djwei96/MPSUM": {
+      "reason": "does not satisfy the selection criteria (licence=none)",
+      "rdf_files_skipped": 2
+    },
+    "drobilla/ingen": {
+      "reason": "pruned after analysis (python_files=1<2)",
+      "rdf_files_skipped": 1
+    },
+    "edsu/dewey-crawler": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000, inactive_since<2020-01-01, licence=none)",
+      "rdf_files_skipped": 1
+    },
+    "edsu/lcco": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000, commits<10, inactive_since<2020-01-01, licence=none)",
+      "rdf_files_skipped": 0
+    },
+    "geopython/pygeoapi": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "gnames/gnverifier": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000)",
+      "rdf_files_skipped": 0
+    },
+    "jakobhviid/ServiceAbstractionLayer": {
+      "reason": "pruned after analysis (python_files=1<2)",
+      "rdf_files_skipped": 1
+    },
+    "jjon/HARE": {
+      "reason": "does not satisfy the selection criteria (inactive_since<2020-01-01, licence=none)",
+      "rdf_files_skipped": 3
+    },
+    "julianrojas87/velopark-dump": {
+      "reason": "pruned after analysis (python_files=1<2)",
+      "rdf_files_skipped": 1
+    },
+    "lawlesst/vivo-rdflib-sparqlstore": {
+      "reason": "does not satisfy the selection criteria (size<50kb, inactive_since<2020-01-01)",
+      "rdf_files_skipped": 4
+    },
+    "maparent/virtuoso-python": {
+      "reason": "does not satisfy the selection criteria (inactive_since<2020-01-01)",
+      "rdf_files_skipped": 4
+    },
+    "mhausenblas/omnidator": {
+      "reason": "does not satisfy the selection criteria (inactive_since<2020-01-01, licence=none)",
+      "rdf_files_skipped": 16
+    },
+    "michaelbrunnbauer/rdf2rdb": {
+      "reason": "does not satisfy the selection criteria (commits<10, size<50kb, inactive_since<2020-01-01)",
+      "rdf_files_skipped": 0
+    },
+    "midi-ld/midi2rdf": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "nareike/adhs": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000, size<50kb, inactive_since<2020-01-01)",
+      "rdf_files_skipped": 1
+    },
+    "nathyBekele/redash-chatbot-add-on": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "nfdi-de/chem-dcat-ap": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "niccoloridi/cjeu-py": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "nikita-moor/etymological-dictionary": {
+      "reason": "does not satisfy the selection criteria (python_bytes<10000, commits<10)",
+      "rdf_files_skipped": 2
+    },
+    "okfn/pdcalc": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "openphacts/ops-search": {
+      "reason": "does not satisfy the selection criteria (inactive_since<2020-01-01)",
+      "rdf_files_skipped": 2
+    },
+    "ozekik/lightrdf": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "pebbie/sparqlgpviz": {
+      "reason": "pruned after analysis (python_files=1<2)",
+      "rdf_files_skipped": 1
+    },
+    "prrvchr/mContactOOo": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "prrvchr/uno": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "stain/signposting": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "tetherless-world/chear-ontology": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "tharunkumars-workspace/AI-Powered-Code-Reviewer-and-Quality-Assistant-": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "thorwhalen/creel": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "yWorks/yfiles-jupyter-graphs-for-sparql": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
+    },
+    "zincware/ZnTrack": {
+      "reason": "pruned after analysis (rdf_files=0<1)",
+      "rdf_files_skipped": 0
     }
   },
   "totals": {
-    "add_in_loop": 436,
-    "add_in_run": 693,
-    "add_isolated": 406,
-    "add_long_receiver": 760,
-    "add_receiver_chars": 6742,
-    "add_run_lines": 1466,
-    "add_run_shared_subject_triples": 183,
-    "add_terms_all_static": 195,
-    "add_terms_computed": 904,
-    "add_triples": 1099,
-    "bind_initbindings": 10,
-    "bind_initns": 30,
-    "bind_term_interpolated": 28,
-    "file_single_graph": 487,
-    "func_single_graph": 630,
-    "func_with_graph_ops": 776,
-    "graph_ctor": 1337,
-    "graph_ctor_dataset": 63,
-    "graph_named_access": 46,
-    "graph_named_identifier": 43,
-    "graphs_distinct": 954,
-    "ns_def_class": 16,
-    "ns_def_computed_iri": 100,
-    "ns_def_local": 189,
-    "ns_def_module": 303,
-    "ns_def_total": 492,
-    "ns_defined_here": 455,
-    "ns_imported_from_project": 291,
-    "ns_imported_relative": 83,
-    "ns_term_subscript": 683,
-    "sparql_assigned": 46,
-    "sparql_consumed_builtin": 24,
-    "sparql_consumed_comprehension": 8,
-    "sparql_consumed_for": 45,
-    "sparql_interpolated": 18,
-    "sparql_prepare": 34,
-    "sparql_queries_distinct": 80,
-    "sparql_query": 141,
-    "sparql_query_calls_literal": 109,
-    "sparql_query_lines": 620,
-    "sparql_update": 6,
-    "trav_calls": 835,
-    "trav_navigation_depth_1": 65,
-    "trav_navigation_depth_2": 18,
-    "trav_navigation_depth_3": 3,
-    "trav_navigation_depth_4": 2,
-    "trav_navigation_loop": 88,
-    "trav_other_read": 10,
-    "trav_single_value": 17,
-    "trav_term_selector": 614,
-    "trav_tuple_selector": 221
+    "add_in_loop": 6038,
+    "add_in_run": 8627,
+    "add_isolated": 5053,
+    "add_long_receiver": 5415,
+    "add_receiver_chars": 54625,
+    "add_run_lines": 18389,
+    "add_run_shared_subject_triples": 4224,
+    "add_terms_all_static": 1292,
+    "add_terms_computed": 12388,
+    "add_triples": 13680,
+    "bind_initbindings": 123,
+    "bind_initns": 210,
+    "bind_term_interpolated": 238,
+    "file_single_graph": 2466,
+    "func_single_graph": 3626,
+    "func_with_graph_ops": 4113,
+    "graph_ctor": 7850,
+    "graph_ctor_dataset": 533,
+    "graph_named_access": 370,
+    "graph_named_identifier": 198,
+    "graphs_distinct": 5265,
+    "ns_def_class": 116,
+    "ns_def_computed_iri": 560,
+    "ns_def_local": 1061,
+    "ns_def_module": 2611,
+    "ns_def_total": 3672,
+    "ns_defined_here": 3376,
+    "ns_imported_from_project": 1271,
+    "ns_imported_relative": 242,
+    "ns_term_subscript": 4334,
+    "sparql_assigned": 578,
+    "sparql_consumed_builtin": 158,
+    "sparql_consumed_comprehension": 99,
+    "sparql_consumed_for": 228,
+    "sparql_interpolated": 140,
+    "sparql_prepare": 263,
+    "sparql_queries_distinct": 613,
+    "sparql_query": 1177,
+    "sparql_query_calls_literal": 884,
+    "sparql_query_lines": 4953,
+    "sparql_update": 83,
+    "trav_calls": 7870,
+    "trav_navigation_depth_1": 819,
+    "trav_navigation_depth_2": 141,
+    "trav_navigation_depth_3": 50,
+    "trav_navigation_depth_4": 29,
+    "trav_navigation_loop": 1039,
+    "trav_other_read": 51,
+    "trav_single_value": 412,
+    "trav_term_selector": 6139,
+    "trav_tuple_selector": 1731
   },
   "files_with": {
-    "add_in_loop": 48,
-    "add_in_run": 63,
-    "add_isolated": 68,
-    "add_long_receiver": 68,
-    "add_receiver_chars": 98,
-    "add_run_lines": 98,
-    "add_run_shared_subject_triples": 37,
-    "add_terms_all_static": 15,
-    "add_terms_computed": 92,
-    "add_triples": 98,
-    "bind_initbindings": 7,
-    "bind_initns": 9,
-    "bind_term_interpolated": 16,
-    "file_single_graph": 487,
-    "func_single_graph": 525,
-    "func_with_graph_ops": 642,
-    "graph_ctor": 690,
-    "graph_ctor_dataset": 27,
-    "graph_named_access": 13,
-    "graph_named_identifier": 21,
-    "graphs_distinct": 674,
-    "ns_def_class": 15,
-    "ns_def_computed_iri": 34,
-    "ns_def_local": 81,
-    "ns_def_module": 104,
-    "ns_def_total": 174,
-    "ns_defined_here": 167,
-    "ns_imported_from_project": 121,
-    "ns_imported_relative": 23,
-    "ns_term_subscript": 90,
-    "sparql_assigned": 15,
-    "sparql_consumed_builtin": 10,
-    "sparql_consumed_comprehension": 4,
-    "sparql_consumed_for": 14,
-    "sparql_interpolated": 10,
-    "sparql_prepare": 11,
-    "sparql_queries_distinct": 32,
-    "sparql_query": 40,
-    "sparql_query_calls_literal": 32,
-    "sparql_query_lines": 32,
-    "sparql_update": 4,
-    "trav_calls": 108,
-    "trav_navigation_depth_1": 18,
-    "trav_navigation_depth_2": 6,
-    "trav_navigation_depth_3": 2,
-    "trav_navigation_depth_4": 1,
-    "trav_navigation_loop": 18,
-    "trav_other_read": 6,
-    "trav_single_value": 9,
-    "trav_term_selector": 83,
-    "trav_tuple_selector": 60
+    "add_in_loop": 627,
+    "add_in_run": 597,
+    "add_isolated": 880,
+    "add_long_receiver": 563,
+    "add_receiver_chars": 1049,
+    "add_run_lines": 1049,
+    "add_run_shared_subject_triples": 431,
+    "add_terms_all_static": 140,
+    "add_terms_computed": 978,
+    "add_triples": 1049,
+    "bind_initbindings": 57,
+    "bind_initns": 65,
+    "bind_term_interpolated": 87,
+    "file_single_graph": 2466,
+    "func_single_graph": 2877,
+    "func_with_graph_ops": 3128,
+    "graph_ctor": 3351,
+    "graph_ctor_dataset": 225,
+    "graph_named_access": 93,
+    "graph_named_identifier": 129,
+    "graphs_distinct": 3377,
+    "ns_def_class": 98,
+    "ns_def_computed_iri": 251,
+    "ns_def_local": 455,
+    "ns_def_module": 791,
+    "ns_def_total": 1196,
+    "ns_defined_here": 1130,
+    "ns_imported_from_project": 563,
+    "ns_imported_relative": 108,
+    "ns_term_subscript": 491,
+    "sparql_assigned": 232,
+    "sparql_consumed_builtin": 60,
+    "sparql_consumed_comprehension": 42,
+    "sparql_consumed_for": 78,
+    "sparql_interpolated": 62,
+    "sparql_prepare": 118,
+    "sparql_queries_distinct": 259,
+    "sparql_query": 400,
+    "sparql_query_calls_literal": 259,
+    "sparql_query_lines": 259,
+    "sparql_update": 42,
+    "trav_calls": 1033,
+    "trav_navigation_depth_1": 241,
+    "trav_navigation_depth_2": 50,
+    "trav_navigation_depth_3": 12,
+    "trav_navigation_depth_4": 7,
+    "trav_navigation_loop": 242,
+    "trav_other_read": 24,
+    "trav_single_value": 125,
+    "trav_term_selector": 831,
+    "trav_tuple_selector": 503
   },
   "repos_with": {
-    "add_in_loop": 24,
-    "add_in_run": 24,
-    "add_isolated": 28,
-    "add_long_receiver": 25,
-    "add_receiver_chars": 30,
-    "add_run_lines": 30,
-    "add_run_shared_subject_triples": 17,
-    "add_terms_all_static": 9,
-    "add_terms_computed": 29,
-    "add_triples": 30,
-    "bind_initbindings": 5,
-    "bind_initns": 7,
-    "bind_term_interpolated": 8,
-    "file_single_graph": 44,
-    "func_single_graph": 40,
-    "func_with_graph_ops": 40,
-    "graph_ctor": 46,
-    "graph_ctor_dataset": 11,
-    "graph_named_access": 7,
-    "graph_named_identifier": 12,
-    "graphs_distinct": 46,
-    "ns_def_class": 3,
-    "ns_def_computed_iri": 14,
-    "ns_def_local": 20,
-    "ns_def_module": 24,
-    "ns_def_total": 30,
-    "ns_defined_here": 29,
-    "ns_imported_from_project": 12,
-    "ns_imported_relative": 7,
-    "ns_term_subscript": 20,
-    "sparql_assigned": 10,
-    "sparql_consumed_builtin": 6,
-    "sparql_consumed_comprehension": 4,
-    "sparql_consumed_for": 8,
-    "sparql_interpolated": 5,
-    "sparql_prepare": 8,
-    "sparql_queries_distinct": 18,
-    "sparql_query": 21,
-    "sparql_query_calls_literal": 18,
-    "sparql_query_lines": 18,
-    "sparql_update": 4,
-    "trav_calls": 29,
-    "trav_navigation_depth_1": 11,
-    "trav_navigation_depth_2": 5,
-    "trav_navigation_depth_3": 2,
-    "trav_navigation_depth_4": 1,
-    "trav_navigation_loop": 11,
-    "trav_other_read": 5,
-    "trav_single_value": 5,
-    "trav_term_selector": 27,
-    "trav_tuple_selector": 21
+    "add_in_loop": 208,
+    "add_in_run": 186,
+    "add_isolated": 220,
+    "add_long_receiver": 163,
+    "add_receiver_chars": 233,
+    "add_run_lines": 233,
+    "add_run_shared_subject_triples": 154,
+    "add_terms_all_static": 56,
+    "add_terms_computed": 230,
+    "add_triples": 233,
+    "bind_initbindings": 39,
+    "bind_initns": 32,
+    "bind_term_interpolated": 50,
+    "file_single_graph": 332,
+    "func_single_graph": 346,
+    "func_with_graph_ops": 348,
+    "graph_ctor": 367,
+    "graph_ctor_dataset": 69,
+    "graph_named_access": 36,
+    "graph_named_identifier": 40,
+    "graphs_distinct": 358,
+    "ns_def_class": 20,
+    "ns_def_computed_iri": 94,
+    "ns_def_local": 156,
+    "ns_def_module": 181,
+    "ns_def_total": 252,
+    "ns_defined_here": 242,
+    "ns_imported_from_project": 65,
+    "ns_imported_relative": 19,
+    "ns_term_subscript": 130,
+    "sparql_assigned": 107,
+    "sparql_consumed_builtin": 25,
+    "sparql_consumed_comprehension": 20,
+    "sparql_consumed_for": 41,
+    "sparql_interpolated": 21,
+    "sparql_prepare": 47,
+    "sparql_queries_distinct": 99,
+    "sparql_query": 146,
+    "sparql_query_calls_literal": 99,
+    "sparql_query_lines": 99,
+    "sparql_update": 28,
+    "trav_calls": 214,
+    "trav_navigation_depth_1": 99,
+    "trav_navigation_depth_2": 37,
+    "trav_navigation_depth_3": 12,
+    "trav_navigation_depth_4": 7,
+    "trav_navigation_loop": 99,
+    "trav_other_read": 15,
+    "trav_single_value": 37,
+    "trav_term_selector": 186,
+    "trav_tuple_selector": 155
   },
   "concentration": {
     "add_triples": {
-      "total": 1099,
-      "repos": 30,
-      "top_repo_share": 0.193,
-      "median_per_repo": 17
+      "total": 13680,
+      "repos": 233,
+      "top_repo_share": 0.108,
+      "median_per_repo": 22
     },
     "add_isolated": {
-      "total": 406,
-      "repos": 28,
-      "top_repo_share": 0.207,
-      "median_per_repo": 5
-    },
-    "trav_calls": {
-      "total": 835,
-      "repos": 29,
-      "top_repo_share": 0.22,
+      "total": 5053,
+      "repos": 220,
+      "top_repo_share": 0.097,
       "median_per_repo": 10
     },
+    "trav_calls": {
+      "total": 7870,
+      "repos": 214,
+      "top_repo_share": 0.183,
+      "median_per_repo": 11
+    },
     "sparql_query": {
-      "total": 141,
-      "repos": 21,
-      "top_repo_share": 0.191,
+      "total": 1177,
+      "repos": 146,
+      "top_repo_share": 0.083,
       "median_per_repo": 3
     },
     "ns_def_module": {
-      "total": 303,
-      "repos": 24,
-      "top_repo_share": 0.195,
+      "total": 2611,
+      "repos": 181,
+      "top_repo_share": 0.166,
       "median_per_repo": 5
     },
     "ns_imported_from_project": {
-      "total": 291,
-      "repos": 12,
-      "top_repo_share": 0.378,
-      "median_per_repo": 11
+      "total": 1271,
+      "repos": 65,
+      "top_repo_share": 0.133,
+      "median_per_repo": 7
     },
     "bind_initbindings": {
-      "total": 10,
-      "repos": 5,
-      "top_repo_share": 0.4,
+      "total": 123,
+      "repos": 39,
+      "top_repo_share": 0.171,
       "median_per_repo": 1
     },
     "add_terms_all_static": {
-      "total": 195,
-      "repos": 9,
-      "top_repo_share": 0.318,
-      "median_per_repo": 16
+      "total": 1292,
+      "repos": 56,
+      "top_repo_share": 0.267,
+      "median_per_repo": 5
     },
     "trav_navigation_loop": {
-      "total": 88,
-      "repos": 11,
-      "top_repo_share": 0.295,
-      "median_per_repo": 3
+      "total": 1039,
+      "repos": 99,
+      "top_repo_share": 0.097,
+      "median_per_repo": 5
     }
   },
   "ratios": {
     "adds_isolated": {
       "pooled": 0.369,
-      "median_per_repo": 0.302,
-      "repos_counted": 19
+      "median_per_repo": 0.4,
+      "repos_counted": 168
     },
     "adds_static_terms": {
-      "pooled": 0.177,
+      "pooled": 0.094,
       "median_per_repo": 0.0,
-      "repos_counted": 19
+      "repos_counted": 168
     },
     "adds_in_loop": {
-      "pooled": 0.397,
-      "median_per_repo": 0.244,
-      "repos_counted": 19
+      "pooled": 0.441,
+      "median_per_repo": 0.385,
+      "repos_counted": 168
     },
     "adds_shared_subject": {
-      "pooled": 0.167,
-      "median_per_repo": 0.125,
-      "repos_counted": 19
+      "pooled": 0.309,
+      "median_per_repo": 0.246,
+      "repos_counted": 168
     },
     "traversal_navigation": {
-      "pooled": 0.105,
-      "median_per_repo": 0.0,
-      "repos_counted": 15
+      "pooled": 0.132,
+      "median_per_repo": 0.1,
+      "repos_counted": 119
     },
     "queries_literal": {
-      "pooled": 0.602,
-      "median_per_repo": 0.833,
-      "repos_counted": 9
+      "pooled": 0.58,
+      "median_per_repo": 0.714,
+      "repos_counted": 65
     }
   },
   "selectors": {
-    "objects": 308,
-    "value": 144,
-    "subjects": 144,
-    "triples": 117,
-    "subject_objects": 51,
-    "predicate_objects": 21,
-    "quads": 16,
-    "items": 10,
-    "predicates": 9,
-    "transitive_objects": 5,
-    "transitive_subjects": 4,
-    "subject_predicates": 4,
-    "triples_choices": 2
+    "objects": 2720,
+    "value": 1840,
+    "subjects": 1526,
+    "triples": 1251,
+    "subject_objects": 216,
+    "predicate_objects": 121,
+    "items": 53,
+    "quads": 48,
+    "predicates": 35,
+    "triples_choices": 23,
+    "subject_predicates": 19,
+    "transitive_subjects": 11,
+    "transitive_objects": 7
   },
   "selector_contexts": {
-    "for": 293,
-    "list": 198,
-    "assign": 120,
-    "other": 102,
-    "comprehension": 55,
-    "set": 29,
-    "next": 17,
-    "test": 10,
-    "iter": 7,
-    "return": 3,
+    "for": 2185,
+    "list": 1275,
+    "other": 1121,
+    "comprehension": 1054,
+    "assign": 890,
+    "set": 576,
+    "next": 412,
+    "test": 156,
+    "any": 105,
+    "iter": 53,
+    "sorted": 23,
+    "return": 17,
+    "min": 2,
     "tuple": 1
   },
   "query_forms": {
-    "select": 104,
-    "non_literal": 72,
-    "ask": 3,
-    "construct": 1,
-    "delete": 1
+    "select": 767,
+    "non_literal": 638,
+    "ask": 37,
+    "other": 37,
+    "insert": 25,
+    "construct": 9,
+    "delete": 8,
+    "drop": 1
   },
   "query_text_forms": {
-    "literal": 65,
-    "literal_via_name": 44,
-    "variable": 44,
-    "other": 10,
-    "fstring": 8,
-    "percent": 6,
-    "format": 4
+    "literal_via_name": 549,
+    "variable": 457,
+    "literal": 335,
+    "fstring": 68,
+    "concat": 45,
+    "other": 39,
+    "percent": 21,
+    "format": 6,
+    "external": 2
   },
   "add_runs": {
-    "1": 406,
-    "2": 73,
-    "3": 41,
-    "4": 20,
-    "5": 20,
-    "6": 10,
-    "7": 1,
-    "8": 3,
-    "9": 1,
-    "10": 2,
-    "13": 1,
-    "14": 1,
-    "16": 1,
-    "19": 1,
-    "62": 1
+    "1": 5053,
+    "2": 886,
+    "3": 509,
+    "4": 373,
+    "5": 211,
+    "6": 123,
+    "7": 76,
+    "8": 61,
+    "9": 28,
+    "10": 22,
+    "11": 6,
+    "12": 4,
+    "13": 4,
+    "14": 7,
+    "15": 2,
+    "16": 4,
+    "17": 1,
+    "19": 2,
+    "21": 2,
+    "23": 2,
+    "24": 1,
+    "26": 1
   },
   "add_runs_same_subject": {
-    "1": 406,
-    "2": 29,
-    "3": 21,
-    "4": 9,
-    "5": 4,
-    "6": 1
+    "1": 5053,
+    "2": 542,
+    "3": 258,
+    "4": 201,
+    "5": 100,
+    "6": 60,
+    "7": 20,
+    "8": 43,
+    "9": 12,
+    "10": 5,
+    "11": 3,
+    "13": 1,
+    "14": 1
   },
   "namespace_iris": {
-    "distinct_iris": 173,
-    "iri_repo_pairs_declared_in_several_files": 62,
-    "distinct_files_involved": 81,
-    "iris_shared_across_repos": 33
+    "distinct_iris": 771,
+    "iri_repo_pairs_declared_in_several_files": 431,
+    "distinct_files_involved": 667,
+    "iris_shared_across_repos": 152
   },
   "top_namespaces_used": {
-    "RDF": 1384,
-    "RDFS": 931,
-    "OWL": 867,
-    "XSD": 708,
-    "SH": 409,
-    "BLDG": 246,
-    "EX": 222,
-    "OWL_NS": 154,
-    "ex": 154,
-    "DCTERMS": 126,
-    "TST": 104,
-    "SKOS": 76,
-    "SDO": 72,
-    "BRICK": 38,
-    "SEMSCI": 38,
-    "FOAF": 31,
-    "MODEL": 31,
-    "OBO": 30,
-    "BACNET": 28,
-    "VOID": 27,
-    "APT": 26,
-    "_ns": 26,
-    "RELS": 25,
-    "PROV": 24,
-    "ns_rdf": 23
+    "RDF": 8905,
+    "EX": 4430,
+    "OWL": 4180,
+    "RDFS": 4140,
+    "XSD": 3103,
+    "SKOS": 2157,
+    "SEM": 1920,
+    "SH": 1787,
+    "DCTERMS": 1686,
+    "PROV": 727,
+    "self.shaclNS": 727,
+    "ex": 601,
+    "DCAT": 446,
+    "CIM": 421,
+    "FOAF": 355,
+    "ECO": 316,
+    "OWL_NS": 309,
+    "IPO": 301,
+    "SP": 288,
+    "nnet": 288,
+    "SDO": 257,
+    "DC": 238,
+    "SCHEMA": 221,
+    "TEST": 217,
+    "TIME": 216
   },
   "examples": {
-    "bind_term_interpolated": [
-      {
-        "kind": "bind_term_interpolated",
-        "line": 2151,
-        "snippet": "                    _n = URIRef(f\"{RDF}_{i}\")",
-        "path": "ArangoDB-Community/ArangoRDF/arango_rdf/main.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 2335,
-        "snippet": "    assert (bnode, URIRef(f\"{RDF}_1\"), Literal(\"one\")) in rdf_graph_3",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 2336,
-        "snippet": "    assert (bnode, URIRef(f\"{RDF}_2\"), Literal(\"two\")) in rdf_graph_3",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 2337,
-        "snippet": "    assert (bnode, URIRef(f\"{RDF}_3\"), Literal(\"three\")) in rdf_graph_3",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 3593,
-        "snippet": "    assert (bnode, URIRef(f\"{RDF}_1\"), None) in rdf_graph_4",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 481,
-        "snippet": "                    f\"\"\"SELECT ?x {{ ?p sh:property ?p .\n                        ?p sh:path {prop_name.n3()} .\n                        FILTER NOT EXISTS {{ ?p sh:minCount ?mc }}\n                        FILTER NOT EXISTS {{ ?p sh:maxCount ?mc }}\n                    }}\"\"\"  # noqa",
-        "path": "BrickSchema/Brick/generate_brick.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 43,
-        "snippet": "        query = f\"SELECT ?tag WHERE {{ <{entity}> <{ALIGN.hasVBISTag}> ?tag }}\"",
-        "path": "BrickSchema/py-brickschema/tests/test_vbis.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 137,
-        "snippet": "            print(f\"\\033[1m⚠️  Ill-typed literal\\033[0m {literal.n3()} in graph {graph}: \"\n                  \"strict RDF stores may be missing this nanopub\")",
-        "path": "Nanopublication/nanopub-py/nanopub/__main__.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 702,
-        "snippet": "            details = \", \".join(f\"{o.n3()} in graph {c}\" for o, c in ill_typed)",
-        "path": "Nanopublication/nanopub-py/nanopub/nanopub.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 37,
-        "snippet": "        pubinfo_uri = URIRef(f\"{dummy_namespace}pubinfo\")",
-        "path": "Nanopublication/nanopub-py/tests/test_sign_utils.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 286,
-        "snippet": "            f\"\"\"\n            PREFIX sh: <http://www.w3.org/ns/shacl#>\n            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n            SELECT ?shape WHERE {{\n            ?shape a sh:NodeShape .\n            {rdf_type.n3()} rdfs:subClassOf* ?class .\n            {{ ?shape sh:targetClass ?class }}\n            UNION\n            {{ ?shape sh:class ?class }}\n        }}\"\"\"",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      },
-      {
-        "kind": "bind_term_interpolated",
-        "line": 343,
-        "snippet": "        f\"{root_var} rdf:type/rdfs:subClassOf* {tc.n3()} .\\n\" for tc in targetClasses  # type: ignore",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      }
-    ],
     "trav_for": [
       {
         "kind": "trav_for",
-        "line": 3296,
-        "snippet": "            for col in self.__adb_col_statements.objects(\n                subject=None, predicate=self.adb_col_uri, unique=True\n            ):\n                all_v_cols.add(str(col))",
-        "path": "ArangoDB-Community/ArangoRDF/arango_rdf/main.py"
+        "line": 401,
+        "snippet": "\tfor s, p, o in g.triples((URIRef('http://example.com/Student10'), FOAF.name, Literal('Venus Williams'))):\n\t\ti += 1\n\t\tprint(f\"{s} is the subject\")\n\t\tprint(f\"{p} is a predicate\")\n\t\tprint(f\"{o} is an object\")\n\t\ts",
+        "path": "AAtley/triplify_csv/tests/test_triplify_csv.py"
       },
       {
         "kind": "trav_for",
-        "line": 4189,
-        "snippet": "            for t in rdf_graph.triples(triple):\n                extract_graph.add(t)",
-        "path": "ArangoDB-Community/ArangoRDF/arango_rdf/main.py"
+        "line": 517,
+        "snippet": "\t\tfor s, p, o, c in g.quads((None, None, None, None)):\n\t\t\ti += 1\n\t\t\tprint(f\"{s} is the subject\")\n\t\t\tprint(f\"{p} is a predicate\")\n\t\t\tprint(f\"{o} is an object\")\n\t\t\tprint(f\"{c} is the graph\")",
+        "path": "AAtley/triplify_csv/tests/test_triplify_csv.py"
       },
       {
         "kind": "trav_for",
-        "line": 144,
-        "snippet": "    for s, p, o in rdf_graph.triples((None, None, None)):\n        if isinstance(s, URIRef):\n            unique_uris.add(s)\n\n        if include_predicates and isinstance(p, URIRef):\n            if p != adbrdf.adb_col_uri:\n                unique_uris.add(p)\n\n        if isinstance(o, URIRef):\n            unique_uris.add(o)",
-        "path": "ArangoDB-Community/ArangoRDF/tests/conftest.py"
+        "line": 527,
+        "snippet": "\t\tfor s, p, o, c in g.quads((None, FOAF.name, Literal('Venus'), URIRef('http://example.com/PersonGraph'))):\n\t\t\ti += 1\n\t\t\tprint(f\"{o} is the name\")\n\t\t\tprint(f\"{c} is the graph\")\n\t\t\tassert str(c) == 'http://example.com/PersonGraph'",
+        "path": "AAtley/triplify_csv/tests/test_triplify_csv.py"
       },
       {
         "kind": "trav_for",
-        "line": 160,
-        "snippet": "    for s, p, o in rdf_graph.triples((None, None, None)):\n        if isinstance(s, BNode):\n            unique_bnodes.add(s)\n        if include_predicates and isinstance(p, BNode):\n            unique_bnodes.add(p)\n        if isinstance(o, BNode):\n            unique_bnodes.add(o)",
-        "path": "ArangoDB-Community/ArangoRDF/tests/conftest.py"
+        "line": 546,
+        "snippet": "\t\tfor s, p, o  in g.triples((None, None, None)):\n\t\t\ti += 1\n\t\t\tprint(f\"{s} is the subject\")\n\t\t\tprint(f\"{p} is a predicate\")\n\t\t\tprint(f\"{o} is an object\")",
+        "path": "AAtley/triplify_csv/tests/test_triplify_csv.py"
+      },
+      {
+        "kind": "trav_for",
+        "line": 166,
+        "snippet": "\t\tfor tm, p, o in self.g.triples((None, RDF.type, URIRef(rr('TriplesMap')))):\n\t\t\ttmaps[str(tm)] = {\n\t\t\t\t'poms' : [],\n\t\t\t\trr('logicalTable') : {},\n\t\t\t\trr('subjectMap') : {}\n\t\t\t\t}\n\t\t\t# for each predicateObjectMap find its bnode obj\n\t\t\tfor tmap, p, bn in self.g.triples((tm, URIRef(rr('predicateObjectMap')), None)):\n\t\t\t\tpom = {}\n\t\t\t\t# for each pom's bnode as subject \n\t\t\t\tfor bnk, pompred, pomobj in self.g.triples((bn, None, None)):\n\t\t\t\t\tif not isinstance(pomobj, BNode):\n\t\t\t\t\t\t# if we already have a predicate append obj to list",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
       },
       {
         "kind": "trav_for",
         "line": 173,
-        "snippet": "    for _, _, o in rdf_graph.triples((None, None, None)):\n        if isinstance(o, Literal):\n            literals.add(o)",
-        "path": "ArangoDB-Community/ArangoRDF/tests/conftest.py"
+        "snippet": "\t\t\tfor tmap, p, bn in self.g.triples((tm, URIRef(rr('predicateObjectMap')), None)):\n\t\t\t\tpom = {}\n\t\t\t\t# for each pom's bnode as subject \n\t\t\t\tfor bnk, pompred, pomobj in self.g.triples((bn, None, None)):\n\t\t\t\t\tif not isinstance(pomobj, BNode):\n\t\t\t\t\t\t# if we already have a predicate append obj to list\n\t\t\t\t\t\tif str(pompred) in pom and len(pom[str(pompred)]) > 0:\n\t\t\t\t\t\t\tpom[str(pompred)] += ',' + str(pomobj)\n\t\t\t\t\t\telse:\n\t\t\t\t\t\t\tpom[str(pompred)] = str(pomobj)\n\t\t\t\t\telse:\n\t\t\t\t\t\tpom[str(pompred)] = {}\n\t\t\t\t\t\tfor pmbkn, pmbknp, pmbkno in self.g.triples((pomobj,None,None)):",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
       },
       {
         "kind": "trav_for",
-        "line": 182,
-        "snippet": "    for s, p, o in rdf_graph.triples((None, None, None)):\n        if isinstance(o, Literal):\n            literal_statements.add((s, p, o))",
-        "path": "ArangoDB-Community/ArangoRDF/tests/conftest.py"
+        "line": 176,
+        "snippet": "\t\t\t\tfor bnk, pompred, pomobj in self.g.triples((bn, None, None)):\n\t\t\t\t\tif not isinstance(pomobj, BNode):\n\t\t\t\t\t\t# if we already have a predicate append obj to list\n\t\t\t\t\t\tif str(pompred) in pom and len(pom[str(pompred)]) > 0:\n\t\t\t\t\t\t\tpom[str(pompred)] += ',' + str(pomobj)\n\t\t\t\t\t\telse:\n\t\t\t\t\t\t\tpom[str(pompred)] = str(pomobj)\n\t\t\t\t\telse:\n\t\t\t\t\t\tpom[str(pompred)] = {}\n\t\t\t\t\t\tfor pmbkn, pmbknp, pmbkno in self.g.triples((pomobj,None,None)):\n\t\t\t\t\t\t\tif not isinstance(pmbkno, BNode):\n\t\t\t\t\t\t\t\tpom[str(pompred)][str(pmbknp)] = str(pmbkno).strip('\\\"\"')\n\t\t\t\t\t\t\telse:",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
       },
       {
         "kind": "trav_for",
-        "line": 1583,
-        "snippet": "    for statement, _, _ in rdf_graph.triples((None, RDF.predicate, likes)):\n        if statement != statement_1:\n            statement_2 = statement\n            break",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+        "line": 185,
+        "snippet": "\t\t\t\t\t\tfor pmbkn, pmbknp, pmbkno in self.g.triples((pomobj,None,None)):\n\t\t\t\t\t\t\tif not isinstance(pmbkno, BNode):\n\t\t\t\t\t\t\t\tpom[str(pompred)][str(pmbknp)] = str(pmbkno).strip('\\\"\"')\n\t\t\t\t\t\t\telse:\n\t\t\t\t\t\t\t\tpom[str(pompred)][str(pmbknp)] = {}\n\t\t\t\t\t\t\t\tfor js, jp, jo in self.g.triples((pmbkno,None,None)):\n\t\t\t\t\t\t\t\t\tpom[str(pompred)][str(pmbknp)][str(jp)] = str(jo).strip('\\\"\"')",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
       },
       {
         "kind": "trav_for",
-        "line": 1644,
-        "snippet": "    for quad in rdf_graph.quads((None, None, None, None)):\n        rdf_graph_copy.add(quad)",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+        "line": 129,
+        "snippet": "        for s, p, o in self.sysconf.triples((None, self.quit.defaultBranch, None)):\n            return str(o)",
+        "path": "AKSW/QuitStore/quit/conf.py"
       },
       {
         "kind": "trav_for",
-        "line": 4016,
-        "snippet": "    for statement, _, _ in rdf_graph.triples((None, RDF.predicate, likes)):\n        if statement != statement_1:\n            statement_2 = statement\n            break",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+        "line": 140,
+        "snippet": "        for s, p, o in self.sysconf.triples((None, self.quit.pathOfGitRepo, None)):\n            return str(o)",
+        "path": "AKSW/QuitStore/quit/conf.py"
       },
       {
         "kind": "trav_for",
-        "line": 4128,
-        "snippet": "    for quad in rdf_graph.quads((None, None, None, None)):\n        rdf_graph_copy.add(quad)",
-        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+        "line": 145,
+        "snippet": "        for s, p, o in self.sysconf.triples((None, self.quit.upstream, None)):\n            return str(o)",
+        "path": "AKSW/QuitStore/quit/conf.py"
       },
       {
         "kind": "trav_for",
-        "line": 16,
-        "snippet": "for pfx in brick_graph.objects(predicate=rdflib.SH.declare):\n    brick_graph.remove((None, rdflib.SH.declare, pfx))\n    brick_graph.add((BRICK, rdflib.SH.declare, pfx))",
-        "path": "BrickSchema/Brick/handle_extensions.py"
+        "line": 103,
+        "snippet": "        for _ in self.store.store.quads((uri, None, None, QUIT.default)):\n            return True",
+        "path": "AKSW/QuitStore/quit/core.py"
+      }
+    ],
+    "trav_navigation_loop": [
+      {
+        "kind": "trav_navigation_loop",
+        "line": 173,
+        "snippet": "\t\t\tfor tmap, p, bn in self.g.triples((tm, URIRef(rr('predicateObjectMap')), None)):",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
       },
       {
-        "kind": "trav_for",
-        "line": 21,
-        "snippet": "for rule, pfxs in brick_graph.subject_objects(predicate=rdflib.SH.prefixes):\n    brick_graph.remove((rule, rdflib.SH.prefixes, pfxs))\n    brick_graph.add((rule, rdflib.SH.prefixes, BRICK))",
-        "path": "BrickSchema/Brick/handle_extensions.py"
+        "kind": "trav_navigation_loop",
+        "line": 176,
+        "snippet": "\t\t\t\tfor bnk, pompred, pomobj in self.g.triples((bn, None, None)):",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 185,
+        "snippet": "\t\t\t\t\t\tfor pmbkn, pmbknp, pmbkno in self.g.triples((pomobj,None,None)):",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 190,
+        "snippet": "\t\t\t\t\t\t\t\tfor js, jp, jo in self.g.triples((pmbkno,None,None)):",
+        "path": "AAtley/triplify_csv/triplify_csv/triplify_csv.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 53,
+        "snippet": "        domain = g.value(prop, RDFS.domain)",
+        "path": "ArthurKeen/arango-query-core/arango_query_core/owl_rdflib.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 54,
+        "snippet": "        range_uri = g.value(prop, RDFS.range)",
+        "path": "ArthurKeen/arango-query-core/arango_query_core/owl_rdflib.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 70,
+        "snippet": "        domain = g.value(prop, RDFS.domain)",
+        "path": "ArthurKeen/arango-query-core/arango_query_core/owl_rdflib.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 71,
+        "snippet": "        range_ = g.value(prop, RDFS.range)",
+        "path": "ArthurKeen/arango-query-core/arango_query_core/owl_rdflib.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 36,
+        "snippet": "            for p, o in g.predicate_objects(ext):",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/rdfsupport/fhirgraphutils.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 34,
+        "snippet": "            sk_o = subj_pred_idx_to_uri(sk_s, p, gin.value(o, FHIR.index))",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/rdfsupport/rdfcompare.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 128,
+        "snippet": "                         if isinstance(anon_s, BNode) and len([g.subject_predicates(anon_s)]) == 0)",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/rdfsupport/rdfcompare.py"
+      },
+      {
+        "kind": "trav_navigation_loop",
+        "line": 15,
+        "snippet": "            if isinstance(node, BNode) and g.value(node, OWL.onProperty) == FHIR.value:",
+        "path": "BD2KOnFHIR/fhirtordf/tests/fhir_tests/test_fhir_ttl.py"
+      }
+    ],
+    "trav_comprehension": [
+      {
+        "kind": "trav_comprehension",
+        "line": 196,
+        "snippet": "        for subject in g.subjects(\n            predicate=rdflib.URIRef(SUBCLASS),\n            object=rdflib.URIRef(\"https://w3id.org/dpv/owl#Risk\"),\n        )",
+        "path": "AI-SDC/ACRO/acro/ontology_handler.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 247,
+        "snippet": "        for subject in g.subjects(\n            SUBCLASSTYPE,\n            rdflib.term.URIRef(\"https://w3id.org/dpv/risk/owl#RiskEvaluation\"),\n        )",
+        "path": "AI-SDC/ACRO/acro/ontology_handler.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 343,
+        "snippet": "        for subject in g.subjects(\n            predicate=rdflib.URIRef(SUBCLASS),\n            object=rdflib.URIRef(\"https://w3id.org/dpv/owl#Risk\"),\n        )",
+        "path": "AI-SDC/ACRO/acro/ontology_handler.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 133,
+        "snippet": "        values.update(str(n) for n in g.objects(concept, SKOS.notation))",
+        "path": "AshMatics/ashmatics-datamodels/tests/documents/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 134,
+        "snippet": "        values.update(str(label) for label in g.objects(concept, SKOS.prefLabel))",
+        "path": "AshMatics/ashmatics-datamodels/tests/documents/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 133,
+        "snippet": "        values.update(str(n) for n in g.objects(concept, SKOS.notation))",
+        "path": "AshMatics/ashmatics-datamodels/tests/methods/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 134,
+        "snippet": "        values.update(str(lbl) for lbl in g.objects(concept, SKOS.prefLabel))",
+        "path": "AshMatics/ashmatics-datamodels/tests/methods/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 132,
+        "snippet": "        values.update(str(n) for n in g.objects(concept, SKOS.notation))",
+        "path": "AshMatics/ashmatics-datamodels/tests/org/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 133,
+        "snippet": "        values.update(str(label) for label in g.objects(concept, SKOS.prefLabel))",
+        "path": "AshMatics/ashmatics-datamodels/tests/org/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 102,
+        "snippet": "        values.update(str(n) for n in g.objects(concept, SKOS.notation))",
+        "path": "AshMatics/ashmatics-datamodels/tests/registry/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 103,
+        "snippet": "        values.update(str(label) for label in g.objects(concept, SKOS.prefLabel))",
+        "path": "AshMatics/ashmatics-datamodels/tests/registry/test_ontology_binding.py"
+      },
+      {
+        "kind": "trav_comprehension",
+        "line": 199,
+        "snippet": "        assert [str(n) for n in graph.objects(a, FOAF_NAME)] == [\"A\"]",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_process_json_jsonld.py"
       }
     ],
     "add_run": [
+      {
+        "kind": "add_run",
+        "line": 30,
+        "snippet": "    g.add((risk_uri, rdfs.subClassOf, dpv_owl.Risk))",
+        "path": "AI-SDC/ACRO/test/test_ontology_handling.py"
+      },
+      {
+        "kind": "add_run",
+        "line": 35,
+        "snippet": "    g.add((barn_uri, rdfs.subClassOf, p.Statbarn))",
+        "path": "AI-SDC/ACRO/test/test_ontology_handling.py"
+      },
+      {
+        "kind": "add_run",
+        "line": 40,
+        "snippet": "    g.add((analysis_uri, rdfs.subClassOf, barn_uri))",
+        "path": "AI-SDC/ACRO/test/test_ontology_handling.py"
+      },
+      {
+        "kind": "add_run",
+        "line": 45,
+        "snippet": "    g.add(\n        (\n            check_uri,\n            rdfs.subClassOf,\n            rdflib.URIRef(\"https://w3id.org/dpv/risk/owl#RiskEvaluation\"),\n        )\n    )",
+        "path": "AI-SDC/ACRO/test/test_ontology_handling.py"
+      },
+      {
+        "kind": "add_run",
+        "line": 294,
+        "snippet": "        self.graphconf.add((self.quit[quote(graphuri)], RDF.type, self.quit.Graph))",
+        "path": "AKSW/QuitStore/quit/conf.py"
+      },
+      {
+        "kind": "add_run",
+        "line": 52,
+        "snippet": "            self.graph.add((main_node, CSVW.table, table_node))",
+        "path": "Aleksander-Drozd/csvwlib/csvwlib/converter/ToRDFConverter.py"
+      },
+      {
+        "kind": "add_run",
+        "line": 89,
+        "snippet": "        self.graph.add((table_node, CSVW.row, row_node))",
+        "path": "Aleksander-Drozd/csvwlib/csvwlib/converter/ToRDFConverter.py"
+      },
       {
         "kind": "add_run",
         "line": 4254,
@@ -539,146 +925,60 @@
       },
       {
         "kind": "add_run",
-        "line": 29,
-        "snippet": "    graph.add((restriction_class, RDF.type, OWL.Restriction))",
-        "path": "BrickSchema/Brick/alignments/rec/generate.py"
+        "line": 194,
+        "snippet": "        g.add((query_uri, RDF.type, SP.Select))",
+        "path": "AtomGraph/Web-Algebra/src/web_algebra/operations/linkeddatahub/content/generate_class_containers.py"
       },
       {
         "kind": "add_run",
-        "line": 16,
-        "snippet": "graph.add((VBIS.hasVBISTag, RDF.type, OWL.DatatypeProperty))",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
+        "line": 211,
+        "snippet": "        g.add((view_uri, RDF.type, LDH.View))",
+        "path": "AtomGraph/Web-Algebra/src/web_algebra/operations/linkeddatahub/content/generate_class_containers.py"
       },
       {
         "kind": "add_run",
-        "line": 98,
-        "snippet": "                graph.add((VBIS[f\"{bc}Shape\"], SH.property, shape))",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
+        "line": 129,
+        "snippet": "            g.add((property_uri, LDH.view, view_uri))",
+        "path": "AtomGraph/Web-Algebra/src/web_algebra/operations/linkeddatahub/content/generate_ontology_views.py"
       },
       {
         "kind": "add_run",
-        "line": 109,
-        "snippet": "                    graph.add((pattern, RDF.type, SH.PropertyShape))",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 117,
-        "snippet": "            graph.add((VBIS[f\"{bc}Shape\"], SH.property, shape))",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 92,
-        "snippet": "g.add((BLDG[\"VAV2-4\"], RDF.type, BRICK.Variable_Air_Volume_Box))",
-        "path": "BrickSchema/Brick/examples/example1/generate.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 188,
-        "snippet": "g.add((BRICK.Fire_Zone, RDF.type, OWL.Class))",
-        "path": "BrickSchema/Brick/examples/example1/generate.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 30,
-        "snippet": "g.add((APT[\"thermostat_zone\"], A, BRICK[\"HVAC_Zone\"]))",
-        "path": "BrickSchema/Brick/examples/simple_apartment/generate.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 159,
-        "snippet": "    shaclGraph.add((sc, SH.rule, rule))",
-        "path": "BrickSchema/Brick/generate_brick.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 169,
-        "snippet": "        graph.add((klass, A, SH.NodeShape))",
-        "path": "BrickSchema/Brick/generate_brick.py"
-      },
-      {
-        "kind": "add_run",
-        "line": 179,
-        "snippet": "            shaclGraph.add((rule, SH.condition, cond))",
-        "path": "BrickSchema/Brick/generate_brick.py"
-      }
-    ],
-    "ns_def_module": [
-      {
-        "kind": "ns_def_module",
-        "line": 8,
-        "snippet": "OWL = Namespace(\"http://www.w3.org/2002/07/owl#\")",
-        "path": "BrickSchema/Brick/alignments/rec/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 9,
-        "snippet": "RDF = Namespace(\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\")",
-        "path": "BrickSchema/Brick/alignments/rec/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 10,
-        "snippet": "BRICK = Namespace(\"https://brickschema.org/schema/Brick#\")",
-        "path": "BrickSchema/Brick/alignments/rec/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 11,
-        "snippet": "REC_DEVICE = Namespace(\"https://w3id.org/rec/device/\")",
-        "path": "BrickSchema/Brick/alignments/rec/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 8,
-        "snippet": "BRICK = Namespace(\"https://brickschema.org/schema/Brick#\")",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 9,
-        "snippet": "SH = Namespace(\"http://www.w3.org/ns/shacl#\")",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 10,
-        "snippet": "VBIS = Namespace(\"https://brickschema.org/schema/Brick/alignments/vbis#\")",
-        "path": "BrickSchema/Brick/alignments/vbis/generate.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 3,
-        "snippet": "BRICK = Namespace(\"https://brickschema.org/schema/Brick#\")",
-        "path": "BrickSchema/Brick/bricksrc/namespaces.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 4,
-        "snippet": "TAG = Namespace(\"https://brickschema.org/schema/BrickTag#\")",
-        "path": "BrickSchema/Brick/bricksrc/namespaces.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 5,
-        "snippet": "BSH = Namespace(\"https://brickschema.org/schema/BrickShape#\")",
-        "path": "BrickSchema/Brick/bricksrc/namespaces.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 6,
-        "snippet": "REF = Namespace(\"https://brickschema.org/schema/Brick/ref#\")",
-        "path": "BrickSchema/Brick/bricksrc/namespaces.py"
-      },
-      {
-        "kind": "ns_def_module",
-        "line": 6,
-        "snippet": "DEMO = rdflib.Namespace(\"urn:demo_extension#\")",
-        "path": "BrickSchema/Brick/demo_extension/new_sensors.py"
+        "line": 45,
+        "snippet": "    g.add((URIRef(EX_A), URIRef(EX_P), Literal(\"v1\")))",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_values.py"
       }
     ],
     "ns_imported_from_project": [
+      {
+        "kind": "ns_imported_from_project",
+        "line": 12,
+        "snippet": "from quit.namespace import RDFS, FOAF, XSD, PROV, QUIT, is_a",
+        "path": "AKSW/QuitStore/quit/core.py"
+      },
+      {
+        "kind": "ns_imported_from_project",
+        "line": 6,
+        "snippet": "from quit.namespace import FOAF, PROV, QUIT",
+        "path": "AKSW/QuitStore/quit/provenance.py"
+      },
+      {
+        "kind": "ns_imported_from_project",
+        "line": 6,
+        "snippet": "from bam_masterdata.cli.entities_to_rdf import BAM, entities_to_rdf, rdf_graph_init",
+        "path": "BAMresearch/bam-masterdata/tests/cli/test_entities_to_rdf.py"
+      },
+      {
+        "kind": "ns_imported_from_project",
+        "line": 14,
+        "snippet": "from fhirtordf.rdfsupport.namespaces import FHIR, LOINC, SNOMEDCT, namespaces",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/loaders/fhirresourceloader.py"
+      },
+      {
+        "kind": "ns_imported_from_project",
+        "line": 6,
+        "snippet": "from fhirtordf.rdfsupport.namespaces import FHIR, namespace_for, W5, V2, V3, SCT, LOINC, RXNORM",
+        "path": "BD2KOnFHIR/fhirtordf/tests/rdfsupport_tests/test_namespaces.py"
+      },
       {
         "kind": "ns_imported_from_project",
         "line": 6,
@@ -720,113 +1020,353 @@
         "line": 3,
         "snippet": "from .namespaces import BRICK, A, OWL, SKOS, SH, XSD",
         "path": "BrickSchema/Brick/bricksrc/timeseries.py"
+      }
+    ],
+    "graph_named": [
+      {
+        "kind": "graph_named",
+        "line": 66,
+        "snippet": "        store = ConjunctiveGraph(identifier='default')",
+        "path": "AKSW/QuitStore/quit/core.py"
       },
       {
-        "kind": "ns_imported_from_project",
-        "line": 3,
-        "snippet": "from bricksrc.namespaces import BRICK, SKOS, SH, XSD, RDFS, DCTERMS, RDF, SDO, OWL, TAG",
-        "path": "BrickSchema/Brick/demo_extension/new_sensors.py"
+        "kind": "graph_named",
+        "line": 336,
+        "snippet": "                    graph = Graph(identifier=graphUri)",
+        "path": "AKSW/QuitStore/quit/core.py"
       },
       {
-        "kind": "ns_imported_from_project",
-        "line": 24,
-        "snippet": "from bricksrc.namespaces import (\n    BRICK,\n    BSH,\n    REC,\n    RDF,\n    OWL,\n    RDFS,\n    TAG,\n    SOSA,\n    SKOS,\n    QUDT,\n    VCARD,\n    SH,",
+        "kind": "graph_named",
+        "line": 416,
+        "snippet": "            graph = Graph(identifier=URIRef(graphUri))",
+        "path": "AKSW/QuitStore/quit/core.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 15,
+        "snippet": "        self.__graph = Graph(\n            store=store, identifier=identifier, namespace_manager=namespace_manager\n        )",
+        "path": "AKSW/QuitStore/quit/graphs.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 86,
+        "snippet": "        return Graph(store=self.store, identifier=self.identifier)",
+        "path": "AKSW/QuitStore/quit/graphs.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 211,
+        "snippet": "            return Graph(store=self.store, identifier=identifier, namespace_manager=self)",
+        "path": "AKSW/QuitStore/quit/graphs.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 81,
+        "snippet": "        g = Graph(identifier='urn:existing.graph')",
+        "path": "AKSW/QuitStore/tests/test_core.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 44,
+        "snippet": "        iGraph = InMemoryAggregatedGraph(graphs=[Graph(identifier='urn:graph')])",
+        "path": "AKSW/QuitStore/tests/test_graphs.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 50,
+        "snippet": "        g = Graph(identifier='urn:graph')",
+        "path": "AKSW/QuitStore/tests/test_graphs.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 59,
+        "snippet": "        g = Graph(identifier='urn:graph')",
+        "path": "AKSW/QuitStore/tests/test_graphs.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 43,
+        "snippet": "        g = Graph(identifier=\"http://example.org/g\")",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_batch_add.py"
+      },
+      {
+        "kind": "graph_named",
+        "line": 44,
+        "snippet": "        badg = Graph(identifier=\"http://example.org/badness\")",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_batch_add.py"
+      }
+    ],
+    "ns_def_module": [
+      {
+        "kind": "ns_def_module",
+        "line": 6,
+        "snippet": "PROV = Namespace('http://www.w3.org/ns/prov#')",
+        "path": "AKSW/QuitStore/quit/namespace.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 7,
+        "snippet": "QUITD = Namespace('http://quit.aksw.org/vocab/')",
+        "path": "AKSW/QuitStore/quit/namespace.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 9,
+        "snippet": "QUIT = Namespace('http://quit.aksw.org/vocab/')",
+        "path": "AKSW/QuitStore/quit/namespace.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 10,
+        "snippet": "CSVW = Namespace('http://www.w3.org/ns/csvw#')",
+        "path": "Aleksander-Drozd/csvwlib/csvwlib/converter/ToJSONConverter.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 18,
+        "snippet": "CSVW = Namespace('http://www.w3.org/ns/csvw#')",
+        "path": "Aleksander-Drozd/csvwlib/csvwlib/converter/ToRDFConverter.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 17,
+        "snippet": "LDH = Namespace(\"https://w3id.org/atomgraph/linkeddatahub#\")",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_ldh_generate_ontology_views.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 18,
+        "snippet": "EX = Namespace(\"http://example.org/ns#\")",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_ldh_generate_ontology_views.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 14,
+        "snippet": "BAM = Namespace(\"https://bamresearch.github.io/bam-masterdata/#\")",
+        "path": "BAMresearch/bam-masterdata/bam_masterdata/cli/entities_to_rdf.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 15,
+        "snippet": "PROV = Namespace(\"http://www.w3.org/ns/prov#\")",
+        "path": "BAMresearch/bam-masterdata/bam_masterdata/cli/entities_to_rdf.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 12,
+        "snippet": "LOINC = Namespace(\"http://loinc.org/rdf#\")",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/rdfsupport/namespaces.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 13,
+        "snippet": "SNOMEDCT = Namespace(\"http://snomed.info/id/\")",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/rdfsupport/namespaces.py"
+      },
+      {
+        "kind": "ns_def_module",
+        "line": 14,
+        "snippet": "RXNORM = Namespace(\"http://www.nlm.nih.gov/research/umls/rxnorm/\")",
+        "path": "BD2KOnFHIR/fhirtordf/fhirtordf/rdfsupport/namespaces.py"
+      }
+    ],
+    "bind_term_interpolated": [
+      {
+        "kind": "bind_term_interpolated",
+        "line": 2151,
+        "snippet": "                    _n = URIRef(f\"{RDF}_{i}\")",
+        "path": "ArangoDB-Community/ArangoRDF/arango_rdf/main.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 2335,
+        "snippet": "    assert (bnode, URIRef(f\"{RDF}_1\"), Literal(\"one\")) in rdf_graph_3",
+        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 2336,
+        "snippet": "    assert (bnode, URIRef(f\"{RDF}_2\"), Literal(\"two\")) in rdf_graph_3",
+        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 2337,
+        "snippet": "    assert (bnode, URIRef(f\"{RDF}_3\"), Literal(\"three\")) in rdf_graph_3",
+        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 3593,
+        "snippet": "    assert (bnode, URIRef(f\"{RDF}_1\"), None) in rdf_graph_4",
+        "path": "ArangoDB-Community/ArangoRDF/tests/test_main.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 29,
+        "snippet": "        (~RDF.type, f\"^<{RDF.type}>\", \"^rdf:type\"),",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_path.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 32,
+        "snippet": "            f\"<{RDF.type}>/<{RDFS.subClassOf}>\",",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_path.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 37,
+        "snippet": "            f\"<{RDF.type}>|<{RDFS.subClassOf}>\",",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_path.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 40,
+        "snippet": "        (-RDF.type, f\"!(<{RDF.type}>)\", \"!(rdf:type)\"),",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_path.py"
+      },
+      {
+        "kind": "bind_term_interpolated",
+        "line": 481,
+        "snippet": "                    f\"\"\"SELECT ?x {{ ?p sh:property ?p .\n                        ?p sh:path {prop_name.n3()} .\n                        FILTER NOT EXISTS {{ ?p sh:minCount ?mc }}\n                        FILTER NOT EXISTS {{ ?p sh:maxCount ?mc }}\n                    }}\"\"\"  # noqa",
         "path": "BrickSchema/Brick/generate_brick.py"
       },
       {
-        "kind": "ns_imported_from_project",
-        "line": 12,
-        "snippet": "from bricksrc.namespaces import QUDT, RDF, RDFS, BRICK  # noqa: E402",
-        "path": "BrickSchema/Brick/tests/conftest.py"
+        "kind": "bind_term_interpolated",
+        "line": 427,
+        "snippet": "    clauses.append(f\"OPTIONAL {{ {v} <{RDFS.label}> ?lbl{nid} . }}\")",
+        "path": "DataDrivenCPS/acquirium/src/acquirium/Client/explore/compile.py"
       },
       {
-        "kind": "ns_imported_from_project",
-        "line": 13,
-        "snippet": "from bricksrc.namespaces import TAG, SKOS, A, OWL  # noqa: E402",
-        "path": "BrickSchema/Brick/tests/conftest.py"
-      },
-      {
-        "kind": "ns_imported_from_project",
-        "line": 5,
-        "snippet": "from bricksrc.namespaces import (  # noqa: E402\n    BRICK,\n    TAG,\n    SOSA,\n    VCARD,\n    SKOS,\n    QUDT,\n    XSD,\n)",
-        "path": "BrickSchema/Brick/tests/test_class_structure.py"
+        "kind": "bind_term_interpolated",
+        "line": 544,
+        "snippet": "        where_clauses.append(f\"OPTIONAL {{ {v} <{RDFS.label}> {lvar} . }}\")",
+        "path": "DataDrivenCPS/acquirium/src/acquirium/Client/explore/compile.py"
       }
     ],
     "sparql_literal": [
       {
         "kind": "sparql_literal",
-        "line": 137,
-        "snippet": "sensors = g.query(\n    \"\"\"SELECT ?sensor WHERE {\n    ?sensor rdf:type/rdfs:subClassOf* brick:Air_Temperature_Sensor\n}\"\"\"\n)",
-        "path": "BrickSchema/Brick/examples/example1/generate.py"
+        "line": 99,
+        "snippet": "        results = ontology.query(query)",
+        "path": "AtomGraph/Web-Algebra/src/web_algebra/operations/linkeddatahub/content/generate_class_containers.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 169,
-        "snippet": "sensors = g.query(\n    \"\"\"SELECT ?sensor WHERE {\n    ?sensor rdf:type brick:Supply_Air_Temperature_Sensor\n}\"\"\"\n)",
-        "path": "BrickSchema/Brick/examples/example1/generate.py"
+        "line": 93,
+        "snippet": "        results = ontology.query(query)",
+        "path": "AtomGraph/Web-Algebra/src/web_algebra/operations/linkeddatahub/content/generate_ontology_views.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 719,
-        "snippet": "    params = [row[\"param\"] for row in graph.query(qstr)]",
-        "path": "BrickSchema/Brick/generate_brick.py"
+        "line": 47,
+        "snippet": "    results = g.query(\n        \"\"\"\n        SELECT ?x (MIN(?y_) as ?y) (AVG(DISTINCT ?z_) as ?z) {\n          VALUES (?x ?y_ ?z_) {\n            (\"x1\" 10 1)\n            (\"x1\" 11 1)\n            (\"x1\" 12 3)\n            (\"x2\" 20 2)\n          }\n       } GROUP BY ?x ORDER BY ?x\n    \"\"\"\n    )",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_distinct.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 188,
-        "snippet": "for row in new_brick.query(qstr):",
-        "path": "BrickSchema/Brick/tools/compare_versions/compare_versions.py"
+        "line": 96,
+        "snippet": "    results = g.query(\n        \"\"\"\n    PREFIX : <http://example.org/>\n\n    SELECT DISTINCT ?x {\n      ?x :age ?ax ; :knows [ :age ?ay ].\n      FILTER( ?ax > ?ay )\n    }\n    \"\"\"\n    )",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_distinct.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 210,
-        "snippet": "for row in old_brick.query(qstr):",
-        "path": "BrickSchema/Brick/tools/compare_versions/compare_versions.py"
+        "line": 109,
+        "snippet": "    results = g.query(\n        \"\"\"\n    PREFIX : <http://example.org/>\n\n    SELECT (COUNT(DISTINCT ?x) as ?cx) {\n      ?x :age ?ax ; :knows [ :age ?ay ].\n      FILTER( ?ax > ?ay )\n    }\n    \"\"\"\n    )",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_distinct.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 21,
-        "snippet": "        with progressbar(graph.query(query)) as results:",
-        "path": "BrickSchema/py-brickschema/brickschema/brickify/src/handlers/Handler/HaystackHandler/utils/HaystackRDFInferenceSession.py"
+        "line": 150,
+        "snippet": "    results = dict(g.query(query))",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_distinct.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 53,
-        "snippet": "        r.asdict() for r in graph.query(QUERY)",
-        "path": "DerwenAI/kuzu-rdflib/demo.py"
+        "line": 46,
+        "snippet": "        g.query(\n            \"\"\"\n        SELECT ?x ?y (AVG(?z) as ?az) {\n            VALUES (?x ?y ?z) {\n                (1 undef 10)\n                (1 undef 15)\n                (2 undef 20)\n                (2 undef 21)\n                (2 undef 24)\n           }\n        } GROUP BY ?x ?y\n        ORDER BY ?x\n    \"\"\"",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_undef.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 100,
-        "snippet": "        r.asdict() for r in graph.query(QUERY)",
-        "path": "DerwenAI/kuzu-rdflib/demo.py"
+        "line": 84,
+        "snippet": "        g.query(\n            \"\"\"\n    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\n    SELECT ?obj ?label\n    WHERE {\n        ?obj rdfs:label ?label\n    }\n    GROUP BY ?obj ?label\n    VALUES ( ?obj ) {\n        ( <http://example.com/something> )\n    }\n    \"\"\"",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_undef.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 13,
-        "snippet": "q1 = prepareQuery(\"\"\"SELECT *\n            WHERE {\n               ?d rdf:type odml:Document .\n               ?d odml:hasSection ?s .\n               ?s rdf:type odml:Section .\n               ?s odml:hasName \"Stimulus\" .\n               ?s odml:hasProperty ?p .\n               ?p odml:hasName \"Contrast\" .\n               ?p odml:hasValue ?v .\n               ?p odml:hasUnit \"%\" .\n               ?v rdf:type rdf:Bag .\n               ?v rdf:li \"20.0\" .\n            }\"\"\", initNs=rdf_namespace)",
-        "path": "G-Node/python-odml/doc/rdf/sparql_example_queries.py"
+        "line": 24,
+        "snippet": "        q_prepared = prepareQuery(q_str)",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_construct_bindings.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 30,
-        "snippet": "q2 = prepareQuery(\"\"\"SELECT *\n                WHERE {\n                   ?d rdf:type odml:Document .\n                   ?d odml:hasSection ?s .\n                   ?s rdf:type odml:Section .\n                   ?s odml:hasName \"Stimulus\" .\n                   ?s odml:hasProperty ?p .\n\n                   ?p odml:hasName \"Contrast\" .\n                   ?p odml:hasValue ?v .\n                   ?p odml:hasUnit \"%\" .    \n                   ?v rdf:type rdf:Bag .\n                   ?v rdf:li \"20.0\" .",
-        "path": "G-Node/python-odml/doc/rdf/sparql_example_queries.py"
+        "line": 61,
+        "snippet": "    for result in graph.query(query):",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_nested_filters.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 57,
-        "snippet": "q3 = prepareQuery(\"\"\"SELECT *\n                WHERE {\n                   ?d rdf:type odml:Document .\n                   ?d odml:hasSection ?s .\n                   ?s rdf:type odml:CellProperties .\n                   ?s odml:hasProperty ?p .\n\n                   ?p odml:hasName \"EOD Frequency\" .\n                   ?p odml:hasValue ?v .\n                   ?p odml:hasUnit \"Hz\" .    \n                   ?v rdf:type rdf:Bag .\n                   ?v rdf:li ?value .                      \n                }\"\"\", initNs=rdf_namespace)",
-        "path": "G-Node/python-odml/doc/rdf/sparql_example_queries.py"
+        "line": 340,
+        "snippet": "    for result in graph.query(query):",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_nested_filters.py"
       },
       {
         "kind": "sparql_literal",
-        "line": 72,
-        "snippet": "for row in g.query(q1):",
-        "path": "G-Node/python-odml/doc/rdf/sparql_example_queries.py"
+        "line": 17,
+        "snippet": "    result = g.query(\n        \"\"\"prefix ex:  <https://www.example.org/>\n        select ?subject ?car\n        where  {\n                $this ex:subject ?subject.\n                optional\n                {\n                 # an offending subselect clause\n                 select ?car\n                 where {\n                           ?car ex:type \"Car\".\n                       }\n                  }",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_optional.py"
       }
     ],
     "sparql_interpolated": [
+      {
+        "kind": "sparql_interpolated",
+        "line": 32,
+        "snippet": "    return g.query(f\"SELECT ?s WHERE {{ ?s <{EX_P}> ?o }} ORDER BY ?s\")",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_values.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 39,
+        "snippet": "    return g.query(f\"SELECT ?s ?o WHERE {{ ?s <{EX_P}> ?o }} ORDER BY ?s\")",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_values.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 48,
+        "snippet": "    return g.query(\n        f\"SELECT ?s ?x WHERE {{ ?s <{EX_P}> ?o . OPTIONAL {{ ?s <{EX_Q}> ?x }} }} ORDER BY ?s\"\n    )",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_values.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 55,
+        "snippet": "    return g.query(f\"SELECT ?s WHERE {{ ?s <{EX_P}> ?o }}\")",
+        "path": "AtomGraph/Web-Algebra/tests/unit/test_values.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 17,
+        "snippet": "    results = g.query(query_tpl % \"GROUP_CONCAT\")",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_distinct.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 32,
+        "snippet": "    results = g.query(query_tpl % \"SUM\")",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_distinct.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 21,
+        "snippet": "    results = list(g.query(query_tpl % agg_func))",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_agg_undef.py"
+      },
+      {
+        "kind": "sparql_interpolated",
+        "line": 17,
+        "snippet": "        r = g.query(\n            \"\"\"\n                prefix : <http://example.org/ns#>\n                select * where { ?s ?p ?o . %s } \"\"\"\n            % expr\n        )",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_evaluate_bind.py"
+      },
       {
         "kind": "sparql_interpolated",
         "line": 480,
@@ -850,338 +1390,80 @@
         "line": 30,
         "snippet": "        res2 = g.query(\n            \"\"\"SELECT DISTINCT ?s ?o WHERE {\n                              ?s rdfs:subClassOf ?o .\n                              brick:%s rdfs:subClassOf+ ?s .\n                              ?o rdfs:subClassOf+ brick:%s .\n                        }\"\"\"\n            % (minify(brick_class), minify(brick_class))\n        )",
         "path": "BrickSchema/Brick/tests/test_subclass_hierarchy.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 102,
-        "snippet": "    for row in g.query(qstr_allclasses.format(root)):",
-        "path": "BrickSchema/Brick/tools/compare_versions/compare_versions.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 285,
-        "snippet": "        rows = graph.query(\n            f\"\"\"\n            PREFIX sh: <http://www.w3.org/ns/shacl#>\n            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n            SELECT ?shape WHERE {{\n            ?shape a sh:NodeShape .\n            {rdf_type.n3()} rdfs:subClassOf* ?class .\n            {{ ?shape sh:targetClass ?class }}\n            UNION\n            {{ ?shape sh:class ?class }}\n        }}\"\"\"\n        )",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 39,
-        "snippet": "    query = prepareQuery(query.format(language=language), initNs={k: v for k, v in graph.namespaces()})",
-        "path": "cognitedata/neat/cognite/neat/_v0/core/_data_model/importers/_rdf/_shared.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 107,
-        "snippet": "    query = prepareQuery(query.format(language=language), initNs={k: v for k, v in graph.namespaces()})",
-        "path": "cognitedata/neat/cognite/neat/_v0/core/_data_model/importers/_rdf/_shared.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 432,
-        "snippet": "        relationship_triples = cast(list[Triple], list(graph.query(f\"DESCRIBE <{relationship_id}>\")))",
-        "path": "cognitedata/neat/cognite/neat/_v0/core/_instances/transformers/_classic_cdf.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 193,
-        "snippet": "            for (subject,) in list(graph.query(self._query_template.format(rdf_type=type_))):  # type: ignore",
-        "path": "cognitedata/neat/cognite/neat/_v0/core/_instances/transformers/_prune_graph.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 474,
-        "snippet": "        self.dataset.update(f\"CLEAR SILENT GRAPH <{NAMED_GRAPH_NAMESPACE['DIFF_ADD']}>\")",
-        "path": "cognitedata/neat/cognite/neat/_v0/core/_store/_instance.py"
-      },
-      {
-        "kind": "sparql_interpolated",
-        "line": 475,
-        "snippet": "        self.dataset.update(f\"CLEAR SILENT GRAPH <{NAMED_GRAPH_NAMESPACE['DIFF_DELETE']}>\")",
-        "path": "cognitedata/neat/cognite/neat/_v0/core/_store/_instance.py"
-      }
-    ],
-    "graph_named": [
-      {
-        "kind": "graph_named",
-        "line": 27,
-        "snippet": "    graph: rdflib.Graph = rdflib.Graph(\n        store = \"kuzudb\",\n        identifier = \"kuzudb\",\n    )",
-        "path": "DerwenAI/kuzu-rdflib/demo.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 149,
-        "snippet": "                self.graph = Graph(store=self.store,\n                                   identifier=URIRef(self.chars.strip()))",
-        "path": "MKLab-ITI/prophet/rdflib/plugins/parsers/trix.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 161,
-        "snippet": "                self.graph = Graph(self.store, identifier=self.get_bnode(\n                    self.chars.strip()))",
-        "path": "MKLab-ITI/prophet/rdflib/plugins/parsers/trix.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 135,
-        "snippet": "    cg.addN([(s, p, o, Graph(store=cg.store, identifier=c)) for (c, s, p, o) in quads])",
-        "path": "Nanopublication/nanopub-py/nanopub/trustyuri/rdf/RdfUtils.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 38,
-        "snippet": "        pubinfo_g = Graph(store=input_g.store, identifier=pubinfo_uri)",
-        "path": "Nanopublication/nanopub-py/tests/test_sign_utils.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 58,
-        "snippet": "        g = Graph(self.store, identifier=identifier)",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/database/graph_connection.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 81,
-        "snippet": "        result = Graph(self.store, identifier=identifier)",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/database/graph_connection.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 94,
-        "snippet": "        g = Graph(self.store, identifier=identifier)",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/database/graph_connection.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 27,
-        "snippet": "            _graph = Graph(identifier=identifier)",
-        "path": "RDFLib/pyLODE/pylode/profiles/supermodel/dataset.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 105,
-        "snippet": "            profile_graph = Graph(identifier=str(profile))",
-        "path": "RDFLib/pyLODE/pylode/profiles/supermodel/loader.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 165,
-        "snippet": "        self.add_graph(Graph(identifier=PYLODE_CONFIG_GRAPH))",
-        "path": "RDFLib/pyLODE/pylode/profiles/supermodel/loader.py"
-      },
-      {
-        "kind": "graph_named",
-        "line": 168,
-        "snippet": "        root_graph = Graph(identifier=root_profile_iri)",
-        "path": "RDFLib/pyLODE/pylode/profiles/supermodel/loader.py"
-      }
-    ],
-    "trav_comprehension": [
-      {
-        "kind": "trav_comprehension",
-        "line": 100,
-        "snippet": "    subjects = {str(s) for s in g.subjects()}",
-        "path": "Ebiquity/crystalia-collector/tests/test_combine.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 183,
-        "snippet": "        for t in g.objects(s, HAS_TYPE)",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 185,
-        "snippet": "        for v in g.objects(s, value_pred)",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 223,
-        "snippet": "        for s in g.subjects(RDF.type, DESCRIPTOR)",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 224,
-        "snippet": "        for o in g.objects(s, HAS_TYPE)",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 69,
-        "snippet": "        return [str(o) for o in self.graph.objects(s, p)]",
-        "path": "JustlyAI/lmss_entity_extractor/app/lmss_parser.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 82,
-        "snippet": "            for cls in self.graph.subjects(RDFS.subClassOf, owl_thing)",
-        "path": "JustlyAI/lmss_entity_extractor/app/lmss_parser.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 162,
-        "snippet": "                1 for _ in self.graph.triples((None, self.LMSS.hasEmbedding, None))",
-        "path": "JustlyAI/lmss_entity_extractor/app/lmss_parser.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 221,
-        "snippet": "                    for s, p, o in graph.triples((n, None, node))]",
-        "path": "MKLab-ITI/prophet/rdflib/compare.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 224,
-        "snippet": "                    for s, p, o in graph.triples((node, None, n))]",
-        "path": "MKLab-ITI/prophet/rdflib/compare.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 45,
-        "snippet": "            self.vars = [Variable(v) for v in graph.objects(rs,\n                                                            RS.resultVariable)]",
-        "path": "MKLab-ITI/prophet/rdflib/plugins/sparql/results/rdfresults.py"
-      },
-      {
-        "kind": "trav_comprehension",
-        "line": 190,
-        "snippet": "        logger.debug(\"Preformat graph: incoming quads=%d\", sum(1 for _ in g.quads((None, None, None, None))))",
-        "path": "Nanopublication/nanopub-py/nanopub/nanopub.py"
-      }
-    ],
-    "trav_navigation_loop": [
-      {
-        "kind": "trav_navigation_loop",
-        "line": 224,
-        "snippet": "        for o in g.objects(s, HAS_TYPE)",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 301,
-        "snippet": "        for t in g.objects(s, HAS_TYPE)",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 303,
-        "snippet": "        for v in g.objects(s, URIRef(f\"{CRYS_NS}value\"))",
-        "path": "Ebiquity/crystalia-collector/tests/test_pipeline.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 55,
-        "snippet": "            embedding_value = self.graph.value(embedding_node, self.LMSS.embeddingValue)",
-        "path": "JustlyAI/lmss_entity_extractor/app/lmss_classification.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 52,
-        "snippet": "                for b in graph.objects(s, RS.binding):",
-        "path": "MKLab-ITI/prophet/rdflib/plugins/sparql/results/rdfresults.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 53,
-        "snippet": "                    sol[Variable(graph.value(\n                        b, RS.variable))] = graph.value(b, RS.value)",
-        "path": "MKLab-ITI/prophet/rdflib/plugins/sparql/results/rdfresults.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 54,
-        "snippet": "                        b, RS.variable))] = graph.value(b, RS.value)",
-        "path": "MKLab-ITI/prophet/rdflib/plugins/sparql/results/rdfresults.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 425,
-        "snippet": "        path = shacl_path_to_sparql_path(shape_graph, graph.value(pshape, SH.path))",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 426,
-        "snippet": "        if not graph.value(pshape, SH.qualifiedValueShape):",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 437,
-        "snippet": "        path = shacl_path_to_sparql_path(shape_graph, graph.value(pshape, SH.path))",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 438,
-        "snippet": "        if not graph.value(pshape, SH.qualifiedValueShape):",
-        "path": "NatLabRockies/BuildingMOTIF/buildingmotif/dataclasses/shape_collection.py"
-      },
-      {
-        "kind": "trav_navigation_loop",
-        "line": 470,
-        "snippet": "                    for y2 in self.graph.objects(x, p):",
-        "path": "RDFLib/OWL-RL/owlrl/OWLRL.py"
       }
     ],
     "bind_initbindings": [
       {
         "kind": "bind_initbindings",
-        "line": 174,
-        "snippet": "        return self.graph.query(query, initBindings=init_bindings)",
-        "path": "JoelBender/BACpypes3/bacpypes3/rdf/core.py"
+        "line": 30,
+        "snippet": "        results = g1.query(\n            q_prepared,\n            initBindings={\"a\": Literal(\"A\"), \"b\": Literal(\"B\"), \"c\": Literal(\"C\")},\n        )",
+        "path": "Blackcat-Informatics/purrdf/bindings/python/tests/rdflib_suite/vendor/test_construct_bindings.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 28,
-        "snippet": "for row in g.query(find_device_by_address, initBindings=init_bindings):",
-        "path": "JoelBender/BACpypes3/samples/find-device-by-address.py"
+        "line": 80,
+        "snippet": "    for row in graph.query(sparql, initBindings=bindings):",
+        "path": "DerwenAI/kglab/scripts/graph.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 18,
-        "snippet": "for row in g.query(find_device_by_instance, initBindings=init_bindings):",
-        "path": "JoelBender/BACpypes3/samples/find-device-by-instance.py"
+        "line": 42,
+        "snippet": "        return self.graph.query(query_string, initNs=namespace_bindings, initBindings=variable_bindings)",
+        "path": "Dewberry/blobfish/blobfish/ckan/load.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 37,
-        "snippet": "            res = g.query(\"\"\"                                                                        \n            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>                                \n            PREFIX ex: <http://example.org/>                                                         \n            PREFIX foaf: <http://xmlns.com/foaf/0.1/>                                                \n            SELECT ?name                                                                             \n            \tWHERE {                                                                      ",
-        "path": "daniakalomiris/university-chatbot/chatbot.py"
+        "line": 286,
+        "snippet": "                qres = g.query(query, initBindings=querybindings, initNs=prefixes)",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/dataservice/startDataservice.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 54,
-        "snippet": "            res = g.query(\"\"\"\n            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n            PREFIX ex: <http://example.org/>\n            PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n            SELECT DISTINCT ?subject ?number ?name\n                WHERE {\n                    ?student foaf:name ?studentName .\n                    ?student ex:hasCompleted ?course .\n                    ?course ex:hasSubject ?subject .\n                    ?course ex:hasNumber ?number .\n                    ?course foaf:name ?name .\n                    ex:hasCompleted ex:hasGrade ?grade\n            ",
-        "path": "daniakalomiris/university-chatbot/chatbot.py"
+        "line": 194,
+        "snippet": "        result = self.e.query(query_instance, initBindings=bindings,\n                              initNs={'base': self.basens, 'opcua': self.opcuans})",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/opcua/lib/entity.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 76,
-        "snippet": "            res = g.query(\"\"\"\n            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n            PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n            PREFIX ex: <http://example.org/>\n            SELECT ?subject ?number ?name\n                WHERE {\n                    ?course ex:hasSubject ?subject .\n                    ?course ex:hasNumber ?number .\n                    ?course foaf:name ?name .        \n                    ?course ex:hasTopic ?topic .\n                    ?topic foaf:name ?topicName\n            \t}",
-        "path": "daniakalomiris/university-chatbot/chatbot.py"
+        "line": 218,
+        "snippet": "        result = self.e.query(query_default_instance, initBindings=bindings,\n                              initNs={'base': self.basens, 'opcua': self.opcuans})",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/opcua/lib/entity.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 98,
-        "snippet": "            res = g.query(\"\"\"\n            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n            PREFIX ex: <http://example.org/>\n            PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n            SELECT DISTINCT ?name\n            \tWHERE {\n            \t    ?student ex:hasCompleted ?course .\n            \t    ?student foaf:name ?name .\n            \t    ?topic foaf:name ?topicName .\n            \t    ?course ex:hasTopic ?topic\n            \t}\n            \"\"\", initBindings={'topicName': Literal(topic)})",
-        "path": "daniakalomiris/university-chatbot/chatbot.py"
+        "line": 782,
+        "snippet": "        for s, sup in self.g.query(query, initBindings={'root': semantic_bridge_root}):",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/opcua/lib/owlbuilder.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 205,
-        "snippet": "        result = self.graph.query(\n            \"SELECT * { ?s ?p ?o }\",\n            initBindings = {\n                \"p\": TST.b,\n                Variable(\"o\"): TST.c,\n            },\n        )",
-        "path": "maparent/virtuoso-python/virtuoso/tests/test_rdflib3.py"
+        "line": 533,
+        "snippet": "            results = list(self.shaclg.query(query_minmax, initBindings=bindings,\n                                             initNs={'sh': SH, 'base': self.basens}))",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/opcua/lib/shacl.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 60,
-        "snippet": "    qres = g.query(q, initBindings={'w_start': w_start})",
-        "path": "nikita-moor/etymological-dictionary/dictionary.py"
+        "line": 767,
+        "snippet": "            results = list(g.query(query_realtype, initBindings=bindings,\n                                   initNs={'opcua': self.opcuans, 'base': self.basens}))",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/opcua/lib/utils.py"
       },
       {
         "kind": "bind_initbindings",
-        "line": 172,
-        "snippet": "            for r, in self.onto_graph.query(\"\"\"\n              SELECT ?r\n              WHERE {\n                ?c rdfs:subClassOf|owl:equivalentClass ?res .\n                ?res a owl:Restriction ;\n                     owl:onProperty ?p ;\n                     owl:allValuesFrom|owl:someValuesFrom|owl:hasValue ?r\n              }\n            \"\"\", initBindings={'c': c, 'p': p}):",
-        "path": "usc-isi-i2/kgtk/kgtk/knowledge_graph/shacl.py"
+        "line": 888,
+        "snippet": "        result = graph.query(query_generic_references, initBindings=bindings, initNs={'opcua': self.opcuans})",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/opcua/lib/utils.py"
+      },
+      {
+        "kind": "bind_initbindings",
+        "line": 117,
+        "snippet": "        qres_subclasses = g.query(sparql_get_all_subclasses, initNs=prefixes, initBindings=initBindings)",
+        "path": "IndustryFusion/DigitalTwin/semantic-model/shacl2flink/lib/shacl_sparql_to_sql.py"
+      },
+      {
+        "kind": "bind_initbindings",
+        "line": 566,
+        "snippet": "        for row in self.brick_ontology.query(query, initBindings=bindings):",
+        "path": "MaxBerktoldRWTH/BRICKbuilder/src/app/ifc_populate_window.py"
       }
     ]
   }

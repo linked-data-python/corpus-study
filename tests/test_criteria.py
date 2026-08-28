@@ -76,7 +76,11 @@ def test_teaching_material_is_matched_on_name_description_and_topics(cfg):
 
 def test_a_repository_named_after_the_library_is_the_library(cfg):
     assert "library_itself" in stage1_reasons(good(full_name="alcides/rdflib"), cfg)
-    assert "library_itself" in stage1_reasons(good(full_name="x/SPARQLWrapper"), cfg)
+    assert "library_itself" in stage1_reasons(good(full_name="x/RDFLib"), cfg)
+    # ... but an RDF library written *against* rdflib is a user of it, and is
+    # exactly the kind of code the study is about.
+    assert stage1_reasons(good(full_name="RDFLib/pySHACL"), cfg) == []
+    assert stage1_reasons(good(full_name="RDFLib/OWL-RL"), cfg) == []
     assert stage1_reasons(good(full_name="x/rdflib-endpoint"), cfg) == []
 
 
@@ -116,3 +120,13 @@ def test_vendored_tree_detection(acfg):
     # Ordinary source is untouched.
     assert not is_vendored(("src", "app.py"), "any/project", acfg)
     assert not is_vendored((), "any/project", acfg)
+
+
+def test_a_bundled_python_runtime_is_vendored(acfg):
+    # `prrvchr/mContactOOo` ships setuptools, selenium and trio under
+    # `uno/lib/python/` — a virtualenv layout without the site-packages marker.
+    assert is_vendored(("uno", "lib", "python", "trio", "_core.py"),
+                       "prrvchr/mContactOOo", acfg)
+    assert is_vendored(("lib", "python3.11", "setuptools", "dist.py"),
+                       "any/project", acfg)
+    assert not is_vendored(("lib", "helpers.py"), "any/project", acfg)

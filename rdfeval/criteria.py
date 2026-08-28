@@ -120,7 +120,15 @@ def is_vendored(rel_parts: tuple[str, ...], repo_name: str, cfg: dict) -> bool:
     """
     if not rel_parts:
         return False
-    top = rel_parts[0].lower()
+    # A `.../lib/python*/…` tree is a bundled runtime: the layout of a
+    # virtualenv without the `site-packages` marker that `exclude_dirs`
+    # recognises (seen in `prrvchr/mContactOOo`, which ships setuptools,
+    # selenium and trio under `uno/lib/python/`).
+    lowered = [p.lower() for p in rel_parts]
+    for a, b in zip(lowered, lowered[1:]):
+        if a == "lib" and b.startswith("python"):
+            return True
+    top = lowered[0]
     if top in {d.lower() for d in cfg.get("vendored_dirs_always", [])}:
         return True
     if top in {d.lower() for d in cfg.get("vendored_dirs", [])}:

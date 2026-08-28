@@ -106,12 +106,29 @@ dépôts avec au plus 2 par compte, contre 20 pour un même compte en B4. C'est
 la garantie structurelle que réclame une étude statistique — les fichiers d'un
 même projet ne sont pas des observations indépendantes.
 
-## Décision
+## Décision, et ce qu'elle a donné
 
-**Maxime a retenu B7 (401 dépôts), le 2026-08-28.** Les critères exacts, le
-second étage post-analyse et le chiffrage du coût sont consignés dans
-`funnel.md` § 6. La recommandation qui suit est celle qui avait été formulée
-avant cette décision ; elle est conservée telle quelle.
+**Maxime a retenu B7, le 2026-08-28.** Les critères exacts et le second étage
+post-analyse sont consignés dans `funnel.md` § 3.
+
+Chiffres réalisés, à comparer aux 401 dépôts prévus par le tableau ci-dessus :
+**444 dépôts au manifeste** (les 60 de la vague 1 sont conservés, 384 ajoutés),
+dont **407 satisfont les critères** et **376 survivent à l'élagage
+post-analyse**. L'écart avec la prévision vient de trois ajustements faits en
+implémentant les critères : les dépôts archivés restent admis
+(`exclude_archived = false`, hérité de la vague 1), le marqueur pédagogique se
+cherche en début de mot et non en sous-chaîne (« course » est dans
+« discourse »), et la liste des « copies de la bibliothèque » a été ramenée à
+rdflib et ses forks — pySHACL et OWL-RL sont des *clients* de rdflib, donc
+exactement le code que l'étude vise.
+
+Résultat mesuré : 38 845 fichiers Python analysés, 6 095 RDF-pertinents,
+182 664 opérations RDF, 22 Go sur disque. La prévision annonçait ≈ 32 000
+fichiers et ≈ 12,5 Go ; le dépassement vient des dépôts de la vague 1 conservés
+et de quelques projets volumineux sous le plafond de 200 Mo.
+
+La recommandation qui suit est celle qui avait été formulée avant la décision ;
+elle est conservée telle quelle.
 
 ## Recommandation (avant décision)
 

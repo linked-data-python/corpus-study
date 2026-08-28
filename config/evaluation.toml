@@ -76,9 +76,13 @@ teaching_markers = [
     "teaching", "student", "classroom", "vorlesung", "ejercicio", "coursework",
     "kurs",
 ]
-# A repository *named* after the library is the library, not a user of it.
+# A repository *named* after the library under study is that library, not a
+# user of it.  The list holds rdflib and its ancestors only: pySHACL, OWL-RL
+# or SPARQLWrapper are RDF libraries too, but they are written *against*
+# rdflib and are exactly the kind of code the study is about.  A vendored copy
+# of any of them is caught by `[analysis] vendored_dirs`, not here.
 exclude_library_clones = true
-library_clone_names = ["rdflib", "rdfextras", "sparqlwrapper", "isodate", "owlrl", "pyshacl"]
+library_clone_names = ["rdflib", "rdfextras", "rdflib-rdfstar"]
 # Second stage, decided only after cloning and analysis (`rdfeval analyze`):
 # repositories that satisfy the metadata criteria but turn out to contain no
 # analysable RDF Python are marked `pruned` in the manifest, kept for
@@ -105,6 +109,9 @@ jobs = 8                          # parallel clones
 [analysis]
 # Files larger than this are skipped (generated files, data dumps).
 max_file_bytes = 1_000_000
+# Reuse a repository's previous analysis when its pinned commit has not moved.
+# Analysing several hundred checkouts must survive an interruption.
+reuse_existing = true
 # Directories never analysed inside a repository checkout.  `site-packages`
 # and `dist-packages` matter: some repositories commit a whole virtualenv,
 # whose vendored libraries (rdflib itself included) are not project code and

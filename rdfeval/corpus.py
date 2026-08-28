@@ -64,6 +64,25 @@ def _python_files(root: Path, full_name: str,
     return files, vendored
 
 
+def _reuse(path: Path, commit: str) -> list[dict] | None:
+    """Rows of a previous analysis of the same commit, or None to re-analyse.
+
+    Analysing several hundred checkouts takes long enough that the stage must
+    survive an interruption: per-repository results are written as they are
+    produced and reused on the next run when the pinned commit has not moved.
+    """
+    if not path.exists():
+        return None
+    try:
+        rows = [json.loads(line) for line in path.read_text().splitlines()
+                if line.strip()]
+    except (OSError, json.JSONDecodeError):
+        return None
+    if rows and rows[0].get("commit") != commit:
+        return None
+    return rows
+
+
 def _rdf_deps(root: Path) -> list[str]:
     found: set[str] = set()
     for pattern in REQUIREMENT_FILES:
@@ -86,10 +105,17 @@ def run(config: dict) -> None:
     RESULTS_SUMMARY.mkdir(parents=True, exist_ok=True)
 
     all_rows: list[dict] = []
+    reuse = acfg.get("reuse_existing", True)
     for rec in manifest:
         root = repo_dir(config, rec["full_name"])
         if not (root / ".git").exists():
             print(f"  ! {rec['full_name']}: not acquired, skipped")
+            continue
+        out = ANALYSIS_DIR / (rec["full_name"].replace("/", "__") + ".jsonl")
+        rows = _reuse(out, rec["commit"]) if reuse else None
+        if rows is not None:
+            all_rows.extend(rows)
+            print(f"  {rec['full_name']}: {len(rows)} py files (reused)")
             continue
         rows = []
         n_err = 0
@@ -103,7 +129,6 @@ def run(config: dict) -> None:
             rows.append(row)
             if fa.error:
                 n_err += 1
-        out = ANALYSIS_DIR / (rec["full_name"].replace("/", "__") + ".jsonl")
         with open(out, "w") as f:
             for row in rows:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -112,6 +137,7 @@ def run(config: dict) -> None:
         rec["analysis_errors"] = n_err
         rec["vendored_files_skipped"] = n_vendored
         rec["rdf_deps"] = _rdf_deps(root)
+        save_manifest(manifest)          # checkpoint: analysis is resumable
         all_rows.extend(rows)
         print(f"  {rec['full_name']}: {rec['python_files']} py files, "
               f"{rec['rdf_files']} with RDF ops, {n_err} unparsable"

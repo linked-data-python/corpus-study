@@ -11,8 +11,10 @@ hand-picked examples.
 Public repositories that use RDFLib are discovered through four independent
 channels (GitHub code search, GitHub repository search, Wheelodex reverse
 dependencies of the `rdflib` PyPI distribution, and a curated seed list for
-domain diversity), pinned to exact commits in a version-controlled manifest,
-and cloned. Every Python file is analysed with an AST-based analyser that
+domain diversity), filtered by explicit criteria on GitHub metadata (licence
+permitting snippet redistribution, activity, size, amount of Python, and
+exclusion of teaching material and of the library itself), pinned to exact
+commits in a version-controlled manifest, and cloned. Every Python file is analysed with an AST-based analyser that
 distinguishes actual RDF operations from incidental occurrences; files are
 stratified into RDF-density bands and sampled with a fixed seed. Inside
 sampled files, RDF-heavy functions are extracted as regions (whole files
@@ -58,10 +60,12 @@ Tests: `python -m pytest tests/`.
 
 ## Results as of 2026-08-28
 
-60 repositories pinned, 5 812 Python files analysed, 1 557 RDF-relevant,
-47 323 RDF operations. 52 sampled files → 163 regions → 151 reviewed
-translations → **140 pairs proved semantically equivalent** (0 found
-non-equivalent, 1 unresolved).
+**444 repositories** pinned (407 satisfying the selection criteria, 38 pruned
+after analysis for holding no analysable RDF Python), **38 845 Python files
+analysed, 6 095 RDF-relevant, 182 664 RDF operations**. The translation study
+was drawn from the first wave of 60 repositories and has not been re-drawn:
+52 sampled files → 163 regions → 151 reviewed translations → **140 pairs
+proved semantically equivalent** (0 found non-equivalent, 1 unresolved).
 
 The pooled median token reduction is 1.1 %, and that number is meaningless
 on its own: it pools four situations distinguished by **where the RDF of the
