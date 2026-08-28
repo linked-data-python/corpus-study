@@ -220,3 +220,111 @@ def build():
     draft, _ = draft_translation(src)
     assert draft.splitlines()[1].startswith("@prefix ex:")
     transpile(draft, filename="<indented>")
+
+
+# --- the reading oracle (design record corpus/403) ---------------------------
+
+FIXTURE_TTL = """\
+@prefix ex: <http://example.org/> .
+ex:a a ex:Sensor ; ex:v 1 ; ex:label "A" .
+ex:b a ex:Sensor ; ex:v 2 ; ex:label "B" .
+ex:c a ex:Other  ; ex:v 3 .
+"""
+
+READ_ORIGINAL = """\
+from rdflib import Graph, Namespace, RDF
+
+EX = Namespace("http://example.org/")
+
+
+def read(g: Graph):
+    sensors = g.subjects(RDF.type, EX.Sensor)
+    label = g.value(EX.a, EX.label)
+    values = [int(v) for v in g.objects(EX.b, EX.v)]
+    return sorted(str(s) for s in sensors), label, values
+"""
+
+READ_TRANSLATED = """\
+from rdflib import Graph
+@prefix ex: <http://example.org/> .
+
+
+def read(g: Graph):
+    @graph g
+    sensors = m{ ?s a ex:Sensor }
+    label = m{ ex:a ex:label ?l }.first()
+    values = [int(v) for v in m{ ex:b ex:v ?v }]
+    return sorted(str(s) for s in sensors), label, values
+"""
+
+
+def _read_pair(tmp_path, translated=READ_TRANSLATED, driver_kwargs="fixture='fixture.ttl'"):
+    (tmp_path / "fixture.ttl").write_text(FIXTURE_TTL)
+    (tmp_path / "original.py").write_text(READ_ORIGINAL)
+    (tmp_path / "translated.ldpy").write_text(translated)
+    (tmp_path / "driver.py").write_text(
+        "from rdfeval.harness import run_pair\n"
+        f"VERDICT = run_pair(__file__, entry='read', {driver_kwargs})\n")
+    proc = subprocess.run([sys.executable, str(tmp_path / "driver.py")],
+                          capture_output=True, text=True, cwd=tmp_path,
+                          timeout=120)
+    import json
+    for line in proc.stderr.splitlines():
+        if line.startswith("RDFEVAL-VERDICT "):
+            return json.loads(line[len("RDFEVAL-VERDICT "):])
+    raise AssertionError(proc.stderr or proc.stdout)
+
+
+def test_reading_oracle_proves_a_read_region_equivalent(tmp_path):
+    """The oracle for reading is not isomorphism but the equality of the
+    values both versions produce from the same input graph."""
+    verdict = _read_pair(tmp_path)
+    assert verdict["error"] is None, verdict["error"]
+    assert verdict["equivalent"], verdict["diffs"]
+    assert verdict["method"] == "fixture:fixture.ttl entry:read"
+    assert verdict["ordered"] is False
+
+
+def test_reading_oracle_catches_a_wrong_pattern(tmp_path):
+    wrong = READ_TRANSLATED.replace("m{ ?s a ex:Sensor }", "m{ ?s a ex:Other }")
+    verdict = _read_pair(tmp_path, translated=wrong)
+    assert not verdict["equivalent"]
+    assert any("result" in d for d in verdict["diffs"])
+
+
+def test_a_lazy_result_is_materialised_before_comparison():
+    """A generator compares equal to nothing, including itself: both sides
+    must be walked first."""
+    from rdflib import Graph, Literal, URIRef
+    from rdfeval.harness import materialise
+    g = Graph()
+    g.add((URIRef("http://e/a"), URIRef("http://e/p"), Literal(1)))
+    assert materialise(g.objects()) == [Literal(1)]
+    assert materialise(iter([1, 2])) == [1, 2]
+    assert materialise({"k": iter([1])}) == {"k": [1]}
+    assert materialise(g) is g                      # a graph stays a graph
+    assert materialise("abc") == "abc"              # a string is not a sequence
+
+
+def test_a_sparql_result_is_materialised_as_rows():
+    from rdflib import Graph
+    from rdfeval.harness import materialise
+    g = Graph().parse(data=FIXTURE_TTL, format="turtle")
+    rows = materialise(g.query(
+        "SELECT ?s WHERE { ?s a <http://example.org/Sensor> } ORDER BY ?s"))
+    assert [str(r[0]) for r in rows] == ["http://example.org/a",
+                                         "http://example.org/b"]
+    assert materialise(g.query("ASK { <http://example.org/a> a "
+                               "<http://example.org/Sensor> }")) is True
+
+
+def test_solution_order_is_not_meaning_unless_the_driver_says_so():
+    """No store promises an order, so a fixture run compares multisets."""
+    from rdfeval.harness import _compare_value
+    diffs: list = []
+    _compare_value([1, 2], [2, 1], "r", diffs, ordered=False)
+    assert diffs == []
+    _compare_value([1, 2], [2, 1], "r", diffs, ordered=True)
+    assert len(diffs) == 1
+    _compare_value([1, 1, 2], [1, 2, 2], "r", diffs, ordered=False)
+    assert len(diffs) == 2, "a multiset still counts multiplicity"

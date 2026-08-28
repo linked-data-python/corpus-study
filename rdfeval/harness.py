@@ -12,6 +12,19 @@ A driver calls :func:`run_pair`, which
      never raw serialisation; other values are normalised
      (term-by-term for lists/tuples/sets/dicts) then compared for equality.
 
+**Reading regions** (the oracle of design record ``corpus/403``) are not
+covered by graph isomorphism: they produce *values*, so the oracle is the
+equality of what the two versions produce from the same input graph.  Pass
+``fixture=`` a Turtle file and :func:`run_pair` parses it into a fresh graph
+per side and calls the entry point with it.  Two properties of RDF reading
+shape the comparison:
+
+  * a lazy result — a generator, an rdflib ``Result``, an ldpy match — is
+    **materialised** before anything is compared, on both sides;
+  * the order in which a store yields solutions is not specified, so results
+    are compared as **multisets** unless ``ordered=True`` says the region
+    itself imposes an order (it sorts, or the query has an ``ORDER BY``).
+
 The verdict is a JSON-serialisable dict; drivers print it so the validate
 stage can collect it from a subprocess.
 """
@@ -46,6 +59,54 @@ def _exec_ldpy(path: Path) -> tuple[dict, str]:
     return ns, out.getvalue()
 
 
+def fixture_graph(path) -> object:
+    """A fresh graph parsed from a Turtle fixture.
+
+    Called once per side, so a region that also *writes* cannot leak its
+    effects into the other version's input.
+    """
+    from rdflib import Graph
+    p = Path(path)
+    return Graph().parse(source=str(p), format="turtle")
+
+
+_ATOMIC = (str, bytes, bytearray, dict, set, frozenset, list, tuple)
+
+
+def materialise(value):
+    """Walk a lazy result until it is comparable.
+
+    ``g.objects(...)`` is a generator, ``g.query(...)`` an rdflib ``Result``,
+    ``m{ }`` a lazy match: none of them compares as a value, and each is
+    consumed by being read.  Everything iterable that is not already a
+    container, a string or a graph becomes a list; rows become tuples.
+    """
+    from rdflib import Graph
+    from rdflib.query import Result, ResultRow
+    if isinstance(value, Result):
+        if value.type == "ASK":
+            return bool(value)
+        return [materialise(row) for row in value]
+    if isinstance(value, ResultRow):
+        return tuple(value)
+    if isinstance(value, (Graph, str, bytes, bytearray)):
+        return value
+    if isinstance(value, dict):
+        return {k: materialise(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return type(value)(materialise(v) for v in value)
+    if isinstance(value, (set, frozenset)):
+        return {materialise(v) for v in value}
+    if hasattr(value, "__iter__") and not isinstance(value, _ATOMIC):
+        return [materialise(v) for v in value]
+    return value
+
+
+def _multiset(value):
+    """A comparison key that ignores order but not multiplicity."""
+    return sorted(repr(normalise(v)) for v in value)
+
+
 def _graphs(ns: dict) -> dict[str, object]:
     from rdflib import Graph
     return {k: v for k, v in ns.items()
@@ -74,7 +135,8 @@ def normalise(value):
     return value
 
 
-def _compare_value(a, b, label: str, diffs: list[str]) -> None:
+def _compare_value(a, b, label: str, diffs: list[str],
+                   ordered: bool = True) -> None:
     from rdflib import Graph
     if isinstance(a, Graph) and isinstance(b, Graph):
         if not graphs_isomorphic(a, b):
@@ -82,7 +144,12 @@ def _compare_value(a, b, label: str, diffs: list[str]) -> None:
                          f"({len(a)} vs {len(b)} triples)")
         return
     try:
-        equal = normalise(a) == normalise(b)
+        a, b = materialise(a), materialise(b)
+        if not ordered and isinstance(a, (list, tuple)) \
+                and isinstance(b, (list, tuple)):
+            equal = _multiset(a) == _multiset(b)
+        else:
+            equal = normalise(a) == normalise(b)
     except Exception as e:
         diffs.append(f"{label}: comparison error {e}")
         return
@@ -91,10 +158,33 @@ def _compare_value(a, b, label: str, diffs: list[str]) -> None:
 
 
 def run_pair(driver_file: str, entry: str | None = None,
-             calls: list | None = None) -> dict:
+             calls: list | None = None, fixture: str | None = None,
+             ordered: bool | None = None) -> dict:
+    """Establish that ``original.py`` and ``translated.ldpy`` agree.
+
+    ``entry``/``calls``   compare what a function returns and what it mutates
+    ``fixture``           a Turtle file, parsed fresh for each side and passed
+                          to ``entry`` as its single argument — the reading
+                          oracle: same input graph, same values out
+    ``ordered``           whether the order of a sequence is part of the
+                          region's meaning.  Defaults to True, and to False
+                          for a fixture run: no RDF store promises an order,
+                          so a region that wants one must sort or ``ORDER BY``
+                          — and then the driver says ``ordered=True``.
+    """
     ex_dir = Path(driver_file).resolve().parent
+    if ordered is None:
+        ordered = fixture is None
     verdict: dict = {"example": ex_dir.name, "equivalent": False,
                      "method": None, "diffs": [], "error": None}
+    if fixture is not None:
+        if not entry:
+            verdict["error"] = "fixture= needs entry= (the region to call)"
+            _emit(verdict)
+            return verdict
+        path = ex_dir / fixture
+        if calls is None:
+            calls = [lambda: ((fixture_graph(path),), {})]
     try:
         ns_o, out_o = _exec_python(ex_dir / "original.py")
         ns_t, out_t = _exec_ldpy(ex_dir / "translated.ldpy")
@@ -105,7 +195,9 @@ def run_pair(driver_file: str, entry: str | None = None,
 
     diffs: list[str] = []
     if entry:
-        verdict["method"] = f"entry:{entry}"
+        verdict["method"] = (f"fixture:{fixture} entry:{entry}"
+                             if fixture else f"entry:{entry}")
+        verdict["ordered"] = ordered
         fo, ft = ns_o.get(entry), ns_t.get(entry)
         if not callable(fo) or not callable(ft):
             verdict["error"] = f"entry {entry!r} not found in both modules"
@@ -127,11 +219,12 @@ def run_pair(driver_file: str, entry: str | None = None,
                 verdict["error"] = traceback.format_exc(limit=8)
                 _emit(verdict)
                 return verdict
-            _compare_value(ro, rt, f"call[{i}].result", diffs)
+            _compare_value(ro, rt, f"call[{i}].result", diffs, ordered)
             for j, (ao, at) in enumerate(zip(args_o, args_t)):
-                _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs)
+                _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs, ordered)
             for k in kw_o:
-                _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]", diffs)
+                _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]",
+                               diffs, ordered)
         verdict["calls"] = len(calls)
     else:
         verdict["method"] = "module-state"
