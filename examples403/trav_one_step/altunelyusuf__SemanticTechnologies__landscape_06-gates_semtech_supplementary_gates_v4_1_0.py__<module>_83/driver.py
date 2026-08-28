@@ -3,14 +3,15 @@
 Establishes semantic equivalence of original.py and translated.ldpy.
 
 The region is a bare module-level statement (no enclosing function), so
-entry=None is the only oracle the harness offers here: it compares every
-rdflib Graph in the module globals by isomorphism, plus captured stdout
-(rdfeval/harness.py, module-state branch). The region reads `ab` but never
-writes it, and computes `bad` without printing it — so on its own this
-comparison would hold regardless of whether the loop translated correctly
-(the untouched `ab` is trivially isomorphic on both sides). Both original.py
-and translated.ldpy add an identical `print(sorted(bad))` so the loop's
-actual output is what gets compared.
+entry=None is the oracle here: module-state comparison (rdfeval/harness.py).
+`ab` is read but never written, so its isomorphism alone would be a hollow
+green — but the harness's module-state branch also compares every other
+comparable module-level value (`_values`), which is what actually exercises
+the loop: `bad`, `ks`, `notes`, `insts` and `kind_cls` are all plain
+lists/sets of RDF terms and strings, so they are compared directly. Checked
+by deliberately mistranslating the m{ } pattern for `ks` during review: the
+verdict failed on `bad`, `ks` and stdout together, confirming the comparison
+is load-bearing, not vacuous.
 """
 from rdfeval.harness import run_pair
 

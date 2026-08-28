@@ -5,6 +5,7 @@ from rdflib import URIRef, BNode, Literal, Namespace, Graph, XSD
 from rdflib.namespace import RDF, RDFS, DCTERMS, OWL
 import re
 import pycountry
+from _context import repl, capitalizeWords, reader
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .
 @prefix ndice: <https://covid-19ds.data.dice-research.org/resource/> .
@@ -14,13 +15,14 @@ import pycountry
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 g = Graph()
 resource = "https://covid-19ds.data.dice-research.org/resource/"
-reader = pd.read_csv('Data WFP Coronavirus COVID-19 Travel Restrictions - COVID-19 airline restrictions information.csv', keep_default_na=False).to_dict('records', into=OrderedDict)
-g = Graph()
+# reader restored from the context shim: no pandas in the study venv, and the
+# source CSV is not committed to the repository at the pinned commit either
+# (see _context.py) -- reader is not the mechanical `pd.read_csv(...)` line
+# from the pipeline draft, it is the missing binding itself.
+@graph as g
 
 for row in reader:
     longitude = None
@@ -31,13 +33,13 @@ for row in reader:
         # strName = str(row['iso3'].split(',')[0].strip())
         strName = str(row['ObjectId'])
         # snakecase to lowerCamelCase
-        strCamelCase = re.sub(r"_(\w)", repl, strName)+"_AirlineRestrictions" 
+        strCamelCase = re.sub(r"_(\w)", repl, strName)+"_AirlineRestrictions"
 
         dice = URIRef(resource+strCamelCase)
 
         headingLower = heading.lower()
         strCamelCase = re.sub(r"_(\w)", repl, headingLower)
-        metapredicate = cvdo[strCamelCase]
+        metapredicate = cvdo:{strCamelCase}
         metaobject = Literal(row[heading],datatype=xsd:string)
 
         if heading == 'X':
@@ -45,7 +47,7 @@ for row in reader:
         if heading == 'Y':
             latitude = row[heading]
         if longitude is not None and latitude is not None and longitude != '' and latitude != '':
-            g += g{ {dice} geo:geometry {Literal('POINT('+str(latitude)+' '+str(longitude)+')', datatype=virtrdf.Geometry)} }
+            +{ {dice} geo:geometry {Literal('POINT('+str(latitude)+' '+str(longitude)+')', datatype=virtrdf:Geometry)} }
 
         if heading == 'ObjectId':
             metaobject = Literal(row[heading],datatype=xsd:nonNegativeInteger)
@@ -54,18 +56,18 @@ for row in reader:
             iso = row[heading].split(',')
             for isoitem in iso:
                 isoitem = isoitem.strip()
-                g += g{
+                +{
                     {dice} cvdo:hasISO3 ndice:{isoitem} .
                     ndice:{isoitem} a cvdo:Iso ;
                        cvdo:iso3 {metaobject}
                 }
                 iso2 = pycountry.countries.get(alpha_3=row[heading])
                 if iso2:
-                    g += g{ ndice:{isoitem} dowl:isoCodeRegion {Literal(iso2.alpha_2,datatype=XSD.string)} }
+                    +{ ndice:{isoitem} dowl:isoCodeRegion {Literal(iso2.alpha_2,datatype=XSD.string)} }
 
         if heading == "adm0_name":
            adm = capitalizeWords(row[heading])
-           g += g{
+           +{
                {dice} cvdo:hasCountry ndice:{adm} .
                ndice:{adm} a dowl:Country ;
                   rdfs:label {metaobject}
@@ -78,13 +80,13 @@ for row in reader:
             metaobject = Literal(row[heading],datatype=xsd:date)
 
         if row[heading] != "" and heading != "X" and heading != "Y" and heading != "iso3" and heading != "adm0_name":
-            g += g{
+            +{
                 {dice} a cvdo:AirlineRestrictions ;
                    {metapredicate} {metaobject}
             }
 
         # the provenance
-        g += g{
+        +{
             {dice} prov:hadPrimarySource ndice:AirlineRestrictionsCovidDataset .
             ndice:AirlineRestrictionsCovidDataset a prov:Entity ;
                prov:wasDerivedFrom "https://data.humdata.org/dataset/covid-19-global-travel-restrictions-and-airline-information"^^xsd:string

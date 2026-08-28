@@ -1,4 +1,109 @@
-# Input graph for aigora-de__rdf-construct__src_rdf_construct_shacl_converters.py__CardinalityConverter_convert_for_class — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for
+# aigora-de__rdf-construct__src_rdf_construct_shacl_converters.py__CardinalityConverter_convert_for_class
+# -- written during translation. `cls` is bound to ex:Widget by the driver
+# for most restrictions below; ex:Gadget (the driver's second call) has none
+# at all -- the zero-solution case.
+#
+# Positive restrictions on ex:Widget (r1..r10) exercise every branch of the
+# function: plain/min/max/qualified/min-qualified/max-qualified cardinality,
+# someValuesFrom onto a datatype and onto a class, allValuesFrom onto a
+# class declared rdfs:Datatype (the OTHER branch of _is_datatype, distinct
+# from the XSD-namespace check) and onto a plain class.
+#
+# Neighbourhood (r11..r14, ex:RegularSuper) satisfies only ONE or TWO of the
+# three joined motifs (subClassOf ex:Widget / a owl:Restriction /
+# owl:onProperty) and must contribute nothing -- this is what proves the
+# fused m{ } actually joins instead of just chaining independent selectors.
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# r1: exact cardinality
+ex:Widget rdfs:subClassOf _:r1 .
+_:r1 a owl:Restriction ;
+    owl:onProperty ex:hasName ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+
+# r2: min and max cardinality together
+ex:Widget rdfs:subClassOf _:r2 .
+_:r2 a owl:Restriction ;
+    owl:onProperty ex:hasCount ;
+    owl:minCardinality "2"^^xsd:nonNegativeInteger ;
+    owl:maxCardinality "5"^^xsd:nonNegativeInteger .
+
+# r3: qualified cardinality with onClass
+ex:Widget rdfs:subClassOf _:r3 .
+_:r3 a owl:Restriction ;
+    owl:onProperty ex:hasPart ;
+    owl:qualifiedCardinality "3"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:Part .
+
+# r4: min qualified cardinality with onClass
+ex:Widget rdfs:subClassOf _:r4 .
+_:r4 a owl:Restriction ;
+    owl:onProperty ex:hasLabel ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:LabelClass .
+
+# r5: qualified cardinality with onDataRange (not onClass)
+ex:Widget rdfs:subClassOf _:r5 .
+_:r5 a owl:Restriction ;
+    owl:onProperty ex:hasCode ;
+    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onDataRange xsd:string .
+
+# r6: max qualified cardinality with onClass
+ex:Widget rdfs:subClassOf _:r6 .
+_:r6 a owl:Restriction ;
+    owl:onProperty ex:hasTag ;
+    owl:maxQualifiedCardinality "10"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:Tag .
+
+# r7: someValuesFrom a datatype (XSD-namespace branch of _is_datatype)
+ex:Widget rdfs:subClassOf _:r7 .
+_:r7 a owl:Restriction ;
+    owl:onProperty ex:hasRating ;
+    owl:someValuesFrom xsd:integer .
+
+# r8: someValuesFrom a plain class (not a datatype)
+ex:Widget rdfs:subClassOf _:r8 .
+_:r8 a owl:Restriction ;
+    owl:onProperty ex:hasOwner ;
+    owl:someValuesFrom ex:Person .
+
+# r9: allValuesFrom a URIRef declared rdfs:Datatype (the OTHER branch of
+# _is_datatype -- not in the XSD namespace, but explicitly typed)
+ex:Widget rdfs:subClassOf _:r9 .
+_:r9 a owl:Restriction ;
+    owl:onProperty ex:hasStatus ;
+    owl:allValuesFrom ex:StatusEnum .
+ex:StatusEnum a rdfs:Datatype .
+
+# r10: allValuesFrom a plain class
+ex:Widget rdfs:subClassOf _:r10 .
+_:r10 a owl:Restriction ;
+    owl:onProperty ex:hasColor ;
+    owl:allValuesFrom ex:Color .
+
+# r11: subClassOf ex:Widget and a blank node, but NOT an owl:Restriction --
+# satisfies only the first motif.
+ex:Widget rdfs:subClassOf _:r11 .
+_:r11 a owl:Class .
+
+# r12: an owl:Restriction with onProperty, but NOT reached from ex:Widget --
+# satisfies only the second and third motifs.
+ex:Other rdfs:subClassOf _:r12 .
+_:r12 a owl:Restriction ;
+    owl:onProperty ex:hasIgnored .
+
+# r13: subClassOf ex:Widget and an owl:Restriction, but with NO onProperty
+# at all -- satisfies the first two motifs, zero solutions for the third.
+ex:Widget rdfs:subClassOf _:r13 .
+_:r13 a owl:Restriction .
+
+# A normal (non-restriction, non-blank) superclass: satisfies the first
+# motif trivially but is not an owl:Restriction.
+ex:Widget rdfs:subClassOf ex:RegularSuper .
+ex:RegularSuper a owl:Class .

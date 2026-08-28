@@ -21,6 +21,8 @@ and an empty graph (the zero-solution case).
 """
 from rdflib import Graph
 
+import re
+
 from rdfeval.harness import graphs_isomorphic, run_pair
 
 RICH_TTL = """
@@ -126,8 +128,21 @@ def call(ttl):
     return lambda: ((Probe(_graph(ttl)),), {})
 
 
+def drop_nondeterminism(text):
+    """What this region prints that is not its meaning.
+
+    The region prints the graph it was handed — whose identifier is a fresh
+    UUID per `Graph()` — and its own wall-clock phase timings. Neither is a
+    property of the translation. The rest of the output IS compared, and that
+    is where the query results are.
+    """
+    text = re.sub(r"identifier=N[0-9a-f]{32}", "identifier=N<fresh>", text)
+    return re.sub(r"time:\s*[\d.]+", "time: <elapsed>", text)
+
+
 VERDICT = run_pair(
     __file__,
     entry="run_query",
     calls=[call(RICH_TTL), call(EMPTY_TTL)],
+    stdout_filter=drop_nondeterminism,
 )

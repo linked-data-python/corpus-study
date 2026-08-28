@@ -5,8 +5,7 @@ from typing import Union, List, Callable, ClassVar, Tuple, Any
 from rdflib import URIRef, Graph
 from rdflib.namespace import OWL, RDF, RDFS
 from rdflib.term import BNode
-from funowl.base.clone_subgraph import clone_subgraph, USE_BNODE_COPIES
-from funowl.base.rdftriple import SUBJ, TRIPLE, PRED, TARG
+from context_shim import clone_subgraph, USE_BNODE_COPIES
 
 def TANN(self, g: Graph, subj: Union[SUBJ, TRIPLE]) -> None:
     """

@@ -3,9 +3,8 @@
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
 from rdflib.namespace import OWL
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import PropertyConstraint  # context shim -- see meta.json
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 
@@ -17,17 +16,21 @@ def convert_for_class(
 ) -> list[PropertyConstraint]:
     """Extract cardinality restrictions from class definition."""
     constraints: list[PropertyConstraint] = []
+    @graph source_graph
 
-    # Find restrictions that this class is a subclass of
-    for superclass in source_graph.objects(cls, rdfs:subClassOf):
+    # Find restrictions that this class is a subclass of, that are actually
+    # owl:Restriction nodes carrying an onProperty: one join instead of a
+    # loop feeding two hand-written checks (a BNode-typed superclass, then
+    # "(superclass, RDF.type, OWL.Restriction) in graph", then a first
+    # value() lookup for onProperty that must also succeed).
+    for superclass, on_prop in m{ {cls} rdfs:subClassOf ?superclass .
+                                   ?superclass a owl:Restriction ;
+                                       owl:onProperty ?on_prop }:
+        # m{ } has no term-kind filter, so the "is it a blank node" check
+        # stays a plain Python guard -- unchanged in position or effect.
         if not isinstance(superclass, BNode):
             continue
 
-        # Check if it's an owl:Restriction
-        if (superclass, rdf:type, owl:Restriction) not in source_graph:
-            continue
-
-        on_prop = source_graph.value(superclass, owl:onProperty)
         if not isinstance(on_prop, URIRef):
             continue
 
@@ -35,58 +38,58 @@ def convert_for_class(
         has_constraint = False
 
         # Exact cardinality
-        exact = source_graph.value(superclass, owl:cardinality)
+        exact = m{ {superclass} owl:cardinality ?v }.first()
         if exact:
             constraint.min_count = int(exact)
             constraint.max_count = int(exact)
             has_constraint = True
 
         # Minimum cardinality
-        min_card = source_graph.value(superclass, owl:minCardinality)
+        min_card = m{ {superclass} owl:minCardinality ?v }.first()
         if min_card:
             constraint.min_count = int(min_card)
             has_constraint = True
 
         # Maximum cardinality
-        max_card = source_graph.value(superclass, owl:maxCardinality)
+        max_card = m{ {superclass} owl:maxCardinality ?v }.first()
         if max_card:
             constraint.max_count = int(max_card)
             has_constraint = True
 
         # Qualified cardinality
-        qual_card = source_graph.value(superclass, owl:qualifiedCardinality)
+        qual_card = m{ {superclass} owl:qualifiedCardinality ?v }.first()
         if qual_card:
             constraint.min_count = int(qual_card)
             constraint.max_count = int(qual_card)
             # Also get the qualification
-            on_class = source_graph.value(superclass, owl:onClass)
+            on_class = m{ {superclass} owl:onClass ?v }.first()
             if on_class:
                 constraint.node_class = on_class
-            on_data = source_graph.value(superclass, owl:onDataRange)
+            on_data = m{ {superclass} owl:onDataRange ?v }.first()
             if on_data:
                 constraint.datatype = on_data
             has_constraint = True
 
         # Qualified min cardinality
-        qual_min = source_graph.value(superclass, owl:minQualifiedCardinality)
+        qual_min = m{ {superclass} owl:minQualifiedCardinality ?v }.first()
         if qual_min:
             constraint.min_count = int(qual_min)
-            on_class = source_graph.value(superclass, owl:onClass)
+            on_class = m{ {superclass} owl:onClass ?v }.first()
             if on_class:
                 constraint.node_class = on_class
             has_constraint = True
 
         # Qualified max cardinality
-        qual_max = source_graph.value(superclass, owl:maxQualifiedCardinality)
+        qual_max = m{ {superclass} owl:maxQualifiedCardinality ?v }.first()
         if qual_max:
             constraint.max_count = int(qual_max)
-            on_class = source_graph.value(superclass, owl:onClass)
+            on_class = m{ {superclass} owl:onClass ?v }.first()
             if on_class:
                 constraint.node_class = on_class
             has_constraint = True
 
         # someValuesFrom implies at least one value
-        some_from = source_graph.value(superclass, owl:someValuesFrom)
+        some_from = m{ {superclass} owl:someValuesFrom ?v }.first()
         if some_from:
             constraint.min_count = 1
             if isinstance(some_from, URIRef):
@@ -98,7 +101,7 @@ def convert_for_class(
             has_constraint = True
 
         # allValuesFrom constrains the type but not cardinality
-        all_from = source_graph.value(superclass, owl:allValuesFrom)
+        all_from = m{ {superclass} owl:allValuesFrom ?v }.first()
         if all_from and isinstance(all_from, URIRef):
             if self._is_datatype(all_from, source_graph):
                 constraint.datatype = all_from

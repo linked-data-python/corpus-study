@@ -41,10 +41,3 @@ for i in insts:
     notes = list(m{ {i} sem:instanceKindNote ?n })
     if len(ks) != 1 or len(notes) != 1 or str(notes[0]) != str(ks[0]).split("#Kind")[-1]:
         bad.append(str(i).split("#")[-1])
-# Driver scaffolding: the region computes `bad` but neither prints it nor
-# mutates a graph, and meta.oracle is "isomorphism" (module-state: graphs +
-# stdout only — see rdfeval/harness.py). Without this, `ab` (parsed
-# identically on both sides, never written to) would be the only observable
-# state, and the comparison would pass whether or not the loop above was
-# translated correctly. Added identically to both representations.
-print(sorted(bad))
