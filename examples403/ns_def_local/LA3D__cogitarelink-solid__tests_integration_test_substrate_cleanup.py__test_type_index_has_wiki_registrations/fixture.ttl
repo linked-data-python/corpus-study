@@ -1,4 +1,46 @@
-# Input graph for LA3D__cogitarelink-solid__tests_integration_test_substrate_cleanup.py__test_type_index_has_wiki_registrations — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for LA3D__cogitarelink-solid__tests_integration_test_substrate_cleanup.py__test_type_index_has_wiki_registrations
+#
+# NOT actually wired through run_pair's fixture= mechanism -- see meta.json:
+# the region's entry point takes no argument (it fetches and parses its own
+# graph over HTTP internally), so run_pair's `entry(fixture_graph(...))`
+# calling convention does not apply. Kept as documentation of what a real
+# `settings/publicTypeIndex` document looks like, shaped per corpus/403's
+# oracle requirements anyway: several matching solutions, the wiki:Page
+# abstract class NOT registered (the zero-solution case the docstring
+# calls out), and a registration for an unrelated predicate that must not
+# match solid:forClass.
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix wiki: <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix schema: <https://schema.org/> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<#concept> a solid:TypeRegistration ;
+    solid:forClass skos:Concept ;
+    solid:instance </vault/wiki/concepts/> .
+
+<#source> a solid:TypeRegistration ;
+    solid:forClass wiki:Source ;
+    solid:instance </vault/wiki/sources/> .
+
+<#workingnote> a solid:TypeRegistration ;
+    solid:forClass wiki:WorkingNote ;
+    solid:instance </vault/wiki/notes/> .
+
+<#person> a solid:TypeRegistration ;
+    solid:forClass schema:Person ;
+    solid:instance </vault/wiki/people/> .
+
+<#place> a solid:TypeRegistration ;
+    solid:forClass schema:Place ;
+    solid:instance </vault/wiki/places/> .
+
+# Neighbouring triple that must NOT match solid:forClass: a container
+# description with no registration semantics at all.
+<#storage> a ldp:BasicContainer ;
+    rdf:type wiki:Page .
+
+# wiki:Page itself is never the object of solid:forClass anywhere above --
+# the zero-solution case the region's docstring asserts (D106: "the
+# abstract wiki:Page is NOT registered").

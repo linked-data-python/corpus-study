@@ -10,10 +10,15 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `triple` is a whole triple PATTERN held as an opaque caller-supplied string -- upstream's own checkEntailments(g) calls this with eight different shapes: ':Father rdfs:subClassOf :Person .', ':Ann a :Child .', ':Ann :isChildOf :Carl .', 'rdfs:range rdf:type rdfs:Resource .', etc. -- concatenated with `+` straight into the ASK query's body: `\"\"\"ASK {\"\"\" + triple + \"\"\" }\"\"\"`.",
+    "out of reach by construction, on the read side: querying.md is explicit that s{ }'s interpolation ({expr}) 'is allowed where a term may stand' and lowers to initBindings, never a string substitution -- there is no island for 'an entire triple pattern held in a variable', the same limit INSTRUCTIONS_403 SS2 notes for -{ }/m{ } (which take a WRITTEN pattern, never one received as data), here applied on rdflib's own query engine rather than a BGP island.",
+    "no partial credit either: subject, predicate and object all vary independently across the eight call sites (a class-hierarchy triple, an rdf:type triple, a two-hop-inference property triple, an axiomatic RDFS triple used as its own subject) -- there is no fixed term slot within a fixed clause shape to interpolate even after the fact.",
+    "checkEntailment(g, triple) only prints (no return, no assertion); it is the eight real (g, triple) invocations from upstream's checkEntailments(g), against a hand-written fixture graph, that prove the (unmodified) region still computes right: four ASKs come back True (triple1, triple3, triple4, triple7), four come back False -- the zero-solution case for this stratum (triple2, triple5, triple6, triple8). fixture.ttl documents which and why; it does not attempt to reproduce owlrl's RDFS closure (that reasoning step belongs to the enclosing RDFSInference(), which is not part of this region)."
+  ],
   "draft_sha": "9d314ab40aa43e63",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.150348+00:00",

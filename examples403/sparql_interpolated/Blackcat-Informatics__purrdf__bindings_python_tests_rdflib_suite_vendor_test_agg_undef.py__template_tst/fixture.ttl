@@ -1,4 +1,7 @@
-# Input graph for Blackcat-Informatics__purrdf__bindings_python_tests_rdflib_suite_vendor_test_agg_undef.py__template_tst — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Not used by driver.py: `template_tst(agg_func, first, second)` builds its
+# own empty Graph() *inside* the function body and gets all its data from
+# the query's own VALUES clause -- there is no external graph to parse a
+# fixture into. See meta.json / driver.py: the oracle here is `calls=`, the
+# six real (agg_func, first, second) triples from upstream's
+# get_aggregates_tests(), not a fixture graph.
 @prefix ex: <http://example.org/> .

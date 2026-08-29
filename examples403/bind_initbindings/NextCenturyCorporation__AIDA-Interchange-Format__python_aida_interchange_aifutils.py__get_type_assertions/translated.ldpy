@@ -1,12 +1,7 @@
 # Extracted from NextCenturyCorporation/AIDA-Interchange-Format@1197e7adef : python/aida_interchange/aifutils.py
 # region: get_type_assertions (lines 991-1002, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-_TYPE_QUERY = prepareQuery("""SELECT ?typeAssertion WHERE {
-  ?typeAssertion a rdf:Statement .
-  ?typeAssertion rdf:predicate rdf:type .
-  ?typeAssertion rdf:subject ?typedObject .
-  }
-  """)
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 def get_type_assertions(g, typed_object):
     """
@@ -18,5 +13,11 @@ def get_type_assertions(g, typed_object):
     :returns: A list of type assertions for the specified entity
     :rtype: list
     """
-    query_result = g.query(_TYPE_QUERY, initBindings={'typedObject': typed_object})
+    query_result = s{
+        SELECT ?typeAssertion WHERE {
+          ?typeAssertion a rdf:Statement .
+          ?typeAssertion rdf:predicate rdf:type .
+          ?typeAssertion rdf:subject {typed_object} .
+          }
+    }(g)
     return [x for (x,) in query_result]

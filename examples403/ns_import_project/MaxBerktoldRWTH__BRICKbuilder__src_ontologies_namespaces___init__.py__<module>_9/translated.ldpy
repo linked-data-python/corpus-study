@@ -1,4 +1,23 @@
 # Extracted from MaxBerktoldRWTH/BRICKbuilder@28f0710933 : src/ontologies/namespaces/__init__.py
 # region: <module> (lines 9-9, stratum ns_import_project)
 # licence of the source repository: see meta.json
-from src.ontologies.namespaces.qudt import QUDT, QUDTU, QUDTQK
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `src.ontologies.namespaces.qudt` rewritten to `qudt_ns_context`, the shim
+# module next to this file (the real dotted project path does not resolve
+# for a single extracted file).
+from qudt_ns_context import qudt:, qudtu:, qudtqk:
+
+
+# Demo harness (identical on both sides, see meta.json): this region is a
+# single re-export line with rdf_ops=0 -- it binds names but performs no
+# graph operation of its own, so there is nothing for the harness's default
+# module-state comparison to observe UNLESS the bound namespaces are
+# actually dereferenced. The prefix import means QUDT/QUDTU/QUDTQK stop
+# existing as module-level Python names at all (declarations.md: "no name
+# is captured"), so comparing module globals directly would report every
+# name as missing on this side, for a reason that has nothing to do with
+# whether the translation is correct. demo() dereferences one real term
+# from each namespace instead, and returns their string forms.
+def demo():
+    return (str(qudt:hasUnit), str(qudtu:M), str(qudtqk:Length))

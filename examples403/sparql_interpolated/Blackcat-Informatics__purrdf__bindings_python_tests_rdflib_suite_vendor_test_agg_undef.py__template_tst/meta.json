@@ -13,11 +13,14 @@
     "graph_ctor": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
   "translation_notes": [
-    "prefixes: RDFS->rdfs"
+    "Identity translation: `agg_func` is spliced with `%s` into `SELECT ?x (%s(?y_) as ?y) { ... }` -- it names the SPARQL AGGREGATE FUNCTION (SUM, MIN, MAX, SAMPLE, COUNT, GROUP_CONCAT), a syntax position, not a term. `s{ }`'s interpolation ({expr}) is legal only in TERM position and lowers to initBindings (querying.md: \"Interpolation in term position only\"); there is no island for 'a keyword chosen at call time', the same limit as a motif of variable FORM, here applied to the aggregate function name rather than a whole clause.",
+    "minimal excerpt showing the limit: `query_tpl % agg_func` where `query_tpl` is `\"SELECT ?x (%s(?y_) as ?y) { VALUES (?x ?y_ ?z) {...} } GROUP BY ?x ORDER BY ?x\"` and `agg_func` ranges over SUM/MIN/MAX/SAMPLE/COUNT/GROUP_CONCAT across upstream's own get_aggregates_tests() -- six distinct query shapes from one template, none of them a term substitution.",
+    "no fixture graph: `g = Graph()` is built empty inside the function, and all data comes from the query's own inline VALUES clause -- fixture.ttl is unused (see its header) and the driver calls the six real (agg_func, first, second) invocations from upstream's get_aggregates_tests() instead (AVG is commented out there too, at the pinned commit).",
+    "template_tst only asserts and prints (no return, no mutated argument to compare), so the driver's oracle is call[i].result/stdout equality across the six real invocations -- trivially satisfied by an unmodified region, but that identity is exactly the point being demonstrated."
   ],
   "draft_sha": "b2dacc7f315a71d0",
   "provenance": {

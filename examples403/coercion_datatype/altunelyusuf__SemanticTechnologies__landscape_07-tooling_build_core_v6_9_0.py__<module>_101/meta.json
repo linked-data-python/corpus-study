@@ -14,12 +14,28 @@
     "term_constructor": 4,
     "triple_add": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: SRNS->srns, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "f<…>",
+    "language literal",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "Genuine language-tagged literals (not the Warning-1 untyped case, and not a datatype= either): Literal(e[\"cite\"][:180], lang=\"en\"), Literal(e[\"cite\"], lang=\"en\") and Literal(f\"...\", lang=\"en\") all carry an explicit language tag. Translated with ldpy's own {expr}@lang notation -- {e[\"cite\"][:180]}@en etc. Verified by direct execution that {f\"Verification level {e['level']}: {e['ev']}\"}@en (an f-string nested inside the interpolation braces) transpiles and matches Literal(f\"...\", lang=\"en\") exactly; no lexical-form normalisation risk since language-tagged literals are always strings (Trap 1 only concerns non-string values under datatype=).",
+    "URIRef(e[\"url\"]) rewritten as a formatted IRI f<{e[\"url\"]}> rather than left as a bare interpolation of the Python call: e[\"url\"] is always an absolute URL in the enrichment data and no @base is declared in this region, so f<...> (no percent-encoding, just resolves against @base) and URIRef(x) agree exactly (Trap 2 does not apply). Kept as f<...>, not e<...>, since the original performs no encoding.",
+    "SRNS is a plain rdflib Namespace (verified: SRNS = Namespace(\"http://example.org/semtech/research#\"), no aliasing/validation), so SRNS[f\"Pub_{...}\"] is exact concatenation and is safely rewritten as the local-part interpolation srns:{f\"Pub_{key.replace(chr(45), chr(95))}\"} (same idiom as ex:{name} in terms.md); SRNS.ResearchCorpus was already srns:ResearchCorpus in the mechanical draft.",
+    "RDF.type rewritten as Turtle's 'a' shorthand both times (migrate-from-rdflib.md's canonical mapping), so no @prefix rdf: is declared.",
+    "@graph g1 designates the pre-existing, pre-parsed graph once, before the for-loop (block-scope covers the whole loop body, no re-declaration per iteration). Per iteration: the corpus->pub triple has a different subject from the six pub-subject triples that immediately follow it, so kept as two separate +{ } islands rather than one merged block (no over-merging across a subject change); the six pub-subject adds ARE contiguous and same-subject, merged into one +{ pub p1 o1 ; ... ; p6 o6 } run (add_run_shared_subject).",
+    "Executability: BASEDIR (\"/home/claude/semtech-landscape\", the original author's own machine) and load() -- both defined earlier in the same source file, just outside this region -- restored via context_predecl.py (BASEDIR redirected to a local landscape/ subdirectory holding a verbatim copy of enrichment_o_v6_1_0.py, the EXT8 dict this region iterates). The pre-existing base graph semtech_research_v6_8_0.ttl is a minimal placeholder, not the real 1208-line file: this region never reads g1's pre-existing content, only adds to it, so the base graph's actual content cannot affect this region's correctness (see that file's own header comment).",
+    "Sabotage-tested: dropping @en from one triple's language tag makes rdfeval check fail (graphs not isomorphic), confirming the pilot discriminates language-literal correctness."
+  ],
+  "article_candidate": true,
   "draft_sha": "bdb1a3d16fe4c0aa",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.501736+00:00",
@@ -30,5 +46,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

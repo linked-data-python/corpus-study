@@ -2,6 +2,7 @@
 # region: _division_members (lines 247-254, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from rdflib import OWL, RDF, Graph, URIRef
+from context_shim import _label  # see meta.json: restores the missing helper
 SECTOR_MEMBERS_QUERY = """
 PREFIX oeo:  <https://openenergyplatform.org/ontology/oeo/>
 PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

@@ -12,10 +12,16 @@
   "categories": {
     "sparql": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `query` is a whole SPARQL query STRING passed in by the caller -- `parse_properties(graph, query, parameters, language, issue_list)` is a generic helper, reused by every RDF-based importer with a different `query` (parse_concepts's sibling in the same file has its own CLASSES_QUERY; OWLImporter's real PROPERTIES_QUERY, reused verbatim in driver.py, is a third) -- and only `.format(language=language)` before `prepareQuery(...)`.",
+    "out of reach by construction: querying.md is explicit that `s{ }` is 'written in the language's own syntax, validated at transpile time' -- the island IS the literal query text at the call site. There is no mechanism to hand it a query held in a runtime string, so a function generic over an arbitrary caller-supplied query cannot be expressed by any island regardless of what that particular query contains -- this is a stronger case than a motif of variable FORM (INSTRUCTIONS_403 SS2): here the region does not even know its own query's shape at translation time.",
+    "minimal excerpt showing the limit: `query = prepareQuery(query.format(language=language), initNs=...)` where `query` is the function's own second PARAMETER, not a literal in this region at all.",
+    "context shim (neat_shared_context.py): parse_properties's own module-level siblings convert_rdflib_content/sanitize_entity/handle_meta (free variables, not extracted since only parse_properties itself was) plus the five cognite.neat._v0.core.* imports (a third-party package not installed here) are reproduced -- verbatim for the pure functions, minimal re-declarations matching the real dataclasses' fields for IssueList/NeatValueError/ResourceRedefinedWarning/ResourceRetrievalWarning (the real ones pull in pandas and the Cognite SDK transitively, well beyond what parsing a dict/str field needs), and an unreachable stub for ConceptEntity -- see that module's own header for the full argument and why fixture.ttl's plain http://example.org/ URIs keep that stub unreached on both sides.",
+    "fixture.ttl + fixture_empty.ttl, exercised with upstream's own real PROPERTIES_QUERY (from OWLImporter, the only real caller, at the pinned commit -- not a query invented for this driver): several solutions (ex:hasAge a plain case; ex:hasTag two ranges on one property folding into one grouped entry with a multi-value value_type list; ex:hasQuietFlag with no label/comment at all), a genuine blank-node ?concept and a genuine blank-node ?value_type each hitting one of parse_properties's own BNode-skip branches (confirmed by running original.py directly: issue_list carries exactly the two expected ResourceRetrievalWarnings), the zero-solution case (fixture_empty.ttl -> NeatValueError('Unable to parse properties')), and neighbourhood that must not match the query's own property-type FILTER (an owl:AnnotationProperty) or isn't a property at all (a bare owl:Class)."
+  ],
   "draft_sha": "ce4c98a48207d671",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.026012+00:00",

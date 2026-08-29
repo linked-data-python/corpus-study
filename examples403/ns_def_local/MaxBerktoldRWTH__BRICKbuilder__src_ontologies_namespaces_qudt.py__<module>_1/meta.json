@@ -13,9 +13,16 @@
     "namespace_ctor": 6
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "not-expressible",
+  "constructions": [
+    "@prefix"
+  ],
+  "translation_notes": [
+    "Same not-expressible pattern as the sibling region IBM__kif__kif_lib_namespace_semsci.py__<module>_1 in this lot: three `_NS = Namespace(...)` are class attributes of `DefinedNamespace` subclasses (QUDT, QUDTU, QUDTQK). rdflib's DefinedNamespace.__getattr__ reads `cls._NS` on EVERY attribute access (rdflib/namespace/__init__.py:290-301) -- annotated or not, since the lookup is unconditional. `@prefix qudt: <...> .` transpiles to a transpile-time binding-table entry, not a runtime class attribute, so it produces no `_NS`.",
+    "This region additionally has a REAL downstream consumer, restored from the same repository (not invented): src/ontologies/namespaces/__init__.py imports QUDT/QUDTU/QUDTQK from this very file and its `if __name__ == \"__main__\":` block reads `QUDT.degreeCelsius` -- appended to original.py as `degree_celsius = QUDT.degreeCelsius`, verbatim in spirit, with a comment citing the source. `degreeCelsius` is not even among the annotated names in this file (hasQuantityKind, hasUnit only): DefinedNamespace resolves ARBITRARY attributes through `_NS`, which is exactly the generality that a lexical `@prefix` cannot reproduce.",
+    "Reproduced by `rdfeval check`: original.py runs to completion; translated.ldpy raises at the restored consumer line, `AttributeError: DefinedNamespace like object has no attribute '_NS'` (rdflib/namespace/__init__.py:296) -- identical error text to the sibling SEMSCI region, same mechanism, independent confirmation with a real (not fabricated) call site.",
+    "translated.ldpy keeps the @prefix substitution in place (not reverted) so `rdfeval check` keeps reproducing the failure for review; translation_status stays draft -- no notation covers this without changing what src/ontologies/namespaces/__init__.py's existing, unmodified code does with QUDT.degreeCelsius."
+  ],
   "draft_sha": "14da2e3ceb4b7d3e",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.225889+00:00",
@@ -26,5 +33,6 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

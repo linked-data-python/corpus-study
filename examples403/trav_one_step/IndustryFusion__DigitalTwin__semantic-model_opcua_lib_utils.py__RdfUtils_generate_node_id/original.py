@@ -2,6 +2,7 @@
 # region: RdfUtils.generate_node_id (lines 954-963, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from rdflib import URIRef, Namespace, Graph, Literal, BNode
+from rdfutils_context import nodeId_to_iri
 
 def generate_node_id(self, graph, rootentity, node, id):
     node_id = next(graph.objects(node, self.basens['hasNodeId']), 'unknown')

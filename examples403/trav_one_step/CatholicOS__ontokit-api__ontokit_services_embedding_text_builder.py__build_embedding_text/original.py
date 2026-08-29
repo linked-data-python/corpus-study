@@ -4,6 +4,7 @@
 from rdflib import Graph, URIRef
 from rdflib import Literal as RDFLiteral
 from rdflib.namespace import OWL, RDFS, SKOS
+from embedding_text_context import _local_name
 
 def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> str:
     """Build a text representation of an entity for embedding.

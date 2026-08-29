@@ -1,19 +1,28 @@
 """Validation driver for RDFLib__timefuncs__tests_functions_test_finishes.py__test_finishes.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
+`test_finishes` is a pytest test: it loads its own fixture at a hardcoded
+relative path (`tests_dir / "data" / "finishes.ttl"`, `tests_dir =
+Path(__file__).parent`) -- see `data/finishes.ttl`, the real upstream fixture
+copied verbatim, which both `original.py` and `translated.ldpy` resolve
+correctly under their own `__file__` with NO path-fixing code needed -- runs
+a query, asserts the result against a hardcoded `expected`, and returns
+nothing.  Calling it directly through `entry=`/`calls=` would therefore give
+`run_pair` nothing to compare (no return value, no mutated argument, no
+stdout: the "nothing observable" guard in rdfeval.harness), even though an
+AssertionError on either side already fails the whole check -- which is the
+region's own pass/fail criterion.  `demo`, identical on both files (see
+meta.json), runs the test and returns a sentinel so run_pair has something
+to compare.
 
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+`initNs={"time": TIME, "tfun": TFUN}` is the region's ONLY rdflib binding
+kwarg here -- there is no `initBindings`, so per the batch warning about
+initNs-only regions in this stratum, this region needs no interpolation:
+only `@prefix time:` / `@prefix tfun:` in scope (see meta.json).
 """
 from rdfeval.harness import run_pair
 
 VERDICT = run_pair(
     __file__,
-    entry='test_finishes',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    entry="demo",
+    calls=[((), {})],
 )

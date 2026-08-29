@@ -4,6 +4,7 @@
 import httpx
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF
+from context_shim import _pod_base  # context shim, see meta.json
 @prefix wiki: <https://pod.vardeman.me/vault/ontology/wiki#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
@@ -16,17 +17,17 @@ def test_type_index_has_wiki_registrations():
     (skos:Concept, wiki:Source, wiki:WorkingNote, schema:Person/Place/Event/
     Organization/HowTo). Registration routes class → container/shape (D78/D100).
     """
-    SOLID = Namespace("http://www.w3.org/ns/solid/terms#")
-    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
-    SCHEMA = Namespace("https://schema.org/")
+    @prefix solid: <http://www.w3.org/ns/solid/terms#> .
+    @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+    @prefix schema: <https://schema.org/> .
     ti = httpx.get(POD_URL + "settings/publicTypeIndex",
                    headers={"Accept": "text/turtle"}, timeout=5)
     assert ti.status_code == 200
     g = Graph().parse(data=ti.text, format="turtle", publicID=POD_URL + "settings/publicTypeIndex")
-    regs = list(g.subjects(rdf:type, SOLID.TypeRegistration))
+    regs = list(g.subjects(rdf:type, solid:TypeRegistration))
     assert len(regs) >= 5, f"Expected 5+ Type Index registrations, found {len(regs)}"
-    registered = {str(o) for o in g.objects(predicate=SOLID.forClass)}
+    registered = {str(o) for o in g.objects(predicate=solid:forClass)}
     # The wiki-memory L3 concept + a representative schema.org Thing class are routed.
-    assert str(SKOS.Concept) in registered, f"skos:Concept not registered: {registered}"
+    assert str(skos:Concept) in registered, f"skos:Concept not registered: {registered}"
     assert str(wiki:Source) in registered, f"wiki:Source not registered: {registered}"
-    assert str(SCHEMA.Person) in registered, f"schema:Person not registered: {registered}"
+    assert str(schema:Person) in registered, f"schema:Person not registered: {registered}"

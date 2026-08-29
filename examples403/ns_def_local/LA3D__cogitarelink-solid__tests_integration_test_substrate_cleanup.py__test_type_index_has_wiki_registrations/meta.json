@@ -16,10 +16,17 @@
     "namespace_term": 6
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: WIKI->wiki, RDF->rdf"
+    "prefixes: WIKI->wiki, RDF->rdf, SOLID->solid, SKOS->skos, SCHEMA->schema",
+    "The measured construction, done: SOLID/SKOS/SCHEMA are the three `namespace_ctor` inside the function body (the actual ns_def_local target for this region) and become @prefix declared IN the function block; WIKI/RDF (module-level context) become module-level @prefix. All six namespace_term reads (rdf:type, solid:TypeRegistration, solid:forClass, skos:Concept, wiki:Source, schema:Person) become prefixed names, resolved at transpile time to constant URIRefs -- confirmed with `ldpy -t` (transpile-only): each one is inlined as `_ldpy_.URIRef('...')`, correctly scoped (the function-local prefixes do not leak, the module-level ones are visible inside the function per declarations.md block scope). No DefinedNamespace subclass is involved here, so none of the sibling regions' not-expressible pattern applies -- this translation is directly-expressible on its own terms.",
+    "EXCLUDED for executability, not for notation (AGENT_BATCH case 1, `dependance externe, reseau`): this is a live integration test against a real Solid Pod (tests/conftest.py's `_pod_base()`, restored in context_shim.py, defaults to https://pod.vardeman.me; the project's own docstring conventions and companion tests confirm it expects `make reset` and a running pod). `rdfeval check` fails even before that, at `import httpx`: httpx is not installed in the study venv (~/.venvs/ldpy). The driver is kept as the standard run_pair(entry=..., fixture=...) call and its verdict carries that exact error (ModuleNotFoundError: No module named 'httpx').",
+    "The fixture=/entry= reading-oracle protocol (corpus/405) does not fit this region regardless of the above: run_pair calls `entry(fixture_graph(...))`, passing the parsed graph as the function's SOLE argument, but test_type_index_has_wiki_registrations takes NO parameters -- it acquires and parses its own graph internally via the network call. Restructuring it to accept a graph parameter would remove the network fetch, which is precisely the behaviour under test (per instructions, no refactoring); fixture.ttl is written to the shape the instructions require (several solutions, a zero-solution case, non-matching neighbourhood) for documentation, but is not actually wired through run_pair's fixture= mechanism for this reason.",
+    "translation_status stays draft: excluded regions never reach final regardless of translation quality."
   ],
   "draft_sha": "e9b787163f73af11",
   "provenance": {
@@ -31,5 +38,6 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

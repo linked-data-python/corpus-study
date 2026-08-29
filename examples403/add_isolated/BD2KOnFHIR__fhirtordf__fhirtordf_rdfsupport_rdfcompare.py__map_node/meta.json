@@ -13,11 +13,20 @@
     "graph_read": 2,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf"
+    "The two isolated gout.add((sk_s, p, o)) / gout.add((sk_s, p, sk_o)) calls (if/else branches) become @graph gout + +{ }, declared once before the loop (block scope covers the whole rest of the function, including both branches and the recursive call). No += anywhere.",
+    "OWL and RDF are imported (from the original file) but never referenced in the region body -- no prefixed name is used at all, so no @prefix is declared; every term (sk_s, p, o, sk_o) is a plain Python value carried through {expr}.",
+    "The two reads (gin.predicate_objects(s), gin.value(o, FHIR.index)) are left as rdflib calls: this batch's assigned construction is the isolated add (write side); the reads are not part of the add_isolated stratum for this region and are unchanged in both versions, so they carry no risk to the equivalence proof.",
+    "subj_pred_idx_to_uri (module-level helper immediately above map_node in the source file, outside the extracted lines 22-36) and FHIR (from fhirtordf.rdfsupport.namespaces, an unimportable package outside the repo) are restored via context_shim.py: subj_pred_idx_to_uri copied verbatim, FHIR as a plain rdflib.Namespace standing in for the repo's DottedNamespace -- map_node only does ordinary attribute access (FHIR.index), which both resolve identically.",
+    "fixture.ttl covers a direct add branch (two predicate-object pairs on s0), a BNode branch that recurses two levels deep (each level contributing its own direct pairs, including the fhir:index triple itself getting copied by the unconditional predicate_objects loop -- faithful to the original's own behaviour, not something the translation changes), and an unrelated subject that must not be reached.",
+    "Verified not a hollow green: changing one +{ } target from {o} to {sk_s} (self-loop instead of the real object) flips the check to FAIL, arg[3] (gout) reported not isomorphic."
   ],
   "draft_sha": "fbc46ee342349915",
   "provenance": {
@@ -29,5 +38,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:map_node",
+    "diffs": [],
+    "error": null
+  }
 }

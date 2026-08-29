@@ -3,32 +3,32 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, Literal
 from rdflib.namespace import RDF, RDFS
+from context_shim import ONTOMOPS, mop_subject, selected_cbus
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-
+outg = Graph()
+@graph outg
 for iri_str, lbl, is_generated in selected_cbus:
     try:
         cbu_ref = __import__('rdflib').term.URIRef(iri_str)
     except Exception:
         continue
 
-    outg += g{
-        {mop_subject} {ONTOMOPS.hasChemicalBuildingUnit} {cbu_ref} .
-        {cbu_ref} a {ONTOMOPS.ChemicalBuildingUnit}
-    }
+    +{ {mop_subject} {ONTOMOPS.hasChemicalBuildingUnit} {cbu_ref} }
+    +{ {cbu_ref} a {ONTOMOPS.ChemicalBuildingUnit} }
 
     # Always add label if present (including empty string), but only add formula if non-empty
     if lbl is not None:
-        outg += g{ {cbu_ref} rdfs:label {Literal(lbl)} }
+        +{ {cbu_ref} rdfs:label {Literal(lbl)} }
     if lbl:
         try:
-            outg += g{ {cbu_ref} {ONTOMOPS.hasCBUFormula} {Literal(lbl)} }
+            +{ {cbu_ref} {ONTOMOPS.hasCBUFormula} {Literal(lbl)} }
         except Exception:
             pass
 
     # For generated CBUs, also add as ChemicalInput type
     if is_generated:
         ONTOSYN = Namespace("https://www.theworldavatar.com/kg/OntoSyn/")
-        outg += g{ {cbu_ref} a {ONTOSYN.ChemicalInput} }
+        +{ {cbu_ref} a {ONTOSYN.ChemicalInput} }
         print(f"[INTEGRATION] Created new CBU with IRI: {iri_str}")

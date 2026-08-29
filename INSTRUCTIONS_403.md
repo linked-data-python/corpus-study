@@ -99,10 +99,9 @@ Pièges connus, à ne pas reproduire :
   valeur (`g.value`, `next`), la jointure produit plus de solutions que la
   boucle d'origine. Ne fondez que si le code traite déjà « la première ou
   aucune » comme sa sémantique.
-- **`ex:{?v}` ne s'instancie pas.** C'est la seule position de terme où une
-  variable ne se substitue pas : vous obtenez l'IRI `ex:v`, sans erreur, à
-  chaque tour de boucle. Pour forger une IRI depuis une colonne :
-  `e<http://…/{?id}>`.
+- **`ex:{?v}` concatène sans encoder** (il s'instancie depuis 0.4.0, voir
+  §2 bis). Pour forger une IRI depuis une colonne qui peut contenir une
+  espace ou une barre oblique, c'est `e<http://…/{?id}>` qui encode.
 - **`_:label` n'est pas `BNode("label")`.** Si le *label* atteint une
   sérialisation ou un hachage (signature, code d'artefact), gardez
   `{BNode(...)}`.
@@ -110,6 +109,49 @@ Pièges connus, à ne pas reproduire :
   chaîne : lisez `how-to/migrate-from-rdflib.md`, piège 1.
 - **`URIRef(x)` n'est pas `f<{x}>`** si un `@base` est en portée : piège 2 de
   la même page.
+
+---
+
+## 2 bis. Ce que le langage a gagné depuis la première vague (0.4.0)
+
+Quatre changements, tous implémentés et testés. Ils rendent caduques
+certaines habitudes prises sur les vagues précédentes.
+
+- **`ex:{?id}` s'instancie.** La partie locale d'un nom préfixé était la
+  seule position de terme où une variable ne s'instanciait pas : elle rendait
+  `ex:id`, la même IRI à chaque ligne, sans erreur. Elle se résout désormais
+  contre les liaisons courantes. Attention : `ex:{…}` **concatène sans
+  encoder** ; c'est `e<…{?id}>` qui encode en pour-cent. Choisissez selon que
+  la valeur peut contenir une espace ou une barre oblique, et dites-le en
+  note. Sur une valeur ordinaire, `ex:{expr}` reste immédiat et ne demande
+  aucune liaison.
+- **`+{ }` et `-{ }` en suite d'instruction composée.** `if cond: +{ … }`
+  sur une seule ligne est accepté. Inutile donc d'ouvrir un bloc pour un `if`
+  d'une ligne — c'est précisément ce qui allongeait les traductions.
+- **`b.raw`.** Sur `for @bindings as b in rows:`, `b[key]` est le terme RDF
+  et `b.raw[key]` la valeur telle qu'elle est arrivée. C'est ce qu'il faut
+  quand l'original teste `if row[col] != "":`, car `Literal("") != ""`.
+- **Avertissement « préfixe déclaré = nom Python »** : le transpileur le
+  signale désormais. S'il apparaît, c'est un vrai piège du fichier, pas un
+  bruit.
+
+Deux pièges de fidélité, vérifiés sur rdflib 7.2.1, qui ont déjà produit des
+traductions fausses :
+
+- `Literal('x')` et `Literal('x', datatype=xsd:string)` **ne sont pas
+  égaux** : le premier a un `datatype` nul. Traduire `Literal(v, XSD.string)`
+  par une interpolation nue `{v}` change donc le graphe. Il faut
+  `{v}^^xsd:string`.
+- `Literal(True, datatype=XSD.boolean)` vaut `"true"` quand `f"{True}"` vaut
+  `"True"` : rdflib normalise la forme lexicale d'un littéral typé construit
+  depuis une valeur Python. La réécriture mécanique n'est sûre que si la
+  valeur est déjà une chaîne.
+
+Et une subtilité de portée, à connaître avant de désigner un graphe :
+**`@graph g` capture la VALEUR de `g` à sa ligne, pas le nom.** Si le code
+réaffecte `g` plus loin (`g = g + autre`), il faut une nouvelle déclaration
+`@graph g` après la réaffectation, sans quoi les écritures partent dans le
+graphe devenu inatteignable — en silence.
 
 ---
 

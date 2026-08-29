@@ -1,0 +1,31 @@
+# Input graph for
+# city-knowledge-graphs__python-2023__lab6_OWLReasoning-solution.py__checkEntailment
+# -- written during translation.
+#
+# checkEntailment(g, triple) only prints; it asserts nothing, so the driver
+# does not need this graph to reproduce upstream's own OWL 2 RL closure
+# (that reasoning step -- owlrl.DeductiveClosure(...).expand(g) -- happens in
+# the enclosing OWLRLInference(), which is NOT part of the extracted region).
+# It only needs a graph on which at least one of the three real `triple`
+# strings from upstream's checkEntailments(g) comes back True, at least one
+# comes back False (the ASK "zero solution" case), and neighbouring data that
+# must not make an unrelated triple ASK true by accident.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix :     <http://city.ac.uk/kg/lab7/> .
+
+# --- asserted directly: this ASK comes back True ---
+:Carl :hasChild :Ann .                # triple1
+
+# --- neighbourhood that must NOT make triple2/triple3 true by accident ---
+:Person a          owl:Class .
+:Child  a          owl:Class ;
+        rdfs:subClassOf :Person .
+:Ann    a          :Person .          # :Ann is a :Person, deliberately NOT a :Child
+:Ann    :hasFather :Carl .
+:Juliet a          :Person .
+
+# triple2 (:Ann rdf:type :Child) and triple3 (:Juliet :hasChild :Ann) are
+# deliberately absent: their ASKs come back False -- the zero-solution case
+# for this stratum.

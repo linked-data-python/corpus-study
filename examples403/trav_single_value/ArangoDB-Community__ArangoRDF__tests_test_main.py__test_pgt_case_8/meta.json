@@ -17,10 +17,21 @@
     "triple_add": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "IRI",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "prefixes: RDF->rdf, RDFS->rdfs",
+    "EXCLUDED -- external dependency: this region is an ArangoDB integration test, not a pure rdflib region. Its conftest.py (tests/conftest.py in ArangoDB-Community/ArangoRDF) requires a LIVE ArangoDB server (default http://localhost:8529, module-level `ArangoClient(...).db(...)`) plus `arangorestore` subprocess calls to seed data, and the region's own body drives that live database throughout: `adbrdf.rdf_to_arangodb_by_pgt(...)`, `adb_graph.vertex_collection(...).has(...)`, `db.has_collection(...)`, `db.delete_graph(...)`. Only 2 of the region's 19 rdf_ops are pure rdflib reads (`rdf_graph.value(predicate=RDF.type, object=RDF.Statement)`, twice, on `rdf_graph` then `rdf_graph_2`) -- everything else is ArangoDB collection/graph bookkeeping that cannot be fixture-driven without reimplementing ArangoRDF's PGT import semantics, which would be inventing logic, not translating it (INSTRUCTIONS_403 SS2: 'N'inventez pas de logique'). `original.py` also imports via `from .conftest import (...)`, a package-relative import that fails standalone (confirmed: `python -m rdfeval check` -> ImportError, before even reaching the ArangoDB connection).",
+    "translated the two pure-rdflib reads anyway, per SS1 ('la reference du langage est executable') and to keep the study's construction counts honest even for an excluded region: `rdf_graph.value(predicate=RDF.type, object=RDF.Statement)` -> `m{ ?s a rdf:Statement }.first()` (arity 1, subject is the free term -- migrate-from-rdflib.md's own `g.value(s, EX.p)` row, mirrored for a predicate+object-keyed lookup). `g.value()` never raises and returns an arbitrary match on plurality, exactly `.first()`'s contract -- no nuance lost here (unlike a bare `next()`, which is not what this region uses).",
+    "two separate `@graph` declarations (`@graph rdf_graph` then, after `rdf_graph_2 = adbrdf.arangodb_graph_to_rdf(...)` reassigns to a NEW graph, `@graph rdf_graph_2`): `@graph g` captures the VALUE of `g` at its own line, not the name (INSTRUCTIONS_403 SS2 bis) -- a single declaration before the first read would still point at the original `rdf_graph` once `rdf_graph_2` exists, so the second read needs its own declaration.",
+    "confirmed transpile-only (`python -m ldpy`/`ldpy.transpiler.transpile` on translated.ldpy) succeeds; only the pilot execution fails, on the ArangoDB import, per INSTRUCTIONS_403 SS 'Quand ca ne passe pas' case 1 (dependance externe, base de donnees) -- translation_status stays draft, never final, since `rdfeval check` cannot go green here."
   ],
   "draft_sha": "f03e7719358e7a4c",
   "provenance": {

@@ -16,6 +16,7 @@ def _extract_description(self, graph: Graph, ontology_iri: str | None) -> str | 
 
     Priority: dc:description > dcterms:description > rdfs:comment
     """
+    @graph graph
     # Define subjects to check (ontology IRI first)
     subjects_to_check: list[URIRef | None] = []
     if ontology_iri:
@@ -26,15 +27,15 @@ def _extract_description(self, graph: Graph, ontology_iri: str | None) -> str | 
 
     for subject in subjects_to_check:
         for prop in desc_properties:
-            for obj in graph.objects(subject, prop):
+            for obj in m{ {subject} {prop} ?o }:
                 value = str(obj)
                 if value:
                     return value
 
     # If no ontology IRI, search globally for any description on owl:Ontology subjects
-    for ont_subject in graph.subjects(rdf:type, owl:Ontology):
+    for ont_subject in m{ ?s rdf:type owl:Ontology }:
         for prop in desc_properties:
-            for obj in graph.objects(ont_subject, prop):
+            for obj in m{ {ont_subject} {prop} ?o }:
                 value = str(obj)
                 if value:
                     return value

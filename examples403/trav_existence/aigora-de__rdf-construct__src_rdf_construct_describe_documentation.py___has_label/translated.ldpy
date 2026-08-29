@@ -23,7 +23,8 @@ def _has_label(graph: Graph, subject: URIRef) -> bool:
     Returns:
         True if subject has at least one label.
     """
+    @graph graph
     for pred in LABEL_PREDICATES:
-        if any(graph.objects(subject, pred)):
+        if bool(m{ {subject} {pred} ?o }):
             return True
     return False

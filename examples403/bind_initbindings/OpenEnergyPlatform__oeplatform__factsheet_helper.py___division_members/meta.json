@@ -12,11 +12,21 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf"
+    "prefixes: all four PREFIX lines of SECTOR_MEMBERS_QUERY move to module-level @prefix: oeo, rdf, rdfs, owl. (The draft only added owl and rdf; oeo and rdfs -- both actually used in the query -- were missing and have been added.)",
+    "`?division` is NOT projected (SELECT DISTINCT ?sector); per INSTRUCTIONS_403 SS4 that is the case for a bare interpolation, so `initBindings={'division': division}` becomes `{division}` written directly at each of its 4 occurrences (the three UNION branches' `someValuesFrom`/direct-property positions, plus the FILTER). Confirmed by a scratch test that the SAME interpolated expression repeated several times in one island each becomes an independent synthetic SPARQL variable pre-bound to the same value (ldpy/transpiler/core.py names them `__i0`, `__i1`, ... one per occurrence) -- so repetition is not a problem, and a FILTER operand accepts `{expr}` exactly like a triple-pattern term position (not shown as such in querying.md, verified directly against the transpiler).",
+    "`SECTOR_MEMBERS_QUERY` was a module-level string passed to `g.query(...)`; `s{ }` needs its text literal at the island site, so the query moved from the module level into the function body (same structural consequence as the other two SPARQL-string regions in this lot).",
+    "`_label(g, node)`, used only for the sort key, is NOT part of this region (it lives elsewhere in factsheet/helper.py) and was restored via context_shim.py, transcribed verbatim, identical on both sides -- not itself a bind_initbindings construction.",
+    "fixture.ttl covers all three UNION branches with distinct labelled sectors (for the sort order), the FILTER self-reference case, the isinstance(...,URIRef) blank-node case, and one neighbourhood triple per branch shape that must not match; a second call with an unreferenced division is the zero-solution case. Verified against original.py directly: division1 -> [agriculture, energy, transport] (alphabetical by label), divisionZero -> []."
   ],
   "draft_sha": "33c1fedcb9bc016d",
   "provenance": {
@@ -28,5 +38,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_division_members",
+    "diffs": [],
+    "error": null
+  }
 }

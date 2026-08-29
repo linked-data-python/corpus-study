@@ -3,10 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import URIRef, Graph, OWL, RDF, BNode
 from rdflib.term import Node
-from fhirtordf.rdfsupport.namespaces import FHIR
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
+from context_shim import FHIR, subj_pred_idx_to_uri
 
 def map_node(s: Node, sk_s: URIRef, gin: Graph, gout: Graph) -> None:
     """
@@ -16,10 +13,11 @@ def map_node(s: Node, sk_s: URIRef, gin: Graph, gout: Graph) -> None:
     :param gin: Input graph
     :param gout: Output graph
     """
+    @graph gout
     for p, o in gin.predicate_objects(s):
         if not isinstance(o, BNode):
-            gout += g{ {sk_s} {p} {o} }
+            +{ {sk_s} {p} {o} }
         else:
             sk_o = subj_pred_idx_to_uri(sk_s, p, gin.value(o, FHIR.index))
-            gout += g{ {sk_s} {p} {sk_o} }
+            +{ {sk_s} {p} {sk_o} }
             map_node(o, sk_o, gin, gout)

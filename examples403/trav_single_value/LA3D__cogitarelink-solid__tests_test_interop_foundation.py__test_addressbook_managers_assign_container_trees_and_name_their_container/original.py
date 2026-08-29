@@ -1,10 +1,19 @@
 # Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
 # region: test_addressbook_managers_assign_container_trees_and_name_their_container (lines 173-182, stratum trav_single_value)
 # licence of the source repository: see meta.json
+#
+# The extracted region read FOUR real Turtle files from disk, one per
+# manager slug, via `AB_MGR_DIR = REPO / "overlays/addressbook/interop/managers"`
+# -- `REPO` is undefined outside the source checkout, one of the corpus/403
+# "163 regions with no visible graph" (see AGENT_BATCH.md). Restored the
+# binding as an explicit `manager_graphs` parameter -- a dict mapping each
+# slug to its already-parsed rdflib.Graph, one per manager file -- and
+# dropped the now-unused file-existence check and on-disk parse (see
+# meta.json). Everything downstream (the actual RDF reads under study) is
+# unchanged.
 import rdflib
 ST = rdflib.Namespace("http://www.w3.org/ns/shapetrees#")
 ABTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/addressbook.tree#"
-AB_MGR_DIR = REPO / "overlays/addressbook/interop/managers"
 AB_MANAGERS = {  # slug -> (ContainerTree localname, managed container URL)
     "person":       ("PersonContainerTree",       "https://pod.vardeman.me/vault/contacts/Person/"),
     "organization": ("OrganizationContainerTree", "https://pod.vardeman.me/vault/contacts/Organization/"),
@@ -12,11 +21,9 @@ AB_MANAGERS = {  # slug -> (ContainerTree localname, managed container URL)
     "membership":   ("MembershipContainerTree",   "https://pod.vardeman.me/vault/contacts/Membership/"),
 }
 
-def test_addressbook_managers_assign_container_trees_and_name_their_container():
+def test_addressbook_managers_assign_container_trees_and_name_their_container(manager_graphs):
     for slug, (tree_local, ctr_url) in AB_MANAGERS.items():
-        f = AB_MGR_DIR / f"{slug}.shapetree.ttl"
-        assert f.exists(), f"missing addressbook manager {f}"
-        g = rdflib.Graph(); g.parse(f, format="turtle")
+        g = manager_graphs[slug]
         mgr = next(g.subjects(rdflib.RDF.type, ST.Manager))
         a = g.value(mgr, ST.hasAssignment)
         assert a is not None, f"{slug}: no st:hasAssignment"

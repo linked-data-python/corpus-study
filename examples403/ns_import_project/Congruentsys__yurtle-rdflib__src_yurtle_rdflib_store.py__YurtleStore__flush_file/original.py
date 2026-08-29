@@ -1,9 +1,17 @@
 # Extracted from Congruentsys/yurtle-rdflib@8bbb378f5a : src/yurtle_rdflib/store.py
 # region: YurtleStore._flush_file (lines 388-432, stratum ns_import_project)
 # licence of the source repository: see meta.json
+#
+# Executability restorations (AGENT_BATCH "163 regions" case, see meta.json):
+# `.core`/`.namespaces` rewritten to `yurtle_context`, the shim module next
+# to this file (relative imports do not resolve outside the package).
+# `import logging` restored: present at the top of the real store.py
+# (line 38) but not captured by the region's extracted context, and this
+# region's own body calls `logger.debug`/`logger.warning`.
+import logging
 from pathlib import Path
 from rdflib import Graph, URIRef
-from .core import (
+from yurtle_context import (
     BEING,
     PM,
     YURTLE,
@@ -11,7 +19,7 @@ from .core import (
     YurtleParser,
     YurtleWriter,
 )
-from .namespaces import PROVENANCE
+from yurtle_context import PROVENANCE
 logger = logging.getLogger(__name__)
 
 def _flush_file(self, path: Path) -> None:
@@ -59,3 +67,77 @@ def _flush_file(self, path: Path) -> None:
     state.is_dirty = False
 
     logger.debug(f"Flushed {path}: {state.triple_count} triples")
+
+
+# Demo harness (identical on both sides, see meta.json): _flush_file is a
+# method body lifted out of YurtleStore, so this appends the minimal `self`
+# the region's own body reads (file_states, internal_graph, writer,
+# _compute_file_hash -- the last transcribed verbatim from store.py lines
+# 215-221) and returns what the region actually WRITES: the file it produces,
+# read back as a graph (the region's only RDF-observable effect through
+# YurtleWriter.write_file, which is real, not stubbed -- see yurtle_context.py)
+# plus the two state fields the region itself updates that do not depend on
+# wall-clock time (triple_count, is_dirty; hash/last_modified are excluded
+# on purpose, see meta.json).
+import hashlib
+import re
+import tempfile
+from rdflib import Literal
+from yurtle_context import FileState
+
+# core.py's own FRONTMATTER_PATTERN (line 120), transcribed: write_file
+# wraps the turtle it produces between "---" fences plus the markdown body,
+# so reading the raw file back as turtle needs the same fence-stripping a
+# real YurtleParser.parse would do (not reproduced in full, see
+# yurtle_context.py) before rdflib can parse it.
+_FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---\s*\n(.*)$", re.DOTALL)
+
+class FakeStore:
+    """Minimal stand-in for YurtleStore, reproducing exactly the attributes
+    and the _compute_file_hash method this region's own body reads --
+    _compute_file_hash transcribed verbatim from store.py lines 215-221."""
+
+    def __init__(self):
+        self.internal_graph = Graph()
+        self.file_states = {}
+        self.writer = YurtleWriter()
+
+    def _compute_file_hash(self, path: Path) -> str:
+        try:
+            content = path.read_bytes()
+            return hashlib.md5(content).hexdigest()
+        except Exception:
+            return ""
+
+
+def demo():
+    tmpdir = Path(tempfile.mkdtemp())
+    path = tmpdir / "doc.md"
+
+    store = FakeStore()
+    subject = URIRef("https://example.org/being/alice")
+    other_subject = URIRef("https://example.org/being/bob")  # neighbour: must not leak in
+
+    store.internal_graph.add((subject, BEING.name, Literal("Alice")))
+    store.internal_graph.add((subject, PM.status, Literal("active")))
+    store.internal_graph.add((subject, PROVENANCE.definedIn, URIRef("file:///origin.md")))  # must be filtered out
+    store.internal_graph.add((other_subject, BEING.name, Literal("Bob")))  # neighbour subject: must not appear
+
+    store.file_states[path] = FileState(
+        path=path,
+        hash="",
+        last_modified=0.0,
+        triple_count=0,
+        subject_uri=subject,
+        is_dirty=True,
+        markdown_content="# Alice\n",
+    )
+
+    _flush_file(store, path)
+
+    text = path.read_text(encoding="utf-8")
+    m = _FRONTMATTER_PATTERN.match(text)
+    frontmatter = m.group(1) if m else ""
+    written = Graph().parse(data=frontmatter, format="turtle")
+    state = store.file_states[path]
+    return (written, state.triple_count, state.is_dirty)

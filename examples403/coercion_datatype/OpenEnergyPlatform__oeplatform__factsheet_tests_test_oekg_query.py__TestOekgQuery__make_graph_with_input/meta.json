@@ -15,12 +15,25 @@
     "term_constructor": 4,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "Warning 1 (measurement artefact): Literal(table_iri_literal) carries no explicit datatype -- table_iri_literal is annotated str, so this Literal(str) is already plain/untyped; kept via default coercion as bare {expr} interpolation, no ^^ added. This region is part of the untyped subset the stratum's overly broad sampling criterion also captures.",
+    "namespaces.OEO/namespaces.OBO are plain rdflib Namespace objects (not DefinedNamespace/aliasing), so attribute access is exact base+localname concatenation -- verified against factsheet/oekg/namespaces.py. Declared as real @prefix oeo:/@prefix obo: with the same base IRIs and used as prefixed names (oeo:OEO_00020227, obo:BFO_0000051, ...), which is strictly more specific than runtime interpolation of the namespace attribute and is safe here (contrast with the OntoUML PSDO case in this same batch, where the namespace *is* aliasing and prefixed names would be wrong).",
+    "URIRef(\"https://oekg.test/...\") rewritten as bare IRI literals (<https://oekg.test/...>): all absolute, so Trap 2 (a @base in scope changing resolution) does not apply -- no @base is declared here anyway.",
+    "g.add(...) x4 translated to +{ } against @graph g (designating the existing local Graph(), not creating a new one). The first two adds share the subject 'bundle' and are contiguous, so merged into one +{ s p1 o1 ; p2 o2 } run (add_run_shared_subject); the next two adds have different subjects (scenario, then input_ds) and are kept as separate +{ } islands (add_isolated), matching the original sequence exactly -- no merging across a subject change.",
+    "Executability: from factsheet.oekg import namespaces has no target under this harness's exec()-based execution (no real oeplatform checkout on sys.path); restored via a local factsheet/oekg/namespaces.py context shim (see meta.json), copied verbatim (bind_all_namespaces dropped, unused by this region).",
+    "Sabotage-tested: corrupting one predicate IRI (BFO_0000051 -> BFO_0000052) makes rdfeval check fail (values differ on the returned graph), confirming the pilot discriminates the translation."
+  ],
+  "article_candidate": true,
   "draft_sha": "dcae5456d3f193f4",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.559962+00:00",
@@ -31,5 +44,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_make_graph_with_input",
+    "diffs": [],
+    "error": null
+  }
 }

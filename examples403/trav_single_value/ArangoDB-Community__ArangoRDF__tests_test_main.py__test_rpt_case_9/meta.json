@@ -17,10 +17,21 @@
     "triple_add": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "IRI",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "prefixes: RDF->rdf, RDFS->rdfs",
+    "EXCLUDED -- external dependency, same finding as the sibling region of this batch (ArangoDB-Community__ArangoRDF__tests_test_main.py__test_pgt_case_8, same file, same conftest.py). This region is an ArangoDB integration test: its conftest.py requires a LIVE ArangoDB server (default http://localhost:8529, module-level `ArangoClient(...).db(...)`) plus `arangorestore` subprocess calls, and the region's own body drives that live database throughout: `adbrdf.rdf_to_arangodb_by_rpt(...)`, `adb_graph.vertex_collection(...).has(...)`, `db.delete_graph(...)`. Only 2 of the region's 17 rdf_ops are pure rdflib reads (`rdf_graph.value(predicate=RDF.type, object=RDF.Statement)`, twice, on `rdf_graph` then `rdf_graph_2`) -- everything else is ArangoDB collection/graph bookkeeping that cannot be fixture-driven without reimplementing ArangoRDF's RPT import semantics, which would be inventing logic, not translating it. `original.py`'s `from .conftest import (...)` fails standalone before even reaching the ArangoDB connection (confirmed via `python -m rdfeval check`).",
+    "translated the two pure-rdflib reads anyway, to keep the study's construction counts honest even for an excluded region: `rdf_graph.value(predicate=RDF.type, object=RDF.Statement)` -> `m{ ?s a rdf:Statement }.first()` (arity 1, subject is the free term). `g.value()` never raises and returns an arbitrary match on plurality, exactly `.first()`'s contract.",
+    "two separate `@graph` declarations (`@graph rdf_graph` then, after `rdf_graph_2 = adbrdf.arangodb_graph_to_rdf(...)` reassigns to a NEW graph, `@graph rdf_graph_2`), same reasoning as the sibling region: `@graph g` captures the value of `g` at its own line, not the name.",
+    "confirmed transpile-only succeeds; only the pilot execution fails, on the ArangoDB import, per INSTRUCTIONS_403 SS 'Quand ca ne passe pas' case 1 (dependance externe, base de donnees) -- translation_status stays draft, never final."
   ],
   "draft_sha": "4c74272f09863c3d",
   "provenance": {

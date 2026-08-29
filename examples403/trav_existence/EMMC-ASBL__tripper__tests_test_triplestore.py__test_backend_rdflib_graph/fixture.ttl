@@ -1,4 +1,13 @@
-# Input graph for EMMC-ASBL__tripper__tests_test_triplestore.py__test_backend_rdflib_graph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Stand-in for the "family" ontology that EMMC-ASBL/tripper's own test
+# suite resolves through the `get_ontology_path` pytest fixture (real file
+# not vendored in this corpus — see meta.json/driver.py). Minimal: only the
+# two facts the region's `ts.value(...)` assertions read.
+@prefix fam:  <http://onto-ns.com/ontologies/examples/family#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+fam:Father  rdfs:subClassOf fam:Person .
+fam:Dauther rdfs:subClassOf fam:Person .
+
+# neighbourhood that must not match the region's read (fam:Father/fam:Dauther only)
+fam:Mother rdfs:subClassOf fam:Person .
+fam:Person a <http://www.w3.org/2002/07/owl#Class> .

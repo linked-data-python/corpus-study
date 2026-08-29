@@ -14,12 +14,28 @@
     "term_constructor": 10,
     "triple_add": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "prefixes actually used: rdfs -> http://www.w3.org/2000/01/rdf-schema#, lv2 -> http://lv2plug.in/ns/lv2core#, pset -> http://lv2plug.in/ns/ext/presets#, atom -> http://lv2plug.in/ns/ext/atom#, pstate -> http://lv2plug.in/ns/ext/state# (see below for the 'pstate' name). Not RDF: RDF.type is `a` inside `+{ }`. Not XSD: imported at module level in the real file but never referenced inside create_lv2_preset (confirmed by reading the checked-out source) -- the draft's mechanical guess was wrong, same over-declaration pattern already flagged on the ktbs/TheWorldAvatar precedents in this corpus.",
+    "NS (the real source's namespace-holding class, module-level, restored via context_shim) has FIXED, statically-known sub-namespaces (NS.pset, NS.lv2, NS.atom, NS.state), so every NS.x.y read in this region becomes a `@prefix` + prefixed name (pset:Preset, lv2:appliesTo, lv2:symbol, pset:value, lv2:port, atom:Path) rather than staying `{NS.x.y}` interpolation -- more specific per INSTRUCTIONS_403 SS2, even though NS is not a plain top-level `NS = Namespace(...)` (the textbook ns_def_local shape) but a class whose attributes are Namespace instances. `NS` ends up unused in translated.ldpy (only `get_graph` from context_shim is still needed) -- a genuine, not gratuitous, effect of translating every namespace read into a prefix.",
+    "REAL pitfall confirmed, not just anticipated: the source's local variable for the state blank node is named `state` (`state = BNode()`), which collides with the natural prefix name for http://lv2plug.in/ns/ext/state# . Declaring `@prefix state: <...>` and writing `{state}` for the Python variable does trip the transpiler's 'prefixe declare = nom Python' warning (verified directly: `@prefix state: <...> ... state = BNode(); +{ state:state state:probe 1 }` prints the LdpyWarning at transpile time, INSTRUCTIONS_403 SS2bis). Resolved with zero refactoring of the source by naming the prefix `pstate:` instead (`pstate:state` for `NS.state.state`) -- the Python variable `state` is untouched, still spelled exactly as in the original.",
+    "the params loop (`for param in plugin.params: port = BNode(); graph.add(...) x3`) is genuinely row-shaped: one fixed pattern (port-symbol, port-value, preset-port-link), only symbol/value/port-identity varying per param -- becomes `for @bindings in ({'port': BNode(), 'symbol': ..., 'value': ...} for param in ...): +{ ?port lv2:symbol ?symbol ; pset:value ?value . {preset} lv2:port ?port }`, one `+{ }` merging all three add()s (two via ';' on the shared port subject, one via '.' for the differently-subjected preset-port link) -- same shape the ktbs/create_obsel precedent in this corpus already established for a fresh-BNode-per-row loop.",
+    "the properties loop branches on `prop.type` to pick URIRef vs Literal for the OBJECT only -- predicate and subject stay the same triple pattern every iteration, so this is the ktbs/attributes.items() precedent again (a ternary computing the varying value inside the bindings-generator, not a branch to a different predicate/shape): `for @bindings in ({'key': URIRef(prop.key), 'value': URIRef(prop.value) if prop.type == str(atom:Path) else Literal(prop.value)} for prop in plugin.properties.values()): +{ {state} ?key ?value }`.",
+    "create_lv2_preset RETURNS a serialised Turtle string (`graph.serialize(format='turtle')`), not the graph itself, so a demo(label, plugin) harness identical on both sides round-trips that string back into a fresh Graph before returning it -- comparing the raw strings would compare serialisation order, which run_pair's docstring explicitly rules out (same pattern as boricles/ontosphere's _export_rdf region already in this corpus).",
+    "context_shim.py restores NS and get_graph() (module-level in the real file, just above the extracted function, outside its line range) copied verbatim, plus minimal Param/Property/PluginInstance dataclasses reduced to the fields this region reads -- confirmed against the real carla/loadcarxp.py via `gh api` at the pinned commit; noted there that Property.key is typed `int` in the source but parse_carxp() actually stores a string (used as a URI), so the shim types it `str` to match what the region receives, not the source's own (misleading) annotation.",
+    "deliberately checked this isn't a hollow green: swapping ?value for ?symbol in the params-loop pattern makes rdfeval check fail (12 vs 12 triples but not isomorphic on call[0], 8 vs 8 on call[2])."
+  ],
+  "article_candidate": true,
   "draft_sha": "ef5937ec971f3ca7",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.849268+00:00",
@@ -30,5 +46,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

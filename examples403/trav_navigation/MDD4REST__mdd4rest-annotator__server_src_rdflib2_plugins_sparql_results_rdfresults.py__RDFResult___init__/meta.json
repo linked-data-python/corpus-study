@@ -16,11 +16,23 @@
     "serialize_parse": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RS->rs, RDF->rdf"
+    "prefixes: RS->rset (pas RS->rs : le fichier lie-meme la variable Python `rs` au sujet du ResultSet -- avec le prefixe `rs:`, le transpileur signale exactement l'avertissement decrit dans INSTRUCTIONS_403 SS2 bis (\"prefixe declare = nom Python\"), donc autre prefixe pour desamorcer le vrai piege plutot que l'ignorer), RDF->rdf.",
+    "`graph.value(predicate=RDF.type, object=RS.ResultSet)` (sujet libre) -> `m{ ?rs rdf:type rset:ResultSet }.first()` ; `graph.value(rs, RS.boolean)` -> `m{ {rs} rset:boolean ?v }.first()`.",
+    "Le cas de la strate, sur la chaine SELECT (boucle imbriquee de selecteurs : graph.objects(rs, solution) puis, par solution, graph.objects(s, binding) puis DEUX graph.value(b, ...)) : la jointure interne binding/variable/value fusionne en un seul `m{ {s} rset:binding ?b . ?b rset:variable ?var . ?b rset:value ?val }` (sure ici : un noeud de binding porte toujours variable ET value ensemble dans ce vocabulaire, sinon le code original lui-meme plante sur Variable(None)). La boucle EXTERIEURE sur les solutions reste son propre `m{ {rs} rset:solution ?s }`, PAS fusionnee avec la jointure interne : une solution sans binding (sol3 du fixture) doit produire un dict vide dans self.bindings, ce qu'une jointure complete solution+binding supprimerait silencieusement (piege de cardinalite explicite de INSTRUCTIONS_403 SS2). Verifie en cassant volontairement le predicat rset:solution : le pilote detecte la perte de la ligne sol3 (bindings passe de 3 elements dont {} a 0).",
+    "harnais run() ajoute a l'identique dans les deux fichiers (exclu des metriques de surface) : la region est un corps `__init__(self, source, **kwargs)` extrait d'une classe, pas une fonction autonome -- run() lui fournit un self jetable (SimpleNamespace) et rend un dict simple des attributs, seule forme que la comparaison structurelle du harnais (dict/liste/ensemble) sait vraiment parcourir (deux SimpleNamespace se comparent par egalite exacte, ordre inclus ; ici l'ordre des solutions et des bindings n'est pas garanti).",
+    "graph.value(predicate=, object=) sans sujet ne renvoie qu'UN match arbitraire : un seul fixture ne peut donc porter qu'un seul sujet `a rs:ResultSet` sans rendre la branche executee non deterministe. 4 appels, chacun son graphe : fixture.ttl (SELECT, motif riche : plusieurs solutions, cas zero-solution interne pour sol3, voisinage ex:orphanBinding/ex:notAResultSet qui ne doit pas matcher), plus deux petits graphes ASK (true/false) et un graphe CONSTRUCT sans aucun rs:ResultSet -- ce dernier est le cas zero-solution du `m{ }.first()` du haut de la fonction."
   ],
   "draft_sha": "ab67beaa3c855198",
   "provenance": {
@@ -33,5 +45,11 @@
     "trav_navigation",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:run",
+    "diffs": [],
+    "error": null
+  }
 }

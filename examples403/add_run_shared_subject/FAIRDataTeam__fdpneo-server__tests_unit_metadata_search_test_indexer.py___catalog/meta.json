@@ -15,11 +15,22 @@
     "term_constructor": 3,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "from … import p:",
+    "IRI",
+    "prefixed name",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "the two `g.add((s, ...))` calls share the subject `s` with nothing between them, so they merge into one `+{ {s} a <...Catalog> ; dct:title \"Cat\" }` under `@graph g`. `RDF.type` becomes `a`, so `@prefix rdf:` (in the mechanical draft) would go unused and was dropped -- same reasoning as the sibling Dewberry/FAIRDataTeam-applier regions in this stratum.",
+    "`URIRef(\"http://www.w3.org/ns/dcat#Catalog\")` stays a bare `<...>` IRI, not a `dcat:` prefixed name: the original writes it as a raw string constant, not through a DCAT namespace object (DCAT is not even imported in this file) -- introducing a prefix the source never declares would not be the most faithful reading, only the most compact one.",
+    "`DCT.title` -> `dct:title`: `from fdpneo_server.shared.namespaces import DCT, FDP_METADATA_STATE, SH` is the ns_import_project idiom (a project-level namespace import), so the most specific translation carries it as `from context_shim import dct:` rather than degrading it to a Python interpolation `{DCT.title}` -- same choice as the sibling FAIRDataTeam-applier region in this stratum, which verified DCT's real IRI (http://purl.org/dc/terms/) against fdpneo_server/shared/namespaces.py at this commit; reused here rather than re-deriving it. FDP_METADATA_STATE and SH are imported by the original but never read inside this six-line region, so they are dropped from both original.py's and translated.ldpy's import line (see context_shim.py) rather than invented.",
+    "context_shim.py (new for this region: `fdpneo_server` is not installed -- `import fdpneo_server` -> ModuleNotFoundError, checked directly) carries only DCT, the one name this region actually uses.",
+    "checked that the pilot discriminates: changing the merged literal to \"Broken\" makes `rdfeval check` fail with 'graphs not isomorphic (2 vs 2 triples)'."
   ],
   "draft_sha": "718b27531887e88a",
   "provenance": {
@@ -31,5 +42,12 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_catalog",
+    "diffs": [],
+    "error": null
+  }
 }

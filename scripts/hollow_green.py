@@ -138,6 +138,53 @@ def observed_value(ex_dir: Path):
             return ("error: %s" % type(e).__name__, None)
 
 
+# ---------------------------------------------------------------------------
+# A second screen, and this one IS reliable: it is static.
+# ---------------------------------------------------------------------------
+
+def shared_graph_objects(study) -> list:
+    """Shims that build a graph at module level — a possible vacuous check.
+
+    Both sides of a pair import the shim, and Python caches modules: a
+    ``Graph()`` created at a shim's module level is therefore **the same
+    object** for the original and the translation. If that graph is the one
+    the driver compares, the isomorphism check compares it to itself and
+    passes even when the translation is broken. One such pair was found by
+    hand in the 2026-08-29 wave (a shim exporting the output graph).
+
+    Sharing is only dangerous for an OUTPUT. A shared graph that the region
+    merely READS is the fixture pattern and is correct — so this returns
+    candidates to inspect, not defects. Unlike the emptiness probe above,
+    it reads source and runs nothing, so what it reports is exactly what is
+    there.
+    """
+    import ast
+    from rdfeval.validate import iter_examples
+    out = []
+    for ex_dir, meta in iter_examples(study):
+        if meta.get("translation_status") != "final":
+            continue
+        for shim in sorted(Path(ex_dir).glob("*.py")):
+            if shim.name in ("original.py", "driver.py"):
+                continue
+            try:
+                tree = ast.parse(shim.read_text())
+            except (SyntaxError, OSError):
+                continue
+            for node in tree.body:          # module level only
+                if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+                    continue
+                call = node.value
+                if not isinstance(call, ast.Call):
+                    continue
+                name = getattr(call.func, "id",
+                               getattr(call.func, "attr", ""))
+                if name in ("Graph", "Dataset", "ConjunctiveGraph"):
+                    out.append((meta.get("stratum", "?"), meta["region_id"],
+                                shim.name))
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--study", default="403", choices=("401", "403"))
@@ -174,6 +221,17 @@ def main() -> int:
         print("\nThese pass without exercising anything: their fixture holds "
               "no solution of the\npattern they translate. Give them a "
               "fixture that does, or record why none exists.")
+
+    shared = shared_graph_objects(study)
+    print("\nstatic screen: %d pair(s) whose shim builds a graph at module "
+          "level" % len(shared))
+    for stratum, rid, shim in sorted(shared):
+        print("    %-24s %s  (%s)" % (stratum, rid[:60], shim))
+    if shared:
+        print("\nBoth sides import the shim and Python caches modules, so that "
+              "graph is ONE object.\nHarmless when the region only READS it "
+              "(that is the fixture pattern); vacuous when it\nis the graph "
+              "the driver compares. Look at each one.")
     return 0
 
 

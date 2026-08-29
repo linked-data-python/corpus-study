@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "The bound variable `typedObject` is NOT projected by the query (SELECT ?typeAssertion WHERE {...}); per INSTRUCTIONS_403 SS4 that is the case for a bare interpolation in term position, so `initBindings={'typedObject': typed_object}` becomes `{typed_object}` written directly where `?typedObject` stood.",
+    "`_TYPE_QUERY = prepareQuery(\"\"\"...\"\"\")` was a module-level prepared-query object passed to `g.query(_TYPE_QUERY, ...)`; `s{ }` requires its query text literal at the island site, so that variable and the `prepareQuery` call collapse into the island written directly inside `get_type_assertions`. ldpy prepares and caches queries itself (a small hand-written LRU, querying.md) so nothing is lost by not naming the prepared query -- it moved from a Python-level cache to the transpiler's own.",
+    "The query never declares `PREFIX rdf:` and the original code never passes `initNs` either: it relies on rdflib's implicit default namespace bindings (a fresh Graph() binds rdf/rdfs/xsd/xml automatically), which `Graph.query()` falls back to when no PREFIX/initNs is given. `s{ }` does NOT inherit that fallback -- its prologue comes only from `@prefix` declarations lexically in scope (traced in ldpy/runtime.py: `PreparedQuery._execute` calls `graph.query(prep, ...)` with `prep` already compiled by `prepareQuery(text, initNs=dict(namespaces))`, `namespaces` being exactly the @prefix set at the island, nothing more). So `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .` had to be added explicitly, even though the original source never wrote it: a fidelity trap worth flagging for the study, since it is invisible in a diff against the query TEXT alone.",
+    "added `from rdflib.plugins.sparql import prepareQuery` to original.py only, to restore the top-of-file import the real repo has (see original.py) -- not needed on the ldpy side since s{ } prepares its own query."
+  ],
   "draft_sha": "c45b44f6729ecea9",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.407177+00:00",
@@ -24,5 +35,12 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_type_assertions",
+    "diffs": [],
+    "error": null
+  }
 }

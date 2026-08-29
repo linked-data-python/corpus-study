@@ -1,0 +1,10 @@
+# Context shim (see meta.json): NOT the real (1208-line)
+# altunelyusuf/SemanticTechnologies@bad0fa7c46
+# landscape/01-research/semtech_research_v6_8_0.ttl -- a minimal stand-in.
+# This region never reads g1's pre-existing content, only adds to it, so the
+# base graph's actual content does not affect its behaviour; a few
+# placeholder triples are enough to make the Graph().parse(...) call in the
+# captured context real. Identical for both representations.
+@prefix ex: <http://example.org/semtech/research#> .
+ex:ResearchCorpus a ex:Corpus ;
+    ex:placeholder "pre-existing content, unrelated to this region" .

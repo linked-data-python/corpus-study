@@ -52,3 +52,24 @@ def __init__(self, source, **kwargs):
             raise Exception('Malformed boolean in ask answer!')
     elif type_ == 'CONSTRUCT':
         self.graph = g
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# bare `__init__(self, source, **kwargs)` body, not a class -- there is no
+# RDFResult to instantiate. `run` supplies a throwaway namespace object as
+# `self`, calls the region on it, and returns a plain dict of the
+# interesting attributes, since the harness's structural comparison (dict /
+# list / set) is what actually walks into a result and ignores solution
+# order and blank-node identity; comparing two SimpleNamespace instances
+# directly would not (SimpleNamespace equality is exact-order attribute
+# equality, and there is no such thing as an ordered solution set here).
+def run(source):
+    from types import SimpleNamespace
+    self = SimpleNamespace()
+    __init__(self, source)
+    return {
+        "type": self.type,
+        "vars": self.vars,
+        "bindings": getattr(self, "bindings", None),
+        "askAnswer": self.askAnswer,
+        "graph": self.graph,
+    }

@@ -1,0 +1,34 @@
+# Input graph for TeamWalabi__agriculture-image-metadata__agri_image_meta_utils_sparql_queries.py__query_images_by_location_and_properties
+# — written during translation. Covers: several solutions (img1, img2), a
+# neighbourhood that must NOT match the required pattern (img3: right type,
+# no imageName; ex:notAnImage: has an imageName but the wrong rdf:type), and
+# a predicate (agimage:platformID) that matches NOTHING in the graph at all
+# — the zero-solution case for one of the query's OPTIONAL sub-patterns
+# (see meta.json for why a literal zero-ROW case is not exercisable for a
+# bare module-level statement with no entry point to call twice).
+@prefix agimage: <https://w3id.org/agri-image/> .
+@prefix exif: <http://www.w3.org/2003/12/exif/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/> .
+
+ex:img1 a agimage:Image ;
+    agimage:imageName "IMG_001.jpg" ;
+    agimage:imageNumber 1 ;
+    exif:SerialNumber "SN123" ;
+    agimage:fieldID "field_01" ;
+    agimage:plotID "plot_01" ;
+    agimage:baseXYZ ( 1.0 2.0 3.0 ) .
+
+ex:img2 a agimage:Image ;
+    agimage:imageName "IMG_002.jpg" .
+    # no optional attributes at all: proves every OPTIONAL leaves its
+    # variables unbound rather than dropping the row
+
+# neighbourhood that must NOT match: right rdf:type, but no imageName, so
+# the required (non-OPTIONAL) second half of the pattern fails
+ex:img3 a agimage:Image .
+
+# neighbourhood that must NOT match: has an imageName, but the wrong
+# rdf:type
+ex:notAnImage a agimage:Field ;
+    agimage:imageName "should not appear" .

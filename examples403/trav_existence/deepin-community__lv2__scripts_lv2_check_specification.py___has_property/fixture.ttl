@@ -1,0 +1,13 @@
+# Input graph for deepin-community__lv2__scripts_lv2_check_specification.py___has_property — written during translation.
+# Covers: several solutions for one (subject, predicate) pair (ex:s1/ex:p1
+# has two values), a single-solution pair (ex:s1/ex:p2), the zero-solution
+# case both ways (a predicate never used on the subject, ex:s1/ex:p3; a
+# subject absent from the graph entirely, ex:s3/ex:p1), and neighbouring
+# triples that must NOT match (ex:p2 on ex:s1 is not ex:p1; ex:p1 on ex:s2
+# is not on ex:s1 -- proves the read is scoped to the exact pair).
+@prefix ex: <http://example.org/> .
+
+ex:s1 ex:p1 "v1" .
+ex:s1 ex:p1 "v2" .
+ex:s1 ex:p2 "other" .
+ex:s2 ex:p1 "v3" .

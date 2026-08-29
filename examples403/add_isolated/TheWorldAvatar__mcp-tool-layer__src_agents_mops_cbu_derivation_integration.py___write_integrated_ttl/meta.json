@@ -15,11 +15,20 @@
     "term_constructor": 2,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "5 isolated outg.add() calls in the loop body become +{ } under a single @graph outg declared once before the for loop (block scope reaches through the try/except and both nested if's). RDF and RDFS are imported from rdflib.namespace (well-known vocab), so RDF.type -> a / RDFS.label -> rdfs:label via @prefix; ONTOMOPS and ONTOSYN are LOCAL Namespace(...) constants (one restored via context_shim, one constructed inside the region body itself), so they stay plain Python, referenced as {ONTOMOPS.hasChemicalBuildingUnit} etc. -- same precedent as add_isolated/BBDFrancois...PRIV/DBO/DBR/DBP.",
+    "mop_subject and cbu_ref have different subjects on the first two adds ((mop_subject, hasChemicalBuildingUnit, cbu_ref) then (cbu_ref, a, ChemicalBuildingUnit)), so they stay two separate +{ }, not merged with ';'.",
+    "kind=statement, no graph parameter: selected_cbus, outg and mop_subject are locals the enclosing _write_integrated_ttl builds earlier (an LLM-selected CBU list, graph creation, MOP-subject selection over a parsed source TTL) that line-range extraction did not capture. ONTOMOPS (the real namespace constant, line 536 of the source file) and mop_subject/selected_cbus (hand-written minimal test data) are restored via context_shim.py; outg = Graph() is instead written directly in original.py/translated.ldpy themselves (like the missing-graph-binding case), NOT put in the shim.",
+    "Caught empirically during this batch: an EARLIER version of this pair shimmed outg = Graph() in context_shim.py too. Because Python caches a module on its first import, original.py and translated.ldpy -- executed in two separate namespaces by the same driver process -- ended up importing the exact SAME outg object; run_pair then compared that Graph to itself and reported equivalent:true regardless of what the +{ } rewrite actually did. Corrupting a label on purpose to check for a hollow green (INSTRUCTIONS_403 SS5) surfaced it: the check stayed green. Moving outg's construction into the two files themselves (one fresh Graph per exec, as region 2 of this batch already did for `g`) fixed it; the same corruption now reliably flips the check to FAIL.",
+    "selected_cbus covers a generated CBU with a real label (every conditional add fires), an existing CBU with an empty-string label (label added, formula and ChemicalInput both skipped), and an existing CBU with label=None (label also skipped)."
   ],
   "draft_sha": "882e8c3fb8a3bf55",
   "provenance": {
@@ -31,5 +40,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

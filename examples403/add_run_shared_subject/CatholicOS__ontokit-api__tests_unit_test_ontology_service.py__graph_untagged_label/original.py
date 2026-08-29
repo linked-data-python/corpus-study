@@ -13,3 +13,11 @@ def graph_untagged_label() -> Graph:
     g.add((EX.Widget, RDF.type, OWL.Class))
     g.add((EX.Widget, RDFS.label, Literal("Widget")))
     return g
+
+
+# Demo harness (identical on both sides, see meta.json): pytest refuses to
+# call a `@pytest.fixture`-decorated function directly ("Fixture ... called
+# directly", since pytest >= 8) -- run_pair's entry mechanism needs an
+# ordinary callable. This unwraps to the plain function pytest wraps.
+def demo():
+    return graph_untagged_label.__wrapped__()

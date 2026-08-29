@@ -15,12 +15,27 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: PROV->prov, RDF->rdf, RDFS->rdfs, SH->sh, SKOS->skos, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "Not the stratum's idiom: the stratifier's site is line 436, `subj = i if focus_nodes else validation_graph.value(subject=i, predicate=SH.focusNode)` -- flagged trav_existence because the read sits inside a conditional expression, but the ternary's own test is `focus_nodes` (unrelated to the read); the `.value(...)` result is the ELSE branch's value, immediately reused as the subject of the triple `.add()`s next -- never tested for truth. Per INSTRUCTIONS_403's AVERTISSEMENT for this stratum, translated with the more specific construction: `m{ {i} sh:focusNode ?o }.first()`.",
+    "`.add()` -> `+{ }`, once `@graph validation_graph` designates the method's one graph for the whole loop -- `validation_graph.add((subj, URIRef(\"https://vocab.eccenca.com/shui/conforms\"), Literal(False, datatype=XSD.boolean)))` becomes `+{ {subj} <https://vocab.eccenca.com/shui/conforms> {Literal(False, datatype=XSD.boolean)} }`. The `Literal(False, datatype=XSD.boolean)` call is passed through unchanged (`{expr}` is a formatted-node passthrough) rather than rewritten to `{False}^^xsd:boolean`: per INSTRUCTIONS_403 SS2 bis, a bool's lexical form under `^^xsd:boolean` is only safe when the source value is already a string, and False here is a Python bool, not a string.",
+    "prefixes: PROV->prov, RDF->rdf, RDFS->rdfs, SH->sh, SKOS->skos, XSD->xsd -- SH.focusNode -> sh:focusNode is the only namespace term actually used in the region; the URIRef(\"https://vocab.eccenca.com/shui/conforms\") constant has no @prefix imported by the original file and stays a bare IRI, same discipline as the aigora-de sibling of this stratum.",
+    "fixture.ttl / driver.py: the region's own `.add()`/`+{ }` cannot tolerate the zero-solution case -- rdflib raises `AssertionError` on `add((None, p, o))`, verified directly -- so a call that would make `.value()`/`.first()` return None crashes BEFORE any original-vs-translated comparison, on both sides identically, which run_pair cannot distinguish from a real divergence (it aborts the whole run on any exception, not per-call). A `demo(mode, ...)` harness, added identically to original.py and translated.ldpy except for the one line that mirrors the region's own read construction, has two modes: \"mutate\" calls the real, unmodified `add_shui_conforms_val` (covers several solutions across two result URIs in one call, and the focus_nodes-provided branch that never reads at all, in another); \"read\" evaluates just the read/match construction in isolation, which is how the zero-solution case is proven both ways (ex:result3 exists but carries the wrong predicate; ex:result4 is absent from the graph entirely) without ever reaching `.add()`/`+{ }`. Same technique as the RDFLib__prez sibling of this stratum (a demo() harness identical on both sides, for a different reason -- there pydantic was missing, here it's the None-subject invariant).",
+    "self.log.info(...) is the only use of `self` in the region; `_SelfStub` (identical in both files) supplies just that."
+  ],
+  "article_candidate": false,
   "draft_sha": "2602e704adfa55db",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.368537+00:00",
@@ -31,5 +46,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

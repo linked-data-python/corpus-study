@@ -10,11 +10,23 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OVERLAY_NS->overlay"
+    "prefixes: OVERLAY_NS->overlay",
+    "ROOT/OVL/_g restaures verbatim depuis le haut du vrai fichier de test (contexte au-dessus de la plage de lignes de la region) : `_g` est l'helper Graph-depuis-chemin-Turtle du fichier, pas un ilot. ROOT est repointe vers le repertoire de cette paire ; manifest.ttl vit sous overlays/wiki-memory/, extrait verbatim du depot au commit epingle.",
+    "Le cas de la strate : `for pi in g.objects(None, overlay:installsPage): tr = g.value(pi, ...); body = g.value(pi, ...); meta = g.value(pi, ...)` -> un seul `m{ [] overlay:installsPage ?pi . ?pi overlay:targetResource ?tr ; overlay:body ?body ; overlay:meta ?meta }` joint, sujet laisse anonyme (`[ ]`, ce qui supprime la variable jetable que g.objects(None, P) exigeait), pi partage entre les quatre motifs.",
+    "Piege de cardinalite (cf INSTRUCTIONS_403 SS2) : la fusion n'est sure ici que parce que chaque entree overlay:installsPage de la donnee source porte les trois proprietes targetResource/body/meta. g.value() tolere une propriete absente (rend None, traduit en \"\" par le ternaire de l'original) ; le m{ } joint, lui, ELIMINERAIT silencieusement une entree a qui il manque l'une des trois, au lieu de la garder avec un champ vide -- une vraie difference de comportement pour une entree partielle hypothetique, non exercee par ce fixture car elle serait invisible au retour ok/echec de demo() (l'entree a propriete manquante ne serait de toute facon pas parmi EXPECTED_PAGES) et produirait donc un vert trompeur plutot que demontre. Non reproduit : manifest.ttl garde toutes les entrees installsPage completes.",
+    "harnais demo() ajoute a l'identique dans les deux fichiers (exclu des metriques de surface, meme convention que la region soeur test_shape_declares_frame) : la region est un test pytest qui ne fait qu'asserter -- sans lui une AssertionError non rattrapee interromprait le pilote au premier ecart, rendant le resultat invisible a l'oracle. La fonction n'est pas parametree (contrairement a la soeur) donc un seul appel ; plusieurs solutions (4 installsPage attendus) et voisinage qui ne doit pas matcher (2 installsPage non selectionnes + installsContainer/installsShape sur le meme sujet) vivent dans manifest.ttl.",
+    "Zero-solution non exerce : la region est un test a chemin positif (les 4 EXPECTED_PAGES doivent matcher, sinon assertion) -- un manifest sans aucun installsPage ferait echouer l'assertion originale elle-meme (pas un defaut de traduction), et demo() le rendrait comparable ('assertion-failed', ...) mais sans varier le contenu du manifest entre deux appels (la fonction ne prend pas ce chemin en parametre) cela n'ajoute rien a la comparaison. La branche FAUX/zero-solution de m{ } est deja demontree ailleurs dans ce meme fichier source par la region soeur test_shape_declares_frame."
   ],
   "draft_sha": "030f406bbf7d530e",
   "provenance": {
@@ -26,5 +38,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

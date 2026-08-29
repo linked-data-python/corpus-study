@@ -1,4 +1,20 @@
 # Input graph for aigora-de__rdf-construct__src_rdf_construct_describe_documentation.py___has_label — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Covers: several LABEL_PREDICATES solutions (rdfs:label, skos:altLabel,
+# dcterms:title -- one subject each), the zero-solution case (a subject with
+# only non-label predicates, and a subject absent from the graph entirely),
+# and neighbouring triples that must NOT match (rdfs:comment on ex:noLabel;
+# rdfs:label on a DIFFERENT subject, ex:neighbour, to prove the read is
+# scoped to the given subject, not the whole graph).
+@prefix ex:      <http://example.org/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+ex:hasLabel    rdfs:label "Has a label" .
+ex:hasAltLabel skos:altLabel "Alt label" .
+ex:hasTitle    dcterms:title "A title" .
+
+ex:noLabel ex:other "not a label predicate" ;
+    rdfs:comment "not a label predicate either" .
+
+ex:neighbour rdfs:label "Belongs to a different subject" .

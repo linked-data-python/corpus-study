@@ -1,112 +1,250 @@
 {
   "seed": 20260828,
   "per_stratum": null,
-  "target": 6,
-  "batch_size": 3,
-  "already_final": 57,
-  "planned": 42,
+  "target": 16,
+  "batch_size": 4,
+  "already_final": 93,
+  "planned": 136,
   "batches": {
     "add_in_loop": [
       [
-        "boricles__ontosphere__backend_app_services_export_service.py___export_rdf",
-        "ktbs__ktbs__lib_ktbs_api_trace.py__StoredTraceMixin_create_obsel",
-        "steve-bate__firm__firm_ld_jsonld_utils.py___insert_resource"
+        "JonasHeinickeBio__biomedical-knowledge-lookup__src_knowledge_lookup_services_rdf_converter.py__UnifiedRDFConverter__add_concept_mappings",
+        "SpotlightKid__jack-audio-tools__carla_carxp2lv2presets.py__create_lv2_preset",
+        "acdh-oeaw__vocabseditor__vocabs_rdf_utils.py__graph_construct_qs",
+        "dice-group__RELD__V1_semEval.py__create_rdf"
+      ],
+      [
+        "morph-kgc__morph-kgc__src_morph_kgc_mapping_mapping_parser.py___complete_termtypes",
+        "morph-kgc__morph-kgc__src_morph_kgc_mapping_mapping_parser.py___rdf_class_to_pom",
+        "par-tec__security-ontologies__dsomm___init__.py__parse_activity",
+        "sap218__jabberwocky__01_converter_gimble.py__<module>_162"
+      ],
+      [
+        "spdx__spec-parser__spec_parser_rdf.py__gen_rdf_properties",
+        "stevereiner__flexible-graphrag__flexible-graphrag_rdf_sparql_property_graph_wrapper.py__PropertyGraphSPARQLWrapper__build_rdf_representation"
       ]
     ],
     "add_isolated": [
       [
-        "SoftwareHeritage__swh-indexer__swh_indexer_metadata_mapping_github.py__GitHubMapping_translate_parent",
-        "acdh-oeaw__vocabseditor__vocabs_models.py__SkosConcept_as_graph",
-        "beyonai__ByDC__packages_datacloud-knowledge_src_datacloud_knowledge_ingestion_owl_generate_graph_builder.py__GraphBuilder_add_entity_mapping"
+        "BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__map_node",
+        "Haoyu-R__SeLoC-ML__tflite2semantic_parser_xlsx.py__tflite2semantic",
+        "TheWorldAvatar__mcp-tool-layer__src_agents_mops_cbu_derivation_integration.py___write_integrated_ttl",
+        "TheWorldAvatar__mcp-tool-layer__src_ontospecies_extension_operations_ontospecies_extension.py__add_atomic_weight_to_element"
+      ],
+      [
+        "bloodbee__jrt__jrt_builder.py__GraphBuilder_build",
+        "cltl__FrameNetNLTK__rdf_utils.py__add_decomposition",
+        "dtai-kg__SCOOP__SCOOP_shape_generator_xsd2shacl_src_XSDtoSHACL.py__XSDtoSHACL_transEnumeration",
+        "jupyter-naas__abi__libs_naas-abi-marketplace_naas_abi_marketplace_domains_operations_modules_ontology_engineer_pipelines_MergeIndividualsPipeline.py__MergeIndividualsPipeline__merge_single_pair"
+      ],
+      [
+        "matthiasprobst__h5RDMtoolbox__tests_test_server.py__test_graph_data_drops_nodes_without_visible_edges_by_default",
+        "morph-kgc__morph-kgc__src_morph_kgc_mapping_yarrrml.py___translate_yarrrml_function_to_rml"
       ]
     ],
     "add_run_shared_subject": [
       [
-        "Harold-Solbrig__funowl__funowl_class_expressions.py__ObjectMinCardinality_to_rdf",
-        "biokb__biokb_wfo__src_biokb_wfo_rdf_turtle.py__TurtleCreator_create_nodes_ttl",
-        "shijx12__KQAPro_Baselines__SPARQL_sparql_engine.py__SparqlEngine__new_fact_node"
+        "CatholicOS__ontokit-api__tests_unit_test_ontology_service.py__graph_untagged_label",
+        "DiTEC-project__wdn-knowledge-graph__wdn_knowledge_graph_knowledge_graph.py__create_knowledge_graph_from_inp",
+        "FAIRDataTeam__fdpneo-server__tests_unit_metadata_search_test_indexer.py___catalog",
+        "IndustryFusion__DigitalTwin__semantic-model_opcua_lib_bindings.py__Bindings_create_attribute_binding"
+      ],
+      [
+        "RDFLib__rdflib-leveldb__test_test_graph.py__test_create_db",
+        "TDCC-NES__askwol__tests_test_metadata_validator.py__test_complete_ontology_metadata_passes_required_checks",
+        "alganet__apysource__apysource_verification.py__run_checks",
+        "dfriedenberger__obse__obse_graphwrapper.py__GraphWrapper_add_labeled_instance"
+      ],
+      [
+        "par-tec__security-ontologies__samm.py__parse_practice_level",
+        "statnett__KGraphPy__tests_test_header_validation.py__test_fix_datetime_format_in_triples_duplicates"
       ]
     ],
     "bind_initbindings": [
       [
-        "Terramorpha__minergym__minergym_ontology.py__Ontology_zone_surfaces",
-        "TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_step_chemicalinput_query.py__query_synthesis_inputs",
-        "mpsonntag__snippets__python_odmlToRDF_subclassing.py__test_rdf_subclassing_queries"
+        "IndustryFusion__DigitalTwin__semantic-model_opcua_lib_utils.py__RdfUtils_get_all_subreferences",
+        "NextCenturyCorporation__AIDA-Interchange-Format__python_aida_interchange_aifutils.py__get_type_assertions",
+        "OpenEnergyPlatform__oeplatform__factsheet_helper.py___division_members",
+        "RDFLib__timefuncs__tests_functions_test_finishes.py__test_finishes"
+      ],
+      [
+        "Xemnas00__Points-of-interest__src_Pipeline_RDF_triples_generator.py__is_city",
+        "comp-rob2b__kindyngen__kindynsyn_synthesizer_synthesizer.py__TreeExpander_expand",
+        "gtfierro__rdf-mcp__rdf_mcp_servers_brick_server.py__get_possible_properties",
+        "hidden-graph__rdflib-starlight__starlight_graph_starlight_graph.py__StarlightGraph_query"
+      ],
+      [
+        "mariocosenza__kgsum__src_dataset_preparation.py__select_local_void_description",
+        "mathiasrichter__shapiro__shapiro_model.py__NodeShape_get_shacl_properties",
+        "mathiasrichter__shapiro__shapiro_model.py__SemanticModelElement_get_predicates"
       ]
     ],
     "coercion_datatype": [
       [
-        "cognitedata__neat__cognite_neat__v0_core__data_model_exporters__data_model2semantic_model.py__OWLClass_title_triples",
-        "schemaorg__sdopythonapp__lib_rdflib_plugins_sparql_parser.py__<module>_322",
-        "tetherless-world__materialsmine__tests_test_L155_S2_Roy_2005.py__IngestTestRunner_no_test_dielectric_real_permittivity"
+        "Display-Lab__scaffold__tests_bitstomach_test_loss.py__test_moderators",
+        "OntoUML__ontouml-json2graph__json2graph_decoder_decode_obj_property.py__set_cardinality_relations",
+        "OpenEnergyPlatform__oeplatform__factsheet_tests_test_oekg_query.py__TestOekgQuery__make_graph_with_input",
+        "altunelyusuf__SemanticTechnologies__landscape_07-tooling_build_core_v6_9_0.py__<module>_101"
       ],
       [
-        "vital-ai__vital-graph__tests_integration_test_bulk_export.py__test_export_import_round_trip"
+        "dtai-kg__SCOOP__SCOOP_shape_generator_xsd2shacl_src_XSDtoSHACL.py__XSDtoSHACL_transRestriction",
+        "eliozo__worksheet-generation-with-llms__scripts_rdfgen_csv_to_concepts.py__addToRdfGraph",
+        "ktbs__ktbs__lib_ktbs_methods_fsa.py___FSAMethod_do_compute_obsels",
+        "kumagallium__asterism__api_tests_test_orphan_reclaim_api.py___add_version"
+      ],
+      [
+        "linkml__linkml__tests_linkml_test_generators_test_owlgen.py__test_slot_cardinality_axioms",
+        "linkml__sparqlfun__sparqlfun_query_engine.py___unwrap",
+        "schemaorg__sdopythonapp__lib_rdflib_plugins_sparql_results_tsvresults.py__TSVResultParser_convertTerm"
       ]
     ],
     "ns_def_local": [
       [
-        "RDFLib__pyLDAPI__pyldapi_renderer_container.py__ContainerRenderer__generate_mem_profile_rdf",
-        "comp-int-hum__ochre-python__src_pyochre_server_ochre_viewsets_ontologyviewset.py__OntologyViewSet_regenerate",
-        "comp-rob2b__kindyngen__kindynsyn_namespaces.py__<module>_120"
+        "IBM__kif__kif_lib_namespace_semsci.py__<module>_1",
+        "LA3D__cogitarelink-solid__tests_integration_test_substrate_cleanup.py__test_type_index_has_wiki_registrations",
+        "LexMalta__recipes__recipe-importer_rdflib_namespace__BRICK.py__<module>_1218",
+        "MaxBerktoldRWTH__BRICKbuilder__src_ontologies_namespaces_qudt.py__<module>_1"
       ],
       [
-        "openworm__owmeta-core__owmeta_core_dataobject.py__<module>_634",
-        "shubhamjakhete__nvda_reader__globalPlugins_contextLabeler__vendor_rdflib_tools_csv2rdf.py__main"
+        "RDFLib__timefuncs__tests_test_is_before_standalone.py__test_is_before_rdflib",
+        "city-knowledge-graphs__python-2024__lab2_solution_Solution_Task2.4_table.py__Task2_4_Solution___init__",
+        "cltl__FrameNetNLTK__rdf_utils.py__convert_to_lemon",
+        "cognitedata__neat__tests_v0_tests_unit_test_store_test_instance_diff.py__test_diff_instances"
+      ],
+      [
+        "linkml__linkml__tests_linkml_runtime_test_loaders_dumpers_test_rdflib_dumper.py__test_blank_node",
+        "mhrimaz__aasbrain-concept-description-repo__app_models_aas_namespace.py__<module>_1",
+        "openworm__owmeta__owmeta_biology.py__<module>_1",
+        "technologiestiftung__digital-budget-network-explorer__csv_to_ttl.py__build_graph"
       ]
     ],
     "ns_import_project": [
       [
-        "dfriedenberger__generators__generators_util_rdf2json.py__<module>_1",
-        "johnjung__metadata_converters__metadata_converters_mepa_edm.py__MepaToEDM_build_mepa_collection_triples",
-        "ktbs__ktbs__lib_ktbs_methods_hrules.py___HRulesMethod_do_compute_obsels"
+        "Congruentsys__yurtle-rdflib__src_yurtle_rdflib_store.py__YurtleStore__flush_file",
+        "DataDrivenCPS__acquirium__src_acquirium_internals_qudt_units.py__QUDTUnitConverter__search_label_contains",
+        "IndustryFusion__DigitalTwin__semantic-model_opcua_lib_entity.py__Entity___init__",
+        "MaxBerktoldRWTH__BRICKbuilder__src_ontologies_namespaces___init__.py__<module>_9"
+      ],
+      [
+        "TeamWalabi__agriculture-image-metadata__agri_image_meta_ontology_generator.py___resolve_rdf_type_uri",
+        "ktbs__ktbs__utest_test_ktbs_method_fsa.py__TestFSAAsk_test_no_match_V",
+        "pyscal__atomRDF__atomrdf_datamodels_structure.py__AtomicScaleSample_to_graph_calculated_properties",
+        "senzing-garage__sz-semantics__src_sz_semantics_sem.py__Thesaurus___init__"
+      ],
+      [
+        "statnett__KGraphPy__kgraphpy_processor.py___make_header_graph_for_conversion",
+        "usc-isi-i2__etk__etk_unit_tests_test_kg_shacl.py__TestSHACLOntoConverter_test_cnode",
+        "vemonet__rdflib-endpoint__src_rdflib_endpoint_sparql_router.py__<module>_26"
       ]
     ],
     "remove": [],
     "sparql_interpolated": [
       [
-        "AtomGraph__Web-Algebra__tests_unit_test_values.py___two_var_two_rows",
-        "Blackcat-Informatics__purrdf__bindings_python_tests_rdflib_suite_vendor_test_evaluate_bind.py__get_bind_tests_check",
-        "ktbs__ktbs__lib_ktbs_engine_obsel.py__<module>_328"
+        "Blackcat-Informatics__purrdf__bindings_python_tests_rdflib_suite_vendor_test_agg_undef.py__template_tst",
+        "city-knowledge-graphs__python-2023__lab6_OWLReasoning-solution.py__checkEntailment",
+        "city-knowledge-graphs__python__lab4_RDFSReasoning.py__checkEntailment",
+        "cognitedata__neat__cognite_neat__v0_core__data_model_importers__rdf__shared.py__parse_properties"
+      ],
+      [
+        "cognitedata__neat__cognite_neat__v0_core__instances_transformers__classic_cdf.py__RelationshipAsEdgeTransformer__relationship_as_edge",
+        "hidden-graph__rdflib-starlight__tests_unit_test_result_patches.py__TestSelectStarOverGroundPatternIteration_test_nonmatching_fact_yields_zero_rows",
+        "ktbs__ktbs__lib_rdfrest_util_prefix_conjunctive_view.py__PrefixConjunctiveView_contexts",
+        "kumagallium__asterism__ingest_tests_test_crosswalk_runtime.py___seed_phase"
+      ],
+      [
+        "morph-kgc__morph-kgc__src_morph_kgc_mapping_mapping_parser.py___expand_constant_shortcut_properties",
+        "semantic-systems__coypu-mapping-generation__util_rdf2csv.py___resolve_geom"
       ]
     ],
     "sparql_literal": [
       [
-        "davidlamprecht__AutoRDF2GML__example_autordf2gml-cb.py__nested_loops__nested_loops_recursion",
-        "ksahlmann__myno__myno-agriculture_virtual-device_aggregatPreload.py__get_event_functions",
-        "lazlop__semantic_objects__tests_ingest_test_shacl_roundtrip_parity.py__test_class_scope_or_roundtrip"
+        "RDFLib__timefuncs__tests_functions_test_is_after.py__test_is_after",
+        "TeamWalabi__agriculture-image-metadata__agri_image_meta_utils_sparql_queries.py__query_images_by_location_and_properties",
+        "TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_step_step_details.py__query_step_type_label",
+        "aminedouiri__knowledge-formalization-web-application__apps_visualisation_views.py__visualisation"
       ],
       [
-        "oxigraph__oxrdflib__tests_test_sparql.py__SparqlTestCase_test_select_query_conjunctive"
+        "davidlamprecht__AutoRDF2GML__content-based-feature_autordf2gml-cb-v1.py__nested_loops__nested_loops_recursion",
+        "lazlop__semantic_objects__tests_ingest_test_shacl_roundtrip_parity.py__test_pinned_field_emits_the_actual_value_not_its_type",
+        "pyiron__semantikon__semantikon_analysis.py___add_child_data_class",
+        "pyiron__semantikon__semantikon_ontology.py___inherit_properties"
+      ],
+      [
+        "unibz-core__Scior__scior_modules_rules_rule_group_ufo_some.py__run_rs02",
+        "usc-isi-i2__etk__etk_knowledge_graph_shacl.py__SHACLOntoConverter__convert_ontology_non_referenced_property",
+        "usc-isi-i2__etk__etk_knowledge_graph_shacl.py__SHACLOntoConverter__convert_ontology_owl_restriction"
       ]
     ],
     "trav_existence": [
       [
-        "LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_one_manager_per_container_assigns_a_container_tree",
-        "LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_registry_chain_covers_all_apps_every_registration_a_container_tree",
-        "anuzzolese__pyrml__pyrml_pyrml_core.py__TripleMappings_from_rdf"
+        "EMMC-ASBL__tripper__tests_test_triplestore.py__test_backend_rdflib_graph",
+        "aigora-de__rdf-construct__src_rdf_construct_describe_documentation.py___has_label",
+        "deepin-community__lv2__scripts_lv2_check_specification.py___has_property",
+        "eccenca__cmem-plugin-pyshacl__cmem_plugin_pyshacl_plugin_pyshacl.py__ShaclValidation_add_shui_conforms_val"
+      ],
+      [
+        "laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__check_public_artifact_profile",
+        "linkml__linkml__tests_linkml_test_generators_test_owlgen.py__test_owlgen",
+        "linkml__linkml__tests_linkml_test_generators_test_owlgen.py__test_rdfs_profile",
+        "synaptixs__ontomesh__src_ontology_quality.py__detect_pitfalls"
+      ],
+      [
+        "tetherless-world__setlr__setlr_core.py__read_xml",
+        "vemonet__rdflib-endpoint__src_rdflib_endpoint_sparql_router.py__SparqlRouter_prepare_sd_graph"
       ]
     ],
     "trav_navigation": [
       [
-        "BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__rdf_compare_split_primary_subjects",
-        "CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_orphan_class",
-        "aigora-de__rdf-construct__src_rdf_construct_lint_rules.py__check_property_no_type"
+        "LA3D__cogitarelink-solid__tests_test_frame_model_agreement.py__test_manifest_installs_narrative_and_exemplars_as_pages",
+        "MDD4REST__mdd4rest-annotator__server_src_rdflib2_plugins_sparql_results_rdfresults.py__RDFResult___init__",
+        "TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_ontosynthesis_cbu_conversion.py__build_cbu_json_from_graph",
+        "kumagallium__asterism__ingest_src_asterism_rml_validate.py___tm_transcribed_columns"
       ],
       [
-        "altunelyusuf__SemanticTechnologies__landscape_06-gates_semtech_supplementary_gates_v1_0_0.py__<module>_149"
+        "laBioSynCare__laBioSynCare.github.io__scripts_check-signal-layer.py__main",
+        "linkml__linkml__tests_linkml_test_generators_test_shaclgen.py__test_nodeshape_uses_rdfs_predicates",
+        "mapsa__blathers__src_blathers_extract.py___extract_properties",
+        "surroundaustralia__cheka__cheka_cheka.py__Cheka__cache_pg_validating_artifacts"
+      ],
+      [
+        "wordlift__worph__src_worph_core_rml_parser.py___parse_fnml_calls",
+        "zwelz3__holonic__src_holonic_client.py___parse_shacl_report"
       ]
     ],
     "trav_one_step": [
       [
-        "IndustryFusion__DigitalTwin__semantic-model_opcua_tests_test_libshacl.py__TestShaclAdditional_test_ngsild_property_constraints_scalar_and_list",
-        "LexMalta__recipes__recipe-importer_rdflib_extras_infixowl.py__BooleanClassExtentHelper___call____getExtent",
-        "emmo-repo__domain-electrochemistry__.github_scripts_check_iri_resolution.py__ontology_subject"
+        "CatholicOS__ontokit-api__ontokit_services_embedding_text_builder.py__build_embedding_text",
+        "CatholicOS__ontokit-api__ontokit_services_ontology_extractor.py__OntologyMetadataExtractor__extract_description",
+        "INM-6__alpaca__alpaca_test_test_ontology_annotation.py__OntologyAnnotationTestCase_test_provenance_annotation_multiple_returns",
+        "IndustryFusion__DigitalTwin__semantic-model_opcua_lib_utils.py__RdfUtils_generate_node_id"
+      ],
+      [
+        "aigora-de__rdf-construct__src_rdf_construct_describe_profiles.py___detect_owl_full",
+        "lv2__lv2__scripts_lv2_check_specification.py___check_specification",
+        "mupparapusamuel__semantica__semantica_ingest_ontology_ingestor.py__OntologyIngestor__add_property",
+        "synaptixs__ontomesh__wizard_app.py__list_materialised_triples"
+      ],
+      [
+        "w3c-cg__sstim__scripts_check-band-scope-notes.py__main",
+        "w3c-cg__sstim__scripts_sstim-definition-coverage.py__main"
       ]
     ],
     "trav_single_value": [
       [
-        "mapsa__blathers__src_blathers_extract.py___extract_nested_node"
+        "ArangoDB-Community__ArangoRDF__tests_test_main.py__test_pgt_case_8",
+        "ArangoDB-Community__ArangoRDF__tests_test_main.py__test_rpt_case_9",
+        "LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_addressbook_managers_assign_container_trees_and_name_their_container",
+        "RDFLib__prez__tests_test_endpoints_spaceprez.py__test_feature"
+      ],
+      [
+        "RDFLib__pyLODE__pylode_profiles_supermodel_query_property_shape.py__get_sh_path",
+        "alganet__apysource__apysource_resolution.py___targeting",
+        "alganet__apysource__apysource_resolution.py__resolve_chain",
+        "deepin-community__lv2__scripts_lv2_build_index.py__index_row"
+      ],
+      [
+        "hidden-graph__rdflib-starlight__starlight_parsers_turtle_parser.py___skolemize_encoding",
+        "hidden-graph__rdflib-starlight__starlight_query_evaluate_patches.py___decode_tt_hash"
       ]
     ]
   }

@@ -2,8 +2,6 @@
 # region: template_tst (lines 19-25, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
 from rdflib import RDFS, Graph, Literal, URIRef, Variable
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 query_tpl = """
 SELECT ?x (%s(?y_) as ?y) {
   VALUES (?x ?y_ ?z) {

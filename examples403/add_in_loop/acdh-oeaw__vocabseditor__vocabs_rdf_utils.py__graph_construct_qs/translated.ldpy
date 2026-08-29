@@ -13,24 +13,33 @@ def graph_construct_qs(results):
     main_concept_scheme_graph = results.first().scheme.as_graph()
     g = g + main_concept_scheme_graph
     for obj in results:
+        # `g` was just reassigned above (first iteration) or by the previous
+        # iteration's `g = g + obj.as_graph()` below: @graph g re-designates
+        # the CURRENT g, not a stale one -- see meta.json on @graph's
+        # capture-by-value scope (INSTRUCTIONS_403 SS2bis).
+        @graph g
         concept = URIRef(obj.create_uri())
-        g += g{ {concept} skos:inScheme {main_concept_scheme} }
+        +{ {concept} skos:inScheme {main_concept_scheme} }
         g = g + obj.as_graph()
         if obj.collection.all():
             for x in obj.collection.all():
                 collection = x.get_subject()
                 collection_graph = x.as_graph()
                 g = g + collection_graph
+                # re-designated again: this is the third reassignment of
+                # `g` this function makes (initial union, per-obj union,
+                # per-collection union) -- each needs its own @graph.
+                @graph g
                 if x.creator:
                     for i in x.creator.split(";"):
-                        g += g{ {collection} dc:creator {Literal(i.strip())} }
+                        +{ {collection} dc:creator {Literal(i.strip())} }
                 if x.contributor:
                     for i in x.contributor.split(";"):
-                        g += g{ {collection} dc:contributor {Literal(i.strip())} }
+                        +{ {collection} dc:contributor {Literal(i.strip())} }
                 if x.has_members.all():
                     for y in x.has_members.all():
                         if y.legacy_id:
-                            g += g{ {collection} skos:member {URIRef(y.legacy_id)} }
+                            +{ {collection} skos:member {URIRef(y.legacy_id)} }
                         else:
-                            g += g{ {collection} skos:member {URIRef(y.create_uri())} }
+                            +{ {collection} skos:member {URIRef(y.create_uri())} }
     return g

@@ -10,10 +10,17 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:"
+  ],
+  "translation_notes": [
+    "A one-line `__init__.py` re-export: `from src.ontologies.namespaces.qudt import QUDT, QUDTU, QUDTQK` -> `from qudt_ns_context import qudt:, qudtu:, qudtqk:`. Verified against the pinned commit that QUDT/QUDTU/QUDTQK (src/ontologies/namespaces/qudt.py) are real `rdflib.namespace.DefinedNamespace` subclasses, not plain `Namespace(...)` instances -- transcribed as such in the shim (not simplified to plain Namespace) specifically to check whether ldpy's dynamic import-binding resolution works through a DefinedNamespace's metaclass-based `__getattr__` the same way it does for a plain Namespace instance: verified directly, it does (first `rdfeval check` run was green, no adjustment needed).",
+    "rdf_ops=0: this region is a single import statement with no graph operation of its own, so the harness's default entry=None module-state comparison has nothing to observe -- worse, it would be actively MISLEADING here: the prefix-import form does not bind QUDT/QUDTU/QUDTQK as module-level Python names AT ALL (declarations.md: 'no name is captured'), so comparing ns_o's globals against ns_t's globals directly would report every name missing on the translated side, for a reason that has nothing to do with whether the translation is correct (translated.ldpy would look 'wrong' by a metric that cannot see prefix declarations at all). demo() (identical on both sides, appended after the one-line region) dereferences one real term from each of the three namespaces (QUDT.hasUnit / qudt:hasUnit, QUDTU.M / qudtu:M, QUDTQK.Length / qudtqk:Length) and returns their string forms -- the only way to observe that the dynamic prefix resolves to the SAME IRI as the plain import it replaces.",
+    "Fixture strength checked directly: swapping qudtu:M for qudtu:K in translated.ldpy's demo() flips `rdfeval check` to FAIL (differing tuple); reverted afterward, OK confirmed again.",
+    "Executability (AGENT_BATCH's 163-regions case): `src.ontologies.namespaces.qudt` (a real dotted project path that cannot resolve for a single extracted file) rewritten to `qudt_ns_context`, a shim module. QUDT/QUDTU/QUDTQK transcribed with a REDUCED member set (a few real terms each, real IRIs) -- the real qudt.py classes carry many more declared members that this region's own body (a single import line) never enumerates or otherwise depends on; not reached, not simplified."
+  ],
   "draft_sha": "794adfe1c3d93e0b",
   "provenance": {
     "generated_at": "2026-08-28T17:54:57.654345+00:00",
@@ -24,5 +31,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

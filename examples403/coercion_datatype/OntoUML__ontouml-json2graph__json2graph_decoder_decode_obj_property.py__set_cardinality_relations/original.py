@@ -1,9 +1,16 @@
 # Extracted from OntoUML/ontouml-json2graph@982f12b9c4 : json2graph/decoder/decode_obj_property.py
 # region: set_cardinality_relations (lines 214-273, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+# Executability: the real file's relative imports (..modules) cannot resolve
+# under this harness (exec() sets no __package__); rewritten to absolute
+# imports against the local modules/ context shim (see meta.json).
+# determine_cardinality_bounds -- a sibling function defined earlier in the
+# same source file (lines 194-211), just outside this region -- is restored
+# via modules/decode_obj_property_predecl.py.
 from rdflib import Graph, URIRef, RDF, Literal, XSD
-from ..modules import arguments as args
-from ..modules.utils_graph import load_ontouml_vocabulary, ontouml_ref
+from modules import arguments as args
+from modules.utils_graph import load_ontouml_vocabulary, ontouml_ref
+from modules.decode_obj_property_predecl import determine_cardinality_bounds
 
 def set_cardinality_relations(property_dict: dict, ontouml_graph: Graph) -> None:
     """Create the ontouml:Cardinality instance and sets its properties.

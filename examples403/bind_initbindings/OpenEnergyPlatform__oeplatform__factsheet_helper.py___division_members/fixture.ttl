@@ -1,4 +1,58 @@
-# Input graph for OpenEnergyPlatform__oeplatform__factsheet_helper.py___division_members — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for OpenEnergyPlatform__oeplatform__factsheet_helper.py___division_members
+# -- written during translation. Covers, for a call with division=ex:division1:
+#   - one solution per UNION branch of SECTOR_MEMBERS_QUERY (three solutions);
+#   - a sector equal to the division itself, excluded by FILTER (?sector != ?division);
+#   - a blank-node sector, matching the pattern but excluded by the Python-side
+#     `isinstance(row[0], URIRef)` filter;
+#   - neighbouring triples, of each branch's shape, that must NOT match
+#     (wrong division, wrong predicate, wrong onProperty);
+#   - distinct rdfs:label values so the label-sort has an unambiguous order.
+# A call with division=ex:divisionZero (never a ?division in any triple
+# below) is the zero-solution case.
 @prefix ex: <http://example.org/> .
+@prefix oeo: <https://openenergyplatform.org/ontology/oeo/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Branch 1: direct membership via oeo:OEO_00000504.
+ex:transport oeo:OEO_00000504 ex:division1 ;
+    rdfs:label "Transport" .
+
+# Branch 2: rdf:type an owl:Restriction with someValuesFrom division1.
+ex:energy rdf:type ex:restrictionA ;
+    rdfs:label "Energy" .
+ex:restrictionA a owl:Restriction ;
+    owl:onProperty oeo:OEO_00000504 ;
+    owl:someValuesFrom ex:division1 .
+
+# Branch 3: rdfs:subClassOf a Restriction with someValuesFrom division1.
+ex:agriculture rdfs:subClassOf ex:restrictionB ;
+    rdfs:label "Agriculture" .
+ex:restrictionB a owl:Restriction ;
+    owl:onProperty oeo:OEO_00000504 ;
+    owl:someValuesFrom ex:division1 .
+
+# sector == division: must be excluded by FILTER (?sector != ?division).
+ex:division1 oeo:OEO_00000504 ex:division1 .
+
+# a blank-node sector: matches the graph pattern but must be excluded by
+# `isinstance(row[0], URIRef)` in Python.
+[] oeo:OEO_00000504 ex:division1 .
+
+# neighbourhood: same predicate, but a DIFFERENT division -> must not match
+# a call for division1.
+ex:other_sector oeo:OEO_00000504 ex:division2 ;
+    rdfs:label "Other" .
+
+# neighbourhood: right shape, wrong predicate -> must not match branch 1.
+ex:wrong_predicate_sector ex:unrelatedProp ex:division1 ;
+    rdfs:label "WrongPredicate" .
+
+# neighbourhood: a Restriction, but on a DIFFERENT property -> must not
+# match branch 2 (or 3).
+ex:wrong_prop_sector rdf:type ex:restrictionC ;
+    rdfs:label "WrongProp" .
+ex:restrictionC a owl:Restriction ;
+    owl:onProperty ex:someOtherProperty ;
+    owl:someValuesFrom ex:division1 .

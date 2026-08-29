@@ -1,10 +1,10 @@
 # Extracted from OpenEnergyPlatform/oeplatform@ff28ef6390 : factsheet/tests/test_oekg_query.py
 # region: TestOekgQuery._make_graph_with_input (lines 18-28, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+@prefix oeo: <https://openenergyplatform.org/ontology/oeo/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
 from rdflib import RDF, Graph, Literal, URIRef
 from factsheet.oekg import namespaces
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
 
 def _make_graph_with_input(self, table_iri_literal: str):
     g = Graph()
@@ -12,10 +12,9 @@ def _make_graph_with_input(self, table_iri_literal: str):
     scenario = <https://oekg.test/scenario/A>
     input_ds = <https://oekg.test/dataset/in1>
 
-    g += g{
-        {bundle} a {namespaces.OEO.OEO_00020227} ;
-           {namespaces.OBO.BFO_0000051} {scenario} .
-        {scenario} {namespaces.OEO.OEO_00020437} {input_ds} .
-        {input_ds} {namespaces.OEO.OEO_00390094} {Literal(table_iri_literal)}
-    }
+    @graph g
+    +{ {bundle} a oeo:OEO_00020227 ;
+                obo:BFO_0000051 {scenario} }
+    +{ {scenario} oeo:OEO_00020437 {input_ds} }
+    +{ {input_ds} oeo:OEO_00390094 {table_iri_literal} }
     return g, bundle, scenario

@@ -14,9 +14,17 @@
     "namespace_term": 38
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "not-expressible",
+  "constructions": [
+    "@prefix"
+  ],
+  "translation_notes": [
+    "context_shim.py restores `from ..rdflib import DefinedNamespace, Namespace, URIRef`, a relative import that needs a real parent package to resolve when the region is exec'd standalone. kif_lib/rdflib.py (the real target) is itself a pure re-export of rdflib's own symbols, so the shim is the same re-export.",
+    "NOT-EXPRESSIBLE, the exact case the batch brief warns about: `_NS = Namespace(...)` is a class attribute of `class SEMSCI(DefinedNamespace)`. rdflib's DefinedNamespace.__getattr__ reads `cls._NS` on EVERY attribute access (rdflib/namespace/__init__.py:290-301), not just at definition time -- the `CHEMINF_000140: URIRef` lines are bare annotations, they hold no value; the actual URIRef is produced lazily by that lookup. `@prefix semsci: <...> .` transpiles to `__namespaces__['semsci'] = Namespace(...)`, a transpile-time binding table entry, not a class attribute -- it produces no runtime `_NS`.",
+    "Reproduced by running `rdfeval check` on this very pair: original.py runs to completion (40 attribute accesses resolve through _NS); translated.ldpy raises at line 68, `CAS_registry_number = SEMSCI.CHEMINF_000446`, the first attribute access after the substitution, in the sibling class `CHEMINF` that reads SEMSCI's attributes at class-definition time -- `AttributeError: DefinedNamespace like object has no attribute '_NS'` (rdflib/namespace/__init__.py:296). That one line is the minimal extract: `class SEMSCI(DefinedNamespace): @prefix semsci: <...> .` then any `SEMSCI.Something` elsewhere breaks.",
+    "translated.ldpy is left with the substitution IN PLACE (not reverted) precisely so `rdfeval check` keeps reproducing the failure for review; translation_status stays draft and cannot go final -- there is no notation that covers this without changing kif_lib/namespace/semsci.py's own contract (SEMSCI.CHEMINF_000140 etc. read as class attributes by rdflib itself, and by the file's own CHEMINF/SIO classes three lines below).",
+    "The measured construction count is unaffected: both Namespace() calls in this region (SEMSCI._NS, and the annotation-only class body) are namespace_ctor; the 38 namespace_term reads (SEMSCI.CHEMINF_*, SEMSCI.SIO_*) are exactly what breaks."
+  ],
   "draft_sha": "0d201a44b8123c47",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.342608+00:00",
@@ -27,5 +35,6 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

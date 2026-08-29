@@ -14,11 +14,21 @@
     "term_constructor": 3,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd, RDF->rdf"
+    "no `@prefix` at all: `self.basens`, `self.binding_namespace` and `utils.NGSILD` are Namespace objects reached through attribute/subscript access on runtime values (`self.basens['Binding']`, `utils.NGSILD['Property']`), never a project-level name import -- so every predicate/type/object stays a Python interpolation `{...}`, and `RDF['type']` -> `a` leaves `rdf:` unused. The mechanical draft's `@prefix xsd:`/`@prefix rdf:` were both dead (XSD is not referenced in this six-line body either) and are dropped.",
+    "the exact boundary this stratum is about: five of the six `self.bindingsg.add((bindingiri, ...))` calls (type, bindsEntity, bindingVersion, bindsFirmware, bindsAttributeType) share `bindingiri` with nothing between them and merge into one `+{ ... ; ... }`. The SIXTH, `bindsLogic`, shares the same subject but sits inside `if logic_transform is not None:` -- folding it into the unconditional `;` block would assert `bindsLogic` (as `Literal(None)`, via the interpolation coercion) for every call, which the original never does when `logic_transform` is `None`. Kept as its own `+{ }`, written as the one-line compound-statement form (`if cond: +{ }`, legal since 0.4.0) rather than opening a block for a single triple. The final `self.bindingsg.add((attribute_iri, ...))` is on a DIFFERENT subject (`attribute_iri`, not `bindingiri`) and was never a candidate for the same `;` island regardless of control flow.",
+    "`@graph self.bindingsg` designates an attribute expression, not a bare name -- verified directly (`@graph <expr>` accepts any Python expression that evaluates to a graph, per reference/language/current-graph.md and confirmed empirically), same as the FAIRDataTeam-applier and kumagallium regions elsewhere in this study.",
+    "context_shim.py: `Bindings.__init__` copied verbatim from semantic-model/opcua/lib/bindings.py at the pinned commit (the class `create_attribute_binding` is a method of; the region itself is extracted as a bare function taking `self`, matching the corpus pipeline's own extraction), and lib/utils.py's `NGSILD` constant, cross-checked against the value already reproduced in a sibling region's shim for the same repository/commit (examples403/trav_one_step/.../test_ngsild_property_constraints_scalar_and_list/context_shim.py). `import lib.utils as utils` -> `import context_shim as utils`: a module alias import, not a prefix import, since the region reads NGSILD through attribute access on the module, never as a name imported directly.",
+    "demo() harness (identical on both sides, see driver.py): create_attribute_binding takes `self` and writes into `self.bindingsg`, returning only the new binding's IRI -- the driver could not compare the interesting artefact (the graph) without a wrapper. demo() builds a fresh context_shim.Bindings and returns (bindingiri, bindingsg) so run_pair's own tuple/graph normalisation handles both by isomorphism/equality automatically, without a hand-rolled __eq__.",
+    "randomness: create_attribute_binding draws `random.choices(...)` once, unseeded, for bindingiri's local name. Documented and worked around entirely in driver.py (random.choices patched to a deterministic, state-free stand-in) rather than by touching the region's own line.",
+    "checked that the pilot discriminates on the exact merge-boundary question this stratum is about: folding bindsLogic into the unconditional block (dropping its `if`) makes `rdfeval check` fail on the no-logic_transform call with 'values differ' -- the broken translation asserts bindsLogic even when logic_transform is None, which the original never does."
   ],
   "draft_sha": "4da45975cc32456d",
   "provenance": {
@@ -30,5 +40,12 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

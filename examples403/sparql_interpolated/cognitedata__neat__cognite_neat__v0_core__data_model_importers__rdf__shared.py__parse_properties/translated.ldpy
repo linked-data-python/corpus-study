@@ -6,14 +6,22 @@ from urllib.parse import quote
 from rdflib import BNode, Graph, Namespace, URIRef
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.query import ResultRow
-from cognite.neat._v0.core._constants import cognite_prefixes
-from cognite.neat._v0.core._data_model.models.entities._constants import Unknown
-from cognite.neat._v0.core._issues._base import IssueList
-from cognite.neat._v0.core._issues.errors._general import NeatValueError
-from cognite.neat._v0.core._issues.warnings._resources import (
+# The five imports below come from cognite.neat._v0.core.* upstream, a
+# third-party package not installed here; neat_shared_context reproduces
+# them (see meta.json / that module's own header for what and why).
+from neat_shared_context import cognite_prefixes
+from neat_shared_context import Unknown
+from neat_shared_context import IssueList
+from neat_shared_context import NeatValueError
+from neat_shared_context import (
     ResourceRedefinedWarning,
     ResourceRetrievalWarning,
 )
+# convert_rdflib_content, sanitize_entity and handle_meta are parse_properties'
+# own module-level siblings in upstream's _shared.py (not extracted with the
+# region, since only parse_properties itself was); neat_shared_context
+# reproduces them too, verbatim, next to their real transitive dependencies.
+from neat_shared_context import convert_rdflib_content, sanitize_entity, handle_meta
 
 def parse_properties(
     graph: Graph, query: str, parameters: set, language: str, issue_list: IssueList

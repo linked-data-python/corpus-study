@@ -15,11 +15,21 @@
     "namespace_term": 2,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "IRI",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: DCAT->dcat, GEO->geo, RDF->rdf"
+    "prefixes: DCAT->dcat, GEO->geo, RDF->rdf",
+    "graph binding restored (see original.py header): `response_graph` was built from a live HTTP round-trip through an in-process FastAPI TestClient wired to the real prez app + a pyoxigraph store loaded from test_data/*.ttl (tests/conftest.py: `client`, `an_fc_link`, `a_spaceprez_dataset_link`, `a_feature_link` -- three chained fixture calls), one of corpus/403's '163 regions with no visible graph'. Replaced `client`/`a_feature_link` with an explicit `response_graph` parameter and dropped the now-unused `client.get(...)`/`Graph().parse(data=...)` lines; the one read under study is otherwise untouched.",
+    "NOTABLE FINDING for this stratum, same shape as the sibling LA3D region of this batch: `next(response_graph.triples(expected_response_1))` is syntactically the trav_single_value idiom this region was sampled for, but `expected_response_1` is a FULLY BOUND triple -- all three terms known, zero variables. The value `next()` returns is never used for anything but its truthiness in the bare `assert`; there is no 'single value I expect' to bind, only a membership test. Per INSTRUCTIONS_403 SS2 ('la construction la plus specifique'), the most specific construction is therefore trav_existence's `bool(m{ })` -- the exact worked example in querying.md#the-single-expected-value-and-existence (`assert bool(m{ ex:b a ex:Sensor })`) -- not `.first()`/`.one()`: this region contributes ZERO occurrences of `.first()`/`.one()` despite its stratum label.",
+    "`expected_response_1` (a plain tuple, used only as the argument to `.triples()`) was inlined directly into the `m{ }` pattern rather than kept as a separate variable: this is the notation's native form for a literal triple (every worked example in querying.md/migrate-from-rdflib.md writes the pattern in place, never builds a tuple first) and there is no island form for 'a Python tuple of terms used as a whole pattern' -- not a restructuring of control flow, just the direct spelling the doc itself uses for this exact shape.",
+    "zero-solution branch cannot be exercised through this driver: the entire function body IS the one `assert`, so a fixture where the triple is absent would make the ORIGINAL side raise inside `run_pair`'s single try/except, which aborts the whole comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py) -- same limitation already documented on the sibling LA3D region of this batch. Hardened the fixture instead with neighbourhood data (a second Feature of the same type, a second type on the same subject) that must not satisfy the exact triple."
   ],
   "draft_sha": "c02d3272d7b9a443",
   "provenance": {
@@ -31,5 +41,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:test_feature",
+    "diffs": [],
+    "error": null
+  }
 }

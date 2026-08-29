@@ -41,3 +41,11 @@ class QUDTQK(DefinedNamespace):
     Mass: URIRef
     Time: URIRef
 
+# Restored consumer (see meta.json): src/ontologies/namespaces/__init__.py, in
+# the SAME repository, imports these three classes and its
+# `if __name__ == "__main__":` block does `label = to_label(QUDT.degreeCelsius)`.
+# `degreeCelsius` is not among the annotated names above -- DefinedNamespace
+# resolves ANY attribute through `_NS` (rdflib/namespace/__init__.py:290),
+# annotated or not.
+degree_celsius = QUDT.degreeCelsius
+

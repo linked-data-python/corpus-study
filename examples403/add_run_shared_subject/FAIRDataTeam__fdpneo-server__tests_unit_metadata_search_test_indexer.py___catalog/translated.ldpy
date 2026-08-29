@@ -3,16 +3,15 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF
-from fdpneo_server.shared.namespaces import DCT, FDP_METADATA_STATE, SH
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import dct:  # context shim -- see meta.json
 
 REC = "http://localhost:8000/catalog/c1"
 
 def _catalog() -> Graph:
     g = Graph()
     s = URIRef(REC)
-    g += g{
-        {s} a <http://www.w3.org/ns/dcat#Catalog> ;
-           {DCT.title} "Cat"
+    @graph g
+    +{ {s} a <http://www.w3.org/ns/dcat#Catalog> ;
+           dct:title "Cat"
     }
     return g

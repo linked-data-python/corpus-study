@@ -1,0 +1,16 @@
+# Second input graph for
+# cognitedata__neat__cognite_neat__v0_core__data_model_importers__rdf__shared.py__parse_properties
+# -- the zero-solution case (design record corpus/403 SS3): a graph with no
+# owl:ObjectProperty/owl:DatatypeProperty resource at all, so upstream's
+# PROPERTIES_QUERY returns no rows and `properties` stays empty, which is
+# what makes parse_properties append NeatValueError("Unable to parse
+# properties") to issue_list.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix ex:   <http://example.org/> .
+
+ex:Person a owl:Class .
+ex:hasIgnored a owl:AnnotationProperty ;   # still the wrong property type
+    rdfs:domain ex:Person ;
+    rdfs:range ex:String .

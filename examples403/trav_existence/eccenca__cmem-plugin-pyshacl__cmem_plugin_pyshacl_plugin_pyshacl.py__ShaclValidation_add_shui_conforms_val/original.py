@@ -31,3 +31,26 @@ def add_shui_conforms_val(
             )
         )
     return validation_graph
+
+# --- Test harness only (see meta.json) — identical in original.py and
+# translated.ldpy except for the one line that mirrors the region's own
+# read construction. `self.log.info(...)` is the only use of `self` in the
+# region, hence the tiny stub. `demo(mode, ...)` has two modes:
+#   "mutate" — calls the real, unmodified region (covers several solutions
+#     across two result URIs, and the focus_nodes-provided branch that
+#     never reads at all);
+#   "read"   — evaluates the region's own read expression in isolation,
+#     because the region's `.add()` call cannot tolerate a None subject
+#     (verified: rdflib raises `AssertionError` on `add((None, ...))`), so
+#     the zero-solution case cannot be driven through "mutate" without
+#     crashing both sides before any comparison happens.
+class _SelfStub:
+    class _Log:
+        def info(self, *args, **kwargs):
+            pass
+    log = _Log()
+
+def demo(mode, validation_graph, a, b=None):
+    if mode == "mutate":
+        return add_shui_conforms_val(_SelfStub(), validation_graph, a, b)
+    return validation_graph.value(subject=a, predicate=SH.focusNode)

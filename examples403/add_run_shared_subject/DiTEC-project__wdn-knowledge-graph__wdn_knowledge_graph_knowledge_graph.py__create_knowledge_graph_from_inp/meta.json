@@ -19,10 +19,21 @@
     "triple_add": 31
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "plain literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: RDFS->rdfs, XSD->xsd. RDF RETIRED from the draft: RDF.type becomes `a`, so a `@prefix rdf:` would go unused and falsify the island count.",
+    "the exact boundary the stratum is about, six times over: within each of the six per-component loops (Junction, Reservoir, Tank, Pipe, Pump, Valve), the run of `g.add((component_uri, ...))` calls sharing that subject, with no intervening control flow or unrelated statement, merges into one `+{ … ; … }`. Two places do NOT get folded into the surrounding run, deliberately: (1) Junctions -- the last unconditional add (elevation) is followed by `if junction_obj.demand_timeseries_list: if demand_obj.base_value is not None: g.add(... baseDemand ...)`, a triple nested inside two conditions that do not hold for every junction; merging it into the unconditional `;` block would assert `wdn:baseDemand` for junctions whose INP entry has no demand series or a null base value, which the original never does. Left as its own `+{ }` inside the (one-line, 0.4.0-legal) nested `if`. (2) Pipes -- `hasStartNode`/`hasEndNode` share `pipe_uri` with the first five triples, but `start_node_uri`/`end_node_uri` are computed by two statements sitting BETWEEN the two `.add()` runs in the original; folding them into a single `;` island would require hoisting that computation above the first block, which is a reorder INSTRUCTIONS_403 SS2 forbids. Kept as two separate `+{ }` islands, in the original order. The same shape (compute intermediate URIs, then a second `+{ }`) recurs for Pumps and Valves.",
+    "`wdn_namespace`, `junction_uri`/`reservoir_uri`/.../`valve_uri` and every `*_node_uri` stay Python-side and interpolated ({wdn_namespace.Junction}, {junction_uri}, ...): `wdn_namespace` is `Namespace(<a URL computed at call time>)`, not a module-level constant importable as a prefix, and the subject/object URIs are themselves computed per loop iteration from f-strings over the WNTR object model -- there is no static IRI or project-level namespace import to lift into `@prefix`.",
+    "EXCLUDED, not because any translation choice is in doubt but because the PILOT cannot execute: `import wntr` fails on both sides (wntr==1.3.2, the source repository's pinned version, is not installed in the shared ~/.venvs/ldpy interpreter -- confirmed absent, and confirmed reachable on PyPI via `pip index versions wntr`, so this is an installation gap, not an unpublished/unreproducible dependency). See driver.py for the full account, including why installing a third-party package into the venv shared by every concurrent agent is out of this region's scope, and why the real 5.2 MB sample .inp file already present in the corpus clone (sample_data/LeakDB_Scenario-1.inp) was not copied into this region directory."
   ],
   "draft_sha": "b8dee9f8bbd6c54f",
   "provenance": {
@@ -34,5 +45,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

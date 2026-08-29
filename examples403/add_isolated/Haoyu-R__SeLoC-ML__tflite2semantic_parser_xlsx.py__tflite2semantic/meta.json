@@ -14,11 +14,19 @@
     "term_constructor": 7,
     "triple_add": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: nnet->nnet"
+    "7 isolated g.add() calls across the if/elif/else (2 per branch, plus a literal duplicate of the else branch's last add() -- a copy-paste artefact of the original code, preserved as-is, not merged or 'fixed'). All become +{ } under a single @graph g declared once before the if/elif/else (block scope covers the whole rest of the module, including every branch).",
+    "nnet = Namespace(...) is a LOCAL namespace constant (not imported from rdflib.namespace), so -- following the precedent set by add_isolated/BBDFrancois...PRIV/DBO/DBR/DBP -- it stays plain Python, referenced inside +{ } as {nnet.inputLayer} etc., rather than promoted to @prefix nnet: (which is the ns_def_local stratum's own construction, not this batch's, and would also collide lexically with the Python name `nnet` -- the transpiler's declared-prefix-equals-python-name warning).",
+    "kind=statement, no graph parameter and no annotated binding: j, idOfNN, neuralNetwork, graph (the tflite subgraph object with .OperatorsLength()) and addCommonInfo are locals/nested-function of the enclosing tflite2semantic()/for-j-loop that line-range extraction did not capture. Restored via context_shim.py: idOfNN/neuralNetwork reproduce the file's own IRI scheme; graph is a minimal stand-in for .OperatorsLength() (the only method this region calls on it); addCommonInfo is stubbed inert since its real body needs a parsed .tflite model + TF interpreter (external dependency out of reach and out of scope for lines 393-411 specifically, which are outside addCommonInfo's own body at lines 356-391).",
+    "j/graph.OperatorsLength() set so the else (middle-layer) branch runs -- the richest of the three, and entry=None/module-state execution only runs ONE branch per process, so the other two are exercised by static transpilation only, not by this pilot's runtime comparison.",
+    "Verified not a hollow green: changing the first else-branch add's object from {middleLayer} to {neuralNetwork} (self-loop) flips the check to FAIL, graph g reported not isomorphic."
   ],
   "draft_sha": "6941cb6ed26c388f",
   "provenance": {
@@ -31,5 +39,11 @@
     "add_isolated",
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

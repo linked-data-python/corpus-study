@@ -13,11 +13,23 @@
     "graph_read": 1,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "m{ }",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd"
+    "Two different namespace origins, same split documented for the johnjung/metadata_converters and LexMalta/edmondchuc siblings of this stratum: QUDT (from the PROJECT module acquirium.internals.internals_namespaces, verified as a real `Namespace(...)` in internals_namespaces.py) is genuinely ns_import_project and became `from qudt_context import UNIT, QUDT_QUANTITY_KIND, qudt:` (UNIT/QUDT_QUANTITY_KIND stay plain imports: neither is dereferenced inside this region's own body). RDFS/SKOS (from `rdflib.namespace`, rdflib's OWN namespaces -- out of scope for this stratum's construction per the task brief) became `@prefix rdfs:`/`@prefix skos:` + prefixed names instead. RDF and XSD are imported but never dereferenced in this function's body, left as plain unused imports (same rule as the sibling pairs: an imported namespace is not forced into a prefix, of either kind, by its mere presence in the import list). classification minor-restructuring for the same reason as those siblings: two different namespace origins forced two different constructions in the same import block.",
+    "`predicates = [RDFS.label, SKOS.prefLabel, QUDT.symbol, QUDT.ucumCode, QUDT.uneceCommonCode]` then `for predicate in predicates: for subj, _, lit in self.graph.triples((None, predicate, None))` -- a two-variable traversal (subj, lit) with the predicate position BOUND to a loop variable, not a constant -- translated to `for subj, lit in m{ ?subj {predicate} ?lit }(self.graph)`: `{predicate}` interpolates the runtime term into predicate position (graphs.md: 'In any term position, braces switch back to Python'), and the discarded middle element (`_`) simply disappears because m{ } only projects declared variables (querying.md: 'Two or more -> unpackable rows'). Call-suffix `(self.graph)` used rather than `@graph self.graph` + a bare `m{ }`, since this is the region's ONLY graph operation and adding a declaration line for one read would not shorten anything.",
+    "Oracle is `values` (this region reads, does not write): fixture.ttl covers (1) a match reached only after skipping a same-predicate, same-substring candidate that fails `_looks_like_unit` (ex:galacticSurvey, label also contains 'gal' but is not typed qudt:Unit and has no qudt:conversionMultiplier -- proves the loop keeps scanning past a false match rather than stopping at the first label hit), (2) the zero-solution case ('doesnotexist'), (3) a match reached only through a LATER predicate in the priority list (qudt:ucumCode, not label/prefLabel/symbol -- proves the outer predicates loop and the interpolated `{predicate}` are not silently fixed to the first entry), plus neighbourhood that must not match at all: a triple on an untracked predicate (ex:comment) and a non-Literal object on a TRACKED predicate (ex:secondRef rdfs:label ex:gallon) exercising the `isinstance(lit, Literal)` guard without crashing.",
+    "Fixture strength checked directly: dropping `qudt:ucumCode` from translated.ldpy's `predicates` list flips `rdfeval check` to FAIL on call[2] (UnitDefinition(...) vs None); reverted afterward, OK confirmed again.",
+    "Executability (AGENT_BATCH's 163-regions case): `acquirium.internals.internals_namespaces` (a real dotted project path that cannot resolve for a single extracted file) rewritten to `qudt_context`, a shim module. `from __future__ import annotations` restored (present at qudt_units.py line 21, not captured by the extracted context): without it, the bare `UnitDefinition` in this function's own return annotation is evaluated eagerly at def-time and raises NameError, since UnitDefinition is not otherwise imported into original.py/translated.ldpy (driver.py never needs the class name itself, only the value the region returns). `self` (`_looks_like_unit`, `_from_uri` -> `UnitDefinition.from_graph`, all transcribed verbatim from qudt_units.py) lives in qudt_context.ConverterStub, used identically by both sides and by driver.py's demo() rather than duplicated -- `_from_uri`'s downstream FIXED_MULTIPLIERS lookup and `_refine_ratio_multiplier` (which recurses back into the public `resolve_unit`, and from there potentially back into `_search_label_contains` itself under a different strategy) are left out: unit-conversion-accuracy refinements, unreachable by design (the fixture uses plain, non-'-PER-' unit names and multipliers not in FIXED_MULTIPLIERS) and irrelevant to WHICH unit this region finds -- not reached, not simplified, same reasoning as the johnjung/metadata_converters sibling's own omissions (MAPS/CHISOC, .triples()).",
+    "`demo(text)` (identical on both sides, appended after the region) takes a bare string rather than passing the ConverterStub itself as entry='_search_label_contains''s argument: an earlier version did exactly that and `rdfeval check` FAILed with 'call[i].arg[0]: values differ' on every call -- the harness's per-argument comparison falls back to Python identity equality for a plain stub with no __eq__, so two separately-constructed instances (one per side) always compare unequal, independent of translation correctness. Same failure mode and same fix as the acdh-oeaw/vocabseditor sibling of this stratum."
   ],
   "draft_sha": "eb3a7ddd1f832ddf",
   "provenance": {
@@ -29,5 +41,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

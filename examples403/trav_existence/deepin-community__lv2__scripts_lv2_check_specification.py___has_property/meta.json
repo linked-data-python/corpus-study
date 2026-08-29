@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Binding restored (AGENT_BATCH's 163-regions case): the extracted region has an empty context and `model` carries no annotation, so the stratifier's static pass could not see it is an rdflib Graph (rdf_ops: 0, categories: {} above, hence meta.oracle defaulted to \"isomorphism\" even though the region only reads). Restored with `model: Graph` + `from rdflib import Graph`, identically in original.py and translated.ldpy; the function body is otherwise untouched.",
+    "Textbook trav_existence, and the cleanest possible instance: `model.value(subject, predicate, None) is not None` discards the value entirely -- only the None/not-None distinction is used, never the value itself -- so it is genuine existence, not the .first()-shaped reuse case INSTRUCTIONS_403's AVERTISSEMENT warns about. Translated `@graph model` + `return bool(m{ {subject} {predicate} ?o })`, per the stratum's own mapping (`g.value(...) is not None` -> `bool(m{ })`).",
+    "meta.json's `oracle` field is left as the pipeline computed it (\"isomorphism\") -- it is provenance from the tirage, not something this region's driver follows; the driver actually used is fixture+entry (values oracle), the same call made for the RDFLib__prez sibling of this stratum with the identical oracle/rdf_ops mismatch.",
+    "fixture.ttl / driver.py: `_has_property` takes three arguments (model, subject, predicate), so the default fixture= calling convention doesn't fit; calls= is explicit, one (subject, predicate) pair per case. Two solutions for ex:s1/ex:p1, one for ex:s1/ex:p2 (both True); zero solutions three ways -- a predicate never used on the subject (ex:s1/ex:p3), the predicate present but on a different subject (ex:s2/ex:p2), and a subject entirely absent from the graph (ex:s3/ex:p1) -- proving the read is scoped to the exact pair, not the subject or predicate alone."
+  ],
+  "article_candidate": true,
   "draft_sha": "1ab37f86a1dee6a2",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.501976+00:00",
@@ -24,5 +35,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_has_property",
+    "diffs": [],
+    "error": null
+  }
 }

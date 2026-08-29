@@ -5,7 +5,6 @@ import wntr
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, RDFS, XSD
 import sys
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -23,6 +22,7 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
 
     # Create an RDF graph to store the knowledge graph
     g = Graph()
+    @graph g
 
     # Bind the prefix for the ontology using the extracted namespace
     g.bind('wdn', wdn_namespace)
@@ -33,8 +33,7 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
     # Process Junctions
     for junction_name, junction_obj in wn.junctions():
         junction_uri = URIRef(wdn_namespace[f"Junction_{junction_name}"])
-        g += g{
-            {junction_uri} a {wdn_namespace.Junction} ;
+        +{ {junction_uri} a {wdn_namespace.Junction} ;
                rdfs:label {Literal(f"Junction {junction_name}")} ;
                {wdn_namespace.elevation} {Literal(junction_obj.elevation, datatype=XSD.double)}
         }
@@ -43,13 +42,12 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
         if junction_obj.demand_timeseries_list:
             demand_obj = junction_obj.demand_timeseries_list[0]  # Assuming one demand series
             if demand_obj.base_value is not None:
-                g += g{ {junction_uri} {wdn_namespace.baseDemand} {Literal(demand_obj.base_value, datatype=XSD.double)} }
+                +{ {junction_uri} {wdn_namespace.baseDemand} {Literal(demand_obj.base_value, datatype=XSD.double)} }
 
     # Process Reservoirs
     for reservoir_name, reservoir_obj in wn.reservoirs():
         reservoir_uri = URIRef(wdn_namespace[f"Reservoir_{reservoir_name}"])
-        g += g{
-            {reservoir_uri} a {wdn_namespace.Reservoir} ;
+        +{ {reservoir_uri} a {wdn_namespace.Reservoir} ;
                rdfs:label {Literal(f"Reservoir {reservoir_name}")} ;
                {wdn_namespace.head} {Literal(reservoir_obj.base_head, datatype=XSD.double)}
         }
@@ -57,8 +55,7 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
     # Process Tanks
     for tank_name, tank_obj in wn.tanks():
         tank_uri = URIRef(wdn_namespace[f"Tank_{tank_name}"])
-        g += g{
-            {tank_uri} a {wdn_namespace.Tank} ;
+        +{ {tank_uri} a {wdn_namespace.Tank} ;
                rdfs:label {Literal(f"Tank {tank_name}")} ;
                {wdn_namespace.bottomElevation} {Literal(tank_obj.elevation, datatype=XSD.double)} ;
                {wdn_namespace.initialLevel} {Literal(tank_obj.init_level, datatype=XSD.double)} ;
@@ -70,8 +67,7 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
     # Process Pipes
     for pipe_name, pipe_obj in wn.pipes():
         pipe_uri = URIRef(wdn_namespace[f"Pipe_{pipe_name}"])
-        g += g{
-            {pipe_uri} a {wdn_namespace.Pipe} ;
+        +{ {pipe_uri} a {wdn_namespace.Pipe} ;
                rdfs:label {Literal(f"Pipe {pipe_name}")} ;
                {wdn_namespace.length} {Literal(pipe_obj.length, datatype=XSD.double)} ;
                {wdn_namespace.diameter} {Literal(pipe_obj.diameter, datatype=XSD.double)} ;
@@ -83,32 +79,28 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
         start_node_uri = URIRef(wdn_namespace[f"{pipe_obj.start_node.node_type}_{pipe_obj.start_node_name}"])
         end_node_uri = URIRef(wdn_namespace[f"{pipe_obj.end_node.node_type}_{pipe_obj.end_node_name}"])
 
-        g += g{
-            {pipe_uri} {wdn_namespace.hasStartNode} {start_node_uri} ;
+        +{ {pipe_uri} {wdn_namespace.hasStartNode} {start_node_uri} ;
                {wdn_namespace.hasEndNode} {end_node_uri}
         }
 
     # Process Pumps
     for pump_name, pump_obj in wn.pumps():
         pump_uri = URIRef(wdn_namespace[f"Pump_{pump_name}"])
-        g += g{
-            {pump_uri} a {wdn_namespace.Pump} ;
+        +{ {pump_uri} a {wdn_namespace.Pump} ;
                rdfs:label {Literal(f"Pump {pump_name}")}
         }
 
         # Object Property: Pumps Water to Tanks
         node_uri = URIRef(wdn_namespace[f"{pump_obj.start_node.node_type}_{pump_obj.start_node_name}"])
         tank_uri = URIRef(wdn_namespace[f"{pump_obj.start_node.node_type}_{pump_obj.end_node_name}"])
-        g += g{
-            {pump_uri} {wdn_namespace.pumpsReceiveWaterFrom} {node_uri} ;
+        +{ {pump_uri} {wdn_namespace.pumpsReceiveWaterFrom} {node_uri} ;
                {wdn_namespace.pumpsWaterTo} {tank_uri}
         }
 
     # Process Valves
     for valve_name, valve_obj in wn.valves():
         valve_uri = URIRef(wdn_namespace[f"Valve_{valve_name}"])
-        g += g{
-            {valve_uri} a {wdn_namespace.Valve} ;
+        +{ {valve_uri} a {wdn_namespace.Valve} ;
                rdfs:label {Literal(f"Valve {valve_name}")} ;
                {wdn_namespace.setting} {Literal(valve_obj.setting)}
         }
@@ -117,8 +109,7 @@ def create_knowledge_graph_from_inp(inp_file, destination="knowledge_graph.ttl")
         start_node_uri = URIRef(wdn_namespace[f"Node_{valve_obj.start_node_name}"])
         end_node_uri = URIRef(wdn_namespace[f"Node_{valve_obj.end_node_name}"])
 
-        g += g{
-            {valve_uri} {wdn_namespace.hasStartNode} {start_node_uri} ;
+        +{ {valve_uri} {wdn_namespace.hasStartNode} {start_node_uri} ;
                {wdn_namespace.hasEndNode} {end_node_uri}
         }
 

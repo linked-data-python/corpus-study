@@ -12,10 +12,23 @@
   "categories": {
     "namespace_ctor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "The six next(graph.objects(s, p), 'unknown') calls each become m{ {s} {p} ?v }.first() followed by `if x is None: x = 'unknown'`. next(iterator, default) only substitutes the default on StopIteration (an empty iterator), never on a falsy-but-present value, and an RDF term is never Python None, so `x = default if x is None else x` after .first() is exactly equivalent -- not the shorter `x = m{...}.first() or 'unknown'`, which would (wrongly) also fire on a falsy-but-matched term.",
+    "Both subject and predicate are plain Python expressions at every one of the six sites: {node}/{rootentity}/{rootns}/{ns} are the function's own parameters or locals, and the predicate is always an attribute+subscript on self (self.basens['hasNodeId'] etc., a Namespace only known at runtime, not a compile-time prefix), so every site interpolates both terms with {expr} rather than any prefixed name -- there is no @prefix in this file at all.",
+    "@graph graph designates the function's own graph parameter as current for the whole body (bound method extracted as a plain function; self is read only for self.basens), so every m{ } stays bare.",
+    "meta.json's auto-detected oracle was 'isomorphism' (the extraction pipeline only classified the Namespace(nsuri) constructor call, missing the six graph_read sites), but the region reads a graph and returns a computed value with no graph construction at all: retargeted to the reading oracle (corpus/405) with fixture.ttl and calls=, matching the sibling trav_one_step regions in this batch. Corrected in this meta.json's oracle field below.",
+    "nodeId_to_iri, idtype2String and is_iri (module-level helpers in the same source file, not carried by the extraction) are restored via a context shim (rdfutils_context.py), reproduced verbatim from the published source including the 'Warning no idtype found.' print in idtype2String's else branch -- both original.py and translated.ldpy import the identical shim, so its stdout is identical on both sides regardless of translation.",
+    "Fixture scenarios 1-4 mirror the source repository's own semantic-model/opcua/tests/test_libutils.py::test_generate_node_id (same predicate names, same expected output strings, independently recomputed and checked here): same-namespace with a plain id (prepended), id=None (no prefix), different-namespace (id ignored even though non-empty), and same-namespace with an id that is itself a full IRI (nodeId_to_iri's is_iri branch). Scenario 5 is new here: the zero-solution case, where every one-step read is empty and all six values collapse to 'unknown' on both sides."
+  ],
   "draft_sha": "783efc84c0082f61",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.211426+00:00",
@@ -27,5 +40,12 @@
     "trav_one_step",
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:generate_node_id",
+    "diffs": [],
+    "error": null
+  }
 }

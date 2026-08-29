@@ -1,7 +1,34 @@
 # Extracted from LexMalta/recipes@b861b7ccea : recipe-importer/rdflib/namespace/_BRICK.py
 # region: <module> (lines 1218-1218, stratum ns_def_local)
 # licence of the source repository: see meta.json
+#
+# Restored context (see meta.json): the extraction pipeline's line-based
+# window kept only the assignment on line 1218, dedented, losing the class
+# it lives in. In the real file this line is the LAST line of
+# `class BRICK(DefinedNamespace):`, whose body is ~1200 `Name: URIRef`
+# annotations generated from the Brick ontology (lines 5-1217). Restored
+# below: the real class header/docstring, two real annotated names (the
+# first two of the file, AED/AHU, verbatim), the real `_extras` line, and
+# the real `_NS` line at its real position -- enough to show what `_NS`
+# actually is here: a class attribute of a DefinedNamespace subclass, not a
+# bare module-level name.
 from rdflib.namespace import DefinedNamespace, Namespace
-@prefix ns: <https://brickschema.org/schema/Brick#> .
+from rdflib.term import URIRef
 
 
+class BRICK(DefinedNamespace):
+    """
+    Brick Ontology classes, properties and entity properties. See https://brickschema.org/
+    for more information.
+
+    Generated from: https://github.com/BrickSchema/Brick/releases/download/nightly/Brick.ttl
+    Date: 2021-09-22T14:32:56
+    """
+
+    # http://www.w3.org/2002/07/owl#Class
+    AED: URIRef
+    AHU: URIRef  # Assembly consisting of sections containing a fan or fans and other necessary equipment to perform one or more of the following functions: circulating, filtration, heating, cooling, heat recovery, humidifying, dehumidifying, and mixing of air. Is usually connected to an air-distribution system.
+
+    _extras = ["PM2.5_Sensor", "PM2.5_Level_Sensor"]
+
+    @prefix ns: <https://brickschema.org/schema/Brick#> .

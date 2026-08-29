@@ -14,11 +14,21 @@
     "namespace_term": 44,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: TFUN->tfun, AFTER->after, TIME->time"
+    "prefixes: TFUN->tfun, AFTER->after, TIME->time",
+    "The FILTER calls a custom SPARQL extension function, tfun:isAfter(?a, ?b), registered on rdflib's global operator table by importing the `timefuncs` package (register_custom_function in timefuncs/__init__.py). That registration is orthogonal to the island construction: s{ } embeds the query text verbatim and rdflib validates it as plain SPARQL syntax at transpile time -- a FunctionCall to an unregistered IRI is syntactically valid and only fails at evaluation time if the function is not registered when the query actually runs. `timefuncs` is not installable in this environment, so `_context.py` reproduces the registration side effect, copying `is_after` and its private helper `_path_exists` verbatim from RDFLib/timefuncs@dd3bde8727 (real logic needed: the region's `expected` list only matches the real predicate semantics against the real data).",
+    "Context restored (see original.py/translated.ldpy headers): `from pathlib import Path`, elided by line-range extraction (used one context line down by `tests_dir = Path(__file__).parent`, which WAS captured). The real input graph, `tests/functions/data/after.ttl`, is restored verbatim at data/after.ttl since `test_is_after` builds its own graph from that fixed relative path rather than taking one as an argument -- so there is no fixture.ttl for this region (see driver.py); the real file already covers several solutions (11 a/b pairs), a neighbourhood that must not match (a11-a13/b11-b13, deliberately excluded by the assert's `expected` list, kept as-is), and is the actual regression fixture the real project checks tfun:isAfter against.",
+    "The query itself is a plain two-variable SELECT with one FILTER calling the custom function -- no UNION/OPTIONAL/paths/aggregates, but FILTER alone already puts it outside m{ }'s coverage (querying.md: 'No FILTER, OPTIONAL, UNION, property paths or aggregates'), so s{ } is the correct, not just the sampled, construction here.",
+    "initNs={\"time\": TIME, \"tfun\": TFUN} disappears entirely: the prologue is built from @prefix time:/tfun: declared at file scope (querying.md 'The prologue is the block's'), a single vocabulary declaration instead of a dict rebuilt at every call site -- and AFTER, used only in Python code (never in the query text), becomes an ordinary @prefix too, so `str(AFTER.a01)` reads `str(after:a01)`.",
+    "The original test only asserts and returns nothing (same situation as lazlop/semantic_objects's test_class_scope_or_roundtrip in this stratum): `return actual` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff; it changes nothing about the RDF behaviour under test."
   ],
   "draft_sha": "c4fc2090188ba46c",
   "provenance": {
@@ -30,5 +40,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_is_after",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,10 +1,10 @@
 # Extracted from Display-Lab/scaffold@d368cfe17c : tests/bitstomach/test_loss.py
 # region: test_moderators (lines 398-432, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 from rdflib import RDF, BNode, Graph, Literal
 from src.bitstomach.signals import Loss
 from src.utils.namespace import FHIR, PSDO, SLOWMO
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 
 def test_moderators():
@@ -12,24 +12,25 @@ def test_moderators():
     prior_gap = 0.03
     slope = -0.1
     graph = Graph()
+    @graph graph
     r = graph.resource(BNode())
     # add loss types
-    r.add(rdf:type, PSDO.performance_gap_content)
-    r.add(rdf:type, PSDO.performance_trend_content)
-    r.add(rdf:type, PSDO.loss_content)
+    +{ {r.identifier} a {PSDO.performance_gap_content} ;
+                       a {PSDO.performance_trend_content} ;
+                       a {PSDO.loss_content} }
 
     # add loss properites
-    r.add(SLOWMO.PerformanceGapSize, Literal(gap))
-    r.add(SLOWMO.PerformanceTrendSlope, Literal(slope))
-    r.add(SLOWMO.PriorPerformanceGapSize, Literal(prior_gap))
-    r.add(SLOWMO.StreakLength, Literal(3))
-    r.add(SLOWMO.RegardingMeasure, BNode("PONV05"))
+    +{ {r.identifier} {SLOWMO.PerformanceGapSize} {gap} ;
+                       {SLOWMO.PerformanceTrendSlope} {slope} ;
+                       {SLOWMO.PriorPerformanceGapSize} {prior_gap} ;
+                       {SLOWMO.StreakLength} {3} ;
+                       {SLOWMO.RegardingMeasure} {BNode("PONV05")} }
 
     # Add the comparator
     c = graph.resource(BNode())
-    c.set(rdf:type, PSDO.peer_90th_percentile_benchmark)
-    c.set(rdf:value, Literal(95.0))
-    r.add(SLOWMO.RegardingComparator, c)
+    +{ {c.identifier} a {PSDO.peer_90th_percentile_benchmark} ;
+                       rdf:value {95.0} }
+    +{ {r.identifier} {SLOWMO.RegardingComparator} {c.identifier} }
 
     moderators = Loss.moderators([r])
 

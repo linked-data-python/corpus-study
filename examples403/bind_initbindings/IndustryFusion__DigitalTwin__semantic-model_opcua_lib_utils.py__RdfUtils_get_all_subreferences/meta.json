@@ -10,10 +10,22 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "Both bound variables (`node`, `superclass`) are NOT projected by the query (SELECT ?reference ?target); per INSTRUCTIONS_403 SS4 that is the case for a bare interpolation in term position, so `initBindings={'node': node, 'superclass': reference}` becomes `{node}` and `{reference}` written directly where `?node` and `?superclass` stood.",
+    "`initNs={'opcua': self.opcuans}` is dead: the query text never references an `opcua:` prefixed name. No `@prefix opcua:` was written -- there is nothing to bind it to (self.opcuans is a runtime attribute, not a static IRI a @prefix declaration can take), and dropping it changes nothing observable. Only `rdfs:`, embedded as an inline `PREFIX rdfs: <...>` line inside the original query STRING, was hoisted to a module-level `@prefix rdfs: <...> .` -- s{ }'s prologue comes from @prefix declarations in scope, never from PREFIX lines written inside the island (querying.md).",
+    "The query text lived in a separate variable (`query_generic_references = \"\"\"...\"\"\"`) passed to `graph.query(...)`; `s{ }` requires its query text literal at the island site (validated at transpile time), so that variable collapses into the island written directly at the call site. This is a structural consequence of the island, not a stylistic refactor -- it recurs on every sparql_literal/bind_initbindings region that used a named query variable (see also the NextCenturyCorporation region in this same lot).",
+    "`s{ }`'s value is a lazy prepared query with no `__len__` (querying.md: \"len() deliberately fails\"), unlike rdflib's `Result`. The original's `if len(result) > 0: results = list(result)` therefore had to materialise first (`result = list(s{...}(graph))`) before applying the same (redundant, since list(empty)==[]) guard -- the guard itself is left untouched, only the point where the lazy result becomes a list moved earlier.",
+    "measurement note per the batch warning: this region genuinely exercises BOTH `initBindings` and `initNs` together (not one of the 33 initNs-only false positives in this stratum's sample)."
+  ],
   "draft_sha": "6b632de7c414f2f5",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.257493+00:00",
@@ -24,5 +36,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_all_subreferences",
+    "diffs": [],
+    "error": null
+  }
 }

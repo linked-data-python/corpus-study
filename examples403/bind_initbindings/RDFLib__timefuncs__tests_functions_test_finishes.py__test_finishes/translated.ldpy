@@ -1,8 +1,14 @@
 # Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_finishes.py
 # region: test_finishes (lines 15-49, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from rdflib import Graph, Namespace
-from rdflib.namespace import TIME
+# (added to make the region executable: the real file imports Path and
+# `finishes` at the top -- `from pathlib import Path` and
+# `from timefuncs import finishes`, the latter's side effect being to
+# register `tfun:finishes`; see context_shim.py and meta.json)
+from pathlib import Path
+
+from rdflib import Graph
+from context_shim import finishes
 @prefix tfun: <https://w3id.org/timefuncs/> .
 @prefix finishes: <https://w3id.org/timefuncs/testdata/finishes/> .
 @prefix time: <http://www.w3.org/2006/time#> .
@@ -12,18 +18,6 @@ tests_dir = Path(__file__).parent
 def test_finishes():
     g = Graph().parse(str(tests_dir / "data" / "finishes.ttl"))
 
-    q = """
-        SELECT ?a ?b
-        WHERE {
-            VALUES ?a_type { time:Interval time:ProperInterval }
-            VALUES ?b_type { time:Interval time:ProperInterval }
-
-            ?a a ?a_type .
-            ?b a ?b_type .
-
-            FILTER tfun:finishes(?a, ?b)
-        }
-        """        
     expected = [
         (str(finishes:a01), str(finishes:b01)),
         # (str(finishes:a02), str(finishes:b02)), false
@@ -37,10 +31,29 @@ def test_finishes():
 
     actual = sorted([
         (str(r[0]), str(r[1]))
-        for r in g.query(
-            q,
-            initNs={"time": TIME, "tfun": TFUN}
-        )
+        for r in s{
+            SELECT ?a ?b
+            WHERE {
+                VALUES ?a_type { time:Interval time:ProperInterval }
+                VALUES ?b_type { time:Interval time:ProperInterval }
+
+                ?a a ?a_type .
+                ?b a ?b_type .
+
+                FILTER tfun:finishes(?a, ?b)
+            }
+        }(g)
     ])
 
     assert actual == expected
+
+
+# Demo harness (identical on both sides, see meta.json): `test_finishes`
+# asserts internally and returns nothing, printing nothing and mutating no
+# argument -- entry=/calls= would have nothing to compare on its own (the
+# "nothing observable" guard in rdfeval.harness). `demo` runs it -- an
+# AssertionError on either side already fails the whole check, which is the
+# region's own pass/fail criterion -- and returns a sentinel.
+def demo():
+    test_finishes()
+    return "ok"

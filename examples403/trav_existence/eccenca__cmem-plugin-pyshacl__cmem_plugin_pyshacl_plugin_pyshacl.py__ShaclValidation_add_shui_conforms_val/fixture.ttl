@@ -1,4 +1,14 @@
 # Input graph for eccenca__cmem-plugin-pyshacl__cmem_plugin_pyshacl_plugin_pyshacl.py__ShaclValidation_add_shui_conforms_val — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Covers: several solutions of the region's read (ex:result1/ex:result2
+# each resolve to a distinct sh:focusNode), the zero-solution case both
+# ways (ex:result3 exists but carries no sh:focusNode -- only a
+# neighbouring predicate; ex:result4 is absent from the graph entirely,
+# referenced only from driver.py), and a neighbouring sh:focusNode triple
+# on an unrelated subject (ex:decoy) that must not leak into either result.
 @prefix ex: <http://example.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:result1 sh:focusNode ex:node1 .
+ex:result2 sh:focusNode ex:node2 .
+ex:result3 sh:resultSeverity sh:Violation .
+ex:decoy   sh:focusNode ex:otherNode .

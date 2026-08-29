@@ -28,7 +28,33 @@ def add_shui_conforms_val(
     """Add shui conforms flag"""
     self.log.info("Adding shui:conforms flags to validation graph")
     itr = focus_nodes or validation_result_uris
+    @graph validation_graph
     for i in itr:
-        subj = i if focus_nodes else validation_graph.value(subject=i, predicate=sh:focusNode)
-        validation_graph += g{ {subj} <https://vocab.eccenca.com/shui/conforms> {Literal(False, datatype=XSD.boolean)} }
+        subj = i if focus_nodes else m{ {i} sh:focusNode ?o }.first()
+        +{ {subj} <https://vocab.eccenca.com/shui/conforms> {Literal(False, datatype=XSD.boolean)} }
     return validation_graph
+
+# --- Test harness only (see meta.json) — identical in original.py and
+# translated.ldpy except for the one line that mirrors the region's own
+# read construction. `self.log.info(...)` is the only use of `self` in the
+# region, hence the tiny stub. `demo(mode, ...)` has two modes:
+#   "mutate" — calls the real, unmodified region (covers several solutions
+#     across two result URIs, and the focus_nodes-provided branch that
+#     never reads at all);
+#   "read"   — evaluates the region's own read construction in isolation,
+#     because the region's `+{ }` write cannot tolerate a None subject
+#     (verified: rdflib raises `AssertionError` on `add((None, ...))`, which
+#     is what +{ } calls under it), so the zero-solution case cannot be
+#     driven through "mutate" without crashing both sides before any
+#     comparison happens.
+class _SelfStub:
+    class _Log:
+        def info(self, *args, **kwargs):
+            pass
+    log = _Log()
+
+def demo(mode, validation_graph, a, b=None):
+    if mode == "mutate":
+        return add_shui_conforms_val(_SelfStub(), validation_graph, a, b)
+    @graph validation_graph
+    return m{ {a} sh:focusNode ?o }.first()

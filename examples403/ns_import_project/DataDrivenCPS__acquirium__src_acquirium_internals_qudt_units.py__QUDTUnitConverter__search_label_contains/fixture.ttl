@@ -1,4 +1,33 @@
-# Input graph for DataDrivenCPS__acquirium__src_acquirium_internals_qudt_units.py__QUDTUnitConverter__search_label_contains — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for DataDrivenCPS__acquirium__src_acquirium_internals_qudt_units.py__QUDTUnitConverter__search_label_contains
+@prefix ex:   <http://example.org/units/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Real unit: label contains "gal", and looks-like-a-unit via rdf:type.
+ex:gallon a qudt:Unit ;
+    rdfs:label "US Gallon" ;
+    qudt:conversionMultiplier "0.00378541"^^xsd:double .
+
+# Same-predicate, same-substring candidate that must be SKIPPED: its label
+# also contains "gal", but it does not look like a unit (no rdf:type
+# qudt:Unit, no qudt:conversionMultiplier) -- exercises the loop continuing
+# past a false `_looks_like_unit` rather than stopping at the first
+# label match.
+ex:galacticSurvey a ex:Document ;
+    rdfs:label "Galactic survey report" .
+
+# Neighbour: a DIFFERENT predicate entirely (not in the region's
+# `predicates` list) -- must never be reached by the "gal" search.
+ex:gallonNote ex:comment "gal jug" .
+
+# Neighbour: a non-Literal object on a TRACKED predicate -- must not crash
+# the `isinstance(lit, Literal)` guard and must not match.
+ex:secondRef rdfs:label ex:gallon .
+
+# Matches only through a LATER predicate in the priority list (ucumCode),
+# not through label/prefLabel/symbol -- exercises predicates beyond the
+# first one tried.
+ex:minute a qudt:Unit ;
+    qudt:ucumCode "min" ;
+    qudt:conversionMultiplier "60"^^xsd:double .

@@ -14,11 +14,22 @@
     "term_constructor": 2,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OS->os, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "Only ONE call in the region body is a plain, unconditional g.add(): the tail `g.add((parent, _class(OS, \"hasAtomicWeight\"), aw))`. It becomes `+{ {parent} {_class(OS, \"hasAtomicWeight\")} {aw} }(g)` -- the call-suffix form, since g is touched exactly once here: no @graph declaration needed, one line instead of two.",
+    "The two g.set((aw, _class(OS, \"hasAtomicWeightValue\"), Literal(...))) calls (mutually exclusive N/A-vs-float branches) are LEFT AS rdflib API, not turned into +{ }: .set() first removes any existing (aw, hasAtomicWeightValue, *) triple before adding, a replace-then-add that +{ } (add_to only, never a prior remove) does not cover. Behaviourally identical here only because `aw` is freshly minted on every call, so no prior value can exist to replace -- but that's an accident of this call site, not a property of the construction, so translating it as +{ } would misrepresent what +{ } actually covers. Left as-is and signalled here per INSTRUCTIONS_403 SS5.",
+    "RDF and RDFS (imported, from rdflib.namespace) are never referenced in the region body itself (only inside the out-of-region helpers _ensure_type_with_label/_class, restored via context_shim) -- no @prefix for either, unlike the draft's mechanical 'prefixes: RDF->rdf, RDFS->rdfs'. XSD.float (used once, in the else-branch Literal(..., datatype=XSD.float)) -> @prefix xsd: + datatype=xsd:float: this substitutes the datatype sub-expression only (xsd:float is the identical URIRef XSD.float denotes), the Literal(...) call itself is untouched -- NOT trap 1 (Literal(n, dt) -> \"n\"^^dt), which this deliberately avoids. OS -> plain Python via context_shim (a LOCAL Namespace constant, ns_def_local's construction, not this batch's -- same precedent as the other three regions in this batch).",
+    "_class, _mint_hash_iri, _ensure_type_with_label, _safe_parent, _sanitize_label and locked_graph (module-level helpers used by add_atomic_weight_to_element but defined elsewhere in the same source file) restored via context_shim.py. Two are deliberately NOT verbatim: _mint_hash_iri is made to return a fixed IRI instead of hashing datetime.now() (the real version would mint a different `aw` on every call, including the two separate calls -- original vs translated -- this pilot makes, breaking the isomorphism oracle for a reason that has nothing to do with the translation); locked_graph is simplified to `yield Graph()`, dropping the real FileLock+TTL-parse/serialise (an external dependency -- a real data directory and the filelock package -- that add_atomic_weight_to_element's own body never inspects, since it only reads/writes the yielded `g` inside the `with` block, which the driver observes directly).",
+    "add_atomic_weight_to_element never returns nor is ever passed the graph it writes to (it returns only str(aw) or an error string), so run_pair's built-in entry=/calls= comparison (return value + arguments only) cannot see whether the tail +{ }(g) actually ran -- a hollow green matching the deterministic aw regardless. driver.py therefore bypasses run_pair (precedent: add_isolated/BBDFrancois...driver.py) and drives both sides by hand, snapshotting context_shim.LAST_GRAPH (set by locked_graph on every call) right after each call, with the two calls never overlapping so there is no race on that shared slot.",
+    "Four cases: a normal float value (reaches the tail add), the literal \"N/A\" (other g.set branch), a value that fails float() (early return INSIDE the try/except, before the tail add -- proves no spurious triple there), and a non-absolute element_iri (earliest return, graph never touched).",
+    "Verified not a hollow green: changing the tail add's object from {aw} to {parent} (self-loop) flips the check to FAIL on cases 0 and 1 (the two that reach the tail add), graphs reported not isomorphic; cases 2 and 3 correctly stay unaffected (they never reach that line either way)."
   ],
   "draft_sha": "9faa73703b10d190",
   "provenance": {
@@ -30,5 +41,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:add_atomic_weight_to_element",
+    "diffs": [],
+    "error": null
+  }
 }

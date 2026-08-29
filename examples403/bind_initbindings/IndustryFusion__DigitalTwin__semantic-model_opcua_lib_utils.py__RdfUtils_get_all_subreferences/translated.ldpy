@@ -1,6 +1,8 @@
 # Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/lib/utils.py
 # region: RdfUtils.get_all_subreferences (lines 868-892, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
 def get_all_subreferences(self, graph, node, reference):
     """Get non-hierarchical references
 
@@ -12,17 +14,13 @@ def get_all_subreferences(self, graph, node, reference):
     Returns:
         list(URIRef): List of References found for the node
     """
-    query_generic_references = """
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-    select ?reference ?target where {
-        ?node ?reference ?target .
-        ?reference rdfs:subPropertyOf* ?superclass .
-    }
-    """
-    bindings = {'node': node, 'superclass': reference}
-    result = graph.query(query_generic_references, initBindings=bindings, initNs={'opcua': self.opcuans})
+    result = list(s{
+        select ?reference ?target where {
+            {node} ?reference ?target .
+            ?reference rdfs:subPropertyOf* {reference} .
+        }
+    }(graph))
     results = []
     if len(result) > 0:
-        results = list(result)
+        results = result
     return results

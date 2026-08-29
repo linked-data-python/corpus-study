@@ -4,6 +4,7 @@
 from rdflib import Graph, URIRef
 from rdflib import Literal as RDFLiteral
 from rdflib.namespace import OWL, RDFS, SKOS
+from embedding_text_context import _local_name
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -14,19 +15,20 @@ def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> 
 
     Format: "{type}: {label}. {comment}. Parents: {parents}. Also known as: {alt_labels}"
     """
+    @graph graph
     parts: list[str] = []
 
     # Primary label
-    labels = [str(o) for o in graph.objects(entity_uri, rdfs:label) if isinstance(o, RDFLiteral)]
+    labels = [str(o) for o in m{ {entity_uri} rdfs:label ?o } if isinstance(o, RDFLiteral)]
     primary_label = labels[0] if labels else _local_name(str(entity_uri))
     parts.append(f"{entity_type}: {primary_label}")
 
     # Comments/definitions
     comments = [
-        str(o) for o in graph.objects(entity_uri, rdfs:comment) if isinstance(o, RDFLiteral)
+        str(o) for o in m{ {entity_uri} rdfs:comment ?o } if isinstance(o, RDFLiteral)
     ]
     definitions = [
-        str(o) for o in graph.objects(entity_uri, skos:definition) if isinstance(o, RDFLiteral)
+        str(o) for o in m{ {entity_uri} skos:definition ?o } if isinstance(o, RDFLiteral)
     ]
     desc = comments or definitions
     if desc:
@@ -35,10 +37,10 @@ def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> 
     # Parents (use subPropertyOf for properties, subClassOf for classes)
     parent_pred = rdfs:subPropertyOf if entity_type == "property" else rdfs:subClassOf
     parent_labels = []
-    for p in graph.objects(entity_uri, parent_pred):
+    for p in m{ {entity_uri} {parent_pred} ?p }:
         if isinstance(p, URIRef) and p != owl:Thing:
             plabel = next(
-                (str(o) for o in graph.objects(p, rdfs:label) if isinstance(o, RDFLiteral)),
+                (str(o) for o in m{ {p} rdfs:label ?o } if isinstance(o, RDFLiteral)),
                 _local_name(str(p)),
             )
             parent_labels.append(plabel)
@@ -47,7 +49,7 @@ def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> 
 
     # Alternative labels
     alt_labels = [
-        str(o) for o in graph.objects(entity_uri, skos:altLabel) if isinstance(o, RDFLiteral)
+        str(o) for o in m{ {entity_uri} skos:altLabel ?o } if isinstance(o, RDFLiteral)
     ]
     extra_labels = [lbl for lbl in labels[1:] if lbl != primary_label]
     all_alt = alt_labels + extra_labels

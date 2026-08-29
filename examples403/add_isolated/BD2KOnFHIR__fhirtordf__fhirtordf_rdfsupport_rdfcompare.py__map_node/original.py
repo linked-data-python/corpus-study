@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import URIRef, Graph, OWL, RDF, BNode
 from rdflib.term import Node
-from fhirtordf.rdfsupport.namespaces import FHIR
+from context_shim import FHIR, subj_pred_idx_to_uri
 
 def map_node(s: Node, sk_s: URIRef, gin: Graph, gout: Graph) -> None:
     """

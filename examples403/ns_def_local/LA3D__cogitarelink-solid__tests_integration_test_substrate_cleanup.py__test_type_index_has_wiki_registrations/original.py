@@ -4,6 +4,7 @@
 import httpx
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF
+from context_shim import _pod_base  # context shim, see meta.json
 POD_URL = _pod_base() + "/vault/"
 WIKI = Namespace("https://pod.vardeman.me/vault/ontology/wiki#")
 

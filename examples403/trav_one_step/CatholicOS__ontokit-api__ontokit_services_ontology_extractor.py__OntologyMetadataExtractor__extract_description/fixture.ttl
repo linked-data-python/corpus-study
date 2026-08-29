@@ -1,4 +1,43 @@
-# Input graph for CatholicOS__ontokit-api__ontokit_services_ontology_extractor.py__OntologyMetadataExtractor__extract_description — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for CatholicOS__ontokit-api__ontokit_services_ontology_extractor.py__OntologyMetadataExtractor__extract_description
 @prefix ex: <http://example.org/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ex:OntoDC -- dc:description must win even though dcterms:description and
+# rdfs:comment are also present (priority order: dc > dcterms > rdfs:comment).
+ex:OntoDC
+    a owl:Ontology ;
+    dc:description "DC wins." ;
+    dcterms:description "Should be shadowed by dc:description." ;
+    rdfs:comment "Should be shadowed too." .
+
+# ex:OntoDCTERMS -- no dc:description, so dcterms:description wins over
+# rdfs:comment.
+ex:OntoDCTERMS
+    a owl:Ontology ;
+    dcterms:description "DCTERMS wins." ;
+    rdfs:comment "Should be shadowed by dcterms:description." .
+
+# ex:OntoComment -- only rdfs:comment: exercises the last-priority fallback.
+ex:OntoComment
+    a owl:Ontology ;
+    rdfs:comment "Comment wins by elimination." .
+
+# ex:OntoEmpty -- an owl:Ontology subject with none of the three
+# description properties. When passed explicitly as ontology_iri, the
+# subjects_to_check loop finds nothing for it, and the function -- as
+# written, not as its own comment claims -- falls through UNCONDITIONALLY
+# to the second, global search loop and returns whatever owl:Ontology
+# subject that loop finds first (see driver.py and translation_notes).
+ex:OntoEmpty a owl:Ontology .
+
+# Neighbourhood that must NOT match: same description predicates, but the
+# subject is not typed owl:Ontology, so it is invisible to the global
+# search (rdf:type owl:Ontology pattern) and is never passed as
+# ontology_iri by any call below.
+ex:NotAnOntology
+    a owl:Class ;
+    dc:description "Should never be returned." .

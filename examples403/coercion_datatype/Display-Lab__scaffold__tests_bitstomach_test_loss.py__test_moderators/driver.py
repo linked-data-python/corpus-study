@@ -11,5 +11,5 @@ from rdfeval.harness import run_pair
 VERDICT = run_pair(
     __file__,
     entry='test_moderators',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((), {})],  # test_moderators() takes no arguments
 )

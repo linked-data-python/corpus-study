@@ -3,40 +3,60 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, BNode, URIRef
 from rdflib.namespace import Namespace, NamespaceManager, RDF, RDFS, XSD
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import NS, get_graph
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix pstate: <http://lv2plug.in/ns/ext/state#> .
 
 
 def create_lv2_preset(label, plugin):
     graph = get_graph()
+    @graph graph
     preset = URIRef('')
-    graph += g{
-        {preset} a {NS.pset.Preset} ;
-           {NS.lv2.appliesTo} {URIRef(plugin.uri)} ;
-           rdfs:label {Literal(label)}
-    }
+    +{ {preset} a pset:Preset ;
+                lv2:appliesTo {URIRef(plugin.uri)} ;
+                rdfs:label {Literal(label)} }
 
-    for param in plugin.params:
-        port = BNode()
-        graph += g{
-            {port} {NS.lv2.symbol} {Literal(param.symbol)} ;
-               {NS.pset.value} {Literal(param.value)} .
-            {preset} {NS.lv2.port} {port}
-        }
+    for @bindings in (
+        {"port": BNode(), "symbol": Literal(param.symbol), "value": Literal(param.value)}
+        for param in plugin.params
+    ):
+        +{ ?port lv2:symbol ?symbol ;
+                 pset:value ?value .
+           {preset} lv2:port ?port }
 
     if plugin.properties:
         state = BNode()
 
-        for prop in plugin.properties.values():
-            if prop.type == str(NS.atom.Path):
-                value = URIRef(prop.value)
-            else:
+        for @bindings in (
+            {
+                "key": URIRef(prop.key),
                 # XXX: handle other Atom types?
-                value = Literal(prop.value)
+                "value": URIRef(prop.value) if prop.type == str(atom:Path) else Literal(prop.value),
+            }
+            for prop in plugin.properties.values()
+        ):
+            +{ {state} ?key ?value }
 
-            graph += g{ {state} {URIRef(prop.key)} {value} }
-
-        graph += g{ {preset} {NS.state.state} {state} }
+        +{ {preset} pstate:state {state} }
 
     return graph.serialize(format='turtle')
+
+
+# Demo harness (identical on both sides, see meta.json): create_lv2_preset
+# returns a serialised Turtle STRING, and rdflib's serialisers are not
+# byte-stable across two independently built (even if isomorphic) graphs --
+# comparing the returned strings with plain equality would be comparing
+# serialisation order, not RDF content, which is exactly what run_pair's
+# docstring says graph comparison must not do ("never raw serialisation").
+# This round-trips the string back into a fresh Graph, so the driver compares
+# the two GRAPHS by isomorphism instead (same pattern as the boricles/
+# ontosphere export_service region already in this corpus).
+def demo(label, plugin):
+    from rdflib import Graph
+    serialised = create_lv2_preset(label, plugin)
+    g = Graph()
+    g.parse(data=serialised, format='turtle')
+    return g

@@ -1,0 +1,72 @@
+# Input graph for TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_ontosynthesis_cbu_conversion.py__build_cbu_json_from_graph
+# -- written during translation.
+#
+# Five MOPs, each exercising a different branch of the region:
+#   ex:mopGuest      -- label contains "·": _is_guest_mop skips it before
+#                        the ccdc check even runs (has a valid ccdc, so a
+#                        broken guest check would surface as a spurious
+#                        entry).
+#   ex:mopNoCcdc     -- no ontomops:hasCCDCNumber at all: the zero-solution
+#                        case for that pattern ("N/A" -> continue).
+#   ex:mopZeroCbu    -- valid ccdc, no hasChemicalBuildingUnit at all: the
+#                        zero-solution case for the CBU pattern (entry still
+#                        built, both CBU slots fall back to "N/A"/[]).
+#   ex:mopNoFormula  -- valid ccdc, one CBU with a label but no
+#                        hasCBUFormula: the zero-solution case for the
+#                        formula pattern ("N/A", names from the label only).
+#   ex:mopRich       -- valid ccdc, three CBUs: several solutions of the
+#                        CBU pattern, and of every names-accumulating
+#                        pattern on the first one (two labels, an
+#                        alternative name, a chemical formula, an
+#                        owl:sameAs chemical input with its own label/
+#                        alt-name/formula); sorted by formula, so only the
+#                        first two (by formula string) end up in the entry
+#                        -- the third (ex:cbuC) must be silently dropped,
+#                        exactly like the original's cbu_data[0]/[1] slicing.
+#
+# Neighbourhood that must not match: ex:cbuOrphan looks exactly like a CBU
+# but is not linked from any MOP; ex:chemInputOrphan has a label but is
+# reachable from no CBU's owl:sameAs.
+@prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+@prefix ontosyn:  <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix ex:       <http://example.org/> .
+
+ex:mopGuest a ontomops:MetalOrganicPolyhedron ;
+    rdfs:label "Guest · Complex" ;
+    ontomops:hasCCDCNumber "999999" .
+
+ex:mopNoCcdc a ontomops:MetalOrganicPolyhedron .
+
+ex:mopZeroCbu a ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber "111111" .
+
+ex:mopNoFormula a ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber "333333" ;
+    ontomops:hasChemicalBuildingUnit ex:cbuNoFormula .
+ex:cbuNoFormula rdfs:label "NoFormulaCBU" .
+
+ex:mopRich a ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber "222222" ;
+    ontomops:hasChemicalBuildingUnit ex:cbuA, ex:cbuB, ex:cbuC .
+
+ex:cbuA ontomops:hasCBUFormula "C6H5PO3" ;
+    rdfs:label "PhosphonateLinker", "PLK" ;
+    ontosyn:hasAlternativeNames "\"AltNameA\"" ;
+    ontosyn:hasChemicalFormula "C6H5O3P" ;
+    owl:sameAs ex:chemInputA .
+ex:chemInputA rdfs:label "Phenylphosphonic acid" ;
+    ontosyn:hasAlternativeNames "PPA" ;
+    ontosyn:hasChemicalFormula "C6H7O3P" .
+
+ex:cbuB ontomops:hasCBUFormula "V6O6" ;
+    rdfs:label "VanadiumCluster" .
+
+ex:cbuC ontomops:hasCBUFormula "ZZZ-third-cbu-dropped" ;
+    rdfs:label "ThirdCBUShouldBeDropped" .
+
+# neighbourhood
+ex:cbuOrphan ontomops:hasCBUFormula "ORPHAN-FORMULA" ; rdfs:label "OrphanCBU" .
+ex:chemInputOrphan rdfs:label "OrphanChemInput" .

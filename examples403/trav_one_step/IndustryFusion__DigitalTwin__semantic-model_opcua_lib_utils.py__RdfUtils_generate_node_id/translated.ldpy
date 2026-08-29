@@ -2,14 +2,28 @@
 # region: RdfUtils.generate_node_id (lines 954-963, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from rdflib import URIRef, Namespace, Graph, Literal, BNode
+from rdfutils_context import nodeId_to_iri
 
 def generate_node_id(self, graph, rootentity, node, id):
-    node_id = next(graph.objects(node, self.basens['hasNodeId']), 'unknown')
-    idtype = next(graph.objects(node, self.basens['hasIdentifierType']), 'unknown')
-    rootns = next(graph.objects(rootentity, self.basens['hasNamespace']), 'unknown')
-    rootnsuri = next(graph.objects(rootns, self.basens['hasUri']), 'unknown')
-    ns = next(graph.objects(node, self.basens['hasNamespace']), 'unknown')
-    nsuri = next(graph.objects(ns, self.basens['hasUri']), 'unknown')
+    @graph graph
+    node_id = m{ {node} {self.basens['hasNodeId']} ?v }.first()
+    if node_id is None:
+        node_id = 'unknown'
+    idtype = m{ {node} {self.basens['hasIdentifierType']} ?v }.first()
+    if idtype is None:
+        idtype = 'unknown'
+    rootns = m{ {rootentity} {self.basens['hasNamespace']} ?v }.first()
+    if rootns is None:
+        rootns = 'unknown'
+    rootnsuri = m{ {rootns} {self.basens['hasUri']} ?v }.first()
+    if rootnsuri is None:
+        rootnsuri = 'unknown'
+    ns = m{ {node} {self.basens['hasNamespace']} ?v }.first()
+    if ns is None:
+        ns = 'unknown'
+    nsuri = m{ {ns} {self.basens['hasUri']} ?v }.first()
+    if nsuri is None:
+        nsuri = 'unknown'
     nsurins = Namespace(nsuri)
     result = nodeId_to_iri(nsurins, self.basens, node_id, idtype, id, is_entityns=(str(nsuri) == str(rootnsuri)))
     return result

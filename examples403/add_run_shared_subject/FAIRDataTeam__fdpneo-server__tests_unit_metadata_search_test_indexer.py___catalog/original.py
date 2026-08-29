@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF
-from fdpneo_server.shared.namespaces import DCT, FDP_METADATA_STATE, SH
+from context_shim import DCT  # context shim -- see meta.json
 REC = "http://localhost:8000/catalog/c1"
 
 def _catalog() -> Graph:

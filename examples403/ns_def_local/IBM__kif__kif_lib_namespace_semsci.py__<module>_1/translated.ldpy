@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from ..rdflib import DefinedNamespace, Namespace, URIRef
+from context_shim import DefinedNamespace, Namespace, URIRef  # context shim, see meta.json
 
 # flake8: noqa
 
@@ -17,7 +17,7 @@ class SEMSCI(DefinedNamespace):
     See <https://github.com/MaastrichtU-IDS/semanticscience>.
     """
 
-    _NS = Namespace('http://semanticscience.org/resource/')
+    @prefix semsci: <http://semanticscience.org/resource/> .
     CHEMINF_000140: URIRef
     CHEMINF_000334: URIRef
     CHEMINF_000335: URIRef

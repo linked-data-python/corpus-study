@@ -15,12 +15,26 @@
     "term_constructor": 5,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: SKOS->skos, DC->dc"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "prefixes: SKOS->skos, DC->dc (confirmed against the checked-out source via `gh api`; RDFS/DCT/OWL/VOCABS are declared at module level in the real file but never referenced inside graph_construct_qs, so not declared here).",
+    "THE central difficulty of this region, and why it is a strong article candidate: `g` is reassigned by plain union (`g = g + ...`) THREE separate times -- once before the loop (with the scheme graph), once per concept inside the loop (`g = g + obj.as_graph()`), once per collection inside the nested loop (`g = g + collection_graph`) -- and each reassignment happens BEFORE some `.add()` calls and AFTER others in the same scope. INSTRUCTIONS_403 SS2bis warns `@graph g` captures the graph VALUE at its line, not the name, and that a later reassignment needs a fresh `@graph g` or writes go to a graph that has become unreachable, IN SILENCE. This region is exactly that trap, three times over, and inside loops (so 'a fresh @graph g after the reassignment' must itself be INSIDE the loop body, re-executed every iteration -- not just once after the source-level reassignment).",
+    "translated.ldpy re-declares `@graph g` at three points: right after `for obj in results:` (picks up either the initial union or the PREVIOUS iteration's per-obj union), and right after `g = g + collection_graph` inside the nested `for x in obj.collection.all():` loop. A fourth declaration -- right after `g = g + obj.as_graph()`, before `if obj.collection.all():` -- was written first but is REDUNDANT (nothing writes before the nested loop's own re-declaration supersedes it): the transpiler said so directly (`local variable '_ldpy_gN' is assigned to but never used`), removed on that signal.",
+    "verified empirically, not just reasoned: (1) a small standalone repro (@graph g re-declared after each of two mid-loop reassignments) confirms the pattern works -- all four expected triples plus the unioned graph's own triple are present; (2) DELETING the third @graph g from the real translation makes rdfeval check fail with 5 of 10 triples silently missing on call[0] -- the exact silent-loss failure mode SS2bis describes, reproduced and then fixed, not just cited.",
+    "the region's writes are single `.add()` calls, never runs on a shared subject worth a `;` merge (each `+{ }` here is a lone triple) -- no add_run_shared_subject idiom applies. Two of the four writes sit inside `for i in x.creator.split(';'):` / `for i in x.contributor.split(';'):`, genuinely row-shaped loops over a semicolon-separated string -- but with only one field varying (the object) and the pattern otherwise fixed, `+{ {collection} dc:creator {Literal(i.strip())} }` with plain `{i}` interpolation is already the minimal form; introducing `for @bindings in` here would trade one interpolated value for a one-entry dict-generator with no gain, so this region's row-shaped loops stayed simpler than the ktbs/JonasHeinickeBio precedents in this corpus for the same stratum -- both are legitimate outcomes of 'the most specific construction', not every add_in_loop region needs @bindings.",
+    "context_shim.py: `results` is a Django QuerySet of Concept model instances (vocabs/models.py), and `.get_subject()`/`.as_graph()`/`.create_uri()` are real methods of those models -- reproducing them needs the full Django ORM, out of scope for a standalone region, so QuerySetStub/ModelStub are minimal duck-typed stand-ins exposing only what this region calls, not a faithful model port.",
+    "driver.py shares the SAME RESULTS_1/RESULTS_2 objects between the original.py call and the translated.ldpy call (a plain, non-callable `(args, kwargs)`, not a per-side factory): ModelStub has no `__eq__`, so if each side built its own fixture instance, comparing `results` as a call argument would report a spurious identity-based difference on every run -- same root cause as the JonasHeinickeBio/biomedical-knowledge-lookup region in this corpus, solved there with a demo() wrapper; here the simpler fix applies because the region never mutates `results`, so sharing one object is safe.",
+    "deliberately checked this isn't a hollow green: redirecting the contributor write to dc:creator makes rdfeval check fail (10 vs 10 triples but not isomorphic)."
+  ],
+  "article_candidate": true,
   "draft_sha": "72e23febb9ee894b",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.009788+00:00",
@@ -31,5 +45,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:graph_construct_qs",
+    "diffs": [],
+    "error": null
+  }
 }

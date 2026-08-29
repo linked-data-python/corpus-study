@@ -2,6 +2,7 @@
 # region: tflite2semantic (lines 393-411, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, URIRef, Namespace
+from context_shim import idOfNN, neuralNetwork, graph, j, addCommonInfo
 nnet = Namespace("https://w3id.org/tinyml-schema/neural-network-schema#")
 g = Graph()
 

@@ -3,6 +3,9 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, Literal
 from rdflib.namespace import RDF, RDFS
+from context_shim import ONTOMOPS, mop_subject, selected_cbus
+
+outg = Graph()
 
 for iri_str, lbl, is_generated in selected_cbus:
     try:

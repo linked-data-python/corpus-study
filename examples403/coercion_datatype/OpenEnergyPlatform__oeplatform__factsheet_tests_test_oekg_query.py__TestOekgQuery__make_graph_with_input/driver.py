@@ -8,8 +8,15 @@ from rdfeval.harness import run_pair
 # entry=None executes both modules and compares every rdflib Graph found in
 # the module globals (plus captured stdout).  For function regions, set
 # entry="<function name>" and provide the fixture arguments.
+#
+# _make_graph_with_input(self, table_iri_literal) never reads self, so a
+# placeholder is enough; it returns (g, bundle, scenario), all compared by
+# run_pair (the graph by isomorphism, bundle/scenario as terms).
 VERDICT = run_pair(
     __file__,
     entry='_make_graph_with_input',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[
+        ((None, "https://example.org/oep/table/1"), {}),
+        ((None, ""), {}),
+    ],
 )

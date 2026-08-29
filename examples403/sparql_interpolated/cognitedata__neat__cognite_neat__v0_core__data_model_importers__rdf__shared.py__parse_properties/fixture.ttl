@@ -1,4 +1,88 @@
-# Input graph for cognitedata__neat__cognite_neat__v0_core__data_model_importers__rdf__shared.py__parse_properties — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# cognitedata__neat__cognite_neat__v0_core__data_model_importers__rdf__shared.py__parse_properties
+# -- written during translation. Exercised with upstream's own real
+# PROPERTIES_QUERY / PROPERTIES_QUERY_PARAMETERS (from
+# cognite/neat/_v0/core/_data_model/importers/_rdf/_owl2data_model.py's
+# OWLImporter, the only real caller of parse_properties) -- see driver.py.
+#
+# Deliberately uses http://example.org/ URIs throughout, NOT any real
+# Cognite namespace (https://cognitedata.com/<space>/...): that keeps
+# uri_to_entity_components() returning None for every URI here, so
+# convert_rdflib_content(..., uri_handling="as-concept-entity") always takes
+# its "remove-namespace" fallback and neat_shared_context.ConceptEntity's
+# stub constructor is never reached (see that module's header).
+#
+# Covers:
+#  - ex:hasAge: a plain single-domain/single-range property, en label and
+#    comment fully bound -- the straightforward positive case.
+#  - ex:hasTag: TWO ranges (ex:Keyword, ex:FreeText) on the same property --
+#    two solution rows for the same (concept, property_), folding into one
+#    grouped entry with a multi-value value_type list.
+#  - ex:hasQuietFlag: domain and range bound, but no rdfs:label/rdfs:comment
+#    at all -- the fully-unbound-OPTIONAL row (name/description stay None).
+#  - ex:hasSecret: rdfs:domain is a blank node wrapping
+#    owl:unionOf( [] ) -- ?concept resolves to a genuine blank node, hitting
+#    parse_properties's first "Cannot determine concept ... blank node"
+#    branch (skipped, not added to properties).
+#  - ex:hasWidget: rdfs:range is a blank node wrapping owl:unionOf( [] ) --
+#    ?value_type resolves to a genuine blank node, hitting the second
+#    "Unable to determine value type ... blank node" branch (also skipped).
+#  - neighbourhood that must NOT match: ex:hasIgnored is an
+#    owl:AnnotationProperty, excluded by PROPERTIES_QUERY's own
+#    `FILTER (?property_Type IN (owl:ObjectProperty, owl:DatatypeProperty))`;
+#    ex:JustAClass is not a property at all.
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix ex:    <http://example.org/> .
+
+ex:Person a owl:Class .
+ex:Keyword a owl:Class .
+ex:FreeText a owl:Class .
+ex:Item a owl:Class .
+ex:Gadget a owl:Class .
+ex:Puzzle a owl:Class .
+
+# --- plain positive case: one solution row ---
+ex:hasAge a owl:DatatypeProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Integer ;
+    rdfs:label "age"@en ;
+    rdfs:comment "The age of a person."@en .
+
+# --- two ranges on the same property: two solution rows, one grouped entry
+#     with a multi-value value_type list ---
+ex:hasTag a owl:DatatypeProperty ;
+    rdfs:domain ex:Item ;
+    rdfs:range ex:Keyword, ex:FreeText ;
+    rdfs:label "tag"@en .
+
+# --- domain and range bound, no label/comment at all: fully-unbound OPTIONAL
+#     row (name and description both come back None) ---
+ex:hasQuietFlag a owl:DatatypeProperty ;
+    rdfs:domain ex:Gadget ;
+    rdfs:range ex:Boolean .
+
+# --- blank-node concept: rdfs:domain is a blank node with owl:unionOf
+#     wrapping a further, unresolved blank node -- ?concept binds to a real
+#     BNode, not a URIRef, so parse_properties's own BNode-concept guard
+#     fires and skips this row before it is ever added ---
+ex:hasSecret a owl:DatatypeProperty ;
+    rdfs:domain [ owl:unionOf ( [] ) ] ;
+    rdfs:range ex:String .
+
+# --- blank-node value_type: rdfs:range is a blank node with owl:unionOf
+#     wrapping a further, unresolved blank node -- ?value_type binds to a
+#     real BNode, firing parse_properties's second BNode guard ---
+ex:hasWidget a owl:DatatypeProperty ;
+    rdfs:domain ex:Puzzle ;
+    rdfs:range [ owl:unionOf ( [] ) ] .
+
+# --- neighbourhood that must NOT match PROPERTIES_QUERY ---
+ex:hasIgnored a owl:AnnotationProperty ;         # wrong property type: excluded by the query's own FILTER
+    rdfs:domain ex:Person ;
+    rdfs:range ex:String .
+
+ex:JustAClass a owl:Class ;                       # not a property at all
+    rdfs:label "Just a class"@en .

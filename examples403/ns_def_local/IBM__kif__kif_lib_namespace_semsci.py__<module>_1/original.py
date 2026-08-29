@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from ..rdflib import DefinedNamespace, Namespace, URIRef
+from context_shim import DefinedNamespace, Namespace, URIRef  # context shim, see meta.json
 
 # flake8: noqa
 

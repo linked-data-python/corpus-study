@@ -1,9 +1,23 @@
 # Extracted from DataDrivenCPS/acquirium@e3bffb4bed : src/acquirium/internals/qudt_units.py
 # region: QUDTUnitConverter._search_label_contains (lines 393-401, stratum ns_import_project)
 # licence of the source repository: see meta.json
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `acquirium.internals.internals_namespaces` rewritten to `qudt_context`,
+# the shim module next to this file (the real dotted project path does not
+# resolve for a single extracted file). `from __future__ import
+# annotations` restored (present at the top of the real qudt_units.py,
+# line 21, not captured by the region's extracted context): without it the
+# bare `UnitDefinition` in this function's own return annotation would be
+# evaluated eagerly at def-time and raise NameError, since UnitDefinition
+# is not otherwise imported here -- driver.py calls this function directly
+# against a qudt_context.ConverterStub carrying a fixture-parsed graph, and
+# never needs the class name itself.
+from __future__ import annotations
+
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, XSD
-from acquirium.internals.internals_namespaces import QUDT, UNIT, QUDT_QUANTITY_KIND
+from qudt_context import QUDT, UNIT, QUDT_QUANTITY_KIND
 
 def _search_label_contains(self, text: str) -> UnitDefinition | None:
     target = text.casefold()
@@ -14,3 +28,25 @@ def _search_label_contains(self, text: str) -> UnitDefinition | None:
                 if self._looks_like_unit(subj):
                     return self._from_uri(subj)
     return None
+
+
+# Demo harness (identical on both sides, see meta.json): _search_label_contains
+# is a method body lifted out of QUDTUnitConverter, so `self` is not
+# comparable across the two exec'd sides (a plain stub with no __eq__ --
+# the harness's per-argument comparison would report "values differ" on
+# every call for that reason alone, not a translation bug, same failure
+# mode documented in the acdh-oeaw/vocabseditor sibling of this stratum).
+# demo(text) takes a bare string instead, builds a fresh ConverterStub
+# from the fixture internally, and returns the one thing meant to be
+# compared: what the region itself returns.
+from pathlib import Path
+
+from rdfeval.harness import fixture_graph
+from qudt_context import ConverterStub
+
+_FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
+
+
+def demo(text):
+    stub = ConverterStub(fixture_graph(_FIXTURE))
+    return _search_label_contains(stub, text)

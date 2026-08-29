@@ -5,7 +5,7 @@ import random
 import string
 from rdflib import Graph, Namespace, Literal, XSD
 from rdflib.namespace import RDF
-import lib.utils as utils
+import context_shim as utils  # context shim -- see meta.json
 randnamelength = 16
 
 def create_attribute_binding(self, parent_node_id,
@@ -36,3 +36,16 @@ def create_attribute_binding(self, parent_node_id,
         self.bindingsg.add((bindingiri, self.basens['bindsLogic'], Literal(logic_transform)))
     self.bindingsg.add((attribute_iri, self.basens['boundBy'], bindingiri))
     return bindingiri
+
+
+# Demo harness (identical on both sides, see meta.json): create_attribute_binding
+# takes `self` (extracted as a bare function from Bindings) and writes into
+# self.bindingsg, not through a return value the driver could compare alone
+# -- the return value is only the new binding's IRI. This wraps the call in
+# a fresh context_shim.Bindings instance (the real class the method
+# belongs to, __init__ copied verbatim) and hands back both the IRI and the
+# graph it wrote to.
+def demo(parent_node_id, attribute_iri, logic_transform=None, version='0.1', firmware='firmware'):
+    b = utils.Bindings("http://example.org/", Namespace("http://example.org/base/"))
+    bindingiri = create_attribute_binding(b, parent_node_id, attribute_iri, logic_transform, version, firmware)
+    return bindingiri, b.bindingsg

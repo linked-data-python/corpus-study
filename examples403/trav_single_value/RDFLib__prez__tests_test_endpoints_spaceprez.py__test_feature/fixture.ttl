@@ -1,4 +1,22 @@
-# Input graph for RDFLib__prez__tests_test_endpoints_spaceprez.py__test_feature — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for RDFLib__prez__tests_test_endpoints_spaceprez.py__test_feature -- written during translation.
+#
+# The region checks that ONE exact, fully-bound triple is present in the
+# response graph -- `next(response_graph.triples((Feature1, RDF.type,
+# GEO.Feature)))`, no variable is ever bound. Since the pattern has no free
+# term, "several solutions" does not apply the same way it would for a
+# selecting query; what this fixture DOES cover:
+#
+#   * the exact triple under test (Feature1 a geo:Feature);
+#   * NEIGHBOURHOOD that must NOT satisfy it: a second feature (Feature2,
+#     also geo:Feature, wrong subject) and a second type on Feature1 itself
+#     (dcat:Dataset, wrong object) -- if the match were accidentally
+#     type-only or subject-only, one of these would make it pass regardless.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+
+<https://example.com/spaceprez/Feature1> a geo:Feature ;
+    dcat:title "Feature One" .
+
+<https://example.com/spaceprez/Feature2> a geo:Feature .
+<https://example.com/spaceprez/Feature1> a dcat:Dataset .

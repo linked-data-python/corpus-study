@@ -1,0 +1,68 @@
+# Trimmed from LA3D/cogitarelink-solid@49121503ea :
+# overlays/wiki-memory/manifest.ttl -- real predicates and values for the
+# overlay:installsPage entries the region under test reads, plus a couple of
+# unrelated overlay:installs* predicates on the same subject (neighbourhood:
+# a query that matched any predicate instead of exactly overlay:installsPage
+# would pick these up too) and two installsPage entries the region's own
+# assertions never select (neighbourhood: present in the pattern's results,
+# absent from EXPECTED_PAGES).
+@prefix overlay: <https://pod.vardeman.me/vault/ontology/overlay#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+@prefix wiki:    <https://pod.vardeman.me/vault/ontology/wiki#> .
+
+<https://pod.vardeman.me/vault/ontology/overlay#wiki-memory>
+    a overlay:Overlay ;
+    overlay:name "wiki-memory" ;
+    dct:conformsTo wiki:WikiMemoryProfile ;
+
+    # neighbourhood: installsContainer/installsShape use the same subject as
+    # installsPage but a different predicate -- must not be picked up by a
+    # pattern anchored on overlay:installsPage.
+    overlay:installsContainer </vault/wiki/> , </vault/wiki/concepts/> ;
+    overlay:installsShape [ overlay:document "shapes/page.shacl.ttl" ] ;
+
+    # neighbourhood: two installsPage entries EXPECTED_PAGES never selects
+    # (their targetResource suffix matches none of the four expected ones).
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/index.md> ;
+        overlay:body <synthesis/index.md> ;
+        overlay:meta <synthesis/index.md.meta.ttl> ;
+        dct:title "Wiki-memory L3 synthesis (deploy at substrate root)"
+    ] ;
+
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/how-identifiers-work.md> ;
+        overlay:body <concepts/how-identifiers-work.md> ;
+        overlay:meta <concepts/how-identifiers-work.md.meta.ttl> ;
+        dct:title "How Identifiers Work"
+    ] ;
+
+    # the four installsPage entries EXPECTED_PAGES requires -- several
+    # solutions of the same pattern.
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/how-wiki-memory-works.md> ;
+        overlay:body <concepts/how-wiki-memory-works.md> ;
+        overlay:meta <concepts/how-wiki-memory-works.md.meta.ttl> ;
+        dct:title "How Wiki-Memory Works (conceptual model + worked example)"
+    ] ;
+
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/photosynthesis.md> ;
+        overlay:body <concepts/photosynthesis.md> ;
+        overlay:meta <concepts/photosynthesis.md.meta.ttl> ;
+        dct:title "Photosynthesis (gold exemplar concept)"
+    ] ;
+
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/biology.md> ;
+        overlay:body <concepts/biology.md> ;
+        overlay:meta <concepts/biology.md.meta.ttl> ;
+        dct:title "Biology (broader-concept exemplar)"
+    ] ;
+
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/people/marie-curie.md> ;
+        overlay:body <people/marie-curie.md> ;
+        overlay:meta <people/marie-curie.md.meta.ttl> ;
+        dct:title "Marie Curie (thing-frame exemplar)"
+    ] .

@@ -14,12 +14,28 @@
     "term_constructor": 3,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "prefixes actually used: aidpais -> http://www.aid-pais-kg.org/, vocab -> http://www.aid-pais-kg.org/vocab/. Not RDF/RDFS: RDF.type is written as `a` inside `+{ }`; RDFS is never referenced in this region (the draft's guess was wrong -- confirmed by reading the checked-out source).",
+    "one loop, genuinely row-shaped: each mapping in `concept.mappings` produces up to five triples from one fixed shape (hasMapping to the resolved target, then type/mappingType/confidenceScore/mappingSource on the freshly-minted mapping_uri) with only the values varying per mapping -- the stratum's target construction, `for @bindings in (dict-generator): +{ } with ?var`. `to_uri` (a method call on `self`) and `mapping_uri` (an f-string over three identifiers) are computed values, same precedent as ktbs/create_obsel and steve-bate/_insert_resource already in this corpus (a generator expression building one dict per loop item is not restructuring -- it is how the sugar consumes a non-dict loop variable).",
+    "the two optional properties (`if mapping.confidence: ...`, `if mapping.source: ...`) are folded into the bindings themselves via conditional dict-key inclusion (`**({...} if cond else {})`), using the SAME truthy test as the original `if` guards, rather than kept as explicit `if cond: +{ }` one-liners: an absent key leaves its `?var` unbound, and an unbound variable drops only ITS triple inside a `;`-joined `+{ }` (verified directly against the transpiler: a multi-clause pattern with one unbound term keeps every other clause). This let all four mapping_uri-subject triples merge into one `+{ ?mapping_uri a vocab:Mapping ; vocab:mappingType ?mapping_type ; vocab:confidenceScore ?confidence ; vocab:mappingSource ?source }` (add_run_shared_subject idiom nested inside add_in_loop), instead of two merged plus two separately-guarded islands. Deliberately checked this isn't a hollow green: breaking the translation (redirecting ?source to ?to_uri) makes `rdfeval check` fail (10 vs 10 triples but not isomorphic on call[0], 3 vs 4 on call[2]).",
+    "mapping_type has no guard in the source (`Literal(mapping.mapping_type)` is unconditional, even when None) -- kept unconditional in the bindings dict too, so `Literal(None)` (rdflib's actual, slightly odd, `Literal('None')`) round-trips identically on both sides; CALL_3 in driver.py exercises exactly this.",
+    "`mapping_uri` is built with `aidpais:{f\"mapping/{concept.primary_id}_{mapping.from_concept.identifier}_{mapping.to_concept.identifier}\"}` -- a prefixed name with an interpolated local part evaluated as a plain expression outside any island (terms.md: 'wherever a Python expression may appear'), matching `self.namespaces.AIDPAIS[f\"...\"]`'s concatenate-without-encoding semantics exactly (no percent-encoding either side, since none of the three identifiers used in fixtures/tests contains a space or slash -- ex:{expr} joins, it does not encode, per INSTRUCTIONS_403 SS2bis).",
+    "`self._get_concept_uri_from_identifier(mapping.to_concept)` (source `to_uri`) is a sibling method call, kept as plain Python inside the bindings-generator -- not a construction the closed vocabulary has a name for, just an ordinary expression.",
+    "context_shim.py restores RDFNamespaces (trimmed to the 7 namespaces this region and its one sibling call reach) and UnifiedRDFConverter._get_concept_uri_from_identifier (a sibling method outside the extracted region's line range, called via `self`), both copied verbatim from the real source at the pinned commit (confirmed via `gh api` against JonasHeinickeBio/biomedical-knowledge-lookup@00477184b3); ConceptIdentifier/ConceptMapping/UnifiedConcept are minimal dataclass stand-ins for the pydantic models in biomedical_knowledge_models.py, reduced to the fields this region reads.",
+    "demo(concept, concept_uri) is appended identically to original.py and translated.ldpy: _add_concept_mappings takes `self` as an explicit parameter (extracted from a method), and comparing that stand-in object directly as a call argument would report a spurious difference every time (each side builds its own ConverterStub instance, compared by identity) -- same pattern as ktbs/create_obsel already in this corpus. demo() builds a fresh self/graph internally and returns only the graph, which is what the region actually produces."
+  ],
+  "article_candidate": true,
   "draft_sha": "cdf0adc33119a9db",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.619498+00:00",
@@ -30,5 +46,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

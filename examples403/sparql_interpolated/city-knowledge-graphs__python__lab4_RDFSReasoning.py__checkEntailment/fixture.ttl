@@ -1,0 +1,31 @@
+# Input graph for city-knowledge-graphs__python__lab4_RDFSReasoning.py__checkEntailment
+# -- written during translation.
+#
+# checkEntailment(g, triple) only prints; it asserts nothing, so the driver
+# does not need this graph to reproduce upstream's own RDFS closure (that
+# reasoning step -- owlrl.DeductiveClosure(...).expand(g) -- happens in the
+# enclosing RDFSInference(), which is NOT part of the extracted region). It
+# only needs a graph on which several of the eight real `triple` strings from
+# upstream's checkEntailments(g) come back True, several come back False (the
+# ASK "zero solution" case), and neighbouring data that must not make an
+# unrelated triple ASK true by accident.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <http://city.ac.uk/kg/lab4/> .
+
+# --- asserted directly: these ASKs come back True ---
+:Father    rdfs:subClassOf :Person .          # triple1
+:Juliet    a                :Person .          # triple3
+:Ann       a                :Child .           # triple4
+rdfs:range rdf:type         rdfs:Resource .    # triple7 (RDFS axiomatic triple)
+
+# --- neighbourhood that must NOT make triple2/5/6/8 true by accident ---
+:Man    a               rdfs:Class .
+:Man    rdfs:subClassOf :Person .              # a different pair than triple2 (:Woman)
+:Ann    :hasFather      :Carl .
+:Ann    :hasMother      :Juliet .              # close to triple6 (:hasParent) but a different predicate
+:Carl   a               :Father .
+
+# triple2 (:Woman rdfs:subClassOf :Person), triple5 (:Ann :isChildOf :Carl)
+# and triple8 (:Mother rdfs:subClassOf :Person) are deliberately absent:
+# their ASKs come back False -- the zero-solution case for this stratum.

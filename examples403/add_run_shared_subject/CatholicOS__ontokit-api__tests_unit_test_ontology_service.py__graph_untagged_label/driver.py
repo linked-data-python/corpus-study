@@ -10,6 +10,6 @@ from rdfeval.harness import run_pair
 # entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
-    entry='graph_untagged_label',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    entry='demo',
+    calls=[((), {})],
 )

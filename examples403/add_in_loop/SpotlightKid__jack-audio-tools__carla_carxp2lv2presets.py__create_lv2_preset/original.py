@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, BNode, URIRef
 from rdflib.namespace import Namespace, NamespaceManager, RDF, RDFS, XSD
+from context_shim import NS, get_graph
 
 def create_lv2_preset(label, plugin):
     graph = get_graph()
@@ -32,3 +33,20 @@ def create_lv2_preset(label, plugin):
         graph.add((preset, NS.state.state, state))
 
     return graph.serialize(format='turtle')
+
+
+# Demo harness (identical on both sides, see meta.json): create_lv2_preset
+# returns a serialised Turtle STRING, and rdflib's serialisers are not
+# byte-stable across two independently built (even if isomorphic) graphs --
+# comparing the returned strings with plain equality would be comparing
+# serialisation order, not RDF content, which is exactly what run_pair's
+# docstring says graph comparison must not do ("never raw serialisation").
+# This round-trips the string back into a fresh Graph, so the driver compares
+# the two GRAPHS by isomorphism instead (same pattern as the boricles/
+# ontosphere export_service region already in this corpus).
+def demo(label, plugin):
+    from rdflib import Graph
+    serialised = create_lv2_preset(label, plugin)
+    g = Graph()
+    g.parse(data=serialised, format='turtle')
+    return g

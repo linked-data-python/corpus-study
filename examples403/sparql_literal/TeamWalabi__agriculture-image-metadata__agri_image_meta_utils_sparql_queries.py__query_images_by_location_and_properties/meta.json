@@ -10,10 +10,23 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "Context restored (see original.py/translated.ldpy headers): this region is a single bare statement (`results = g.query(query)`) with NO enclosing function and NO context lines at all -- `g` and `query` were both undefined. Restored by reproducing the real function's own code verbatim for the call path where none of its eight optional filter/location keyword arguments are supplied: with every optional argument None, `filter_str` and `optional_str` (built from Python lists of f-string fragments) both collapse to \"\", so the f-string that assigns `query` in the real source produces fixed, non-interpolated text -- the only call path where `query` is a plain literal, matching the sparql_literal stratum this site was sampled from.",
+    "Flag for the study (not this region's own construction, but visible in the same real function, kept out of the translated island): when any of those optional arguments ARE supplied, the real `query` f-string splices raw FILTER(...)/OPTIONAL{...} clause TEXT in as whole SPARQL syntax fragments, not at term position (e.g. `filters.append(f'FILTER(CONTAINS(?imageName, \"{image_name}\"))')`). That is exactly the piege INSTRUCTIONS_403 SS2 warns against ('pas de chaine de requete assemblee: l'interpolation de s{ } est en position de terme... jamais une substitution textuelle') and squarely sparql_interpolated territory, NOT expressible through s{ }'s {expr} mechanism without rewriting the surrounding Python (which would be refactoring, forbidden by SS2). This one call site is literal only because the sampled call path happens to pass no optional arguments.",
+    "New transpiler-limitation finding, confirmed by isolated repro (not previously listed in lexical.md's Known limitations): a full bracketed IRI containing a '#' inside s{ }, e.g. <http://www.w3.org/2003/12/exif/ns#SerialNumber>, is misread -- the '#' is treated as a SPARQL/Python-style comment start by s{ }'s raw-text scan (unlike g{ }/m{ }/+{ }/-{ }, which parse the same text through the island's own Turtle-based grammar and are unaffected: verified +{ ex:a <...ns#SerialNumber> \"x\" } and m{ ?s <...ns#SerialNumber> ?o } both transpile fine). It swallows the rest of the line, including the closing braces, and the island then reports the unrelated 'expected } to close s{...}' at end of file. Reproduced minimally: `s{ ASK { ex:a <http://www.w3.org/2003/12/exif/ns#SerialNumber> \"x\" } }` fails the same way. Worked around here because exif: is already declared and the query's own literal PREFIX exif: line (present in the original, unused for this one triple) makes the equivalent prefixed name exif:SerialNumber available: same IRI, no textual '#', not a semantic change. A value arriving as data (not written by hand in source) would not have this escape hatch -- worth raising upstream (see ldpy/012-style constat, INSTRUCTIONS_403 SS5.4).",
+    "The query itself -- six OPTIONALs (one a four-step rdf:first/rdf:rest chain over an RDF list) and an ORDER BY -- is plain SPARQL with no dynamic parts on this call path, so s{ } covers it directly and completely; no m{ } downgrade applies here (OPTIONAL and ORDER BY are both outside m{ }'s coverage per querying.md).",
+    "The three literal PREFIX lines (agimage:, exif:, rdf:) move to file-scope @prefix, inherited into the island's prologue (querying.md 'The prologue is the block's'); the rest of the query text -- including the five full <https://w3id.org/agri-image/...> IRIs the original writes instead of agimage:-prefixed names -- is kept exactly as written, since #2 forbids rewriting query text beyond what construction substitution requires.",
+    "results (an rdflib Result on the original side, s{ }'s own lazy iterable on the translated side) is not something run_pair's module-state comparison can judge equal (neither is a Graph or a JSON-ish value -- rdfeval.harness._comparable/_values). `rows = [tuple(r) for r in results]` was appended identically to both sides purely so the driver has something concrete to diff; changes nothing about the RDF behaviour.",
+    "fixture.ttl replaces the six original.py-only rdflib Graph() calls with a single graph parsed once by both sides: img1/img2 give two solutions (img2 has NO optional attributes at all, proving every OPTIONAL leaves its variables unbound rather than dropping the row); img3 (right rdf:type, no imageName) and ex:notAnImage (has imageName, wrong rdf:type) are neighbourhood that must not satisfy the required half of the pattern; agimage:platformID appears on neither image, the zero-solution case for that one OPTIONAL sub-pattern (a literal zero-ROW case is not exercisable here: the region is a bare module-level statement with no entry point run_pair could call a second time against an empty graph)."
+  ],
   "draft_sha": "97f3b9c3bb8bc2d4",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.905313+00:00",
@@ -24,5 +37,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

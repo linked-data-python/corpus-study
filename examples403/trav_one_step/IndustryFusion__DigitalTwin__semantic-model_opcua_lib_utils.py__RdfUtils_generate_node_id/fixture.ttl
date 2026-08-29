@@ -1,0 +1,59 @@
+# Input graph for IndustryFusion__DigitalTwin__semantic-model_opcua_lib_utils.py__RdfUtils_generate_node_id
+# Namespace/predicate names follow the source repository's own test suite
+# (semantic-model/opcua/tests/test_libutils.py::test_generate_node_id).
+@prefix ex: <http://example.org/> .
+@prefix base: <http://example.org/base/> .
+
+# Scenario 1: node's namespace equals rootentity's namespace (is_entityns
+# ends up True), hasIdentifierType = numericID ('i'); id="testID:" is
+# prepended because is_entityns is True.
+ex:node1 base:hasNodeId "12345" ;
+         base:hasIdentifierType base:numericID ;
+         base:hasNamespace ex:ns1 .
+ex:ns1 base:hasUri "ns://example" .
+ex:root1 base:hasNamespace ex:ns1 .
+
+# Scenario 2: id passed as None, so no instance-id prefix is used
+# regardless of is_entityns; hasIdentifierType = guidID ('g').
+ex:node2 base:hasNodeId "67890" ;
+         base:hasIdentifierType base:guidID ;
+         base:hasNamespace ex:ns2 .
+ex:ns2 base:hasUri "ns://another" .
+ex:root2 base:hasNamespace ex:ns2 .
+
+# Scenario 3: node's namespace differs from rootentity's (is_entityns ends
+# up False), so a non-empty id argument is still ignored;
+# hasIdentifierType = opaqueID ('b').
+ex:node3 base:hasNodeId "abcde" ;
+         base:hasIdentifierType base:opaqueID ;
+         base:hasNamespace ex:ns3node .
+ex:ns3node base:hasUri "ns://node:" .
+ex:root3 base:hasNamespace ex:ns3root .
+ex:ns3root base:hasUri "ns://root" .
+
+# Scenario 4: same namespace again (is_entityns True) and an id that is
+# itself a full IRI (http://...): exercises nodeId_to_iri's is_iri(...)
+# branch, which returns a URIRef built from the id directly rather than
+# from the namespace.
+ex:node4 base:hasNodeId "abcde" ;
+         base:hasIdentifierType base:opaqueID ;
+         base:hasNamespace ex:ns4 .
+ex:ns4 base:hasUri "ns://root4" .
+ex:root4 base:hasNamespace ex:ns4 .
+
+# Scenario 5 (zero solutions): node5/root5 carry NO hasNodeId,
+# hasIdentifierType or hasNamespace at all -- only an unrelated triple, so
+# the subject exists in the graph without being wholly absent from it.
+# Every one of the region's six one-step reads must come back empty and
+# fall back to 'unknown'.
+ex:node5 a ex:Node .
+ex:root5 a ex:Node .
+
+# Neighbourhood that must NOT match any of the five calls above: same
+# predicates, different (unrelated) subjects, plus a look-alike predicate
+# on ex:node1 itself that must not be confused with base:hasNodeId.
+ex:decoy base:hasNodeId "not-mine" ;
+         base:hasIdentifierType base:stringID ;
+         base:hasNamespace ex:decoyns .
+ex:decoyns base:hasUri "ns://decoy" .
+ex:node1 base:hasOldNodeId "99999" .

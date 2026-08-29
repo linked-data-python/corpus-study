@@ -15,11 +15,20 @@
     "term_constructor": 1,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: EX->ex, OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos"
+    "prefixes: EX->ex, OWL->owl, RDFS->rdfs. RDF and SKOS RETIRED from the draft: RDF is never used as a prefix (RDF.type becomes `a`), and SKOS is imported by the source file but never referenced inside this six-line region -- an unused `@prefix` declaration would falsify the island count.",
+    "the two `g.add((EX.Widget, ...))` calls share the subject EX.Widget and no control flow sits between them, so they merge into a single `+{ EX.Widget a owl:Class ; rdfs:label \"Widget\" }` under `@graph g` (`g = Graph()` kept as in the original, `@graph g` designates it rather than replacing the line with `@graph as g`, to avoid restructuring).",
+    "pytest >= 8 refuses to call a `@pytest.fixture`-decorated function directly ('Fixture ... called directly'). Added an identical `demo()` on both sides (see original.py/translated.ldpy) that calls `graph_untagged_label.__wrapped__()`, the plain function pytest wraps -- a harness accommodation, not a change to the region's own six lines, following the precedent of the Dewberry region in this same stratum.",
+    "checked that the pilot actually discriminates: reverting the merge to two `.add()`-equivalent islands with a different literal makes `rdfeval check` fail with 'graphs not isomorphic (2 vs 2 triples)', confirming the comparison is not a hollow green."
   ],
   "draft_sha": "3f48874a2908c80d",
   "provenance": {
@@ -31,5 +40,12 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

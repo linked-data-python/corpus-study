@@ -1,4 +1,91 @@
-# Input graph for RDFLib__timefuncs__tests_functions_test_finishes.py__test_finishes — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for RDFLib__timefuncs__tests_functions_test_finishes.py__test_finishes.
+#
+# `test_finishes` loads its OWN fixture, at a path it hardcodes:
+# `tests_dir / "data" / "finishes.ttl"` where `tests_dir = Path(__file__).parent`
+# -- so the real file both original.py and translated.ldpy read is
+# `data/finishes.ttl`, at the exact same relative path as in the upstream
+# repository (RDFLib/timefuncs@dd3bde8727, tests/functions/data/finishes.ttl),
+# copied here VERBATIM, unmodified, with no path-fixing code needed on either
+# side (see meta.json).
+#
+# This file mirrors data/finishes.ttl for documentation/protocol consistency
+# (INSTRUCTIONS_403 SS3: "le fixture est un acte de traduction a part entiere");
+# it is not read directly by either version -- see driver.py.  It is the real
+# upstream test fixture, not one written for this study: it already covers
+# several solutions (a01, a03-a06, a08), a case a query type mismatch rules
+# out (a02, an Instant not an Interval), transitive chains (a04, a05), and
+# datatype-compared beginnings/ends (a06).
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix : <https://w3id.org/timefuncs/testdata/finishes/> .
+
+:a01 a time:Interval .
+:b01 a time:Interval .
+
+:a02 a time:Instant .
+:b02 a time:Interval .
+
+:a03 a time:Interval .
+:b03 a time:Interval .
+
+:a04 a time:Interval .
+:b04 a time:Interval .
+
+:a05 a time:Interval .
+:b05 a time:Interval .
+
+:a06 a time:Interval .
+:b06 a time:Interval .
+
+:a07 a time:Interval .
+:b07 a time:Interval .
+
+:a08 a time:ProperInterval .
+:b08 a time:Interval .
+
+:a09 a time:Interval .
+:b09 a time:ProperInterval .
+
+:a10 a time:ProperInterval .
+:b10 a time:ProperInterval .
+
+:a01 time:intervalFinishes :b01 .
+
+# fails due to a being of type time:Instant
+:a02 time:intervalFinishes :b02 .
+
+:b03 time:intervalFinishedBy :a03 .
+
+:a04 time:intervalFinishes :x04 .
+:x04 time:intervalFinishes :y04 .
+:y04 time:intervalFinishes :b04 .
+
+:a05 time:intervalFinishes :x05 .
+:y05 time:intervalFinishedBy :x05 .
+:z05 time:intervalFinishedBy :y05 .
+:z05 time:intervalFinishes :w05 .
+:b05 time:intervalFinishedBy :w05 .
+
+:a06
+    time:hasBeginning [ time:inXSDDateTimeStamp "2021-07-29T00:00:01Z" ] ;
+    time:hasEnd [ time:inXSDDateTimeStamp "2021-07-29T00:00:02Z" ] ;
+.
+:b06
+    time:hasBeginning [ time:inXSDDateTimeStamp "2021-07-29T00:00:00Z" ] ;
+    time:hasEnd [ time:inXSDDateTimeStamp "2021-07-29T00:00:02Z" ] ;
+.
+
+# a time:finishes x time:intervalEquals y time:intervalEquals b
+:a07
+    time:hasBeginning [ time:inXSDDateTimeStamp "2021-07-30T00:00:01Z" ] ;
+    time:hasEnd [ time:inXSDDateTimeStamp "2021-07-30T00:00:02Z" ] ;
+.
+:x07
+    time:hasBeginning [ time:inXSDDateTimeStamp "2021-07-30T00:00:00Z" ] ;
+    time:hasEnd [ time:inXSDDateTimeStamp "2021-07-30T00:00:02Z" ] ;
+.
+:x07 time:intervalEquals :y07 .
+:y07 time:intervalEquals :z07 .
+
+:a08 time:intervalFinishes :x08 .
+:x08 time:intervalEquals :y08 .
+:y08 time:intervalEquals :b08 .

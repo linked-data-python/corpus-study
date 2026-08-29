@@ -17,10 +17,27 @@
     "term_constructor": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "typed literal",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, PROV->prov"
+    "prefixes: RDF->rdf, PROV->prov",
+    "Translated in full even though it cannot be proven equivalent by execution (see below): every prov_graph.triples((None, p, o)) / .subjects(p, o) / .objects(s, p) / .value(s, p) becomes m{ }, one island per site, never merged -- e.g. len(list(prov_graph.triples((None, RDF.type, self.ONTOLOGY.Parameter)))) -> len(list(m{ ?s rdf:type {self.ONTOLOGY.Parameter} })), kept as len(list(...)) rather than .count() to stay a literal per-site substitution (INSTRUCTIONS_403 SS2: never refactor beyond the rdflib idiom itself).",
+    "Each `(s, p, o) in prov_graph` membership test (self, ALPACA and self.ONTOLOGY terms only known at runtime) becomes bool(m{ {s} {p} {o} }), the trav_existence idiom -- used here even though the region was sampled for trav_one_step, per INSTRUCTIONS_403 SS2's 'credit every island separately': the most specific construction at EACH site, not only the one the stratum sampled on.",
+    "self.ONTOLOGY.X and ALPACA.X (both plain Python attribute access on runtime Namespace objects, not compile-time prefixes) interpolate as {self.ONTOLOGY.X} / {ALPACA.X} in every term position, subject and predicate included -- there is no @prefix for either in this file.",
+    "Literal('param_1') -> the bare Turtle string \"param_1\" (an untyped plain literal, matching Literal(str) exactly); Literal(45) -> the bare integer 45 (rdflib's Literal(int) constructor already infers datatype=xsd:integer, the same inference the language's own default coercion performs on a native Python int, so no explicit ^^xsd:integer is needed -- this is NOT the unsafe case INSTRUCTIONS_403 SS2bis warns about, which is an *explicit* datatype= on a non-string value).",
+    "prov_graph.value(attribute, ALPACA.pairName).toPython() -> m{ {attribute} {ALPACA.pairName} ?v }.first().toPython(): .value()'s None-when-missing and .first()'s None-when-missing agree, so calling .toPython() on either raises the same AttributeError when the pattern has no solution -- no special-casing needed for fidelity.",
+    "EXCLUDED: the pilot cannot execute past the region's own first line. Both original.py and translated.ldpy do `from alpaca import activate, deactivate, Provenance, save_provenance` at module scope, and `alpaca` (alpaca-prov on PyPI) is not installed in this study's rdflib==7.2.1-pinned venv (verified directly: `python -c \"import alpaca\"` -> ModuleNotFoundError). rdfeval check confirms both sides fail identically at that import, before entry/calls is ever reached -- see driver.py for the full reasoning, including why this is not a context-shim job (InputObject/process_multiple/self.ONTOLOGY only mean something together with alpaca.Provenance's real call-stack introspection, which is the system under test, not a broken binding).",
+    "The translated.ldpy file was checked independently of the pilot: `ldpy.transpiler.transpile()` on its source succeeds on its own (pure syntax check, no alpaca import needed), confirming every island above is syntactically valid even though the region as a whole cannot be run."
   ],
   "draft_sha": "bd8748c7992869af",
   "provenance": {

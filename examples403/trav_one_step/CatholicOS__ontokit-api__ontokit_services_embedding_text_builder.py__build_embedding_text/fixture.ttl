@@ -1,4 +1,43 @@
-# Input graph for CatholicOS__ontokit-api__ontokit_services_embedding_text_builder.py__build_embedding_text — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for CatholicOS__ontokit-api__ontokit_services_embedding_text_builder.py__build_embedding_text
 @prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ex:Animal ("class") -- several solutions of every one-step pattern the
+# region reads: two rdfs:label (primary + extra, exercises labels[1:]), a
+# comment that must win over the definition (desc = comments or
+# definitions), one filtered parent (owl:Thing, must be dropped) and one
+# kept parent with its own rdfs:label, one skos:altLabel, and a non-literal
+# rdfs:label object that the isinstance(o, RDFLiteral) filter must drop.
+ex:Animal
+    rdfs:label "Animal"@en, "Animalia" ;
+    rdfs:comment "A living organism." ;
+    skos:definition "Should be shadowed by the comment above." ;
+    rdfs:subClassOf owl:Thing, ex:LivingBeing ;
+    skos:altLabel "Fauna" ;
+    rdfs:label <http://example.org/not-a-literal-label> .
+
+ex:LivingBeing rdfs:label "Living being" .
+
+# ex:WorksAt ("property") -- exercises the subPropertyOf branch (instead of
+# subClassOf) and the "no comment, fall back to definition" branch.
+ex:WorksAt
+    rdfs:label "works at" ;
+    skos:definition "A relation from a person to an organisation." ;
+    rdfs:subPropertyOf ex:relatedTo .
+
+ex:relatedTo rdfs:label "related to" .
+
+# ex:Empty -- the zero-solution case for every one-step pattern in the
+# region: no rdfs:label, rdfs:comment, skos:definition, rdfs:subClassOf or
+# skos:altLabel at all (only an unrelated rdf:type triple, so the subject
+# is not simply absent from the graph).
+ex:Empty a owl:Class .
+
+# Neighbourhood that must NOT match any of the three calls below: same
+# predicates (rdfs:label, rdfs:comment, skos:altLabel), different subject.
+ex:Other
+    rdfs:label "Should not appear" ;
+    rdfs:comment "Should not appear either" ;
+    skos:altLabel "NeitherShouldThis" .

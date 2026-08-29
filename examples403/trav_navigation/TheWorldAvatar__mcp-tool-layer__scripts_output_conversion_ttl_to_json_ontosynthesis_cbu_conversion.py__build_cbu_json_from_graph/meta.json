@@ -13,11 +13,23 @@
     "namespace_term": 4,
     "term_constructor": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl"
+    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, plus ONTOMOPS->ontomops, ONTOSYN->ontosyn (the region builds its predicate IRIs as URIRef(str(NS) + \"suffix\") instead of NS.suffix -- same fixed IRIs, just awkward Python; a prefixed name is the direct, more specific translation).",
+    "163-regions case: `graph`/`mop_type_uri`/`procedures`/`direct_mops_found` and the three helper closures (_is_guest_mop, _collect_input_aliases_for_mop, _augment_cbu_names) are restored context (see original.py's header and mop_helpers.py) -- the region is itself a nested closure inside build_cbu_json_from_graph, extracted as a bare `for` statement (kind: statement), not a function; a one-line run(graph) wrapper (identical on both sides) gives it a callable shape and returns `procedures`.",
+    "NOT fused into a multi-pattern m{ } despite the stratum's usual construction: every chained read here is OPTIONAL with a Python-level fallback (`str(x[0]) if x else \"N/A\"`, `if s not in names: names.append(...)`), or a UNION of alternative predicates accumulated into one `names` list (label, then hasAlternativeNames, then hasChemicalFormula, then the same three again via owl:sameAs). `m{ }` has no OPTIONAL (see reference/language/querying.md, \"What m{ } does not have\"): joining any of these mandatorily would silently DROP a cbu/mop missing just one of the properties, instead of keeping it with the \"N/A\"/[] fallback the original computes -- confirmed by sabotaging one predicate name in translated.ldpy and watching entries for mopZeroCbu/mopNoFormula collapse to N/A across the board, not just the one field. Each selector therefore keeps its own single-pattern m{ } (the trav_one_step shape), which is the most specific correct translation here -- this region is the optionality analogue of the negation borne INSTRUCTIONS_403 SS calls out for -{ }/m{ } fusion.",
+    "`ccdc_vals = list(...); ccdc = str(ccdc_vals[0]) if ccdc_vals else \"N/A\"` -> `.first()` (per how-to/migrate-from-rdflib.md's g.value() row): ccdc_vals is never printed, so nothing observable changes. `formula_vals` for the CBU's own formula is kept as `list(m{ ... })` rather than `.first()`, deliberately NOT the more idiomatic form: the original prints formula_vals verbatim in a debug line, and .first() would silently turn that printed list into a single term or None -- a real difference in this region's own stdout, which the driver compares.",
+    "fixture.ttl : cinq MOP, chacun un branchement different (guest ecarte malgre un ccdc valide ; ccdc absent = zero-solution -> N/A -> continue ; zero CBU = zero-solution -> N/A/[] des deux slots ; CBU sans hasCBUFormula = zero-solution -> N/A + noms depuis le label seul ; MOP riche a 3 CBU dont seuls les 2 premiers, tries par formule, entrent dans l'entree -- le troisieme doit disparaitre silencieusement, exactement comme le slicing cbu_data[0]/[1] de l'original). Voisinage : ex:cbuOrphan et ex:chemInputOrphan, formes comme un CBU/chem_input reel mais relies a rien. Verifie par sabotage d'un predicat (hasChemicalBuildingUnit) dans translated.ldpy : le pilote detecte l'ecart (toutes les entrees retombent a N/A/[])."
   ],
   "draft_sha": "b8dadaecca77cdc8",
   "provenance": {
@@ -29,5 +41,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:run",
+    "diffs": [],
+    "error": null
+  }
 }

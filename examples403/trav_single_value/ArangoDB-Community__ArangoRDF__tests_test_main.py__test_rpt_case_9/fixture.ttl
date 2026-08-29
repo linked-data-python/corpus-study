@@ -1,4 +1,11 @@
-# Input graph for ArangoDB-Community__ArangoRDF__tests_test_main.py__test_rpt_case_9 — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for ArangoDB-Community__ArangoRDF__tests_test_main.py__test_rpt_case_9.
+#
+# UNUSED: this region is EXCLUDED (see meta.json translation_notes), same
+# reason as the sibling region of this batch (test_pgt_case_8, same file,
+# same conftest.py) -- it is an ArangoDB integration test that requires a
+# live ArangoDB server, not a pure-rdflib read. `driver.py`/`run_pair` never
+# reaches the point where this file would be parsed: `original.py`'s
+# `from .conftest import (...)` raises before the fixture is ever loaded.
+# Left as a stub rather than deleted, for documentation parity with the
+# rest of the stratum.
 @prefix ex: <http://example.org/> .

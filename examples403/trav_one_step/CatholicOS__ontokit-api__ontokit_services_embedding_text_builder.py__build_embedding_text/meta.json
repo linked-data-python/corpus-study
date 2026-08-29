@@ -13,11 +13,23 @@
     "graph_read": 6,
     "namespace_term": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDFS->rdfs, SKOS->skos"
+    "prefixes: OWL->owl, RDFS->rdfs, SKOS->skos",
+    "Five one-step traversals (graph.objects(entity_uri, PRED)) become five m{ {s} pred ?o } reads, each arity 1 (a single named variable), matching the stratum's target exactly. The nested for p in graph.objects(entity_uri, parent_pred) uses a dynamically chosen predicate (rdfs:subPropertyOf or rdfs:subClassOf depending on entity_type), interpolated as {parent_pred} in predicate position -- a plain Python variable holding a URIRef term, same treatment as a subject/object interpolation.",
+    "@graph graph designates the function's own graph parameter as current for the whole body, so every m{ } stays bare (no (graph) call suffix needed) -- matches current-graph.md's 'designate the existing Python variable as current' form.",
+    "_local_name (called for the primary label and for a parent with no rdfs:label of its own) is not defined in the extracted region: it is a private helper further down in the same source file (ontokit/services/embedding_text_builder.py, lines 56-60 at commit 23680a4d04). Restored via a context shim (embedding_text_context.py), reproduced verbatim from the published source, imported identically by both original.py and translated.ldpy.",
+    "isinstance(o, RDFLiteral) after each m{ } read is preserved as-is: it is ordinary Python filtering a term island already returns (a URIRef, Literal or BNode), not something m{ } itself needs to express -- the fixture's non-literal rdfs:label object on ex:Animal exercises this filter on both sides.",
+    "fixture calls exercise: (1) ex:Animal/class -- two labels (labels[1:] extra-label path), comment-over-definition priority, one owl:Thing parent dropped and one kept parent with its own label, one alt label, and a non-literal rdfs:label object dropped by the isinstance filter; (2) ex:WorksAt/property -- the subPropertyOf branch and the 'no comment, fall back to definition' branch; (3) ex:Empty/class -- the zero-solution case across every field (label, comment/definition, parents, alt labels all empty), falling back to _local_name."
   ],
   "draft_sha": "e3fbc98c29b34cf3",
   "provenance": {
@@ -29,5 +41,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:build_embedding_text",
+    "diffs": [],
+    "error": null
+  }
 }

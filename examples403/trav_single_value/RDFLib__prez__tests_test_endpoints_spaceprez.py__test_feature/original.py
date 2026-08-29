@@ -1,13 +1,21 @@
 # Extracted from RDFLib/prez@421ee0a9fe : tests/test_endpoints_spaceprez.py
 # region: test_feature (lines 28-37, stratum trav_single_value)
 # licence of the source repository: see meta.json
-from rdflib import Graph, URIRef
+#
+# The extracted region built `response_graph` from a live HTTP round-trip
+# through an in-process FastAPI TestClient wired to a real pyoxigraph-backed
+# prez app (tests/conftest.py: `client` assembles the real app + a store
+# loaded from test_data/*.ttl; `a_feature_link` chains three more fixtures
+# and HTTP calls on top of it) -- one of the corpus/403 "163 regions with no
+# visible graph" (see AGENT_BATCH.md): the fetched graph is the thing under
+# test, but reaching it needs the whole app + dataset, not reproducible
+# standalone. Restored the binding as an explicit `response_graph` parameter
+# and dropped the now-unused client/HTTP lines (see meta.json). The read
+# under study, on `response_graph`, is unchanged.
+from rdflib import URIRef
 from rdflib.namespace import DCAT, GEO, RDF
 
-def test_feature(client, a_feature_link):
-    r = client.get(f"{a_feature_link}?_mediatype=text/turtle")
-    g_text = r.text
-    response_graph = Graph().parse(data=g_text)
+def test_feature(response_graph):
     expected_response_1 = (
         URIRef("https://example.com/spaceprez/Feature1"),
         RDF.type,

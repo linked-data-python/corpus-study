@@ -14,11 +14,25 @@
     "graph_write": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "m{ }",
+    "call suffix (g)",
+    "+{ }",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: BEING->being, PM->pm, YURTLE->yurtle, PROVENANCE->provenance"
+    "prefixes: BEING->being, PM->pm, YURTLE->yurtle (core.py lines 50-53), PROVENANCE->provenance (namespaces.py) -- all four verified as real `Namespace(...)` bindings in the pinned commit, not guessed. Dynamic regime: `from yurtle_context import being:, pm:, yurtle:, YurtleDocument, YurtleParser, YurtleWriter` / `from yurtle_context import provenance:` -- no @prefix line with an inlined IRI, since the construction under test is the import, not ns_def_local. YURTLE/PM are imported (mirroring the real file's own import list) but never dereferenced inside this specific region's body; kept as prefixes anyway because they ARE namespace objects genuinely imported by the real line, same reasoning as the draft's original notes -- only BASE/DCTERMS-style truly-unused-elsewhere names would be left as plain imports (not the case here: PM/YURTLE are namespace objects, not inert names).",
+    "`self.internal_graph.predicate_objects(state.subject_uri)` -- a fixed-subject, two-variable traversal -- is more specific than a bare `list(g)` scan (querying.md: 'a pattern that selects... it pays for itself from the first triple it excludes'), so translated to `m{ {state.subject_uri} ?p ?o }(self.internal_graph)` rather than left as a raw rdflib call, per INSTRUCTIONS_403 SS2 ('toujours la construction la plus specifique'), even though the region's assigned stratum is ns_import_project, not trav_navigation.",
+    "The single `subject_graph.add((state.subject_uri, p, o))` inside the loop -> `+{ {state.subject_uri} {p} {o} }(subject_graph)`, the call-suffix form, because `m{ }` reads self.internal_graph while `+{ }` writes a DIFFERENT graph (subject_graph) in the same loop -- a single `@graph` designation cannot serve both, so each island names its own graph explicitly instead (current-graph.md's `+{ }(other)` example). The draft this replaced had written `subject_graph += g{ {state.subject_uri} {p} {o} }`, the forbidden `+=` degradation (graphs.md says `+=` is for adding a WHOLE other graph, not a single templated triple; also documented as wrong in the acdh-oeaw/vocabseditor sibling of this same stratum).",
+    "`if p == PROVENANCE.definedIn: continue` -> `if p == provenance:definedIn: continue` -- verified directly that ldpy's lexer accepts a prefixed name immediately followed by the if-statement's own trailing colon (terms.md's `def h(x = ex:Thing): return x` example is the same shape); transpiles and the fixture-corruption check below confirms it is not silently ignored.",
+    "Executability (AGENT_BATCH's 163-regions case): `import logging` restored (present at store.py line 38, not captured by the extracted context; this region calls logger.debug/logger.warning) and `.core`/`.namespaces` rewritten to `yurtle_context`, a shim module (relative imports do not resolve for a single extracted file). yurtle_context.py transcribes YurtleDocument's fields and YurtleWriter.write/_serialize_turtle/write_file VERBATIM from core.py (lines 58-77, 620-648) -- write_file is real, not stubbed, so the driver's 'read back what got written' check is meaningful; YurtleParser is left an empty stand-in because neither write() nor write_file() ever reads self.parser, and this region never calls YurtleParser directly.",
+    "self (FakeStore) and the demo() harness are appended IDENTICALLY to original.py and translated.ldpy (same convention as the johnjung/metadata_converters and acdh-oeaw siblings of this stratum): _compute_file_hash is transcribed verbatim from store.py lines 215-221 (not stubbed, since state.hash is a real side effect of the region, even though it is excluded from what the driver compares -- see next note). demo() returns (written_graph, state.triple_count, state.is_dirty), NOT `self` itself -- comparing a plain stub object by `==` falls back to Python identity and always differs across the two separately-constructed instances (documented failure mode in the acdh-oeaw sibling's notes).",
+    "state.hash and state.last_modified are real side effects of the region but are excluded from the driver's return tuple on purpose: last_modified is `path.stat().st_mtime`, real wall-clock, non-deterministic between the two exec'd sides; hash is content-derived and would likely match but depends on Turtle serialization order not guaranteed stable across two separate Python processes -- same reasoning as harness.py's own stdout_filter note ('a wall-clock duration... not the program's meaning'). triple_count and is_dirty ARE deterministic content-derived results and stay in the comparison.",
+    "Frontmatter round-trip: YurtleWriter.write_file wraps its Turtle output between `---` fences plus the markdown body (core.py's own `write()`), so demo() strips the fences with core.py's own FRONTMATTER_PATTERN regex (transcribed) before handing the frontmatter to Graph().parse -- parsing the raw file directly raised rdflib BadSyntax (verified: fixed while writing this pair, not assumed).",
+    "Fixture strength checked directly: replacing the provenance guard with `if False: continue` in translated.ldpy flips `rdfeval check` to FAIL (2 vs 3 triples, plus a differing graph digest); reverted afterward, OK confirmed again."
   ],
   "draft_sha": "b5ba8e3ea22c23bd",
   "provenance": {
@@ -30,5 +44,12 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,4 +1,26 @@
-# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__map_node — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__map_node
+# — written during translation. driver.py calls map_node(s0, sk_s0, gin, gout)
+# with s0 = ex:s0. Covers:
+#  * several direct (non-BNode) predicate-object pairs on s0 (the "if not
+#    isinstance(o, BNode)" add branch, exercised more than once);
+#  * one BNode child that recurses one level deep, itself with its own mix
+#    of direct pairs and a second BNode child (the else branch + the
+#    recursive call, exercised twice);
+#  * an unrelated subject, reachable by no chain of predicate-object pairs
+#    starting at s0, that must NOT appear in the output graph -- map_node
+#    only ever follows gin.predicate_objects(s), never a full scan.
 @prefix ex: <http://example.org/> .
+@prefix fhir: <http://hl7.org/fhir/> .
+
+ex:s0 ex:p1 "leaf-one" ;
+      ex:p2 <http://example.org/iri-one> ;
+      ex:p3 _:b1 .
+
+_:b1 fhir:index 0 ;
+     ex:q1 "nested-leaf" ;
+     ex:q2 _:b2 .
+
+_:b2 fhir:index 1 ;
+     ex:r1 "deep-leaf" .
+
+ex:other ex:foo "must not be copied" .

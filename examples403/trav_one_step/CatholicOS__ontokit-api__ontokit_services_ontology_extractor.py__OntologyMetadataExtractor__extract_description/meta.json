@@ -14,11 +14,24 @@
     "namespace_term": 5,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: DC->dc, DCTERMS->dcterms, OWL->owl, RDF->rdf, RDFS->rdfs",
+    "graph.objects(subject, prop) -> m{ {subject} {prop} ?o }, arity 1: both subject and prop are plain Python loop variables (subject from subjects_to_check, prop from the desc_properties priority list), so both interpolate with {expr} rather than being written as terms -- the same treatment INSTRUCTIONS_403 gives a parameter in subject position, extended here to predicate position since prop ranges over a list built from prefixed-name values (dc:description, dcterms:description, rdfs:comment).",
+    "graph.subjects(RDF.type, OWL.Ontology) -> m{ ?s rdf:type owl:Ontology }, arity 1 (single named variable ?s): the trav_one_step idiom for g.subjects(p, o), same construction as g.objects(s, p) with subject and object roles swapped.",
+    "@graph graph designates the method's own graph parameter as current for the whole body (bound method extracted as a plain function; self is never read), so every m{ } stays bare.",
+    "Preserved a real quirk instead of 'fixing' it: the second (global) loop over m{ ?s rdf:type owl:Ontology } is NOT gated on `ontology_iri` being falsy, despite what its own comment says -- it runs unconditionally whenever the first loop returns nothing, including when ontology_iri was given but that subject has none of the three description properties. fixture.ttl's ex:OntoEmpty and driver.py's call_global_fallthrough_quirk exist specifically to prove the translation keeps this behaviour rather than silently correcting it (which INSTRUCTIONS_403 SS2 forbids as refactoring).",
+    "The true zero-solution case (both loops empty, return None) cannot be reached against the shared fixture.ttl: as soon as any owl:Ontology subject with a description exists anywhere in the file, the unconditional second loop -- see the quirk above -- will always find one, whatever ontology_iri is passed. call_zero_solutions() in driver.py therefore builds its own fresh, unrelated, empty Graph() instead (still fresh per side, as fixture_graph is elsewhere) -- the only way to exercise the empty-result branch without contradicting the quirk test.",
+    "ex:NotAnOntology in fixture.ttl carries dc:description but is never typed owl:Ontology and is never passed as ontology_iri: the neighbourhood that must not leak into the global search."
   ],
   "draft_sha": "c8270cfe935a4a3c",
   "provenance": {
@@ -30,5 +43,12 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_extract_description",
+    "diffs": [],
+    "error": null
+  }
 }

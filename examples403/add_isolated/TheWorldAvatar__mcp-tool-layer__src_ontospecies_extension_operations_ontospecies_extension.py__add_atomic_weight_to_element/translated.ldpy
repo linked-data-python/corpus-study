@@ -3,9 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
-@prefix os: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+from context_shim import OS, locked_graph, _safe_parent, _mint_hash_iri, _ensure_type_with_label, _class
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
@@ -29,5 +27,5 @@ def add_atomic_weight_to_element(element_iri: str, value) -> str:
                 g.set((aw, _class(OS, "hasAtomicWeightValue"), Literal(float(value), datatype=xsd:float)))
             except Exception:
                 return f"Invalid atomic weight value: {value!r}"
-        g += g{ {parent} {_class(OS, "hasAtomicWeight")} {aw} }
+        +{ {parent} {_class(OS, "hasAtomicWeight")} {aw} }(g)
         return str(aw)

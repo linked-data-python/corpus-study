@@ -16,11 +16,26 @@
     "serialize_parse": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    ".one()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: ST->st"
+    "prefixes: ST->st",
+    "graph binding restored (see original.py header): the extracted region reads FOUR real Turtle files from disk via `AB_MGR_DIR = REPO / \"overlays/addressbook/interop/managers\"`, one of corpus/403's '163 regions with no visible graph' -- `REPO` is undefined outside the source checkout. Replaced with an explicit `manager_graphs` parameter (a dict slug -> already-parsed rdflib.Graph, one per manager) and dropped the now-unused file-existence check and on-disk parse; the four reads under study are otherwise untouched.",
+    "`mgr = next(g.subjects(rdflib.RDF.type, ST.Manager))` -> `m{ ?mgr a st:Manager }.one()`, NOT `.first()`: `mgr` is dereferenced immediately afterwards with no None-check (`g.value(mgr, ST.hasAssignment)`). `.first()` would turn a zero-solution graph into `mgr = None`, and `g.value(None, ST.hasAssignment)` reads `None` as rdflib's WILDCARD subject -- silently returning an assignment from an unrelated resource instead of failing loudly. `.one()` raises on absence, matching `next()`'s only observable behaviour here (both crash the test); it also raises on plurality, which `next()` would not (next() would just take an arbitrary match) -- a nuance that cannot manifest on this data, since every real manager file has exactly one `st:Manager` by construction, so it is noted rather than tested.",
+    "`a = g.value(mgr, ST.hasAssignment)` immediately checked with `assert a is not None` -> `.first()`: this is exactly `g.value`'s own idiom (never raises, None on zero solutions), and the explicit None-check downstream is preserved verbatim.",
+    "the two `g.value(a, ST.assigns/.manages) == URIRef(...)` reads -> `.first()` each: same reasoning, `g.value` never raises and the comparison already tolerates `None`.",
+    "zero-solution branch cannot be exercised through this driver: every read here feeds a bare `assert` inside the one function call `run_pair` invokes, which aborts the whole comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py) -- same limitation already documented on the sibling region of this batch (trav_existence/...test_registry_chain_covers_all_apps_every_registration_a_container_tree). Hardened the fixture instead with a decoy assignment (urn:ex:decoy:a2) unconnected to any manager's st:hasAssignment, to catch an over-broad pattern.",
+    "each manager's data is kept in its OWN isolated graph (driver.py re-partitions fixture.ttl by subject closure from a synthetic per-slug root IRI, since the real code parses four separate files each with their own `<>`): merging all four into one shared graph would make `m{ ?mgr a st:Manager }.one()` see four candidates instead of one, which is not what the original tests and would make the match's outcome store-order dependent."
   ],
   "draft_sha": "8e0c73aa9dd186de",
   "provenance": {
@@ -33,5 +48,11 @@
     "trav_single_value",
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_addressbook_managers_assign_container_trees_and_name_their_container",
+    "diffs": [],
+    "error": null
+  }
 }

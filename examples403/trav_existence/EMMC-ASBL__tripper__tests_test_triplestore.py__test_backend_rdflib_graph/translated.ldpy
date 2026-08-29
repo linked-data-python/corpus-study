@@ -25,4 +25,5 @@ def test_backend_rdflib_graph(
     # Test that triples added with tripper are available in the original
     # graph
     ts.add_triples([(":Nils", RDF.type, FAM.Father)])
-    assert graph.value(<:Nils>, URIRef(RDF.type)) == URIRef(FAM.Father)
+    @graph graph
+    assert m{ <:Nils> f{URIRef(RDF.type)} ?o }.first() == URIRef(FAM.Father)

@@ -10,10 +10,14 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `triple` is a whole triple PATTERN held as an opaque caller-supplied string -- upstream's own checkEntailments(g) calls this with three shapes: ':Carl :hasChild :Ann .', ':Ann rdf:type :Child .', ':Juliet :hasChild :Ann .' -- concatenated with `+` straight into the ASK query's body: `\"\"\"ASK {\"\"\" + triple + \"\"\" }\"\"\"`.",
+    "Same limit as the sibling lab4 region (city-knowledge-graphs/python@lab4/RDFSReasoning.py, same function name, near-identical body): out of reach by construction on the read side -- querying.md is explicit that s{ }'s interpolation ({expr}) 'is allowed where a term may stand' and lowers to initBindings, never a string substitution. There is no island for 'an entire triple pattern held in a variable', the same limit INSTRUCTIONS_403 SS2 notes for -{ }/m{ } (which take a WRITTEN pattern, never one received as data), here on rdflib's own query engine rather than a BGP island. Subject, predicate and object vary independently across the three call sites, so there is no fixed term slot to interpolate even after the fact.",
+    "checkEntailment(g, triple) only prints (no return, no assertion); it is the three real (g, triple) invocations from upstream's checkEntailments(g), against a hand-written fixture graph, that prove the (unmodified) region still computes right: one ASK comes back True (triple1), two come back False -- the zero-solution case for this stratum (triple2, triple3). fixture.ttl documents which and why; it does not attempt to reproduce owlrl's OWL 2 RL closure (that reasoning step belongs to the enclosing OWLRLInference(), which is not part of this region)."
+  ],
   "draft_sha": "3df817ca68897df5",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.146063+00:00",

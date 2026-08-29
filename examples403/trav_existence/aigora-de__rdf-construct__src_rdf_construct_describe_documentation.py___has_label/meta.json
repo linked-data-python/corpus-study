@@ -12,12 +12,23 @@
   "categories": {
     "graph_read": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "IRI",
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "Textbook trav_existence: `if any(graph.objects(subject, pred)): return True` throws the iterator away for its truth alone, never reuses a value -- translated with the stratum's own construction, `bool(m{ {subject} {pred} ?o })`, per INSTRUCTIONS_403 SS2 (`any(g.objects(...))` -> `bool(m{ })`); the loop over LABEL_PREDICATES and the early return are untouched (no refactoring). `{subject}`/`{pred}` are bare interpolations (both already rdflib terms, no coercion to reconsider) in the exact subject/predicate positions of INSTRUCTIONS_403's own trav_one_step example `m{ {s} p ?o }`.",
+    "LABEL_PREDICATES: RDFS.label -> rdfs:label (prefixed name); the four skos:/dc:/dcterms: URIRef(...) constants have no @prefix imported by the original file, so they stay bare IRIs (<http://www.w3.org/2004/02/skos/core#prefLabel> etc.) rather than inventing prefixes the source never declared. RDF is imported but unused in the original file too (only RDFS.label is referenced) -- kept as-is, not cleaned up.",
+    "fixture.ttl / driver.py: `_has_label(graph, subject)` takes two arguments, so the default fixture= calling convention (entry called with just the parsed graph) doesn't fit; calls= is given explicitly, one call per subject, each re-parsing fixture.ttl fresh. Five subjects: three each resolving through a different LABEL_PREDICATES member (rdfs:label, skos:altLabel, dcterms:title), one with only non-label predicates (ex:other, rdfs:comment -- the zero-solution case with real neighbouring data), one absent from the graph entirely (zero solution, no data at all); plus a label on an unrelated subject (ex:neighbour) to prove the read is scoped to the given subject, not the whole graph."
+  ],
+  "article_candidate": true,
   "draft_sha": "ff471dbdbd9bc089",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.587799+00:00",
@@ -28,5 +39,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_has_label",
+    "diffs": [],
+    "error": null
+  }
 }
