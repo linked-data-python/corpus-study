@@ -43,7 +43,6 @@ import re
 import textwrap
 
 from .config import EXAMPLES_DIR, provenance
-from .regions import load_regions
 
 PN_LOCAL_OK = re.compile(r"[A-Za-z_][\w.-]*$")   # conservative subset
 
@@ -642,10 +641,3 @@ def materialise(reg: dict, config: dict, root=None,
     return "drafted"
 
 
-def run(config: dict) -> None:
-    regions = load_regions()
-    counts: dict[str, int] = {}
-    for reg in regions:
-        status = materialise(reg, config)
-        counts[status] = counts.get(status, 0) + 1
-    print(f"translate: {counts}")

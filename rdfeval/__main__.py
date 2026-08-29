@@ -8,14 +8,14 @@ import sys
 from . import __version__
 from .config import load_config
 
-STAGES = ("discover", "select", "acquire", "analyze", "sample", "regions",
-          "translate", "validate", "compare", "aggregate", "audit",
+STAGES = ("discover", "select", "acquire", "analyze",
+          "validate", "compare", "aggregate", "audit",
           "surface", "strata", "check", "status", "article", "review",
           "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
 # acquire) and the human-in-the-loop stage (translate review) stay explicit.
-ALL_STAGES = ("analyze", "sample", "regions", "validate", "compare",
+ALL_STAGES = ("analyze", "surface", "strata", "validate", "compare",
               "aggregate", "audit", "surface", "strata", "userstudy")
 
 
@@ -67,15 +67,6 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "analyze":
             from . import corpus
             corpus.run(config)
-        elif stage == "sample":
-            from . import sample
-            sample.run(config)
-        elif stage == "regions":
-            from . import regions
-            regions.run(config)
-        elif stage == "translate":
-            from . import translate
-            translate.run(config)
         elif stage == "validate":
             from . import validate
             validate.run(config, study)

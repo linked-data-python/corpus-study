@@ -131,28 +131,15 @@ vendored_dirs = ["rdflib", "rdfextras", "isodate", "html5lib", "pyparsing",
 vendored_dirs_always = ["_vendor", "vendor", "vendored", "third_party",
                         "thirdparty", "externals", "3rdparty"]
 
-[sampling]
-seed = 20260827
-# RDF-density bands over rdf_node_density = rdf_ast_nodes / total ast nodes.
-# Files with zero RDF operations are excluded from banding (they are the
-# "no-RDF" stratum, only useful as sanity control).
-band_low = [0.0, 0.05]
-band_medium = [0.05, 0.20]
-band_high = [0.20, 1.0]
-# Number of files sampled per band for the intensive evaluation.
-sample_low = 12
-sample_medium = 16
-sample_high = 24
-# Additional random control sample of low-density files (not translated,
-# used to check the analyser's false-positive rate by manual inspection).
-control_sample = 10
-# At most this many files may come from a single repository in one band
-# (prevents one large project from dominating a band).
-max_per_repo_per_band = 3
-
 [strata]
-# Stratified draw by *type of use* (design record corpus/403).  The strata
-# themselves are `rdfeval.surface.STRATA`; their population is the site index.
+# The draw: stratified by *type of use* (design record corpus/403).  The
+# strata themselves are `rdfeval.surface.STRATA`; their population is the site
+# index written by `rdfeval surface`.
+#
+# FROZEN (2026-08-29).  These three numbers define the population every
+# per-stratum reading is made against; changing one invalidates the published
+# surface figures and every comparison drawn from them.  The evaluation budget
+# is `[campaign]` below, and that is what gets tuned.
 seed = 20260828
 # Regions drawn per stratum when the population allows it (consigne du
 # 2026-08-28).  A stratum with fewer sites contributes all it has.

@@ -232,7 +232,7 @@ def _draft_questions(triples, value, rng: random.Random) -> list[dict]:
 
 
 def run(config: dict, study: Study = STUDY) -> None:
-    rng = random.Random(config["sampling"]["seed"])
+    rng = random.Random(config["strata"]["seed"])
     max_tasks = config["userstudy"]["max_tasks"]
     group_key = study.group
     candidates = []

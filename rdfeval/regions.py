@@ -28,9 +28,7 @@ import json
 from .acquire import repo_dir
 from .analyze import analyze_source
 from .config import RESULTS_RAW, provenance
-from .sample import load_sample
 
-REGIONS_PATH = RESULTS_RAW / "regions.jsonl"
 
 
 def _functions(tree: ast.Module):
@@ -166,47 +164,3 @@ def _cat_counts(ops) -> dict:
     for op in ops:
         counts[op.category] = counts.get(op.category, 0) + 1
     return dict(sorted(counts.items()))
-
-
-def run(config: dict) -> None:
-    rcfg = config["regions"]
-    sample = load_sample()
-    out: list[dict] = []
-    for band, files in sample["sample"].items():
-        for f in files:
-            root = repo_dir(config, f["repository"])
-            path = root / f["path"]
-            try:
-                source = path.read_text(encoding="utf-8", errors="replace")
-            except OSError as e:
-                print(f"  ! {f['repository']}/{f['path']}: {e}")
-                continue
-            regs = extract_regions(source, rcfg)
-            for i, reg in enumerate(regs):
-                reg.update({
-                    "region_id": f"{f['repository'].replace('/', '__')}"
-                                 f"__{f['path'].replace('/', '_')}"
-                                 f"__{reg['qualname'].replace('.', '_')}",
-                    "repository": f["repository"],
-                    "commit": f["commit"],
-                    "path": f["path"],
-                    "band": band,
-                    "file_rdf_node_density": f["rdf_node_density"],
-                })
-                out.append(reg)
-    REGIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(REGIONS_PATH, "w") as fh:
-        fh.write(json.dumps({"provenance": provenance(config)}) + "\n")
-        for reg in out:
-            fh.write(json.dumps(reg, ensure_ascii=False) + "\n")
-    n_files = len({(r['repository'], r['path']) for r in out})
-    print(f"regions: {len(out)} regions from {n_files} files "
-          f"({sum(1 for r in out if r['kind'] == 'file')} whole-file)")
-
-
-def load_regions() -> list[dict]:
-    if not REGIONS_PATH.exists():
-        raise SystemExit("no regions; run `rdfeval regions` first")
-    rows = [json.loads(line) for line in REGIONS_PATH.read_text().splitlines()
-            if line.strip()]
-    return [r for r in rows if "region_id" in r]

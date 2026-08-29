@@ -1,9 +1,7 @@
-# Instructions du traducteur — étude 403 (langage entier × corpus entier)
+# Instructions du traducteur — l'étude du corpus
 
 Vous traduisez en **linked-data-python** (ldpy) des régions de code rdflib
-réel, tirées d'un échantillon stratifié par *type d'usage*. Ces instructions
-remplacent celles de l'étude 401 (§6 de [BRIEF.md](BRIEF.md)), qui ne
-visaient que la construction de graphes.
+réel, tirées d'un échantillon stratifié par *type d'usage*.
 
 **Ce qu'on cherche à savoir** — pour chaque construction du langage : sert-elle
 sur du code réel, où, combien de fois, et avec quel gain ? Une région que rien
@@ -12,35 +10,90 @@ ne couvre est un **résultat**, pas un échec. Ne contournez jamais : signalez.
 Fiches de référence : [`corpus/403`](../corpus/403-evaluation-absorption-complete.md)
 (le protocole), [`404`](../corpus/404-outillage-tirage-stratifie.md)
 (le tirage), [`405`](../corpus/405-oracle-de-lecture.md) (l'oracle
-de lecture).
+de lecture). Vous n'avez pas à les lire pour traduire : tout ce qui vous est
+nécessaire est ci-dessous.
 
 ---
 
-## 1. La référence du langage est exécutable — lisez-la, ne devinez pas
+## 1. Le langage, en entier, ici
 
-Toute la documentation de `../ldpy/docs/` est **transpilée, exécutée et ses
-assertions vérifiées par la suite de tests**. Chaque bloc `ldpy` que vous y
-lisez est donc vrai aujourd'hui. À l'inverse, ce que vous croyez savoir du
-langage par analogie avec Turtle ou SPARQL ne l'est pas.
+Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
+(~8 500 mots) que ces instructions imposaient autrefois. Elle est
+**engendrée**, pas recopiée : elle ne peut pas dériver du langage réel.
 
-À lire avant de traduire, dans cet ordre :
+<!-- BEGIN island-reference (generated: sync_language_reference.py) -->
 
-| page | ce qu'elle règle |
+**Déclarations**
+
+| forme | ce que c'est |
 |---|---|
-| `reference/language/index.md` | la liste complète des îlots — commencez ici |
-| `reference/language/terms.md` | IRI, littéraux, variables, IRI formatée |
-| `reference/language/declarations.md` | `@prefix`, `@base`, import de préfixes, portée de bloc |
-| `reference/language/graphs.md` | `g{ }`, nœuds vides |
-| `reference/language/current-graph.md` | `@graph`, `+{ }`, `-{ }` et ses jokers |
-| `reference/language/querying.md` | `m{ }`, `s{ }`, `.first()`, `.one()`, `.count()` |
-| `reference/language/bindings.md` | `@bindings`, templates, suffixe d'appel |
-| `reference/language/coercion.md` | ce que devient une valeur Python entrant dans un îlot |
-| `reference/language/lexical.md` | les trois règles de désambiguïsation et **les limites connues** |
-| `how-to/migrate-from-rdflib.md` | le tableau des réécritures mécaniques |
+| `@prefix ex: <IRI> .` | Binds `ex:` to a namespace IRI for the rest of the enclosing block. A prefix is lexical: it has no run-time object, and `ex:` on its own is never a value. Declaring it again in a deeper block shadows it, the way a Python name would. |
+| `@base <IRI> .` | Sets the base against which relative IRIs are resolved for the rest of the block, so that `<sensor/1>` means `<IRI>sensor/1`. |
+| `from MODULE import ex:, unit: as u:` | Imports prefixes declared by another module, optionally renaming them. The module is imported as usual; what travels is the prefix bindings, which have no value to import by ordinary means. |
+| `@graph EXPR \| @graph as NAME -> Graph` | Designates the current graph for the block — the one `+{ }`, `-{ }` and a receiver-less `m{ }` act on. `as NAME` creates a fresh graph and binds it to NAME; `global` and `nonlocal` widen the scope. |
+| `@bindings EXPR \| @bindings as NAME -> Bindings` | Designates the current bindings: the mapping that gives `?name` its value in the enclosing block. Any mapping will do, and `as NAME` creates an empty one. |
+| `for @bindings [as NAME] in ITER:` | Loops over an iterable of mappings, making each row the current bindings for the body. A `csv.DictReader` and the solutions of `m{ }` are both iterables of mappings, so both drive this loop. |
 
-En cas de doute sur une forme : **écrivez-la dans un fichier et transpilez-la**
-(`python -m ldpy fichier.ldpy`). Le transpileur est l'arbitre, pas votre
-souvenir de la documentation.
+**Termes**
+
+| forme | ce que c'est |
+|---|---|
+| `<IRI> -> URIRef` | An absolute IRI, or a relative one resolved against the `@base` in scope. |
+| `ex:local -> URIRef` | A prefixed name: the local part is appended to the IRI bound to `ex:`. Turtle's character set applies inside an island, so `o-pizza:topping` and `ex:café` are names here although neither is a legal Python expression. `ex:{expr}` computes the local part. |
+| `"..."@lang \| "..."^^dt -> Literal` | An RDF literal carrying a language tag or a datatype. The quoted part may be an f-string, and `{expr}` may supply the datatype itself. |
+| `?name \| $name -> Variable` | A SPARQL variable. In a pattern it is what gets matched and projected; in `g{ }` or `+{ }` it takes its value from the current bindings, and leaves the triple out when it has none. |
+| `f<...{expr}...> -> URIRef` | A formatted IRI: the braces interpolate as in an f-string, the result is percent-encoded and then resolved against `@base`. Encoding first is what keeps a space or a slash in a value from changing the IRI's structure. |
+| `f{expr} \| ?{expr} -> Node` | Coerces any Python value into an RDF term, by the coercion policy in scope. Two spellings of one operation: `?{ }` reads better in term position, `f{ }` beside `f<...>`. |
+| `_:{expr} -> BNode` | A blank node whose identity is its data: the same value gives the same node anywhere in the program, so two rows that share a key join without inventing an IRI for them. |
+
+**Graphes et graphe courant**
+
+| forme | ce que c'est |
+|---|---|
+| `g{ ... } -> Graph` | Builds an RDF graph from Turtle written in place. `{expr}` interpolates a Python value in term position, and each occurrence is evaluated once. The braces are an expression, so a `g{ }` goes anywhere a value goes — a default argument, a comprehension, a return. |
+| `+{ ... } [ (GRAPH) ]` | Adds the triples to the current graph. `?name` takes its value from the current bindings, and a triple with an unbound variable is dropped rather than written half-way. A trailing `(g)` names another receiver. |
+| `-{ ... } [ (GRAPH) ]` | Removes from the current graph every triple matching the pattern. An unbound variable is a wildcard here, not a hole: this is a SPARQL `DELETE WHERE`, not a list of triples to subtract. |
+
+**Lecture**
+
+| forme | ce que c'est |
+|---|---|
+| `m{ ... } -> Solutions` | Matches a basic graph pattern against the current graph, lazily. Iterating yields a bare term when one variable is projected and a tuple otherwise; `.one()`, `.first()`, `.count()` and `bool()` are the usual reductions. A `(graph)` suffix names another source. |
+| `s{ ... } -> Query` | A SPARQL query or update, parsed when the file is transpiled rather than at run time. `{expr}` in term position becomes an initial binding — never string pasting, so nothing here can be injected. Call it on a graph to run it; `.execute()` runs an update. |
+
+**Évaluation différée**
+
+| forme | ce que c'est |
+|---|---|
+| `e{ ... } -> Expr` | A deferred SPARQL expression. It is not evaluated where it is written, but against the bindings in force when the island holding it is instantiated — once per row of a `for @bindings` loop. `{python}` holes are evaluated where they are written. |
+| `e<...{?var}...> -> Expr` | A deferred IRI: `f<...>`'s interpolation, except that the holes are SPARQL expressions re-evaluated for each set of bindings. |
+
+*(Engendré depuis `ldpy/lsp/islanddoc.py` — la table que le survol de l'éditeur affiche, en anglais comme tout le code. `ldpy/tests/test_islanddoc.py` garantit qu'elle décrit **toutes** les sortes d'îlot et que chacun de ses liens tombe sur une ancre vivante de la documentation. Ne l'éditez pas à la main : `python scripts/sync_language_reference.py`.)*
+
+<!-- END island-reference -->
+
+Trois choses que le tableau ne dit pas et qui décident de la plupart des
+traductions :
+
+- **la règle d'adjacence.** Un îlot n'ouvre que si le sigil touche
+  l'accolade : `e{` ouvre, `e {` non ; `euler + 1` reste du Python. De même
+  `{ex:b2}` est un ensemble contenant une IRI, alors que `{ex : b2}` est un
+  dictionnaire. En cas de doute, écrivez la forme dans un fichier et
+  transpilez-la.
+- **un îlot est une expression.** `g{ … }` va partout où une valeur va :
+  argument par défaut, compréhension, `return`, lambda. `+{ }` et `-{ }`
+  sont des *instructions*, y compris en suite d'un `if` d'une ligne.
+- **le transpileur est l'arbitre.** `python -m ldpy fichier.ldpy` tranche
+  toute question de forme, et il tranche plus vite que la documentation. Ce
+  que vous croyez savoir par analogie avec Turtle ou SPARQL n'est pas fiable.
+
+Pour aller plus loin sur un point précis — et seulement alors — la
+documentation est à `../ldpy/docs/` : `reference/language/lexical.md` pour les
+trois règles de désambiguïsation et les limites connues,
+`how-to/migrate-from-rdflib.md` pour le tableau des réécritures mécaniques
+avec leurs pièges. Toute la documentation est transpilée, exécutée et ses
+assertions vérifiées par la suite de tests : ce qu'elle montre est vrai
+aujourd'hui.
 
 ---
 
@@ -112,10 +165,10 @@ Pièges connus, à ne pas reproduire :
 
 ---
 
-## 2 bis. Ce que le langage a gagné depuis la première vague (0.4.0)
+## 2 bis. Ce que le langage a gagné en 0.4.0
 
 Quatre changements, tous implémentés et testés. Ils rendent caduques
-certaines habitudes prises sur les vagues précédentes.
+certaines habitudes prises avant cette version.
 
 - **`ex:{?id}` s'instancie.** La partie locale d'un nom préfixé était la
   seule position de terme où une variable ne s'instanciait pas : elle rendait
@@ -170,7 +223,7 @@ VERDICT = run_pair(__file__)                     # compare les graphes du module
 
 ### Région qui LIT un graphe → égalité des valeurs produites
 
-Nouveau dans l'étude 403. Écrivez un **graphe d'entrée** `fixture.ttl` à côté
+Écrivez un **graphe d'entrée** `fixture.ttl` à côté
 de la paire ; il est parsé en un graphe frais pour chaque version.
 
 ```python
@@ -231,7 +284,7 @@ call suffix (g)   global/nonlocal modifier
 Une construction qui manque à cette liste est un signalement, pas une
 licence d'inventer : mettez-la en `translation_notes`.
 
-**Ce n'est pas une consigne de forme, et la vague du 2026-08-29 l'a montré.**
+**Ce n'est pas une consigne de forme, et la campagne du 2026-08-29 l'a montré.**
 Elle a écrit `nom préfixé`, `nom prefixe` et `prefixed name` pour une seule
 et même construction ; `suffixe d'appel (g)` à côté de `call suffix (g)` ;
 `littéral typé`, `litteral type` et `typed literal` ; `f<...>` à côté de
@@ -241,7 +294,7 @@ justes — mais elle ne peut rabattre que ce qu'elle a déjà vu. Écrivez les
 libellés **en anglais, sans accent, tels que ci-dessus**, en copiant depuis
 cette liste plutôt qu'en les retapant de mémoire.
 
-Classification de la traduction (inchangée depuis 401) :
+Classification de la traduction :
 `directly-expressible` · `minor-restructuring` · `awkward` ·
 `not-expressible` · `excluded`.
 

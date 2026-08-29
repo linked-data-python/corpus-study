@@ -15,25 +15,37 @@ domain diversity), filtered by explicit criteria on GitHub metadata (licence
 permitting snippet redistribution, activity, size, amount of Python, and
 exclusion of teaching material and of the library itself), pinned to exact
 commits in a version-controlled manifest, and cloned. Every Python file is analysed with an AST-based analyser that
-distinguishes actual RDF operations from incidental occurrences; files are
-stratified into RDF-density bands and sampled with a fixed seed. Inside
-sampled files, RDF-heavy functions are extracted as regions (whole files
-when function extraction would be misleading). Each region receives an LD
-Python counterpart — mechanically drafted, manually reviewed, and
-classified — whose semantic equivalence is established by executing both
-versions and comparing the resulting RDF graphs by isomorphism (never raw
-serialisation). Only equivalent pairs enter the quantitative comparison:
+distinguishes actual RDF operations from incidental occurrences. The analysis
+then locates **sites**: each occurrence of a recognised *kind of use* of
+RDFLib — a namespace defined in a function, a run of `add` calls sharing a
+subject, a one-step traversal, a literal SPARQL query, a computed datatype.
+Sites are drawn with a fixed seed, stratified by kind of use and capped per
+repository, and the function enclosing each drawn site becomes a **region**
+(the whole file when function extraction would be misleading). Each region
+receives an LD Python counterpart — mechanically drafted, manually reviewed,
+and classified — whose semantic equivalence is established by executing both
+versions: RDF isomorphism for a region that builds a graph, equality of the
+values produced for one that reads. Only equivalent pairs enter the
+quantitative comparison:
 surface size (LOC/tokens/chars/syntax nodes), RDF-specific complexity, and
 RDF/code-correspondence metrics (scaffolding tokens per triple, nesting per
 term, constructors per triple). All thresholds live in
 `config/evaluation.toml`; every result is stamped with the pipeline
 revision and configuration version.
 
-The complete selection funnel — how 1 188 discovered candidates become 60
-analysed repositories and 140 validated pairs, what is excluded at every level
-(repository, file, region, pair), which criteria are declared but not enforced,
-and which are missing — is documented in [funnel.md](funnel.md), with a
-per-repository table in `results/summary/candidates.csv`.
+The complete funnel — how 1 187 discovered candidates become 376 measured
+repositories, 29 231 located sites, 1 196 drawn regions and the pairs that
+survive, with every exclusion criterion at every level (repository, file,
+region, pair) and what each one removes — is documented in
+[funnel.md](funnel.md), with a per-repository table in
+`results/summary/candidates.csv`.
+
+**The draw is frozen**: 100 regions per stratum, seed 20260828, at most 4 per
+repository. What is capped is the *evaluation budget* —
+`campaign.max_pairs_per_stratum = 20`, the highest count any stratum had
+actually reached. Past that, one more pair of the same stratum says little
+that the previous twenty did not, and the effort belongs to a stratum that is
+short.
 
 ## Pipeline stages
 
@@ -42,51 +54,43 @@ python -m rdfeval discover    # query GitHub/Wheelodex -> manifest/discovery.jso
 python -m rdfeval select      # inclusion criteria + commit pinning -> manifest/repositories.jsonl
 python -m rdfeval acquire     # clone at pinned commits -> corpus/repos/ (gitignored)
 python -m rdfeval analyze     # AST analysis -> results/raw/analysis/, files_index.jsonl
-python -m rdfeval sample      # stratified seeded sampling -> results/raw/sample.json
-python -m rdfeval regions     # region extraction -> results/raw/regions.jsonl
-python -m rdfeval translate   # scaffold examples/<band>/<id>/ (draft translations)
-#   -- human review: finalise translated.ldpy, driver.py, meta.json --
+python -m rdfeval surface     # shapes of the code -> surface.json + sites.jsonl,
+                              #     one record per located occurrence of a
+                              #     stratum shape (29 231 sites, 14 strata)
+python -m rdfeval strata      # seeded draw, 100 regions per stratum, capped at
+                              #     4 per repository -> results/raw/strata.json
+                              #     + examples/<stratum>/<id>/ with drafts
+#   -- translation by batches: see INSTRUCTIONS.md --
 python -m rdfeval validate    # drivers -> results/raw/validation.jsonl
 python -m rdfeval compare     # pair metrics -> results/raw/pairs.jsonl, summary/pairs.csv
-python -m rdfeval aggregate   # stats + figures -> results/summary/
+python -m rdfeval aggregate   # stats + figures, APPROVED pairs only
 python -m rdfeval audit       # analyser precision/recall audit (hand-judged)
 python -m rdfeval userstudy   # draft task material -> ../user_study/config/
 python -m rdfeval all         # the offline stages (analyze..userstudy)
 ```
 
-### The second study: the whole language against the whole corpus (403)
-
-The stages above answer *how much of the corpus the construction half of the
-notation absorbs*, sampling files by RDF density. A second study
-([design record corpus/403](../corpus/403-evaluation-absorption-complete.md))
-asks the other question — for each **kind of use** of rdflib, is the
-construction the language proposes for it useful, where, how often — and so
-samples by *stratum of use*, not by band:
-
-```
-python -m rdfeval surface     # ... also writes results/raw/sites.jsonl:
-                              #     one record per located occurrence of a
-                              #     stratum shape (29 232 sites)
-python -m rdfeval strata      # seeded draw, 100 regions per stratum, capped
-                              #     at 4 per repository -> results/raw/strata.json
-                              #     + examples403/<stratum>/<id>/ with drafts
-#   -- translation by batches: see INSTRUCTIONS_403.md --
-python -m rdfeval validate    # (as above)
-```
+There is **one** study. It used to be two — an earlier draw sampled whole
+files by RDF density and asked only how much of the *construction* half of
+the notation the corpus absorbs — and the two shared this pipeline behind a
+`--study` flag. The stratified draw supersedes it on every axis (1 196
+regions over 242 repositories against 163 over 17), measures exactly the same
+metrics, and answers a wider question, so the older one was removed on
+2026-08-29. It is in the git history if its numbers are ever needed again.
 
 Driving the campaign:
 
 ```
-python -m rdfeval check examples403/<stratum>/<id>   # transpile + run the driver
-python -m rdfeval status --study 403 [--run-checks]  # where the campaign stands
-python -m rdfeval review --study 403                 # the human review, pair by pair
-python -m rdfeval compare --study 403                # pair metrics (final pairs)
-python -m rdfeval aggregate --study 403              # APPROVED pairs only
-python -m rdfeval article --study 403                # one publishable example per stratum
-python scripts/make_batches.py --per-stratum 6       # plan what is LEFT to translate
+python -m rdfeval check examples/<stratum>/<id>   # transpile + run the driver
+python -m rdfeval status [--run-checks]  # where the campaign stands
+python -m rdfeval review                 # the human review, pair by pair
+python -m rdfeval compare                # pair metrics (final pairs)
+python -m rdfeval aggregate              # APPROVED pairs only
+python -m rdfeval article                # one publishable example per stratum
+python scripts/make_batches.py           # plan what is LEFT, up to the
+                                         #   per-stratum budget (20)
 ```
 
-Translators follow [INSTRUCTIONS_403.md](INSTRUCTIONS_403.md) (what to
+Translators follow [INSTRUCTIONS.md](INSTRUCTIONS.md) (what to
 translate into what) and [AGENT_BATCH.md](AGENT_BATCH.md) (how a batch is
 run and verified). The two machine checks are pre-conditions: a pair that
 fails either never reaches a reviewer. **Only approved pairs enter the

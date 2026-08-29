@@ -4,7 +4,7 @@ The detector's precision underpins every downstream number, so it is
 itself measured rather than assumed.  This stage draws a seeded random
 sample of detected operations across the whole corpus, writes each with its
 source line and enough context to be judged by a human, and re-checks the
-control files of the sampling stage.
+control files of the draw.
 
     results/raw/audit_sample.jsonl   operations to inspect (+ verdict slot)
     results/summary/audit.json       counts once verdicts are filled in
@@ -95,7 +95,7 @@ def run(config: dict, sample_size: int = 120) -> None:
     rows = sorted((r for r in load_files_index()
                    if r["rdf_ops"] > 0 and not r["error"]),
                   key=lambda r: (r["repository"], r["path"]))
-    seed = config["sampling"]["seed"]
+    seed = config["strata"]["seed"]
     rng = random.Random(seed)
     verdicts = load_existing_verdicts()
 

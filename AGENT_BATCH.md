@@ -1,7 +1,7 @@
-# Protocole d'un lot de traduction (étude 403)
+# Protocole d'un lot de traduction (étude du corpus)
 
 Ce fichier est le contrat opérationnel d'un agent traducteur. Les règles de
-*traduction* sont dans [INSTRUCTIONS_403.md](INSTRUCTIONS_403.md) — lisez-le
+*traduction* sont dans [INSTRUCTIONS.md](INSTRUCTIONS.md) — lisez-le
 en entier avant de commencer. Ici : ce que vous éditez, comment vous
 vérifiez, et ce que vous rendez.
 
@@ -35,7 +35,7 @@ imports du projet, une classe, une constante. **163 régions sur 1 196 n'ont
 même pas de graphe visible** (il était lié par `self.graph` ou par un
 paramètre non annoté).
 
-Le remède est celui de l'étude 401 : un **module de contexte** à côté de la
+Le remède est un **module de contexte** à côté de la
 paire, importé par `original.py`, avec un en-tête qui dit d'où il vient.
 
 ```python
@@ -58,7 +58,7 @@ Reproduisez le contexte **le plus fidèlement possible** au dépôt d'origine
 
 1. **Lire** `meta.json` (provenance, strates, oracle), `original.py`, puis le
    brouillon `translated.ldpy`.
-2. **Traduire** en suivant INSTRUCTIONS_403.md — la construction la plus
+2. **Traduire** en suivant INSTRUCTIONS.md — la construction la plus
    spécifique, aucune refactorisation.
 3. **Écrire le pilote.** Si `meta.oracle == "values"`, la région lit :
    remplissez `fixture.ttl` (plusieurs solutions, le cas zéro solution, du
@@ -67,7 +67,7 @@ Reproduisez le contexte **le plus fidèlement possible** au dépôt d'origine
    la région est une fonction.
 4. **Vérifier** :
    ```
-   ~/.venvs/ldpy/bin/python -m rdfeval check examples403/<strate>/<region_id>
+   ~/.venvs/ldpy/bin/python -m rdfeval check examples/<strate>/<region_id>
    ```
    Transpilation puis pilote. Itérez jusqu'à `OK`.
 5. **Renseigner `meta.json`** :
@@ -76,7 +76,7 @@ Reproduisez le contexte **le plus fidèlement possible** au dépôt d'origine
    - `classification`: `directly-expressible` | `minor-restructuring` |
      `awkward` | `not-expressible` | `excluded` ;
    - `constructions`: la liste des îlots employés, dans le vocabulaire de
-     INSTRUCTIONS_403 §4 ;
+     INSTRUCTIONS.md §4 ;
    - `translation_notes`: ce qui a demandé un choix, et **ce qui manque** si
      une construction ne couvre pas le cas ;
    - `article_candidate`: `true` si le gain se voit en trois lignes.

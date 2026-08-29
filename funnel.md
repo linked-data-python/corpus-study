@@ -6,12 +6,12 @@ critères d'exclusion**, à chaque niveau (dépôt, fichier, région, paire), av
 ce que chacun retire.
 
 Quatre étages : **dépôt** (§ 1), **fichier** (§ 2), **région** — et il y en
-a deux, celui de l'étude 401 par densité (§ 4, figé) et celui de l'étude 403
+a deux, celui de le premier tirage par densité (§ 4, figé) et celui de l'étude du corpus
 par strate d'usage (§ 5, vivant) — puis **paire mesurée** (§ 5.3).
 
 Chiffres des dépôts et fichiers : vague 2 du 2026-08-28, critères B7,
 `config_version` 1.0.0. Chiffres du tirage stratifié et de la campagne :
-2026-08-29, graine 20260828 (`rdfeval status --study 403` les régénère).
+2026-08-29, graine 20260828 (`rdfeval status` les régénère).
 Tableau par dépôt candidat :
 [`results/summary/candidates.csv`](results/summary/candidates.csv).
 
@@ -222,13 +222,13 @@ traductions déjà revues restent valides.
 > 15 dépôts au lieu de 141 et 16 — mais il faut trancher : les retirer, ou les
 > garder en les déclarant comme code de bibliothèque.
 
-## 5. Niveau région — étude 403 (tirage par strate d'usage)
+## 5. Niveau région — étude du corpus (tirage par strate d'usage)
 
 C'est l'étage vivant. Il ne reprend rien de l'étage 401 ci-dessus : autre
 population (les 376 dépôts mesurés, pas les 60 de la vague 1), autre unité de
 tirage (le **site** d'usage, pas le fichier), autre critère (le **type
 d'usage**, pas la densité). Les deux arbres d'exemples restent séparés
-(`examples/` contre `examples403/`) et leurs agrégats ne se mélangent jamais
+(`examples/` contre `examples/`) et leurs agrégats ne se mélangent jamais
 sous un même chiffre.
 
 ### 5.1 Du dépôt au site
@@ -291,7 +291,7 @@ Deux déduplications, et elles expliquent tous les écarts du tableau :
 | **TOTAL** | **29 231** | — | **1 342** | **1 196** | — | **131** |
 
 ¹ plafond théorique = dépôts × 4. « Crédit » = régions créditées à la strate ;
-« classée » = régions **rangées** dans `examples403/<strate>/`, une région
+« classée » = régions **rangées** dans `examples/<strate>/`, une région
 multi-strates n'étant rangée qu'une fois. D'où 1 342 crédits pour
 **1 196 régions distinctes** — 124 appartiennent à deux strates ou plus (une à
 cinq).
@@ -334,12 +334,12 @@ jamais.
 Pas encore, et c'est un point à trancher plutôt qu'à laisser dériver. Les deux
 arbres sont **disjoints** (7 identifiants de région en commun sur 163 et
 1 196, par coïncidence de nom de fonction) et mesurent **exactement les mêmes
-métriques** : les colonnes de `pairs.csv` et de `pairs_403.csv` sont
-identiques, au `band` près remplacé par `stratum`/`strata`. L'étude 403 peut
-donc reprendre les affirmations de l'étude 401, et sur une bien meilleure
+métriques** : les colonnes de `pairs.csv` et de `pairs.csv` sont
+identiques, au `band` près remplacé par `stratum`/`strata`. L'étude du corpus peut
+donc reprendre les affirmations de le premier tirage, et sur une bien meilleure
 population :
 
-| | `examples/` (401) | `examples403/` (403) |
+| | `examples/` (401) | `examples/` (403) |
 |---|---:|---:|
 | régions | 163 | **1 196** |
 | paires mesurées | 141 | 117 |
@@ -366,7 +366,7 @@ affirmations — **c'est la revue humaine qui est le verrou**, pas l'outillage.
    que l'arbre 401 sorte de l'article (§ 5.4).
 2. ~~**Relever les quotas d'échantillonnage**~~ — fait autrement : l'étude
    403 (§ 5) tire 1 196 régions dans 242 dépôts, contre 163 dans 17. Le point
-   reste valide pour l'étude 401, qui n'est pas rejouée.
+   reste valide pour le premier tirage, qui n'est pas rejouée.
 3. ~~**Plafonner par dépôt dans le tirage**~~ — fait en 403 :
    `max_per_repo_per_stratum = 4`. Le plafond **par organisation** n'existe
    toujours pas, et c'est lui qui manque : `prrvchr/*` et `RDFLib/*` pèsent
