@@ -16,7 +16,11 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@graph", "+{ }", "interpolation {expr}"],
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
     "piege 2 (add_in_loop) : 'rows' est un iterable de TUPLES (entity, raw), pas de mappings -- 'for @bindings in rows:' ne s'applique pas. Garde 'for entity, raw in rows:' Python ordinaire ; le seul .add() isole devient '@graph ds.graph(rdflib.URIRef(key))' (designe le graphe nomme EXISTANT obtenu du Dataset, forme documentee : '@graph <expr>' accepte une expression Python arbitraire, pas seulement un nom simple -- verifie empiriquement) + '+{ }', avec entity/raw/PRED interpoles en {expr} (variables Python ordinaires, aucun piege ex:{?id} puisqu'aucune n'est un '?var').",
     "'ds.update(f\"INSERT DATA {{ GRAPH <...> {{ ... }} }}\")' (stratum sparql_interpolated, egalement porte par cette region) n'a PAS ete traduit en s{ }.execute() : hors du mandat de ce lot (add_in_loop) et non trivial ici (cible = rdflib.Dataset avec clause GRAPH explicite, pas le @graph courant d'un simple Graph ; s{ } documente son support des UPDATE et de l'interpolation en position de terme mais uniquement contre un Graph). Laisse en Python f-string tel quel -- a reprendre par le lot sparql_interpolated.",
@@ -37,5 +41,11 @@
     "add_in_loop",
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_seed_promoted",
+    "diffs": [],
+    "error": null
+  }
 }

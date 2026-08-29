@@ -45,7 +45,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="status: also run the two machine checks on "
                              "every pair marked final")
     parser.add_argument("--study", choices=("401", "403"), default="401",
-                        help="which study validate/compare/aggregate operate "
+                        help="which study validate/compare/aggregate/userstudy "
+                             "operate "
                              "on (401: density bands; 403: strata of use)")
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
@@ -111,7 +112,7 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit(check_mod.main(args.targets))
         elif stage == "userstudy":
             from . import userstudy
-            userstudy.run(config)
+            userstudy.run(config, study)
 
     if args.stage == "all":
         for stage in ALL_STAGES:

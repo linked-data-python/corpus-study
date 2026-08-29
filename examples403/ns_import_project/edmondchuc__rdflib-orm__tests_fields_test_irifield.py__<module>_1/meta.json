@@ -18,7 +18,7 @@
   "translation_status": "final",
   "classification": "minor-restructuring",
   "constructions": [
-    "from \u2026 import p:",
+    "from … import p:",
     "@prefix",
     "prefixed name",
     "IRI"
@@ -28,7 +28,7 @@
     "the two DefinedNamespace-alias cases documented for this stratum (Display-Lab/scaffold's PSDO, CPO) do not arise here: RDF.type/RDF.value/OWL.Thing/BASE_URI.test are plain Namespace attribute access, readable-name == local-name, so @prefix and the project import are both faithful.",
     "rdf_ops/categories count 21 namespace_term + graph_ctor/graph_read/term_constructor across FIVE separate pytest test_* functions, none invoked by a bare exec of the file (pytest discovers and calls them; module-state comparison sees zero graphs and empty stdout on both sides regardless of translation correctness). driver.py is therefore custom, not the generic run_pair(entry=None): it calls each test_* in file order on both sides and compares outcome (completed vs raised, and the exception type) plus stdout per call -- the tests' own internal asserts (g.value(...) == URIRef('123'), pytest.raises(...)) do the isomorphism-equivalent checking. Negative control run: swapping base:test for base:wrong in one read makes test_irifield_convert_to_rdf disagree (original ok vs translated AssertionError), confirming the driver is sensitive to the translation, not just to the shim.",
     "CONFIRMED upstream fragility, reproduced identically rather than fixed: Database.databases is a shared class attribute never reset between the shim's tests, and the first two tests (test_required_field_raises, test_irifield_create) never call Database.set_db() themselves. Run standalone -- `pytest tests/fields/test_irifield.py` against the checked-out repo at corpus/repos/edmondchuc__rdflib-orm -- BOTH raise AttributeError: 'NoneType' object has no attribute 'base_uri' instead of the FieldError/success their bodies read as if expected; they only pass inside the full suite because an earlier test file happens to set the 'default' Database first. The driver resets Database.databases before each side's five-call run (both sides import the same cached orm_context module, so Database is literally the same class object) and reproduces the AttributeError identically on both sides -- this is the region's own bug, not a translation defect, and the protocol says not to fix it.",
-    "classification minor-restructuring, not directly-expressible: the import block is restructured (BASE_URI's own import line folds into the models/base: import; two @prefix lines are inserted) to give from \u2026 import p: and @prefix each their own coherent block -- a straight line-for-line substitution was not possible once two different namespace sources needed two different constructions."
+    "classification minor-restructuring, not directly-expressible: the import block is restructured (BASE_URI's own import line folds into the models/base: import; two @prefix lines are inserted) to give from … import p: and @prefix each their own coherent block -- a straight line-for-line substitution was not possible once two different namespace sources needed two different constructions."
   ],
   "draft_sha": "23e2446748ee9eaa",
   "provenance": {
@@ -41,5 +41,11 @@
     "ns_import_project"
   ],
   "oracle": "isomorphism",
-  "article_candidate": true
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "custom:pytest-functions",
+    "diffs": [],
+    "error": null
+  }
 }

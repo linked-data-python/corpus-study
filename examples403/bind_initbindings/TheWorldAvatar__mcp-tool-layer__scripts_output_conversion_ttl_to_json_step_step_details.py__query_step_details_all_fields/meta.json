@@ -15,7 +15,14 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "s{ }", "call suffix (g)", "interpolation {expr}", "prefixed name", "variable"],
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
     "Both queries bind `?S` via `initBindings={\"S\": URIRef(step_uri)}` and neither PROJECTS ?S (q_props selects ?p ?o ?olabel; q_label selects ?label) -- the strate's 'not projected' case, so the target is a term interpolated directly in the pattern, per the correspondence table and querying.md's `SELECT ?s WHERE { ?s a {cls} }` example. What makes this region worth flagging: `?S` never itself occupies a term slot in the WHERE clause -- the original code instead writes a SEPARATE pattern variable `?s` and adds `FILTER(?s = ?S)`, because a raw Python value cannot be spliced directly into a plain query-text string at a term position without string formatting (which is exactly what INSTRUCTIONS_403 SS2 forbids reproducing). Since `?s` is used nowhere else in either query (not projected, not referenced a second time), `FILTER(?s = ?S)` + initBindings is EXTENSIONALLY the same WHERE clause as substituting the constant directly at `?s`'s one occurrence: `{URIRef(step_uri)} ?p ?o . FILTER(?p != rdf:type) OPTIONAL { ?o rdfs:label ?olabel }` for q_props, `{URIRef(step_uri)} rdfs:label ?label` for q_label -- both the variable ?s AND the FILTER(?s = ?S) indirection disappear together. This is notation-only (same WHERE, same solutions), not a refactor: verified by the driver's neighbour (ex:other_step, same predicates as ex:step1 under a different subject) not leaking into either step's results.",
     "URIRef(step_uri) rather than bare {step_uri}: step_uri is a plain str parameter, and node()'s default coercion turns a bare str into a Literal (coercion.md), which would never match a URIRef subject in the graph -- silently returning zero rows instead of raising. Wrapping it in URIRef(...), exactly as the original code already does for its initBindings value, makes node() pass the term through unchanged, matching the original semantics exactly.",
@@ -35,5 +42,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:query_step_details_all_fields",
+    "diffs": [],
+    "error": null
+  }
 }

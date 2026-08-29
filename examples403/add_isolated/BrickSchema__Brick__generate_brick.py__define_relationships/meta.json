@@ -15,7 +15,13 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}", "prefixed name"],
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
     "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref",
     "rdf:type aliases rendered as Turtle `a`: A",
@@ -35,5 +41,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:define_relationships",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -21,7 +21,13 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}", "prefixed name"],
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
     "prefixes: RDF->rdf, OWL->owl, RDFS->rdfs, XSD->xsd",
     "7 isolated .add() calls across 3 different graphs (onto, align, clean_kb) inside two loops plus one rewrite loop. Each becomes @graph <var> + +{ }, re-declaring @graph whenever the site switches graph (block-scope allows redeclaring @graph mid-suite, takes effect from that line to the end of the enclosing suite per declarations.md).",
@@ -40,5 +46,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "output-files",
+    "diffs": [],
+    "error": null
+  }
 }

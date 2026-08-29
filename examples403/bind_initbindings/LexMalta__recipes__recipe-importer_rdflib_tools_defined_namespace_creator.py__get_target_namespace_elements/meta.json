@@ -12,7 +12,14 @@
   "categories": {},
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "s{ }", "call suffix (g)", "interpolation {expr}", "prefixed name", "variable"],
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
     "Two separate rdflib mechanisms in one call site, both belong to this stratum but translate differently. (1) `initNs=namespaces` (a dict of DCTERMS/OWL/RDFS/SKOS built only to feed initNs) is exactly 'the prologue inherited from @prefix': the dict, and the now-unused `from rdflib.namespace import DCTERMS, OWL, RDFS, SKOS` import, disappear, replaced by @prefix dcterms:/rdfs:/skos: at file scope (OWL dropped too -- it was never used inside the query text, only carried in the initNs dict). (2) The FILTER's `STRSTARTS(STR(?s), \"xxx\")` is not bound through initBindings at all: the original assembles it with `.replace(\"xxx\", target_namespace)`, a textual splice into the quoted string literal -- the exact `sparql_interpolated` trap INSTRUCTIONS_403 SS2 warns against reproducing. Its correct address in s{ } is unrelated to the projected/non-projected question the strate's initBindings guidance turns on (STRSTARTS's second argument is not a SPARQL variable at all): it is simply `FILTER STRSTARTS(STR(?s), {target_namespace})`, {expr} in term (function-argument) position, which the querying.md example already covers for FILTER calls.",
     "meta.oracle corrected from the pipeline default \"isomorphism\" to \"values\": the automated categoriser recorded rdf_ops=0 / categories={} for this region (it evidently does not recognise `g.query(q, initNs=...)` when q is built through a `.replace()` chain rather than passed as a literal), so the pipeline's reads-heuristic (translate.py) never set the fixture-driven driver template. The region unambiguously reads a graph and returns computed values (elements, elements_strs); fixture.ttl and driver.py were written by hand against the reading oracle (corpus/405): several solutions across all three OPTIONAL branches (dcterms:description / rdfs:comment / skos:definition), one in-namespace member with none of the three (str(None) survives the OPTIONAL's unbound ?def on both sides), a zero-solution namespace, and two neighbours that must NOT match for two different reasons (wrong namespace; right namespace but no `a` triple at all).",
@@ -30,5 +37,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:get_target_namespace_elements",
+    "diffs": [],
+    "error": null
+  }
 }

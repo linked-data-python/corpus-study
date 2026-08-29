@@ -12,7 +12,13 @@
   "categories": {},
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "s{ }", "call suffix (g)", "prefixed name", "variable"],
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
     "The canonical sparql_literal case: a static, unparametrised query text with its own PREFIX block, assigned to a module constant and passed whole to g.query(). The module constant QUDT_QUERY9 disappears -- its text becomes the s{ } island directly at the g.query() call site, and the four PREFIX lines (BASF_EC_RaMPO, owl, rdfs, rdf) move out of the query text into @prefix declarations at module scope, inherited into the island's prologue (querying.md). Single island in the function, so the call suffix s{ ... }(g) was used rather than a @graph declaration (same threshold as the acquirium remove/_apply_graph_write precedent: a declaration would cost a line to save a parenthesis).",
     "The query text itself -- two UNION branches, two owl:unionOf/rdf:rest*/rdf:first property paths, an OPTIONAL, five FILTERs -- is copied verbatim into the island with no rewriting: s{ } is all of SPARQL, so nothing here needed simplifying to fit. Its only syntactic risk is the ambiguity between a SPARQL group and an {expr} interpolation, and since none of this query's { ... } blocks are also valid Python expressions, none of them are misread; transpiling this file is itself the demonstrated proof (rdfeval check transpiles before it runs the driver).",
@@ -30,5 +36,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:run_query",
+    "diffs": [],
+    "error": null
+  }
 }

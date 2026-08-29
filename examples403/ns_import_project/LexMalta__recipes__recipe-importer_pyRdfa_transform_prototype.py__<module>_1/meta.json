@@ -17,7 +17,7 @@
   "translation_status": "final",
   "classification": "minor-restructuring",
   "constructions": [
-    "from \u2026 import p:",
+    "from … import p:",
     "@prefix",
     "prefixed name",
     "@graph",
@@ -28,7 +28,7 @@
     "SAME split as the edmondchuc/rdflib-orm region in this stratum, confirming it is not a one-off: `ns_rdf` (bound a few lines above, `from rdflib import RDF as ns_rdf` when rdflib>=3.0.0, which is what actually executes against the pinned 7.2.1) comes from rdflib itself -- not a project module, cannot be given a `__namespaces__` export, so it stays `@prefix nsrdf: <...>` at module scope. The legacy `else: from rdflib.RDF import RDFNS as ns_rdf` branch is left completely untouched (dead on rdflib>=3.0.0, but rewriting or dropping it would be refactoring the region's own logic, not translating it).",
     "relative import specifically: `from .. import ns_rdfa` additionally cannot even resolve standalone -- verified, `ImportError: attempted relative import with no known parent package` when the region is exec'd as a top-level script (both run_pair's _exec_python/_exec_ldpy always do this). Restoring the binding for original.py therefore means changing the import's SOURCE MODULE (relative -> the shim), same discipline as replacing a broken absolute import; the name `ns_rdfa` itself is untouched.",
     "namespace_term: 3 (ns_rdfa['Pattern'], ns_rdfa['copy'], and the doubled-but-identical ns_rdf['type']) all become prefixed names (nsrdfa:Pattern, nsrdfa:copy, nsrdf:type) -- rdflib's [...] subscript notation and ldpy's colon notation denote the identical URIRef, verified by the driver.",
-    "triple_add: 1 -- the single `graph.add((x,p,y))` on the function's own graph parameter is add_isolated's idiom even though this region's stratum is ns_import_project: `@graph graph` + `+{ {x} {p} {y} }`. INSTRUCTIONS_403 \u00a72 forbids leaving a bare .add() where +{ } covers the case, and this one is a plain fully-bound single-triple add with nothing else going on.",
+    "triple_add: 1 -- the single `graph.add((x,p,y))` on the function's own graph parameter is add_isolated's idiom even though this region's stratum is ns_import_project: `@graph graph` + `+{ {x} {p} {y} }`. INSTRUCTIONS_403 §2 forbids leaving a bare .add() where +{ } covers the case, and this one is a plain fully-bound single-triple add with nothing else going on.",
     "graph_read: 2 (the two graph.triples(...) calls) and the membership test `(PR, nsrdf:type, Prototype) in graph` are deliberately left as plain rdflib calls, NOT forced into m{ }/trav_* islands: this region's only assigned stratum is ns_import_project, and -- more to the point -- `to_remove`, the set collecting triples for the final batch removal, is a plain Python set of already-fully-bound tuples, not a live graph; the corpus's own rdf_ops categorization agrees (triple_add: 1, no add/remove count for to_remove.add(...) or graph.remove(t)). Making to_remove a Graph so that -{ }/+{ } could apply to it would be restructuring a bookkeeping variable's TYPE purely to fit the island syntax onto something the categorization does not even count as an RDF op -- out of scope for this region, noted rather than forced.",
     "classification minor-restructuring, not directly-expressible: same reason as the sibling edmondchuc region -- two different namespace sources (one project-owned, one rdflib's own) forced two different constructions in the same import block, plus the @graph/+{ } substitution for the one real add."
   ],
@@ -43,5 +43,11 @@
     "ns_import_project"
   ],
   "oracle": "isomorphism",
-  "article_candidate": true
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:handle_prototypes",
+    "diffs": [],
+    "error": null
+  }
 }

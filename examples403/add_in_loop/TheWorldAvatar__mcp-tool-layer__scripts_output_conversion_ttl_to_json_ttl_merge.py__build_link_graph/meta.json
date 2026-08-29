@@ -18,7 +18,11 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "@graph", "+{ }"],
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }"
+  ],
   "translation_notes": [
     "prefixes: ONTOSYN->ontosyn, ONTOMOPS->ontomops, ONTOSPECIES->ontospecies, RDF->rdf, RDFS->rdfs",
     "piege 2 (add_in_loop): les quatre boucles de la region iterent sur g.subjects(...)/g.objects(...)/g.triples(...), donc sur des termes ou des 3-uplets, jamais des mappings -- 'for @bindings in' ne s'applique a aucune d'elles. Garde des boucles Python ordinaires ; chaque .add() isole devient un +{ } sous un seul '@graph as lg' (idiome add_isolated repete a l'interieur des boucles, pas add_in_loop au sens de la strate).",
@@ -38,5 +42,11 @@
     "add_in_loop",
     "trav_one_step"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:build_link_graph",
+    "diffs": [],
+    "error": null
+  }
 }

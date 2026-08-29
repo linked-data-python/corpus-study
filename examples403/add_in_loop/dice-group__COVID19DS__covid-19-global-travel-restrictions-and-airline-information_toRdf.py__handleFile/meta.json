@@ -16,7 +16,12 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}"],
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
     "prefixes: prov->prov, cvdo->cvdo, ndice->ndice, virtrdf->virtrdf, geo->geo, dowl->dowl, XSD->xsd, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl",
     "'for @bindings in' NON utilise ici, deliberement, malgre 'reader' etant un iterable de mappings (chaque ligne CSV). Empiriquement verifie (voir scratchpad) : 'for @bindings as row in reader:' fait entrer CHAQUE valeur de la ligne dans un objet ldpy.runtime.Bindings via node(), donc row['x'] devient un rdflib.Literal des l'entree dans la boucle -- pas une lecture paresseuse au moment ou l'ilot lit '?x'. Or Literal('') != '' vaut True (Literal.__eq__ n'accepte pas un str nu) : la garde 'row[heading] != \"\"' du code original serait toujours vraie, cassee silencieusement. re.sub/.lower()/pycountry.countries.get(alpha_3=...) sur un Literal auraient aussi un comportement different d'un str. Cette region traite value-comme-donnee-Python ET value-comme-terme-RDF avec LA MEME variable dans la meme boucle (traitement par colonne generique 'for heading in row') : le coercement precoce de @bindings n'est pas sans risque ici. Garde 'for row in reader:' Python ordinaire ; aucun besoin de '@bindings' d'ailleurs, car chaque valeur ecrite dans +{ } passe deja par une variable Python explicite (dice, metapredicate, metaobject) avant l'ilot -- couverte par l'interpolation {expr} plutot que par un '?var' lie.",
@@ -35,5 +40,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

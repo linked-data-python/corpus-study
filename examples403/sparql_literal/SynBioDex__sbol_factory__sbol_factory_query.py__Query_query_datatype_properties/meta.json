@@ -12,7 +12,13 @@
   "categories": {},
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "@graph", "s{ }", "prefixed name", "variable"],
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
     "The two g.query(query) calls become two s{ } islands under one @graph self.graph (the function's only two islands, both on the same graph -- past the acquirium remove/_apply_graph_write threshold for preferring a block declaration over repeating the call suffix twice).",
     "class_uri is a plain str (callers pass str(row[0]) results), and the original query text splices it inside literal angle brackets: '<{}>.'.format(class_uri). s{ }'s {expr} interpolation substitutes a whole TERM via node() coercion, and node() turns a bare str into a plain Literal, not a URIRef -- that would silently change what the pattern matches. The correct, non-degraded spelling is {URIRef(class_uri)}: node() passes an already-URIRef term through unchanged (coercion.md), so this reproduces exactly what the SPARQL IRIREF '<...>' the original text built by hand meant. URIRef(class_uri) is safe here (migrate guide trap 2): no @base is in scope for s{ }, and class_uri is always an absolute IRI string in this codebase.",
@@ -30,5 +36,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:query_datatype_properties",
+    "diffs": [],
+    "error": null
+  }
 }
