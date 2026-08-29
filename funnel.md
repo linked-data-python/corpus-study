@@ -5,7 +5,13 @@ reprise — *que représente vraiment le corpus ?* — et il rassemble **tous le
 critères d'exclusion**, à chaque niveau (dépôt, fichier, région, paire), avec
 ce que chacun retire.
 
-Chiffres de la vague 2 (2026-08-28, critères B7 ; `config_version` 1.0.0).
+Quatre étages : **dépôt** (§ 1), **fichier** (§ 2), **région** — et il y en
+a deux, celui de l'étude 401 par densité (§ 4, figé) et celui de l'étude 403
+par strate d'usage (§ 5, vivant) — puis **paire mesurée** (§ 5.3).
+
+Chiffres des dépôts et fichiers : vague 2 du 2026-08-28, critères B7,
+`config_version` 1.0.0. Chiffres du tirage stratifié et de la campagne :
+2026-08-29, graine 20260828 (`rdfeval status --study 403` les régénère).
 Tableau par dépôt candidat :
 [`results/summary/candidates.csv`](results/summary/candidates.csv).
 
@@ -161,7 +167,7 @@ d'entre eux ont fourni des paires validées (`MKLab-ITI/prophet`,
 `maparent/virtuoso-python`, `openphacts/ops-search`,
 `lawlesst/vivo-rdflib-sparqlstore`), tous écartés pour inactivité depuis 2018.
 
-## 4. Niveau région, traduction, paire
+## 4. Niveau région — étude 401 (tirage par densité)
 
 **Cet étage date de la vague 1 et n'a pas été rejoué.** L'échantillon a été
 tiré des 60 dépôts d'alors, pas des 376 mesurés aujourd'hui ; les 151
@@ -213,26 +219,139 @@ traductions déjà revues restent valides.
 > 15 dépôts au lieu de 141 et 16 — mais il faut trancher : les retirer, ou les
 > garder en les déclarant comme code de bibliothèque.
 
-## 5. Ce qui reste à faire
+## 5. Niveau région — étude 403 (tirage par strate d'usage)
+
+C'est l'étage vivant. Il ne reprend rien de l'étage 401 ci-dessus : autre
+population (les 376 dépôts mesurés, pas les 60 de la vague 1), autre unité de
+tirage (le **site** d'usage, pas le fichier), autre critère (le **type
+d'usage**, pas la densité). Les deux arbres d'exemples restent séparés
+(`examples/` contre `examples403/`) et leurs agrégats ne se mélangent jamais
+sous un même chiffre.
+
+### 5.1 Du dépôt au site
+
+| étape | critère | où | reste |
+|---|---|---|---:|
+| dépôts au manifeste | § 1 | `select.py` | 444 |
+| **éligibles au tirage** | `snippet_ok` (licence republiable) **et** non élagué | `strata.py` | **385** |
+| fichiers de la strate conforme | § 2 | `corpus.py` | 5 190 |
+| **sites** | une occurrence localisée d'une forme de strate, 14 strates | `surface.py` → `results/raw/sites.jsonl` | **29 231** |
+
+Deux remarques sur ces 385, parce qu'elles ne se déduisent pas du § 1 :
+
+- le vivier du tirage est filtré sur la **licence**, pas sur les critères B7.
+  Neuf dépôts éligibles ne satisfont pas B7 (inactivité, taille) et
+  pourraient donc être tirés. **Aucune région n'en est venue** — l'écart est
+  latent, pas réalisé — mais il est là et vaut d'être aligné ;
+- un même emplacement de code est **site de plusieurs strates** : une suite
+  de `.add` dans une boucle en compte trois. Les 29 231 sites ne sont donc
+  pas 29 231 endroits distincts.
+
+### 5.2 Du site à la région
+
+`rdfeval strata`, graine **20260828**, cible **100 régions par strate**,
+plafond **4 par dépôt et par strate**.
+
+Pour chaque strate, dans l'ordre : les sites de la strate sont triés par
+`(dépôt, chemin, ligne)` — clé stable, donc reproductible — puis mélangés par
+`random.Random(20260828)`. On parcourt jusqu'à la cible en écartant un site
+dont le dépôt a déjà 4 régions dans cette strate, un fichier illisible, et un
+site dont la **région englobante** ne s'extrait pas. La région englobante est
+la fonction qui contient le site (`min_rdf_ops = 2`, `max_region_loc = 120`),
+ou **le fichier entier** quand les fonctions qualifiantes couvrent moins de
+la moitié des opérations RDF du fichier (`coverage_threshold = 0,5`) —
+extraire une région qui cache l'essentiel du travail RDF tromperait.
+
+Deux déduplications, et elles expliquent tous les écarts du tableau :
+
+1. **dans une strate**, deux sites de la même région ne donnent qu'une
+   région ;
+2. **entre strates**, une région déjà tirée est réutilisée et **créditée aux
+   deux** : elle sera traduite une fois et comptée dans chacune.
+
+| strate | sites | dépôts | crédit | classée | plafond¹ | finales |
+|---|---:|---:|---:|---:|---:|---:|
+| `ns_import_project` | 1 271 | 65 | 100 | 100 | 260 | 9 |
+| `ns_def_local` | 1 061 | 156 | 100 | 100 | 624 | 4 |
+| `add_isolated` | 5 053 | 220 | 100 | 98 | 880 | 10 |
+| `add_in_loop` | 3 646 | 208 | 100 | 85 | 832 | 9 |
+| `add_run_shared_subject` | 1 246 | 154 | 100 | 78 | 616 | 9 |
+| `remove` | 636 | 81 | 100 | 94 | 324 | 21 |
+| `trav_one_step` | 5 235 | 185 | 100 | 92 | 740 | 9 |
+| `trav_navigation` | 1 039 | 99 | 100 | 90 | 396 | 9 |
+| `trav_single_value` | 2 252 | 111 | 100 | 76 | 444 | 8 |
+| `trav_existence` | 261 | 43 | **89** | 72 | 172 | 9 |
+| `sparql_literal` | 884 | 99 | 100 | 95 | 396 | 7 |
+| `sparql_interpolated` | 140 | 21 | **53** | 49 | 84 | 10 |
+| `bind_initbindings` | 333 | 56 | 100 | 81 | 224 | 9 |
+| `coercion_datatype` | 6 174 | 242 | 100 | 86 | 968 | 8 |
+| **TOTAL** | **29 231** | — | **1 342** | **1 196** | — | **131** |
+
+¹ plafond théorique = dépôts × 4. « Crédit » = régions créditées à la strate ;
+« classée » = régions **rangées** dans `examples403/<strate>/`, une région
+multi-strates n'étant rangée qu'une fois. D'où 1 342 crédits pour
+**1 196 régions distinctes** — 124 appartiennent à deux strates ou plus (une à
+cinq).
+
+**Les deux strates sous la cible ne le sont pas faute de sites.**
+`trav_existence` a 261 sites dans 43 dépôts (plafond 172) et n'atteint que
+89 ; `sparql_interpolated` a 140 sites dans 21 dépôts (plafond 84) et
+n'atteint que 53. Dans les deux cas c'est le **nombre de régions englobantes
+distinctes** atteignables sous le plafond de 4 qui borne, pas la population :
+plusieurs sites tombent dans la même fonction. `undrawable_sites` vaut 0
+partout — aucun site n'a été perdu par illisibilité ou extraction impossible.
+
+Le tirage porte sur **242 dépôts** (sur 385 éligibles), au plus 38 régions
+d'un même dépôt toutes strates confondues (`jupyter-naas/abi`,
+`altunelyusuf/SemanticTechnologies`). 1 152 régions sont des fonctions,
+44 des fichiers entiers.
+
+### 5.3 De la région à la paire mesurée
+
+| étape | critère | reste |
+|---|---|---:|
+| régions tirées | § 5.2 | **1 196** |
+| brouillon mécanique | écrit pour **toutes** dès le tirage (`materialise = true`) | 1 196 |
+| **tentées** par un agent | par lots, strates les plus déficitaires d'abord | **154** |
+| non exprimables | le langage ne l'atteint pas — c'est un **résultat**, pas une perte | −18 |
+| non évaluables en isolation | dépendance absente (les deux catégories encore mélangées) | −19 |
+| malaisées / exprimables | classées `awkward` (1) ou `expressible` (116) | **117** |
+| **traduites, statut `final`** | traduction + pilote + équivalence prouvée | **131** |
+| paires mesurées | métriques calculées | 117 |
+| **approuvées** | revue humaine — **verrou : rien d'agrégé ne sort avant** | **0** |
+
+Couverture d'expressivité sur ce qui a pu être évalué : **116 / 135**.
+
+Les 1 042 régions non tentées gardent leur brouillon mécanique intact et se
+reprennent sans re-tirage : `strata` complète l'échantillon, il ne le refait
+jamais.
+
+## 6. Ce qui reste à faire
 
 1. **Trancher le sort des 44 paires `prophet`** (§ 4) avant de figer
    l'article.
-2. **Relever les quotas d'échantillonnage** et tirer une vague 2 de fichiers
-   avec `draw_wave` : le corpus est six fois plus grand, l'échantillon ne l'est
-   pas. C'est là, et pas dans la taille du corpus, que se gagne la puissance
-   statistique — l'unité d'analyse est la paire validée, et trois dépôts
-   fournissent aujourd'hui 103 des 141 paires.
-3. **Plafonner par dépôt et par organisation dans le tirage**, pas dans la
-   sélection : le risque n'est pas d'avoir huit dépôts d'un même compte dans le
-   corpus, il est d'en tirer les fichiers.
-4. **Séparer le recensement** plutôt que de jeter : `corpus.json` publie
+2. ~~**Relever les quotas d'échantillonnage**~~ — fait autrement : l'étude
+   403 (§ 5) tire 1 196 régions dans 242 dépôts, contre 163 dans 17. Le point
+   reste valide pour l'étude 401, qui n'est pas rejouée.
+3. ~~**Plafonner par dépôt dans le tirage**~~ — fait en 403 :
+   `max_per_repo_per_stratum = 4`. Le plafond **par organisation** n'existe
+   toujours pas, et c'est lui qui manque : `prrvchr/*` et `RDFLib/*` pèsent
+   chacun plusieurs dépôts.
+4. **Aligner le vivier du tirage 403 sur les critères B7** (§ 5.1) : il est
+   filtré sur la licence seule, neuf dépôts hors critères pourraient être
+   tirés. Sans effet à ce jour, mais latent.
+5. **Séparer les 19 « non évaluables »** (§ 5.3) en deux : paquet installable
+   par pip contre système réellement absent. Elles sont dans le même sac, et
+   l'article en tire une propriété du corpus qui pourrait n'être qu'une
+   propriété du venv.
+6. **Séparer le recensement** plutôt que de jeter : `corpus.json` publie
    désormais les totaux complets *et* ceux de la strate conforme. Les dépôts
    de cours sont une strate, pas un déchet.
-5. Refaire l'**audit de l'analyseur** (`rdfeval audit`) sur le corpus élargi :
+7. Refaire l'**audit de l'analyseur** (`rdfeval audit`) sur le corpus élargi :
    la précision (0,99) et le taux de manque (12 %) ont été mesurés sur la
    vague 1.
 
-## 6. Régénérer
+## 7. Régénérer
 
 ```bash
 python scripts/fetch_repo_stats.py       # métadonnées GitHub complètes (GraphQL, cache)
