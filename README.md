@@ -58,7 +58,7 @@ python -m rdfeval all         # the offline stages (analyze..userstudy)
 
 The stages above answer *how much of the corpus the construction half of the
 notation absorbs*, sampling files by RDF density. A second study
-([design record corpus/403](../DESIGN_CHOICES/corpus/403-evaluation-absorption-complete.md))
+([design record corpus/403](../corpus/403-evaluation-absorption-complete.md))
 asks the other question — for each **kind of use** of rdflib, is the
 construction the language proposes for it useful, where, how often — and so
 samples by *stratum of use*, not by band:
@@ -95,7 +95,7 @@ published aggregates**, which always say "n approved of m translated".
 The strata overlap by design, so a region drawn for several is translated once
 and credited to each. Regions that **read** a graph are proved equivalent not
 by isomorphism but by the equality of the values both versions produce from a
-`fixture.ttl` input graph ([corpus/405](../DESIGN_CHOICES/corpus/405-oracle-de-lecture.md)).
+`fixture.ttl` input graph ([corpus/405](../corpus/405-oracle-de-lecture.md)).
 Current draw: **1 196 regions over 242 repositories, 14 strata** — 777 proved
 by isomorphism, 419 by values.
 
@@ -224,3 +224,10 @@ of this pipeline, config/metrics versions). Re-running `sample` with the
 same corpus, config and seed reproduces the sample; `manifest/` pins the
 corpus itself. Raw data live under `results/raw/`, derived summaries under
 `results/summary/`.
+
+## Design records
+
+Every non-trivial choice in this repository is written down, one file per
+decision, in the [`pilotage`](https://github.com/linked-data-python/pilotage) repository. Comments and docs
+cite them by identifier — `ldpy/024`, `vscode/103` — which resolves to
+[`design/`](https://github.com/linked-data-python/pilotage/tree/main/design).

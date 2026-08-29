@@ -9,9 +9,9 @@ visaient que la construction de graphes.
 sur du code réel, où, combien de fois, et avec quel gain ? Une région que rien
 ne couvre est un **résultat**, pas un échec. Ne contournez jamais : signalez.
 
-Fiches de référence : [`corpus/403`](../DESIGN_CHOICES/corpus/403-evaluation-absorption-complete.md)
-(le protocole), [`404`](../DESIGN_CHOICES/corpus/404-outillage-tirage-stratifie.md)
-(le tirage), [`405`](../DESIGN_CHOICES/corpus/405-oracle-de-lecture.md) (l'oracle
+Fiches de référence : [`corpus/403`](../corpus/403-evaluation-absorption-complete.md)
+(le protocole), [`404`](../corpus/404-outillage-tirage-stratifie.md)
+(le tirage), [`405`](../corpus/405-oracle-de-lecture.md) (l'oracle
 de lecture).
 
 ---

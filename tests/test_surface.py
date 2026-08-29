@@ -1,7 +1,7 @@
 """Tests of the design-oriented surface analysis.
 
 Each test pins one shape the language-design decision depends on: if a counter
-moves, a claim in DESIGN_CHOICES/corpus/402 moves with it.
+moves, a claim in corpus/402 moves with it.
 """
 
 from rdfeval.surface import _query_shape, surface_source

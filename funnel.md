@@ -88,7 +88,7 @@ bibliothèque tiers présenté comme du code du projet — et ont été trouvée
 un mois d'intervalle :
 
 1. **Virtualenv commité** (vague 1, fiche
-   [401](../DESIGN_CHOICES/corpus/401-plan-etude-corpus.md) § Révision) :
+   [401](../corpus/401-plan-etude-corpus.md) § Révision) :
    2 549 fichiers, 30 % de l'index initial, dont rdflib lui-même, comptés
    comme « code réel utilisant rdflib ». Aucun fichier échantillonné n'en
    venait, l'échantillon a donc été conservé.
