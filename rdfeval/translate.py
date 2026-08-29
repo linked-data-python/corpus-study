@@ -2,7 +2,7 @@
 
 For every region this stage materialises an example directory
 
-    examples/<band>/<region_id>/
+    examples/<stratum>/<region_id>/
         original.py       provenance header + context + region source
         translated.ldpy   MECHANICAL DRAFT of the LD Python counterpart
         driver.py         validation driver scaffold (see rdfeval.harness)
@@ -568,16 +568,17 @@ FIXTURE_TEMPLATE = """\
 READ_CATEGORIES = ("graph_read", "sparql")
 
 
-def materialise(reg: dict, config: dict, root=None, group: str = "band") -> str:
+def materialise(reg: dict, config: dict, root=None,
+                group: str = "stratum") -> str:
     """Write the example directory of one region.
 
-    ``root``/``group`` place it: the 401 study groups by density band under
-    ``examples/``, the 403 study by stratum under its own root, and the two
-    never share a directory (their aggregates must not mix).
+    ``root``/``group`` place it: examples are filed under
+    ``examples/<stratum>/``. They are passed in rather than read from the
+    configuration so that a test can materialise into a temporary tree.
     """
     root = root or EXAMPLES_DIR
-    band_dir = root / reg[group]
-    ex_dir = band_dir / reg["region_id"]
+    group_dir = root / reg[group]
+    ex_dir = group_dir / reg["region_id"]
     meta_path = ex_dir / "meta.json"
     if meta_path.exists():
         meta = json.loads(meta_path.read_text())

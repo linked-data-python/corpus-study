@@ -1,7 +1,7 @@
 """Export validated pairs as user-study task material.
 
 Selects semantically-validated examples, balanced across the study's own
-grouping — RDF-density bands for study 401, **strata of use** for study 403 —
+grouping — **strata of use** —
 and produces ``../user_study/config/tasks.generated.json``: for each example,
 both representations plus automatically derived comprehension facts.
 Question texts are generated as *drafts* for the researchers to review — the
@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 
 from .config import ROOT, provenance
-from .study import STUDY_401, Study
+from .study import STUDY, Study
 from .validate import iter_examples
 
 OUT_PATH = ROOT.parent / "user_study" / "config" / "tasks.generated.json"
@@ -231,7 +231,7 @@ def _draft_questions(triples, value, rng: random.Random) -> list[dict]:
     return qs
 
 
-def run(config: dict, study: Study = STUDY_401) -> None:
+def run(config: dict, study: Study = STUDY) -> None:
     rng = random.Random(config["sampling"]["seed"])
     max_tasks = config["userstudy"]["max_tasks"]
     group_key = study.group

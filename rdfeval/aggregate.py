@@ -22,7 +22,7 @@ import statistics as st
 from .compare import load_pairs
 from .config import RESULTS_SUMMARY, provenance
 from .stats import paired_report
-from .study import Study, STUDY_401
+from .study import Study, STUDY
 
 METRICS = ("code_loc", "tokens", "chars", "syntax_nodes")
 
@@ -50,11 +50,11 @@ def _reduction(row: dict, metric: str) -> float | None:
     return round(100.0 * (a - b) / a, 3)
 
 
-def run(config: dict, study: Study = STUDY_401) -> None:
+def run(config: dict, study: Study = STUDY) -> None:
     pairs = load_pairs(study)
     translated = len(pairs)
     if study.incremental_review:
-        # Fiche 403: the published aggregates are recomputed on demand over
+        # Record corpus/403: the published aggregates are recomputed on demand over
         # the APPROVED subset only, and always say over how many.  A draft an
         # agent produced is a hypothesis, not a measurement.
         approved = [p for p in pairs if p.get("review_status") == "approved"]
@@ -227,7 +227,7 @@ def _by_construction(ok: list[dict]) -> dict:
     return out
 
 
-def _band_csv(agg: dict, study: Study = STUDY_401) -> None:
+def _band_csv(agg: dict, study: Study = STUDY) -> None:
     import csv
     with open(study.path(RESULTS_SUMMARY / "aggregate_bands.csv"), "w",
               newline="") as f:
@@ -250,7 +250,7 @@ def _band_csv(agg: dict, study: Study = STUDY_401) -> None:
                         " ".join(d["strata"])])
 
 
-def _figures(ok: list[dict], agg: dict, study: Study = STUDY_401) -> None:
+def _figures(ok: list[dict], agg: dict, study: Study = STUDY) -> None:
     if not ok:
         return
     import matplotlib

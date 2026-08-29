@@ -1,11 +1,11 @@
 """Where a translation campaign stands, per stratum.
 
-    python -m rdfeval status --study 403
+    python -m rdfeval status
 
 Reads every example's ``meta.json`` and ``review.json`` and reports, for each
 stratum: how many regions are drafted, final, machine-checked, and approved.
 It is what drives the next batch — and what keeps the published numbers
-honest, since the aggregates of study 403 are computed on the approved subset
+honest, since the aggregates are computed on the approved subset
 only (design record corpus/403).
 
 ``--check`` additionally runs the two machine checks on every pair marked
@@ -19,7 +19,7 @@ from collections import Counter, defaultdict
 
 from .config import RESULTS_SUMMARY
 from .constructions import normalise as normalise_constructions
-from .study import Study, STUDY_401
+from .study import Study, STUDY
 from .validate import iter_examples
 
 STATUS_CSV = RESULTS_SUMMARY / "campaign_status.csv"
@@ -95,7 +95,7 @@ def collect(study: Study, run_checks: bool = False) -> dict:
             "failures": failures}
 
 
-def run(config: dict, study: Study = STUDY_401, run_checks: bool = False) -> None:
+def run(config: dict, study: Study = STUDY, run_checks: bool = False) -> None:
     data = collect(study, run_checks)
     if not data["per_group"]:
         print(f"status: no example under {study.examples_dir}")

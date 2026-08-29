@@ -18,12 +18,12 @@ import subprocess
 import sys
 
 from .config import EXAMPLES_DIR, RESULTS_RAW, provenance
-from .study import Study, STUDY_401
+from .study import Study, STUDY
 
 VALIDATION_PATH = RESULTS_RAW / "validation.jsonl"
 
 
-def iter_examples(study: Study = STUDY_401):
+def iter_examples(study: Study = STUDY):
     root = study.examples_dir
     if not root.exists():
         return
@@ -50,7 +50,7 @@ def _run_driver(ex_dir, timeout: int) -> dict:
             + (proc.stderr.strip()[-500:] or proc.stdout.strip()[-500:])}
 
 
-def run(config: dict, study: Study = STUDY_401) -> None:
+def run(config: dict, study: Study = STUDY) -> None:
     timeout = config["validation"]["timeout_seconds"]
     rows = []
     regressions: list[tuple[str, str]] = []

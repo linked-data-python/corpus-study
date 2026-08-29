@@ -1,9 +1,9 @@
-"""The incremental human review of study 403.
+"""The incremental human review of the corpus study.
 
-    python -m rdfeval review --study 403                 # interactive
-    python -m rdfeval review --study 403 --stratum remove
-    python -m rdfeval review --study 403 --set approved <region_id> [-m "…"]
-    python -m rdfeval review --study 403 --list
+    python -m rdfeval review                 # interactive
+    python -m rdfeval review --stratum remove
+    python -m rdfeval review --set approved <region_id> [-m "…"]
+    python -m rdfeval review --list
 
 Design record ``corpus/403`` replaced the 401 model — review everything, then
 compute — with an incremental one: the reviewer works in batches of whatever
@@ -24,7 +24,7 @@ import shutil
 import textwrap
 from datetime import datetime, timezone
 
-from .study import Study, STUDY_403
+from .study import Study, STUDY
 from .validate import iter_examples
 
 STATUSES = ("approved", "rejected", "needs-work", "unreviewed")
@@ -130,7 +130,7 @@ def render(ex_dir, meta: dict, study: Study, width: int | None = None) -> str:
     return "\n".join(head + [""] + body + tail)
 
 
-def run(config: dict, study: Study = STUDY_403, stratum: str | None = None,
+def run(config: dict, study: Study = STUDY, stratum: str | None = None,
         set_to: str | None = None, region: str | None = None,
         comment: str | None = None, reviewer: str | None = None,
         list_only: bool = False) -> None:

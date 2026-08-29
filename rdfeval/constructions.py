@@ -1,6 +1,6 @@
 """The controlled vocabulary of language constructions.
 
-Study 403 credits or debits **each island separately**, so ``meta.json``'s
+The study credits or debits **each island separately**, so ``meta.json``'s
 ``constructions`` list is a headline measurement, not a comment.  Free text
 does not survive that: the first wave produced ``nom préfixé`` and
 ``nom prefixe``, ``f<...>`` and ``f<…>``, ``suffixe d'appel (g)`` and

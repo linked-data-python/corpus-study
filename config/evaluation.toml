@@ -164,6 +164,16 @@ max_per_repo_per_stratum = 4
 # as part of `rdfeval strata`.
 materialise = true
 
+[campaign]
+# How many regions of a stratum are ever TRANSLATED.  The draw (above) is
+# frozen at 100 per stratum and stays that way — it is the population the
+# strata are read from.  This is the evaluation budget: past a certain
+# number, one more pair of the same stratum tells you nothing you did not
+# already know, and the effort is better spent on a stratum that is short.
+# 20 was chosen (2026-08-29) as the highest count any stratum had actually
+# reached; `scripts/make_batches.py --target` defaults to it.
+max_pairs_per_stratum = 20
+
 [regions]
 # A region is a function/method/class or the module top level.
 min_rdf_ops = 2                   # regions with fewer RDF operations are not extracted

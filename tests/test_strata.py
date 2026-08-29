@@ -148,22 +148,28 @@ def test_every_stratum_appears_in_the_summary():
 
 # --- the two studies never share a number -----------------------------------
 
-def test_study_output_paths_are_disjoint():
+def test_there_is_one_study():
+    """The two studies collapsed into one (2026-08-29). What is checked here
+    is that nothing writes a suffixed file any more, and that a stale
+    `--study` in a copied command line still resolves."""
     from pathlib import Path
-    from rdfeval.study import STUDY_401, STUDY_403, get
+    from rdfeval.study import STUDY, STUDIES, get
     base = Path("results/raw/pairs.jsonl")
-    assert STUDY_401.path(base).name == "pairs.jsonl"
-    assert STUDY_403.path(base).name == "pairs_403.jsonl"
-    assert get("403").examples_dir.name == "examples403"
-    assert get(None) is STUDY_401
+    assert STUDY.path(base).name == "pairs.jsonl"
+    assert STUDY.suffix == ""
+    assert STUDY.group == "stratum"
+    assert STUDY.incremental_review
+    assert STUDY.examples_dir.name == "examples"
+    assert list(STUDIES) == ["corpus"]
+    assert get(None) is STUDY and get("403") is STUDY
 
 
-def test_only_approved_pairs_enter_the_403_aggregates(tmp_path, monkeypatch):
+def test_only_approved_pairs_enter_the_aggregates(tmp_path, monkeypatch):
     """Fiche 403: the published numbers are recomputed on the approved
     subset, and always say over how many."""
     import json
     from rdfeval import aggregate
-    from rdfeval.study import STUDY_403
+    from rdfeval.study import STUDY
 
     def pair(rid, review):
         return {"region_id": rid, "repository": "o/r", "stratum": "remove",
@@ -181,8 +187,8 @@ def test_only_approved_pairs_enter_the_403_aggregates(tmp_path, monkeypatch):
         pair("a", "approved"), pair("b", "unreviewed"), pair("c", "rejected")])
     monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
     aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
-                  STUDY_403)
-    agg = json.loads((tmp_path / "aggregate_403.json").read_text())
+                  STUDY)
+    agg = json.loads((tmp_path / "aggregate.json").read_text())
     assert agg["pairs_translated"] == 3
     assert agg["pairs_total"] == 1
     assert agg["pairs_reviewed_basis"] == "approved"
@@ -233,8 +239,8 @@ def test_status_counts_filed_and_credited_separately(tmp_path, monkeypatch):
 
     monkeypatch.setattr(status_mod, "iter_examples", fake_examples)
     (tmp_path / "review.json").write_text(json.dumps({"review_status": "approved"}))
-    from rdfeval.study import STUDY_403
-    data = status_mod.collect(STUDY_403)
+    from rdfeval.study import STUDY
+    data = status_mod.collect(STUDY)
     assert data["per_group"]["remove"]["regions"] == 1
     assert data["credited"] == {"remove": 1, "add_isolated": 1}
     assert data["per_group"]["remove"]["approved"] == 1
@@ -246,7 +252,7 @@ def test_article_export_takes_approved_pairs_only(tmp_path, monkeypatch):
     an agent produced is a hypothesis, not something to print."""
     import json
     from rdfeval import article as article_mod
-    from rdfeval.study import STUDY_403
+    from rdfeval.study import STUDY
 
     def make(rid, review, stratum="remove"):
         d = tmp_path / rid
@@ -265,7 +271,7 @@ def test_article_export_takes_approved_pairs_only(tmp_path, monkeypatch):
     monkeypatch.setattr(article_mod, "iter_examples", lambda study: iter(examples))
     monkeypatch.setattr(article_mod, "ARTICLE_DIR", tmp_path / "out")
     monkeypatch.setattr(article_mod, "_licence_of", lambda repo: "MIT")
-    article_mod.run({}, STUDY_403)
+    article_mod.run({}, STUDY)
     page = (tmp_path / "out" / "remove.md").read_text()
     assert "-{ {s} {p} ?o }" in page
     assert "o/r" in page and "abc" in page and "MIT" in page
@@ -377,7 +383,7 @@ def test_status_keeps_the_unevaluable_regions_in_the_denominator(tmp_path, monke
     will not install — is not evidence that the notation covers it, and must
     not silently leave the denominator."""
     from rdfeval import status as status_mod
-    from rdfeval.study import STUDY_403
+    from rdfeval.study import STUDY
 
     def meta(rid, status, classification):
         return {"region_id": rid, "stratum": "remove", "strata": ["remove"],
@@ -390,7 +396,7 @@ def test_status_keeps_the_unevaluable_regions_in_the_denominator(tmp_path, monke
             (tmp_path, meta("d", "draft", "excluded")),
             (tmp_path, meta("e", "draft", None))]
     monkeypatch.setattr(status_mod, "iter_examples", lambda study: iter(rows))
-    data = status_mod.collect(STUDY_403)
+    data = status_mod.collect(STUDY)
     assert data["outcome"] == {"expressible": 2, "not-expressible": 1,
                                "attempted, not evaluable": 1,
                                "not attempted": 1}

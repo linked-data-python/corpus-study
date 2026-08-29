@@ -134,7 +134,7 @@ def test_a_bundled_python_runtime_is_vendored(acfg):
 
 def test_a_vendor_marker_matches_at_any_depth():
     """A copy of rdflib buried under `_vendor/` is still rdflib: matching the
-    top level only let two reach the 403 draw."""
+    top level only let two reach the draw."""
     from rdfeval.criteria import is_vendored
     cfg = {"vendored_dirs": ["rdflib"],
            "vendored_dirs_always": ["_vendor", "vendor", "third_party"]}

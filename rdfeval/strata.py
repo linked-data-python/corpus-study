@@ -27,7 +27,7 @@ Outputs::
 
     results/raw/strata.json       the drawn regions, with source and context
     results/summary/strata.csv    one row per stratum: population and draw
-    examples403/<stratum>/<id>/   one directory per region, with its draft
+    examples/<stratum>/<id>/   one directory per region, with its draft
 
 The example tree is separate from the 401 study's ``examples/``: the two
 answer different questions with different oracles, and their aggregates must
@@ -44,7 +44,7 @@ import textwrap
 from collections import defaultdict
 
 from .acquire import repo_dir
-from .config import EXAMPLES_403_DIR, RESULTS_RAW, RESULTS_SUMMARY, provenance
+from .config import EXAMPLES_DIR, RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .regions import _functions, _names_read, _span
 from .surface import SITES_RAW, STRATA
 
@@ -441,7 +441,7 @@ def _report(out: dict) -> None:
 
 
 def materialise_all(config: dict) -> dict[str, int]:
-    """Write one example directory per drawn region, under ``examples403/``.
+    """Write one example directory per drawn region, under ``examples/``.
 
     A region is filed under its **first** stratum — the draw order — and its
     ``meta.json`` carries the full list, so a region serving three strata is
@@ -454,10 +454,10 @@ def materialise_all(config: dict) -> dict[str, int]:
     for region in draw_result["regions"].values():
         reg = dict(region)
         reg["stratum"] = reg["strata"][0]
-        status = materialise(reg, config, root=EXAMPLES_403_DIR,
+        status = materialise(reg, config, root=EXAMPLES_DIR,
                              group="stratum")
         counts[status] = counts.get(status, 0) + 1
-        review = (EXAMPLES_403_DIR / reg["stratum"] / reg["region_id"]
+        review = (EXAMPLES_DIR / reg["stratum"] / reg["region_id"]
                   / "review.json")
         if not review.exists():
             # Incremental human review (fiche 403): the aggregates are always

@@ -1,8 +1,8 @@
 """Check one translated pair: does it transpile, and does its driver agree?
 
-    python -m rdfeval check examples403/<stratum>/<region_id>
+    python -m rdfeval check examples/<stratum>/<region_id>
 
-The two machine checks of the 403 protocol, in one command and in order:
+The two machine checks of the protocol, in one command and in order:
 
   1. ``translated.ldpy`` transpiles (the island syntax is valid);
   2. the driver runs and prints ``equivalent: true``.

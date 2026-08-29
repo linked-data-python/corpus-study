@@ -1,6 +1,6 @@
 """Find pairs whose equivalence check passes without demonstrating anything.
 
-    python scripts/hollow_green.py [--study 403]
+    python scripts/hollow_green.py 
 
 A reading region is proved by the equality of the values both versions
 produce from the same fixture.  If that value is **empty on both sides** —
@@ -187,7 +187,7 @@ def shared_graph_objects(study) -> list:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--study", default="403", choices=("401", "403"))
+    ap.add_argument("--study", default=None, help="accepted and ignored")
     args = ap.parse_args()
     from rdfeval.study import get as get_study
     from rdfeval.validate import iter_examples

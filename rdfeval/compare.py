@@ -42,7 +42,7 @@ from .analyze import SIGNIFICANT_TOKENS, analyze_source
 from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .ldpy_metrics import LdpyMetricsError, measure_ldpy_source
 from .constructions import normalise as normalise_constructions
-from .study import Study, STUDY_401
+from .study import Study, STUDY
 from .validate import iter_examples
 
 PAIRS_PATH = RESULTS_RAW / "pairs.jsonl"
@@ -264,7 +264,7 @@ def measure_pair(py_source: str, ldpy_source: str,
     }
 
 
-def run(config: dict, study: Study = STUDY_401) -> None:
+def run(config: dict, study: Study = STUDY) -> None:
     rows = []
     skipped = []
     for ex_dir, meta in iter_examples(study):
@@ -343,7 +343,7 @@ def run(config: dict, study: Study = STUDY_401) -> None:
 
 
 def _review_status(ex_dir) -> str:
-    """The human verdict recorded beside the pair (study 403)."""
+    """The human verdict recorded beside the pair."""
     review = ex_dir / "review.json"
     if not review.exists():
         return "not-applicable"
@@ -353,7 +353,7 @@ def _review_status(ex_dir) -> str:
         return "unreadable"
 
 
-def load_pairs(study: Study = STUDY_401) -> list[dict]:
+def load_pairs(study: Study = STUDY) -> list[dict]:
     path = study.path(PAIRS_PATH)
     if not path.exists():
         raise SystemExit(f"no pairs; run `rdfeval compare --study {study.name}` first")

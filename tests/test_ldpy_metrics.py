@@ -90,7 +90,7 @@ def test_scaffolding_lower_than_python():
     assert per_triple < 8
 
 
-# --- assertions and patterns are counted apart (study 403) -------------------
+# --- assertions and patterns are counted apart -------------------
 
 MIXED = """\
 @prefix ex: <http://example.org/> .

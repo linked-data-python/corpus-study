@@ -121,7 +121,7 @@ def is_vendored(rel_parts: tuple[str, ...], repo_name: str, cfg: dict) -> bool:
     The ``vendored_dirs_always`` markers (``_vendor``, ``vendor``,
     ``third_party``…) match at **any depth**: they are never a project's own
     package, and a copy of rdflib buried under one is still rdflib.  Matching
-    only the top level let two such copies reach the 403 draw —
+    only the top level let two such copies reach the draw —
     ``globalPlugins/contextLabeler/_vendor/rdflib/collection.py`` and
     ``bindings/python/tests/rdflib_suite/vendor/test_having.py`` — where they
     were caught by hand, as *the library's own implementation* rather than

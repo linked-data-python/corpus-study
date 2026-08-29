@@ -44,10 +44,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run-checks", action="store_true",
                         help="status: also run the two machine checks on "
                              "every pair marked final")
-    parser.add_argument("--study", choices=("401", "403"), default="401",
-                        help="which study validate/compare/aggregate/userstudy "
-                             "operate "
-                             "on (401: density bands; 403: strata of use)")
+    # `--study` accepted and ignored: there is one study now, and a command
+    # line copied from an old note must not fail for saying so.
+    parser.add_argument("--study", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
 

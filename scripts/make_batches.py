@@ -36,20 +36,34 @@ ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "results" / "summary" / "batch_plan.json"
 
 
+def _budget() -> int:
+    """`campaign.max_pairs_per_stratum` — the evaluation budget of a stratum.
+
+    Read from the configuration rather than hard-coded here: the number is a
+    decision (record corpus/403), and a decision belongs where it can be seen
+    without reading a script."""
+    import tomllib
+    with open(ROOT / "config" / "evaluation.toml", "rb") as f:
+        return tomllib.load(f)["campaign"]["max_pairs_per_stratum"]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--per-stratum", type=int, default=None,
                     help="NEW regions to plan for every stratum in this pass")
     ap.add_argument("--target", type=int, default=None,
                     help="plan up to this TOTAL of final regions per stratum "
-                         "(balances: a stratum already there gets nothing)")
+                         "(balances: a stratum already there gets nothing); "
+                         "defaults to campaign.max_pairs_per_stratum")
     ap.add_argument("--batch-size", type=int, default=3)
     ap.add_argument("--seed", type=int, default=20260828)
     args = ap.parse_args()
-    if (args.per_stratum is None) == (args.target is None):
-        ap.error("give exactly one of --per-stratum or --target")
+    if args.per_stratum is not None and args.target is not None:
+        ap.error("give at most one of --per-stratum or --target")
+    if args.per_stratum is None and args.target is None:
+        args.target = _budget()
 
-    examples = ROOT / "examples403"
+    examples = ROOT / "examples"
     rng = random.Random(args.seed)
     plan: dict[str, list[list[str]]] = {}
     done_total = todo_total = 0
