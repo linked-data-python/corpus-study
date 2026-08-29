@@ -188,8 +188,11 @@ tous portent leur révision de pipeline dans leur champ `provenance` :
 | `results/summary/aggregate.json`, `aggregate_bands.csv`, `fig_*.{png,pdf}` | `e7edab9` | statistiques et figures dérivées de ces paires |
 | `results/summary/audit.json`, `results/raw/audit_{sample,negatives}.jsonl` | `c43f8ff` | précision 0,99 et manque 12 %, jugés à la main sur la vague 1 |
 
-En dépendent, avec les mêmes chiffres : `article/eswc/corpus_study.tex`, et les
-24 tâches de `user_study/config/tasks.generated.json`.
+En dépend encore, avec les mêmes chiffres : **`article/tgdk/corpus_study.tex`**
+— 163 régions, 151 revues, 141 paires, 140 équivalentes, réduction médiane de
+1,1 % en tokens. C'est la seule dépendance qui reste : les 24 tâches de
+`user_study/config/tasks.generated.json` ont été **régénérées depuis 403**
+(elles portent toutes `"study": "403"`) et ne viennent plus d'ici.
 
 À l'inverse, tout ce qui vient de `analyze` et de `surface`
 (`files_index.jsonl`, `results/raw/analysis/`, `surface.jsonl`, `corpus.json`,
@@ -326,10 +329,41 @@ Les 1 042 régions non tentées gardent leur brouillon mécanique intact et se
 reprennent sans re-tirage : `strata` complète l'échantillon, il ne le refait
 jamais.
 
+### 5.4 `examples/` est-il obsolète ?
+
+Pas encore, et c'est un point à trancher plutôt qu'à laisser dériver. Les deux
+arbres sont **disjoints** (7 identifiants de région en commun sur 163 et
+1 196, par coïncidence de nom de fonction) et mesurent **exactement les mêmes
+métriques** : les colonnes de `pairs.csv` et de `pairs_403.csv` sont
+identiques, au `band` près remplacé par `stratum`/`strata`. L'étude 403 peut
+donc reprendre les affirmations de l'étude 401, et sur une bien meilleure
+population :
+
+| | `examples/` (401) | `examples403/` (403) |
+|---|---:|---:|
+| régions | 163 | **1 196** |
+| paires mesurées | 141 | 117 |
+| dépôts représentés | 16 | **65** |
+| part du dépôt le plus lourd | **31 %** (`MKLab-ITI/prophet`) | 6 % |
+| trois dépôts les plus lourds | **73 %** | 15 % |
+| approuvées | 151 revues | **0** |
+
+Le déséquilibre de 401 n'est pas cosmétique : ses trois premiers dépôts
+fournissent 103 des 141 paires, et le premier — 44 paires, 31 % — est du
+**rdflib recopié** qui n'est plus analysé depuis la vague 2 (§ 4, point
+ouvert).
+
+L'arbre 401 reste donc **gelé, pas obsolète** : il porte seul la section
+quantitative de l'article tant que rien n'est approuvé en 403, où
+`aggregate_403` publie des `null` par construction. Il devient retirable le
+jour où assez de paires 403 sont approuvées pour porter les mêmes
+affirmations — **c'est la revue humaine qui est le verrou**, pas l'outillage.
+
 ## 6. Ce qui reste à faire
 
 1. **Trancher le sort des 44 paires `prophet`** (§ 4) avant de figer
-   l'article.
+   l'article — ou le rendre sans objet en approuvant assez de paires 403 pour
+   que l'arbre 401 sorte de l'article (§ 5.4).
 2. ~~**Relever les quotas d'échantillonnage**~~ — fait autrement : l'étude
    403 (§ 5) tire 1 196 régions dans 242 dépôts, contre 163 dans 17. Le point
    reste valide pour l'étude 401, qui n'est pas rejouée.
