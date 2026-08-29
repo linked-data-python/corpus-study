@@ -3,20 +3,18 @@
 # licence of the source repository: see meta.json
 from rdflib import RDF, URIRef, Literal
 from rdflib.namespace import XSD
-from obse.sparql_queries import SparQLWrapper
-from .namespaces import ANS
+from generators_context import SparQLWrapper, ans:
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
 
 
 def process_key_value_pairs(sparql_wrapper: SparQLWrapper, rdf_use):
     """Verarbeitet alle Key-Value-Paare für ein RDF-Subjekt."""
     json_obj = {}
 
-    for kv_pair in sparql_wrapper.graph.objects(rdf_use, ANS.hasKeyValuePair):
-        key = str(sparql_wrapper.graph.value(kv_pair, ANS.key))  # Extrahiere den Key
-        value_node = sparql_wrapper.graph.value(kv_pair, ANS.value)  # Extrahiere den Wert
+    for kv_pair in sparql_wrapper.graph.objects(rdf_use, ans:hasKeyValuePair):
+        key = str(sparql_wrapper.graph.value(kv_pair, ans:key))  # Extrahiere den Key
+        value_node = sparql_wrapper.graph.value(kv_pair, ans:value)  # Extrahiere den Wert
         t, json_obj[key] = process_value(sparql_wrapper, value_node)  # Verarbeite den Wert
         if t == "list" and len(json_obj[key]) > 0:
             json_obj["has_"+key] = True
@@ -29,7 +27,7 @@ def process_value(sparql_wrapper: SparQLWrapper, value_node):
 
     if (value_node, rdf:type, rdf:Seq) in sparql_wrapper.graph:
         return 'list', process_seq(sparql_wrapper, value_node)  # Wenn es eine Liste (rdf:Seq) ist
-    elif (value_node, rdf:type, ANS.Dictionary) in sparql_wrapper.graph:
+    elif (value_node, rdf:type, ans:Dictionary) in sparql_wrapper.graph:
         return 'dict', process_key_value_pairs(sparql_wrapper, value_node)  # Wenn es ein JSON-Objekt ist
     elif isinstance(value_node, Literal):
         return 'lit', literal_to_value(value_node)  # Wenn es ein einfacher Wert ist
@@ -42,7 +40,7 @@ def process_seq(sparql_wrapper: SparQLWrapper, seq_node):
     seq_list = []
     index = 1
     while True:
-        item = sparql_wrapper.graph.value(seq_node, URIRef(RDF["_{}".format(index)]))
+        item = sparql_wrapper.graph.value(seq_node, URIRef(rdf:{"_{}".format(index)}))
         if item is None:
             break
         _, element = process_value(sparql_wrapper, item)

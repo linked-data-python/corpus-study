@@ -5,7 +5,6 @@ from rdflib import URIRef, Literal
 from rdflib.namespace import XSD
 from vitalgraph.db.sparql_sql.bulk_export import (
     export_space, import_space, export_space_to_nquads, read_export_manifest)
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 HES = <http://vital.ai/ontology/vital-core#hasEdgeSource>
 HED = <http://vital.ai/ontology/vital-core#hasEdgeDestination>
@@ -17,12 +16,12 @@ async def test_export_import_round_trip(space_impl, two_spaces, tmp_path):
 
     quads = []
     for i in range(N_EDGES):
-        e = URIRef(f"urn:export:e:{i}")
+        e = f<urn:export:e:{i}>
         quads += [
-            (e, HES, URIRef(f"urn:export:s:{i}"), G),
-            (e, HED, URIRef(f"urn:export:d:{i}"), G),
-            (URIRef(f"urn:export:n:{i}"), <urn:export:age>,
-             Literal(i, datatype=xsd:integer), G),
+            (e, HES, f<urn:export:s:{i}>, G),
+            (e, HED, f<urn:export:d:{i}>, G),
+            (f<urn:export:n:{i}>, <urn:export:age>,
+             f{i}, G),
         ]
     await space_impl.add_rdf_quads_batch_bulk(src, quads)
 

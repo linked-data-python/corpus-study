@@ -1,6 +1,19 @@
 # Extracted from comp-rob2b/kindyngen@414ebd52b2 : kindynsyn/namespaces.py
 # region: <module> (lines 120-148, stratum ns_def_local)
 # licence of the source repository: see meta.json
+#
+# NOT TRANSLATED (see meta.json: classification "not-expressible"). `_NS =
+# Namespace(...)` here is a required class attribute of a `DefinedNamespace`
+# subclass, not a lexical vocabulary shortcut: rdflib's own
+# `DefinedNamespaceMeta.__getitem__` reads `cls._NS` at attribute-access
+# time. Replacing this line with `@prefix rbdyn_coord: <...> .` removes the
+# `_NS` class attribute entirely (`@prefix` is a transpile-time lexical
+# binding, not a runtime value/attribute), and every subsequent
+# `RBDYN_COORD.Whatever` access breaks with
+# `AttributeError: DefinedNamespace like object has no attribute '_NS'`
+# -- confirmed by transpiling and running the substitution directly. Kept as
+# plain Python (`.ldpy` is a superset of Python, so this is still valid
+# ldpy) rather than force a change that breaks the class.
 from rdflib.namespace import DefinedNamespace, Namespace
 from rdflib.term import URIRef
 

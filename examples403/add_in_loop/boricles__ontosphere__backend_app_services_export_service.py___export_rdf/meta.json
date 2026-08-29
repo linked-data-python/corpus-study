@@ -18,11 +18,25 @@
     "term_constructor": 4,
     "triple_add": 21
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "@bindings",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "the Nodes loop keeps the if/elif/elif/else exactly as written (it picks a rdf:type, not just a value -- OWL.Class/ObjectProperty/NamedIndividual, a genuine type dispatch, not a row of uniform data) but each branch now ASSIGNS `b[\"type\"]` instead of writing immediately; `b[\"label\"]`/`b[\"description\"]` are likewise only set inside the two existing `if node.label:`/`if node.description:` guards. A single `+{ ?uri a ?type ; rdfs:label ?label ; rdfs:comment ?description }` after the if-chain then writes all three -- the unbound-variable-drop rule in +{ } (an omitted binding key -> the triple carrying it is silently dropped) reproduces the two `if` guards with NO explicit check, which is the joker point AGENT_BATCH's watch-list calls out. This is `@bindings as b` (fresh per iteration, declared right after node_uri), not the sugared `for @bindings in ITER:` loop form: graph_data.nodes yields domain objects (node.uri, node.node_type, ...), not mappings, and building a mapping ahead of time would mean either duplicating the if/elif into a dict-lookup (a real control-flow rewrite -- turning branch dispatch into a value lookup, forbidden by INSTRUCTIONS_403 SS2's 'no refactoring') or computing it in a helper generator function (moves the loop out of the region). The delayed-write form keeps every original branch and guard line-for-line.",
+    "the Edges loop is a DISPATCH on edge_type, not a row of uniform data: six of its nine branches (SUBCLASS_OF/DOMAIN/RANGE/HAS_PROPERTY/EQUIVALENT_TO/DISJOINT_WITH) each select a DIFFERENT, branch-constant predicate -- `?p` bound to a value pulled from a row would buy nothing there (the predicate is known at the branch, not carried by the edge), so those stay plain `+{ }` with `{source}`/`{target}` interpolation, one 1:1 swap per g.add(). The RANGE branch's own if/else (xsd datatype vs plain target) is also kept as-is; only the object differs, and `xsd:{datatype_name}` (an interpolated prefixed-name local part, matching terms.md) replaces `XSD[datatype_name]` directly.",
+    "RELATED_TO's three unconditional g.add() (same subject rel_uri, no branching) merge into one `+{ rel_uri a owl:ObjectProperty ; rdfs:domain source ; rdfs:range target }` -- add_run_shared_subject idiom, most specific for a run with nothing conditional in it. The 'else' (custom-type) branch has the SAME three triples plus a fourth, conditional one (`if edge.label: g.add(rel_uri, RDFS.label, ...)`) -- there the @bindings-as-b delayed-write pattern applies again (second and last use of the joker in this region), for the same reason as the Nodes loop: one conditional triple among several sharing a subject.",
+    "b.raw was not needed anywhere: `if node.label:`/`if node.description:`/`if edge.label:` are truthy checks (catching both None and \"\"), and the chosen translation OMITS the binding key entirely when the guard is false rather than always setting it and testing `b.raw[...]` afterwards -- so the +{ } drop rule does the whole job, with no separate raw-value check to write. Both are legitimate per AGENT_BATCH's watch-list; omission was preferred here because it lets the guard and the write stay exactly where the original put them (inside the existing `if`), rather than moving the check into the write site.",
+    "`@graph g` designates the existing local `g = Graph()` (not `@graph as g`) -- the more specific form for a graph already constructed by hand, letting `g.bind(...)` stay untouched Python (it configures the rdflib Graph's serialiser prefix map, not an RDF operation) and every write below be a bare `+{ }` instead of the mechanical `g += g{ ... }` a first pass produced.",
+    "prefixes: owl:/rdfs:/xsd: declared and used (OWL.Class etc., RDFS.subClassOf etc., XSD[...] via the interpolated local part above). rdf: is NOT declared: RDF.type is written as `a` inside `+{ }`, so an unused rdf: prefix would inflate the construction count for nothing -- confirmed by grep: the only RDF.* use in this region is RDF.type/RDF.Ontology, both `a` in Turtle. onto:/NS is not declared as a prefix either: `g.bind(\"onto\", NS)` only registers a serialiser prefix, and NS never appears as a term prefix in any triple pattern -- every node/edge URI goes through `_resolve_uri(x, NS)` in plain Python, arriving at the island already a computed URIRef, so it is `{node_uri}`/`{source}`/`{target}` interpolation, not `onto:{x}` (which would silently NOT percent-encode per bindings.md's `ex:{?id}` warning, and would also be wrong here since _resolve_uri's own choice between an absolute IRI and a namespace-relative one is exactly the kind of decision INSTRUCTIONS_403 SS2 asks to make in full knowledge -- keeping it in Python means the region's own encoding choice, whatever it is, is preserved unchanged rather than silently replaced by ldpy's).",
+    "context_shim.py restores `_resolve_uri` (a module-level helper in the same source file, just below the extracted region's line range, so extraction did not capture it -- copied verbatim) and GraphNode/GraphEdge/GraphData (the real @dataclass field shapes from backend/app/services/graph_service.py, copied verbatim; GraphService itself is an empty placeholder, imported by name but never touched by this region). `import logging` is added to original.py's header: `logger = logging.getLogger(__name__)` was present in the extracted region but the module-level `import logging` sits above the region's line range in the real file, so it was silently missing.",
+    "demo(graph_data, fmt, namespace_uri) is appended identically to original.py and translated.ldpy (documented in both): _export_rdf's graph never escapes the function except serialised to text, and rdflib's serialisers are not byte-stable across two independently built (even isomorphic) graphs, so comparing the returned strings by equality would be judging serialisation order, not RDF content -- exactly what rdfeval.harness's docstring says graph comparison must never do. demo() round-trips the returned text back into a fresh Graph with the same fmt -> rdf_format mapping _export_rdf itself uses, so the driver compares two GRAPHS by isomorphism."
   ],
   "draft_sha": "e91507327d943adf",
   "provenance": {
@@ -34,5 +48,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

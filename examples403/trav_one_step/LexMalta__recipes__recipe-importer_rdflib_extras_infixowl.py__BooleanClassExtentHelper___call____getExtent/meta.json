@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "`Individual.factoryGraph.subjects(self.operator)` is `g.subjects(p)` with the object left wild: not literally the table's `for o in g.objects(s, p)` row (subject/predicate fixed, object read) nor `next(g.subjects(...))`, but the mirror case in how-to/migrate-from-rdflib.md for `set(g.subjects())` (fully wild) adapted with the predicate fixed: `m{ ?s {self.operator} [] }`. The object position is `[]`, a non-distinguished variable (matched, not projected, querying.md #blank-nodes-are-non-distinguished-variables), so arity is 1 and the solutions are the subject terms directly -- exactly what `for c in ...subjects(p)` needs, with no throwaway object variable to invent.",
+    "`Individual.factoryGraph` is a class attribute, not a lexically-scoped `@graph`, and is reassigned between test runs (by the driver, mirroring how the real `getUnions`/`getIntersections` callers set it before calling): the call suffix `(Individual.factoryGraph)` supplies it explicitly.",
+    "context_shim.py restores `Individual`/`BooleanClass`/`BooleanClassExtentHelper`, which `_getExtent` closes over (`self`) and calls but which the pipeline's context window did not capture (the enclosing `__call__` method) -- imported from the installed rdflib.extras.infixowl (rdflib 7.2.1) rather than transcribed, since the source repo vendors a near-verbatim copy of the same upstream module at this exact path and the traversal this region exercises is identical in both (see the shim's header for the diff). original.py restores the missing `self` binding directly, per AGENT_BATCH.md's guidance for a graph reached through an attribute rather than a parameter.",
+    "no custom comparison logic was needed to prove equivalence: BooleanClass is itself iterable over its rdf:List members, so the harness's generic materialise() walks each yielded BooleanClass down to its plain RDF-term members before comparing -- verified empirically before writing the driver (see meta.json provenance; a standalone probe against the installed rdflib.extras.infixowl confirmed BooleanClass(c, operator=...).__iter__ yields exactly its member terms).",
+    "`oracle` corrected from the pipeline's `isomorphism` to `values`: this region only reads (`rdf_ops: 0`/`categories: {}` above is itself a pipeline artifact -- its static heuristic does not recognise `Individual.factoryGraph.subjects(...)` as a graph read, presumably because `Individual` is not a name pattern it tracks); nothing here is compared by RDF isomorphism, and the driver proves it by materialised value equality against fixture.ttl, per design record corpus/405."
+  ],
   "draft_sha": "3076044ab2d1f174",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.156361+00:00",
@@ -24,5 +35,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_getExtent",
+    "diffs": [],
+    "error": null
+  }
 }

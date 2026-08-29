@@ -1,15 +1,24 @@
 """Validation driver for schemaorg__sdopythonapp__lib_rdflib_plugins_sparql_parser.py__<module>_322.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region only DEFINES a pyparsing grammar rule (STRING_LITERAL2) and its
+parse action; nothing at module scope is itself an RDF term or a graph, so
+there is nothing to compare without running the parser. `demo` (identical on
+both sides, see meta.json) parses a concrete SPARQL string-literal token and
+returns the rdflib.Literal the parse action built -- the oracle is value
+equality on that term (datatype/language included).
+
+Two cases: a token with no escape sequence, and one with an escape (`\\n`,
+two characters, not a real newline in the SPARQL source text) that
+decodeUnicodeEscape must resolve to an actual newline -- so a translation
+that silently dropped the escaping step would be caught.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
-    entry=None,
-    calls=None,
+    entry="demo",
+    calls=[
+        (('"plain"',), {}),
+        (('"hello\\nworld"',), {}),
+    ],
 )

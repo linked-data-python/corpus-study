@@ -1,11 +1,12 @@
 # Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/methods/hrules.py
 # region: _HRulesMethod.do_compute_obsels (lines 100-171, stratum ns_import_project)
 # licence of the source repository: see meta.json
+import logging
 from rdflib import Literal, RDF, URIRef, XSD
 from rdfrest.util import check_new
 from .abstract import AbstractMonosourceMethod, NOT_MON, PSEUDO_MON, STRICT_MON
 from .utils import copy_obsel, translate_node
-from ..namespace import KTBS, KTBS_NS_URI
+from ktbs_namespace_context import KTBS, KTBS_NS_URI
 LOG = logging.getLogger(__name__)
 
 def do_compute_obsels(self, computed_trace, cstate, monotonicity, diag):

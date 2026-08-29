@@ -1,4 +1,39 @@
 # Input graph for TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_step_chemicalinput_query.py__query_synthesis_inputs — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+#
+# Exercises both UNION branches (direct ontosyn:hasChemicalInput, and the
+# ontosyn:hasSynthesisStep / ontosyn:hasAddedChemicalInput chain), all three
+# OPTIONAL clauses (label / amount / alternative names, including a chemical
+# with none of the three, and one with two alternative names so the same
+# ?chemical is bound by more than one solution), the zero-solution case
+# (a synthesis with no chemical at all), and neighbourhood that must not
+# match: a second synthesis with its own chemical, and an rdfs:label
+# directly on the synthesis itself rather than on a chemical.
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# --- Synthesis_1: several solutions, both UNION branches ---
+ontosyn:Synthesis_1 ontosyn:hasChemicalInput ontosyn:Chemical_1 ;
+                     ontosyn:hasSynthesisStep ontosyn:Step_1 ;
+                     rdfs:label "Synthesis 1 (must not leak into ?label)" .
+
+ontosyn:Step_1 ontosyn:hasAddedChemicalInput ontosyn:Chemical_2 .
+
+ontosyn:Chemical_1 rdfs:label "Acetone" ;
+                    ontosyn:hasAmount "10 mL" ;
+                    ontosyn:hasAlternativeNames "Propan-2-one" .
+
+# Chemical_2 has two alternative names: two solutions bind ?chemical to the
+# same term, and the region must fold them into one grouped entry.
+ontosyn:Chemical_2 ontosyn:hasAlternativeNames "AltName-A", "AltName-B" .
+
+# Also fed via hasChemicalInput directly: no label, no amount, no altName
+# at all -- exercises the all-OPTIONAL-unbound row.
+ontosyn:Synthesis_1 ontosyn:hasChemicalInput ontosyn:Chemical_3 .
+
+# --- neighbourhood that must NOT match Synthesis_1's query ---
+ontosyn:Synthesis_2 ontosyn:hasChemicalInput ontosyn:Chemical_4 .
+ontosyn:Chemical_4 rdfs:label "Should not appear for Synthesis_1" .
+
+# a synthesis that exists but has no chemical link at all: the zero-solution
+# case when queried directly.
+ontosyn:Synthesis_3 rdfs:label "Empty synthesis" .

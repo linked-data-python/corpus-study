@@ -3,8 +3,8 @@
 # licence of the source repository: see meta.json
 from typing import Any, Tuple
 from rdflib import RDF, BNode, Graph, Literal, URIRef
-from swh.indexer.namespaces import ACTIVITYSTREAMS, CODEMETA, FORGEFED, SCHEMA, XSD
-from .base import BaseExtrinsicMapping, JsonMapping, produce_terms
+from context_shim import ACTIVITYSTREAMS, CODEMETA, FORGEFED, SCHEMA, XSD
+from context_shim import BaseExtrinsicMapping, JsonMapping, produce_terms
 
 @produce_terms(FORGEFED.forkedFrom)
 def translate_parent(self, graph: Graph, root: BNode, v: Any) -> None:

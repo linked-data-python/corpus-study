@@ -5,18 +5,16 @@ from numbers import Integral, Real
 from rdflib import Graph, Literal, RDF, RDFS, URIRef, XSD
 from rdflib.term import Node
 from datetime import datetime
-from rdfrest.util.iso8601 import parse_date, ParseError, UTC
-from rdfrest.util import cache_result, coerce_to_node, coerce_to_uri
-from .obsel import ObselMixin, ObselProxy
-from ..namespace import KTBS
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import parse_date, ParseError, UTC
+from context_shim import cache_result, coerce_to_node, coerce_to_uri
+from context_shim import ObselMixin, ObselProxy
+from context_shim import ktbs:
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 _NOW = datetime.now
 
-def create_obsel(self, id=None, type=None, begin=None, end=None, 
-                 subject=None, attributes=None, relations=None, 
+def create_obsel(self, id=None, type=None, begin=None, end=None,
+                 subject=None, attributes=None, relations=None,
                  inverse_relations=None, source_obsels=None, label=None,
                  no_return=False):
     """
@@ -61,15 +59,13 @@ def create_obsel(self, id=None, type=None, begin=None, end=None,
     # this would imply verifying that begin and end are mutually consistent
     # knowing that they could be heterogeneous (int/datetime)
     graph = Graph()
+    @graph graph
     obs = coerce_to_node(id, self.uri) # return BNode if id is None
     type_uri = coerce_to_uri(type, self.uri)
-    graph += g{
-        {obs} a {type_uri} ;
-           {KTBS.hasTrace} {self.uri}
-    }
+    +{ {obs} a {type_uri} ; ktbs:hasTrace {self.uri} }
 
     if isinstance(begin, Integral):
-        graph += g{ {obs} {KTBS.hasBegin} {Literal(int(begin))} }
+        +{ {obs} ktbs:hasBegin {Literal(int(begin))} }
     else: # will use KTBS.hasBeginDT
         begin_dt = begin
         if isinstance(begin, str):
@@ -79,10 +75,10 @@ def create_obsel(self, id=None, type=None, begin=None, end=None,
                 begin = begin.replace(tzinfo=UTC)
         else:
             raise ValueError("Could not interpret begin %s", begin)
-        graph += g{ {obs} {KTBS.hasBeginDT} {Literal(begin_dt)} }
+        +{ {obs} ktbs:hasBeginDT {Literal(begin_dt)} }
 
     if isinstance(end, Integral):
-        graph += g{ {obs} {KTBS.hasEnd} {Literal(int(end))} }
+        +{ {obs} ktbs:hasEnd {Literal(int(end))} }
     else: # will use KTBS.hasEndDT
         end_dt = end
         if isinstance(end_dt, str):
@@ -92,45 +88,54 @@ def create_obsel(self, id=None, type=None, begin=None, end=None,
                 end = end.replace(tzinfo=UTC)
         else:
             raise ValueError("Could not interpret end %s", end)
-        graph += g{ {obs} {KTBS.hasEndDT} {Literal(end_dt)} }
+        +{ {obs} ktbs:hasEndDT {Literal(end_dt)} }
 
     if subject is not None:
-        graph += g{ {obs} {KTBS.hasSubject} {subject} }
+        +{ {obs} ktbs:hasSubject {subject} }
 
     if attributes is not None:
-        for key, val in attributes.items():
-            k_uri = coerce_to_uri(key)
-            if isinstance(val, Node):
-                v_node = val
-            else:
-                v_node = Literal(val)
-                # TODO LATER do something if val is a list
-            graph += g{ {obs} {k_uri} {v_node} }
+        # TODO LATER do something if val is a list
+        for @bindings in ({"p": coerce_to_uri(key),
+                            "o": val if isinstance(val, Node) else Literal(val)}
+                           for key, val in attributes.items()):
+            +{ {obs} ?p ?o }
 
     if relations is not None:
-        for rtype, other in relations:
-            rtype_uri = coerce_to_uri(rtype)
-            other_uri = coerce_to_uri(other)
-            graph += g{ {obs} {rtype_uri} {other_uri} }
+        for @bindings in ({"p": coerce_to_uri(rtype), "o": coerce_to_uri(other)}
+                           for rtype, other in relations):
+            +{ {obs} ?p ?o }
 
     if inverse_relations is not None:
-        for other, rtype in inverse_relations:
-            other_uri = coerce_to_uri(other)
-            rtype_uri = coerce_to_uri(rtype)
-            graph += g{ {other_uri} {rtype_uri} {obs} }
+        for @bindings in ({"s": coerce_to_uri(other), "p": coerce_to_uri(rtype)}
+                           for other, rtype in inverse_relations):
+            +{ ?s ?p {obs} }
 
     if source_obsels is not None:
-        for src in source_obsels:
-            s_uri = coerce_to_uri(src)
-            graph += g{ {obs} {KTBS.hasSourceObsel} {s_uri} }
+        for @bindings in ({"o": coerce_to_uri(src)} for src in source_obsels):
+            +{ {obs} ktbs:hasSourceObsel ?o }
 
     if label is not None:
-        graph += g{ {obs} rdfs:label {Literal(label)} }
+        +{ {obs} rdfs:label {Literal(label)} }
 
-    uris = self.post_graph(graph, None, trust, obs, KTBS.Obsel)
+    uris = self.post_graph(graph, None, trust, obs, ktbs:Obsel)
     assert len(uris) == 1
     self.obsel_collection.force_state_refresh()
     if not no_return:
-        ret = self.factory(uris[0], [KTBS.Obsel])
+        ret = self.factory(uris[0], [ktbs:Obsel])
         assert isinstance(ret, ObselMixin)
         return ret
+
+
+# Demo harness (identical on both sides, see meta.json): create_obsel builds
+# its graph and hands it to self.post_graph(...) -- a side effect, not a
+# returned value -- so the driver cannot compare the graph by simply calling
+# create_obsel(self, ...) and looking at the result. This wraps the call
+# with a self stand-in (context_shim._TraceStub) that captures exactly the
+# graph it was posted, called with no_return=True to stay clear of
+# self.factory()/ObselMixin (the REST resource-creation step, out of scope
+# for a region under study for its graph construction).
+def demo(**kwargs):
+    from context_shim import _TraceStub
+    self = _TraceStub()
+    create_obsel(self, no_return=True, **kwargs)
+    return self.captured_graph

@@ -15,11 +15,22 @@
     "namespace_term": 4,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: ST->st"
+    "prefixes: ST->st",
+    "graph binding restored (see original.py header): the extracted region built a fresh graph per slug from a real file on disk (MGR_DIR / REPO), one of the corpus/403 '163 regions with no visible graph'. `REPO` is undefined outside the source checkout, so the region cannot even be imported as extracted -- added a `graph` parameter and dropped the MGR_DIR/exists()/parse lines; the loop over CONTAINER_SLUGS is untouched, now checking the same injected graph 7 times.",
+    "of the four reads, three are 'the one value I expect' with the value reused afterwards -- `next(g.subjects(RDF.type, ST.Manager))` -> `m{ ?mgr a st:Manager }.first()` (exact migrate-from-rdflib.md row), `g.value(mgr, ST.hasAssignment)` -> `.first()` (assigned to `a`, reused below), `g.value(a, ST.assigns)` -> `.first()` (assigned to `assigned`, its value inspected via `.endswith`). Only the LAST read, `g.value(a, ST.manages) is not None`, discards the fetched value and tests existence alone -- that one is the stratum's actual target and becomes `bool(m{ {a} st:manages ?x })`, not `.first() is not None`: the most specific construction for a value that is truly never used.",
+    "the zero-solution branch of `bool(m{ {a} st:manages ?x })` cannot be exercised through this driver: every read in this region feeds a bare `assert ... , \"message\"` with no graceful path, so any fixture that makes one false raises AssertionError on the FIRST side run_pair calls (see rdfeval/harness.py: the try/except around `fo(*args)`/`ft(*args)` aborts before the second side even runs, so a shared exception is never actually compared) -- a false call cannot get a green verdict here, it can only abort the comparison before it happens. Hardened the fixture instead with neighbourhood decoys that must not match (ex:notAManager, ex:decoyAssignment) to keep the existing check discriminating. This is a property of THIS region's assert-and-raise shape under run_pair's fail-fast call semantics, not of the language or of bool(m{ }) -- contrast with the pyrml region of this same batch, whose analogous existence check sits inside a graceful `if:` and exercises both branches in one call."
   ],
   "draft_sha": "1f3f8ef4adb42a14",
   "provenance": {
@@ -31,5 +42,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:test_one_manager_per_container_assigns_a_container_tree",
+    "diffs": [],
+    "error": null
+  }
 }

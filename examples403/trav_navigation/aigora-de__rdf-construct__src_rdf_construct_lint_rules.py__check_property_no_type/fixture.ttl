@@ -1,4 +1,31 @@
-# Input graph for aigora-de__rdf-construct__src_rdf_construct_lint_rules.py__check_property_no_type — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for aigora-de__rdf-construct__src_rdf_construct_lint_rules.py__check_property_no_type
 @prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Several solutions, from BOTH loops:
+# 1. has a domain, no rdf:type at all -- the per-item type lookup has ZERO
+#    solutions, so it trivially fails to intersect property_types.
+ex:hasName rdfs:domain ex:Person .
+
+# 2. has a range, no rdf:type -- the SECOND loop's own issue.
+ex:hasFriend rdfs:range ex:Person .
+
+# 3. has BOTH a domain and a range, no rdf:type -- the domain loop reports
+#    it first; the range loop must see it via `existing` and NOT duplicate.
+ex:hasColor rdfs:domain ex:Item ;
+    rdfs:range ex:Color .
+
+# Neighbourhood that must NOT match:
+# properly typed -- has a domain, but also an explicit property type, so the
+# type lookup DOES intersect property_types.
+ex:hasAge rdfs:domain ex:Person ;
+    a owl:DatatypeProperty .
+
+# builtin namespace -- is_builtin() excludes it regardless of type (this is
+# a real RDFS fact: rdfs:label does have rdfs:domain rdfs:Resource).
+rdfs:label rdfs:domain rdfs:Resource .
+
+# blank-node subject -- the isinstance(subj, URIRef) guard excludes it.
+_:b1 rdfs:domain ex:Thing .

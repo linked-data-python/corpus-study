@@ -13,11 +13,20 @@
     "namespace_term": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: only dcterms: is used in the region body (DCTERMS.title). OWL/RDF/RDFS/XSD from the draft's blanket prefix list were dropped: none of those namespaces is written literally in this region -- declaring them would inflate the island count without a corresponding use.",
+    "the region's only real rewrite is DCTERMS.title -> dcterms:title (a standalone prefixed-name term, valid anywhere a Python expression may appear -- not inside a graph island here, since the region returns a plain list of tuples, not a graph).",
+    "Literal(f\"{remove_namespace_from_uri(self.id_)} - {self.label}\") is kept AS rdflib code, not rewritten: it is a PLAIN literal (no @lang, no ^^dt) built OUTSIDE any graph/`+{ }` context -- exactly the case migrate-from-rdflib.md's 'What not to rewrite' section documents as having no island spelling of its own ('outside, keep Literal'). f{expr} would produce the identical term (str -> plain Literal under the default coercion policy) but is not a more specific construction here, only a different spelling of the same no-op coercion, so nothing was gained by using it; kept Literal(...) per that documented guidance.",
+    "genuine finding for the coercion_datatype stratum: this site was categorised as 'term_constructor' by the tirage, but the literal it builds carries no datatype at all -- it is not an instance of the Literal(v, datatype=XSD...) pattern the stratum targets, just an ordinary plain-literal construction. No ldpy.Coercion policy applies (there is no coercion happening: `f\"...\"` is already a str, and a str needs no conversion to become a plain Literal).",
+    "context_shim.py: OWLClass reduced to the two fields the property reads (id_, label) -- the real class is a pydantic BaseModel with more fields (type_, comment, sub_class_of, namespace) unrelated to this region. remove_namespace_from_uri reduced to the single-URI, default-validation branch actually exercised (split on '#_'/'#'/'/', keep the last segment); the pydantic-validated 'full' branch and the sequence-of-URIs overload are not reached. Both are needed because `cognite.neat` (pydantic + the Cognite SDK) is not installed in the pinned study venv.",
+    "demo harness added identically to both original.py and translated.ldpy (same convention as other @property/method regions in this study): OWLClass.title_triples = title_triples attaches the extracted property to the shim class, then demo(id_, label) reads it off a fresh instance so the driver has a plain callable to invoke -- a bare `@property`-decorated function is not itself callable (ns.get('title_triples') would be a property object, not a function).",
+    "two driver cases: self.label truthy (builds the triple, the coercion_datatype site) and falsy (the early `return []`, so an empty-label class never reaches the Literal construction)."
   ],
   "draft_sha": "36d5bf2a7d73c529",
   "provenance": {
@@ -29,5 +38,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

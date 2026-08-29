@@ -7,9 +7,7 @@ EX_B = "http://ex/b"
 EX_P = "http://ex/p"
 
 def _two_var_two_rows():
-    g = Graph()
-    g += g{
-        {URIRef(EX_A)} {URIRef(EX_P)} "v1" .
-        {URIRef(EX_B)} {URIRef(EX_P)} "v2"
-    }
-    return g.query(f"SELECT ?s ?o WHERE {{ ?s <{EX_P}> ?o }} ORDER BY ?s")
+    @graph as g
+    +{ {URIRef(EX_A)} {URIRef(EX_P)} "v1" .
+       {URIRef(EX_B)} {URIRef(EX_P)} "v2" }
+    return s{ SELECT ?s ?o WHERE { ?s {URIRef(EX_P)} ?o } ORDER BY ?s }

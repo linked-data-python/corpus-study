@@ -3,17 +3,15 @@
 # licence of the source repository: see meta.json
 from typing import Any, Tuple
 from rdflib import RDF, BNode, Graph, Literal, URIRef
-from swh.indexer.namespaces import ACTIVITYSTREAMS, CODEMETA, FORGEFED, SCHEMA, XSD
-from .base import BaseExtrinsicMapping, JsonMapping, produce_terms
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
+from context_shim import ACTIVITYSTREAMS, CODEMETA, FORGEFED, SCHEMA, XSD
+from context_shim import BaseExtrinsicMapping, JsonMapping, produce_terms
 
 @produce_terms(FORGEFED.forkedFrom)
 def translate_parent(self, graph: Graph, root: BNode, v: Any) -> None:
     """
 
     >>> graph = Graph()
-    >>> root = <http://example.org/test-fork>
+    >>> root = URIRef("http://example.org/test-fork")
     >>> GitHubMapping().translate_parent(
     ...     graph, root, {"html_url": "http://example.org/test-software"})
     >>> prettyprint_graph(graph, root)
@@ -26,4 +24,4 @@ def translate_parent(self, graph: Graph, root: BNode, v: Any) -> None:
     """
     if isinstance(v, dict) and isinstance(v.get("html_url"), str):
         repository = URIRef(v["html_url"])
-        graph += g{ {root} {FORGEFED.forkedFrom} {repository} }
+        +{ {root} {FORGEFED.forkedFrom} {repository} }(graph)

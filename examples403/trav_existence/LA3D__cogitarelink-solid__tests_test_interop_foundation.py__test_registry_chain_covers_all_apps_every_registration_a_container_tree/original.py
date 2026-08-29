@@ -1,16 +1,22 @@
 # Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
 # region: test_registry_chain_covers_all_apps_every_registration_a_container_tree (lines 59-82, stratum trav_existence)
 # licence of the source repository: see meta.json
+#
+# The extracted region built its graph from a real file on disk (REG /
+# REPO, one of the corpus/403 "163 regions with no visible graph" -- see
+# AGENT_BATCH.md): `REPO` is undefined outside the source checkout, so the
+# region cannot even be imported as extracted. Restored the binding as an
+# explicit `graph` parameter (see meta.json) and dropped the now-unused
+# REG/parse line; `g = graph` is the one line left in its place.
 import rdflib
 TREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/wiki-memory.tree#"
 INTEROP = rdflib.Namespace("http://www.w3.org/ns/solid/interop#")
 OWNER = rdflib.URIRef("https://pod.vardeman.me/vault/profile/card#me")
-REG = REPO / "overlays/wiki-memory/interop/registry.ttl"
 ABTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/addressbook.tree#"
 IDTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/id-schemes.tree#"
 
-def test_registry_chain_covers_all_apps_every_registration_a_container_tree():
-    g = rdflib.Graph(); g.parse(REG, format="turtle")
+def test_registry_chain_covers_all_apps_every_registration_a_container_tree(graph):
+    g = graph
     rset = g.value(OWNER, INTEROP.hasRegistrySet)
     assert rset is not None, "owner WebID has no hasRegistrySet"
     dreg = g.value(rset, INTEROP.hasDataRegistry)

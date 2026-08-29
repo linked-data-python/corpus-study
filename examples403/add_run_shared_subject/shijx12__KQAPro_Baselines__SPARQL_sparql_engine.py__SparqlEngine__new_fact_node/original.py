@@ -2,6 +2,7 @@
 # region: SparqlEngine._new_fact_node (lines 129-134, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
 from rdflib import URIRef, BNode, Literal, XSD
+from context_shim import SparqlEngine
 
 def _new_fact_node(self, h, r, t):
     node = BNode()

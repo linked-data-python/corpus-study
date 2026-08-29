@@ -1,23 +1,43 @@
 # Extracted from anuzzolese/pyrml@d18fe2edfc : pyrml/pyrml_core.py
 # region: TripleMappings.from_rdf (lines 1630-1643, stratum trav_existence)
 # licence of the source repository: see meta.json
-from pyrml import rml_vocab
-from typing import Dict, Union, Set, List, Type, Generator
-from pyrml.pyrml_api import PyRML, DataSource, TermMap, AbstractMap, TermUtils, graph_add_all, Expression, FunctionNotRegisteredException, NoneFunctionException, ParameterNotExintingInFunctionException, RMLModelException
-from rdflib import URIRef, Graph, IdentifiedNode
-import pyrml.rml_vocab as rml_vocab
+#
+# `pyrml` is not installed in this environment. Restored rml_vocab and
+# TripleMappings from a minimal context shim (pyrml_context.py, see
+# meta.json); TermMap is used here only as a return-type annotation. Trimmed
+# the rest of the original file's top-of-file import block down to what this
+# function body actually references -- Dict/Union/Set/Type/Generator and the
+# nine pyrml.pyrml_api names other than TermMap, plus the plain `URIRef`
+# import, were never used by these 14 lines.
+#
+# `tps = g.triples((tm, rml_vocab.RML_NS.logicalSource|rml_vocab.RR_NS.logicalTable, None))`
+# stays plain rdflib: NOT expressible by any island (see meta.json). Two
+# blockers compound: the predicate is a SPARQL property-path alternation
+# (`|`), which querying.md lists explicitly under "What m{ } does not have";
+# and the subject `tm` is `None` (a wildcard) exactly when `parent` is
+# falsy, decided at RUNTIME by a Python condition -- the piege from
+# INSTRUCTIONS_403 SS2 ("un motif recu en donnee est hors d'atteinte"): a
+# joker is lexical (an unbound `?var` written in the pattern), never a
+# value that happens to be `None`, so neither `m{ }` nor `s{ }`'s `{expr}`
+# term-position interpolation can express "variable here if this Python
+# value is None, else this bound term" in one pattern.
+from typing import List
+from rdflib import Graph, IdentifiedNode
+from pyrml_context import rml_vocab, TermMap, TripleMappings
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
 
 @staticmethod
 def from_rdf(g: Graph, parent: IdentifiedNode = None) -> List[TermMap]:
+    @graph g
 
     tm = None
     if parent:
-        tm = g.value(parent, rml_vocab.RR_NS.parentTriplesMap)
+        tm = m{ {parent} rr:parentTriplesMap ?tm }.first()
 
     tps = g.triples((tm, rml_vocab.RML_NS.logicalSource|rml_vocab.RR_NS.logicalTable, None))
 
     triple_mappings = []
     for tm,p,o in tps:
-        if g.value(tm, rml_vocab.RR_NS.subjectMap):
+        if bool(m{ {tm} rr:subjectMap ?x }):
             triple_mappings.append(TripleMappings.__build(g, tm))
     return triple_mappings

@@ -12,11 +12,22 @@
   "categories": {
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf"
+    "prefixes: OWL->owl, RDF->rdf were declared by the draft but the region's own 4 lines never reference OWL.* or RDF.* -- an unused @prefix would be noise (as already noted for a prior trav_navigation region), so neither is declared. No prefixed name is needed at all: the region's one navigation step reads through variables and an interpolation only.",
+    "TWO confirmed bugs in the upstream source, both preserved literally rather than fixed (checked against github.com/BD2KOnFHIR/fhirtordf@05b23ba1d, rdfcompare.py lines 114-129): (1) `len([g.subject_predicates(anon_s)]) == 0` wraps the WHOLE generator in a length-1 list rather than materialising it (`list(...)`), so the condition is always False and `anon_subjs` is always the empty set -- the 'no incoming predicate' filter is dead code, regardless of what is in the graph. (2) the return line reads `g1`, a free variable captured from the enclosing `rdf_compare_split(g1, g2, ...)`, not the function's own parameter `g` -- at the call site `primary_subjects(g2)` this silently returns URIRef subjects of `g1` under a result nominally about `g2`.",
+    "translating (1) literally: `g.subject_predicates(anon_s)` (an object-position lookup, narrowed by `anon_s`) is the region's one genuine multi-step navigation and becomes `m{ ?s2 ?p2 {anon_s} }(g)` -- the interpolation instantiates the outer comprehension's bound term in object position, exactly the trav_navigation idiom. It stays wrapped in the SAME `[ ... ]` list-of-one as the original, so the bug is reproduced by construction, not special-cased: whatever `m{ }` matches, `len([m{ }(g)]) == 0` is still always False.",
+    "translating (2): a single-argument extraction of `primary_subjects` cannot pass two graphs through one parameter, so it cannot exercise the buggy call site `primary_subjects(g2)` where `g1 != g` at all. We restore `g1` (context, both files, see original.py) as an alias of the function's own argument -- exactly the binding the closure has at the OTHER, non-buggy call site `primary_subjects(g1)`. This is a modeling choice for testability, not a fix: the region's own code is untouched and still literally reads `g1`, not `g`; only which graph the severed free variable resolves to is decided externally, via a small `run_primary_subjects` wrapper (excluded from surface metrics, like a context shim) that sets the module global right before calling the untouched region. The `global` it uses is scaffolding, not credited as a construction of the region.",
+    "`g.subjects()` and `g1.subjects()` (both full, unfiltered scans -- no predicate, no object) are kept as plain rdflib calls, NOT wrapped in `m{ ?s ?p ?o }`: the reference confirms 'a traversal with no selection to make does not get shorter inside one' and explicitly says to keep `list(g)` for a full scan. This CONFIRMS the already-known finding (INSTRUCTIONS_403 SS5): an unfiltered `.subjects()`/`.objects()` read has no island that improves on it.",
+    "with `g1` restored as an alias of `g`, and `anon_subjs` always empty (bug 1), the OBSERVABLE behaviour of `run_primary_subjects(g)` reduces to 'the URIRef subjects of g' -- which is what makes the fixture meaningfully testable (several solutions, an object-only neighbour, and BNode subjects that never surface either way, see fixture.ttl) rather than a constant independent of the input.",
+    "second driver call passes an empty graph for the zero-solution case: zero candidates for the (dead) BNode branch and zero URIRef subjects, so `run_primary_subjects` returns the empty set on both sides."
   ],
   "draft_sha": "6c3921cdc45d6859",
   "provenance": {
@@ -28,5 +39,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:run_primary_subjects",
+    "diffs": [],
+    "error": null
+  }
 }

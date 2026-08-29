@@ -1,4 +1,31 @@
-# Input graph for emmo-repo__domain-electrochemistry__.github_scripts_check_iri_resolution.py__ontology_subject — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for emmo-repo__domain-electrochemistry__.github_scripts_check_iri_resolution.py__ontology_subject
+# -- written during translation.
+#
+# Several solutions of the pattern the region reads (onto1, onto2: both
+# `a owl:Ontology`) -- the region returns whichever the store yields first,
+# so a translation that changed the traversal order would show up here.
+# Neighbourhood that must NOT match: onto3 is typed with a different class
+# that merely shares the local name "Ontology"; describes--owl:imports-->onto1
+# puts owl:Ontology-shaped data in a position (object of owl:imports) that a
+# too-broad pattern could pick up by mistake.
+#
+# The zero-solution case (no owl:Ontology triple at all) is NOT encoded as a
+# second fixture/call here: the region does not return None on that path, it
+# raises RuntimeError -- and rdfeval.harness.run_pair treats any exception
+# raised by the entry point as a fatal harness error (it aborts the whole
+# comparison, `verdict["error"]`), not as a value to compare, so there is no
+# way to drive that branch through `rdfeval check` without producing a
+# spurious FAIL. Confirmed by hand instead (see meta.json translation_notes):
+# both original.py and translated.ldpy raise RuntimeError with the identical
+# message for an empty graph.
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:onto1 a owl:Ontology .
+ex:onto2 a owl:Ontology .
+
+# neighbour that must NOT match: same local name, different vocabulary
+ex:onto3 a ex:Ontology .
+
+# neighbour that must NOT match: owl:Ontology-shaped data in object position
+ex:describes owl:imports ex:onto1 .

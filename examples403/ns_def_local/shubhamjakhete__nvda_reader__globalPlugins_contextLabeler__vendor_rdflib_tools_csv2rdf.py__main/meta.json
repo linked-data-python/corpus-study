@@ -13,10 +13,18 @@
     "namespace_ctor": 6,
     "term_constructor": 5
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "onze sites de la strate dans ce `main` : 6x `rdflib.Namespace(...)` (branche fichier de config -f, -b/--base, -p/--propbase) assignes a `csv2rdf.BASE` / `csv2rdf.PROPBASE`, et 5x `rdflib.URIRef(...)` (branche -f, -c/--class, boucle --col*/--prop*) assignes a `csv2rdf.CLASS` / `csv2rdf.PROPS[...]`. Chaque site est une AFFECTATION a un attribut (ou une entree de dict) d'un objet `CSV2RDF` -- @prefix est purement lexical, il ne produit aucune valeur, il ne peut donc jamais couvrir aucune de ces onze affectations. Meme motif que le sibling de ce lot (JustlyAI__lmss_entity_extractor__..._OntologyClassifier___init__, `self.LMSS = Namespace(...)`), repete onze fois via deux attributs et un dict au lieu d'un seul `self.X`.",
+    "echappement confirme, pas suppose, et VERS UNE AUTRE FONCTION : `CSV2RDF.convert` (context_shim.py, verifie sur le depot reel via le clone local corpus/repos/shubhamjakhete__nvda_reader/.../csv2rdf.py) dereference `self.BASE[\"%d\" % rows]` et `self.PROPBASE[toProperty(x)]` par SOUSCRIPTION -- hors de cette region (`main` ne fait que l'affectation, jamais la dereference). Meme si @prefix produisait une valeur, sa portee de bloc (declarations.md#block-scope) est le corps de `main` : elle ne survivrait pas jusqu'a `convert`, une methode soeur -- l'echappement est donc double : hors de la portee ET hors de la fonction.",
+    "region purement configuration/CLI (getopt + configparser) : aucune ecriture de triplet (`.triple()`) ni aucune dereference locale de type `ns:Term` ne se produit DANS `main` lui-meme -- tout `+{ }` possible se trouverait dans `CSV2RDF.convert`/`CSV2RDF.triple`, hors region. Rien d'autre dans ce bloc ne justifierait une construction ldpy.",
+    "shim de contexte (context_shim.py) : CSV2RDF, toProperty, index, prefixuri, csv_reader et le global `uris` transcrits VERBATIM (clone local, lignes 96-138 et 301-438). Omis, car jamais atteints par le chemin du pilote (-b, -p, -o, un seul fichier CSV, sans -f/-D/--default/--col*/--prop*/-i non-auto/-C) : la famille NodeMaker/NodeUri/NodeFloat/..., `column()`, `config_functions`. Python ne resout un nom qu'a l'execution de la ligne qui l'utilise -- la classe CSV2RDF reste donc completee a l'identique du depot pour le reste, y compris les branches non exercees qui referencent encore ces noms omis (elles ne s'executent simplement pas avec ce jeu d'options).",
+    "harnais `demo` ajoute a l'identique dans les deux fichiers (meme convention que le sibling) : `main` lit `sys.argv` directement et ne retourne rien -- aucun Graph ni valeur de portee module a comparer par le mode module-state du pilote. `demo(csv_path, out_path)` fixe un argv minimal (-b, -p, -o, un fichier CSV), appelle `main`, relit le fichier ecrit par -o et le retourne : seul effet RDF-observable de la region. meta.oracle indique isomorphism mais la region ne construit jamais de rdflib.Graph -- elle ecrit du n3 texte via `.n3()` -- d'ou une comparaison de la sortie textuelle plutot qu'un isomorphisme de graphe ; voir driver.py.",
+    "piege deja connu confirme : `csv2rdf.OUT` vaut `sys.stdout` par defaut (CSV2RDF.__init__) ; sans -o, l'appel se produit sous le `redirect_stdout(io.StringIO())` du harnais (run_pair appelle l'entree sous ce contexte), et `CSV2RDF.convert` fait `self.OUT.name` -- absent sur un `io.StringIO`, ce qui plante. -o (fichier reel avec .name) est donc necessaire au pilote, pas un choix arbitraire.",
+    "sortie comparee comme chaine ordonnee (ordered=True, la valeur par defaut hors fixture=) : les deux lignes de CSV sont parcourues sequentiellement des deux cotes, l'ordre fait partie du sens de la region (pas de tri implicite d'un store)."
+  ],
   "draft_sha": "8c8afff6ea0d0af2",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.450215+00:00",

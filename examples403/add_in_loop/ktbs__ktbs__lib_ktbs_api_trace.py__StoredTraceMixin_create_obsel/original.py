@@ -5,10 +5,10 @@ from numbers import Integral, Real
 from rdflib import Graph, Literal, RDF, RDFS, URIRef, XSD
 from rdflib.term import Node
 from datetime import datetime
-from rdfrest.util.iso8601 import parse_date, ParseError, UTC
-from rdfrest.util import cache_result, coerce_to_node, coerce_to_uri
-from .obsel import ObselMixin, ObselProxy
-from ..namespace import KTBS
+from context_shim import parse_date, ParseError, UTC
+from context_shim import cache_result, coerce_to_node, coerce_to_uri
+from context_shim import ObselMixin, ObselProxy
+from context_shim import KTBS
 _NOW = datetime.now
 
 def create_obsel(self, id=None, type=None, begin=None, end=None, 
@@ -128,3 +128,18 @@ def create_obsel(self, id=None, type=None, begin=None, end=None,
         ret = self.factory(uris[0], [KTBS.Obsel])
         assert isinstance(ret, ObselMixin)
         return ret
+
+
+# Demo harness (identical on both sides, see meta.json): create_obsel builds
+# its graph and hands it to self.post_graph(...) -- a side effect, not a
+# returned value -- so the driver cannot compare the graph by simply calling
+# create_obsel(self, ...) and looking at the result. This wraps the call
+# with a self stand-in (context_shim._TraceStub) that captures exactly the
+# graph it was posted, called with no_return=True to stay clear of
+# self.factory()/ObselMixin (the REST resource-creation step, out of scope
+# for a region under study for its graph construction).
+def demo(**kwargs):
+    from context_shim import _TraceStub
+    self = _TraceStub()
+    create_obsel(self, no_return=True, **kwargs)
+    return self.captured_graph

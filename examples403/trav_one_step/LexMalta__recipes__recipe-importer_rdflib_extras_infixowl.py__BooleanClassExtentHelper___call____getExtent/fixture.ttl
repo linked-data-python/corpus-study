@@ -1,0 +1,17 @@
+# Input graph for LexMalta__recipes__recipe-importer_rdflib_extras_infixowl.py__BooleanClassExtentHelper___call____getExtent
+# -- written during translation. Assigned to Individual.factoryGraph by
+# driver.py (the region reads a class attribute, not a function parameter).
+#
+# Covers: several solutions of the pattern the region reads (c1, c2, both
+# owl:unionOf); neighbouring triples that must NOT match (c3 uses
+# owl:intersectionOf, a different predicate; m1/m2/m3 are list members, never
+# themselves subjects of owl:unionOf). The zero-solution case is covered by
+# a second call in driver.py, against an empty graph, rather than here.
+@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:c1 owl:unionOf ( ex:m1 ex:m2 ) .
+ex:c2 owl:unionOf ( ex:m3 ) .
+
+# neighbour that must NOT match: same shape, different predicate
+ex:c3 owl:intersectionOf ( ex:m4 ) .

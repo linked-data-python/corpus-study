@@ -12,11 +12,19 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "+{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "site de la strate : 3 self.graph.add((node, ...)) consecutifs sur le meme `node` -> un seul +{ ... ; ... ; ... }, toute la fonction tient dans cet unique ilot (pas de branche, pas de boucle).",
+    "self.graph est un ATTRIBUT, pas une variable simple : +{ }(self.graph) (suffixe d'appel, current-graph.md) plutot que `@graph self.graph` suivi d'un +{ } nu -- choisi parce qu'il n'y a qu'UN SEUL site d'ecriture dans toute la fonction (une declaration de contexte pour un usage unique aurait ete plus lourde que le suffixe) et parce que c'est exactement l'exemple documente pour un attribut/propriete self.graph. Verifie a la main que les deux formes transpilent et s'executent correctement meme quand `graph` est une @property en lecture seule sans setter -- ce que `self.graph += g{ }` ne pourrait pas faire (piege documente de current-graph.md), jamais tente ici.",
+    "@prefix xsd: du brouillon RETIRE : aucun terme de vocabulaire prefixe n'apparait dans la region (les 3 predicats sont tous des lectures self.nodes[...]) -- declaration inutile, meme lecon que les deux autres regions de ce lot.",
+    "shim de contexte (context_shim.py) : SparqlEngine reduite aux 3 constantes de classe PRED_FACT_H/PRED_FACT_R/PRED_FACT_T que la region lit comme NOM GLOBAL (`SparqlEngine.PRED_FACT_H`, pas `self.SparqlEngine...`) -- original.py corrige a l'identique (import ajoute) pour rester executable, translated.ldpy pareil.",
+    "contrairement a la region soeur ObjectMinCardinality_to_rdf de ce lot (ou `g` est un parametre externe et `self` peut etre partage tel quel entre les deux cotes), ici self.graph vit A L'INTERIEUR de self : chaque cas construit un `self` FRAIS par cote, et _Engine.__eq__ (driver.py) compare par isomorphisme de self.graph plutot que par identite."
   ],
   "draft_sha": "c050a0e18ed7a126",
   "provenance": {
@@ -28,5 +36,12 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_new_fact_node",
+    "diffs": [],
+    "error": null
+  }
 }

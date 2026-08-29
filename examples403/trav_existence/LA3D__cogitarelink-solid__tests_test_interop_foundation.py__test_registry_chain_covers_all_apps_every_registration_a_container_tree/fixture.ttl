@@ -1,4 +1,62 @@
-# Input graph for LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_registry_chain_covers_all_apps_every_registration_a_container_tree — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_registry_chain_covers_all_apps_every_registration_a_container_tree.
+#
+# The region asserts a chain of invariants and RAISES if any fails (bare
+# `assert`, no graceful path), so the only call this driver can make is one
+# where every invariant already holds (see meta.json/translation_notes for
+# why the zero-solution branch cannot be exercised through run_pair here,
+# same limitation as the sibling region of this batch). What the fixture
+# DOES exercise:
+#
+#   * the full chain OWNER -hasRegistrySet-> hasDataRegistry-> 12
+#     hasDataRegistration objects -- SEVERAL solutions for the one true
+#     `m{ }` (not `.first()`) read in this region, `list(m{ {dreg}
+#     interop:hasDataRegistration ?r })`;
+#   * 7 "wiki" registrations whose registeredShapeTree starts with TREE_NS
+#     and 5 named ones (registry:contacts-person/-organization/-group/
+#     -membership, registry:id-schemes) with the exact ContainerTree IRIs
+#     the region compares against;
+#   * NEIGHBOURHOOD that must NOT match: a second owner (ex:otherOwner)
+#     with its own registry set, and a second data registry
+#     (ex:otherDreg) with its own registration (registry:decoy) that is
+#     reachable only from that other registry, never from `dreg` -- if
+#     `{dreg} interop:hasDataRegistration ?r` were scoped wrong (e.g. no
+#     subject restriction), `len(regs) == 12` would fail loudly, since
+#     registry:decoy would make 13.
+@prefix interop: <http://www.w3.org/ns/solid/interop#> .
+@prefix registry: <https://pod.vardeman.me/vault/meta/interop/registry#> .
+@prefix wiki: <https://pod.vardeman.me/vault/meta/shapetrees/wiki-memory.tree#> .
+@prefix ab: <https://pod.vardeman.me/vault/meta/shapetrees/addressbook.tree#> .
+@prefix idt: <https://pod.vardeman.me/vault/meta/shapetrees/id-schemes.tree#> .
+
+<https://pod.vardeman.me/vault/profile/card#me> interop:hasRegistrySet <urn:ex:rset1> .
+<urn:ex:rset1> interop:hasDataRegistry <urn:ex:dreg1> .
+
+<urn:ex:dreg1> interop:hasDataRegistration
+    registry:concepts, registry:people, registry:places, registry:events,
+    registry:organizations, registry:procedures, registry:working,
+    registry:contacts-person, registry:contacts-organization,
+    registry:contacts-group, registry:contacts-membership,
+    registry:id-schemes .
+
+registry:concepts       interop:registeredShapeTree wiki:ConceptsContainerTree .
+registry:people         interop:registeredShapeTree wiki:PeopleContainerTree .
+registry:places         interop:registeredShapeTree wiki:PlacesContainerTree .
+registry:events         interop:registeredShapeTree wiki:EventsContainerTree .
+registry:organizations  interop:registeredShapeTree wiki:OrganizationsContainerTree .
+registry:procedures     interop:registeredShapeTree wiki:ProceduresContainerTree .
+registry:working        interop:registeredShapeTree wiki:WorkingContainerTree .
+
+registry:contacts-person       interop:registeredShapeTree ab:PersonContainerTree .
+registry:contacts-organization interop:registeredShapeTree ab:OrganizationContainerTree .
+registry:contacts-group        interop:registeredShapeTree ab:GroupContainerTree .
+registry:contacts-membership   interop:registeredShapeTree ab:MembershipContainerTree .
+registry:id-schemes            interop:registeredShapeTree idt:SchemeRecordContainerTree .
+
+# Neighbourhood -- must not match: a second owner/registry-set/data-registry
+# chain, entirely disjoint from the one under test, with its own
+# registration that must not leak into `regs` (12, exact) or `wiki` (7,
+# exact).
+<urn:ex:otherOwner> interop:hasRegistrySet <urn:ex:otherRset> .
+<urn:ex:otherRset> interop:hasDataRegistry <urn:ex:otherDreg> .
+<urn:ex:otherDreg> interop:hasDataRegistration registry:decoy .
+registry:decoy interop:registeredShapeTree wiki:DecoyContainerTree .

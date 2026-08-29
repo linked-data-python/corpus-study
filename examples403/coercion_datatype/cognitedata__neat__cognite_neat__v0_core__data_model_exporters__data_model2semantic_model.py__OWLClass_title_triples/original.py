@@ -2,7 +2,7 @@
 # region: OWLClass.title_triples (lines 202-213, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import DCTERMS, OWL, RDF, RDFS, XSD, BNode, Graph, Literal, Namespace, URIRef
-from cognite.neat._v0.core._utils.rdf_ import remove_namespace_from_uri
+from context_shim import OWLClass, remove_namespace_from_uri
 
 @property
 def title_triples(self) -> list[tuple]:
@@ -16,3 +16,15 @@ def title_triples(self) -> list[tuple]:
         ]
     else:
         return []
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# @property body lifted out of its pydantic class, so this entry point
+# attaches it to a minimal reconstruction of OWLClass and reads the property
+# off a fresh instance -- the oracle is value equality on the returned triple
+# list (see driver.py).
+OWLClass.title_triples = title_triples
+
+
+def demo(id_, label):
+    return OWLClass(id_, label).title_triples

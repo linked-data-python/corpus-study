@@ -12,10 +12,21 @@
   "categories": {
     "graph_read": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable"
+  ],
+  "translation_notes": [
+    "`for subject in graph.subjects(RDF.type, OWL.Ontology): return subject` returns the first solution the store yields, or falls through -- exactly `.first()`'s contract (None on zero solutions, the first term otherwise, no uniqueness check), so it becomes `m{ ?s a owl:Ontology }.first()` with the fallthrough turned into `if subject is not None: return subject`. `graph` is a function parameter used only here, so `@graph graph` designates it for the block rather than repeating a call suffix.",
+    "verified against a fixture with two solutions (onto1, onto2) that `.first()` and rdflib's `.subjects()` agree on WHICH one comes first for the same input text: both ultimately walk `graph.triples()` on the same in-memory store, and `rdfeval check` is green, so the traversal order coincides here -- not something the language guarantees in general, worth keeping in mind for a region whose behaviour actually depends on which of several solutions is 'first'.",
+    "the zero-solution branch could not be exercised through `rdfeval check`: this region raises RuntimeError rather than returning None on no match, and rdfeval.harness.run_pair treats any exception from the entry point as a fatal harness error (aborts the whole comparison) rather than a value to compare -- a tooling gap in the run_pair `calls=` path for exception-raising reads, not a translation gap. Confirmed by hand instead (both sides raise `RuntimeError('test-source: no owl:Ontology declaration found')` verbatim for an empty graph) -- see fixture.ttl for the detail."
+  ],
   "draft_sha": "2ddaea9dd7e10e05",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.158454+00:00",
@@ -26,5 +37,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:ontology_subject",
+    "diffs": [],
+    "error": null
+  }
 }

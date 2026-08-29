@@ -17,11 +17,26 @@
     "serialize_parse": 1,
     "term_constructor": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "IRI",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: INTEROP->interop"
+    "prefixes: INTEROP->interop",
+    "graph binding restored (see original.py header): the extracted region built its graph from a real file on disk (REG / REPO), one of the corpus/403 '163 regions with no visible graph'. `REPO` is undefined outside the source checkout -- added a `graph` parameter and dropped the REG/parse line.",
+    "`OWNER = rdflib.URIRef(\"https://...#me\")` -> `OWNER = <https://...#me>`, the plain migrate-from-rdflib.md row-2 rewrite (no @base in scope in this file, so trap 2 does not apply).",
+    "NOTABLE FINDING for this stratum: this region has ZERO occurrences of the target idiom `bool(m{ })`. Every `g.value(...) is not None` check in it is followed by REUSE of the fetched value (as `rset`, `dreg`, in a `str(...).endswith/startswith` check, or in an `==` comparison against a computed URIRef) -- so the most specific construction throughout is `.first()`, never a discarded-value existence test. Per INSTRUCTIONS_403 SS2 ('la construction la plus specifique'), `bool(m{ })` was NOT used anywhere here even though the region was sampled into trav_existence: a `g.value(...) is not None` guard that keeps the value alive downstream is trav_single_value's idiom, not trav_existence's, regardless of the assert wording. Contrast with the sibling LA3D region and the pyrml region of this same batch, which do each contain one genuine discarded-value read.",
+    "`list(g.objects(dreg, INTEROP.hasDataRegistration))` -> `list(m{ {dreg} interop:hasDataRegistration ?r })`: arity 1, bare terms, same shape as `for o in m{ {s} ex:p ?o }` but materialised eagerly like the original.",
+    "`REG_NS = rdflib.Namespace(...)` (a SECOND, function-local namespace, for hyphenated slugs like 'contacts-person') was left as a plain rdflib.Namespace and interpolated as `{REG_NS[\"contacts-person\"]}` rather than promoted to its own `@prefix` -- `registry:contacts-person` would be syntactically valid (Turtle PN_LOCAL allows '-'), but converting a namespace that exists only to hold 5 already-known constants is not what this stratum targets, and interpolating the existing Python expression keeps the diff against original.py minimal. Noted as a choice, not a language limitation.",
+    "zero-solution branch cannot be exercised through this driver, same reason as the sibling LA3D region of this batch: every read here feeds a bare `assert`, and run_pair aborts the comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py). Hardened the fixture instead with a fully disjoint neighbour owner/registry-set/data-registry chain whose registration must not leak into the exact counts (12, then 7) the region asserts."
   ],
   "draft_sha": "3942c39169269158",
   "provenance": {
@@ -33,5 +48,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:test_registry_chain_covers_all_apps_every_registration_a_container_tree",
+    "diffs": [],
+    "error": null
+  }
 }

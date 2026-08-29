@@ -1,6 +1,13 @@
 # Extracted from beyonai/ByDC@8c0643fb26 : packages/datacloud-knowledge/src/datacloud_knowledge/ingestion/owl_generate/graph_builder.py
 # region: GraphBuilder.add_entity_mapping (lines 509-529, stratum add_isolated)
 # licence of the source repository: see meta.json
+#
+# `_safe_xml_id` restores a binding the sampled context lines dropped (the
+# region calls it but the module-level function that makes it resolve was
+# not in the extracted lines) -- see meta.json / AGENT_BATCH.md "shim de
+# contexte".
+from context_shim import _safe_xml_id
+
 def add_entity_mapping(
     self,
     object_code: str,
@@ -22,3 +29,21 @@ def add_entity_mapping(
     if mapping_refs:
         for ref_id in mapping_refs:
             self._graph.add((uri, self._ns.mapping, self._ns[ref_id]))
+
+
+# Demo harness (identical on both sides, see meta.json): add_entity_mapping
+# is a method body lifted out of its class, so this entry point builds a
+# context_shim.GraphBuilderStub -- the minimal `self` the region's own body
+# reads -- calls add_entity_mapping(self, ...) for effect, and returns
+# self._graph, the region's only RDF-observable effect (meta.oracle:
+# isomorphism). Passing the stub itself as a compared argument would give a
+# spurious harness mismatch (a plain object has no __eq__, so two
+# structurally-identical stubs built one per side compare unequal by
+# identity) -- demo's own arguments stay plain strings/lists instead.
+from context_shim import GraphBuilderStub
+
+
+def demo(object_code, object_name, object_desc, mapping_refs):
+    self = GraphBuilderStub()
+    add_entity_mapping(self, object_code, object_name, object_desc, mapping_refs)
+    return self._graph

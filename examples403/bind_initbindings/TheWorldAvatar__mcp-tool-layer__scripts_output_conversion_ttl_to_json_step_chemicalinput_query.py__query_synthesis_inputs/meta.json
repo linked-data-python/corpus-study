@@ -13,10 +13,24 @@
     "sparql": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "prefixes: the query's own inline PREFIX ontosyn:/rdfs: lines move to the file's @prefix declarations, per querying.md (\"the prologue is the block's\") -- nothing is inside s{ } but the SELECT and WHERE.",
+    "`?synthesis` is bound by initBindings but never projected (SELECT DISTINCT ?chemical ?label ?amount ?altName), so the stratum table's more specific construction applies: a bare interpolation at both places `?synthesis` stood, not `s{ }(bindings=...)`.",
+    "the interpolation is `{URIRef(synthesis_uri)}`, not `{synthesis_uri}`: the default coercion of a plain Python str is a Literal, and `synthesis_uri` is a plain str parameter here, so dropping the explicit URIRef(...) the original code already performs would silently change the term kind bound at that position. `URIRef` itself passes through coercion.node() unchanged (coercion.md), so wrapping it keeps exactly the original's semantics.",
+    "UNION and the three OPTIONAL clauses need no rewriting at all: s{ } is rdflib's own SPARQL, so the query text is carried over untouched apart from the prologue and the two interpolated terms.",
+    "query_synthesis_inputs(graph, synthesis_uri) takes two positional arguments, so run_pair's fixture= shortcut (which passes the parsed graph as the entry's only argument) does not fit; driver.py calls rdfeval.harness.fixture_graph() directly and builds calls= by hand, with ordered=False set explicitly since that shortcut is what normally defaults it (no store promises a row order, and the region's grouping dict -- and each chemical's alternative_names list -- both depend on it).",
+    "fixture.ttl exercises both UNION branches, all three OPTIONAL clauses (bound and fully unbound), one chemical with two alternative names folding into one grouped entry (multiple solutions for one ?chemical), the zero-solution case (a synthesis that exists but links no chemical), and neighbourhood that must not match: a second synthesis's own chemical, and an rdfs:label sitting on the synthesis itself rather than on a chemical."
+  ],
   "draft_sha": "94b6b05397889cce",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.304244+00:00",
@@ -27,5 +41,12 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:query_synthesis_inputs",
+    "diffs": [],
+    "error": null
+  }
 }

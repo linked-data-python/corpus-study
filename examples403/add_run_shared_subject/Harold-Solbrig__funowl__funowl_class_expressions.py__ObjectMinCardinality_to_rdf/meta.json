@@ -14,11 +14,22 @@
     "term_constructor": 1,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf"
+    "site de la strate : 2 g.add((x, ...)) consecutifs (owl:Restriction, owl:onProperty) puis, selon `if self.classExpression:`, soit 2 autres g.add sur le meme x (owl:minQualifiedCardinality, owl:onClass) soit 1 seul (owl:minCardinality). Trois ilots +{ } distincts (un par chemin de controle), chacun factorisant tout ce qui EST sur le meme chemin avec ';' -- fusionner par-dessus l'if/else aurait change quels triplets un appel donne asserte reellement.",
+    "prefixes : owl: est le seul reellement utilise. rdf: du brouillon a ete RETIRE : RDF.type devient `a` (jamais ecrit litteralement rdf:type dans la region) -- une declaration inutile aurait fausse le decompte des ilots (meme lecon que la region soeur Annotatable_TANN de ce lot).",
+    "@graph g designe le PARAMETRE `g` de la fonction (pas une variable creee dans le corps) : plus specifique que `g += g{ }` (evite l'objet graphe intermediaire et le += rdflib) pour un sujet ecrit a plusieurs endroits du corps.",
+    "self.objectPropertyExpression.to_rdf(g), self.min_.to_rdf(g), self.classExpression.to_rdf(g) restent des appels Python interpoles : ce sont des noeuds AST funowl calcules, pas du vocabulaire ecrit en clair dans la region.",
+    "shim de contexte (context_shim.py, driver.py uniquement -- original.py n'a besoin d'aucun import supplementaire) : ExprTerm/ObjectMinCardinality reduits a ce que to_rdf lit (.objectPropertyExpression, .classExpression, .min_, chacun expose seulement .to_rdf(g)) -- meme reduction que la region soeur Annotatable_TANN.",
+    "deux appels du pilote : classExpression pose (branche owl:minQualifiedCardinality/owl:onClass) et classExpression absent (branche owl:minCardinality seule) -- self partage entre les deux invocations d'un meme cas (identite, pas d'egalite structurelle a definir), seul `g` est frais par cote."
   ],
   "draft_sha": "40ea06259309b83d",
   "provenance": {
@@ -30,5 +41,12 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:to_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

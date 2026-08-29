@@ -1,4 +1,50 @@
-# Input graph for mapsa__blathers__src_blathers_extract.py___extract_nested_node — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# mapsa__blathers__src_blathers_extract.py___extract_nested_node.
+#
+# _extract_nested_node(g, node) reads two patterns rooted at `node`:
+#   * rdfs:comment (the trav_single_value site: g.value -> m{ }.first())
+#   * every other predicate/value pair (g.predicate_objects -> m{ } loop),
+#     grouped by predicate and filtered against _STRUCTURAL_NS.
+#
+# The driver resolves `node` itself, per call, from the same freshly-parsed
+# graph (rdflib mints a fresh internal BNode id on every parse, so a literal
+# BNode(...) here would never match) -- it looks it up via the named anchor
+# triple ex:ClassA/B/C ex:hasNested _:nN.
+#
+#   * SEVERAL solutions, both patterns: _:n1 (anchored by ex:ClassA) has an
+#     rdfs:comment AND four predicate/value pairs, including ex:label TWICE
+#     -- exercises rows.setdefault + row.values.append growing one row from
+#     two solutions -- plus a structural `a ex:NestedType` pair that must be
+#     filtered out by _STRUCTURAL_NS (rdf: is one of its four namespaces)
+#     without ever reaching _term_label for it.
+#   * ZERO solutions for rdfs:comment -- the case that tells .first() (None)
+#     apart from .one() (would raise): _:n2 (anchored by ex:ClassB) carries
+#     predicate/value pairs but no rdfs:comment at all.
+#   * NEIGHBOURHOOD that must NOT match either call: _:n3 (anchored by
+#     ex:ClassC, never queried by the driver) has its own rdfs:comment and
+#     ex:label -- proves the pattern is keyed on the exact `node` argument,
+#     not merely on the predicate -- and ex:Other, a NAMED (non-blank)
+#     resource with the same predicates, proving the read is scoped to a
+#     blank node and not just "whatever has these predicates".
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+ex:ClassA ex:hasNested _:n1 .
+_:n1 rdfs:comment "A commented nested node" ;
+     a ex:NestedType ;
+     ex:label "First" ;
+     ex:label "Second" ;
+     ex:weight 3 .
+
+ex:ClassB ex:hasNested _:n2 .
+_:n2 ex:label "Only value, no comment" ;
+     a owl:Thing .
+
+ex:ClassC ex:hasNested _:n3 .
+_:n3 rdfs:comment "Must never be read" ;
+     ex:label "Unrelated" .
+
+ex:Other rdfs:comment "Also must never be read" ;
+         ex:label "Also unrelated" .

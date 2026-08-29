@@ -1,4 +1,46 @@
-# Input graph for anuzzolese__pyrml__pyrml_pyrml_core.py__TripleMappings_from_rdf — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for anuzzolese__pyrml__pyrml_pyrml_core.py__TripleMappings_from_rdf.
+#
+# from_rdf finds candidate triples-map subjects via a predicate-path
+# (rml:logicalSource | rr:logicalTable), restricted to a specific subject
+# only when `parent` resolves one via rr:parentTriplesMap, then keeps only
+# those that carry rr:subjectMap. Two driver calls read this same graph
+# (see driver.py):
+#
+#   * parent=None (subject wildcard): candidates are every triples map
+#     reachable by EITHER predicate, anywhere -- ex:tmA (via
+#     rml:logicalSource), ex:tmB (via rr:logicalTable) and ex:tmC (via
+#     rml:logicalSource, also reachable through ex:refMap). ex:tmB has NO
+#     rr:subjectMap -- the FALSE branch of the region's one true existence
+#     check, `bool(m{ {tm} rr:subjectMap ?x })` -- so it must be excluded;
+#     ex:tmA and ex:tmC both have one and must both be selected. Expected:
+#     {ex:tmA, ex:tmC} (a two-element multiset -- ex:tmB is the
+#     zero-solution/False proof, not a third member).
+#   * parent=<http://example.org/refMap>: `tm` resolves via
+#     rr:parentTriplesMap to ex:tmC, restricting the predicate-path read to
+#     subject=ex:tmC alone. Expected: {ex:tmC} only -- ex:tmA (a different
+#     subject) must NOT leak in even though it satisfies the same
+#     predicate-path pattern; this is the neighbourhood proof that the
+#     untranslated `g.triples((tm, path, None))` line still scopes
+#     correctly once `tm` comes from the translated `.first()` read.
+@prefix ex:  <http://example.org/> .
+@prefix rr:  <http://www.w3.org/ns/r2rml#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+
+# ex:tmA -- top-level triples map (via rml:logicalSource), HAS a
+# rr:subjectMap -> selected whenever it is a candidate at all.
+ex:tmA rml:logicalSource ex:src1 ;
+    rr:subjectMap ex:sm1 .
+
+# ex:tmB -- top-level triples map (via rr:logicalTable, the OTHER side of
+# the alternation), but NO rr:subjectMap -> the zero-solution case.
+ex:tmB rr:logicalTable ex:table1 .
+
+# ex:refMap -- a referencing object map whose rr:parentTriplesMap points at
+# ex:tmC.
+ex:refMap rr:parentTriplesMap ex:tmC .
+
+# ex:tmC -- reached both as a top-level candidate (parent=None) and as the
+# resolved parent (parent=ex:refMap); has a subjectMap -> selected in both
+# calls.
+ex:tmC rml:logicalSource ex:src2 ;
+    rr:subjectMap ex:sm2 .

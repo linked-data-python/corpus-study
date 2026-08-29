@@ -2,6 +2,7 @@
 # region: get_bind_tests.check (lines 16-23, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, URIRef, Variable
+from test_evaluate_bind_context import g
 
 def check(expr, var, obj):
     r = g.query(

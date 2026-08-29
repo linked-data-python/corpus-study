@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import OWL
+from context_shim import LintIssue, Severity, is_builtin, lint_rule  # context shim -- see meta.json
 
 @lint_rule(
     rule_id="property-no-type",

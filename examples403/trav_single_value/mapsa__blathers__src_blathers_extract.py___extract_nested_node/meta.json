@@ -13,11 +13,23 @@
     "graph_read": 2,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, OWL->owl, RDF->rdf, RDFS->rdfs"
+    "The flagged site (line 159): `g.value(node, RDFS.comment)` -> `m{ {node} rdfs:comment ?v }.first()`. Textbook trav_single_value: subject given by interpolation, one projected variable so `.first()` yields the term itself, None on the fixture's zero-solution branch (_:n2, anchored by ex:ClassB) exactly like rdflib's `.value()` -- verified by deliberately swapping in `.one()` and confirming it raises `ValueError: m{ }.one() : aucune solution` on that branch (`m{ }.one()` is a strictly stronger read than `g.value()`, which never raises: it returns None on zero matches and an arbitrary one, never an error, on several -- `.first()` is the exact match here, no nuance lost).",
+    "the OTHER graph read in the same function -- `for pred, value in g.predicate_objects(node)` -- is not the flagged site but is translated too, per INSTRUCTIONS_403 SS2 (most specific construction everywhere, not just the tirage's site): `for pred, value in m{ {node} ?pred ?value }`. Arity 2 (subject fixed, predicate and object both variables) -> unpackable rows in written order (?pred first, ?value second), matching the loop's `pred, value` unpacking. Verified by hand (probe.ldpy, not kept) that `m{ {node} ?pred ?value }` yields triples in exactly the same order as `g.predicate_objects(node)` on the same freshly-parsed graph -- both walk graph.triples() the same way -- which matters here because the region groups results into a dict (`rows.setdefault`) whose value order the return type exposes; the harness compares fixture results as multisets by default (`ordered=False`) but that recursion does not reach INSIDE the returned ExtractedNestedNode/NestedRow dataclasses (they are opaque to materialise/normalise), so this region's green depends on the two sides producing rows in the SAME order, not just the same set -- confirmed true (deterministic given one input text, independent of BNode id randomness), but worth flagging: a region returning a plain-Python container of query results would not have had this dependency.",
+    "prefixes: only rdfs: is declared -- dcterms:/owl:/rdf: from the earlier draft are dropped, nothing in the translated lines resolves through them (OWL, RDF, RDFS, DCTERMS are read as plain Python Namespace objects via `str(RDF)` etc. in `_STRUCTURAL_NS`, never through island notation).",
+    "SH was referenced in `_STRUCTURAL_NS` by the tirage's captured context but never defined (NameError): checked against the real source (corpus/repos/mapsa__blathers/src/blathers/extract.py) and restored verbatim as `SH = Namespace(\"http://www.w3.org/ns/shacl#\")`, the line the auto-captured context window elided.",
+    "context shim (blathers_context.py): NestedRow, ExtractedNestedNode, _str_or_none, _local_name, _term_label, copied verbatim from the real source file (available locally at corpus/repos/mapsa__blathers/) rather than reconstructed from the region's usage alone -- _term_label itself does a graph read (`g.value(iri, RDFS.label)`) but is NOT part of this region (defined elsewhere in extract.py) and is imported identically by both original.py and translated.ldpy, so it is left as plain rdflib code and does not bias the comparison.",
+    "driver.py: `node` cannot be a hardcoded BNode(...) because rdflib mints a fresh internal id on every parse of fixture.ttl (verified by hand); each call instead resolves its own `node` from its own freshly-parsed graph via a named anchor triple (ex:ClassA/B ex:hasNested _:nN), so the value handed to the entry point always belongs to the graph it reads. with_comment and without_comment exercise the single-value site's two branches; both also exercise the predicate_objects loop (_:n1 has ex:label twice, testing row grouping; _:n2 has no rdfs:comment but does have predicate/value pairs). fixture.ttl's neighbourhood (_:n3, reachable only via ex:ClassC which no call queries, and ex:Other, a NAMED resource with the same predicates) proves the read is keyed on the exact node argument, not merely on predicate names."
   ],
   "draft_sha": "f50125274504a6f9",
   "provenance": {
@@ -29,5 +41,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_extract_nested_node",
+    "diffs": [],
+    "error": null
+  }
 }

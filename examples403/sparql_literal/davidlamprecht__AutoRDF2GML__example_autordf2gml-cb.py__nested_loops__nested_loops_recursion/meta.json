@@ -10,10 +10,16 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "The SPARQL text is not visible at the call site: `graph.query(query_a)` queries a variable, and `query_a` comes from `create_sparql_query(current_combination, class_a, class_x)`, a helper defined elsewhere in the source file (lines 592-608, restored verbatim in _context.py) and not part of this region. s{ } requires the query written literally at the transpile-time call site (querying.md: 'in the language's own syntax, validated at transpile time') — there is nothing to write here, only a name.",
+    "Even folding create_sparql_query's body into the picture does not help: its WHERE clause has a VARIABLE NUMBER of triples, built by `for i, prop in enumerate(current_combination): triples += f\"{prev_var} <{prop}> {var} .\\n\"`. {expr} interpolation in s{ } only fills a fixed TERM position in an otherwise-fixed query text (INSTRUCTIONS_403 SS2, 'pas de chaine de requete assemblee') — it cannot synthesize a variable-length sequence of triple patterns. The recursion depth (len(current_combination)) is only known at run time, so no single s{ } text, however parametrised, can stand for every call.",
+    "Minimal excerpt showing the limit: `triples += f\"{prev_var} <{prop}> {var} .\\n\"` inside a `for` loop whose trip count depends on `current_combination`, then `SELECT DISTINCT ?a ?x WHERE {{ ... {triples} }}` — the number of WHERE-clause triples is itself the loop variable.",
+    "Identity translation: translated.ldpy is original.py unchanged (no island applies), which is why the pilot proves only that the untranslated rdflib fallback still runs correctly end-to-end through ldpy's Python superset, not that any construction was exercised.",
+    "graph/class_a/class_x/result_list restored as module-level context (not parameters — see driver.py and original.py headers) because _nested_loops_recursion is a nested function stripped of its enclosing nested_loops(list_of_lists, result_list, class_a, class_x) closure. The oracle is module-state (run_pair(__file__)), not entry=/calls=, because entry mode cannot observe a mutated global (result_list)."
+  ],
   "draft_sha": "4d025a60bee58924",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.719779+00:00",
@@ -24,5 +30,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true
 }

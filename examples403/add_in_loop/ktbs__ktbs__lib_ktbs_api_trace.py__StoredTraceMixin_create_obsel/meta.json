@@ -15,11 +15,27 @@
     "term_constructor": 7,
     "triple_add": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "for @bindings in",
+    "variable",
+    "prefixed name",
+    "from … import p:",
+    "@prefix",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "Four `for x in items: graph.add((..., ...))` loops (attributes.items(), relations, inverse_relations, source_obsels) are each genuinely row-shaped -- one fixed triple pattern, values varying per item, no branching on the item itself -- so each becomes `for @bindings in (dict-generator): +{ pattern with ?p/?o/?s }`, the stratum's target construction, used four times in one region.",
+    "the two `graph.add(...)` calls that open the function (type + hasTrace, same subject `obs`) are merged into one `+{ {obs} a {type_uri} ; ktbs:hasTrace {self.uri} }` (add_run_shared_subject idiom) rather than left as two islands or as two `g +=`; every other add() in the function is already isolated by an `if`/`else` so stays a single `+{ }`.",
+    "`@graph graph` designates the existing local `graph = Graph()` (not `@graph as graph`, since the graph already exists) -- more specific than the mechanical `graph += g{ ... }` a first pass produced, and lets every write below be a bare `+{ }`.",
+    "`from ..namespace import KTBS` is the project namespace (ns_import_project idiom) and is used as a term in 7 of the 10 write sites, so it becomes `from context_shim import ktbs:` rather than `{KTBS.x}` interpolated everywhere -- most specific construction, even though ns_import_project is not the stratum drawn here (same call as the ktbs/blobfish AORC precedent already in this corpus). `KTBS.Obsel`, used twice as a plain argument value to self.post_graph/self.factory (not a triple write), becomes the bare expression `ktbs:Obsel` -- terms are ordinary Python expressions outside islands too.",
+    "prefixes actually used in-region: only rdfs: (RDFS.label -> rdfs:label, once). rdf: is NOT declared: RDF.type is written as `a` inside `+{ }`, so an rdf: prefix would sit unused and inflate the construction count (same call as `add_run_shared_subject/Dewberry__blobfish__...create_graph_triples`, which retired an unused rdf: for the identical reason). xsd: is not declared either: XSD is imported by the real source file but never referenced inside create_obsel (it is used by two sibling methods outside the extracted region, lines 391/412 of lib/ktbs/api/trace.py) -- confirmed by reading the checked-out corpus repo.",
+    "b.raw was NOT needed: every guard in this region is `x is not None` (attributes/relations/inverse_relations/source_obsels/subject/label), never a `!= \"\"` string-emptiness check, so the coercion pitfall in AGENT_BATCH's watch-list does not arise here -- each `if x is not None:` around a whole loop or a single write is a plain Python guard, unaffected by term coercion.",
+    "context_shim.py restores rdfrest.util/rdfrest.util.iso8601 (not an installed package outside the ktbs monorepo -- verbatim copy of coerce_to_uri/coerce_to_node/cache_result and the parse_date machinery) and lib/ktbs/namespace.py's KTBS (real IRI http://liris.cnrs.fr/silex/2009/ktbs#, ClosedNamespace reduced to a plain Namespace, same simplification as other shims in this study). ObselMixin/ObselProxy are empty placeholders needed only so the header import succeeds; they are never exercised because the driver's demo() harness always passes no_return=True.",
+    "demo(**kwargs) is appended identically to original.py and translated.ldpy (documented in both): create_obsel writes its graph into `self.post_graph(...)`, a side effect rather than a return value, so demo() supplies context_shim._TraceStub as `self` and hands back the graph it captured -- same pattern as the add_run_shared_subject blobfish region already in this corpus, whose GraphCreator likewise has no __eq__ to compare an argument by."
   ],
   "draft_sha": "f653b08a46b0e636",
   "provenance": {
@@ -31,5 +47,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

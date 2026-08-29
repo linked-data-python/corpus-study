@@ -12,10 +12,18 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "not-expressible: no island applies. The region is `rdflib.Literal(decodeUnicodeEscape(x[0][1:-1]))`, a PLAIN literal (no @lang, no ^^dt) built from an arbitrary parsed string, standalone in a pyparsing `setParseAction` lambda -- there is no graph, no `+{ }`/`g{ }` context, and no vocabulary term anywhere in scope. migrate-from-rdflib.md's 'What not to rewrite' section documents exactly this shape: 'A plain literal: Literal(\"x\") has no island spelling outside a graph. Inside one, position makes it a literal; outside, keep Literal.' translated.ldpy is therefore byte-for-byte identical to original.py (plus the demo harness, also identical) -- 0 constructions employed.",
+    "why this is a real (if narrow) finding and not just an unlucky pick: the region also is not linked-data application code at all -- it is a fragment of rdflib's OWN vendored SPARQL grammar (lib/rdflib/plugins/sparql/parser.py, a pyparsing rule), i.e. code that IMPLEMENTS the SPARQL string-literal token, not code that USES RDF terms to model a domain. ldpy's islands target the latter; this snippet has no subject/predicate/object, no prefix, nothing an island could name.",
+    "f{expr} was considered and rejected as not actually more specific: under the default coercion policy, f{decodeUnicodeEscape(...)} and rdflib.Literal(decodeUnicodeEscape(...)) produce the IDENTICAL term (str -> plain Literal, no conversion happens either way) -- it would be a shorter spelling of the exact same no-op, crediting a construction for zero semantic change and contradicting the documented guidance to keep Literal(...) here.",
+    "genuine finding for the coercion_datatype stratum, same shape as the sibling region in this batch (OWLClass.title_triples): the tirage's `term_constructor` category fires on any bare `Literal(...)` call, typed or not -- it does not distinguish `Literal(v, datatype=XSD.…)` (the pattern this stratum is meant to exercise) from a plain, untyped `Literal(v)` like this one, where no ldpy.Coercion policy has anything to do because no coercion happens.",
+    "restored bindings in original.py (not a reconstructed shim -- copied verbatim from the real file's own top-of-module imports, lib/rdflib/plugins/sparql/parser.py lines 10 and 12-14): `import re`, `from pyparsing import Regex`. Both packages are already in the pinned study venv.",
+    "demo harness added identically to both original.py and translated.ldpy: the region only defines a grammar rule and its parse action, so nothing is observable at module scope without actually running the parser; demo(text) does that and returns the rdflib term built, which driver.py compares by value (datatype/language included).",
+    "two driver cases: a plain token and one carrying a `\\n` escape (two characters, not a real newline, in the SPARQL source text) that decodeUnicodeEscape must resolve -- so a translation that silently dropped the escaping step would be caught, not just one that dropped the Literal wrapping."
+  ],
   "draft_sha": "bf81d807c8f25c3f",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.745560+00:00",

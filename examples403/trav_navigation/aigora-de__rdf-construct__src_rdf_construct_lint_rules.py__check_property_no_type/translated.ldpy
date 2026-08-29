@@ -3,8 +3,9 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import OWL
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import LintIssue, Severity, is_builtin, lint_rule  # context shim -- see meta.json
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 
@@ -20,6 +21,7 @@ def check_property_no_type(graph: Graph) -> list[LintIssue]:
     This catches subjects that have domain/range but no property type.
     """
     issues = []
+    @graph graph
 
     # Find all subjects that have domain or range but no property type
     property_types = {
@@ -29,9 +31,9 @@ def check_property_no_type(graph: Graph) -> list[LintIssue]:
         owl:AnnotationProperty,
     }
 
-    for subj in graph.subjects(rdfs:domain, None):
+    for subj in m{ ?subj rdfs:domain [ ] }:
         if isinstance(subj, URIRef) and not is_builtin(subj):
-            types = set(graph.objects(subj, rdf:type))
+            types = set(m{ {subj} a ?t })
             if not types.intersection(property_types):
                 issues.append(
                     LintIssue(
@@ -42,9 +44,9 @@ def check_property_no_type(graph: Graph) -> list[LintIssue]:
                     )
                 )
 
-    for subj in graph.subjects(rdfs:range, None):
+    for subj in m{ ?subj rdfs:range [ ] }:
         if isinstance(subj, URIRef) and not is_builtin(subj):
-            types = set(graph.objects(subj, rdf:type))
+            types = set(m{ {subj} a ?t })
             if not types.intersection(property_types):
                 # Avoid duplicates if already reported
                 existing = [i for i in issues if i.entity == subj]

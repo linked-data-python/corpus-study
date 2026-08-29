@@ -13,11 +13,24 @@
     "graph_read": 3,
     "namespace_term": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd from the draft are narrowed to owl/rdfs only: the region's own body never uses RDF.* (rdf:type is written with the Turtle `a` shorthand, not a prefixed name) or SKOS.*/XSD.* at all -- an unused @prefix is noise (already noted for a prior trav_navigation region in this same batch).",
+    "the region chains THREE separate `.subjects()`/`.objects()` calls: candidate classes (`graph.subjects(RDF.type, OWL.Class)`), then per-candidate parents (`graph.objects(class_uri, RDFS.subClassOf)`) and children (`graph.subjects(RDFS.subClassOf, class_uri)`). Unlike a prior trav_navigation region in this same repository family, these do NOT fuse into one `m{ }` join: the control flow between them is `if not parents and not children`, a conjunction of two NEGATED existence checks, and `m{ }` has no FILTER/NOT EXISTS to express a negation at all. Each step gets its own most-specific `m{ }` instead: `m{ ?class_uri a owl:Class }` (arity 1, terms), `m{ {class_uri} rdfs:subClassOf ?p }` (arity 1, terms -- replaces `.objects()`), `m{ ?s rdfs:subClassOf {class_uri} }` (arity 1, terms -- replaces `.subjects()`). This is the counter-example to 'trav_navigation always means fuse into one join': fusion is only valid for a positive AND-chain, and this region's gate is a NOR.",
+    "`isinstance(class_uri, URIRef)` (excluding a blank-node class) cannot move into any pattern -- `m{ }` has no term-kind filter -- and stays exactly where Python would run it, now applied to a solution from `m{ }` instead of from `graph.subjects()`. Same for `class_uri == owl_thing` and `p != owl_thing`: ordinary Python term comparison, unaffected by the switch to islands.",
+    "`owl_thing = OWL.Thing` becomes `owl_thing = owl:Thing`: a prefixed name with no variable in it, resolved immediately, exactly the case the reference calls out as needing no bindings at all.",
+    "`self._get_label`/`self._get_local_name` are plain method calls, untouched by the translation; `self` is a shared, stateless context_shim.OntologyLinter instance reused for every call on both sides (see driver.py), matching the same pattern already used for a `self`-receiver in this batch's other final region.",
+    "`_check_orphan_class` is `async def` with no `await` in its own body (it is declared async only for consistency with its sibling `_check_*` methods, which the real `OntologyLinter.lint()` awaits); `run_check_orphan_class`, added identically to both files and excluded from surface metrics like a context shim, drives the coroutine synchronously since the harness calls its entry point with no event loop.",
+    "fixture.ttl carries three orphans -- a plain one, one with an rdfs:label (exercising `_get_label`'s non-None branch) and one whose only rdfs:subClassOf is owl:Thing (proving the 'excluding owl:Thing' filter on parents actually fires) -- plus owl:Thing itself typed owl:Class (would otherwise qualify as an orphan; proves the identity skip), a class with a real parent, that parent (which is thereby disqualified by having a child), a blank-node-typed owl:Class (proves the isinstance guard), and a resource not typed owl:Class at all (never even a candidate). A second driver call passes an empty graph for the zero-solution case (verified directly: exactly the 3 expected orphans and no more, see driver run)."
   ],
   "draft_sha": "30b1c170ee733cf7",
   "provenance": {
@@ -29,5 +42,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:run_check_orphan_class",
+    "diffs": [],
+    "error": null
+  }
 }

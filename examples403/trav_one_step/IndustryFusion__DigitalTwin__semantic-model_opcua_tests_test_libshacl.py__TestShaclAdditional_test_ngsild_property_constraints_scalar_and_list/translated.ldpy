@@ -20,7 +20,7 @@ def test_ngsild_property_constraints_scalar_and_list(self):
     )
     # should produce at least one property‐shape (scalar)
     self.assertTrue(len(shapes) >= 1)
-    inner = next(self.sh.shaclg.objects(shapes[0], sh:property))
+    inner = m{ {shapes[0]} sh:property ?prop }(self.sh.shaclg).first()
     self.assertIn((inner, sh:path, self.sh.ngsildns['hasValue']), list(self.sh.shaclg))
 
     # list: force list by non‐negative value_rank
@@ -36,7 +36,7 @@ def test_ngsild_property_constraints_scalar_and_list(self):
     # should include a property‐shape with sh:path → ngsi-ld:hasListValue
     found = False
     for s in shapes2:
-        inner = next(self.sh.shaclg.objects(s, sh:property))
+        inner = m{ {s} sh:property ?prop }(self.sh.shaclg).first()
         if (inner, sh:path, self.sh.ngsildns['hasValueList']) in self.sh.shaclg:
             found = True
     self.assertTrue(found)

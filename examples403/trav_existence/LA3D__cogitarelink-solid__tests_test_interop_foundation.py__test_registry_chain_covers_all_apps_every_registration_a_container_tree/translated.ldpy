@@ -1,36 +1,42 @@
 # Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
 # region: test_registry_chain_covers_all_apps_every_registration_a_container_tree (lines 59-82, stratum trav_existence)
 # licence of the source repository: see meta.json
+#
+# The extracted region built its graph from a real file on disk (REG /
+# REPO, one of the corpus/403 "163 regions with no visible graph" -- see
+# AGENT_BATCH.md): `REPO` is undefined outside the source checkout, so the
+# region cannot even be imported as extracted. Restored the binding as an
+# explicit `graph` parameter (see meta.json) and dropped the now-unused
+# REG/parse line.
 import rdflib
 @prefix interop: <http://www.w3.org/ns/solid/interop#> .
 
 TREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/wiki-memory.tree#"
-OWNER = rdflib.<https://pod.vardeman.me/vault/profile/card#me>
-REG = REPO / "overlays/wiki-memory/interop/registry.ttl"
+OWNER = <https://pod.vardeman.me/vault/profile/card#me>
 ABTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/addressbook.tree#"
 IDTREE_NS = "https://pod.vardeman.me/vault/meta/shapetrees/id-schemes.tree#"
 
-def test_registry_chain_covers_all_apps_every_registration_a_container_tree():
-    g = rdflib.Graph(); g.parse(REG, format="turtle")
-    rset = g.value(OWNER, interop:hasRegistrySet)
+def test_registry_chain_covers_all_apps_every_registration_a_container_tree(graph):
+    @graph graph
+    rset = m{ {OWNER} interop:hasRegistrySet ?rset }.first()
     assert rset is not None, "owner WebID has no hasRegistrySet"
-    dreg = g.value(rset, interop:hasDataRegistry)
+    dreg = m{ {rset} interop:hasDataRegistry ?dreg }.first()
     assert dreg is not None, "RegistrySet has no DataRegistry"
-    regs = list(g.objects(dreg, interop:hasDataRegistration))
+    regs = list(m{ {dreg} interop:hasDataRegistration ?r })
     assert len(regs) == 12, f"expected 12 DataRegistrations, got {len(regs)}"
     for r in regs:
-        t = g.value(r, interop:registeredShapeTree)
+        t = m{ {r} interop:registeredShapeTree ?t }.first()
         assert t is not None and str(t).endswith("ContainerTree"), \
             f"{r}: registeredShapeTree must be a ContainerTree, got {t}"
     REG_NS = rdflib.Namespace("https://pod.vardeman.me/vault/meta/interop/registry#")
     wiki = [r for r in regs if r not in (REG_NS["id-schemes"], REG_NS["contacts-person"], REG_NS["contacts-organization"], REG_NS["contacts-group"], REG_NS["contacts-membership"])]
     assert len(wiki) == 7, f"expected 7 wiki-memory registrations, got {len(wiki)}"
     for r in wiki:
-        assert str(g.value(r, interop:registeredShapeTree)).startswith(TREE_NS), \
+        assert str(m{ {r} interop:registeredShapeTree ?t }.first()).startswith(TREE_NS), \
             f"{r}: wiki registration must point into wiki-memory.tree"
-    assert g.value(REG_NS["contacts-person"], interop:registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "PersonContainerTree")
-    assert g.value(REG_NS["contacts-organization"], interop:registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "OrganizationContainerTree")
-    assert g.value(REG_NS["contacts-group"], interop:registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "GroupContainerTree")
-    assert g.value(REG_NS["contacts-membership"], interop:registeredShapeTree) == rdflib.URIRef(ABTREE_NS + "MembershipContainerTree")
-    assert g.value(REG_NS["id-schemes"], interop:registeredShapeTree) == \
+    assert m{ {REG_NS["contacts-person"]} interop:registeredShapeTree ?t }.first() == rdflib.URIRef(ABTREE_NS + "PersonContainerTree")
+    assert m{ {REG_NS["contacts-organization"]} interop:registeredShapeTree ?t }.first() == rdflib.URIRef(ABTREE_NS + "OrganizationContainerTree")
+    assert m{ {REG_NS["contacts-group"]} interop:registeredShapeTree ?t }.first() == rdflib.URIRef(ABTREE_NS + "GroupContainerTree")
+    assert m{ {REG_NS["contacts-membership"]} interop:registeredShapeTree ?t }.first() == rdflib.URIRef(ABTREE_NS + "MembershipContainerTree")
+    assert m{ {REG_NS["id-schemes"]} interop:registeredShapeTree ?t }.first() == \
         rdflib.URIRef(IDTREE_NS + "SchemeRecordContainerTree")

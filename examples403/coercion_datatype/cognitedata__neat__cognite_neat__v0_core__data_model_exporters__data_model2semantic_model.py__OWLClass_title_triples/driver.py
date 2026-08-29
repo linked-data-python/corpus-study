@@ -1,15 +1,25 @@
 """Validation driver for cognitedata__neat__cognite_neat__v0_core__data_model_exporters__data_model2semantic_model.py__OWLClass_title_triples.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a @property body lifted out of its pydantic class, so `demo`
+(identical on both sides, see meta.json) attaches it to a minimal
+reconstruction of OWLClass and reads the property off a fresh instance. The
+oracle is value equality on the returned triple list -- rdfeval.harness
+compares RDF terms (URIRef, Literal with its datatype), not raw reprs, so a
+coercion mistake would be caught even though there is no Graph here to check
+by isomorphism.
+
+Two cases: `self.label` truthy (the branch that builds the triple, where the
+stratum's site sits) and falsy (the early `return []`).
 """
+from rdflib import URIRef
+
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
-    entry='title_triples',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    entry="demo",
+    calls=[
+        ((URIRef("http://example.org/ns#Widget"), "Widget"), {}),
+        ((URIRef("http://example.org/ns#Widget"), None), {}),
+    ],
 )

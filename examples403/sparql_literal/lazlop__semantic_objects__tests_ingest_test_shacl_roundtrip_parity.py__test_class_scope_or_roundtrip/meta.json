@@ -10,10 +10,20 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "Both queries (an ASK and a SELECT with a property path sh:or/rdf:rest*/rdf:first/sh:property) had no PREFIX lines in the original: g.query(str) falls back to the graph's own namespace_manager bindings (bind_prefixes(g) / g.bind(...) upstream) when initNs is not passed. s{ } has no equivalent implicit source: its prologue comes only from @prefix declarations lexically in scope (querying.md). Translating faithfully meant promoting s223:/sh:/rdf: from graph-bound namespaces to file-level @prefix — same IRIs, different mechanism, no behaviour change.",
+    "Property paths (sh:or/rdf:rest*/rdf:first/sh:property) and the ASK form are both plain SPARQL, so s{ } covers this directly; no interpolation is needed since neither query touches a Python value.",
+    "`semantic_objects` (buildingmotif, pyshacl, pandas, a private git dependency) is not installable in this environment, and entities.Battery.generate_rdf_class_definition() cannot be reproduced without it. _context.py substitutes a hand-written Turtle graph reproducing the exact shape the test's own comments and assertions document for Battery (a class-level sh:or of two branches, each with its own sh:qualifiedValueShape and a nested hasMedium pin), plus two decoy branches (wrong medium class, wrong path) and an unrelated s223:Pump shape, so the check is not vacuous. This is fixture-writing (INSTRUCTIONS_403 §3), not a reproduction of the exporter under test in the source repo, which is out of scope for the sparql_literal construction being exercised here.",
+    "The original test function takes no argument, builds its own graph, and only asserts — nothing survives to compare beyond 'did not raise'. Per rdfeval.harness, a call that returns None, mutates nothing and prints nothing is reported as having 'nothing observable to compare', even when both sides silently agree. `return targets` was appended identically to both original.py and translated.ldpy (see comment in both files) purely so run_pair has a value to diff; it changes nothing about the RDF behaviour under test.",
+    "No fixture.ttl file: the reading fixture lives in _context.py's _shacl_graph(), since the entry point takes no graph argument for run_pair's fixture= mechanism to inject into."
+  ],
   "draft_sha": "3376b5cfbc25efb6",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.742198+00:00",
@@ -24,5 +34,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_class_scope_or_roundtrip",
+    "diffs": [],
+    "error": null
+  }
 }

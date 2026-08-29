@@ -1,12 +1,19 @@
 # Extracted from shubhamjakhete/nvda_reader@8b5fb51e42 : globalPlugins/contextLabeler/_vendor/rdflib/tools/csv2rdf.py
 # region: main (lines 441-549, stratum ns_def_local)
 # licence of the source repository: see meta.json
+#
+# `from context_shim import CSV2RDF, csv_reader` restores the two bindings
+# the sampled context lines dropped -- the region only got the module's
+# `import` lines, not the CSV2RDF class or the csv_reader generator that the
+# real file (globalPlugins/.../csv2rdf.py) defines above main() -- see
+# meta.json / AGENT_BATCH.md "shim de contexte".
 import codecs
 import configparser
 import fileinput
 import getopt
 import sys
 import rdflib
+from context_shim import CSV2RDF, csv_reader
 HELP = """
 csv2rdf.py \
     -b <instance-base> \
@@ -178,3 +185,22 @@ def main():
         csv2rdf.DEFINECLASS = True
 
     csv2rdf.convert(csv_reader(fileinput.input(files), delimiter=csv2rdf.DELIM))
+
+
+# Demo harness (identical on both sides, see meta.json): `main` reads
+# `sys.argv` directly and returns nothing, so this entry point sets a
+# minimal argv (-b, -p, -o <out_path>, one CSV fixture file), calls `main`,
+# and returns what it wrote to -o -- the region's only RDF-observable
+# effect (meta.oracle: isomorphism; see driver.py for why this is compared
+# as text rather than as an rdflib.Graph -- the region never builds one).
+def demo(csv_path, out_path):
+    sys.argv = [
+        "csv2rdf.py",
+        "-b", "http://example.org/instances/",
+        "-p", "http://example.org/props/",
+        "-o", out_path,
+        csv_path,
+    ]
+    main()
+    with open(out_path, encoding="utf-8") as f:
+        return f.read()

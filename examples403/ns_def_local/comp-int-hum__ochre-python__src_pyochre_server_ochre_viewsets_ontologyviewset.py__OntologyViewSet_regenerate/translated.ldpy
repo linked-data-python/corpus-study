@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rdflib import Graph, BNode
 import requests
-from rdflib import Graph, Namespace, Literal
+from rdflib import Graph, Literal
 from rdflib.namespace import OWL, RDFS
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -18,11 +18,12 @@ def regenerate(self, request, pk=None):
     """
     Regenerate OCHRE ontology based on the state of the ochre.ttl file.
     """
-    OCHRE = Namespace(settings.OCHRE_NAMESPACE)
+    @prefix ochre: f<{settings.OCHRE_NAMESPACE}> .
     sig_string = files("pyochre").joinpath("data/ochre.ttl").read_text()
 
-    ns = Namespace(settings.OCHRE_NAMESPACE)
+    @prefix ns: f<{settings.OCHRE_NAMESPACE}> .
     g = Graph()
+    @graph g
     g.parse(
         data="@prefix ochre: <{}> .\n".format(settings.OCHRE_NAMESPACE) + sig_string,
         format="turtle"
@@ -34,22 +35,22 @@ def regenerate(self, request, pk=None):
     wikidata_descriptions = {}
     wikidata_parent_descriptions = {}
     for s, p, o in g:
-        if p in [OCHRE["equivalentClass"], OCHRE["equivalentProperty"]] and "wikidata" in str(o):
+        if p in [ochre:equivalentClass, ochre:equivalentProperty] and "wikidata" in str(o):
             name = str(o).split("/")[-1]
             entity = client.get(name, load=True)
             if entity.data:
                 wikidata_descriptions[o] = Literal(entity.description)
     for s, p, o in g:
-        if p in [OCHRE["subClassOf"], OCHRE["subPropertyOf"]] and "wikidata" in str(o):
+        if p in [ochre:subClassOf, ochre:subPropertyOf] and "wikidata" in str(o):
             name = str(o).split("/")[-1]
             entity = client.get(name, load=True)
             if entity.data:
                 wikidata_parent_descriptions[o] = Literal(entity.description)
 
     for k, v in wikidata_descriptions.items():
-        g += g{ {k} rdfs:comment {v} }
+        +{ {k} rdfs:comment {v} }
     for k, v in wikidata_parent_descriptions.items():
-        g += g{ {k} rdfs:comment {v} }
+        +{ {k} rdfs:comment {v} }
     resp = requests.put(
         "{}/ochre/data".format(settings.JENA_URL),
         params={"graph" : settings.ONTOLOGY_URI},

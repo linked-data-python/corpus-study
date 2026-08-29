@@ -2,6 +2,7 @@
 # region: <module> (lines 149-151, stratum trav_navigation)
 # licence of the source repository: see meta.json
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, PROV
+from context import Graph, Namespace, H  # context shim, see meta.json
 SEM = Namespace("http://example.org/semtech#")
 g_ab  = Graph(); g_ab.parse(f"{H}/02-ontology/semtech_abox_v1_0_0.ttl")
 

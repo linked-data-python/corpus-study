@@ -3,29 +3,25 @@
 # licence of the source repository: see meta.json
 from typing import Dict, List
 from rdflib import Graph, URIRef
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 def query_synthesis_inputs(graph: Graph, synthesis_uri: str) -> List[Dict[str, any]]:
     """Find chemicals for a synthesis via direct input links or Add-step links."""
-    query = """
-    PREFIX ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-    SELECT DISTINCT ?chemical ?label ?amount ?altName
+    results = s{ SELECT DISTINCT ?chemical ?label ?amount ?altName
     WHERE {
         {
-            ?synthesis ontosyn:hasChemicalInput ?chemical .
+            {URIRef(synthesis_uri)} ontosyn:hasChemicalInput ?chemical .
         }
         UNION
         {
-            ?synthesis ontosyn:hasSynthesisStep ?step .
+            {URIRef(synthesis_uri)} ontosyn:hasSynthesisStep ?step .
             ?step ontosyn:hasAddedChemicalInput ?chemical .
         }
         OPTIONAL { ?chemical rdfs:label ?label }
         OPTIONAL { ?chemical ontosyn:hasAmount ?amount }
         OPTIONAL { ?chemical ontosyn:hasAlternativeNames ?altName }
-    }
-    """
-    results = graph.query(query, initBindings={"synthesis": URIRef(synthesis_uri)})
+    } }(graph)
 
     # Group by chemical URI to collect all alternative names
     grouped: Dict[str, Dict[str, any]] = {}

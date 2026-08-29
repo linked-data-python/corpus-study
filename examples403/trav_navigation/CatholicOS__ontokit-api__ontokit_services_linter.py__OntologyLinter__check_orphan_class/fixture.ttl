@@ -1,4 +1,36 @@
-# Input graph for CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_orphan_class — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_orphan_class
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Several solutions: two plain orphans -- typed owl:Class, no meaningful
+# parent, no child.
+ex:OrphanA a owl:Class ;
+    rdfs:label "Orphan A" .
+ex:OrphanB a owl:Class .
+
+# A third orphan whose only "parent" is owl:Thing -- must still count: the
+# region excludes owl:Thing from the parents list explicitly.
+ex:OrphanThingOnly a owl:Class ;
+    rdfs:subClassOf owl:Thing .
+
+# owl:Thing itself: typed owl:Class here (as real ontologies often assert),
+# so it would otherwise pass the parent/child test -- must NOT match, since
+# the region skips it by identity before even looking at parents/children.
+owl:Thing a owl:Class .
+
+# Neighbourhood that must NOT match:
+# has a real parent -- not an orphan.
+ex:HasParent a owl:Class ;
+    rdfs:subClassOf ex:Base .
+# ex:Base has a child (ex:HasParent) -- not an orphan either, despite having
+# no parent of its own.
+ex:Base a owl:Class .
+
+# typed owl:Class but as a blank node: excluded by the isinstance(URIRef)
+# guard on the class candidate itself (a check `m{ }` has no term-kind filter
+# for, so it stays a plain Python guard -- see meta.json).
+_:bc a owl:Class .
+
+# not typed owl:Class at all -- never even a candidate.
+ex:NotAClass a ex:SomeOtherType .

@@ -473,8 +473,7 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
     m.islands = len(spans)
     # replace from the end to keep offsets valid
     for start, end, kind in sorted(offsets, reverse=True):
-        placeholder = "__I__" if _is_expression_island(kind) else "pass"
-        masked = masked[:start] + placeholder + masked[end:]
+        masked = masked[:start] + _placeholder(kind) + masked[end:]
     m.masked_source = masked
 
     m.python_tokens = _python_tokens(masked) - m.islands  # placeholders out
@@ -504,3 +503,21 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
 
 def _is_expression_island(kind: str) -> bool:
     return not (kind.startswith("island:prefix") or kind.startswith("island:base"))
+
+
+#: An island that is only PART of a statement cannot be masked by `pass`.
+#: `for @bindings in` spans those three words and nothing else — the iterable
+#: and the `:` stay Python — so `pass` there yields `pass (rows):`, which does
+#: not parse, and the whole region loses its metrics. That silently hit the
+#: one stratum whose target construction this is (`add_in_loop`).
+_PARTIAL = {
+    "island:for-bindings": "for __I__ in",
+    "island:for-bindings-close": ":",
+}
+
+
+def _placeholder(kind: str) -> str:
+    """What stands in for an island so the rest still parses as Python."""
+    if kind in _PARTIAL:
+        return _PARTIAL[kind]
+    return "__I__" if _is_expression_island(kind) else "pass"

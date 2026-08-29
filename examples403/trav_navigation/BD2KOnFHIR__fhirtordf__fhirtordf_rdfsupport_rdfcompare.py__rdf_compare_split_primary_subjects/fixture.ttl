@@ -1,4 +1,23 @@
-# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__rdf_compare_split_primary_subjects — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__rdf_compare_split_primary_subjects
 @prefix ex: <http://example.org/> .
+
+# Several solutions: three URIRef subjects.  With `g1` restored as an alias
+# of the function's own argument (see meta.json), these ARE what
+# `primary_subjects` returns -- the BNode branch below never contributes,
+# see the next comment.
+ex:Alice a ex:Person .
+ex:Bob ex:knows ex:Alice .
+ex:Carol ex:has _:child .
+
+# Neighbourhood that must NOT match: ex:Person only ever appears as an
+# OBJECT here, never as a subject -- it must not leak into the result.
+
+# BNode subjects, present to exercise the per-item `m{}` navigation
+# (`subject_predicates`, the region's one genuine multi-step lookup) over
+# more than one candidate.  Neither ever reaches the output: the region's
+# own "has no incoming predicate" check is dead code (it wraps a generator
+# in a length-1 list, so `len([...]) == 0` never holds -- see meta.json),
+# so it makes no difference that `_:orphanish` truly has no incoming edge
+# while `_:child` does (via `ex:Carol ex:has _:child`).
+_:orphanish ex:note "no incoming edge at all" .
+_:child ex:note "has an incoming edge from ex:Carol" .

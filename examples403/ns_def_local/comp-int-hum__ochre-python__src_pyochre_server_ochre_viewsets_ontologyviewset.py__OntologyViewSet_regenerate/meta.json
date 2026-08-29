@@ -18,10 +18,22 @@
     "triple_add": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "f<…>"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDFS->rdfs"
+    "the stratum's own construction: `OCHRE = Namespace(settings.OCHRE_NAMESPACE)` is declared inside the function, bound to a value computed at run time (Django settings), not a string literal. Translated to `@prefix ochre: f<{settings.OCHRE_NAMESPACE}> .` -- the dynamic-@prefix form in declarations.md (`@prefix dyn: f<http://{host}/ns#> .`), block-scoped to the function.",
+    "the source also has a second, dead local `ns = Namespace(settings.OCHRE_NAMESPACE)` (never read afterwards). Translated it too, as `@prefix ns: f<{settings.OCHRE_NAMESPACE}> .`, unused in exactly the same way -- not mine to drop under the no-refactoring rule.",
+    "`OCHRE[\"equivalentClass\"]` etc. (subscript access on the Namespace) became `ochre:equivalentClass` etc., used as plain Python list elements inside `if p in [...]` -- a prefixed name is an ordinary URIRef-valued expression, no island needed there.",
+    "`for s, p, o in g:` with a Python-side filter is a full, unfiltered graph traversal (`what-not-to-rewrite` in migrate-from-rdflib.md): kept as plain rdflib iteration, not forced into `m{ }`, which is reserved for a pattern that actually selects.",
+    "`g.add((k, RDFS[\"comment\"], v))` -> `+{ {k} rdfs:comment {v} }` under `@graph g` (designating the existing variable, not creating a new one).",
+    "EXCLUDED, not a language gap: the pilot cannot execute the region at all. `django`, `rest_framework` and `wikidata` are not installed in ~/.venvs/ldpy (confirmed: `import django` -> ModuleNotFoundError), and even with those present the body calls the live Wikidata web service (`wikidata.client.Client().get(name, load=True)`) and PUTs to a live Jena triple store (`requests.put(...)`). Faking those responses would mean inventing the business logic they drive, which the context-shim rule explicitly rules out. `translated.ldpy` transpiles cleanly on its own (checked directly against `ldpy.transpiler.transpile`); only the driver's execution is blocked."
   ],
   "draft_sha": "df2db786ab4ff9b0",
   "provenance": {

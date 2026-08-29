@@ -13,12 +13,23 @@
     "namespace_term": 7,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "The site the stratifier flagged (sites[0].line == 4) is `from .namespaces import ANS`: ANS is dfriedenberger/generators' own project vocabulary object, genuinely ns_import_project -- rewritten `from generators_context import SparQLWrapper, ans:`, with ANS.hasKeyValuePair/.key/.value/.Dictionary becoming ans:hasKeyValuePair/:key/:value/:Dictionary (4 of the 7 namespace_term sites).",
+    "SAME split documented for the LexMalta/edmondchuc siblings of this stratum: RDF (`from rdflib import RDF`) is rdflib's own namespace, not a project module -- it cannot be given a __namespaces__ export, so RDF.type/RDF.Seq became `@prefix rdf: <...> .` + rdf:type/rdf:Seq instead of a prefix import (2 more of the 7 sites). classification minor-restructuring for the same reason as those siblings: two different namespace origins forced two different constructions in the same import block.",
+    "The 7th namespace_term site is process_seq's `URIRef(RDF[\"_{}\".format(index)])`: a namespace subscript with a COMPUTED local part. Translated as `URIRef(rdf:{\"_{}\".format(index)})` -- terms.md's interpolated-local-part form (`ex:{name}`) -- keeping the original (redundant, since RDF[...] already returns a URIRef) outer URIRef(...) wrapper untouched, since removing it would be cleanup INSTRUCTIONS_403 forbids. Verified directly by transpiling: the interpolation's own `{}` from `\"_{}\".format(...)` (braces inside a string literal, inside the outer interpolation braces) does not confuse the island scanner -- emits `_ldpy_.pname(NS, (\"_{}\".format(index)))` correctly. This is the 1 term_constructor.",
+    "generators_context.py (shim) reconstructs ANS with a PLACEHOLDER base IRI, documented there: the real ontology file namespaces.py reads at import time (`models/assets-0.0.2.ttl`) is not part of the repository at any commit, any release, or any published sdist/wheel of `artifact-generator` (checked directly against the GitHub tree and PyPI) -- so there is no real IRI to be faithful to, only the real local names (the fragments passed to OntologyReader.get_*()). This is immaterial to correctness: no ANS.* IRI is ever returned by rdf2json.py (its output is plain JSON -- str/int/float/bool/dict/list), only used to walk the graph, so any consistent base works as long as both representations resolve through the SAME shim, verified by the driver.",
+    "oracle corrected from the mechanical draft's isomorphism to values: this region has zero .add()/.remove() -- it is pure graph reading (rdf_ops: namespace_term + term_constructor only, no triple_add/triple_remove) -- so the generic run_pair(entry=None) module-state comparison would have found no graph to compare and reported a hollow green. fixture.ttl + a custom driver (module-state's generic per-argument comparison does not special-case a SparQLWrapper the way it special-cases a bare Graph -- see driver.py) establish real equivalence: same JSON value out for the same graph in, including the zero-solutions case (ex:obj2) and a neighbourhood that must not match (ex:kv-orphan, ex:obj3).",
+    "No graph_read/trav_* island used for the .objects()/.value()/`in graph` calls, even though the region reads a graph: this region's only assigned stratum is ns_import_project (same discipline as the LexMalta sibling's own note) -- the point under test here is the import construction, and forcing m{ }/trav_* onto reads that were never in scope risks the cardinality/ordering pitfalls INSTRUCTIONS_403 §2 warns about for no measured benefit."
+  ],
+  "article_candidate": true,
   "draft_sha": "db5ab2c50714948e",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.052105+00:00",
@@ -29,5 +40,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "custom:fixture-values",
+    "diffs": [],
+    "error": null
+  }
 }

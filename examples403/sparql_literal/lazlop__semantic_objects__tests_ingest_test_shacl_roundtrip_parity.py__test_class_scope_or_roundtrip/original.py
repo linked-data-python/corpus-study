@@ -1,7 +1,9 @@
 # Extracted from lazlop/semantic_objects@243c5efd8c : tests/ingest/test_shacl_roundtrip_parity.py
 # region: test_class_scope_or_roundtrip (lines 162-190, stratum sparql_literal)
 # licence of the source repository: see meta.json
-from semantic_objects.s223._generated import entities, properties
+# `semantic_objects.s223._generated` is not installable here (see _context.py);
+# `_context` stands in for it and for the test file's own `_shacl_graph()`.
+from _context import entities, properties, _shacl_graph
 
 def test_class_scope_or_roundtrip():
     # Battery.connection_point: Union[OutletConnectionPoint_Electricity,
@@ -32,3 +34,7 @@ def test_class_scope_or_roundtrip():
         'http://data.ashrae.org/standard223#OutletConnectionPoint',
         'http://data.ashrae.org/standard223#BidirectionalConnectionPoint',
     }
+    # Appended (see meta.json): the original test asserts and returns nothing,
+    # so the two versions would have nothing for the driver to compare beyond
+    # "did not raise". Returning the computed set gives it something real.
+    return targets

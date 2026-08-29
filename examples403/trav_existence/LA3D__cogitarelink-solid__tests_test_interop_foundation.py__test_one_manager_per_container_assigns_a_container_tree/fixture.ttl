@@ -1,4 +1,38 @@
-# Input graph for LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_one_manager_per_container_assigns_a_container_tree — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for LA3D__cogitarelink-solid__tests_test_interop_foundation.py__test_one_manager_per_container_assigns_a_container_tree.
+#
+# The region asserts a chain of four invariants and RAISES if any fails
+# (`assert x is not None, "..."`), so the only call this driver can make is
+# one where every invariant already holds (see meta.json/translation_notes
+# for why the zero-solution branch cannot be exercised through run_pair
+# here). What the fixture CAN still do is prove the read patterns are
+# scoped precisely, not just "anything matches":
+#
+#   * ex:mgr1 a st:Manager -- the ONE st:Manager-typed subject, so
+#     `m{ ?mgr a st:Manager }.first()` is unambiguous (a second Manager
+#     would make `.first()`'s pick non-deterministic between two valid
+#     files' worth of content, which is not something a store promises).
+#   * ex:mgr1 -> ex:assign1 -> (st:assigns, st:manages): the full chain,
+#     exercising `.first()` reused for its value (assigns/manages both feed
+#     later checks) and `bool(m{ })` for the pure existence check on
+#     st:manages (the discarded-value read genuinely present in this
+#     region -- see translation_notes).
+#   * NEIGHBOURHOOD that must NOT match: ex:notAManager carries the same
+#     st:hasAssignment edge as the real manager but is typed something
+#     else, so it must not be picked up by `?mgr a st:Manager`; and
+#     ex:decoyAssignment carries an unrelated st:manages triple, proving
+#     `{a} st:manages ?x` is scoped to the assignment actually reached
+#     (ex:assign1), not any st:manages triple anywhere in the graph.
 @prefix ex: <http://example.org/> .
+@prefix st: <http://www.w3.org/ns/shapetrees#> .
+
+ex:mgr1 a st:Manager ;
+    st:hasAssignment ex:assign1 .
+
+ex:assign1 st:assigns <http://example.org/trees/WikiMemoryContainerTree> ;
+    st:manages ex:container1 .
+
+# Neighbourhood -- must not match.
+ex:notAManager a ex:SomethingElse ;
+    st:hasAssignment ex:assign1 .
+
+ex:decoyAssignment st:manages ex:decoyContainer .

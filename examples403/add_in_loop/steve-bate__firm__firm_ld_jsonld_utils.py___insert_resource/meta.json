@@ -13,10 +13,21 @@
     "term_constructor": 8,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "for @bindings in",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "`for type_ in value: g.add((subject, RDF.type, URIRef(type_)))` -> `for @bindings in ({\"t\": rdflib.URIRef(type_)} for type_ in value): +{ {subject} a ?t }` -- the one loop in this region that is genuinely row-shaped (each iteration writes exactly one triple, no branching on the loop item itself), so it is the clean match for the stratum's target construction. Predicate `a`/rdf:type is fixed; only the object varies per row, carried as `?t`.",
+    "the second loop (`for obj in value: ... g.add((subject, URIRef(key), obj))`) is NOT recast with @bindings: `obj` is produced by branching that differs in KIND, not just value -- @list (raise or continue), @id vs @value, and a recursive call to _insert_resource itself that has the side effect of writing into `g` while the binding would be computed. Wrapping that in a bindings-generator would either move side effects out of order or force the branches into a helper function, i.e. restructure control flow to fit the idiom rather than translate it. Kept as +{ } with plain {expr} interpolation, one 1:1 swap for each `g.add`, both branches unmerged as in the source.",
+    "`@graph g` designates the existing `g` parameter as current (rather than the mechanical `g += g{ ... }` a first pass produced): this is the more specific construction per INSTRUCTIONS_403 SS2 for a graph passed in as an object, not created locally.",
+    "no context shim needed: the region only imports json, typing.Any and rdflib, all available as-is."
+  ],
   "draft_sha": "ffea6efc0fbf3a29",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.818060+00:00",
@@ -27,5 +38,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_insert_resource",
+    "diffs": [],
+    "error": null
+  }
 }

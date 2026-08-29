@@ -2,3 +2,33 @@
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix base: <http://yang-netconf-mqtt#> .
+@prefix onem2m: <http://www.onem2m.org/ontology/Base_Ontology/base_ontology#> .
+
+# Solution 1: a full device -> functionality -> service -> data point -> topic chain.
+ex:device1 onem2m:hasFunctionality ex:func1 .
+ex:func1 rdf:type base:EventFunctionality .
+ex:serv1 onem2m:exposesFunctionality ex:func1 .
+ex:serv1 onem2m:hasOutputDataPoint ex:dp1 .
+ex:dp1 base:mqttTopic "topic/1" .
+
+# Solution 2: a second, independent chain.
+ex:device2 onem2m:hasFunctionality ex:func2 .
+ex:func2 rdf:type base:EventFunctionality .
+ex:serv2 onem2m:exposesFunctionality ex:func2 .
+ex:serv2 onem2m:hasOutputDataPoint ex:dp2 .
+ex:dp2 base:mqttTopic "topic/2" .
+
+# Neighbour that must NOT match: same shape, but the functionality is not
+# typed base:EventFunctionality.
+ex:device3 onem2m:hasFunctionality ex:func3 .
+ex:func3 rdf:type base:OtherFunctionality .
+ex:serv3 onem2m:exposesFunctionality ex:func3 .
+ex:serv3 onem2m:hasOutputDataPoint ex:dp3 .
+ex:dp3 base:mqttTopic "topic/3" .
+
+# Neighbour that must NOT match: an EventFunctionality with no service
+# exposing it, so the join dead-ends (zero solutions for this arm).
+ex:device4 onem2m:hasFunctionality ex:func4 .
+ex:func4 rdf:type base:EventFunctionality .

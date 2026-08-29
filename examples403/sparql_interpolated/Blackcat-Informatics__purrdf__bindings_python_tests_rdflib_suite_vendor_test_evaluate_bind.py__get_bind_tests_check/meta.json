@@ -12,10 +12,16 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `expr` is a whole SPARQL clause -- upstream's three call sites pass 'bind(\"thing\" as ?name)', 'bind(<http://example.org/other> as ?other)' and 'bind(:Thing as ?type)' -- received as a caller-supplied STRING and spliced by `%` formatting into the query text: `\"select * where { ?s ?p ?o . %s } \" % expr`. This is exactly the textual-assembly idiom the stratum targets, and it is out of reach by construction: s{ }'s interpolation ({expr}) is legal only in TERM position and lowers to initBindings, never to a substitution inside the query string -- there is no island for 'an entire clause held in a variable', the same limit noted for -{ }/m{ } in INSTRUCTIONS_403 SS2, here on the read side and on a full query engine rather than a BGP island.",
+    "no partial credit either: `expr` is not decomposable into a fixed number of terms at the call site -- one call binds a plain literal, another an IRI, the third uses the `:` prefix declared in the query's own prologue -- so there is no fixed slot to interpolate even after the fact.",
+    "minimal excerpt showing the limit: `g.query(\"... select * where { ?s ?p ?o . %s } \" % expr)` where `expr` is an opaque string parameter reused across differently-shaped BIND clauses.",
+    "`check` reads a free variable `g` set up by the enclosing (not extracted) get_bind_tests(); restored via a context shim (test_evaluate_bind_context.py) reproducing that single-triple graph, imported identically by both original.py and translated.ldpy.",
+    "driver: the three real invocations from get_bind_tests() (upstream, at the pinned commit) prove the (unmodified) region still computes right against the restored graph -- each exercises a differently-shaped `expr`, which is itself part of the argument that no fixed term slot could have covered this."
+  ],
   "draft_sha": "608fe0081144d4b9",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.035129+00:00",

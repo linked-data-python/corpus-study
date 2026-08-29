@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
-from ontokit.models.lint import LintIssueType
+from context_shim import LintIssueType, LintResult, OntologyLinter  # context shim -- see meta.json
 
 async def _check_orphan_class(self, graph: Graph) -> list[LintResult]:
     """Find classes with no parent (other than owl:Thing) and no children."""
@@ -45,3 +45,17 @@ async def _check_orphan_class(self, graph: Graph) -> list[LintResult]:
             )
 
     return issues
+
+
+# Test harness only (see meta.json): `run_pair` calls its entry point
+# synchronously, with no event loop, and `_check_orphan_class` is `async def`
+# in its home class (there is no `await` anywhere in the region's own 40
+# lines -- it is declared async only for consistency with its sibling
+# `_check_*` methods, which the OntologyLinter.lint() orchestrator awaits).
+# This wrapper drives the coroutine to completion; the region above is
+# untouched.
+import asyncio
+
+
+def run_check_orphan_class(self, graph):
+    return asyncio.run(_check_orphan_class(self, graph))

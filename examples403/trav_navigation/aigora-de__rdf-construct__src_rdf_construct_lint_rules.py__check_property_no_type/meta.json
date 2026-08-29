@@ -13,11 +13,24 @@
     "graph_read": 4,
     "namespace_term": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl"
+    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl -- all three are actually used in the region's own body this time (unlike the sibling region in this batch), since `RDF.Property`/`OWL.*` appear as SET MEMBERS (`property_types`), not only inside a pattern.",
+    "the region runs the SAME two-step navigation twice, once per predicate (`RDFS.domain` then `RDFS.range`): an outer `graph.subjects(P, None)` (any object -- a wildcard, not a real selection) narrowed per item by `graph.objects(subj, RDF.type)`, gated by `not types.intersection(property_types)` -- a NEGATION over a materialised set, which `m{ }` cannot express (no FILTER/NOT EXISTS). As in the sibling region in this batch, this rules out fusing the two `.subjects()`/`.objects()` calls into one join; each keeps its own most-specific `m{ }`.",
+    "`graph.subjects(RDFS.domain, None)` -- an unconstrained object, i.e. 'has ANY rdfs:domain triple' -- becomes `m{ ?subj rdfs:domain [ ] }`: the anonymous node `[ ]` is matched but not projected, which is exactly the 'existence, no value needed' idiom the reference calls out (no throwaway object variable to name). Same for `RDFS.range`. This is NOT the 'full scan with nothing to narrow' case flagged elsewhere in this batch -- the predicate itself IS the selection -- so `m{ }` earns its place here, unlike a bare `.subjects()`.",
+    "`graph.objects(subj, RDF.type)` becomes `m{ {subj} a ?t }` (arity 1, terms -- `a` is Turtle's rdf:type shorthand, so no `rdf:` prefixed name is even written for it, only declared for `property_types`'s `rdf:Property` member).",
+    "`property_types = {RDF.Property, OWL.ObjectProperty, ...}` becomes a set of four prefixed names with no variables -- resolved immediately, no bindings needed, same idiom as the sibling region's `owl_thing = owl:Thing`.",
+    "`isinstance(subj, URIRef)`, `is_builtin(subj)` and the `existing = [...]` dedup check are ordinary Python, untouched by the switch to islands: none of them is expressible inside `m{ }` (no term-kind filter, no call to an arbitrary predicate function, no lookback into a Python list being built).",
+    "fixture.ttl carries three cases across both loops -- domain-only, range-only, and domain-AND-range (which must produce exactly ONE issue, with the domain-loop's message, proving the `existing` dedup fires) -- each with zero rdf:type triples (the zero-solution case for the per-item type lookup, which is what makes them issues at all), plus a properly-typed property, a builtin-namespace subject (rdfs:label, a real RDFS fact), and a blank-node subject as the three ways to be excluded. Verified directly: exactly 3 issues, ex:hasColor reported once with the domain message (see driver run in the batch report)."
   ],
   "draft_sha": "9de7464010b64b94",
   "provenance": {
@@ -29,5 +42,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:check_property_no_type",
+    "diffs": [],
+    "error": null
+  }
 }

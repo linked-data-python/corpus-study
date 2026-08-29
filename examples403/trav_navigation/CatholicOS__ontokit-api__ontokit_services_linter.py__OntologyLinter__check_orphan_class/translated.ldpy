@@ -3,21 +3,19 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
-from ontokit.models.lint import LintIssueType
+from context_shim import LintIssueType, LintResult, OntologyLinter  # context shim -- see meta.json
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 async def _check_orphan_class(self, graph: Graph) -> list[LintResult]:
     """Find classes with no parent (other than owl:Thing) and no children."""
     issues = []
+    @graph graph
 
     owl_thing = owl:Thing
 
-    for class_uri in graph.subjects(rdf:type, owl:Class):
+    for class_uri in m{ ?class_uri a owl:Class }:
         if not isinstance(class_uri, URIRef):
             continue
         if class_uri == owl_thing:
@@ -26,12 +24,12 @@ async def _check_orphan_class(self, graph: Graph) -> list[LintResult]:
         # Get parents (excluding owl:Thing)
         parents = [
             p
-            for p in graph.objects(class_uri, rdfs:subClassOf)
+            for p in m{ {class_uri} rdfs:subClassOf ?p }
             if isinstance(p, URIRef) and p != owl_thing
         ]
 
         # Get children
-        children = list(graph.subjects(rdfs:subClassOf, class_uri))
+        children = list(m{ ?s rdfs:subClassOf {class_uri} })
 
         # Orphan if no meaningful parents and no children
         if not parents and not children:
@@ -51,3 +49,12 @@ async def _check_orphan_class(self, graph: Graph) -> list[LintResult]:
             )
 
     return issues
+
+
+# Test harness only (see meta.json): the same wrapper as original.py,
+# unrelated to the translation of the region itself -- see the note there.
+import asyncio
+
+
+def run_check_orphan_class(self, graph):
+    return asyncio.run(_check_orphan_class(self, graph))

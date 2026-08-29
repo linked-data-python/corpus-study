@@ -1,11 +1,19 @@
 # Extracted from mpsonntag/snippets@164fac3966 : python/odmlToRDF/subclassing.py
 # region: test_rdf_subclassing_queries (lines 144-245, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+#
+# `Namespace`/`ODML_NS`/`RDF`/`RDFS` and `prepareQuery` are no longer needed:
+# their one job (initNs=, giving `rdf:`/`rdfs:`/`odml:` to the raw query
+# strings) is now @prefix, the block's own prologue -- <https://g-node.org/odml-rdf#>
+# is ODML_NS's value (odml.tools.rdf_converter.ODML_NS = Format.namespace()),
+# restored from the odml package source since the region's own lines never
+# spell it out (see meta.json).
 import odml
 from odml.tools import RDFWriter
 from owlrl import DeductiveClosure, RDFS_Semantics
-from rdflib.plugins.sparql import prepareQuery
-NAMESPACE_MAP = {"odml": Namespace(ODML_NS), "rdf": RDF, "rdfs": RDFS}
+@prefix odml: <https://g-node.org/odml-rdf#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 def test_rdf_subclassing_queries():
     """
@@ -20,24 +28,23 @@ def test_rdf_subclassing_queries():
     _ = rdf_writer.get_rdf_str()
 
     use_graph = rdf_writer.graph
+    @graph use_graph
     DeductiveClosure(RDFS_Semantics).expand(use_graph)
 
-    q_string = "SELECT * WHERE {?s rdf:type odml:Section .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Section } }
 
     # Make sure the query finds two sections
-    assert len(use_graph.query(curr_query)) == 2
+    assert len(list(q)) == 2
 
     # Make sure the query finds
     result_section = []
-    for row in use_graph.query(curr_query):
+    for row in q:
         result_section.append(row.s)
 
-    q_string = "SELECT * WHERE {?s rdf:type odml:Cell .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Cell } }
 
-    assert len(use_graph.query(curr_query)) == 1
-    for row in use_graph.query(curr_query):
+    assert len(list(q)) == 1
+    for row in q:
         assert row.s in result_section
 
     # -- Test custom subclassing queries
@@ -54,40 +61,37 @@ def test_rdf_subclassing_queries():
     _ = rdf_writer.get_rdf_str()
 
     use_graph = rdf_writer.graph
+    @graph use_graph
     DeductiveClosure(RDFS_Semantics).expand(use_graph)
 
-    q_string = "SELECT * WHERE {?s rdf:type odml:Section .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Section } }
 
     # Make sure the query finds three sections
-    assert len(use_graph.query(curr_query)) == 3
+    assert len(list(q)) == 3
 
     # Make sure the query finds
     result_section = []
-    for row in use_graph.query(curr_query):
+    for row in q:
         result_section.append(row.s)
 
     # Custom class 'Species' should be found.
-    q_string = "SELECT * WHERE {?s rdf:type odml:Species .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Species } }
 
-    assert len(use_graph.query(curr_query)) == 1
-    for row in use_graph.query(curr_query):
+    assert len(list(q)) == 1
+    for row in q:
         assert row.s in result_section
 
     # Custom class 'Neuron' should be found.
-    q_string = "SELECT * WHERE {?s rdf:type odml:Neuron .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Neuron } }
 
-    assert len(use_graph.query(curr_query)) == 1
-    for row in use_graph.query(curr_query):
+    assert len(list(q)) == 1
+    for row in q:
         assert row.s in result_section
 
     # Default class 'Cell' was replaced and should not return any result.
-    q_string = "SELECT * WHERE {?s rdf:type odml:Cell .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Cell } }
 
-    assert not use_graph.query(curr_query)
+    assert not q
 
     # -- Test inactivated subclassing
     doc = odml.Document()
@@ -98,14 +102,26 @@ def test_rdf_subclassing_queries():
     _ = rdf_writer.get_rdf_str()
 
     use_graph = rdf_writer.graph
+    @graph use_graph
     DeductiveClosure(RDFS_Semantics).expand(use_graph)
 
-    q_string = "SELECT * WHERE {?s rdf:type odml:Section .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Section } }
 
-    assert len(use_graph.query(curr_query)) == 2
+    assert len(list(q)) == 2
 
-    q_string = "SELECT * WHERE {?s rdf:type odml:Cell .}"
-    curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
+    q = s{ SELECT * WHERE { ?s rdf:type odml:Cell } }
 
-    assert not use_graph.query(curr_query)
+    assert not q
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# pytest test that only ever asserts and returns nothing, so on its own it
+# gives run_pair nothing observable to compare. `demo` turns a failed
+# assertion into a comparable value instead of letting it propagate and
+# abort the driver, and its own return value is what run_pair compares.
+def demo():
+    try:
+        test_rdf_subclassing_queries()
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

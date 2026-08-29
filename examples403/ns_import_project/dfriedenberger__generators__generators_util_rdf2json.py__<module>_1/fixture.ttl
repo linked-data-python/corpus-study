@@ -1,0 +1,38 @@
+@prefix ans: <http://example.org/dfriedenberger/generators/assets#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:  <http://example.org/data/> .
+
+# ex:obj1 -- multiple solutions, one of every shape process_value handles:
+# a plain (undatatyped) literal, xsd:integer, xsd:float, xsd:boolean,
+# an rdf:Seq list of two literals, and a nested ans:Dictionary (recursion
+# through process_key_value_pairs).
+ex:obj1 ans:hasKeyValuePair ex:kv-name, ex:kv-age, ex:kv-score, ex:kv-active,
+                            ex:kv-tags, ex:kv-meta .
+
+ex:kv-name   ans:key "name"   ; ans:value "Alice" .
+ex:kv-age    ans:key "age"    ; ans:value "42"^^xsd:integer .
+ex:kv-score  ans:key "score"  ; ans:value "3.14"^^xsd:float .
+ex:kv-active ans:key "active" ; ans:value "true"^^xsd:boolean .
+
+ex:kv-tags ans:key "tags" ; ans:value ex:tags-seq .
+ex:tags-seq a rdf:Seq ;
+    rdf:_1 "red" ;
+    rdf:_2 "blue" .
+
+ex:kv-meta ans:key "meta" ; ans:value ex:meta-dict .
+ex:meta-dict a ans:Dictionary ;
+    ans:hasKeyValuePair ex:kv-meta-owner .
+ex:kv-meta-owner ans:key "owner" ; ans:value "Bob" .
+
+# ex:obj2 -- the zero-solutions case: no ans:hasKeyValuePair triple at all,
+# so process_key_value_pairs must return {} (what g.value/m{}.first() give
+# for "no match" must round-trip through the whole recursive walk as
+# nothing, not an error).
+ex:obj2 ex:unrelatedProp "should not appear" .
+
+# Neighbourhood that must NOT match: a kv-pair-shaped node reachable from
+# nothing, and a differently-named predicate that happens to point at a real
+# kv-pair node -- neither must leak into ex:obj1's or ex:obj2's result.
+ex:kv-orphan ans:key "orphan" ; ans:value "should not appear either" .
+ex:obj3 ex:notHasKeyValuePair ex:kv-name .

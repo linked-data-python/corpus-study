@@ -1,8 +1,19 @@
 # Extracted from mapsa/blathers@cad7822217 : src/blathers/extract.py
 # region: _extract_nested_node (lines 157-170, stratum trav_single_value)
 # licence of the source repository: see meta.json
+#
+# The tirage's captured context referenced SH in _STRUCTURAL_NS without
+# defining it: `SH = Namespace(...)` is the line directly above
+# _STRUCTURAL_NS in the real file, outside the captured window. Restored
+# here verbatim. NestedRow, ExtractedNestedNode, _str_or_none and
+# _term_label are likewise module-level names of extract.py that the region
+# reads but does not define -- restored from the context shim (see
+# meta.json), verbatim from the source.
 from rdflib import BNode, Graph, Namespace, URIRef
 from rdflib.namespace import DCTERMS, OWL, RDF, RDFS
+from blathers_context import ExtractedNestedNode, NestedRow, _str_or_none, _term_label
+
+SH = Namespace("http://www.w3.org/ns/shacl#")
 _STRUCTURAL_NS = (str(RDF), str(RDFS), str(OWL), str(SH))
 
 def _extract_nested_node(g: Graph, node: BNode) -> ExtractedNestedNode:

@@ -1,7 +1,7 @@
 # Extracted from tetherless-world/materialsmine@0be55da099 : tests/test_L155_S2_Roy_2005.py
 # region: IngestTestRunner.no_test_dielectric_real_permittivity (lines 17-75, stratum coercion_datatype)
 # licence of the source repository: see meta.json
-from . import ingest_tester
+from context_shim import ingest_tester
 import rdflib
 
 def no_test_dielectric_real_permittivity(self):

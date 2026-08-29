@@ -1,19 +1,19 @@
 """Validation driver for AtomGraph__Web-Algebra__tests_unit_test_values.py___two_var_two_rows.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
+The region builds its own two-triple graph (no external input) before
+querying it, so there is nothing to inject through a `fixture.ttl`:
+`_two_var_two_rows()` takes no argument.  The oracle is still the equality
+of the *values* the query returns, not isomorphism -- the region's whole
+point is the SELECT it runs, not the graph it built to run it against.
 
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+`calls=[((), {})]` invokes the entry point once per side, with no arguments.
+`ordered=True` because the region's own query asks for `ORDER BY ?s`.
 """
 from rdfeval.harness import run_pair
 
 VERDICT = run_pair(
     __file__,
     entry='_two_var_two_rows',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    calls=[((), {})],
+    ordered=True,
 )

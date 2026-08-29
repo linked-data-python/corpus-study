@@ -12,10 +12,19 @@
   "categories": {
     "term_constructor": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "f{ }"
+  ],
+  "translation_notes": [
+    "2 of the 5 term_constructor sites -- `[rdflib.Literal(f) for f in frequency]` and `[rdflib.Literal(p) for p in real_permittivity]` -- are the stratum's real target: `Literal(v)` over a COMPUTED value (a float pulled from a data list), coerced by rdflib's own default inference to xsd:double. `f{f}` / `f{p}` go through the identical node() default coercion and produce the identical term (verified: `f{f} == rdflib.Literal(f)` for every element); no custom ldpy.Coercion policy was needed since the default already matches rdflib's own float->xsd:double inference.",
+    "the remaining 3 sites -- `rdflib.Literal(\"Measured at 25 Celsius\")` and the two other `descriptions[...]` entries -- are PLAIN literals (no @lang, no ^^dt) built from CONSTANT strings, outside any graph/`+{ }` context, same shape as the two sibling regions in this batch: migrate-from-rdflib.md's 'What not to rewrite' documents that a plain literal outside a graph has no island spelling of its own ('outside, keep Literal'). Left as rdflib.Literal(...), unchanged.",
+    "verified the translation is discriminating, not just passing by accident: temporarily changing `f{f}` to `f{str(f)}` (which degrades xsd:double to a plain literal) makes `rdfeval check` FAIL on stdout diff, as expected -- reverted before finalising.",
+    "the region has no `return` of its own -- its whole effect is the arguments it hands to `ingest_tester.test_dielectric_real_permittivity`, and that call happens OUTSIDE the region (in the real ingest_tester, which queries a live triple store via `runner.app.db.query` and asserts with `runner.assertCountEqual` -- see context_shim.py). The shim's stand-in prints a term-by-term (value, datatype) view of what it receives instead, so the oracle is stdout equality -- exactly the coercion this region performs, nothing more.",
+    "context_shim.py replaces `from . import ingest_tester` (a relative import that fails standalone, no parent package) with a stand-in `ingest_tester.test_dielectric_real_permittivity` that only captures-and-prints; `self` (materialsmine's `runner`) is unused by both the region and the shim, so a bare None stands in for it in driver.py.",
+    "the region's own name is `no_test_dielectric_real_permittivity` (the `no_test_` prefix, not `test_`, is the repository's own convention for disabling a test from pytest discovery -- ingest_tester.py has a sibling `test_filler_processing` marked '# TODO Fix or remove' with an explicit @disable_test decorator): this region is dead code in its own repository, kept for reference, not exercised by CI. Noted for completeness, not treated differently in translation."
+  ],
   "draft_sha": "49834bcbb09c636d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.475335+00:00",
@@ -26,5 +35,12 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:no_test_dielectric_real_permittivity",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -12,10 +12,23 @@
   "categories": {
     "graph_read": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "context shim (pyrml_context.py, identical on both sides): `pyrml` is not installed in this environment. RR_NS/RML_NS are the real R2RML/RML namespace IRIs, copied from pyrml/rml_vocab.py at the pinned commit. `TripleMappings.__build` is stubbed to return the selected subject `tm` itself -- the real method (pyrml_core.py:1647) builds a full TripleMappings via LogicalSource/SubjectMap/PredicateObjectMap.from_rdf, entirely outside this region and reading nothing from `g` that from_rdf does not already read; the stub is assigned OUTSIDE the shim class body specifically so the attribute name is NOT mangled to _TripleMappings__build, matching what `TripleMappings.__build(g, tm)` resolves to now that from_rdf is extracted on its own (no longer textually inside the real class). original.py's import block was trimmed to the names this 14-line body actually uses (typing.List, rdflib Graph/IdentifiedNode, the three shimmed names) -- the rest of the source file's top-of-file imports (Dict/Union/Set/Type/Generator, nine of the ten pyrml.pyrml_api names, plain URIRef) were never referenced here.",
+    "of the three reads, two ARE directly expressible and translated: `g.value(parent, RR_NS.parentTriplesMap)` -> `m{ {parent} rr:parentTriplesMap ?tm }.first()` (value reused as `tm`, so `.first()` not bool()); `g.value(tm, RR_NS.subjectMap)` used only for its truthiness in `if:` -> `bool(m{ {tm} rr:subjectMap ?x })` -- this region's one genuine discarded-value existence check, and the only one in this three-region batch that sits behind a graceful `if` rather than a bare assert, so the fixture exercises BOTH its branches in one call (see fixture.ttl/driver.py) -- unlike the two LA3D regions of this batch, whose analogous checks could not.",
+    "NOT-EXPRESSIBLE: `tps = g.triples((tm, rml_vocab.RML_NS.logicalSource|rml_vocab.RR_NS.logicalTable, None))`. Minimal extract showing why: `tm = None` earlier, only reassigned `if parent:` -- so the SUBJECT position is a Python-computed wildcard-or-bound-term decided at runtime. Two independent blockers, either one already sufficient: (1) the predicate is a SPARQL property-path ALTERNATION (`|` between two URIRefs, an rdflib `AlternativePath`) -- querying.md lists property paths explicitly under \"What m{ } does not have\", by design (s{ } covers them, not m{ }); (2) even s{ } cannot take over, because its `{expr}` interpolation is only valid in TERM position and always binds -- it cannot express 'this position is an unbound variable exactly when this Python value is None, else this bound term' (the piege documented in INSTRUCTIONS_403 SS2, 'un motif recu en donnee est hors d'atteinte': a joker is lexical, never a runtime value). Confirmed the installed rdflib really does accept a Path object as `.triples()`'s predicate (verified interactively before concluding this) -- so the ORIGINAL is valid rdflib, just outside both islands' reach. Left as plain rdflib on both sides, unchanged from original.py; the region's overall classification follows the read that defines what gets traversed at all, even though the other two reads in the same function credit cleanly.",
+    "kept `p, o` unpacked-but-unused in `for tm,p,o in tps:` exactly as the original does (they are never read) -- resisting the temptation to 'clean up' to `for tm, _, _ in tps:` or to a set-based rebuild, since that would risk silently changing the true original behaviour this region has: a subject reachable via BOTH predicates (present in `rml:logicalSource` and `rr:logicalTable` at once) yields `tm` twice from `tps`, so `TripleMappings.__build` -- and here, the existence check -- runs on it twice. The fixture does not happen to exercise that double-count case, but the untouched raw-rdflib line preserves it faithfully regardless."
+  ],
   "draft_sha": "f34775aa70ec82c7",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.566221+00:00",

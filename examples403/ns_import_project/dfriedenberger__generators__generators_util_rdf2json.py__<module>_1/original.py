@@ -3,8 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import RDF, URIRef, Literal
 from rdflib.namespace import XSD
-from obse.sparql_queries import SparQLWrapper
-from .namespaces import ANS
+from generators_context import SparQLWrapper, ANS
 
 
 def process_key_value_pairs(sparql_wrapper: SparQLWrapper, rdf_use):

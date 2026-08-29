@@ -17,11 +17,21 @@
     "term_constructor": 17,
     "triple_add": 17
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "RDF and RDFS are module-level `from rdflib import RDF, RDFS`, so their @prefix stays at module scope; the region under study is LDP and XHV, both `Namespace(...)` calls INSIDE the function body, translated to `@prefix ldp:`/`@prefix xhv:` at that exact point, in the function's block scope (declarations.md's block-scope rule).",
+    "consolidated each run of g.add(...) sharing a subject into one +{ s p1 o1 ; p2 o2 } (migrate-from-rdflib.md); left the conditional prev/next and parent-label adds as separate +{ } since they are not on the same control-flow path as the block they'd otherwise join.",
+    "dropped the explicit Literal(...) wrapper where the default coercion already produces the same term (plain string -> plain literal); kept Literal(self.comment, lang='en') as {self.comment}@en, the interpolation + glued suffix form, rather than wrapping the whole Literal(...) call opaquely in {}.",
+    "RDF.Bag is used as a PREDICATE in the source (`g.add((parent_uri, RDF.Bag, u))`), not a typo I fixed: kept verbatim as `rdf:Bag` in predicate position, no refactor.",
+    "fixture self is a types.SimpleNamespace, not a plain class: the harness compares call arguments after the call too (mutation check), and SimpleNamespace's structural __eq__ is what makes two separately-constructed fixtures (one per side) compare equal."
   ],
   "draft_sha": "9190cbc831f83db6",
   "provenance": {
@@ -33,5 +43,12 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_generate_mem_profile_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

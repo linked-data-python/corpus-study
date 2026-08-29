@@ -16,11 +16,23 @@
     "namespace_term": 6,
     "term_constructor": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, SH->sh, XSD->xsd"
+    "prefixes: RDF->rdf, RDFS->rdfs, SH->sh, XSD->xsd (RDF and RDFS stay unused, as in original.py: kept only because the source file imports them).",
+    "the two reads are `next(self.sh.shaclg.objects(s, SH.property))`, matched by strata trav_one_step/trav_single_value at once: each becomes `m{ {s} sh:property ?prop }(self.sh.shaclg).first()`. `self.sh.shaclg` is not the file's single current graph (it is reassigned mid-function, `self.sh.shaclg = Graph()`, twice) so the call suffix `(self.sh.shaclg)` supplies it explicitly rather than `@graph`.",
+    "`.first()` differs from `next()` on the empty case (None vs StopIteration) -- the canonical rewrite in how-to/migrate-from-rdflib.md accepts this; here it is moot, since get_ngsild_property_constraints (context_shim.py) always leaves shapes[0]/s with exactly one sh:property triple for the value_rank/datatype combinations this test drives.",
+    "left untranslated on purpose: `(inner, SH.path, ...) in list(self.sh.shaclg)` uses `list(g)`, an unfiltered full-graph scan explicitly kept as `list(g)` by querying.md (#keep-listg-for-a-full-scan); the second `(inner, SH.path, ...) in self.sh.shaclg` is plain Graph.__contains__, not part of the strata this region was drawn for (trav_existence is a different stratum) and not degrading anything m{ } would express here, so left as ordinary rdflib.",
+    "context_shim.py restores `Shacl` (lib/shacl.py) trimmed to exactly the methods this region's two calls reach -- the pipeline's context window captures the test method body but not sibling classes the test file imports. driver.py restores the missing `TestShaclAdditional.setUp()` fixture as a small stand-in with its own __eq__ (RDF isomorphism on .sh.shaclg/.data_graph), needed because the region mutates its `self` argument so the two sides cannot share one instance to sidestep object comparison, unlike the swrl2rdf trav_single_value precedent."
   ],
   "draft_sha": "75054f9dd626ad6f",
   "provenance": {
@@ -33,5 +45,11 @@
     "trav_one_step",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_ngsild_property_constraints_scalar_and_list",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -2,7 +2,7 @@
 # region: <module> (lines 328-338, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
 from rdflib.plugins.sparql.processor import prepareQuery
-from ..namespace import KTBS, RDF
+from obsel_context import KTBS, RDF
 
 _RELATED_OBSELS = prepareQuery("""
     SELECT DISTINCT ?other

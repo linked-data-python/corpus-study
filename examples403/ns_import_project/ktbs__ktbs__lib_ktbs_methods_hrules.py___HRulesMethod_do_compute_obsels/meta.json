@@ -15,11 +15,20 @@
     "triple_add": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+  "classification": "excluded",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name"
   ],
+  "translation_notes": [
+    "The site the stratifier flagged is `from ..namespace import KTBS, KTBS_NS_URI`: KTBS is ktbs/ktbs's own vocabulary object (lib/ktbs/namespace.py: a rdflib.namespace.ClosedNamespace over KTBS_NS_URI + '#', verified against the real file), used once in the region as `KTBS.hasTrace` -- genuinely ns_import_project, rewritten `from ktbs_namespace_context import KTBS_NS_URI, ktbs:` + `ktbs:hasTrace`. KTBS_NS_URI itself is used as a plain STRING (`\"PREFIX ktbs: <%s#> %s\" % (KTBS_NS_URI, select)`, building a raw SPARQL prologue by %-formatting), never as NS.attr -- stays a plain, non-prefixed import name, per declarations.md's mixed-list form.",
+    "RDF.type (`new_obs_graph.set((new_obs_uri, RDF.type, new_type))`) is rdflib's own namespace, not a project module -- @prefix rdf: + rdf:type, same split as every other region in this stratum. XSD (imported but never referenced anywhere in the region's body) is left as a plain, now-unused import, same discipline as BASE/DCTERMS in the sibling johnjung region -- not cleaned up.",
+    "`new_obs_graph.set(...)` is deliberately NOT rewritten to `+{ }`: rdflib's `Graph.set((s, p, o))` first REMOVES every existing (s, p, ?) triple before adding the new one (replace-the-single-value semantics), which `+{ }` does not do (pure add, INSTRUCTIONS_403's own +{ }-vs-.add() rule is about .add(), not .set()). The closed construction vocabulary has no set()-shaped island; substituting +{ } here would be exactly the kind of silent behaviour change (stale rdf:type triples surviving) INSTRUCTIONS_403 §2 warns against. Kept as plain rdflib, only its two namespace terms translated.",
+    "Restoring bindings (AGENT_BATCH's 163-regions case, the legitimate half): `import logging` was outside the extraction's context window (verified against the real file, hrules.py line 20 -- LOG = logging.getLogger(__name__) is carried but the import above it was not) and is added back in original.py/translated.ldpy identically. The `..namespace` relative import is swapped for ktbs_namespace_context.py the same way as every other region in this stratum needing a project-owned namespace shim (module path changed, names untouched).",
+    "classification excluded, translation_status draft (not final): rdfrest.util.check_new, .abstract's AbstractMonosourceMethod/NOT_MON/PSEUDO_MON/STRICT_MON, and .utils' copy_obsel/translate_node are kTBS-internal machinery this corpus does not vendor and `rdfrest` is not installed here (ModuleNotFoundError, verified) -- confirmed by `rdfeval check`: both sides fail identically at the `from rdfrest.util import check_new` line, before entry/calls is ever reached. The region's actual body also drives ObselCollection objects (`.build_select`, `.state.query`, `.edit(...)`, `.add_obsel_graph`) backed by a live RDF-REST trace store; kTBS's own test suite exercises do_compute_obsels only indirectly, through a full in-memory kTBS engine (utest/test_ktbs_method_hrules.py: KtbsTestCase, self.my_ktbs.create_base(...), force_state_refresh()) that itself needs rdfrest and fsa4streams, neither installed. Reproducing that engine would be re-implementing the system under test, which AGENT_BATCH.md forbids -- same call as the vital-graph sibling of this stratum, whose driver.py this one's mirrors. The ns_import_project rewrite itself is not in doubt (transpiles cleanly, verified directly), only whether the region as a WHOLE still behaves identically -- which neither side can demonstrate by execution here."
+  ],
+  "article_candidate": false,
   "draft_sha": "4fe5bff0c652fb72",
   "provenance": {
     "generated_at": "2026-08-28T17:54:57.601513+00:00",

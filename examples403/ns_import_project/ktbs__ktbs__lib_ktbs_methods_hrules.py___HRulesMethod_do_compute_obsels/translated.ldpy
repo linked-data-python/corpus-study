@@ -1,13 +1,13 @@
 # Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/methods/hrules.py
 # region: _HRulesMethod.do_compute_obsels (lines 100-171, stratum ns_import_project)
 # licence of the source repository: see meta.json
+import logging
 from rdflib import Literal, RDF, URIRef, XSD
 from rdfrest.util import check_new
 from .abstract import AbstractMonosourceMethod, NOT_MON, PSEUDO_MON, STRICT_MON
 from .utils import copy_obsel, translate_node
-from ..namespace import KTBS, KTBS_NS_URI
+from ktbs_namespace_context import KTBS_NS_URI, ktbs:
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 LOG = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ def do_compute_obsels(self, computed_trace, cstate, monotonicity, diag):
                 new_obs_uri = translate_node(obs_uri, computed_trace,
                                              source_uri, False)
                 if monotonicity is PSEUDO_MON\
-                and target_contains((new_obs_uri, KTBS.hasTrace, target_uri))\
+                and target_contains((new_obs_uri, ktbs:hasTrace, target_uri))\
                 or new_obs_uri in inserted:
                     # could be either because of pseudo-monotony,
                     # or because a BGP with higher priority already matched

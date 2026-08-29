@@ -1,7 +1,8 @@
 # Extracted from boricles/ontosphere@e055553268 : backend/app/services/export_service.py
 # region: _export_rdf (lines 91-194, stratum add_in_loop)
 # licence of the source repository: see meta.json
-from app.services.graph_service import GraphData, GraphService
+import logging
+from context_shim import GraphData, GraphService, _resolve_uri
 logger = logging.getLogger(__name__)
 
 def _export_rdf(
@@ -108,3 +109,21 @@ def _export_rdf(
         len(serialised) if serialised else 0,
     )
     return serialised
+
+
+# Demo harness (identical on both sides, see meta.json): _export_rdf's graph
+# never escapes the function except serialised to text, and rdflib's
+# serialisers are not byte-stable across two independently built (even if
+# isomorphic) graphs -- comparing the returned string with plain equality
+# would be comparing serialisation order, not RDF content, which is exactly
+# what run_pair's docstring says graph comparison must not do ("never raw
+# serialisation"). This round-trips the string back into a fresh Graph with
+# the same fmt -> rdf_format mapping _export_rdf itself uses, so the driver
+# compares the two GRAPHS by isomorphism instead.
+def demo(graph_data, fmt, namespace_uri):
+    from rdflib import Graph
+    serialised = _export_rdf(graph_data, fmt, namespace_uri)
+    rdf_format = {"owl": "xml", "ttl": "turtle", "jsonld": "json-ld"}[fmt]
+    g = Graph()
+    g.parse(data=serialised, format=rdf_format)
+    return g

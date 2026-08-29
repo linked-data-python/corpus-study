@@ -6,14 +6,15 @@ from typing import Any
 import rdflib
 
 def _insert_resource(g: rdflib.Graph, resource: dict[str, Any]) -> rdflib.URIRef:
+    @graph g
     try:
         subject = rdflib.URIRef(resource["@id"]) if "@id" in resource else rdflib.BNode()
         for key, value in resource.items():
             if key == "@id":
                 continue
             if key == "@type":
-                for type_ in value:
-                    g += g{ {subject} {rdflib.RDF.type} {rdflib.URIRef(type_)} }
+                for @bindings in ({"t": rdflib.URIRef(type_)} for type_ in value):
+                    +{ {subject} a ?t }
             else:
                 for obj in value:
                     if len(obj) == 1:
@@ -42,13 +43,13 @@ def _insert_resource(g: rdflib.Graph, resource: dict[str, Any]) -> rdflib.URIRef
                             obj = rdflib.URIRef(obj["@id"])
                         elif "@value" in obj:
                             obj = rdflib.Literal(obj["@value"])
-                        g += g{ {subject} {rdflib.URIRef(key)} {obj} }
+                        +{ {subject} {rdflib.URIRef(key)} {obj} }
                     else:
                         if "@value" in obj:
                             obj = rdflib.Literal(obj["@value"])
                         else:
                             obj = _insert_resource(g, obj)
-                        g += g{ {subject} {rdflib.URIRef(key)} {obj} }
+                        +{ {subject} {rdflib.URIRef(key)} {obj} }
         return subject
     except:
         print(json.dumps(resource, indent=2))

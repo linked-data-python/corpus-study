@@ -1,9 +1,16 @@
 # Extracted from mpsonntag/snippets@164fac3966 : python/odmlToRDF/subclassing.py
 # region: test_rdf_subclassing_queries (lines 144-245, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+#
+# `from odml.tools.rdf_converter import ODML_NS` and `from rdflib import
+# Namespace, RDF, RDFS` are restored verbatim from the top of the real file
+# (context above the region's own line range, which the extractor could not
+# carry) -- see meta.json.
 import odml
 from odml.tools import RDFWriter
+from odml.tools.rdf_converter import ODML_NS
 from owlrl import DeductiveClosure, RDFS_Semantics
+from rdflib import Namespace, RDF, RDFS
 from rdflib.plugins.sparql import prepareQuery
 NAMESPACE_MAP = {"odml": Namespace(ODML_NS), "rdf": RDF, "rdfs": RDFS}
 
@@ -109,3 +116,16 @@ def test_rdf_subclassing_queries():
     curr_query = prepareQuery(q_string, initNs=NAMESPACE_MAP)
 
     assert not use_graph.query(curr_query)
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# pytest test that only ever asserts and returns nothing, so on its own it
+# gives run_pair nothing observable to compare. `demo` turns a failed
+# assertion into a comparable value instead of letting it propagate and
+# abort the driver, and its own return value is what run_pair compares.
+def demo():
+    try:
+        test_rdf_subclassing_queries()
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

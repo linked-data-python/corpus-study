@@ -1,7 +1,13 @@
 # Extracted from lazlop/semantic_objects@243c5efd8c : tests/ingest/test_shacl_roundtrip_parity.py
 # region: test_class_scope_or_roundtrip (lines 162-190, stratum sparql_literal)
 # licence of the source repository: see meta.json
-from semantic_objects.s223._generated import entities, properties
+# `semantic_objects.s223._generated` is not installable here (see _context.py);
+# `_context` stands in for it and for the test file's own `_shacl_graph()`.
+from _context import entities, properties, _shacl_graph
+
+@prefix s223: <http://data.ashrae.org/standard223#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 def test_class_scope_or_roundtrip():
     # Battery.connection_point: Union[OutletConnectionPoint_Electricity,
@@ -12,23 +18,25 @@ def test_class_scope_or_roundtrip():
     # its own sh:property with its own sh:qualifiedValueShape (including the
     # nested medium pin), not a single shared property shape.
     g = _shacl_graph(entities.Battery)
-    assert not bool(g.query("ASK { s223:Battery sh:property ?p . }")), (
+    assert not bool(s{ ASK { s223:Battery sh:property ?p } }(g)), (
         "Battery has no direct sh:property of its own - only branches "
         "reachable through the class-level sh:or (each branch's own "
         "hasConnectionPoint path shape is checked separately below)"
     )
-    result = g.query("""
-        SELECT ?target WHERE {
-            s223:Battery sh:or/rdf:rest*/rdf:first/sh:property ?prop .
-            ?prop sh:path s223:hasConnectionPoint ;
-                  sh:qualifiedMinCount ?min ;
-                  sh:qualifiedValueShape [ sh:class ?target ;
-                                            sh:node [ sh:property [ sh:path s223:hasMedium ;
-                                                                     sh:class s223:Constituent-Electricity ] ] ] .
-        }
-    """)
+    result = s{ SELECT ?target WHERE {
+                    s223:Battery sh:or/rdf:rest*/rdf:first/sh:property ?prop .
+                    ?prop sh:path s223:hasConnectionPoint ;
+                          sh:qualifiedMinCount ?min ;
+                          sh:qualifiedValueShape [ sh:class ?target ;
+                                                    sh:node [ sh:property [ sh:path s223:hasMedium ;
+                                                                             sh:class s223:Constituent-Electricity ] ] ] .
+                } }(g)
     targets = {str(row.target) for row in result}
     assert targets == {
         'http://data.ashrae.org/standard223#OutletConnectionPoint',
         'http://data.ashrae.org/standard223#BidirectionalConnectionPoint',
     }
+    # Appended (see meta.json): the original test asserts and returns nothing,
+    # so the two versions would have nothing for the driver to compare beyond
+    # "did not raise". Returning the computed set gives it something real.
+    return targets

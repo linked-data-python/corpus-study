@@ -1,9 +1,9 @@
 # Extracted from boricles/ontosphere@e055553268 : backend/app/services/export_service.py
 # region: _export_rdf (lines 91-194, stratum add_in_loop)
 # licence of the source repository: see meta.json
-from app.services.graph_service import GraphData, GraphService
+import logging
+from context_shim import GraphData, GraphService, _resolve_uri
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -30,28 +30,33 @@ def _export_rdf(
     g.bind("rdf", RDF)
     g.bind("xsd", XSD)
     g.bind("onto", NS)
+    @graph g
 
     # -- Add an Ontology declaration --
     onto_uri = URIRef(namespace_uri.rstrip("#").rstrip("/"))
-    g += g{ {onto_uri} a owl:Ontology }
+    +{ {onto_uri} a owl:Ontology }
 
     # -- Nodes --
     for node in graph_data.nodes:
         node_uri = _resolve_uri(node.uri, NS)
+        @bindings as b
+        b["uri"] = node_uri
 
         if node.node_type == "class":
-            g += g{ {node_uri} a owl:Class }
+            b["type"] = owl:Class
         elif node.node_type == "property":
-            g += g{ {node_uri} a owl:ObjectProperty }
+            b["type"] = owl:ObjectProperty
         elif node.node_type == "individual":
-            g += g{ {node_uri} a owl:NamedIndividual }
+            b["type"] = owl:NamedIndividual
         else:
-            g += g{ {node_uri} a owl:Class }
+            b["type"] = owl:Class
 
         if node.label:
-            g += g{ {node_uri} rdfs:label {Literal(node.label)} }
+            b["label"] = node.label
         if node.description:
-            g += g{ {node_uri} rdfs:comment {Literal(node.description)} }
+            b["description"] = node.description
+
+        +{ ?uri a ?type ; rdfs:label ?label ; rdfs:comment ?description }
 
     # -- Edges --
     for edge in graph_data.edges:
@@ -60,40 +65,39 @@ def _export_rdf(
         edge_type = edge.edge_type.upper()
 
         if edge_type == "SUBCLASS_OF":
-            g += g{ {source} rdfs:subClassOf {target} }
+            +{ {source} rdfs:subClassOf {target} }
         elif edge_type == "DOMAIN":
-            g += g{ {source} rdfs:domain {target} }
+            +{ {source} rdfs:domain {target} }
         elif edge_type == "RANGE":
             # Check if target is an XSD datatype
             if edge.target_uri.startswith("xsd:"):
                 datatype_name = edge.target_uri.split(":", 1)[1]
-                g += g{ {source} rdfs:range xsd:{datatype_name} }
+                +{ {source} rdfs:range xsd:{datatype_name} }
             else:
-                g += g{ {source} rdfs:range {target} }
+                +{ {source} rdfs:range {target} }
         elif edge_type == "HAS_PROPERTY":
-            g += g{ {source} owl:hasKey {target} }
+            +{ {source} owl:hasKey {target} }
         elif edge_type == "EQUIVALENT_TO":
-            g += g{ {source} owl:equivalentClass {target} }
+            +{ {source} owl:equivalentClass {target} }
         elif edge_type == "RELATED_TO":
             # Generic relationship -- create an object property assertion
             rel_uri = _resolve_uri(edge.label or "relatedTo", NS)
-            g += g{
+            +{
                 {rel_uri} a owl:ObjectProperty ;
                    rdfs:domain {source} ;
                    rdfs:range {target}
             }
         elif edge_type == "DISJOINT_WITH":
-            g += g{ {source} owl:disjointWith {target} }
+            +{ {source} owl:disjointWith {target} }
         else:
             # Custom relationship type -- model as an object property
-            rel_uri = _resolve_uri(edge.label or edge.edge_type, NS)
-            g += g{ {rel_uri} a owl:ObjectProperty }
+            @bindings as b
+            b["rel"] = _resolve_uri(edge.label or edge.edge_type, NS)
+            b["domain"] = source
+            b["range"] = target
             if edge.label:
-                g += g{ {rel_uri} rdfs:label {Literal(edge.label)} }
-            g += g{
-                {rel_uri} rdfs:domain {source} ;
-                   rdfs:range {target}
-            }
+                b["label"] = edge.label
+            +{ ?rel a owl:ObjectProperty ; rdfs:domain ?domain ; rdfs:range ?range ; rdfs:label ?label }
 
     # -- Serialise --
     format_map = {
@@ -117,3 +121,21 @@ def _export_rdf(
         len(serialised) if serialised else 0,
     )
     return serialised
+
+
+# Demo harness (identical on both sides, see meta.json): _export_rdf's graph
+# never escapes the function except serialised to text, and rdflib's
+# serialisers are not byte-stable across two independently built (even if
+# isomorphic) graphs -- comparing the returned string with plain equality
+# would be comparing serialisation order, not RDF content, which is exactly
+# what run_pair's docstring says graph comparison must not do ("never raw
+# serialisation"). This round-trips the string back into a fresh Graph with
+# the same fmt -> rdf_format mapping _export_rdf itself uses, so the driver
+# compares the two GRAPHS by isomorphism instead.
+def demo(graph_data, fmt, namespace_uri):
+    from rdflib import Graph
+    serialised = _export_rdf(graph_data, fmt, namespace_uri)
+    rdf_format = {"owl": "xml", "ttl": "turtle", "jsonld": "json-ld"}[fmt]
+    g = Graph()
+    g.parse(data=serialised, format=rdf_format)
+    return g

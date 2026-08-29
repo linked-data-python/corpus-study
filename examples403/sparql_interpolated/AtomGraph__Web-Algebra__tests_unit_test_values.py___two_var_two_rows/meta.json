@@ -15,10 +15,20 @@
     "term_constructor": 6,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "s{ }",
+    "interpolation {expr}",
+    "plain literal"
+  ],
+  "translation_notes": [
+    "The predicate is an f-string hole spliced INSIDE the SPARQL angle brackets (`<{EX_P}>`), i.e. textual query assembly; in ldpy this becomes {URIRef(EX_P)} as the whole predicate term (term-position interpolation, an initBindings entry) inside s{ SELECT ?s ?o WHERE { ?s {URIRef(EX_P)} ?o } ORDER BY ?s } -- no query text is concatenated, and EX_P (a bare str) is wrapped in URIRef(...) because a plain string interpolated in term position would coerce to a Literal, not an IRI.",
+    "Also translated the two isolated g.add() calls (add_isolated, same region) to a single +{ } with two `.`-separated triples: most-specific construction per INSTRUCTIONS_403 SS2, not left as raw rdflib .add().",
+    "ordered=True in the driver because the region's own query specifies ORDER BY ?s."
+  ],
   "draft_sha": "cc674147fc8e2d70",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.065629+00:00",
@@ -29,5 +39,11 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_two_var_two_rows",
+    "diffs": [],
+    "error": null
+  }
 }

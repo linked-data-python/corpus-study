@@ -12,10 +12,20 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    ".execute()"
+  ],
+  "translation_notes": [
+    "The rdflib prologue came from an explicit initNs dict passed to prepareQuery; in ldpy it comes from the block's @prefix declarations instead (querying.md, 'the prologue is the block's') — same five prefixes, declared once, no initNs argument needed.",
+    "The query is a fixed BGP with no interpolation: s{ } is used directly, bound to the function's g parameter via the call suffix s{ ... }(g).",
+    ".execute() is used (not bare iteration) because the original keeps `result` around after the for-loop to call result.serialize(format='json') and to return it — PreparedQuery itself has no .serialize(); .execute() returns rdflib's own Result object, which does.",
+    "om-2: and time: are declared but unused by this particular query, mirroring the original initNs dict which also carried them unused here."
+  ],
   "draft_sha": "9a475fabe0e0c2e5",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.727724+00:00",
@@ -26,5 +36,12 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:get_event_functions",
+    "diffs": [],
+    "error": null
+  }
 }

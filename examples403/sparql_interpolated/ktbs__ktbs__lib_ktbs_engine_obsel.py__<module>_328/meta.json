@@ -12,10 +12,20 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "prepareQuery(text % (KTBS.hasTrace, KTBS.hasTrace)) splices the SAME term into the query text twice via %-formatting; both occurrences are genuinely in term (predicate) position, so both become {KTBS.hasTrace} -- term-position interpolation, an initBindings entry -- inside s{ SELECT DISTINCT ?other $obs { ... $obs {KTBS.hasTrace} ?trace . ?other {KTBS.hasTrace} ?trace . } }. No query text is concatenated, and the two occurrences are two separate interpolation expressions (per graphs.md: each source occurrence evaluates on its own), which is fine here since KTBS.hasTrace is deterministic.",
+    "s{ } is itself described as a 'lazy prepared query' (querying.md): prepareQuery(...) simply disappears, its import along with it -- the island already IS the prepared-query object the original code built by hand.",
+    "$obs (not ?obs) is kept as written: terms.md confirms ?name and $name are the same Variable syntax, so no translation is needed there; it is raw SPARQL text inside s{ }, not parsed by ldpy's own grammar (unlike m{ }/g{ }/+{ }/-{ }, s{ }'s non-interpolated content is opaque to ldpy and validated by rdflib alone) -- so no 'variable' construction credit is claimed for the ?other/$obs occurrences inside the query text.",
+    "The region has no `graph` and defines no function (kind: statement) -- neither of run_pair's built-in modes (module-state, entry+calls) applies to a bare prepared-query assignment, so the driver executes both prepared queries by hand against a shared fixture graph, with initBindings on the original side and the island's own call suffix `s{ }(g, bindings)` on the translated side (an ordinary call on the value the island produced, not additional ldpy syntax -- so no 'call suffix' construction credit either, since translated.ldpy itself only assigns the island, it never writes the call-suffix parenthesis).",
+    "Context shim (obsel_context.py) reproduces only KTBS.hasTrace's IRI as a plain Namespace, not the real rdflib ClosedNamespace built by parsing the full kTBS OWL vocabulary -- reproduced minimally per AGENT_BATCH.md, no logic invented.",
+    "Fixture (in the driver, since the region takes no graph argument): obs=o1 related to o2 (forward) and o3 (reverse), all three sharing trace t1; o4 shares a relation with o1 but has a DIFFERENT trace and must not come back (proves the trace filter, not just the UNION); obs=o5 shares the trace but has no relation at all (zero-solution case)."
+  ],
   "draft_sha": "f779436faec825d1",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.152797+00:00",
@@ -26,5 +36,12 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "custom:prepared-query-execution",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -13,11 +13,18 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "+{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "Single .add() call, so no @prefix/@graph: the draft's `@prefix rdf: <...>` was dead weight (rdf: never appears in the body -- RDF is imported but unused here) and `graph += g{ ... }` used the forbidden `+=` degradation. Replaced with `+{ {root} {FORGEFED.forkedFrom} {repository} }(graph)`: the call suffix reads `graph` -- the function's own parameter, a bare name, still any Python expression per current-graph.md -- directly, one line cheaper than declaring `@graph graph` for a graph touched exactly once.",
+    "Predicate FORGEFED.forkedFrom stays a Python attribute-access interpolation `{FORGEFED.forkedFrom}`, not a prefixed name: no @prefix for the ForgeFed vocabulary was declared (would need inventing a prefix the source file never uses), and the construction table does not require rewriting an already-idiomatic namespace-object dereference into `prefix:local`.",
+    "Context shim: swh.indexer.namespaces and metadata_mapping.base are not importable standalone (swh is not installed; `.base` is a sibling-package relative import) -- context_shim.py transcribes swh/indexer/namespaces.py and the produce_terms decorator VERBATIM from the local clone (corpus/repos/SoftwareHeritage__swh-indexer/), confirming FORGEFED = https://forgefed.org/ns# matches the docstring. BaseExtrinsicMapping/JsonMapping are name-only stand-ins: unused by the region's own body.",
+    "The docstring's doctest text (`>>> root = URIRef(...)`) is a Python string literal, not code -- left byte-for-byte identical to original.py; the earlier draft had silently rewritten it to `<http://example.org/test-fork>` inside the string, which this pair fixes back."
   ],
   "draft_sha": "a71f33e125c3fea3",
   "provenance": {
@@ -29,5 +36,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:translate_parent",
+    "diffs": [],
+    "error": null
+  }
 }

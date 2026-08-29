@@ -189,6 +189,16 @@ call suffix (g)   global/nonlocal modifier
 Une construction qui manque à cette liste est un signalement, pas une
 licence d'inventer : mettez-la en `translation_notes`.
 
+**Ce n'est pas une consigne de forme, et la vague du 2026-08-29 l'a montré.**
+Elle a écrit `nom préfixé`, `nom prefixe` et `prefixed name` pour une seule
+et même construction ; `suffixe d'appel (g)` à côté de `call suffix (g)` ;
+`littéral typé`, `litteral type` et `typed literal` ; `f<...>` à côté de
+`f<…>`. Sept constructions apparentes là où il y en avait trois.
+`constructions.normalise` les a rabattues — les comptes publiés sont
+justes — mais elle ne peut rabattre que ce qu'elle a déjà vu. Écrivez les
+libellés **en anglais, sans accent, tels que ci-dessus**, en copiant depuis
+cette liste plutôt qu'en les retapant de mémoire.
+
 Classification de la traduction (inchangée depuis 401) :
 `directly-expressible` · `minor-restructuring` · `awkward` ·
 `not-expressible` · `excluded`.

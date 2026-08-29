@@ -10,10 +10,25 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "One of the 163 no-visible-graph regions (AGENT_BATCH.md): the extracted lines carry no imports at all, and the graph is reached through `self._graph`, a plain (writable, not read-only) instance attribute set in GraphBuilder.__init__. `@graph self._graph` designates it directly, exactly as the task brief anticipates for an attribute-held graph -- no call-suffix needed since the attribute is touched twice (once unconditionally, once in a loop), so a single declaration is cheaper than repeating `(self._graph)`.",
+    "`self._ns` (also an instance attribute, a rdflib Namespace) is dereferenced -- never assigned -- inside this region, unlike the JustlyAI ns_def_local case where `self.LMSS = Namespace(...)` is a write @prefix cannot reach. A plain read is exactly what @prefix's own escape hatch is for: `@prefix ns: f<{self._ns}>` (a formatted IRI, resolved at run time per declarations.md) turns `self._ns.EntityMapping` -> `ns:EntityMapping` and `self._ns[ref_id]` -> `ns:{ref_id}` (interpolated local part, documented in terms.md §Prefixed names) into genuine prefixed names instead of leaving them as bare attribute-chain interpolations. Verified empirically before use: `@prefix ns: f<{self._ns}> .` then `ns:{code}` / `ns:EntityMapping` inside `+{ }` produced the same URIRefs as the untranslated `self._ns[...]`/`self._ns.EntityMapping` (Namespace is a str subclass, so f<...> embeds its base IRI text directly).",
+    "`self._RDF.type` as predicate becomes the Turtle shorthand `a`, per the mechanical-rewrite table in how-to/migrate-from-rdflib.md (`g.add((s, RDF.type, EX.C))` -> `+{ {s} a ex:C }`) -- no @prefix needed for `a` itself, it is built into the grammar.",
+    "`uri = self._ns[f\"{_safe_xml_id(object_code)}_mapping\"]` and the four `self._add_literal(...)` calls are left as plain Python, unchanged: `_add_literal` is an external helper (like modelprops_to_graph in the acdh pair) that does its own `.add()` internally but is not part of this region's own body -- untouched, called identically by both sides.",
+    "Context shim (context_shim.py): _safe_xml_id, _DEFAULT_BASE, GraphBuilderStub.__init__ and ._add_literal transcribed VERBATIM from the local clone (corpus/repos/beyonai__ByDC/.../graph_builder.py, lines 97-99, 55, 143-166, 693-698).",
+    "driver.py uses a `demo(object_code, object_name, object_desc, mapping_refs)` harness (identical on both sides, appended to original.py and translated.ldpy), same shape as the acdh pair in this batch: passing the GraphBuilderStub itself as a compared call argument gives a spurious harness `values differ` (identity equality on a plain object with no __eq__), so demo keeps only plain strings/lists as its own arguments and returns the one thing meant to be compared, self._graph.",
+    "Fixture strength checked directly: corrupting one predicate in translated.ldpy (ns:mapping -> ns:relatesTo) flips `rdfeval check` to FAIL (7 vs 7 triples, not isomorphic); reverted afterward, and OK confirmed again."
+  ],
   "draft_sha": "1a29af94b247e3c6",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.745470+00:00",
@@ -24,5 +39,12 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

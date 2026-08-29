@@ -1,17 +1,18 @@
 # Extracted from biokb/biokb_wfo@67fc2c5366 : src/biokb_wfo/rdf/turtle.py
 # region: TurtleCreator.create_nodes_ttl (lines 89-153, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
+import logging
 import os.path
 from rdflib import RDF, XSD, Graph, Literal
-from tqdm import tqdm
-from biokb_wfo.constants import (
+from context_shim import (
     BASIC_NODE_LABEL,
     DB_DEFAULT_CONNECTION_STR,
     EXPORT_FOLDER,
+    get_empty_graph,
+    models,
+    tqdm,
 )
-from biokb_wfo.db import models
-from biokb_wfo.rdf import namespaces as ns
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import namespaces as ns
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ def create_nodes_ttl(self) -> str:
     ttl_path = os.path.join(self.__ttls_folder, "nodes.ttl")
     logger.info("Create nodes ttl")
     graph = get_empty_graph()
+    @graph graph
 
     with self.Session() as session:
         taxa = (
@@ -42,19 +44,17 @@ def create_nodes_ttl(self) -> str:
         )
         for taxon in tqdm(taxa):
             taxon_uri = ns.WFO_NS[str(taxon.id).zfill(10)]
-            graph += g{
-                {taxon_uri} a {ns.NODE_NS[taxon.rank.capitalize()]} ;
+            +{ {taxon_uri} a {ns.NODE_NS[taxon.rank.capitalize()]} ;
                    a {ns.NODE_NS[BASIC_NODE_LABEL]} ;
-                   {ns.REL_NS["name"]} {Literal(taxon.full_name, datatype=XSD.string)} ;
-                   {ns.REL_NS["rank"]} {Literal(taxon.rank, datatype=XSD.string)} ;
-                   {ns.REL_NS["role"]} {Literal(taxon.role, datatype=XSD.string)}
-            }
+                   {ns.REL_NS["name"]} {taxon.full_name}^^xsd:string ;
+                   {ns.REL_NS["rank"]} {taxon.rank}^^xsd:string ;
+                   {ns.REL_NS["role"]} {taxon.role}^^xsd:string }
             if taxon.parent_id:
                 parent_uri = ns.WFO_NS[str(taxon.parent_id).zfill(10)]
-                graph += g{ {taxon_uri} {ns.REL_NS["HAS_PARENT"]} {parent_uri} }
+                +{ {taxon_uri} {ns.REL_NS["HAS_PARENT"]} {parent_uri} }
             if taxon.ipni:
                 ipni_uri = ns.IPNI_NS[str(taxon.ipni)]
-                graph += g{ {taxon_uri} {ns.REL_NS["SAME_AS"]} {ipni_uri} }
+                +{ {taxon_uri} {ns.REL_NS["SAME_AS"]} {ipni_uri} }
 
     graph.serialize(ttl_path, format="turtle")
     return ttl_path

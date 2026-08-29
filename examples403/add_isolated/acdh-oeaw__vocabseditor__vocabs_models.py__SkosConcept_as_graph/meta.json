@@ -15,11 +15,24 @@
     "term_constructor": 10,
     "triple_add": 13
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd"
+    "prefixes: only rdf:, skos:, dc: -- DCTERMS, OWL, RDFS, XSD are imported but never dereferenced in this function's body (same rule as the JustlyAI ns_def_local pair: an imported namespace is not forced into a @prefix by its mere presence in the import list). The draft had declared all seven.",
+    "The draft's `g += g{ ... }` is the forbidden `+=` degradation; replaced throughout with `@graph g` + `+{ }`.",
+    "Reassignment mid-function: `g = g + note.as_graph()` (a for-loop union of a whole OTHER graph, not a single triple -- no island writes a whole graph, so this line stays plain Python on both sides) rebinds `g` to a NEW Graph object. `@graph g` captures the variable's VALUE at its own line, not a live reference to the name -- verified empirically (see below) -- so a `+{ }` written after the reassignment without a fresh `@graph g` would silently write into the ORPHANED pre-reassignment graph and be lost from the function's actual return value. Re-declared `@graph g` right after the notes loop, before the sources loop resumes -- block-scope allows redeclaring @graph mid-suite (declarations.md), and this is the exact shape already established in the add_isolated sibling BBDFrancois/update_schema_and_sanitize_kb (re-declare @graph whenever the site switches -- there because the GRAPH VARIABLE switches between three graphs; here because the SAME variable name is REBOUND to a new object).",
+    "Verified, not assumed: `@graph g; +{s p o}; g = g + g{other}; +{s p2 o2}` gave len(g)==2 (the second write lost) versus `@graph g; +{s p o}; g = g + g{other}; @graph g; +{s p2 o2}` giving len(g)==3 (all three present) -- transpiled and run directly, per INSTRUCTIONS_403 SS1.",
+    "Three unconditional adds on the shared subject `subj` at the top (rdf:type, skos:prefLabel, skos:inScheme) merged into one `+{ s p1 o1 ; p2 o2 ; p3 o3 }` -- add_run_shared_subject shape, but the honest most-specific translation for an unconditional run (same precedent as the BBDFrancois pair). The two `else:` branch adds keep separate +{ } because they have DIFFERENT subjects (main_concept_scheme vs subj) -- `;` cannot join them. The four label_type branches stay one +{ } each: they are mutually exclusive (if/elif/elif/else), so joining any two with `;` would add triples that never coexist in one run of the original.",
+    "Context shim (context_shim.py): modelprops_to_graph transcribed VERBATIM from vocabs/utils.py (local clone, lines 85-108) -- untouched by the translation, called identically by both sides, so its own internals do not bear on the equivalence proof as long as it runs; the stub `self._meta.fields = []` makes it a genuine no-op rather than reproducing Django's field-descriptor/set_extra machinery for code this region never touches.",
+    "driver.py uses a `demo(scenario)` harness (identical on both sides, appended to original.py and translated.ldpy) rather than calling as_graph(self) directly from the driver: an earlier version passed the SkosConceptStub itself as entry='as_graph''s sole argument, and `rdfeval check` FAILed with 'call[0].arg[0]: values differ' -- the harness's per-argument comparison (`call[i].arg[j]`) falls back to Python identity equality for a plain object with no __eq__, so two structurally identical stub instances (one built per side) compared unequal. demo(scenario) takes a bare string instead, and returns the one thing meant to be compared: the graph.",
+    "Fixture strength checked directly: corrupting one predicate in translated.ldpy (skos:broader -> skos:seeAlso) flips `rdfeval check` to FAIL (12 vs 12 triples, not isomorphic); reverted afterward, and OK confirmed again."
   ],
   "draft_sha": "810d7b03d28651fc",
   "provenance": {
@@ -31,5 +44,12 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

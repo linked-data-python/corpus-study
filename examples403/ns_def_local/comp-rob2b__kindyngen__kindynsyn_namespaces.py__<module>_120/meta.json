@@ -13,9 +13,15 @@
     "namespace_ctor": 2
   },
   "translation_status": "draft",
-  "classification": null,
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "`_NS = Namespace(\"...\")` here is a class attribute of a `DefinedNamespace` subclass, not a plain vocabulary shortcut: rdflib's `DefinedNamespaceMeta.__getitem__` reads `cls._NS` on every attribute access (`RBDYN_COORD.WrenchCoordinate` -> `cls._NS['WrenchCoordinate']`). `@prefix` is a transpile-time LEXICAL binding (declarations.md: 'not a value'), so it creates no `_NS` class attribute at all.",
+    "confirmed by direct transpile-and-run: replacing `_NS = Namespace(...)` with `@prefix rbdyn_coord: <...> .` inside the class body transpiles fine, but `RBDYN_COORD.WrenchCoordinate` then raises `AttributeError: DefinedNamespace like object has no attribute '_NS'`. Minimal repro:\n```ldpy\nfrom rdflib.namespace import DefinedNamespace\nfrom rdflib.term import URIRef\nclass RBDYN_COORD(DefinedNamespace):\n    WrenchCoordinate: URIRef\n    @prefix rbdyn_coord: <https://example.org/ns#> .\nprint(RBDYN_COORD.WrenchCoordinate)  # AttributeError: ... has no attribute '_NS'\n```",
+    "migrate-from-rdflib.md's own 'what not to rewrite' list already names the general case ('A Namespace as an object ... if you need to pass a namespace around, keep the Namespace constant'); DefinedNamespace is a stronger instance of exactly that: it is not merely passed around, its class machinery is BUILT on `_NS` being a live attribute, plus closed-vocabulary bookkeeping (`_extras`, `_warn`/`_fail`, `__contains__`, `__dir__`) that a lexical prefix has no notation for at all.",
+    "translated.ldpy is therefore left identical to original.py (`.ldpy` is a strict superset of Python, so untranslated source is still valid ldpy) rather than forcing a change that breaks `RBDYN_COORD`.",
+    "the driver's module-state check FAILs with 'nothing observable to compare', by design: the region only *declares* a class (no Graph, no comparable module-level value), so there is nothing for run_pair's oracle to compare even before considering the @prefix gap -- expected for a class-declaration region with kind='statement', not a translation defect."
+  ],
   "draft_sha": "4c123bd772b0bfad",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.174486+00:00",

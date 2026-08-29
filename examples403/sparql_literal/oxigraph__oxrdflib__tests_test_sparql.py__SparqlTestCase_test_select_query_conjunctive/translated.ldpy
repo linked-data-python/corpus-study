@@ -9,8 +9,9 @@ from rdflib import RDF, ConjunctiveGraph, Dataset, Graph, Namespace
 
 def test_select_query_conjunctive(self) -> None:
     g = ConjunctiveGraph("Oxigraph")
-    g += g{ ex:foo a ex:Entity }
-    result = g.query("SELECT ?s WHERE { ?s ?p ?o }")
+    @graph g
+    +{ ex:foo a ex:Entity }
+    result = s{ SELECT ?s WHERE { ?s ?p ?o } }.execute()
     self.assertEqual(
         json.loads(result.serialize(format="json").decode("utf-8")),
         {

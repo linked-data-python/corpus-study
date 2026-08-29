@@ -2,14 +2,11 @@
 # region: SparqlEngine._new_fact_node (lines 129-134, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
 from rdflib import URIRef, BNode, Literal, XSD
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from context_shim import SparqlEngine
 
 def _new_fact_node(self, h, r, t):
     node = BNode()
-    self.graph += g{
-        {node} {self.nodes[SparqlEngine.PRED_FACT_H]} {h} ;
-           {self.nodes[SparqlEngine.PRED_FACT_R]} {r} ;
-           {self.nodes[SparqlEngine.PRED_FACT_T]} {t}
-    }
+    +{ {node} {self.nodes[SparqlEngine.PRED_FACT_H]} {h} ;
+             {self.nodes[SparqlEngine.PRED_FACT_R]} {r} ;
+             {self.nodes[SparqlEngine.PRED_FACT_T]} {t} }(self.graph)
     return node

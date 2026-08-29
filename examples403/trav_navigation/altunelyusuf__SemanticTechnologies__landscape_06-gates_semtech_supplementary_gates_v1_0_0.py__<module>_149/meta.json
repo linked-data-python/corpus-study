@@ -12,11 +12,23 @@
   "categories": {
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SEM->sem, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, PROV->prov"
+    "prefixes used: RDF->rdf, OWL->owl, SEM->sem (RDFS/SKOS/DCTERMS/PROV are imported by the source file's own `from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, PROV` -- kept verbatim, unused in this 3-line region both before and after translation -- but nothing in the region references rdfs:/skos:/dcterms:/prov:, so no @prefix was added for them; the auto-generated draft had declared all six defensively, four of them dead, and those four were dropped as unused scaffolding we introduced, not original code)",
+    "trav_navigation site: g_ab.subjects(RDF.type, OWL.NamedIndividual) + (twice-repeated) g_ab.objects(s, RDF.type) + g_ab.value(s, SEM.hasSourceProvenance), three separate selector calls nested inside one list comprehension's `if` chain -> ONE joined `m{ ?s a owl:NamedIndividual ; a ?t }` (rows of (s, t), shared-subject join, written-order nested loop per querying.md) for the two positive traversal steps, consumed as a set comprehension `{s for s, t in m{...} if str(t).startswith(...)}` collapsing querying.md's 'any(t for t in ...)' into 'exists a matching row' -- then a second, separate `bool(m{ {s} sem:hasSourceProvenance ?p })` for the negated existence check, since m{ } has no FILTER/NOT/MINUS (querying.md: 'What m{ } does not have') so the negation can only live in Python, exactly as the original already does with `not g_ab.value(...)`.",
+    "the original's first `if` clause, `list(g_ab.objects(s, RDF.type))` (non-empty check), is logically always true given how `s` was selected: `s` only reaches that point because `(s, RDF.type, OWL.NamedIndividual)` already holds (that is literally `g_ab.subjects(RDF.type, OWL.NamedIndividual)`'s definition), so `g_ab.objects(s, RDF.type)` is provably non-empty (it contains at least OWL.NamedIndividual) for every candidate -- verified this is genuinely dead code in the original, not assumed. Joining the two `.objects(s, RDF.type)` calls (this dead check, and the real 'any T-prefixed type' check) into the SAME `m{ ?s a owl:NamedIndividual ; a ?t }` naturally subsumes the redundant condition (every row already implies it) without adding code for it -- not a cleanup we chose to make for tidiness, but the direct, unavoidable consequence of collapsing two identical repeated traversal calls into the one join the trav_navigation stratum asks for. Classified minor-restructuring (not directly-expressible) because consuming m{ }'s rows required turning the single chained-`if` comprehension into a comprehension over an intermediate set of rows.s values, which is the language's row-vs-term arity model (querying.md: 'Arity decides the shape'), not an edit made for style.",
+    "kept `SEM = Namespace(\"http://example.org/semtech#\")` as a plain rdflib Namespace object (NOT folded into @prefix-only) because `str(SEM)+\"T\"` is a genuine Namespace-as-a-runtime-string use, the one case migrate-from-rdflib.md's 'What not to rewrite' section says has no @prefix form ('@prefix is a lexical declaration, not a value... keep the Namespace constant'). @prefix sem: is declared separately, only for the `sem:hasSourceProvenance` prefixed name inside m{ } -- both coexist for the same IRI, for two different needs, which is itself a small finding: not every coercion/prefix site in a region converges on one notation.",
+    "context shim (context.py): restores `H` (the source script's own module-scope constant, an author-machine absolute path \"/home/claude/semtech-landscape\" that cannot resolve here) plus the `Graph`/`Namespace` rdflib imports the source file itself makes at its own module top but the lines-149-151 extraction does not carry. H is pointed at this corpus study's OWN checkout of the same repository at the studied commit (corpus/repos/altunelyusuf__SemanticTechnologies/landscape), so the pilot parses the real landscape/02-ontology/semtech_abox_v1_0_0.ttl -- not a synthetic fixture.",
+    "IMPORTANT caveat on the green check: at commit bad0fa7c46, semtech_abox_v1_0_0.ttl happens to have hasSourceProvenance recorded for every T-prefixed owl:NamedIndividual, so `ex_no_prov == []` on BOTH sides (checked directly: `len(ex_no_prov) == 0` on the real file) -- rdfeval check's OK by itself risks being a hollow green (corpus/405). The join+negation was therefore ALSO independently verified against a small synthetic graph (not committed to this region's files, a throwaway check) covering: two solutions (individuals with 1 and 2 T-prefixed types, no provenance), the zero-solution case (an empty graph), and three non-matching neighbours (a T-typed NamedIndividual that DOES have provenance; a NamedIndividual with only a non-T type; a T-typed resource that is not an owl:NamedIndividual at all) -- original-style comprehension and the m{ }-based translation produced identical sorted results in every case, run directly against rdflib/ldpy.runtime outside the harness."
   ],
   "draft_sha": "5c126788e6e33a28",
   "provenance": {
@@ -28,5 +40,12 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }
