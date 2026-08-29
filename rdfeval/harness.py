@@ -108,9 +108,22 @@ def _filtered(text: str, stdout_filter) -> str:
     return stdout_filter(text) if stdout_filter is not None else text
 
 
-def _multiset(value):
-    """A comparison key that ignores order but not multiplicity."""
-    return sorted(repr(normalise(v)) for v in value)
+def _unordered(value):
+    """A comparison key that ignores order — at EVERY depth — not multiplicity.
+
+    "No store promises an order" is not a property of the top-level value: a
+    region that returns ``{"Add": {"hasReagent": [...]}}`` built from
+    solutions has the same non-determinism one level down.  Comparing only
+    the outer list would fail such a pair for a reason that is not its
+    meaning.  A region that *does* impose an order says ``ordered=True``, and
+    then nothing is sorted.
+    """
+    value = normalise(value)
+    if isinstance(value, dict):
+        return {k: _unordered(v) for k, v in sorted(value.items(), key=repr)}
+    if isinstance(value, (list, tuple)):
+        return sorted((_unordered(v) for v in value), key=repr)
+    return value
 
 
 def _graphs(ns: dict) -> dict[str, object]:
@@ -187,9 +200,8 @@ def _compare_value(a, b, label: str, diffs: list[str],
         return
     try:
         a, b = materialise(a), materialise(b)
-        if not ordered and isinstance(a, (list, tuple)) \
-                and isinstance(b, (list, tuple)):
-            equal = _multiset(a) == _multiset(b)
+        if not ordered:
+            equal = _unordered(a) == _unordered(b)
         else:
             equal = normalise(a) == normalise(b)
     except Exception as e:

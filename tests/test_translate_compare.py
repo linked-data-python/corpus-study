@@ -330,6 +330,23 @@ def test_solution_order_is_not_meaning_unless_the_driver_says_so():
     assert len(diffs) == 2, "a multiset still counts multiplicity"
 
 
+def test_order_is_ignored_at_every_depth_not_just_the_top():
+    """A region returning {"Add": {"hasReagent": [...]}} built from solutions
+    has the same non-determinism one level down: comparing only the outer
+    list fails such a pair for a reason that is not its meaning."""
+    from rdfeval.harness import _compare_value
+    a = {"Add": {"hasReagent": ["B", "A"], "label": "Add Water"}}
+    b = {"Add": {"hasReagent": ["A", "B"], "label": "Add Water"}}
+    diffs: list = []
+    _compare_value(a, b, "r", diffs, ordered=False)
+    assert diffs == []
+    _compare_value(a, b, "r", diffs, ordered=True)
+    assert len(diffs) == 1, "ordered=True still holds the order to account"
+    _compare_value(a, {"Add": {"hasReagent": ["A"], "label": "Add Water"}},
+                   "r", diffs, ordered=False)
+    assert len(diffs) == 2, "a missing element is still a difference"
+
+
 def test_turtle_a_abbreviates_rdf_type_in_predicate_position_only():
     """`a` is a predicate abbreviation: `RDF.type` as an OBJECT stays a term."""
     from ldpy.transpiler import transpile
