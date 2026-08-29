@@ -14,11 +14,17 @@
     "namespace_ctor": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
   "translation_notes": [
-    "prefixes: RDFS->rdfs"
+    "Le brouillon annoncait @prefix rdfs: <...> : SUPPRIME, RDFS n'apparait nulle part dans le corps de la region (seulement dans l'import) -- meme piege que l'exemple `remove/csvwlib` : un prefixe importe n'est pas force par sa seule presence dans les imports.",
+    "site de la strate : `self.LMSS = Namespace(\"http://lmss.sali.org/\")`. Point dur, verifie sur le depot reel (corpus/repos/JustlyAI__lmss_entity_extractor/app/lmss_classification.py) : @prefix est purement lexical, il ne produit aucune valeur -- il ne peut donc jamais apparaitre a droite d'une AFFECTATION D'ATTRIBUT. `self.LMSS = ...` n'est pas juste un `g.bind()` ou un passage d'argument (les deux cas que le brief anticipait) : c'est un TROISIEME motif d'echappement, et le plus dur des trois, puisque la portee de bloc de @prefix (declarations.md) s'arrete a la fin de `__init__` -- meme si @prefix pouvait produire une valeur, il ne survivrait pas jusqu'aux methodes soeurs qui l'utilisent.",
+    "echappement confirme, pas suppose : `_get_entity_embedding` (meme fichier, hors region) dereference `self.LMSS.hasEmbedding` et `self.LMSS.embeddingValue`. Namespace doit rester un vrai objet pour porter cette API d'attribut -- un `<...>` (URIRef nu) le casserait silencieusement (URIRef n'a pas de __getattr__ minteur de termes), et une regression ainsi introduite ne se verrait PAS dans le pilote de cette region puisque _get_entity_embedding n'y est pas.",
+    "et, distinct du point dur du brief : ce bloc ne fait NI bind() NI dereference locale de LMSS (`LMSS:Something`) -- rien ne justifierait meme d'ECRIRE un @prefix ici, meme a titre demonstratif. Le cout \"IRI ecrite deux fois\" que le brief anticipe ne se materialise donc pas non plus : @prefix ne s'applique pas du tout, il n'y a pas de second ecrit a faire. Comparer avec le meme lot : OAI/oascomply (bind() sans dereference locale -> encore zero @prefix) et city-knowledge-graphs (dbo : bind() ET dereference locale -> LA le cout \"IRI x2\" se voit).",
+    "shim de contexte (context_shim.py) : _load_ontology_index / _load_top_classes transcrits VERBATIM du depot reel (lignes 34-44 du fichier source, clone local corpus/repos/). SentenceTransformer est un nom-seul : le paquet sentence_transformers n'est pas dans le venv d'etude (ModuleNotFoundError) et telecharger de vrais poids demanderait le reseau ; sa valeur de retour (self.model) n'est jamais relue dans cette region.",
+    "`import logging` restaure dans original.py (regle du shim de contexte) : les lignes de contexte echantillonnees gardaient `logger = logging.getLogger(__name__)` mais pas l'import qui le fait resoudre.",
+    "harnais `demo` ajoute a l'identique dans les deux fichiers (comme dans remove/csvwlib) : __init__ est un corps de methode extrait de sa classe ; demo construit l'instance minimale et rend le graphe ecrit, seul effet RDF-observable de la region -- compare par isomorphisme."
   ],
   "draft_sha": "5701308330d032b7",
   "provenance": {
@@ -30,5 +36,6 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

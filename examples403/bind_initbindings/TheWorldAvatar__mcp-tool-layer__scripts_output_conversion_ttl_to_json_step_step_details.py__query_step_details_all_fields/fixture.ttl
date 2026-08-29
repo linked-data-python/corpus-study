@@ -1,4 +1,33 @@
-# Input graph for TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_step_step_details.py__query_step_details_all_fields — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_step_step_details.py__query_step_details_all_fields
+# Covers: several solutions of the q_props pattern on ex:step1 (a repeated
+# predicate to exercise the list-merge branch, a plain literal, an IRI
+# object with an rdfs:label so the "prefer the label" branch fires), the
+# zero-solution case (ex:step2, which owns only its own rdf:type -- FILTER
+# (?p != rdf:type) leaves nothing, and it has no rdfs:label either, so both
+# queries the region issues return zero rows for it -- see driver.py's
+# second call), and neighbouring triples on a different subject that must
+# NOT be picked up (excluded by the subject constraint itself, not by a
+# FILTER).
 @prefix ex: <http://example.org/> .
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:step1 a ontosyn:Add ;
+    rdfs:label "Add Water" ;
+    ex:hasReagent ex:reagentA ;
+    ex:hasReagent ex:reagentB ;
+    ex:hasDuration "10 min" .
+
+ex:reagentA rdfs:label "Reagent A" .
+ex:reagentB rdfs:label "Reagent B" .
+
+# zero-solution subject: only ever the object of nothing, the subject of
+# its own rdf:type and nothing else.
+ex:step2 a ontosyn:Sonicate .
+
+# neighbourhood that must NOT appear in ex:step1's results: same
+# predicates, different subject.
+ex:other_step a ontosyn:HeatChill ;
+    rdfs:label "Other Step" ;
+    ex:hasReagent ex:reagentA ;
+    ex:hasDuration "5 min" .

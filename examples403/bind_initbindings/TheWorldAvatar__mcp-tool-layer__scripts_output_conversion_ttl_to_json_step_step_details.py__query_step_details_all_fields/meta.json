@@ -13,10 +13,18 @@
     "sparql": 2,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "s{ }", "call suffix (g)", "interpolation {expr}", "prefixed name", "variable"],
+  "translation_notes": [
+    "Both queries bind `?S` via `initBindings={\"S\": URIRef(step_uri)}` and neither PROJECTS ?S (q_props selects ?p ?o ?olabel; q_label selects ?label) -- the strate's 'not projected' case, so the target is a term interpolated directly in the pattern, per the correspondence table and querying.md's `SELECT ?s WHERE { ?s a {cls} }` example. What makes this region worth flagging: `?S` never itself occupies a term slot in the WHERE clause -- the original code instead writes a SEPARATE pattern variable `?s` and adds `FILTER(?s = ?S)`, because a raw Python value cannot be spliced directly into a plain query-text string at a term position without string formatting (which is exactly what INSTRUCTIONS_403 SS2 forbids reproducing). Since `?s` is used nowhere else in either query (not projected, not referenced a second time), `FILTER(?s = ?S)` + initBindings is EXTENSIONALLY the same WHERE clause as substituting the constant directly at `?s`'s one occurrence: `{URIRef(step_uri)} ?p ?o . FILTER(?p != rdf:type) OPTIONAL { ?o rdfs:label ?olabel }` for q_props, `{URIRef(step_uri)} rdfs:label ?label` for q_label -- both the variable ?s AND the FILTER(?s = ?S) indirection disappear together. This is notation-only (same WHERE, same solutions), not a refactor: verified by the driver's neighbour (ex:other_step, same predicates as ex:step1 under a different subject) not leaking into either step's results.",
+    "URIRef(step_uri) rather than bare {step_uri}: step_uri is a plain str parameter, and node()'s default coercion turns a bare str into a Literal (coercion.md), which would never match a URIRef subject in the graph -- silently returning zero rows instead of raising. Wrapping it in URIRef(...), exactly as the original code already does for its initBindings value, makes node() pass the term through unchanged, matching the original semantics exactly.",
+    "PREFIX rdfs:/PREFIX rdf: (embedded literally inside both query-text strings in the original, no initNs used at all here) move to @prefix declarations at file scope, inherited into s{ }'s prologue (querying.md), same mechanical move as the kglab-ggg sparql_literal precedent -- confirms the 'prologue hérité des @prefix' half of the strate's correspondence line applies just as much to inline PREFIX lines as to an explicit initNs= dict.",
+    "Two islands in the function, on the same graph parameter, so `@graph graph` was considered against the call suffix twice; kept the call suffix `s{ ... }(graph)` on both since `graph` is also still referenced by name nowhere else in the body (unlike the acquirium-style precedent where a bare-name graph favours a declaration) -- either reads fine here, recorded as a close call rather than a hard rule.",
+    "`query_step_type_label`, `_camelize` and `_local_name` are helper functions from the same source file (step_details.py) but outside the extracted region and its captured context lines -- restored via step_details_context.py per AGENT_BATCH.md's shim protocol, copied verbatim from the real upstream file (fetched at the exact commit) rather than invented. Left as plain rdflib Python in the shim (not translated): `query_step_type_label` is itself another instance of this exact stratum's idiom (`FILTER(?step = ?S)` + initBindings) on the SAME file, which the assigned region does not cover -- worth noting for anyone later sampling this repository again, since a second `bind_initbindings` draw on step_details.py would land here and find it already characterised.",
+    "meta.oracle was already 'values' from the pipeline (categories: sparql:2 correctly detected) and is kept as-is."
+  ],
+  "article_candidate": true,
   "draft_sha": "05d2a069b46354b5",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.298896+00:00",

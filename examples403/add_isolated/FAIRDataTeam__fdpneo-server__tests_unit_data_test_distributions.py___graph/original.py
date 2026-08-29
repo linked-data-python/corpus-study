@@ -2,7 +2,7 @@
 # region: _graph (lines 27-39, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef
-from fdpneo_server.shared.namespaces import DCAT, DCT
+from fdpneo_namespaces_context import DCAT, DCT
 DIST = "https://fdp.example/data/dist-1"
 RIGHTS = "https://fdp.example/offers/public"
 

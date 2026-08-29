@@ -2,20 +2,22 @@
 # region: _graph (lines 27-39, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef
-from fdpneo_server.shared.namespaces import DCAT, DCT
+from fdpneo_namespaces_context import DCAT, DCT
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
 DIST = "https://fdp.example/data/dist-1"
 RIGHTS = "https://fdp.example/offers/public"
 
 def _graph(
     *, with_download: bool = True, with_access: bool = True, with_rights: bool = True
 ) -> Graph:
-    g = Graph()
+    @graph as g
     subject = URIRef(DIST)
-    g += g{ {subject} {DCAT.Distribution} <https://example.org/type> }
+    +{ {subject} dcat:Distribution <https://example.org/type> }  # marker triple
     if with_download:
-        g += g{ {subject} {DCAT.downloadURL} <https://files.example.org/d1.csv> }
+        +{ {subject} dcat:downloadURL <https://files.example.org/d1.csv> }
     if with_access:
-        g += g{ {subject} {DCAT.accessURL} <https://fdp.example/data/dist-1/sparql> }
+        +{ {subject} dcat:accessURL <https://fdp.example/data/dist-1/sparql> }
     if with_rights:
-        g += g{ {subject} {DCT.rights} {URIRef(RIGHTS)} }
+        +{ {subject} dct:rights {URIRef(RIGHTS)} }
     return g

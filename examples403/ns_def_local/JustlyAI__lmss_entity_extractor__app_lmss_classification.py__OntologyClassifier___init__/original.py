@@ -1,9 +1,14 @@
 # Extracted from JustlyAI/lmss_entity_extractor@6acc4d8389 : app/lmss_classification.py
 # region: OntologyClassifier.__init__ (lines 15-32, stratum ns_def_local)
 # licence of the source repository: see meta.json
-from sentence_transformers import SentenceTransformer
+#
+# `import logging` restores a binding the sampled context lines dropped (the
+# region only got `logger = logging.getLogger(__name__)`, not the import
+# that makes it resolve) -- see meta.json / AGENT_BATCH.md "shim de contexte".
+import logging
 from rdflib import Graph, URIRef, RDFS, Literal
 from rdflib.namespace import Namespace
+from context_shim import SentenceTransformer, OntologyClassifier
 logger = logging.getLogger(__name__)
 
 def __init__(
@@ -24,3 +29,13 @@ def __init__(
     self.LMSS = Namespace("http://lmss.sali.org/")
     logger.info(f"Loaded {len(self.ontology_entities)} ontology entities")
     logger.info(f"Identified {len(self.top_classes)} top classes")
+
+
+# Demo harness (identical on both sides, see meta.json): __init__ is a method
+# body lifted out of its class, so this entry point builds a minimal stand-in
+# instance (context_shim.OntologyClassifier) and returns the graph it wrote --
+# the region's only RDF-observable effect (meta.oracle: isomorphism).
+def demo(graph_path, index_path, top_classes_path):
+    instance = OntologyClassifier()
+    __init__(instance, graph_path, index_path, top_classes_path)
+    return instance.graph

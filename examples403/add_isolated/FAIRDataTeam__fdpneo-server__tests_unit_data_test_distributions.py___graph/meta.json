@@ -14,10 +14,16 @@
     "term_constructor": 5,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}", "prefixed name", "IRI"],
+  "translation_notes": [
+    "Textbook add_isolated: one unconditional marker triple plus three .add() calls on the same subject, each behind its own independent boolean flag (with_download / with_access / with_rights). Because the three are independently conditional, they cannot be merged into one +{ s p1 o1 ; p2 o2 } without duplicating the +{ } under every flag combination -- so they stay 4 separate @graph as g / +{ } statements, one per original .add(), guarded by the same if as before.",
+    "`g = Graph()` -> `@graph as g` (create-and-designate form); a hard-coded IRI (the marker triple's object, and the two fixed download/access URLs) became a plain <...> IRI island rather than a prefixed name, since they are not in any bound namespace.",
+    "Context shim fdpneo_namespaces_context.py restores DCAT/DCT (fdpneo_server.shared.namespaces is not installed) with the real IRIs from src/fdpneo_server/shared/namespaces.py -- both also happen to be rdflib's own well-known DCAT/DCTERMS at the same IRIs.",
+    "Driver: entry+calls (isomorphism oracle) on the returned graph, 3 flag combinations (all on, all off, mixed) so each flag's effect is independently checked rather than only the all-True default.",
+    "Verified the fixture is not a hollow green: renaming dcat:accessURL to dcat:accessURI in translated.ldpy flips the check to FAIL (4 vs 4 triples, not isomorphic)."
+  ],
   "draft_sha": "bf45ab60b8a6529b",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.982884+00:00",
