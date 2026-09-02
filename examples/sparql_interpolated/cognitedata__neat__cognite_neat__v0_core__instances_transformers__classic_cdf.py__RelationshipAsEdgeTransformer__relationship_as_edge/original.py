@@ -6,8 +6,8 @@ import warnings
 from collections.abc import Callable, Iterable, Iterator
 from typing import cast
 from rdflib import RDF, Graph, Literal, Namespace, URIRef
-from cognite.neat._v0.core._issues.warnings import ResourceNotFoundWarning
-from cognite.neat._v0.core._utils.rdf_ import (
+from context_shim import ResourceNotFoundWarning  # context shim -- see meta.json
+from context_shim import (  # context shim -- see meta.json
     Triple,
     add_triples_in_batch,
     get_namespace,

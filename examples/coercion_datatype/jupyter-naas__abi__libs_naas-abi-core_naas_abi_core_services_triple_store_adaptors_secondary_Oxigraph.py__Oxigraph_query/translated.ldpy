@@ -59,13 +59,11 @@ if "sparql-results" in content_type:
                                     value_str, datatype=URIRef(datatype)
                                 )
                         else:
-                            value = Literal(
-                                value_str, datatype=URIRef(datatype)
-                            )
+                            value = f"{value_str}"^^{URIRef(datatype)}
                     elif lang:
                         value = Literal(value_str, lang=lang)
                     else:
-                        value = Literal(value_str)
+                        value = f{value_str}
 
                 row_values[var_obj] = value
             else:

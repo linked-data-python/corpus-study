@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from context_shim import BASEDIR, S, load, nodes, cls_iri, bump
 el = load("enrichment_l", "v5_3_0")
 SEM = Namespace("http://example.org/semtech#")
 IRI = {n["id"]: cls_iri(n) for n in nodes}

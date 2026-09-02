@@ -21,7 +21,7 @@ if rdflib.__version__ >= "3.0.0" :
 else :
 	from rdflib.RDF	import RDFNS  as ns_rdf
 
-from .. import ns_rdfa
+from pyrdfa_context import ns_rdfa
 
 Prototype = ns_rdfa["Pattern"]
 pref      = ns_rdfa["copy"]

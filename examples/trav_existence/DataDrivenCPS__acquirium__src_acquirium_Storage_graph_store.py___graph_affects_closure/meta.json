@@ -13,11 +13,20 @@
     "graph_read": 2,
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd, OWL->owl"
+    "prefixes: RDF->rdf, XSD->xsd, OWL->owl",
+    "Textbook trav_existence over two disjuncts: `any(graph.triples((None, OWL.imports, None))) or any(graph.triples((None, RDF.type, OWL.Ontology)))` -> `bool(m{ ?s owl:imports ?o }) or bool(m{ ?s rdf:type owl:Ontology })`, per the stratum's own mapping. No .first()/.one() involved: the value of the matched triple is discarded, only existence matters.",
+    "The region reads the WHOLE graph (no subject/predicate argument to vary), so proving both `or` disjuncts true needs two distinct graphs, not two calls against one fixture: fixture.ttl carries the False case (neither pattern, plus neighbouring rdf:type/predicate triples that must not match), and driver.py builds two further graphs inline (owl:imports only; rdf:type owl:Ontology only) to show each disjunct fires independently.",
+    "Deliberately broke the translation (dropped the second disjunct) to confirm rdfeval check catches it: FAIL call[2].result: values differ (True vs False). Restored, check is green again."
   ],
   "draft_sha": "dfdb981805c4ca83",
   "provenance": {
@@ -29,5 +38,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_graph_affects_closure",
+    "diffs": [],
+    "error": null
+  }
 }

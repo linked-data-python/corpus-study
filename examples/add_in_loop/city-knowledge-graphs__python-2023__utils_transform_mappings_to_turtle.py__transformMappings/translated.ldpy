@@ -23,25 +23,26 @@ def transformMappings(filename):
     g.bind("city", city) #city is a newly created namespace
     g.bind("pizza", pizza) #pizza is a newly created namespace
 
-
-    with open(filename) as file:
+    def rows(file):
         for line in file:
-            elements=line.split("|")
-            uri1=elements[0]
-            uri2=elements[1]
-            type=elements[4].strip()
+            elements = line.split("|")
+            uri1 = elements[0]
+            uri2 = elements[1]
+            type_ = elements[4].strip()
+            if type_ == "CLS":
+                p = OWL.equivalentClass
+            elif type_ == "OPROP" or type_ == "DPROP":
+                p = OWL.equivalentProperty
+            else:
+                continue
+            yield {"s": URIRef(uri1), "p": p, "o": URIRef(uri2)}
 
-            #print(uri1)
-            #print(uri2)
-            #print(type)
-
-
-            if type == "CLS":
-                g += g{ {URIRef(uri1)} owl:equivalentClass {URIRef(uri2)} }
-            elif type == "OPROP" or type == "DPROP":
-                g += g{ {URIRef(uri1)} owl:equivalentProperty {URIRef(uri2)} }
+    @graph g
+    with open(filename) as file:
+        for @bindings in rows(file):
+            +{ ?s ?p ?o }
 
 
     file_out = filename.split(".")[0]+'.ttl'
-    print(g.serialize(format="turtle").decode("utf-8"))    
+    print(g.serialize(format="turtle").decode("utf-8"))
     g.serialize(destination=file_out, format='ttl')

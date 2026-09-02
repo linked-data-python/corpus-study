@@ -10,10 +10,12 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "The query's STRUCTURE, not merely a term, is built by string concatenation: `\"\"\"ASK {\"\"\" + triple + \"\"\" }\"\"\"` where `triple` is an arbitrary caller-supplied fragment of Turtle syntax (a full `s p o` clause, sometimes several), spliced directly into the query body. `s{ }` only exposes interpolation in TERM position (`{expr}` inside a written pattern), never as a hole for an entire graph pattern or clause; there is no island form that takes a pattern as a run-time string. Kept as plain rdflib (`g.query(...)`) in translated.ldpy, unchanged from original.py -- forcing this into `s{ }` would require treating `triple` as literal query text, i.e. exactly the textual substitution the language's `s{ }` interpolation is designed to rule out."
+  ],
   "draft_sha": "8d95f9a6dbc01cc1",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.122984+00:00",

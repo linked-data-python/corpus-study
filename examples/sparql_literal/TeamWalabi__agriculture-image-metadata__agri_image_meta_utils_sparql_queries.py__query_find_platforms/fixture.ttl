@@ -1,4 +1,22 @@
-# Input graph for TeamWalabi__agriculture-image-metadata__agri_image_meta_utils_sparql_queries.py__query_find_platforms — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for TeamWalabi__agriculture-image-metadata__agri_image_meta_utils_sparql_queries.py__query_find_platforms
+# Covers several solutions of the pattern, plus neighbourhood that must NOT
+# match (wrong type, missing platformName). The zero-solution case is
+# exercised separately in driver.py with a second call against a fresh
+# empty Graph() -- see run_pair's `calls=` there.
+@prefix agimage: <https://w3id.org/agri-image/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix ex: <http://example.org/> .
+
+ex:platform1 a agimage:Platform ;
+    agimage:platformName "Tractor A" .
+
+ex:platform2 a agimage:Platform ;
+    agimage:platformName "Drone B" .
+
+# Neighbourhood: a Platform with no platformName -- must not appear in the
+# result (the pattern requires both triples for the same subject).
+ex:platform3 a agimage:Platform .
+
+# Neighbourhood: has a platformName but is NOT a Platform -- must not match.
+ex:sensor1 a agimage:Sensor ;
+    agimage:platformName "Not a platform" .

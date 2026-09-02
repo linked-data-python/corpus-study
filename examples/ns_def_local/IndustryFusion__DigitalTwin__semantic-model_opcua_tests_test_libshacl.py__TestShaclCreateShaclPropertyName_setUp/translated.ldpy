@@ -2,7 +2,7 @@
 # region: TestShaclCreateShaclPropertyName.setUp (lines 1018-1024, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal, BNode
-from lib.shacl import Shacl, Validation
+from context_shim import Shacl, Validation  # context shim, see meta.json
 
 def setUp(self):
     # Minimal setup for Shacl instance

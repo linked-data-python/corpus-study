@@ -13,11 +13,21 @@
     "graph_read": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    ".execute()",
+    "prefixed name",
+    "IRI"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "initNs={'ns': URIRef('urn:')} has a static IRI known at transpile time, so it is a plain @prefix ns: <urn:> ., and the query's PREFIX prologue is inherited from it, per the stratum's correspondence rule (prologue inherited from @prefix). graph.update(TEXT, initNs=...) becomes s{ TEXT }.execute() under @graph graph.",
+    "the RDF/RDFS imports in the region's context are unused by this function and carry no island equivalent here; left untouched rather than invented a use for them.",
+    "the driver could not use the default fixture= wiring: the region needs graph.get_context(...) and GRAPH ns:graph { } (named-graph operations), which a plain rdflib.Graph (what fixture= parses into) does not support. Loaded the fixture into an rdflib.Dataset via calls= instead, and wrapped it in a small proxy so rdfeval's generic Graph-isomorphism argument comparison (which crashes on a quad-yielding Dataset -- a pre-existing rdflib/rdfeval interaction bug, not a translation issue) is not applied to it; see driver.py for the detail.",
+    "checked the anti-hollow-green discipline: corrupting translated.ldpy (ns:pizza -> ns:cheese) makes the check FAIL as expected; restored before finalising."
   ],
   "draft_sha": "e3e3ccd7e3a80c51",
   "provenance": {
@@ -29,5 +39,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:testUpdateWithInitNs",
+    "diffs": [],
+    "error": null
+  }
 }

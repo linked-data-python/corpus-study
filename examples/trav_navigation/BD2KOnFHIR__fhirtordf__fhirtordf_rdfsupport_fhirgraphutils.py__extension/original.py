@@ -5,7 +5,7 @@ from datetime import datetime, date
 from typing import Union, Optional, Tuple, List
 from rdflib import Graph, BNode, Literal, RDF
 from rdflib.term import Identifier, URIRef, Node
-from fhirtordf.rdfsupport.namespaces import FHIR
+from context_shim import FHIR, value  # context shim -- see meta.json
 
 def extension(g: Graph, node: Identifier, extension_predicate: Union[URIRef, str], asLiteral=False) -> \
         Union[None, BNode, date, bool, datetime, int, float]:

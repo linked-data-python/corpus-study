@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from pathlib import Path
 from rdflib.namespace import OWL, RDF, RDFS
+from shim import _load_graph, _local_name
 
 def get_available_layers(ttl_path: Path) -> list[str]:
     graph = _load_graph(ttl_path)

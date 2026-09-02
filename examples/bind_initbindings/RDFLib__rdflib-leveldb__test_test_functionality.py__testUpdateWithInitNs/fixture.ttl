@@ -1,4 +1,13 @@
 # Input graph for RDFLib__rdflib-leveldb__test_test_functionality.py__testUpdateWithInitNs — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+#
+# The region under test performs an INSERT DATA into the named graph
+# <urn:graph> and then reads that same named graph back — the "read" this
+# fixture exercises is really "the write did not leak elsewhere and did not
+# pick up unrelated data", not a traversal of pre-existing data.  So this
+# fixture supplies neighbouring triples in the DEFAULT graph (a distinct
+# graph from <urn:graph>) that must NOT show up in the region's result, and
+# leaves <urn:graph> itself empty before the update (the zero-solution case
+# for that graph).
 @prefix ex: <http://example.org/> .
+
+ex:someone ex:likes ex:coffee .

@@ -1,6 +1,24 @@
 # Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/owl2instances.py
 # region: <module> (lines 855-859, stratum sparql_literal)
 # licence of the source repository: see meta.json
+#
+# Context restored (see meta.json): the extraction tool's captured context
+# line `opcuans = None  # dito` is a stray module-level placeholder (line
+# 184 of the real file, an unrelated variable never reassigned there)
+# rather than the actual local binding in scope at the region's real call
+# site (the `if __name__ == '__main__':` block, line 753):
+# `opcuans = next(Namespace(uri) for prefix, uri in list(g.namespaces())
+# if prefix == 'opcua')`. Restored here verbatim, together with `basens`
+# (line 752, same pattern for prefix 'base'), the graph `g` (parsed from a
+# fixture instead of a CLI-supplied instance file), the `Entity` exporter
+# `e = Entity(namespace_prefix, basens, opcuans)` (line 768; see
+# entity_shim.py, a trimmed but verbatim copy of lib/entity.py's `Entity`
+# -- only the methods this region calls), and `entitiesname` (line 691,
+# `args.entities`, here a fixed output path so the branch is exercised).
+from rdflib import Graph, Namespace
+
+from entity_shim import Entity
+
 query_subclasses = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -22,10 +40,25 @@ WHERE {
   }
 }
 """
-opcuans = None  # dito
+
+g = Graph()
+g.parse("fixture.ttl", format="turtle")
+namespace_prefix = 'http://example.org/opcua-instances/'
+basens = next(Namespace(uri) for prefix, uri in list(g.namespaces()) if prefix == 'base')
+opcuans = next(Namespace(uri) for prefix, uri in list(g.namespaces()) if prefix == 'opcua')
+e = Entity(namespace_prefix, basens, opcuans)
+entitiesname = "/tmp/owl2instances_entities_original.ttl"
 
 if entitiesname is not None:
     result = g.query(query_subclasses)
     e.add_subclasses(result)
     e.add_subclasses_recursive(g, opcuans['BaseNodeClass'])
     e.serialize(destination=entitiesname)
+
+# Appended for the driver (see meta.json): `e` is not itself an rdflib
+# Graph, so run_pair's module-state comparison (which only looks at
+# top-level Graph globals) cannot see what add_subclasses/
+# add_subclasses_recursive built inside it. Exposing e.get_graph() here,
+# identically on both sides, is what actually exercises the CONSTRUCT
+# query and the merge into `e`.
+e_graph = e.get_graph()

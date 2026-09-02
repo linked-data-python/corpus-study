@@ -12,10 +12,13 @@
   "categories": {
     "namespace_ctor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "self.basens = Namespace(\"http://example.org/base/\") is assigned to self and must outlive setUp for other test methods to read it; `@prefix` has no run-time object (INSTRUCTIONS.md #1, #5), so there is nothing to bind on self. Kept as a plain Namespace(...) call, unchanged from original.py -- the minimal, purest instance of this stratum's expected limit (a single namespace_ctor, no other RDF op in the region).",
+    "driver.py: setUp(self) has no Graph involved, only a Namespace assigned to self.basens, so a plain SimpleNamespace() stand-in with its default __dict__ equality is enough to compare the resulting attribute across the two runs (no isomorphism concern, unlike the sibling TestShaclCreateShaclPropertyName_setUp region)."
+  ],
   "draft_sha": "d63a08efbaf3ec65",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.465492+00:00",

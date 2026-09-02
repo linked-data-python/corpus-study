@@ -17,12 +17,27 @@
     "term_constructor": 7,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "from … import p:",
+    "g{ }",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "IRI",
+    "typed literal",
+    "variable"
+  ],
   "translation_notes": [
     "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref",
-    "rdf:type aliases rendered as Turtle `a`: A"
+    "rdf:type aliases rendered as Turtle `a`: A",
+    "Two queries assembled with f-strings became s{ } with a term-position interpolation, never string pasting: the prop_exists lookup (`?p sh:path {prop_name.n3()}` -> `?p sh:path {prop_name}`, the .n3() call drops away because s{ } coerces the term itself) and the import_from lookup (`<{prop_name}>` -> `{prop_name}`, the angle brackets drop away for the same reason). Both are called on a graph with `s{ ... }(graph)`.",
+    "Genuine finding, not a translation artefact: the original query reads `?p sh:property ?p .` — subject and object are the SAME variable, so the pattern only matches a node that is sh:property of itself. No triple in the region's own domain (SHACL property shapes) is ever reflexive this way, so this branch's 'reuse an existing unconstrained PropertyShape' path is dead in practice on any graph shaped like the ones this function builds. Preserved verbatim (same program, same behaviour), not fixed. Confirmed by exercising it in fixture.ttl: even a shape with an exactly-matching sh:path and no min/maxCount is never picked up, on both sides identically.",
+    "context_shim.py stands in for bricksrc.namespaces (the real project namespaces, faithfully reproduced), brickschema.Graph (a thin rdflib.Graph subclass, used here only as a no-argument default-constructor call, so plain Graph is behaviourally identical), and add_relationships (defined elsewhere in the same source file, outside this region; the driver's definitions dict is fully consumed by the keys this region itself pops before reaching that call, so a no-op stand-in is exact for these fixtures, not invented logic).",
+    "the import_from branch (external file parse + a second s{ } query on a fresh graph) is present in the translation but not exercised by driver.py's fixtures: reading an arbitrary external RDF file is out of scope for a graph-isomorphism/values check without inventing a second real file to ship.",
+    "anti-hollow-green: sabotaging the reuse-branch query (adding an always-false conjunct) produced no diff, because that branch is dead per the finding above — a red herring, not a weak pilot. Re-sabotaging a triple this fixture DOES exercise (owl:ObjectProperty -> owl:DatatypeProperty on the plain-object-property branch) made the check FAIL as expected (55 vs 55 triples, not isomorphic), confirming the pilot discriminates; then reverted to the correct translation, which is green again."
   ],
   "draft_sha": "6dfe5ddf08700b56",
   "provenance": {
@@ -34,5 +49,12 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:define_shape_property_property",
+    "diffs": [],
+    "error": null
+  }
 }

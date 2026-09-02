@@ -1,0 +1,12 @@
+# Second input graph for OntoUML__ontouml-json2graph__json2graph_tests_test_main.py__test_cli_default_writes_no_metadata_or_sidecar — the TRUE branch.
+# Same domain data as fixture.ttl, but with a prov:Entity metadata triple
+# added (as the real CLI's --transformation-metadata option would produce)
+# -> `bool(m{ ?s rdf:type prov:Entity })` is True, so the region's own
+# assertion fails and demo() reports ("assertion-failed", ...).
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+ex:attribute-1 rdf:type ex:Property ;
+    ex:cardinality "0..1" .
+ex:transformation-run rdf:type prov:Entity .

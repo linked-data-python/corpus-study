@@ -10,10 +10,20 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "The query is assembled with `str.format(root)` inserting `root` inside `<{0}>`: a term-position interpolation, translated to `s{ SELECT ?class WHERE { ?class rdfs:subClassOf+ {root} . } }(graph)`. The `<...>` disappears because s{ } coerces the interpolated Python value to a term itself (root is a URIRef at the real call sites); no string pasting anywhere.",
+    "The property path `rdfs:subClassOf+` (a transitive closure, SPARQL 1.1) transpiles and runs unchanged inside s{ } — property paths are not a separate construction in the vocabulary, they are part of the SPARQL text s{ } parses.",
+    "163-regions case: the original closes over a module-level `g` (always an empty Graph()) with no parameter carrying it, so the region as extracted has no way to receive a fixture graph. Restored the binding identically on both sides as `def get_tag_sets(root, graph=g)` using `graph` inside instead of the closed-over `g`, per AGENT_BATCH.md's guidance for this exact situation. Added `from rdflib import Graph` to original.py for the same reason (missing entirely from the extracted region).",
+    "anti-hollow-green: weakening `rdfs:subClassOf+` to `rdfs:subClassOf` (no transitive closure) in translated.ldpy made the check FAIL as expected (fewer classes found, both the returned dict and the printed count differed); reverted, check is green again."
+  ],
   "draft_sha": "9db8e16e59d9dc41",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.160598+00:00",
@@ -24,5 +34,12 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_tag_sets",
+    "diffs": [],
+    "error": null
+  }
 }

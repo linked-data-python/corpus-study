@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from pathlib import Path
 from rdflib.namespace import OWL, RDF, RDFS
+from shim import _load_graph, _local_name
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -10,9 +11,9 @@ from rdflib.namespace import OWL, RDF, RDFS
 
 def get_available_layers(ttl_path: Path) -> list[str]:
     graph = _load_graph(ttl_path)
+    @graph graph
     layer_names: set[str] = set()
-    for class_node in graph.subjects(rdf:type, owl:Class):
-        for class_type in graph.objects(class_node, rdf:type):
-            if class_type != owl:Class:
-                layer_names.add(_local_name(class_type))
+    for class_node, class_type in m{ ?class_node rdf:type owl:Class, ?class_type }:
+        if class_type != owl:Class:
+            layer_names.add(_local_name(class_type))
     return sorted(layer_names)

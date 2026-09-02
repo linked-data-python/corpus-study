@@ -1,4 +1,40 @@
-# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__code — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__code.
+#
+# code(g, subject, predicate, system=None, asLiteral=False) reads:
+#   c = g.value(subject, predicate)                       -- the flagged
+#       trav_single_value site (m{ }.first() in the translation).
+#   for coding in g.objects(c, fhir:CodeableConcept.coding): ...
+#
+#   * ex:Obs1 ex:hasCode _:cc1 -- _:cc1 has exactly ONE coding (_:coding1),
+#     so `system=None` ("not system" is always true) returns its code
+#     without any ordering ambiguity.
+#   * ex:Obs2 ex:hasCode _:cc2 -- _:cc2 has TWO codings, only one of which
+#     matches the system the driver passes: exercises the `system` filter
+#     with a result that does not depend on iteration order.
+#   * ex:Obs3 has NO ex:hasCode triple at all -- the ZERO-solution case for
+#     `g.value`/`m{ }.first()`: c is None, code() returns None immediately.
+#   * Neighbourhood that must never match: ex:Obs4's own coding (different
+#     subject), and a coding with no fhir:Coding.code at all on _:cc2's
+#     sibling _:coding2c (never reached because it fails the system test
+#     before the code lookup would matter for the "no system" call).
+@prefix ex:   <http://example.org/> .
+@prefix fhir: <http://hl7.org/fhir/> .
+
+ex:Obs1 ex:hasCode _:cc1 .
+_:cc1 fhir:CodeableConcept.coding _:coding1 .
+_:coding1 fhir:Coding.system "sys-a" ;
+          fhir:Coding.code "CODE-A" .
+
+ex:Obs2 ex:hasCode _:cc2 .
+_:cc2 fhir:CodeableConcept.coding _:coding2a , _:coding2b .
+_:coding2a fhir:Coding.system "sys-x" ;
+           fhir:Coding.code "CODE-X" .
+_:coding2b fhir:Coding.system "sys-y" ;
+           fhir:Coding.code "CODE-Y" .
+
+# ex:Obs3 intentionally has no ex:hasCode triple: the zero-solution case.
+
+ex:Obs4 ex:hasCode _:cc4 .
+_:cc4 fhir:CodeableConcept.coding _:coding4 .
+_:coding4 fhir:Coding.system "sys-a" ;
+          fhir:Coding.code "CODE-NEVER-SEEN" .

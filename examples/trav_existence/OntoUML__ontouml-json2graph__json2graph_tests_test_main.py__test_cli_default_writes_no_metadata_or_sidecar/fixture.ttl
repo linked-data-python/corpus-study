@@ -1,4 +1,12 @@
 # Input graph for OntoUML__ontouml-json2graph__json2graph_tests_test_main.py__test_cli_default_writes_no_metadata_or_sidecar — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Metadata-free output, as the real CLI produces by default (the scenario
+# the upstream test actually exercises): domain triples only, no
+# prov:Entity anywhere -> the FALSE / zero-solution branch of
+# `not bool(m{ ?s rdf:type prov:Entity })`, so the assertion passes.
+# Includes a neighbouring rdf:type triple on an unrelated class, to prove
+# the read is scoped to prov:Entity specifically and not any rdf:type.
+@prefix ex:  <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:attribute-1 rdf:type ex:Property ;
+    ex:cardinality "0..1" .

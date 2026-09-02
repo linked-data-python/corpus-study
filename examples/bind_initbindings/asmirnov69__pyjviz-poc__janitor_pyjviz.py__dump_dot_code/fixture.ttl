@@ -1,0 +1,52 @@
+@prefix pyj: <pyj:> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# cmc1: a labelled cluster with one dataframe, one method, a call edge and a
+# return edge -- exercises every one of the five queries with a genuine
+# match.
+<pyj:cmc1> rdf:type pyj:CMC ;
+    rdf:label "cluster one" .
+
+<pyj:df1> rdf:type pyj:DataFrame ;
+    pyj:df-shape "(2, 3)" ;
+    pyj:df-columns "a,b,c" ;
+    pyj:cmc <pyj:cmc1> .
+
+<pyj:m1> rdf:type pyj:Method ;
+    rdf:label "read_csv" ;
+    pyj:cmc <pyj:cmc1> .
+
+<pyj:df1> pyj:method-call <pyj:m1> .
+<pyj:m1> pyj:method-return <pyj:df1> .
+
+# cmc2: label "none" -- the special case that skips the subgraph wrapper --
+# with a method-call-arg edge (the alternated branch of the property path)
+# instead of method-call, and no return edge: exercises the zero-solution
+# path of the last query for a cmc that does have other matches.
+<pyj:cmc2> rdf:type pyj:CMC ;
+    rdf:label "none" .
+
+<pyj:df2> rdf:type pyj:DataFrame ;
+    pyj:df-shape "(1, 1)" ;
+    pyj:df-columns "x" ;
+    pyj:cmc <pyj:cmc2> .
+
+<pyj:m2> rdf:type pyj:Method ;
+    rdf:label "concat" ;
+    pyj:cmc <pyj:cmc2> .
+
+<pyj:df2> pyj:method-call-arg <pyj:m2> .
+
+# Neighbourhood that must NOT match: a dataframe and a method tagged with a
+# cmc that is not itself typed pyj:CMC (so it never appears in `cmcs`, and
+# must not leak into either cluster's node/edge queries above).
+<pyj:df-stray> rdf:type pyj:DataFrame ;
+    pyj:df-shape "(9, 9)" ;
+    pyj:df-columns "z" ;
+    pyj:cmc <pyj:cmc-unknown> .
+
+<pyj:m-stray> rdf:type pyj:Method ;
+    rdf:label "stray" ;
+    pyj:cmc <pyj:cmc-unknown> .
+
+<pyj:df-stray> pyj:method-call <pyj:m-stray> .

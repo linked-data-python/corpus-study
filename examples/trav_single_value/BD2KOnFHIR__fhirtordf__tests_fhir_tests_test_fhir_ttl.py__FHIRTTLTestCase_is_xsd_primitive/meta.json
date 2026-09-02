@@ -13,11 +13,23 @@
     "graph_read": 5,
     "namespace_term": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: RDFS->rdfs, OWL->owl, XSD->xsd"
+    "Four flagged trav_single_value sites, all `g.value(node_or_base, PRED)` -> `m{ {node} pred:local ?o }(g).first()`: line 14 (owl:onProperty), line 16 (owl:allValuesFrom), line 18 (owl:someValuesFrom), line 20 (owl:onDatatype). Each keeps the exact zero-solution semantics of rdflib's `.value()` -- verified by swapping every `.first()` for `.one()` (one call at a time, e.g. the allValuesFrom site) and confirming `rdfeval check` then FAILS: on ex:StringPrimitive/ex:CodePrimitive/ex:Integer64Primitive the swapped `.one()` raises on a legitimate zero-solution branch where `.first()` correctly answers None (the someValuesFrom fallback, or the FHIRCat-integer64 case), producing wrong results/exceptions instead of matching the original. Confirms `.first()` is the exact match throughout, not `.one()`.",
+    "the fifth graph read -- `for node in g.objects(prim, RDFS.subClassOf)` -- is not one of the flagged single-value sites but is translated too, per INSTRUCTIONS SS2 (most specific construction everywhere): `for node in m{ {prim} rdfs:subClassOf ?o }(g)`, the trav_one_step idiom.",
+    "`FHIR.value` and `FHIR.integer64` (fhirtordf's DottedNamespace notation, see the `code()` region's notes) appear only as plain Python comparisons (`== FHIR.value`, `== FHIR.integer64`), never as a term written inside an island, so they were left untouched -- no prefixed-name notation applies outside an island.",
+    "`fhirtordf.rdfsupport.namespaces`/`dottednamespace` are not installed in this environment: shimmed identically to the `code()` region (see meta.json), a minimal local `fhirtordf` package reproducing `DottedNamespace`/`FHIR` verbatim from corpus/repos/BD2KOnFHIR__fhirtordf/.",
+    "the region carries a bare `@staticmethod` decorator on a module-level function -- an artefact of the tirage extracting a method body without its enclosing class. Harmless for the transpiler/pilot (the decorator is simply applied to the plain function) and left as-is: reproducing exactly what the tirage captured, not a construction under test.",
+    "driver.py: `is_xsd_primitive(prim, g)` needs an external `prim` (a fixed, named IRI -- no BNode lookup indirection needed). Five calls exercise: allValuesFrom -> xsd:string (True), the someValuesFrom/onDatatype fallback -> xsd:token (True), a non-xsd base type (False, the 'type failure' branch), the FHIRCat #35 fhir:integer64 special case (True despite not being xsd:-prefixed), and no matching fhir:value restriction at all -- including one blank node with NO owl:onProperty triple, so the outer .first() answers None there too -- the zero-solution branch (False). fixture.ttl's ex:Other is neighbourhood no call ever reads."
   ],
   "draft_sha": "8054f1e9b16c10a4",
   "provenance": {
@@ -30,5 +42,11 @@
     "trav_single_value",
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:is_xsd_primitive",
+    "diffs": [],
+    "error": null
+  }
 }

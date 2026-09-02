@@ -10,6 +10,5 @@ from rdflib.namespace import XSD, OWL, NamespaceManager
 
 def _graph_affects_closure(graph: Graph) -> bool:
     """Return True if *graph* can change owl:imports-driven closure."""
-    return any(graph.triples((None, owl:imports, None))) or any(
-        graph.triples((None, rdf:type, owl:Ontology))
-    )
+    @graph graph
+    return bool(m{ ?s owl:imports ?o }) or bool(m{ ?s rdf:type owl:Ontology })

@@ -12,10 +12,20 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "IRI"
+  ],
+  "translation_notes": [
+    "The single literal `PREFIX agimage: <...>` line moves to a file-scope @prefix, inherited into the island's prologue -- not recopied inside s{ }. The query text itself is kept exactly as written, mixed style included: `agimage:Platform` stays a prefixed name, `<https://w3id.org/agri-image/platformName>` stays a full bracketed IRI, since SS2 forbids rewriting query text beyond the construction substitution.",
+    "results is s{ }'s own lazy Query result on the translated side and an rdflib Result on the original side; both are re-iterable (rdflib's Result materialises its rows on first pass), so `for row in results: ...` followed by `return results` behaves identically on both sides and needed no extra materialisation code in the island, unlike the sibling region in this stratum whose result was consumed only once.",
+    "fixture.ttl gives two Platform solutions (Tractor A, Drone B) plus neighbourhood that must not match: a Platform with no platformName, and a non-Platform resource that does have a platformName. The zero-solution case is exercised as a second driver call against a fresh empty Graph() rather than in the fixture itself, since this region is a function with its own entry point (unlike the bare-statement sibling region, where a second call was not available)."
+  ],
   "draft_sha": "d592029ec8a96862",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.806254+00:00",
@@ -26,5 +36,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:query_find_platforms",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -2,28 +2,17 @@
 # region: _emit_cite_sites (lines 238-296, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import DCTERMS, PROV, RDF, RDFS
-from apysource.namespaces import OA, SV, new_graph
-from apysource.schema import (  # noqa: F401 — the vocabulary lives here now
+from apysource_shim import (
+    SV,
+    PROV,
+    RDF,
     _CITE_SITE_ALLOWED,
-    _FRAGMENT_ALLOWED,
-    _FRAGMENT_KEYS,
-    _NORMALIZE_KEYS,
-    _SOURCE_ALLOWED,
-    _SOURCE_KEYS,
-    _TOP_ALLOWED,
-    FRAGMENT_KEYS,
-    SOURCE_KEYS,
-    TARGETTING_KEYS,
+    _anon,
     reject_unknown_keys,
     text,
 )
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix oa: <http://www.w3.org/ns/oa#> .
 @prefix sv: <https://alganet.github.io/apysource/vocab.ttl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 
 _reject_unknown_keys = reject_unknown_keys
 _text = text
@@ -54,6 +43,7 @@ def _emit_cite_sites(g: Graph, frag_uri: URIRef, frag_def: dict[str, object],
             f"becoming none.",
         )
 
+    @graph g
     for i, site in enumerate(sites, 1):
         where = f"{what}: cited_by[{i}]"
         if not isinstance(site, dict):
@@ -73,11 +63,13 @@ def _emit_cite_sites(g: Graph, frag_uri: URIRef, frag_def: dict[str, object],
         # Numbered by position in the list, which `_dedupe`-style callers keep
         # sorted, so a site added in the middle does not relabel the ones after it.
         node = _anon(frag_uri, f"cite_{i}")
-        g += g{
-            {node} a sv:CiteSite ;
-               sv:citingFile {Literal(_text(file, f"{where}: file"))} ;
-               prov:wasDerivedFrom {frag_uri} .
-            {frag_uri} sv:citedBy {node}
+        bindings = {"node": node, "file": Literal(_text(file, f"{where}: file")), "frag": frag_uri}
+        @bindings bindings
+        +{
+            ?node a sv:CiteSite ;
+                  sv:citingFile ?file ;
+                  prov:wasDerivedFrom ?frag .
+            ?frag sv:citedBy ?node
         }
 
         line = site.get("line")
@@ -88,4 +80,6 @@ def _emit_cite_sites(g: Graph, frag_uri: URIRef, frag_def: dict[str, object],
                     f"{where}: line must be a whole number, not a "
                     f"{type(line).__name__}.",
                 )
-            g += g{ {node} sv:citingLine {Literal(line)} }
+            bindings = {"node": node, "line": Literal(line)}
+            @bindings bindings
+            +{ ?node sv:citingLine ?line }

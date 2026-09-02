@@ -2,19 +2,12 @@
 # region: _emit_cite_sites (lines 238-296, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import DCTERMS, PROV, RDF, RDFS
-from apysource.namespaces import OA, SV, new_graph
-from apysource.schema import (  # noqa: F401 — the vocabulary lives here now
+from apysource_shim import (
+    SV,
+    PROV,
+    RDF,
     _CITE_SITE_ALLOWED,
-    _FRAGMENT_ALLOWED,
-    _FRAGMENT_KEYS,
-    _NORMALIZE_KEYS,
-    _SOURCE_ALLOWED,
-    _SOURCE_KEYS,
-    _TOP_ALLOWED,
-    FRAGMENT_KEYS,
-    SOURCE_KEYS,
-    TARGETTING_KEYS,
+    _anon,
     reject_unknown_keys,
     text,
 )

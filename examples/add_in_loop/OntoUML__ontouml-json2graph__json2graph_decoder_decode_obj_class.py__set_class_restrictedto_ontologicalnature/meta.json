@@ -13,11 +13,19 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "variable",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "The single-predicate add-in-loop collapses to `for @bindings in (...) : +{ ... ?nature }`, one bound mapping per row of restriction_nature_mapping; kept ontouml_ref (shim) rather than an f-string local part since the mapped nature name never needs percent-encoding.",
+    "XSD/Literal imports from the original are kept unused, matching original.py (not exercised by this region)."
   ],
   "draft_sha": "50405bdeaca3c85f",
   "provenance": {
@@ -29,5 +37,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:set_class_restrictedto_ontologicalnature",
+    "diffs": [],
+    "error": null
+  }
 }

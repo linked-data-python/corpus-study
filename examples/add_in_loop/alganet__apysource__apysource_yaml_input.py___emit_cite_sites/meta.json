@@ -14,11 +14,19 @@
     "term_constructor": 2,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "@bindings",
+    "+{ }",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, PROV->prov, RDF->rdf, RDFS->rdfs, OA->oa, SV->sv"
+    "Validation (type/shape checks, the required-key and required-`file` refusals) stays plain Python per row, so the loop header itself is a plain `for i, site in enumerate(sites, 1):`, not `for @bindings in`: the most specific fit here is `@bindings` (a mapping assigned per row) feeding `+{ }`, rather than forcing the raise-heavy body into the loop-of-mappings form.",
+    "The four unconditional triples (rdf:type, sv:citingFile, prov:wasDerivedFrom, sv:citedBy) become one multi-predicate `+{ }` bound from one @bindings mapping; the conditional fifth triple (sv:citingLine) is a second, separate `@bindings`/`+{ }` pair guarded by the same `if line is not None:` as the original, since a variable can't be left 'sometimes present' inside one block without also satisfying the well-formedness the original raises on.",
+    "DCTERMS, RDFS and OA are unused in this region (kept unused in original.py's imports too, matching the source file's module-level context)."
   ],
   "draft_sha": "8e9cf6a4eb7c194d",
   "provenance": {
@@ -30,5 +38,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_emit_cite_sites",
+    "diffs": [],
+    "error": null
+  }
 }

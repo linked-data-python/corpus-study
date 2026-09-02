@@ -6,19 +6,19 @@ from typing import Union, Optional, Tuple, List
 from rdflib import Graph, BNode, Literal, RDF
 from rdflib.term import Identifier, URIRef, Node
 from rdflib.exceptions import UniquenessError
-from fhirtordf.rdfsupport.namespaces import FHIR
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from context_shim import FHIR
+@prefix fhir: <http://hl7.org/fhir/> .
 
 
 def value(g: Graph, subject: Node, predicate: URIRef, asLiteral=False) -> \
         Union[None, BNode, URIRef, str, date, bool, datetime, int, float]:
 
-    values = list(set(g.objects(subject, predicate)))
+    values = list(set(m{ {subject} {predicate} ?o }(g)))
     if len(values) == 0:
         return None
 
     if all(isinstance(v, BNode) for v in values) and predicate != FHIR.value:
-        vv = [gv for gv in set(g.value(v, FHIR.value) for v in values) if gv is not None]
+        vv = [gv for gv in set(m{ {v} fhir:value ?o }(g).first() for v in values) if gv is not None]
         if len(vv) == 0:
             return None
         elif len(vv) > 1:

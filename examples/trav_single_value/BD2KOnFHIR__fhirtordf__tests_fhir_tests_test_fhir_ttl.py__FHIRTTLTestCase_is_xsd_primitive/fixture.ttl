@@ -1,4 +1,65 @@
-# Input graph for BD2KOnFHIR__fhirtordf__tests_fhir_tests_test_fhir_ttl.py__FHIRTTLTestCase_is_xsd_primitive — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# BD2KOnFHIR__fhirtordf__tests_fhir_tests_test_fhir_ttl.py__FHIRTTLTestCase_is_xsd_primitive.
+#
+# is_xsd_primitive(prim, g) walks, for the FIRST rdfs:subClassOf restriction
+# blank node of `prim` whose owl:onProperty is fhir:value:
+#   base_type = g.value(node, owl:allValuesFrom)
+#             or (if that is None) g.value(g.value(node, owl:someValuesFrom),
+#                                           owl:onDatatype)
+# and checks whether it starts with the xsd: namespace.
+#
+#   * ex:StringPrimitive -- ONE subClassOf restriction on fhir:value with an
+#     owl:allValuesFrom of xsd:string: the "normal", modern-fhir.ttl shape.
+#     Also has a SECOND, unrelated subClassOf restriction (on fhir:id, not
+#     fhir:value) that must be skipped by the `owl:onProperty == fhir:value`
+#     test without ever being read as `node`.
+#   * ex:CodePrimitive -- exercises the someValuesFrom/onDatatype fallback:
+#     no owl:allValuesFrom at all, but an owl:someValuesFrom blank node
+#     carrying owl:onDatatype xsd:token.
+#   * ex:BadPrimitive -- base type resolves to a non-xsd IRI (ex:NotXsd):
+#     the "type failure" / return False branch.
+#   * ex:Integer64Primitive -- base type is fhir:integer64 exactly: the
+#     FHIRCat #35 special case that still returns True despite not being
+#     xsd:-prefixed.
+#   * ex:NoRestriction -- has an rdfs:subClassOf that is NOT a blank node
+#     (a named class), one whose owl:onProperty is a DIFFERENT property
+#     (fhir:id), and one with NO owl:onProperty triple at all: the
+#     ZERO-solution case for the whole loop, distinguishing `g.value`/
+#     `m{ }.first()` (which answer None on the owl:onProperty lookup for
+#     the last of these) from a `.one()` that would raise.
+#   * ex:Other -- neighbourhood with its own fhir:value restriction and
+#     xsd:string allValuesFrom, never read because no call passes it as
+#     `prim`.
+@prefix ex:   <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix fhir: <http://hl7.org/fhir/> .
+
+ex:StringPrimitive rdfs:subClassOf _:strRestr , _:idRestr .
+_:strRestr owl:onProperty fhir:value ;
+           owl:allValuesFrom xsd:string .
+_:idRestr owl:onProperty fhir:id ;
+          owl:allValuesFrom xsd:string .
+
+ex:CodePrimitive rdfs:subClassOf _:codeRestr .
+_:codeRestr owl:onProperty fhir:value ;
+            owl:someValuesFrom _:codeSome .
+_:codeSome owl:onDatatype xsd:token .
+
+ex:BadPrimitive rdfs:subClassOf _:badRestr .
+_:badRestr owl:onProperty fhir:value ;
+           owl:allValuesFrom ex:NotXsd .
+
+ex:Integer64Primitive rdfs:subClassOf _:i64Restr .
+_:i64Restr owl:onProperty fhir:value ;
+           owl:allValuesFrom fhir:integer64 .
+
+ex:NoRestriction rdfs:subClassOf ex:SomeNamedClass , _:otherPropRestr , _:noPropRestr .
+_:otherPropRestr owl:onProperty fhir:id ;
+                  owl:allValuesFrom xsd:string .
+_:noPropRestr owl:allValuesFrom xsd:string .
+
+ex:Other rdfs:subClassOf _:otherRestr .
+_:otherRestr owl:onProperty fhir:value ;
+             owl:allValuesFrom xsd:string .

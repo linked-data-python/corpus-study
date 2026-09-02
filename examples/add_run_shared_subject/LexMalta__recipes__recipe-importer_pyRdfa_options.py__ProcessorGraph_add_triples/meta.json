@@ -13,11 +13,23 @@
     "term_constructor": 5,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "typed literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: ns_dc->nsdc, ns_ht->nsht, ns_xsd->nsxsd, ns_distill->nsdistill, ns_rdfa->nsrdfa"
+    "prefixes: ns_dc->nsdc, ns_ht->nsht, ns_xsd->nsxsd, ns_distill->nsdistill, ns_rdfa->nsrdfa",
+    "self.graph designated as current graph with @graph self.graph (not reassigned in the region, so the value-capture subtlety in INSTRUCTIONS.md 2bis does not bite); the bnode/htbnode subject and every predicate the method writes are lexical, so +{ } reaches all of them even though top_class/info_class/context/msg/node arrive as parameters -- only their term VALUES are data, the pattern itself is written, unlike the pitfall INSTRUCTIONS.md warns this region's name suggests.",
+    "the two same-subject predicate lists (nsdc:description ; nsdc:date on bnode, and a ; nsht:requestURI on htbnode) each collapse into one +{ } joined by ';' -- exactly the construction this stratum exercises; the two conditional rdf:type/context triples stay separate +{ } statements (an `if` guards each, and `+{ }` is accepted as a one-line suite per INSTRUCTIONS.md 2bis) since folding a maybe-absent triple into the same ';' list would need a bound value in all cases.",
+    "context shim (processor_context.py) restores ProcessorGraph and ns_rdf: the extracted region's context window carried neither the class (self.graph binding) nor `from rdflib import RDF as ns_rdf`, both verified against the pinned commit's options.py/__init__.py.",
+    "original.py's own `self.graph.bind(...)` calls are left as plain rdflib calls (unrelated to the lexical @prefix declarations, which only resolve prefixed names at transpile time) -- kept verbatim on both sides for fidelity."
   ],
   "draft_sha": "2746135dd2cc907f",
   "provenance": {
@@ -29,5 +41,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

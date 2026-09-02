@@ -1,7 +1,15 @@
 # Extracted from DataArtifex/rdf-toolkit@226d8a1be3 : src/dartfx/rdf/pydantic/_base.py
 # region: RdfBaseModel._serialise_into_graph (lines 1335-1409, stratum add_isolated)
 # licence of the source repository: see meta.json
+from __future__ import annotations
 from rdflib import RDF, XSD, BNode, Graph, Literal, Namespace, URIRef
+from context_shim import (
+    LangStringList,
+    _ensure_uri,
+    _field_type_info,
+    _get_rdf_property,
+)
+
 
 def _serialise_into_graph(
     self,
@@ -78,3 +86,19 @@ def _serialise_into_graph(
             graph.add((subject, predicate, node))
 
     return subject
+
+
+# Demo harness (identical on both sides, see meta.json): _serialise_into_graph
+# is a method of RdfBaseModel, extracted with an explicit `self` parameter
+# (a bound-method extraction, same pattern as
+# JonasHeinickeBio__biomedical-knowledge-lookup__.../__add_concept_mappings
+# already in this corpus). `model` is built by the driver from
+# context_shim.RdfBaseModelStub with a fixed subject and the fields under
+# test; demo() calls the extracted function on it and returns only the graph
+# it wrote into, not `self`/`model` (comparing the stub instance itself would
+# report a spurious difference every call: each side owns a distinct Python
+# object with no notion of "the same" beyond structural equality, which the
+# harness already gets from comparing the resulting graph).
+def demo(model, graph):
+    _serialise_into_graph(model, graph)
+    return graph

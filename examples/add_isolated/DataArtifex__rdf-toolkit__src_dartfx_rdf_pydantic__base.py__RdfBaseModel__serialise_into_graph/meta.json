@@ -14,12 +14,26 @@
     "term_constructor": 1,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
   ],
+  "translation_notes": [
+    "three of the region's four graph.add((s, p, o)) call sites (the rdf:type add, the LangStringList loop's add, and the final generic add) are genuinely isolated single-triple writes, so each becomes its own `+{ {subject} <term> {node} }`; kept as three separate islands rather than merged with `;` (that would be the add_run_shared_subject idiom, a different stratum, and would restructure the control flow the `continue` guards depend on).",
+    "rdf:type is written with `a` (a prefixed/keyword term, not `rdf:type` spelled out) -- the most specific term for RDF.type inside a Turtle-notation island.",
+    "prefixes actually bound by `@prefix`: rdf/xsd, matching what the draft already declared (RDF.type is the only RDF.* term used; XSD is never referenced directly in the extracted region, kept only because the original module imports it).",
+    "this is a method (`self` first parameter) extracted from RdfBaseModel._serialise_into_graph in DataArtifex/rdf-toolkit@226d8a1be3. Everything reached through `self` (._subject_uri, ._bind_prefixes, .rdf_type, .__class__.model_fields, ._value_to_node) plus the module-level helpers it calls (_get_rdf_property, _field_type_info, _ensure_uri, RdfProperty, LangString/LangStringList) is restored in context_shim.py: _bind_prefixes/_value_to_node/RdfProperty/_get_rdf_property/_field_type_info/_ensure_uri/_looks_like_uri/_default_prefixes/_python_datatype are copied verbatim from the pinned commit; LangString/LangStringList are reduced to plain dataclass/list stand-ins (the real ones are Pydantic BaseModel subclasses this region's logic never validates through); RdfBaseModelStub replaces the full Pydantic RdfBaseModel with only the attributes/methods this region actually touches, and simplifies _subject_uri to return a fixed URIRef instead of delegating to the real UUID/BNode-minting RdfUriGenerator machinery (not exercised by this region -- it only calls the method and uses whatever it returns).",
+    "demo(model, graph) is appended identically to original.py and translated.ldpy (same pattern as JonasHeinickeBio__biomedical-knowledge-lookup__.../__add_concept_mappings already in this corpus): calls the extracted method and returns the graph it wrote into, not `self`, since comparing the stub instance itself would need an __eq__ -- added to RdfBaseModelStub (structural equality over its attribute dict) precisely so the driver's per-argument comparison doesn't report a spurious difference between the two sides' independently-constructed instances.",
+    "driver.py's two calls exercise: rdf_type set + all four field-loop branches (LangStringList fast path with a tagged and an untagged entry, a scalar field, a list field with a None item triggering `if item is None: continue`, a no-RdfProperty field triggering `if prop is None: continue`, a None-valued field triggering `if value is None: continue`); and rdf_type=None with every field None, the zero-triples edge.",
+    "sabotage check: changed the rdf:type triple's object from {rdf_type_uri} to {subject} -- rdfeval check correctly failed (6 vs 6 triples, not isomorphic); reverted."
+  ],
+  "article_candidate": true,
   "draft_sha": "aef24806b291c3ad",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.066775+00:00",
@@ -31,5 +45,11 @@
     "add_isolated",
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

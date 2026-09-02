@@ -3,6 +3,23 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, Literal
 from rdflib.namespace import RDF
+from context_shim import (
+    ACQUIRIUM_NS,
+    BRICK_REF,
+    DATA_SOURCE,
+    HAS_EXTERNAL_REFERENCE,
+    HAS_MEDIUM,
+    HAS_QUANTITY_KIND,
+    HAS_UNIT,
+    MQTT_BROKER,
+    MQTT_REFERENCE,
+    MQTT_TOPIC,
+    OF_SUBSTANCE,
+    QUDT,
+    S223,
+    TIME_KEY,
+    VALUE_KEY,
+)
 
 def build_test_graph_stream() -> Graph:
     num_equipments = 3

@@ -11,6 +11,7 @@ from rdflib.collection import Collection
 
 
 def test_create_datatype_and_iri_shapes_and_shacl_or(self):
+    @graph self.sh.shaclg
     # datatype shapes
     dt_nodes = self.sh.create_datatype_shapes([xsd:boolean, xsd:double])
     self.assertEqual(len(dt_nodes), 2)
@@ -31,7 +32,7 @@ def test_create_datatype_and_iri_shapes_and_shacl_or(self):
     # shacl_or: single
     single = BNode()
     # inject a triple
-    self.sh.shaclg += g{ {single} sh:datatype xsd:string }
+    +{ {single} sh:datatype xsd:string }
     single_tup = self.sh.shacl_or([single])
     # should return one tuple for the single shape
     self.assertEqual(single_tup, [(sh:datatype, xsd:string)])
@@ -40,10 +41,8 @@ def test_create_datatype_and_iri_shapes_and_shacl_or(self):
 
     # multiple
     a = BNode(); b = BNode()
-    self.sh.shaclg += g{
-        {a} sh:nodeKind sh:Literal .
-        {b} sh:nodeKind sh:Literal
-    }
+    +{ {a} sh:nodeKind sh:Literal }
+    +{ {b} sh:nodeKind sh:Literal }
     or_tup = self.sh.shacl_or([a,b])
     pred, obj = or_tup[0]
     self.assertEqual(pred, sh:or)

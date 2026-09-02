@@ -13,10 +13,23 @@
     "namespace_ctor": 3,
     "namespace_term": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "translation_notes": [
+    "the three Namespace(...) objects (prov, dcterms, sh) never escape the function -- they are only used to form namespace_term lookups on the graph the function itself gets back from violations_to_report_graph -- so this is another clean ns_def_local case, with the read side (trav_single_value/trav_existence, this region's secondary stratum) exercised as its most specific construction alongside it: `graph.value(report, prop)` -> `m{ {report} prop ?v }.first()`, `next(graph.subjects(RDF.type, sh.ValidationReport))` -> `m{ ?s a sh:ValidationReport }.first()`, `graph.objects(report, prop)` -> `m{ {report} prop ?v }` iterated directly (a bare-term projection, not a tuple).",
+    "the real triplets package (PyPI 0.2.0) and pandas were installed into the venv to run this region as-is: violations_to_report_graph is the region's own subject of study, not incidental context, so shimming it would mean inventing SHACL-report-generation logic the instructions forbid. The one edit to original.py was restoring `import pandas` and the `VIOLATION_COLUMNS` import that the extraction had dropped -- a missing-binding fix, not new logic (see INSTRUCTIONS.md 'Restaurez la liaison').",
+    "the original test only asserts and returns None, which gives the driver nothing to compare (a hollow green). generatedAtTime is wall-clock and cannot be returned verbatim without making the two runs incomparable, so a harness-only `return has_generated_at, creator_check, sources, references` line -- identical in both files, documented in place -- surfaces exactly the four values the original assertions already check.",
+    "confirmed via deliberate breakage: swapping dcterms:source for dcterms:creator in one m{ } turns the check red (AssertionError on `references`), then green again once reverted."
+  ],
   "draft_sha": "2005971129cb3157",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.108509+00:00",
@@ -28,5 +41,11 @@
     "ns_def_local",
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_report_metadata",
+    "diffs": [],
+    "error": null
+  }
 }

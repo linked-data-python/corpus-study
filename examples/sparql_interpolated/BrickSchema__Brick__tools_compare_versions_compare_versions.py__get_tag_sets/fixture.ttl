@@ -1,0 +1,22 @@
+# Input graph for BrickSchema__Brick__tools_compare_versions_compare_versions.py__get_tag_sets.
+#
+# Exercises `?class rdfs:subClassOf+ <root>` — a transitive property path —
+# with the root class interpolated in term position (a term-position
+# interpolation in `s{ }`, the construction this region's stratum targets).
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+
+# --- several solutions: two direct subclasses, one transitive (two hops) ---
+brick:Air_Temperature_Sensor rdfs:subClassOf brick:Temperature_Sensor .
+brick:Water_Temperature_Sensor rdfs:subClassOf brick:Temperature_Sensor .
+brick:Temperature_Sensor rdfs:subClassOf brick:Sensor .
+brick:Zone_Air_Temperature_Sensor rdfs:subClassOf brick:Air_Temperature_Sensor .
+
+# --- neighbourhood that must NOT match: subclass of an unrelated class ---
+brick:Humidity_Sensor rdfs:subClassOf brick:Point .
+
+# --- neighbourhood that must NOT match: superclass direction, not sub ---
+brick:Sensor rdfs:subClassOf brick:Point .
+
+# (the zero-solution case is covered in driver.py by querying a root class
+# with no subclasses at all: brick:Luminance_Sensor, present nowhere above)

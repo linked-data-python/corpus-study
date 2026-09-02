@@ -2,7 +2,7 @@
 # region: _build_minimal_graph (lines 21-55, stratum ns_def_local)
 # licence of the source repository: see meta.json
 import rdflib
-from acro.ontology_handler import (
+from context_shim import (  # context shim -- see meta.json
     PREFIX,
     is_uri,
     make_ischeckedby,

@@ -16,10 +16,26 @@
     "term_constructor": 9,
     "triple_add": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "IRI",
+    "prefixed name",
+    "plain literal",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "translation_notes": [
+    "None of the four Namespace(...) objects (p, skos, rdfs, dpv_owl) escapes the function -- only the URIRef terms they produce (risk_uri, barn_uri, analysis_uri, check_uri, all reused later as subject or object) leave the block, and a prefixed name resolves to a plain URIRef immediately, so this region is a clean case of the stratum's target construction, not one of the not-expressible ones the batch instructions warned about.",
+    "PREFIX comes from an import, not a literal in the source, so `p` cannot be `@prefix p: <...> .` with a literal IRI; used `@prefix p: f<{PREFIX}> .` instead -- the formatted-IRI form the reference documents for exactly this case. f<...> joins holes verbatim with no percent-encoding, so f<{PREFIX}> is safe here: the whole value is one hole and there is no surrounding literal text to protect.",
+    "the four `.add()` calls sharing a subject (three per block) are fused into one `+{ s p1 o1 ; p2 o2 ; p3 o3 }` per block (add_run_shared_subject's construction), the most specific form available -- keeping four separate `+{ }` per block would have been a needless downgrade.",
+    "context_shim.py supplies PREFIX and stub versions of the other acro.ontology_handler imports the region's import statement names but never calls, so the import line still executes identically on both sides."
+  ],
+  "article_candidate": true,
   "draft_sha": "ac5c0a62c1a07860",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.522360+00:00",
@@ -30,5 +46,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_build_minimal_graph",
+    "diffs": [],
+    "error": null
+  }
 }

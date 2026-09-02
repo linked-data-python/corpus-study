@@ -10,12 +10,23 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
     "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref",
-    "rdf:type aliases rendered as Turtle `a`: A"
+    "rdf:type aliases rendered as Turtle `a`: A",
+    "the region's own multi-.add() run on a shared subject -- classname a owl:Class / a sh:NodeShape / rdfs:subClassOf parent -- folds into one `+{ s p1 o1 ; p2 o2 ; p3 o3 }`; likewise the alias block's two subjects (classname, alias) each get their own `+{ ; }` rather than being fused together (different subjects do not share an island). The trailing `for pc in parent_classes: graph.add((alias, RDFS.subClassOf, pc))` and the final `graph.add((alias, BRICK.aliasOf, classname))` stay as separate `+{ }` islands: the former is per-loop-iteration (cardinality varies with parent_classes), the latter is a single triple with no sibling to merge into without reordering across the `graph.objects(...)` read in between -- INSTRUCTIONS.md SS2 forbids that reorder.",
+    "`@graph graph` is declared once at the top of the function body: `graph` is a parameter, never reassigned within the function (including across the recursive `define_classes(subclassdef, classname, graph=graph)` call, which opens its own frame), so one declaration per call is enough -- see INSTRUCTIONS.md SS2bis on `@graph` capturing a value, not a name.",
+    "context shim `brick_context.py` restores bricksrc.namespaces' constants (real Brick IRIs, matching the @prefix bindings above) plus no-op stand-ins for `add_tags`/`define_constraints` (helper functions defined outside the region, called with empty tag/constraint lists in driver.py) and a minimal `brickschema.Graph = rdflib.Graph` stand-in backing the unused `graph=G` default argument -- restoring bindings only, no invented logic; identical on both sides.",
+    "the region's final branch (`graph.add((classname, propname, propval))` on a non-`str` `propname`) is untouched rdflib -- it is reached by driver.py's fixture but sits outside every `add_run_shared_subject` run (each is its own single-triple `.add`, not a shared-subject group), so it stays plain Python on both sides.",
+    "anti-vert-creux: broke `rdfs:subClassOf {parent}` into `rdfs:subClassOf {classname}` in translated.ldpy -- check went FAIL (graphs not isomorphic); restored, check OK again."
   ],
   "draft_sha": "4d317f0a6d4746e9",
   "provenance": {
@@ -27,5 +38,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:define_classes",
+    "diffs": [],
+    "error": null
+  }
 }

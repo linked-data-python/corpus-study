@@ -16,10 +16,19 @@
     "triple_add": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: EX->ex, OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd"
+    "prefixes: EX->ex, OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd",
+    "the two `g.add((EX.Animal, ...))` calls on the shared subject fold into one `+{ ex:Animal a owl:Class ; rdfs:label \"Animal\" }` under `@graph g` -- exactly what the stratum is about, and it translates cleanly.",
+    "EXCLUDED, not because any translation choice is in doubt but because the PILOT cannot execute: `from ontokit.services.linter import (...)` fails on both sides. `ontokit` is CatholicOS/ontokit-api's OWN package (the system under test in this file), not installed in the shared ~/.venvs/ldpy interpreter and not published on PyPI either (confirmed via `pip index versions ontokit-api`/`ontokit`: no matching distribution) -- unlike the wntr precedent, there is no install step that fixes this; only vendoring/reimplementing `OntologyLinter`, which is out of a shim's scope (see driver.py for the full account, following the vitalgraph precedent for this same exclusion).",
+    "added `from uuid import uuid4` (a stdlib binding missing from the extracted region) to both original.py and translated.ldpy so the only remaining failure is the ontokit import itself."
   ],
   "draft_sha": "53bd02cc62ee5f56",
   "provenance": {

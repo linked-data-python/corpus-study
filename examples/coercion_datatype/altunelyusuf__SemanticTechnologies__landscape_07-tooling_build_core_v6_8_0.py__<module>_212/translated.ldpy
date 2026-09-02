@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from context_shim import BASEDIR, S, load, nodes, cls_iri, bump
 @prefix sem: <http://example.org/semtech#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -18,13 +19,13 @@ g3 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_abox_v6_7_0.ttl"); bump(g3)
 KINDCLS = {"Role": sem:GovernanceRole, "Activity": sem:GovernanceActivity, "Rule": sem:GovernanceRule}
 
 for iid, lab, kind, defn, refs in el.ALL_ITEMS:
-    ind = SEM[iid]
+    ind = sem:{iid}
     g3 += g{
         {ind} a {KINDCLS[kind]} ;
            a owl:NamedIndividual ;
-           rdfs:label {Literal(lab, lang="en")} ;
-           skos:definition {Literal(defn, lang="en")} ;
-           dcterms:source {Literal(S(*refs), lang="en")}
+           rdfs:label f"{lab}"@en ;
+           skos:definition f"{defn}"@en ;
+           dcterms:source f"{S(*refs)}"@en
     }
     if iid in el.GOVERNS:
         g3 += g{ {ind} sem:governsSubject {IRI[el.GOVERNS[iid]]} }

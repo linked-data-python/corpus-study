@@ -3,20 +3,20 @@
 # licence of the source repository: see meta.json
 import logging
 from rdflib import Graph, Literal, BNode, URIRef
-from bricksrc.namespaces import (
+from rdflib.namespace import RDF, OWL, RDFS, SKOS
+from brick_context import (
     BRICK,
     BSH,
     REC,
-    RDF,
-    OWL,
-    RDFS,
     TAG,
     SOSA,
-    SKOS,
     QUDT,
     VCARD,
     SH,
     REF,
+    brickschema,
+    add_tags,
+    define_constraints,
 )
 @prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix bsh: <https://brickschema.org/schema/BrickShape#> .
@@ -45,17 +45,18 @@ def define_classes(definitions, parent, pun_classes=False, graph=G):
 
     If pun_classes is True, then create punned instances of the classes
     """
+    @graph graph
     for classname, defn in definitions.items():
         classname = BRICK[classname] if not isinstance(classname, URIRef) else classname
-        # class is a owl:Class
-        graph += g{
+        # class is a owl:Class, subclass of parent
+        +{
             {classname} a owl:Class ;
                a sh:NodeShape ;
                rdfs:subClassOf {parent}
         }
 
         if pun_classes:
-            graph += g{ {classname} a {classname} }
+            +{ {classname} a {classname} }
 
         # define mapping to tags if it exists
         # "tags" property is a list of URIs naming Tags
@@ -75,7 +76,7 @@ def define_classes(definitions, parent, pun_classes=False, graph=G):
         parents = defn.get("parents", [])
         assert isinstance(parents, list)
         for _parent in parents:
-            graph += g{ {classname} rdfs:subClassOf {_parent} }
+            +{ {classname} rdfs:subClassOf {_parent} }
 
         # add SHACL constraints to the class
         constraints = defn.get("constraints", {})
@@ -85,7 +86,7 @@ def define_classes(definitions, parent, pun_classes=False, graph=G):
         aliases = defn.get("aliases", [])
         assert isinstance(aliases, list)
         for alias in aliases:
-            graph += g{
+            +{
                 {classname} owl:equivalentClass {alias} .
                 {alias} a owl:Class ;
                    a sh:NodeShape ;
@@ -93,11 +94,11 @@ def define_classes(definitions, parent, pun_classes=False, graph=G):
             }
             # find parent class of what the alias is equivalent to, add the RDFS subClassOf properties
             parent_classes = list(
-                graph.objects(subject=classname, predicate=rdfs:subClassOf)
+                graph.objects(subject=classname, predicate=RDFS.subClassOf)
             )
             for pc in parent_classes:
-                graph += g{ {alias} rdfs:subClassOf {pc} }
-            graph += g{ {alias} brick:aliasOf {classname} }
+                +{ {alias} rdfs:subClassOf {pc} }
+            +{ {alias} brick:aliasOf {classname} }
 
         # all other key-value pairs in the definition are
         # property-object pairs
@@ -116,6 +117,6 @@ def define_classes(definitions, parent, pun_classes=False, graph=G):
             propval = defn[propname]
             if isinstance(propval, list):
                 for pv in propval:
-                    graph += g{ {classname} {propname} {pv} }
+                    graph.add((classname, propname, pv))
             else:
-                graph += g{ {classname} {propname} {propval} }
+                graph.add((classname, propname, propval))

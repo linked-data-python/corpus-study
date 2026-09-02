@@ -3,21 +3,8 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, BNode, URIRef
 from rdflib.collection import Collection
-from bricksrc.namespaces import (
-    BRICK,
-    BSH,
-    REC,
-    RDF,
-    OWL,
-    RDFS,
-    TAG,
-    SOSA,
-    SKOS,
-    QUDT,
-    VCARD,
-    SH,
-    REF,
-)
+from context_shim import brickschema, add_relationships
+
 @prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix bsh: <https://brickschema.org/schema/BrickShape#> .
 @prefix rec: <https://w3id.org/rec#> .
@@ -51,15 +38,14 @@ def define_shape_property_property(shape_name, definitions, graph=G):
         # (b) there are no further requirements; the existing property shapes
         # don't have any min/max counts or additional requirements
         if prop_defn.get("optional", False) and len(prop_defn.keys()) == 1:
-            prop_exists = list(
-                graph.query(
-                    f"""SELECT ?x {{ ?p sh:property ?p .
-                        ?p sh:path {prop_name.n3()} .
-                        FILTER NOT EXISTS {{ ?p sh:minCount ?mc }}
-                        FILTER NOT EXISTS {{ ?p sh:maxCount ?mc }}
-                    }}"""  # noqa
-                )
-            )
+            prop_exists = list(s{
+                SELECT ?x WHERE {
+                    ?p sh:property ?p .
+                    ?p sh:path {prop_name} .
+                    FILTER NOT EXISTS { ?p sh:minCount ?mc }
+                    FILTER NOT EXISTS { ?p sh:maxCount ?mc }
+                }
+            }(graph))
             if len(prop_exists) > 0:
                 graph += g{ {shape_name} sh:property {prop_exists[0][0]} }
                 continue  # continue to next property
@@ -74,7 +60,7 @@ def define_shape_property_property(shape_name, definitions, graph=G):
             fname = prop_defn.pop("import_from")
             tmpG = Graph()
             tmpG.parse(fname)
-            res = tmpG.query(f"SELECT ?p ?o WHERE {{ <{prop_name}> ?p ?o }}")  # noqa
+            res = s{ SELECT ?p ?o WHERE { {prop_name} ?p ?o } }(tmpG)
             for p, o in res:
                 graph += g{ {prop_name} {p} {o} }
         if "optional" in prop_defn:

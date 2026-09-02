@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "interpolation {expr}",
+    "call suffix (g)",
+    "IRI"
+  ],
+  "translation_notes": [
+    "Five literal SPARQL SELECT strings, one with no initBindings (translated as a plain `s{ }(g)`) and four with `initBindings={'cmc': cmc}` where `?cmc` is a join-only variable never in the SELECT list: per the strata rule for `bind_initbindings` with a non-projected variable, each `?cmc` occurrence in the pattern becomes a term interpolation `{cmc}` rather than `s{ }(bindings=...)`.",
+    "No `@prefix` was needed: the queries use only bare `rdf:` (bound by rdflib's/ldpy's built-in default namespaces) and full opaque IRIs written literally as `<pyj:CMC>` etc. (scheme `pyj`, not a namespace prefix) -- there is no PREFIX clause to inherit as a prologue in this region.",
+    "Corrected `oracle` from the pipeline's `isomorphism` to `values`: the function only reads `g` and returns a dot-source string built from `.query()` results and `print()`/f-strings; nothing here builds or mutates an RDF graph, so the driver compares the returned string (design record corpus/405) via a Turtle fixture rather than graph isomorphism.",
+    "fixture.ttl: two `pyj:CMC` clusters covering both branches of the `cmc_label != \"none\"` subgraph-wrapper test, each with a dataframe/method/call/return match for every query; the method-call/method-call-arg property-path alternation is exercised on different cmcs; a stray dataframe+method pair tagged with a `pyj:cmc` value that is itself never typed `pyj:CMC` checks that untyped cmcs do not leak into the loop; a second call with an empty graph covers the zero-solution `cmcs == []` case.",
+    "Deliberately broke `translated.ldpy` (retyped one `<pyj:Method>` to `<pyj:MethodX>`) and confirmed `rdfeval check` turns FAIL with a KeyError from the now-missing node -- not a hollow green."
+  ],
   "draft_sha": "cee4ddd82261a00d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.363401+00:00",
@@ -24,5 +35,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:dump_dot_code",
+    "diffs": [],
+    "error": null
+  }
 }

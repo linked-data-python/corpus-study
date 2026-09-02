@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 import rdflib
 from rdflib import OWL, RDF, RDFS
-from oaklib.datamodels.obograph import (
+from context_shim import (
     Edge,
     Graph,
     GraphDocument,
@@ -18,22 +18,23 @@ from oaklib.datamodels.obograph import (
 
 
 def _convert_node(self, source: Node, target: rdflib.Graph) -> rdflib.Graph:
+    @graph target
     uri = self._uri_ref(source.id)
     if not source.type or source.type == "CLASS":
-        target += g{ {uri} a owl:Class }
+        +{ {uri} a owl:Class }
     elif source.type == "PROPERTY":
         if source.propertyType == PropertyTypeEnum.OBJECT:
-            target += g{ {uri} a owl:ObjectProperty }
+            +{ {uri} a owl:ObjectProperty }
         elif source.propertyType == PropertyTypeEnum.ANNOTATION:
-            target += g{ {uri} a owl:AnnotationProperty }
+            +{ {uri} a owl:AnnotationProperty }
         elif source.propertyType == PropertyTypeEnum.DATA:
-            target += g{ {uri} a owl:DatatypeProperty }
+            +{ {uri} a owl:DatatypeProperty }
     elif source.type == "INDIVIDUAL":
-        target += g{ {uri} a owl:NamedIndividual }
+        +{ {uri} a owl:NamedIndividual }
     else:
         raise ValueError(f"Unknown node type: {source.type}")
     if source.lbl:
-        target += g{ {uri} rdfs:label {rdflib.Literal(source.lbl)} }
+        +{ {uri} rdfs:label {source.lbl} }
     if source.meta:
         self._convert_meta(uri, source.meta, target=target)
     return target

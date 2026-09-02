@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 import rdflib
 from rdflib import OWL, RDF, RDFS
-from oaklib.datamodels.obograph import (
+from context_shim import (
     Edge,
     Graph,
     GraphDocument,

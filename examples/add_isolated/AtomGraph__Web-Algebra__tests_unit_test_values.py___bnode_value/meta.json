@@ -15,10 +15,21 @@
     "term_constructor": 3,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "IRI",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "the region is one isolated g.add((s, p, o)): `@graph g` designates g, then a single `+{ {URIRef(EX_A)} {URIRef(EX_P)} {BNode(\"b1\")} }` replaces the .add() call -- the add_isolated stratum's target construction exactly, not degraded to a graph literal (`g{ }` + `+=`) which would build a second graph object rather than write into g.",
+    "the terms are kept as explicit URIRef(...)/BNode(...) calls in interpolation position (same as the original), not rewritten as bare IRIs or _:{ }, since EX_A/EX_P are plain Python strings assembled elsewhere and the region's own idiom already wraps them -- interpolation {expr} coerces the rdflib term through unchanged.",
+    "the trailing g.query(f\"SELECT ...\") is left as a plain rdflib call: it belongs to the sparql_interpolated stratum (this region is double-tagged add_isolated + sparql_interpolated), and this lot's assignment is only the add_isolated construction (@graph + +{ }).",
+    "driver.py's original fixture=\"fixture.ttl\" entry did not match the function's signature (_bnode_value takes no arguments; it builds its own graph internally) -- rdfeval check failed with TypeError before any translation issue. Fixed to calls=[((), {})], ordered=False (no store promises an order for the bare ?o projection); fixture.ttl is now unused and left in place untouched.",
+    "sabotage check: broke the predicate to URIRef(EX_P + \"x\") -- rdfeval check correctly failed (values differ, [(BNode('b1'),)] vs []); reverted."
+  ],
   "draft_sha": "79ce695d43886719",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.940205+00:00",
@@ -30,5 +41,11 @@
     "add_isolated",
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_bnode_value",
+    "diffs": [],
+    "error": null
+  }
 }

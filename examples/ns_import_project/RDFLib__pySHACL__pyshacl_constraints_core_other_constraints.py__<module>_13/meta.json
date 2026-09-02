@@ -10,11 +10,17 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "from … import p:",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "rdf:type aliases rendered as Turtle `a`: RDF_type"
+    "`from pyshacl.consts import RDFS, SH, RDF_type, SH_property` mixes two kinds of binding: RDFS and SH are Namespace objects (project-owned, pyshacl/consts.py:8-11: `RDFS = Namespace(RDFS_PFX)`, `SH = Namespace(SH_PFX)`) -- the exact ns_import_project idiom -- while RDF_type and SH_property (consts.py:63,76: `RDF_type = RDF.type`, `SH_property = SH.property`) are already-derived URIRef terms, not namespaces, so they cannot become prefixes; they travel as ordinary Python names on both sides, unchanged.",
+    "pyshacl.consts is a plain rdflib-based .py module (not written in ldpy), so it exports no `__namespaces__` and `from pyshacl.consts import rdfs:, sh:` cannot resolve directly. Since consts.py is pySHACL's OWN namespace module (project-owned, same reasoning as the LexMalta/recipes ns_rdfa precedent in this stratum), pyshacl_consts_context.py reproduces its RDF/RDFS/SH bindings verbatim plus the `__namespaces__` export the transpiler needs; both original.py and translated.ldpy import from this shim so both sides use identical values.",
+    "Anti-hollow-green finding: the generic module-state driver (entry=None) pairs values ONLY by shared Python variable name between the two module namespaces. A prefix import captures no Python name (`rdfs:`/`sh:` are lexical, not runtime bindings), so the generic comparison silently never looks at RDFS/SH at all -- it only ever compared RDF_type/SH_property, which happened to travel as plain names. Verified by sabotage: rebinding `rdfs:` to a wrong IRI via an extra `@prefix rdfs: <...>.` in translated.ldpy left the generic check green. driver.py now also asserts the module's `__namespaces__` table (which every ldpy module exports, ldpy/transpiler/core.py PRELUDE) against the real RDFS/SH values; re-running the same sabotage now FAILs as it should.",
+    "classification minor-restructuring: the import line is expressible, but as a split between `from … import p:` (RDFS, SH) and unchanged plain names (RDF_type, SH_property) plus a project-context shim, not a 1:1 rewrite of the single import statement."
   ],
   "draft_sha": "aeea7f403df4109c",
   "provenance": {
@@ -26,5 +32,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

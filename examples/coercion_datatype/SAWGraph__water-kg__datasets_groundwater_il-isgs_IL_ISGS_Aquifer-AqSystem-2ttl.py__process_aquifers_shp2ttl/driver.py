@@ -1,15 +1,17 @@
 """Validation driver for SAWGraph__water-kg__datasets_groundwater_il-isgs_IL_ISGS_Aquifer-AqSystem-2ttl.py__process_aquifers_shp2ttl.
 
 Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+
+Both original.py and translated.ldpy `import geopandas as gpd`, which is not
+installed in the study venv (see meta.json: excluded, external dependency),
+and the region reads four real .shp files that are not part of this corpus
+checkout either. run_pair therefore fails at import time on BOTH sides
+identically -- this driver documents that, it is not expected to go green.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry='process_aquifers_shp2ttl',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((), {})],  # unreachable: both sides fail at `import geopandas`
 )

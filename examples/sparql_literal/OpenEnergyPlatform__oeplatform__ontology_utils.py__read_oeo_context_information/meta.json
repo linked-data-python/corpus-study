@@ -14,10 +14,21 @@
     "serialize_parse": 1,
     "sparql": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "The three literal PREFIX-less queries actually rely on rdflib's default behaviour of using the graph's own bound namespaces as initNs when g.query() is called without initNs -- rdfs: is always bound by rdflib's NamespaceManager, and dc:/obo: are bound here because fixture.ttl declares them as @prefix, which rdflib records on the graph's namespace manager at parse time. Moving to s{ } removes that indirection: rdfs:, dc: and obo: are now file-scope @prefix declarations inherited into every island's prologue, so the queries no longer depend on what the input file happens to declare.",
+    "Five g.query() call sites become five s{ } islands, one per query, called on `g` with the `(g)` call suffix; no downgrade to m{ } even though four of the five project only ?s/?o pairs, because the original explicitly builds and returns rdflib Result objects (q_global is returned as part of `result`, q_label/q_main_description/q_definition/q_note are consumed via their ResultRow .s/.o attribute access) -- m{ }'s bare-term/tuple iteration would not offer that attribute access, and #2 forbids degrading the construction used.",
+    "`from oeplatform.settings import OEO_EXT_NAME, ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME` is unrelated to sparql_literal but needed to make the region importable at all: a minimal oeplatform/settings.py shim (see meta.json neighbour oeplatform/ package) reproduces the three constants verbatim from OpenEnergyPlatform/oeplatform@ff28ef6390's real oeplatform/settings.py (ONTOLOGY_ROOT's real value comes from securitysettings.py, not available here, and is never dereferenced by this region, so a placeholder string stands in for it without affecting behaviour).",
+    "The region takes (path, file, ontology=None) and parses the graph itself (g.parse((path/file).as_posix())) rather than receiving one, so the usual fixture= shortcut (which hands a pre-parsed Graph as the sole argument) does not fit; driver.py instead passes (path, file) pointing at fixture.ttl through calls=, with two cases covering both branches of `if ontology in [OPEN_ENERGY_ONTOLOGY_NAME]` (ontology='oeo' runs all five queries, ontology=None runs only the first three and leaves classes_definitions/classes_notes as empty dicts).",
+    "fixture.ttl exercises all five patterns with multiple solutions each (ex:A/ex:B/ex:C for subClassOf and label, ex:A's two obo:IAO_0000115 values testing the definitions list-append), the FILTER(!isBlank(?o)) exclusion (ex:C's subClassOf object is a blank node), the ontology-vs-class dc:description disambiguation via the split('/')[-1]=='' guard (the ontology IRI ends with '/', ex:A's own description does not), and neighbourhood that must not match any of the five patterns (ex:D has only rdfs:comment)."
+  ],
   "draft_sha": "34bf21346a134ae0",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.966145+00:00",
@@ -28,5 +39,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:read_oeo_context_information",
+    "diffs": [],
+    "error": null
+  }
 }

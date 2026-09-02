@@ -20,26 +20,23 @@ if rdflib.__version__ >= "3.0.0" :
 	from rdflib	import RDF  as ns_rdf
 else :
 	from rdflib.RDF	import RDFNS  as ns_rdf
-
-from .. import ns_rdfa
-@prefix nsrdfa: <http://www.w3.org/ns/rdfa#> .
 @prefix nsrdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
+from pyrdfa_context import nsrdfa:
 
 Prototype = nsrdfa:Pattern
 pref      = nsrdfa:copy
 
 def handle_prototypes(graph) :
+	@graph graph
 	to_remove = set()
 	for (x,ref,PR) in graph.triples((None,pref,None)) :
 		if (PR,nsrdf:type,Prototype) in graph :
-			to_remove += g{
-			    {PR} nsrdf:type {Prototype} .
-			    {x} {ref} {PR}
-			}
+			to_remove.add((PR,nsrdf:type,Prototype))
+			to_remove.add((x,ref,PR))
 			# there is a reference to a prototype here
 			for (PR,p,y) in graph.triples((PR,None,None)) :
 				if not ( p == nsrdf:type and y == Prototype ) :
-					graph += g{ {x} {p} {y} }
-					to_remove += g{ {PR} {p} {y} }
+					+{ {x} {p} {y} }
+					to_remove.add((PR,p,y))
 	for t in to_remove : graph.remove(t)

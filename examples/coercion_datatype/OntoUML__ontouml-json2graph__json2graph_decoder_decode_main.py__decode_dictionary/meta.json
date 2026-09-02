@@ -14,11 +14,22 @@
     "term_constructor": 4,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "g{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "typed literal"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "prefixes: XSD->xsd (RDF.type is written as the 'a' shorthand, so no rdf: prefix is needed).",
+    "Context shim ontouml_shim.py stands in for arguments.ARGUMENTS, utils_graph.ontouml_ref, text_values.warn_if_text_value_is_unsupported and the module logger (none importable outside the package); identical for both representations.",
+    "Literal(dimension_value, datatype=XSD.nonNegativeInteger) on the computed width/height value is the region's one coercion_datatype case: rewritten as the language's typed-literal coercion {dimension_value}^^xsd:nonNegativeInteger (INSTRUCTIONS.md trap 1: Literal(n, dt) is not \"n\"^^dt when n is not already a string -- the bare-braces form goes through the same int->str conversion rdflib uses, so it is safe here). The add for that branch is inlined into the g{ } at its own branch, with an early continue, rather than falling through to the shared add() call at the bottom of the loop: same triple, same condition, same control flow, just relocated -- classified minor-restructuring rather than directly-expressible because of that relocation.",
+    "Literal(dictionary_data[key], lang=language) is NOT expressible with \"...\"@lang: the language tag there is a run-time parameter, and ldpy's language-literal suffix only accepts a fixed token glued to the closing quote (docs/reference/language/terms.md) -- there is no interpolated-tag form. Kept as a plain rdflib call outside any island; this is a genuine gap in the language for a dynamic language tag, not a translation shortcut.",
+    "The name/type instance triple (ontouml_graph.add((new_instance, RDF.type, instance_type))) and the shared trailing add() for the plain-literal branch (Literal(dictionary_data[key]), no datatype) both become ontouml_graph += g{ ... }; these carry no datatype coercion so they exercise plain g{ } + interpolation, not the typed-literal construction this stratum targets.",
+    "Fixture in driver.py exercises: type triple, the valid-width typed-literal branch, the invalid-height branch (LOGGER.error + skipped, no triple), the dynamic-lang name branch, a plain boolean field, a restricted field (never reaches the object branches), a list of sub-dictionaries (one dict recursed into, one non-dict skipped), and a nested dict recursion."
   ],
   "draft_sha": "4e416bacdad43e60",
   "provenance": {
@@ -30,5 +41,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:decode_dictionary",
+    "diffs": [],
+    "error": null
+  }
 }

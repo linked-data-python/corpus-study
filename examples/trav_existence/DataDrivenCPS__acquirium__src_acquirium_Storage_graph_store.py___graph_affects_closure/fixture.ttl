@@ -1,4 +1,13 @@
 # Input graph for DataDrivenCPS__acquirium__src_acquirium_Storage_graph_store.py___graph_affects_closure — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# This one covers the FALSE branch: neither owl:imports nor rdf:type
+# owl:Ontology anywhere in the graph, plus neighbouring triples that must
+# NOT match (a plain rdf:type on a non-owl:Ontology class, a predicate that
+# is not owl:imports). The two TRUE branches (owl:imports present /
+# rdf:type owl:Ontology present) are built inline in driver.py, since the
+# region reads the WHOLE graph rather than a filtered pattern -- a single
+# fixture file cannot hold three separate "whole graph" scenarios.
 @prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:a rdf:type ex:PlainClass .
+ex:b ex:seeAlso ex:c .

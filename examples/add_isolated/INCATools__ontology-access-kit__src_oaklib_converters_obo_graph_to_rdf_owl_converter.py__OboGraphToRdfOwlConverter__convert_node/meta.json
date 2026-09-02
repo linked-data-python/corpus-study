@@ -14,11 +14,23 @@
     "term_constructor": 1,
     "triple_add": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
+    "@graph target declared once at the top of the function; target is never reassigned so a single declaration covers every branch",
+    "each g.add((uri, RDF.type, OWL.X)) becomes {uri} a owl:X (rdf:type abbreviated as 'a', still the same prefixed-name construction)",
+    "rdflib.Literal(source.lbl) is a plain (untyped, unlagged) literal built from a str; the language's default coercion of a str value is a plain literal, so a bare interpolation {source.lbl} preserves it -- no need to keep the rdflib.Literal(...) call",
+    "context_shim.py replaces the oaklib.datamodels.obograph import (package not installed) and stands in for OboGraphToRdfOwlConverter's self, providing _uri_ref and a stub _convert_meta; _convert_meta itself is outside the region and is not exercised (meta=None in every fixture)",
+    "self is passed through the harness's call/arg comparison, which is not graph-aware for arbitrary objects; context_shim.Converter defines __eq__/__hash__ as class-only equality (it is stateless) purely so the fixture objects compare equal across the two runs -- not a change to the region's semantics"
   ],
   "draft_sha": "2b642f27faf1d805",
   "provenance": {
@@ -30,5 +42,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_convert_node",
+    "diffs": [],
+    "error": null
+  }
 }

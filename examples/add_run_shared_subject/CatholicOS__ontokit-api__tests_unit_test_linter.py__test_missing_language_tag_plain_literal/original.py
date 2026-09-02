@@ -1,6 +1,7 @@
 # Extracted from CatholicOS/ontokit-api@23680a4d04 : tests/unit/test_linter.py
 # region: test_missing_language_tag_plain_literal (lines 555-567, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
+from uuid import uuid4
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
 from ontokit.services.linter import (

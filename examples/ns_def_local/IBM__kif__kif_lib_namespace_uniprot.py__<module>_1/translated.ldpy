@@ -6,8 +6,7 @@
 
 from __future__ import annotations
 
-from ..rdflib import DefinedNamespace, Namespace, URIRef
-from ..typing import Final
+from context_shim import DefinedNamespace, Namespace, URIRef, Final  # context shim, see meta.json
 
 
 class UNIPROT(DefinedNamespace):
@@ -16,7 +15,7 @@ class UNIPROT(DefinedNamespace):
     See <https://purl.uniprot.org/html/index-en.html#>.
     """
 
-    _NS = Namespace('http://purl.uniprot.org/core/')
+    @prefix uniprot: <http://purl.uniprot.org/core/> .
 
     Taxon: URIRef
     Taxonomic_Rank_Biotype: URIRef
@@ -74,3 +73,12 @@ class UniProt(Namespace):
     namespaces: Final[dict[str, Namespace]] = {
         str(TAXONOMY): TAXONOMY,
     }
+
+
+# Test harness only (see meta.json): nothing in this region's own 73 lines
+# reads an attribute of UNIPROT -- but that is exactly what a
+# DefinedNamespace subclass is *for*: kif_lib imports this module and reads
+# UNIPROT.Taxon, UNIPROT.rank, etc. elsewhere in the package. This probe
+# (identical on both sides) reproduces that downstream access so the driver
+# can observe whether the class still behaves as a namespace registry.
+PROBE = str(UNIPROT.Taxon)

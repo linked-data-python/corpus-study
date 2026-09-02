@@ -1,0 +1,20 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/ns#> .
+
+# ex:Sensor is an owl:Class that ALSO carries two extra rdf:type layers:
+# two solutions of the join for this subject.
+ex:Sensor a owl:Class , ex:PhysicalLayer , ex:DeviceLayer .
+
+# ex:Actuator carries a single extra layer: one solution.
+ex:Actuator a owl:Class , ex:PhysicalLayer .
+
+# ex:Widget is NOT an owl:Class: neighbouring data that must not match the
+# first pattern (?class_node rdf:type owl:Class), even though it too has
+# rdf:type edges.
+ex:Widget a ex:UiLayer .
+
+# ex:Empty is an owl:Class with no extra rdf:type beyond owl:Class itself:
+# the zero-extra-layer case (its only join solution is filtered out because
+# class_type == owl:Class).
+ex:Empty a owl:Class .

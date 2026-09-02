@@ -1,4 +1,27 @@
-# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__extension — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__extension
 @prefix ex: <http://example.org/> .
+@prefix fhir: <http://hl7.org/fhir/> .
+
+# The node whose extensions are read.
+ex:patient1 fhir:Element.extension ex:extA, ex:extB, ex:extC .
+
+# extA: url does not match ext_pred -- neighbouring extension that must NOT
+# match, even though it also carries an Extension.value* predicate.
+ex:extA fhir:Extension.url "http://example.org/ext/other" ;
+    fhir:Extension.valueString "wrong extension" .
+
+# extB: url matches ext_pred, but its predicate_objects has no
+# 'Extension.value*' predicate at all -- must be skipped (falls through
+# without returning), proving the inner join term is not decorative.
+ex:extB fhir:Extension.url "http://example.org/ext/target" ;
+    fhir:Extension.id "b-only-id" .
+
+# extC: url matches ext_pred AND carries the Extension.value* predicate --
+# this is the single expected solution of the fused join.
+ex:extC fhir:Extension.url "http://example.org/ext/target" ;
+    fhir:Extension.valueString "the answer" .
+
+# Zero-solution neighbour: a different patient with no extensions at all.
+ex:patient2 fhir:Element.extension ex:extD .
+ex:extD fhir:Extension.url "http://example.org/ext/target" ;
+    fhir:Extension.id "d-only-id" .

@@ -1,0 +1,7 @@
+@prefix ex: <http://example.org/ex#> .
+
+# n1 has two things that satisfy the SPARQL condition used by the driver;
+# n2 has none (the zero-solution case); n3 is neighbourhood that must not
+# leak into either node's result (it is never passed as `node`).
+ex:n1 ex:hasThing ex:t1, ex:t2 .
+ex:n3 ex:hasThing ex:t3 .

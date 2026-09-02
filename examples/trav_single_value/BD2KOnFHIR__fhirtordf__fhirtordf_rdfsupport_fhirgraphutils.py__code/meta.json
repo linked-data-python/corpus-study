@@ -12,11 +12,23 @@
   "categories": {
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "The flagged site (line 44): `g.value(subject, predicate)` -> `m{ {subject} {predicate} ?o }(g).first()`. Textbook trav_single_value: both subject and predicate given by interpolation (they are the function's own parameters, not fixed IRIs), one projected variable so `.first()` yields the term itself, None on the fixture's zero-solution branch (ex:Obs3, which carries no ex:hasCode triple at all) exactly like rdflib's `.value()`. Verified by deliberately swapping in `.one()`: the check then fails with `ValueError: m{ }.one() : aucune solution` on that branch, confirming `.first()` is the exact match, not an approximation.",
+    "the OTHER graph read in the same function -- `for coding in g.objects(c, FHIR.CodeableConcept.coding)` -- is not the flagged site but is translated too, per INSTRUCTIONS SS2 (most specific construction everywhere): `for coding in m{ {c} fhir:CodeableConcept.coding ?o }(g)`, the trav_one_step idiom (subject fixed by interpolation, predicate a prefixed name, one variable projected).",
+    "`FHIR.CodeableConcept.coding` is fhirtordf's DottedNamespace notation: FHIR is `Namespace(\"http://hl7.org/fhir/\")` with dotted attribute chaining, so `FHIR.CodeableConcept.coding` and the prefixed name `fhir:CodeableConcept.coding` (with `@prefix fhir: <http://hl7.org/fhir/>`) denote the exact same URIRef -- Turtle's PN_LOCAL grammar allows the embedded dot. Kept as `FHIR.Coding.system`/`FHIR.Coding.code` (plain Python, not islands) where they appear as ordinary arguments to the untranslated `value()` helper -- those are outside any island, so no prefixed-name notation applies there; only the two direct `g.*` calls inside `code()` itself were translated.",
+    "`code()` calls a sibling function `value()` (fhirgraphutils.py lines 11-28) that the tirage's captured context does not include. Restored verbatim in the context shim `fhirgraphutils_context.py` (see meta.json) and imported identically by original.py and translated.ldpy -- it is not part of this region and is left as plain rdflib code, so it does not bias the comparison.",
+    "`fhirtordf.rdfsupport.namespaces`/`dottednamespace` are not installed in this environment (no PyPI package, no local sys.path entry): shimmed as a minimal local `fhirtordf` package (see meta.json) reproducing `DottedNamespace`/`DottedURIRef` and `FHIR = DottedNamespace(\"http://hl7.org/fhir/\")` verbatim from the real source (corpus/repos/BD2KOnFHIR__fhirtordf/), trimmed to the one namespace this region uses. Identical for both representations.",
+    "driver.py: `code(g, subject, predicate, system=None, asLiteral=False)` needs external `subject`/`predicate` arguments (both fixed IRIs here, unlike a BNode-anchored fixture, so no lookup indirection was needed). Four calls: match_no_system (ex:Obs1 has exactly one coding, so `system=None` returns unambiguously regardless of iteration order), match_by_system (ex:Obs2 has two codings, only one matching the given system, so the filtered result does not depend on order either), zero_value (ex:Obs3 has no ex:hasCode triple: the trav_single_value zero-solution case), match_as_literal (asLiteral=True, exercising the helper's Literal-vs-str branch). ex:Obs4's coding is fixture neighbourhood no call ever reaches."
   ],
   "draft_sha": "90c4177f21a533e1",
   "provenance": {
@@ -28,5 +40,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:code",
+    "diffs": [],
+    "error": null
+  }
 }

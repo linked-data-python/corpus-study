@@ -14,12 +14,22 @@
     "term_constructor": 8,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: SKOS->skos, RDF->rdf, XSD->xsd, DC->dc, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "variable"
   ],
+  "translation_notes": [
+    "The 8-way if/elif choosing a predicate by note_type collapses to one `+{ {concept} ?p ?o }` inside `for @bindings in (...)`, with predicate and object supplied per row by a Python dict lookup (_NOTE_PREDICATES) that mirrors the original dispatch, defaulting to skos:note exactly like the original `else` branch.",
+    "Wrapped the extracted statement in graph_construct_qs_notes(obj, concept, g) to restore the obj/concept/g bindings the enclosing `for obj in results:` loop supplies in the source file (this region is one of the ones without a directly visible graph).",
+    "Only add_in_loop's construction is credited here; the coercion_datatype stratum tag on this region concerns a different line (158, the Literal(...) with lang=), not this triple pattern.",
+    "article_candidate: the 8-branch if/elif collapsing to one bound triple pattern is a clean before/after example for the stratum."
+  ],
+  "article_candidate": true,
   "draft_sha": "d5245e6eff35db85",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.531390+00:00",
@@ -31,5 +41,11 @@
     "add_in_loop",
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:graph_construct_qs_notes",
+    "diffs": [],
+    "error": null
+  }
 }

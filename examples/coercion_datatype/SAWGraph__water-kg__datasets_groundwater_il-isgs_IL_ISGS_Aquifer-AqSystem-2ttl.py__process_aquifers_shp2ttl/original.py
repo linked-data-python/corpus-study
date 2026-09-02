@@ -1,10 +1,11 @@
 # Extracted from SAWGraph/water-kg@032ec41357 : datasets/groundwater/il-isgs/IL_ISGS_Aquifer-AqSystem-2ttl.py
 # region: process_aquifers_shp2ttl (lines 278-353, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+import logging
 import geopandas as gpd
 from rdflib import Graph, Literal
 from rdflib.namespace import GEO, DCTERMS, OWL, PROV, RDF, RDFS, SDO, XSD
-from namespaces import _PREFIX, find_s2_intersects_poly
+from sawgraph_shim import _PREFIX, find_s2_intersects_poly, initial_kg, build_aq_iris, build_aqsys_iris
 max_id_length = 4
 logger = logging.getLogger(__name__)
 

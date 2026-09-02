@@ -1,4 +1,39 @@
-# Input graph for OpenEnergyPlatform__oeplatform__ontology_utils.py__read_oeo_context_information — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for OpenEnergyPlatform__oeplatform__ontology_utils.py__read_oeo_context_information
+# Covers: several subClassOf/label/description/definition/note solutions,
+# a blank-node object that the subClassOf query's FILTER must exclude, and
+# neighbouring triples that must not match any of the five patterns.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/onto/> .
+
+# The ontology IRI itself: ends with "/", so row.s.split("/")[-1] == "" --
+# this is the one dc:description row that becomes ontology_description.
+<http://example.org/onto/> dc:description "About this ontology" .
+
+# A class's own dc:description -- must NOT become ontology_description
+# (its IRI does not end with "/", so the split-based guard excludes it).
+ex:A dc:description "A note about class A, not the ontology" .
+
+ex:A a owl:Class ;
+    rdfs:label "Class A" ;
+    rdfs:subClassOf ex:B ;
+    obo:IAO_0000115 "Definition of A" ;
+    obo:IAO_0000115 "An alternative definition of A" .
+
+ex:B a owl:Class ;
+    rdfs:label "Class B" ;
+    obo:IAO_0000116 "Editor's note on B" .
+
+# subClassOf a blank node: the FILTER(!isBlank(?o)) in q_global must exclude
+# this row.
+ex:C a owl:Class ;
+    rdfs:label "Class C" ;
+    rdfs:subClassOf [ a owl:Restriction ] .
+
+# Neighbourhood that must not match any of the five patterns: a class with
+# neither a label, a description, a definition nor a note, only unrelated
+# predicates.
+ex:D a owl:Class ;
+    rdfs:comment "Not a label, not a description, not a definition, not a note" .

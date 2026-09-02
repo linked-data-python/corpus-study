@@ -2,7 +2,7 @@
 # region: _build_minimal_graph (lines 21-55, stratum ns_def_local)
 # licence of the source repository: see meta.json
 import rdflib
-from acro.ontology_handler import (
+from context_shim import (  # context shim -- see meta.json
     PREFIX,
     is_uri,
     make_ischeckedby,
@@ -17,37 +17,38 @@ from acro.ontology_handler import (
 def _build_minimal_graph() -> rdflib.Graph:
     """Build a minimal RDF graph that satisfies ontology_handler expectations."""
     g = rdflib.Graph()
-    p = rdflib.Namespace(PREFIX)
-    skos = rdflib.Namespace("http://www.w3.org/2004/02/skos/core#")
-    rdfs = rdflib.Namespace("http://www.w3.org/2000/01/rdf-schema#")
-    dpv_owl = rdflib.Namespace("https://w3id.org/dpv/owl#")
+    @graph g
+    @prefix p: f<{PREFIX}> .
+    @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix dpv_owl: <https://w3id.org/dpv/owl#> .
 
-    risk_uri = p.LowCount
-    g += g{
-        {risk_uri} {rdfs.subClassOf} {dpv_owl.Risk} ;
-           {skos.definition} "Low count risk" ;
-           {skos.prefLabel} "LowCount"
+    risk_uri = p:LowCount
+    +{
+        {risk_uri} rdfs:subClassOf dpv_owl:Risk ;
+                   skos:definition "Low count risk" ;
+                   skos:prefLabel "LowCount"
     }
 
-    barn_uri = p.Frequencies
-    g += g{
-        {barn_uri} {rdfs.subClassOf} {p.Statbarn} ;
-           {skos.definition} "Frequency statbarn" ;
-           {skos.prefLabel} "Frequencies"
+    barn_uri = p:Frequencies
+    +{
+        {barn_uri} rdfs:subClassOf p:Statbarn ;
+                   skos:definition "Frequency statbarn" ;
+                   skos:prefLabel "Frequencies"
     }
 
-    analysis_uri = p.FrequencyTable
-    g += g{
-        {analysis_uri} {rdfs.subClassOf} {barn_uri} ;
-           {skos.definition} "Frequency table analysis" ;
-           {skos.prefLabel} "FrequencyTable"
+    analysis_uri = p:FrequencyTable
+    +{
+        {analysis_uri} rdfs:subClassOf {barn_uri} ;
+                        skos:definition "Frequency table analysis" ;
+                        skos:prefLabel "FrequencyTable"
     }
 
-    check_uri = p.MinimumThresholdCheck
-    g += g{
-        {check_uri} {rdfs.subClassOf} <https://w3id.org/dpv/risk/owl#RiskEvaluation> ;
-           {skos.definition} "Minimum threshold check def" ;
-           {skos.prefLabel} "MinimumThresholdCheck"
+    check_uri = p:MinimumThresholdCheck
+    +{
+        {check_uri} rdfs:subClassOf <https://w3id.org/dpv/risk/owl#RiskEvaluation> ;
+                    skos:definition "Minimum threshold check def" ;
+                    skos:prefLabel "MinimumThresholdCheck"
     }
 
     return g

@@ -1,8 +1,12 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v5_3_0.py
 # region: <module> (lines 147-155, stratum add_in_loop)
 # licence of the source repository: see meta.json
+# Executability: BASEDIR and S() -- defined earlier in the same source file,
+# just outside this region -- restored via context_predecl.py (context shim,
+# see meta.json).
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from context_predecl import BASEDIR, S
 SEM = Namespace("http://example.org/semtech#")
 g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v5_2_0.ttl")
 

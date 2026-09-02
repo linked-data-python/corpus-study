@@ -12,11 +12,23 @@
   "categories": {
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
+    "Two existence reads over two different graphs, both discarding the matched value entirely (`is not None` / `is None`, never the type itself): `g.value(contentclass, RDF.type) is not None` -> `bool(m{ {contentclass} rdf:type ?t })` against the designated current graph `g`; `self.e.value(contentclass, RDF.type) is None` -> `not bool(m{ {contentclass} rdf:type ?t }(self.e))`, the `(graph)` call suffix naming the OTHER source without a second @graph declaration.",
+    "`self.e` is a plain attribute holding an rdflib.Graph (confirmed at entity.py:73, `self.e = Graph()`, in the real class this region's method belongs to) -- not a re-affected name, so the @graph scoping caveat about capturing a VALUE at its line does not bite here; `self.e` itself is never reassigned within the region.",
+    "context_shim.py: minimal `Entity` stand-in providing `self.e` (a Graph a test can pre-populate) and `add_enum_class` recorded rather than executed -- the real method's own graph-building logic is not part of this region and never runs either way; only whether it is CALLED is the region's own observable effect.",
+    "demo() harness (identical both sides, see meta.json): builds a fresh Entity(e_data), runs the region, returns the count of add_enum_class calls -- the one bit of information the `and` of two bool(m{ }) reads decides. Four calls cover all three reachable truth combinations of the `and` (True/True -> called; True/False and False/True and False/False -> not called), including a case where contentclass is entirely absent from `g` (case 4), proving the first read is not silently satisfied by data that lives only in self.e.",
+    "Deliberately broke the translation (dropped the `and not bool(m{ }(self.e))` conjunct) to confirm rdfeval check catches it: FAIL call[1].result: values differ (0 vs 1) -- case 2, typed in both graphs, should NOT call add_enum_class but did once the self.e check was removed. Restored, check is green again."
   ],
   "draft_sha": "d82c71267ffddf64",
   "provenance": {
@@ -28,5 +40,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

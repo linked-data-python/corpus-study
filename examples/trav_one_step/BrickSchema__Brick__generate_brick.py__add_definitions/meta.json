@@ -13,11 +13,24 @@
     "term_constructor": 4,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "s{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref"
+    "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref",
+    "graph.objects(subject=param, predicate=BRICK.aliasOf) is exactly this stratum's target: for one-step reads not written as a for-loop, list(m{ {param} brick:aliasOf ?o }) is the most specific construction available -- arity 1, {param} a term interpolated from a Python value. is_alias only tests len(...)==0, so this also exercises the fixture's zero-solution case (Min_Limit, Max_Limit have no brick:aliasOf) and one-solution case (Alias_Limit does).",
+    "@graph graph declared once at function entry captures the parameter's value; graph is never reassigned in this function so the capture stays valid for the whole body (see ldpy/012-class scoping caveat in INSTRUCTIONS.md 2 bis).",
+    "The static SELECT (qstr, assigned then passed unchanged to graph.query(qstr)) is directly expressible as s{ SELECT ?param WHERE { ?param rdfs:subClassOf* brick:Limit } }(graph); this is bonus beyond the assigned trav_one_step stratum but the most-specific-construction rule (INSTRUCTIONS.md 2) applies regardless of which stratum a region was sampled for.",
+    "NOT translated: graph.query(f\"\"\"select ?class where {{ BIND(brick:{setpoint} as ?class) ... }}\"\"\").bindings kept as a raw rdflib call. Tried s{ SELECT ?class WHERE { BIND(brick:{setpoint} as ?class) ... } } and it does not parse: LdpySyntaxError on the BIND. Per the reference table, s{ }'s {expr} interpolation fills a whole term position (an initial binding for a projected/bound variable) -- it is not string-pasting into a prefixed name's local part the way g{ }/m{ }/e<...> support since 0.4.0 (ex:{expr}). Building the class IRI in Python first (brick[setpoint]) and interpolating the whole term would change the query's variable-binding shape from the original's BIND-based one; since this read never reaches the triple store used to write the graph (class_exists only feeds a logging.warning, no RDF is added or removed from it), it was left as-is rather than risk a subtly different query. Signalled per INSTRUCTIONS.md 5, not a strata target of this batch."
   ],
   "draft_sha": "0311411ebab2bf20",
   "provenance": {
@@ -30,5 +43,11 @@
     "trav_one_step",
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:add_definitions",
+    "diffs": [],
+    "error": null
+  }
 }

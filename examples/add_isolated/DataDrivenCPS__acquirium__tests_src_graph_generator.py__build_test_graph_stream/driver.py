@@ -1,15 +1,12 @@
 """Validation driver for DataDrivenCPS__acquirium__tests_src_graph_generator.py__build_test_graph_stream.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+build_test_graph_stream takes no arguments and returns the graph it built:
+a plain isomorphism comparison of two no-argument calls.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry='build_test_graph_stream',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((), {})],
 )

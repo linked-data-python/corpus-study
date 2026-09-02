@@ -15,10 +15,8 @@ ONT = <https://example.org/ont>
 @pytest.mark.asyncio
 async def test_imports_ignores_non_uri_objects():
     g = Graph()
-    g += g{
-        {ONT} a owl:Ontology ;
-           owl:imports "not a uri"
-    }
+    @graph g
+    +{ {ONT} a owl:Ontology ; owl:imports "not a uri" }
 
     report = await check_imports(g, OntologyCache())
 

@@ -1,19 +1,18 @@
 """Validation driver for AtomGraph__Web-Algebra__tests_unit_test_values.py___bnode_value.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
-
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+_bnode_value takes NO arguments: it builds its own graph internally (a single
+isolated `g.add((s, p, o))`) and returns the result of querying it. There is
+no external input graph, so the reading oracle's `fixture=` (which parses a
+Turtle file and passes it as the entry point's sole argument) does not apply
+here -- the oracle is simply "same values out of a no-argument call",
+compared as a materialised multiset (no store promises an order for a bare
+`?o` projection).
 """
 from rdfeval.harness import run_pair
 
 VERDICT = run_pair(
     __file__,
     entry='_bnode_value',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    calls=[((), {})],
+    ordered=False,
 )

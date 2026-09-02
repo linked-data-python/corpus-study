@@ -2,8 +2,7 @@
 # region: testUpdateWithInitNs (lines 160-170, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Literal, RDF, RDFS, URIRef, Variable
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ns: <urn:> .
 
 michel = <urn:michel>
 likes = <urn:likes>
@@ -12,10 +11,8 @@ graphuri = <urn:graph>
 
 def testUpdateWithInitNs(getgraph):
     graph = getgraph
-    graph.update(
-        "INSERT DATA { GRAPH ns:graph { ns:michel ns:likes ns:pizza . } }",
-        initNs={"ns": <urn:>},
-    )
+    @graph graph
+    s{ INSERT DATA { GRAPH ns:graph { ns:michel ns:likes ns:pizza . } } }.execute()
 
     g = graph.get_context(graphuri)
     assert set(g.triples((None, None, None))) == set(

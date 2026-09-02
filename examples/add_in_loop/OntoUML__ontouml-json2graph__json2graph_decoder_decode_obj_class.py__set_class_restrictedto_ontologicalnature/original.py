@@ -2,8 +2,9 @@
 # region: set_class_restrictedto_ontologicalnature (lines 294-324, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef, XSD, Literal
-from ..modules import arguments as args
-from ..modules.utils_graph import ontouml_ref
+import ontouml_shim as args
+from ontouml_shim import ontouml_ref
+
 
 def set_class_restrictedto_ontologicalnature(class_dict: dict, ontouml_graph: Graph) -> None:
     """Set the ontouml:restrictedTo relation between a class and its related ontouml:OntologicalNature instance.

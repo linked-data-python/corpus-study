@@ -12,11 +12,21 @@
   "categories": {
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
+    "the nested `for class_node in subjects(rdf:type, owl:Class): for class_type in objects(class_node, rdf:type):` becomes one join m{ ?class_node rdf:type owl:Class, ?class_type }: the inner loop consumes ALL rdf:type values (not just the first), so the join's cardinality matches the nested loop's exactly -- no over-production.",
+    "added shim.py for _load_graph/_local_name (undefined in the extracted region); driver passes the fixture path as the ttl_path argument since the function parses its own graph rather than receiving one.",
+    "fixture.ttl: ex:Sensor gives 2 join solutions, ex:Actuator gives 1, ex:Empty gives a solution filtered out by class_type != owl:Class (the zero-extra-layer case), ex:Widget is non-owl:Class neighbourhood that must not match.",
+    "verified anti-hollow-green: dropping the second pattern (`, ?class_type`) makes `rdfeval check` FAIL."
   ],
   "draft_sha": "5215858d7885ad5d",
   "provenance": {
@@ -28,5 +38,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_available_layers",
+    "diffs": [],
+    "error": null
+  }
 }

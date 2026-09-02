@@ -3,20 +3,20 @@
 # licence of the source repository: see meta.json
 import logging
 from rdflib import Graph, Literal, BNode, URIRef
-from bricksrc.namespaces import (
+from rdflib.namespace import RDF, OWL, RDFS, SKOS
+from brick_context import (
     BRICK,
     BSH,
     REC,
-    RDF,
-    OWL,
-    RDFS,
     TAG,
     SOSA,
-    SKOS,
     QUDT,
     VCARD,
     SH,
     REF,
+    brickschema,
+    add_tags,
+    define_constraints,
 )
 G = brickschema.Graph()
 A = RDF.type

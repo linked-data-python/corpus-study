@@ -7,17 +7,16 @@ from fhirtordf.rdfsupport.namespaces import FHIR
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-
 @staticmethod
 def is_xsd_primitive(prim: URIRef, g: Graph) -> bool:
-    for node in g.objects(prim, rdfs:subClassOf):
-        if isinstance(node, BNode) and g.value(node, owl:onProperty) == FHIR.value:
+    for node in m{ {prim} rdfs:subClassOf ?o }(g):
+        if isinstance(node, BNode) and m{ {node} owl:onProperty ?o }(g).first() == FHIR.value:
             # Older versions of fhir.ttl used allValuesFrom (incorrect, btw)
-            base_type = g.value(node, owl:allValuesFrom)
+            base_type = m{ {node} owl:allValuesFrom ?o }(g).first()
             if not base_type:
-                base_node = g.value(node, owl:someValuesFrom)
+                base_node = m{ {node} owl:someValuesFrom ?o }(g).first()
                 if isinstance(base_node, BNode):
-                    base_type = g.value(base_node, owl:onDatatype)
+                    base_type = m{ {base_node} owl:onDatatype ?o }(g).first()
             if not str(base_type).startswith(str(XSD)):
                 print("type failure - {} : {}".format(prim, base_type))
                 # TODO: Remove this once FHIRCat issue #35 (https://github.com/fhircat/FHIRCat/issues/35) is fixed

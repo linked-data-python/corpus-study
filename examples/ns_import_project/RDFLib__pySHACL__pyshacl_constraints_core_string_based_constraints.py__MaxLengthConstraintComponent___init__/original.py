@@ -5,7 +5,7 @@ import rdflib
 from rdflib.namespace import XSD
 from pyshacl.consts import RDF, SH, XSD_WHOLE_INTEGERS
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.shape import Shape
+from pyshacl_shape_context import Shape, MaxLengthConstraintComponent
 SH_maxLength = SH.maxLength
 
 def __init__(self, shape: Shape) -> None:

@@ -12,11 +12,22 @@
   "categories": {
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "the two nested loops `for ext in g.objects(node, FHIR.Element.extension)` then `for p, o in g.predicate_objects(ext)` fuse into ONE `m{ {node} fhir:Element.extension ?ext . ?ext ?p ?o }`: this is a genuine multi-valued/multi-valued join (neither loop reads a single value), so fusing does not change cardinality -- the piege in INSTRUCTIONS.md 2 (folding a g.value/next single-value read into a join) does not apply here.",
+    "`value()` (fhirtordf's own helper, not the region under study) is kept as an ordinary Python call on both sides via a context shim (context_shim.py, copied verbatim from fhirtordf/rdfsupport/fhirgraphutils.py at the pinned commit) -- it is a separate function with its own uniqueness-checking semantics, not itself expressible/inexpressible in this study; only its call sites inside `extension` are what get translated.",
+    "`FHIR.Element.extension` used INSIDE the m{ } pattern transpiles correctly as one dotted prefixed name (`fhir:Element.extension`), but the second predicate `FHIR.Extension.url`, used as a bare Python-level term argument to value(g, ext, ...) OUTSIDE any pattern, does not: `fhir:Extension.url` written there parses as prefixed name `fhir:Extension` followed by an ordinary Python `.url` attribute access (AttributeError at run time; confirmed by inspecting the transpiled Python). This is a real lexical inconsistency between term position inside an island pattern and term position in plain Python -- not documented in migrate-from-rdflib.md's two known pitfalls -- and had to be worked around with the full IRI form `<http://hl7.org/fhir/Extension.url>` instead. Flagged per INSTRUCTIONS.md 2 bis / 5 as a possible defect worth a ldpy/012-style note.",
+    "`context_shim.py`'s copy of `DottedURIRef` needed its own `__eq__`/`__hash__` (present in the real fhirtordf source, initially dropped by mistake while shimming): without them `FHIR.Element.extension == URIRef('http://hl7.org/fhir/Element.extension')` is False under Python's default reflected-comparison fallback, which silently starved `g.objects()` of any match -- a reminder that DottedNamespace/DottedURIRef fidelity matters for the fixture to exercise anything at all.",
+    "fixture.ttl gives patient1 three candidate extensions: extA (wrong url, must not match), extB (right url but no Extension.value* predicate -- proves the second half of the fused join term is load-bearing, not decorative), and extC (right url AND an Extension.valueString -- the single expected solution). patient2's only extension has the right url but no Extension.value* predicate either (zero-solution from a different angle), and a wholly absent node is the zero-candidate case. Breaking the join's filter ('Extension.value' -> 'Extension.NOPE') was confirmed to flip the check to FAIL."
   ],
   "draft_sha": "a5d6a8ebd39dc005",
   "provenance": {
@@ -28,5 +39,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:extension",
+    "diffs": [],
+    "error": null
+  }
 }

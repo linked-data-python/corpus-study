@@ -1,0 +1,7 @@
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix ex: <http://example.org/> .
+
+def f(g, node):
+    @graph g
+    for row in m{ {node} fhir:Element.extension ?ext . ?ext ?p ?o }:
+        print(row)

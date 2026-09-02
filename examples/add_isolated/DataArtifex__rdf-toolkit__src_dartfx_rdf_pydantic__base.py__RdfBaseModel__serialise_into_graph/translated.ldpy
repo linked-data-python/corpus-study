@@ -1,7 +1,14 @@
 # Extracted from DataArtifex/rdf-toolkit@226d8a1be3 : src/dartfx/rdf/pydantic/_base.py
 # region: RdfBaseModel._serialise_into_graph (lines 1335-1409, stratum add_isolated)
 # licence of the source repository: see meta.json
+from __future__ import annotations
 from rdflib import RDF, XSD, BNode, Graph, Literal, Namespace, URIRef
+from context_shim import (
+    LangStringList,
+    _ensure_uri,
+    _field_type_info,
+    _get_rdf_property,
+)
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -34,10 +41,11 @@ def _serialise_into_graph(
     """
     subject = self._subject_uri(base_uri=base_uri, rdf_uri_generator=rdf_uri_generator)
     self._bind_prefixes(graph)
+    @graph graph
 
     rdf_type_uri = _ensure_uri(self.rdf_type)
     if rdf_type_uri is not None:
-        graph += g{ {subject} a {rdf_type_uri} }
+        +{ {subject} a {rdf_type_uri} }
 
     for name, field in self.__class__.model_fields.items():
         prop = _get_rdf_property(field)
@@ -51,7 +59,7 @@ def _serialise_into_graph(
         # Fast path for LocalizedStr fields (LangStringList)
         if isinstance(value, LangStringList):
             for ls_item in value:
-                graph += g{ {subject} {predicate} {Literal(ls_item.value, lang=ls_item.lang)} }
+                +{ {subject} {predicate} {Literal(ls_item.value, lang=ls_item.lang)} }
             continue
 
         is_list, _accepts_scalar, inner_type = _field_type_info(field)
@@ -72,6 +80,22 @@ def _serialise_into_graph(
                 base_uri,
                 rdf_uri_generator=rdf_uri_generator,
             )
-            graph += g{ {subject} {predicate} {node} }
+            +{ {subject} {predicate} {node} }
 
     return subject
+
+
+# Demo harness (identical on both sides, see meta.json): _serialise_into_graph
+# is a method of RdfBaseModel, extracted with an explicit `self` parameter
+# (a bound-method extraction, same pattern as
+# JonasHeinickeBio__biomedical-knowledge-lookup__.../__add_concept_mappings
+# already in this corpus). `model` is built by the driver from
+# context_shim.RdfBaseModelStub with a fixed subject and the fields under
+# test; demo() calls the extracted function on it and returns only the graph
+# it wrote into, not `self`/`model` (comparing the stub instance itself would
+# report a spurious difference every call: each side owns a distinct Python
+# object with no notion of "the same" beyond structural equality, which the
+# harness already gets from comparing the resulting graph).
+def demo(model, graph):
+    _serialise_into_graph(model, graph)
+    return graph

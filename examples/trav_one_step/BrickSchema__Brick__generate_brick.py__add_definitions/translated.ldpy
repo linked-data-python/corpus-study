@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import csv
 from rdflib import Graph, Literal, BNode, URIRef
-from bricksrc.namespaces import (
+from context_shim import (
     BRICK,
     BSH,
     REC,
@@ -19,6 +19,7 @@ from bricksrc.namespaces import (
     VCARD,
     SH,
     REF,
+    brickschema,
 )
 @prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix bsh: <https://brickschema.org/schema/BrickShape#> .
@@ -45,6 +46,7 @@ def add_definitions(graph=G):
     adds it to the graph. If available, adds the source information of
     through rdfs:seeAlso.
     """
+    @graph graph
     with open(Path("./bricksrc/definitions.csv"), encoding="utf-8") as dictionary_file:
         dictionary = csv.reader(dictionary_file)
 
@@ -58,18 +60,13 @@ def add_definitions(graph=G):
                     f"The term '{term}' has more elements than expected. Please check the format."
                 )
             if len(definition[1]):
-                graph += g{ {term} skos:definition {Literal(definition[1], lang="en")} }
+                +{ {term} skos:definition {Literal(definition[1], lang="en")} }
             if len(definition) > 2 and definition[2]:
                 # add seeAlso only if provided
-                graph += g{ {term} rdfs:seeAlso {URIRef(definition[2])} }
+                +{ {term} rdfs:seeAlso {URIRef(definition[2])} }
 
-    qstr = """
-    select ?param where {
-      ?param rdfs:subClassOf* brick:Limit.
-    }
-    """
     limit_def_template = "A parameter that places {direction} bound on the range of permitted values of a {setpoint}."
-    params = [row["param"] for row in graph.query(qstr)]
+    params = [row["param"] for row in s{ SELECT ?param WHERE { ?param rdfs:subClassOf* brick:Limit } }(graph)]
     for param in params:
         words = param.split("#")[-1].split("_")
         prefix = words[0]
@@ -99,11 +96,11 @@ def add_definitions(graph=G):
             setpoint = setpoint + "_Setpoint"
             logger.info(f"Inferred setpoint: {setpoint}")
         limit_def = limit_def_template.format(direction=direction, setpoint=setpoint)
-        is_alias = list(graph.objects(subject=param, predicate=brick:aliasOf))
+        is_alias = list(m{ {param} brick:aliasOf ?o })
         if (
             param != brick:Limit and len(is_alias) == 0
         ):  # definition already exists for Limit
-            graph += g{ {param} skos:definition {Literal(limit_def, lang="en")} }
+            +{ {param} skos:definition {Literal(limit_def, lang="en")} }
         class_exists = graph.query(
             f"""select ?class where {{
             BIND(brick:{setpoint} as ?class)

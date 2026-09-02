@@ -1,30 +1,34 @@
 # Extracted from acdh-oeaw/acdh-django-vocabs@60355474bb : vocabs/rdf_utils.py
 # region: graph_construct_qs (lines 153-170, stratum add_in_loop)
 # licence of the source repository: see meta.json
-from rdflib import Literal, Namespace, RDF, URIRef, XSD
+from rdflib import Graph, Literal, Namespace, RDF, URIRef, XSD
 from rdflib.namespace import DC, RDFS, SKOS
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
+
+# Same dispatch the original if/elif chain performs, kept as data so the
+# loop body becomes a single triple pattern with a variable predicate.
+_NOTE_PREDICATES = {
+    'note': SKOS.note,
+    'scopeNote': SKOS.scopeNote,
+    'changeNote': SKOS.changeNote,
+    'editorialNote': SKOS.editorialNote,
+    'historyNote': SKOS.historyNote,
+    'definition': SKOS.definition,
+    'example': SKOS.example,
+}
 
 
-if obj.has_notes.all():
-    for note in obj.has_notes.all():
-        if note.note_type == 'note':
-            g += g{ {concept} skos:note {Literal(note.name, lang=note.language)} }
-        elif note.note_type == 'scopeNote':
-            g += g{ {concept} skos:scopeNote {Literal(note.name, lang=note.language)} }
-        elif note.note_type == 'changeNote':
-            g += g{ {concept} skos:changeNote {Literal(note.name, lang=note.language)} }
-        elif note.note_type == 'editorialNote':
-            g += g{ {concept} skos:editorialNote {Literal(note.name, lang=note.language)} }
-        elif note.note_type == 'historyNote':
-            g += g{ {concept} skos:historyNote {Literal(note.name, lang=note.language)} }
-        elif note.note_type == 'definition':
-            g += g{ {concept} skos:definition {Literal(note.name, lang=note.language)} }
-        elif note.note_type == 'example':
-            g += g{ {concept} skos:example {Literal(note.name, lang=note.language)} }
-        else:
-            g += g{ {concept} skos:note {Literal(note.name, lang=note.language)} }
+def graph_construct_qs_notes(obj, concept: URIRef, g: Graph) -> None:
+    """Context: restores the `obj`, `concept`, `g` bindings that
+    `graph_construct_qs`'s enclosing `for obj in results:` loop provides in
+    the source file (see meta.json)."""
+    @graph g
+    if obj.has_notes.all():
+        for @bindings in (
+            {
+                "p": _NOTE_PREDICATES.get(note.note_type, SKOS.note),
+                "o": Literal(note.name, lang=note.language),
+            }
+            for note in obj.has_notes.all()
+        ):
+            +{ {concept} ?p ?o }

@@ -14,11 +14,23 @@
     "namespace_term": 3,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "@graph",
+    "+{ }"
+  ],
   "translation_notes": [
-    "prefixes: ns_rdfa->nsrdfa, ns_rdf->nsrdf"
+    "The site the stratifier flagged is `from .. import ns_rdfa`: a RELATIVE import of the project's own parent-package namespace binding (server/src/rdflib2/plugins/parsers/pyRdfa/__init__.py line 197: `ns_rdfa = Namespace(\"http://www.w3.org/ns/rdfa#\")`, verified in corpus/repos/MDD4REST__mdd4rest-annotator). Genuine ns_import_project instance -- and genuinely project-owned, so `from pyrdfa_context import nsrdfa:` works after a one-line shim (`__namespaces__ = {\"nsrdfa\": ns_rdfa}`) standing in for that package's __init__.py.",
+    "Same split found in the sibling LexMalta/recipes fork of this exact file (LexMalta__recipes__recipe-importer_pyRdfa_transform_prototype.py__<module>_1, already final): `ns_rdf` (bound a few lines above, `from rdflib import RDF as ns_rdf` when rdflib>=3.0.0, the branch that actually executes against the pinned 7.2.1) comes from rdflib itself -- not a project module, so it stays `@prefix nsrdf: <...>` at module scope rather than `from … import p:`. The legacy `else: from rdflib.RDF import RDFNS as ns_rdf` branch is left untouched (dead on rdflib>=3.0.0; rewriting it would be refactoring the region's own logic, not translating it).",
+    "The relative import additionally cannot even resolve standalone -- `ImportError: attempted relative import with no known parent package` when the region is exec'd as a top-level script (both sides of run_pair are). Restoring the binding for original.py therefore means changing the import's SOURCE MODULE (relative -> the pyrdfa_context.py shim), same discipline as replacing a broken absolute import; the name `ns_rdfa` itself is untouched.",
+    "namespace_term: 3 (ns_rdfa['Pattern'], ns_rdfa['copy'], ns_rdf['type']) all become prefixed names (nsrdfa:Pattern, nsrdfa:copy, nsrdf:type).",
+    "triple_add: 1 -- the single `graph.add((x,p,y))` on the function's own graph parameter is add_isolated's idiom even though this region's assigned stratum is ns_import_project: `@graph graph` + `+{ {x} {p} {y} }`. INSTRUCTIONS.md §2 forbids leaving a bare .add() where +{ } covers the case, and this one is a plain fully-bound single-triple add with nothing else going on.",
+    "graph_read: 2 (the two graph.triples(...) calls) and the membership test `(PR, nsrdf:type, Prototype) in graph` are deliberately left as plain rdflib calls, not forced into m{ }/trav_* islands: this region's only assigned stratum is ns_import_project, and `to_remove` -- the set collecting triples for the final batch removal -- is a plain Python set of already fully-bound tuples, not a live graph (the rdf_ops categorization agrees: triple_add: 1, no count for to_remove.add(...) or graph.remove(t)). Forcing to_remove into a Graph purely to fit island syntax onto something not counted as an RDF op is out of scope, noted rather than forced.",
+    "classification minor-restructuring, not directly-expressible: two different namespace sources (one project-owned, one rdflib's own) forced two different constructions in the same import block, plus the @graph/+{ } substitution for the one real add."
   ],
   "draft_sha": "d8b6147348771d27",
   "provenance": {
@@ -30,5 +42,12 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:handle_prototypes",
+    "diffs": [],
+    "error": null
+  }
 }

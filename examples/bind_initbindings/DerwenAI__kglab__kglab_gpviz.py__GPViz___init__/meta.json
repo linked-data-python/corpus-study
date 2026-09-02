@@ -10,11 +10,14 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
   "translation_notes": [
-    "unparsable: unexpected indent (<unknown>, line 11)"
+    "not-expressible: pq = rdflib.plugins.sparql.prepareQuery(sparql, initNs=self.namespaces) -- both `sparql` (the query text) and `self.namespaces` (the initNs mapping) are the constructor's own parameters, i.e. runtime values, not literals known when the file is transpiled. s{ } is 'parsed when the file is transpiled rather than at run time' (INSTRUCTIONS.md §1) and @prefix takes a literal <IRI>, confirmed with the transpiler: `@prefix ex: <{iri}> .` is a SyntaxError. Neither construction can stand for a query or a namespace mapping that only exist once this constructor runs, so this region has no island form more specific than plain rdflib.",
+    "the original 'unparsable: unexpected indent' was not a language limitation: the region is a bare method body extracted without its enclosing class. Restored the class wrapper (and the one out-of-region method it calls, _find_triples) via a context shim, gpviz_shim.py, per AGENT_BATCH.md's 'shim de contexte'; original.py and translated.ldpy are otherwise unchanged and identical to each other, since no island applies.",
+    "driver.py compares a plain GPViz instance across both sides, which rdfeval.harness compares generically and always reports unequal (no __eq__): added a tiny _summarize() entry point (also in gpviz_shim.py, identical on both sides) that returns the constructed instance's state as a plain dict instead.",
+    "checked the anti-hollow-green discipline: adding a stray element to self.blank_nodes in translated.ldpy makes the check FAIL as expected; restored before finalising."
   ],
   "draft_sha": "b2f79042580a56a5",
   "provenance": {

@@ -6,7 +6,7 @@ from typing import Union, Optional, Tuple, List
 from rdflib import Graph, BNode, Literal, RDF
 from rdflib.term import Identifier, URIRef, Node
 from rdflib.exceptions import UniquenessError
-from fhirtordf.rdfsupport.namespaces import FHIR
+from context_shim import FHIR
 
 def value(g: Graph, subject: Node, predicate: URIRef, asLiteral=False) -> \
         Union[None, BNode, URIRef, str, date, bool, datetime, int, float]:

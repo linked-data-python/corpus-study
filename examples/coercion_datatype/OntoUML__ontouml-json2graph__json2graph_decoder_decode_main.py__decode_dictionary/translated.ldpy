@@ -2,10 +2,7 @@
 # region: decode_dictionary (lines 27-115, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef, Literal, RDF, XSD
-from ..modules import arguments as args
-from ..modules.text_values import warn_if_text_value_is_unsupported
-from ..modules.utils_graph import ontouml_ref
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+from ontouml_shim import args, ontouml_ref, warn_if_text_value_is_unsupported, initialize_logger
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 LOGGER = initialize_logger()
@@ -84,6 +81,9 @@ def decode_dictionary(dictionary_data: dict, ontouml_graph: Graph, language: str
 
         # Graph's OBJECT definition
         if (key == "name") and language != "":
+            # dynamic language tag (`language` is a parameter, not a literal
+            # token): "..."@lang only accepts a fixed tag, so this stays a
+            # plain rdflib call -- see translation_notes.
             new_object = Literal(dictionary_data[key], lang=language)
         elif key in non_negative_integer_fields:
             dimension_value = dictionary_data[key]
@@ -93,7 +93,12 @@ def decode_dictionary(dictionary_data: dict, ontouml_graph: Graph, language: str
                     f"and was not transformed (expected a non-negative integer, received {dimension_value!r})."
                 )
                 continue
-            new_object = Literal(dimension_value, datatype=xsd:nonNegativeInteger)
+            # datatype coercion on a computed value: {expr}^^dt, not
+            # Literal(n, datatype=dt) -- see INSTRUCTIONS.md trap 1. Safe to
+            # inline the add here since int -> str matches rdflib's own
+            # canonical form (no normalisation gap for xsd:nonNegativeInteger).
+            ontouml_graph += g{ {new_instance} {new_predicate} {dimension_value}^^xsd:nonNegativeInteger }
+            continue
         else:
             new_object = Literal(dictionary_data[key])
 

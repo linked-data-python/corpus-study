@@ -2,9 +2,7 @@
 # region: decode_dictionary (lines 27-115, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef, Literal, RDF, XSD
-from ..modules import arguments as args
-from ..modules.text_values import warn_if_text_value_is_unsupported
-from ..modules.utils_graph import ontouml_ref
+from ontouml_shim import args, ontouml_ref, warn_if_text_value_is_unsupported, initialize_logger
 LOGGER = initialize_logger()
 
 def decode_dictionary(dictionary_data: dict, ontouml_graph: Graph, language: str) -> None:

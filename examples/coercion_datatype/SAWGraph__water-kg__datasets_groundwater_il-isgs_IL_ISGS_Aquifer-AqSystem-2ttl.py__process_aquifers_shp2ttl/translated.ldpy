@@ -1,10 +1,10 @@
 # Extracted from SAWGraph/water-kg@032ec41357 : datasets/groundwater/il-isgs/IL_ISGS_Aquifer-AqSystem-2ttl.py
 # region: process_aquifers_shp2ttl (lines 278-353, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+import logging
 import geopandas as gpd
-from rdflib import Graph, Literal
-from rdflib.namespace import GEO, DCTERMS, OWL, PROV, RDF, RDFS, SDO, XSD
-from namespaces import _PREFIX, find_s2_intersects_poly
+from rdflib import Graph
+from sawgraph_shim import _PREFIX, find_s2_intersects_poly, initial_kg, build_aq_iris, build_aqsys_iris
 @prefix geo: <http://www.opengis.net/ont/geosparql#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -57,9 +57,9 @@ def process_aquifers_shp2ttl(br_infile, sg_infile, cg_infile, cgsys_infile, outf
             aqiri, geoiri = build_aq_iris(aqid, _PREFIX)
             kg_aq += g{
                 {aqiri} a {_PREFIX['gwml2']['GW_Aquifer']} ;
-                   {_PREFIX['il_isgs']['ilSawAqId']} {Literal(aqid, datatype=XSD.string)} ;
-                   {_PREFIX['saw_water']['aquiferType']} {Literal(row.aqtype, datatype=XSD.string)} ;
-                   rdfs:label {Literal(f'A {row.aqtype} aquifer in Illinois', datatype=XSD.string)}
+                   {_PREFIX['il_isgs']['ilSawAqId']} "{aqid}"^^xsd:string ;
+                   {_PREFIX['saw_water']['aquiferType']} "{row.aqtype}"^^xsd:string ;
+                   rdfs:label "A {row.aqtype} aquifer in Illinois"^^xsd:string
             }
             if row.aqtype.lower() == 'coarse-grain_materials':
                 sysid = str(ids_dict[fid])
@@ -69,7 +69,7 @@ def process_aquifers_shp2ttl(br_infile, sg_infile, cg_infile, cgsys_infile, outf
             kg_aq += g{
                 {aqiri} geo:hasGeometry {geoiri} ;
                    geo:defaultGeometry {geoiri} .
-                {geoiri} geo:asWKT {Literal(row.geometry, datatype=GEO.wktLiteral)} ;
+                {geoiri} geo:asWKT {row.geometry}^^geo:wktLiteral ;
                    a geo:Geometry
             }
             if 'multipolygon' in str(row.geometry).lower():
@@ -81,14 +81,12 @@ def process_aquifers_shp2ttl(br_infile, sg_infile, cg_infile, cgsys_infile, outf
         aqsysiri, geoiri = build_aqsys_iris(row.saw_id, _PREFIX)
         kg_aqsys += g{
             {aqsysiri} a {_PREFIX['gwml2']['GW_AquiferSystem']} ;
-               {_PREFIX['il_isgs']['ilSawAqSysId']} {Literal('CM' + str(row.saw_id).zfill(max_id_length), datatype=XSD.string)} ;
+               {_PREFIX['il_isgs']['ilSawAqSysId']} "CM{str(row.saw_id).zfill(max_id_length)}"^^xsd:string ;
                rdfs:label "A system of aquifers in Illinois"^^xsd:string ;
-               rdfs:comment {Literal(
-            f'Illinois aquifer systems consist of adjacent potential aquifers in coarse-grained materials within 50ft of the ground surface',
-            datatype=XSD.string)} ;
+               rdfs:comment "Illinois aquifer systems consist of adjacent potential aquifers in coarse-grained materials within 50ft of the ground surface"^^xsd:string ;
                geo:hasGeometry {geoiri} ;
                geo:defaultGeometry {geoiri} .
-            {geoiri} geo:asWKT {Literal(row.geometry, datatype=GEO.wktLiteral)} ;
+            {geoiri} geo:asWKT {row.geometry}^^geo:wktLiteral ;
                a geo:Geometry
         }
         if 'multipolygon' in str(row.geometry).lower():

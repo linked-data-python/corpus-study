@@ -7,5 +7,6 @@ EX_P = "http://ex/p"
 
 def _bnode_value():
     g = Graph()
-    g += g{ {URIRef(EX_A)} {URIRef(EX_P)} {BNode("b1")} }
+    @graph g
+    +{ {URIRef(EX_A)} {URIRef(EX_P)} {BNode("b1")} }
     return g.query(f"SELECT ?o WHERE {{ <{EX_A}> <{EX_P}> ?o }}")

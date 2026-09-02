@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import csv
 from rdflib import Graph, Literal, BNode, URIRef
-from bricksrc.namespaces import (
+from context_shim import (
     BRICK,
     BSH,
     REC,
@@ -19,6 +19,7 @@ from bricksrc.namespaces import (
     VCARD,
     SH,
     REF,
+    brickschema,
 )
 logger = logging.getLogger(__name__)
 G = brickschema.Graph()

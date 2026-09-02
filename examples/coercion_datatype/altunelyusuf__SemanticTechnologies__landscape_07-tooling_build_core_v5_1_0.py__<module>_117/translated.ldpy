@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from context_shim import BASEDIR, S
 @prefix sem: <http://example.org/semtech#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -18,10 +19,10 @@ for ap, lab, dfn in [
     ("criticalTerm", "critical term", "This annotation carries one critical term of the subject area as 'TERM | expansion | gloss' for glossary and lens rendering."),
     ("syntacticExample", "syntactic example", "This annotation carries a small validated example in the subject area's concrete syntax as 'language | caption | code'."),
     ("criticalTip", "critical tip", "This annotation carries the chapter's one critical practitioner consideration.")]:
-    p = SEM[ap]
+    p = sem:{ap}
     g2 += g{
         {p} a owl:AnnotationProperty ;
-           rdfs:label {Literal(lab, lang="en")} ;
-           skos:definition {Literal(dfn, lang="en")} ;
-           dcterms:source {Literal(S("R1"), lang="en")}
+           rdfs:label f"{lab}"@en ;
+           skos:definition f"{dfn}"@en ;
+           dcterms:source f"{S('R1')}"@en
     }

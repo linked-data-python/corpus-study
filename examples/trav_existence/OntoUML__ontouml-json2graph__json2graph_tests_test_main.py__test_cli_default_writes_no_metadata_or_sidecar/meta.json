@@ -14,11 +14,21 @@
     "graph_read": 1,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: PROV->prov, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: PROV->prov, RDF->rdf, RDFS->rdfs, XSD->xsd",
+    "`assert not any(output_graph.triples((None, RDF.type, PROV.Entity)))` -> `@graph output_graph` + `assert not bool(m{ ?s rdf:type prov:Entity })`, per the stratum's own mapping. Only the RDF-reading assertion is translated; the file-existence check on the next line (`not (tmp_path / \"...\").exists()`) is plain pathlib and untouched.",
+    "context_shim.py stands in for `write_cardinality_project` and `run_metadata_cli`, the two upstream test helpers this region calls: the real second one shells out to `python -m json2graph.decode` as a subprocess, which is out of scope for a region graded on its own RDF-reading line, not on running the whole CLI package. The shim keeps the call shape (same argument order, a `.returncode`/`.stderr`-bearing return) but copies a Turtle fixture into place instead, chosen by a marker file (`_use_prov_fixture`) the driver drops into tmp_path -- see context_shim.py's own header for the full reasoning.",
+    "demo() harness (identical both sides, see meta.json), same convention as the LA3D trav_existence sibling: the region is a pytest test that only ever asserts, and the upstream test itself only ever exercises the metadata-free (FALSE) path -- without demo() catching AssertionError, the TRUE side of `bool(m{ })` (a run WITH a prov:Entity triple, fixture_with_prov.ttl) would never be observable by the oracle, since an uncaught assertion would abort the driver outright.",
+    "Deliberately broke the translation (replaced the read with `assert True`) to confirm rdfeval check catches it: FAIL call[1].result: values differ (('assertion-failed', '') vs 'ok') -- the prov:Entity case should fail its assertion and didn't. Restored, check is green again."
   ],
   "draft_sha": "e2ed29dfaa5359bb",
   "provenance": {
@@ -30,5 +40,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

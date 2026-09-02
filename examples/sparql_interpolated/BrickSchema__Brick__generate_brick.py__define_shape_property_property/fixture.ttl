@@ -1,4 +1,44 @@
-# Input graph for BrickSchema__Brick__generate_brick.py__define_shape_property_property — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for BrickSchema__Brick__generate_brick.py__define_shape_property_property.
+#
+# Exercises the `optional and no other keys` branch, whose SELECT (an
+# f-string in the original, `s{ }` with a term-position interpolation here)
+# looks for an EXISTING sh:PropertyShape for the same sh:path with neither
+# sh:minCount nor sh:maxCount set.
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix ex: <http://example.org/> .
+
+# --- ex:hasWindow: exactly one existing, unconstrained PropertyShape ---
+# (used by the driver's call: a single solution keeps the pick deterministic
+# — no SPARQL engine promises an order among several rows, and this branch's
+# effect depends on WHICH row is picked, so a multi-row case here would make
+# the pair's graphs isomorphic-or-not by accident of engine ordering, not by
+# translation correctness.)
+ex:OtherShapeW sh:property ex:windowShape1 .
+ex:windowShape1 a sh:PropertyShape ;
+    sh:path ex:hasWindow .
+
+# --- ex:hasArea: several existing unconstrained PropertyShapes ---
+# (demonstrates the pattern DOES have several solutions in general; not used
+# in the driver's call, precisely so multiplicity never has to be resolved
+# by picking one — see note above)
+ex:OtherShapeA sh:property ex:areaShape1 .
+ex:areaShape1 a sh:PropertyShape ;
+    sh:path ex:hasArea .
+ex:OtherShapeB sh:property ex:areaShape2 .
+ex:areaShape2 a sh:PropertyShape ;
+    sh:path ex:hasArea .
+
+# --- Zero-solution case: ex:hasTag has NO existing unconstrained shape ---
+# (used by the driver's call: nothing declares sh:path ex:hasTag at all)
+
+# --- Neighbourhood that must NOT match: same path, but constrained ---
+# (FILTER NOT EXISTS on sh:minCount/sh:maxCount must exclude this one)
+ex:OtherShapeC sh:property ex:areaShapeConstrained .
+ex:areaShapeConstrained a sh:PropertyShape ;
+    sh:path ex:hasArea ;
+    sh:minCount 1 .
+
+# --- Neighbourhood that must NOT match: different path entirely ---
+ex:OtherShapeD sh:property ex:unrelatedShape .
+ex:unrelatedShape a sh:PropertyShape ;
+    sh:path ex:hasColor .

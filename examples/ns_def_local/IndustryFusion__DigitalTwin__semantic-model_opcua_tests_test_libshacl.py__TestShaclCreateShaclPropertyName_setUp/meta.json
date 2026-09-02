@@ -13,10 +13,14 @@
     "graph_ctor": 1,
     "namespace_ctor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Both Namespace() calls (basens, opcuans) are assigned straight to self.basens/self.opcuans and outlive the block: `@prefix` has no run-time object (INSTRUCTIONS.md #1, #5), so a self.basens = Namespace(...) that must be readable from other methods of the TestCase cannot become `@prefix ns: <...> .` -- there is nothing to store on self. Kept as plain Namespace(...) calls, unchanged from original.py.",
+    "Context shim added: `from lib.shacl import Shacl, Validation` is unreachable outside the IndustryFusion/DigitalTwin repo, so both original.py and translated.ldpy import Shacl/Validation from context_shim.py instead (minimal constructor that records its four arguments, matching how setUp uses it) -- see AGENT_BATCH.md's shim protocol.",
+    "driver.py: setUp(self) only mutates attributes on `self`; a fresh instance per side stands in for the TestCase, but its Graph() attribute (data_graph, and shacl.data_graph) gets a fresh BNode identifier per instantiation, so plain __eq__/SimpleNamespace comparison would report a false mismatch between two runs of identical code. The driver defines a small comparable stand-in whose __eq__ recurses through attributes and reduces any nested Graph to graphs_isomorphic() before comparing -- no change to original.py/translated.ldpy semantics, purely a comparison detail."
+  ],
   "draft_sha": "6720d0610e2de6a9",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.300352+00:00",

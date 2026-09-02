@@ -1,0 +1,42 @@
+@prefix agento: <http://www.w3id.org/agentic-ai/onto#> .
+@prefix agentoscin: <http://www.semanticweb.org/danilippmann/ontologies/2026/3/agentoscin/> .
+@prefix wp: <http://example.org/workflows#> .
+@prefix step: <http://example.org/steps#> .
+@prefix ag: <http://example.org/agents#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# wp:WP1 has four workflow steps: one of each observable step_type, so the
+# body's is_start/is_conditional/is_end branches and every optional field
+# are exercised. wp:WP2's step must NOT be picked up (neighbourhood).
+wp:WP1 agento:hasWorkflowStep step:Cond, step:StartOnly, step:End, step:Regular .
+
+# --- conditional-but-not-start: routing logic is read, edge mapping too ---
+step:Cond a agentoscin:ConditionalStep ;
+    agento:hasTitle "Route request" ;
+    agento:stepOrder 2 ;
+    agentoscin:hasRoutingLogic "score > 0.5" ;
+    agentoscin:hasEdgeMapping "{\"yes\": \"step:End\", \"no\": \"step:Regular\"}" ;
+    agento:nextStep step:End, step:Regular ;
+    agentoscin:hasDecoratorArgument "wait_next_run", "retry" ;
+    agentoscin:hasAssociatedAgent ag:unknown, ag:researcher ;
+    agentoscin:hasAggregationCombinator "any" ;
+    agento:callsCrew "triage_crew" .
+
+# --- start step (no title -> falls back to _local_name) ---
+step:StartOnly a agento:StartStep ;
+    agento:stepOrder 1 ;
+    agento:nextStep step:Cond .
+
+# --- end step ---
+step:End a agento:EndStep ;
+    agento:hasTitle "Finish" ;
+    agento:stepOrder 4 .
+
+# --- regular step: the zero-solution case for every optional field ---
+step:Regular agento:stepOrder 3 .
+
+# --- neighbourhood: a step reachable from a DIFFERENT workflow, must not
+#     appear in step_info/step_uri_to_name for WP1 ---
+wp:WP2 agento:hasWorkflowStep step:Foreign .
+step:Foreign a agento:StartStep ;
+    agento:hasTitle "Should not be read" .
