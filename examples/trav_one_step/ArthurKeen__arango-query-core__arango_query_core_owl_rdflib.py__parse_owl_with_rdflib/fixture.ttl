@@ -1,4 +1,65 @@
-# Input graph for ArthurKeen__arango-query-core__arango_query_core_owl_rdflib.py__parse_owl_with_rdflib — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input Turtle for ArthurKeen__arango-query-core__arango_query_core_owl_rdflib.py__parse_owl_with_rdflib.
+# parse_owl_with_rdflib(turtle_text: str) parses this TEXT itself (it is
+# not handed a pre-built Graph), so driver.py reads this file as a string
+# and passes it as the sole argument -- see driver.py.
+#
+# Coverage, per read site (several solutions / zero-solution / neighbours
+# that must not match, all in one ontology since the region processes the
+# whole graph in a single call):
+#  - owl:Class subjects (2): ex:Person (full phys: mapping) and
+#    ex:Organization (bare -- "if coll:" false branch, must not appear in
+#    physical_entities though it does appear in entities).
+#  - owl:DatatypeProperty subjects (3): ex:name (domain+range present),
+#    ex:orphanProp (neither -- zero-solution case of both rdfs:domain and
+#    rdfs:range reads), ex:describes (domain resolves to ex:Ghost, an IRI
+#    that is never itself typed owl:Class -- "if domain_name in
+#    entity_props:" false even though domain is not None).
+#  - owl:ObjectProperty subjects (3): ex:worksFor (domain+range,
+#    phys:edgeCollectionName + phys:style), ex:manages (domain+range,
+#    phys:collectionName + phys:mappingStyle -- the *fallback* half of both
+#    `or` chains), ex:knows (bare -- domain/range default to "Any", and
+#    "if edge_coll:" is false so it must not appear in physical_rels).
+#  - Neighbour that must not match ANY of the four owl:Class /
+#    DatatypeProperty / ObjectProperty subject reads: ex:comment, an
+#    owl:AnnotationProperty that also carries a phys:collectionName -- a
+#    pattern that ignored the rdf:type term would wrongly pick it up.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix phys: <http://arangodb.com/schema/physical#> .
+@prefix ex: <http://example.org/onto#> .
+
+ex:Person a owl:Class ;
+    phys:collectionName "persons" ;
+    phys:style "COLLECTION" ;
+    phys:typeField "type" ;
+    phys:typeValue "Person" .
+
+ex:Organization a owl:Class .
+
+ex:name a owl:DatatypeProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:orphanProp a owl:DatatypeProperty .
+
+ex:describes a owl:DatatypeProperty ;
+    rdfs:domain ex:Ghost ;
+    rdfs:range xsd:string .
+
+ex:worksFor a owl:ObjectProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Organization ;
+    phys:edgeCollectionName "worksFor" ;
+    phys:style "DEDICATED_COLLECTION" .
+
+ex:manages a owl:ObjectProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Person ;
+    phys:collectionName "manages" ;
+    phys:mappingStyle "DEDICATED_COLLECTION" .
+
+ex:knows a owl:ObjectProperty .
+
+ex:comment a owl:AnnotationProperty ;
+    phys:collectionName "should_not_appear" .

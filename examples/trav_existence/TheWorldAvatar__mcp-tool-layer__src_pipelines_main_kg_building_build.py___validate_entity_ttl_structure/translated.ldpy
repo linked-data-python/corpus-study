@@ -4,9 +4,9 @@
 import os
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, RDFS
+from context_shim import _resolve_expected_top_entity_uri  # context shim -- see meta.json
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 
 def _validate_entity_ttl_structure(
     *,
@@ -28,6 +28,7 @@ def _validate_entity_ttl_structure(
         g.parse(ttl_path, format="turtle")
     except Exception as e:
         return False, [f"Failed to parse TTL: {e}"]
+    @graph g
 
     top_class_iri = str(shell_validation.get("top_entity_class_iri") or "").strip()
     label_key_suffixes = shell_validation.get("label_key_suffixes_to_strip") or []
@@ -42,11 +43,11 @@ def _validate_entity_ttl_structure(
     )
     top_entity = URIRef(resolved_entity_uri) if resolved_entity_uri else None
     if top_entity is not None and shell_validation.get("require_entity_uri_subject"):
-        if not any(g.triples((top_entity, None, None))):
+        if not bool(m{ {top_entity} ?any_p ?any_o }):
             messages.append(
                 f"Missing top-level entity subject in TTL: {resolved_entity_uri or entity_uri}"
             )
-        elif top_class_iri and (top_entity, rdf:type, URIRef(top_class_iri)) not in g:
+        elif top_class_iri and not bool(m{ {top_entity} rdf:type {URIRef(top_class_iri)} }):
             messages.append(
                 f"Top-level entity missing required rdf:type: {top_class_iri}"
             )
@@ -59,10 +60,10 @@ def _validate_entity_ttl_structure(
             if not pred_iri:
                 continue
             pred = URIRef(pred_iri)
-            objs = [o for o in g.objects(top_entity, pred) if isinstance(o, URIRef)]
+            objs = [o for o in m{ {top_entity} {pred} ?o } if isinstance(o, URIRef)]
             if target_class_iri:
                 target_cls = URIRef(target_class_iri)
-                objs = [o for o in objs if (o, rdf:type, target_cls) in g]
+                objs = [o for o in objs if bool(m{ {o} rdf:type {target_cls} })]
             if len(objs) < min_count:
                 messages.append(
                     f"Missing required link {pred_iri}: expected >= {min_count}, found {len(objs)}"

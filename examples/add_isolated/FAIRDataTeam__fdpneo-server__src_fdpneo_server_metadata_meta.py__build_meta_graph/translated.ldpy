@@ -3,22 +3,27 @@
 # licence of the source repository: see meta.json
 from datetime import datetime
 from rdflib import BNode, Graph, Literal, URIRef
-from rdflib.namespace import RDF
-from fdpneo_server.metadata.graphs import meta_graph_uri, record_graph_uri
-from fdpneo_server.metadata.states import DEFAULT_STATE, MetadataState, allowed_transitions
-from fdpneo_server.shared.namespaces import (
-    DCT,
-    FDP_ALLOWED_STATE_TRANSITION,
-    FDP_DEFAULT,
-    FDP_METADATA_STATE,
-    FDP_VALIDATED_AGAINST,
-    OWL,
-    PROV,
+# Context shim (see meta.json / context_shim.py): the real module paths are
+# `fdpneo_server.metadata.graphs`, `fdpneo_server.metadata.states` and
+# `fdpneo_server.shared.namespaces` -- not importable outside the package.
+from context_shim import (
+    DEFAULT_STATE,
+    FDP_CREATE_OPERATION,
+    FDP_MODIFY_OPERATION,
+    MetaResult,
+    MetadataState,
+    Operation,
+    _extract_creation,
+    _extract_state,
+    _extract_validated_against,
+    _next_version,
+    meta_graph_uri,
+    record_graph_uri,
+    dct:,
+    owl:,
+    prov:,
+    fdp-o:,
 )
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-FDP_CREATE_OPERATION = FDP_DEFAULT["CreateOperation"]
-FDP_MODIFY_OPERATION = FDP_DEFAULT["ModifyOperation"]
 
 def build_meta_graph(
     *,
@@ -73,16 +78,15 @@ def build_meta_graph(
     effective_state = initial_state if is_creation else (prior_state or initial_state)
 
     graph = Graph()
-    graph += g{
-        {record_subject} a {PROV.Entity} ;
-           {DCT.created} {Literal(effective_created)}
+    @graph graph
+    +{ {record_subject} a prov:Entity ;
+           dct:created {Literal(effective_created)}
     }
     if effective_creator is not None:
-        graph += g{ {record_subject} {DCT.creator} {URIRef(effective_creator)} }
-    graph += g{
-        {record_subject} {DCT.modified} {Literal(modified or now)} ;
-           {OWL.versionInfo} {Literal(version)} ;
-           {FDP_METADATA_STATE} {Literal(effective_state.value)}
+        +{ {record_subject} dct:creator {URIRef(effective_creator)} }
+    +{ {record_subject} dct:modified {Literal(modified or now)} ;
+           owl:versionInfo {Literal(version)} ;
+           fdp-o:metadataState {Literal(effective_state.value)}
     }
 
     # ADR-0019 §3: the exact profile version validated at write time. A content
@@ -91,16 +95,14 @@ def build_meta_graph(
     # write recorded, so the provenance never silently disappears.
     effective_binding = validated_against or _extract_validated_against(prior, record_subject)
     if effective_binding is not None:
-        graph += g{ {record_subject} {FDP_VALIDATED_AGAINST} {URIRef(effective_binding)} }
+        +{ {record_subject} fdp-o:validatedAgainst {URIRef(effective_binding)} }
 
     activity = BNode()
-    graph += g{
-        {record_subject} {PROV.wasGeneratedBy} {activity} .
-        {activity} a {PROV.Activity} ;
-           a {FDP_CREATE_OPERATION if is_creation else FDP_MODIFY_OPERATION} ;
-           {PROV.atTime} {Literal(now)}
+    +{ {record_subject} prov:wasGeneratedBy {activity} }
+    +{ {activity} a prov:Activity, {FDP_CREATE_OPERATION if is_creation else FDP_MODIFY_OPERATION} ;
+           prov:atTime {Literal(now)}
     }
     if subject is not None:
-        graph += g{ {activity} {PROV.wasAssociatedWith} {URIRef(subject)} }
+        +{ {activity} prov:wasAssociatedWith {URIRef(subject)} }
 
     return MetaResult(graph=graph, operation=operation, version=version, state=effective_state)

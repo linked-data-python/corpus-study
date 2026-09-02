@@ -13,11 +13,15 @@
     "namespace_term": 2,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@graph", "+{ }", "interpolation {expr}"],
   "translation_notes": [
-    "prefixes: RDFS->rdfs, RDF->rdf"
+    "The region is a method (`self` is its first parameter); the extracted lines (1168-1188) don't carry self.allclasses/self.sessionGraph/self.sessionNS, set up elsewhere in Ontology.__init__ / setOntology. Restored the liaison per AGENT_BATCH.md's 163-region note: context_shim.py's OntologyContext reproduces just those three attributes (a plain list, a fresh rdflib.Graph, a Namespace on the real DEFAULT_SESSION_NAMESPACE constant), and `self` is annotated `self: OntologyContext` in both original.py and translated.ldpy (the annotation only documents the restored liaison -- Python does not enforce it at runtime).",
+    "Two independent g.add() sites, each the sole write in its own if/elif branch (never both in one call) -- genuinely isolated, so each becomes its own `+{ }`. `@graph self.sessionGraph` is declared once above the if/elif rather than repeated in each branch: self.sessionGraph is read (never reassigned) between the declaration and both +{ } sites, so per INSTRUCTIONS.md SS2bis capturing its value once is safe -- both +{ } mutate the same Graph object in place.",
+    "rdf:type is written with the `a` keyword shortcut; RDF (and the already-unused RDFS/BNode) stay imported from rdflib but go unused in translated.ldpy, matching original.py's own already-partly-unused import line -- not a translation artifact.",
+    "`RDF->rdf` in the earlier draft note was moot: no rdf: prefix was needed once rdf:type is written as `a`.",
+    "Anti-hollow-green: changing the second +{ }'s object from `{aClass}` to `{ns[anInstance]}` (so the string branch would add `X rdf:type X` instead of `X rdf:type aClass`) makes `rdfeval check` correctly report equivalent: false (cases B/C/F: sessionGraph not isomorphic). Restored afterwards."
   ],
   "draft_sha": "901ae42209e01314",
   "provenance": {

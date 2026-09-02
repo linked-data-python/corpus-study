@@ -14,11 +14,23 @@
     "term_constructor": 3,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDFS->rdfs, RDF->rdf"
+    "prefixes: RDFS->rdfs, RDF->rdf",
+    "the draft folded the two `self.grafoa.add((...))` calls on the shared subject into `self.grafoa += g{ }`, which the batch note flags as a known mechanical-draft bias for this stratum: `g{ }` builds a NEW, disposable graph, `+=` merges it into `self.grafoa` after the fact -- it happens to be isomorphism-preserving here but is not the construction the stratum measures. Rewrote as `@graph self.grafoa` (declared once, since `self.grafoa` is never reassigned in this function) followed by a single `+{ {subjektua} a {objektua} ; rdfs:label {Literal(...)} }`, which writes straight into the live graph.",
+    "`subjektua`/`objektua` are already-constructed `URIRef` values (from `self.bilatuUria`/`self.getType`, both computed above the fold), so they interpolate as bare `{expr}` in term position rather than through `f<...>` or `ex:{...}` -- there is no IRI literal or prefixed name to write, the terms are opaque Python values by the time the shared-subject fold sees them.",
+    "context shim (context_shim.py): `grafoaSortu` is a bare method extracted without its enclosing `TextToTriple` class (procesSource/source/gate_cloud.py @ 82875c5f94, JonAnderAsua/TFG-KG-RelacionesClientelares), so `self.grafoa`, `self.balioztatu`, `self.bilatuUria`, `self.getType` are all unbound. Fetched the real source from GitHub at this commit to write the shim faithfully: `getType` is copied VERBATIM (a pure function, safe to reproduce exactly). `balioztatu` in the real class blocks on `input()` to ask a human to confirm each classification, and `bilatuUria` issues a live SPARQL SELECT against `self.tripleStore` -- neither can run in this harness, so both are fixture-driven stand-ins keyed by annotation text, matching the CONTRACT `grafoaSortu` depends on (a bool+label pair, a URI string) without inventing their withheld interactive/networked logic. Identical shim imported by both original.py and translated.ldpy.",
+    "added a `demo(annotations, validations, uris)` harness (identical on both sides) that builds a fresh `TextToTripleStub`, calls `grafoaSortu`, and returns `self.grafoa`: the region mutates `self.grafoa` rather than returning it, and the stub has no `__eq__`, so comparing the `self` argument directly would compare object identity and always fail (same pattern as the Dewberry/blobfish region in this stratum).",
+    "fixture exercises the fold (two annotations sharing one subject text), all three `annotationType` values the `if` guard filters before `balioztatu` is even reached (Sentence/Money/Date), a `balioztatu` rejection (no triple), and the 'Location' special case in `getType` (-> schema:Place, not schema:Location)."
   ],
   "draft_sha": "4c507b5097cadbfb",
   "provenance": {

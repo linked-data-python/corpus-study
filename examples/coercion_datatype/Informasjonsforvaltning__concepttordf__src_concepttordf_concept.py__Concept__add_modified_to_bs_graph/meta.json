@@ -14,11 +14,23 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DCT->dct, XSD->xsd, RDF->rdf, RDFS->rdfs"
+    "prefixes: DCT->dct, XSD->xsd, RDF->rdf, RDFS->rdfs (xsd/rdf/rdfs unused in this region's body, kept because original.py imports them, same call as the DataArtifex precedent already in this corpus)",
+    "the coercion_datatype site is Literal(betydningsbeskrivelse.modified, datatype=XSD.date): `modified` is typed `date` on Betydningsbeskrivelse (verified in the source repo's betydningsbeskrivelse.py), not a str, so INSTRUCTIONS.md's second pitfall applies -- a mechanical `{value}^^xsd:date` rewrite is unsafe for a non-string value. Checked on rdflib 7.2.1: Literal(datetime.date(2023,6,15), datatype=XSD.date) == Literal(datetime.date(2023,6,15)) (both lexical '2023-06-15', datatype xsd:date) -- rdflib's own default type inference for `datetime.date` already lands on xsd:date, so the language's default coercion (a bare `{expr}` in term position) reproduces the original's explicit datatype= exactly. Translated as bare interpolation, not `^^xsd:date`, per INSTRUCTIONS.md §2's 'la coercition du langage ... si la valeur n'est pas constante'",
+    "self._g is a plain instance attribute (Graph(), set in Concept.__init__, not a property) reached only through `self`, which the extracted region never assigns to a local `@graph`-able name; translated with the call-suffix form `+{ ... }(self._g)`, matching current-graph.md's own attribute-receiver example (`+{ ex:s ex:p 1 }(store.graph)`) rather than `@graph self._g` (the reference examples for `@graph NAME` only ever designate a bare variable)",
+    "context shim: betydningsbeskrivelse.py (Informasjonsforvaltning/concepttordf@b06016d2ff) copied verbatim -- it is small, self-contained (abc/datetime/enum only) and Betydningsbeskrivelse/RelationToSource are otherwise used only as unused-in-body type annotations, so a verbatim copy is both exact and no more work than a reduced stand-in",
+    "`from __future__ import annotations` added to both sides (matching 7 other regions already in this corpus): the extracted function's own `self: Concept` annotation would otherwise raise NameError at module load -- Concept is the enclosing class, defined outside the extracted lines, and is never otherwise referenced by the region",
+    "demo(modified) harness appended identically to both sides (same pattern as DataArtifex__rdf-toolkit__.../_serialise_into_graph already in this corpus): `self` and `betydningsbeskrivelse` are SimpleNamespace stand-ins exposing only the attributes the region reads (`_g`, `.modified`) -- neither Concept nor the ABC Betydningsbeskrivelse could be instantiated directly anyway. demo() returns self._g, not self, so the driver compares the resulting graph (isomorphism) rather than needing an __eq__ on the stub",
+    "sabotage check (INSTRUCTIONS.md anti-vert-creux): changed dct:modified to dct:created in translated.ldpy -- rdfeval check correctly failed (call[0].result: graphs not isomorphic, 1 vs 1 triples); reverted, check green again"
   ],
   "draft_sha": "17d11b4abae50d2d",
   "provenance": {
@@ -30,5 +42,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

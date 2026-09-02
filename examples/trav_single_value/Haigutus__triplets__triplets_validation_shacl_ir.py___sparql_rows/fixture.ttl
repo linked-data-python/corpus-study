@@ -1,0 +1,45 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/> .
+
+# --- Shape1: URIRef sh:path, three sh:sparql children ----------------------
+ex:Shape1 sh:path ex:hasName .
+
+# 1a. a sh:sparql target with NO sh:select at all -- must be skipped
+#     entirely (zero-solution .first() on sh:select).  Carries a
+#     sh:message as neighbourhood noise that must never surface: it
+#     is only read once select is known non-None.
+ex:Shape1 sh:sparql ex:SparqlNoSelect .
+ex:SparqlNoSelect sh:message "should never surface: no sh:select" .
+
+# 1b. a sh:sparql target with sh:select + sh:message + TWO prefix
+#     declarations under one sh:prefixes ontology -- exercises the nested
+#     ontology -> declare loop with more than one declaration.
+ex:Shape1 sh:sparql ex:SparqlFull .
+ex:SparqlFull sh:select "SELECT ?this WHERE { ?this ex:p ex:o }" .
+ex:SparqlFull sh:message "custom violation message" .
+ex:SparqlFull sh:prefixes ex:Onto1 .
+ex:Onto1 sh:declare ex:DeclEx, ex:DeclFoaf .
+ex:DeclEx sh:prefix "ex" ; sh:namespace "http://example.org/" .
+ex:DeclFoaf sh:prefix "foaf" ; sh:namespace "http://xmlns.com/foaf/0.1/" .
+
+# 1c. a sh:sparql target with sh:select but NO sh:prefixes (prefixes must
+#     come back "") and NO sh:message (row must have no "message" key at
+#     all -- not even message=None).
+ex:Shape1 sh:sparql ex:SparqlBare .
+ex:SparqlBare sh:select "SELECT ?this WHERE { ?this a ex:C }" .
+
+# --- Shape2: blank-node sh:path -> "path" must come back None, and the
+# shape has NO sh:sparql children at all -> rows == [] ----------------------
+ex:Shape2 sh:path _:seqPath .
+_:seqPath rdf:first ex:step ;
+          rdf:rest  rdf:nil .
+
+# --- neighbourhood noise: another shape's own sh:sparql/prefixes must
+# never leak into Shape1's or Shape2's rows ----------------------------------
+ex:OtherShape sh:path ex:decoyPath .
+ex:OtherShape sh:sparql ex:SparqlDecoy .
+ex:SparqlDecoy sh:select "SELECT ?this WHERE { ?this ex:decoy ex:d }" .
+ex:SparqlDecoy sh:prefixes ex:OntoDecoy .
+ex:OntoDecoy sh:declare ex:DeclDecoy .
+ex:DeclDecoy sh:prefix "decoy" ; sh:namespace "http://decoy.example/" .

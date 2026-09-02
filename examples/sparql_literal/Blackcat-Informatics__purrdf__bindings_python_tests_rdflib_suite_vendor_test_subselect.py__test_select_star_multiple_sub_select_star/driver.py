@@ -1,19 +1,20 @@
 """Validation driver for Blackcat-Informatics__purrdf__bindings_python_tests_rdflib_suite_vendor_test_subselect.py__test_select_star_multiple_sub_select_star.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
-
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+This region reads a graph (design record corpus/405), but
+`test_select_star_multiple_sub_select_star` takes no argument: it queries a
+fixed module-level graph (`_graph_with_label`, populated by a `.add(...)`
+call restored from the real file -- see original.py/translated.ldpy
+headers), so run_pair's `fixture=` mechanism (which injects ONE parsed
+graph as the entry point's sole argument) does not apply here -- the same
+situation as lazlop/semantic_objects's `test_class_scope_or_roundtrip` and
+RDFLib/timefuncs's `test_is_after` in this same stratum. `calls=[((), {})]`
+calls the entry point with no arguments, once per side; there is no
+fixture.ttl for this region.
 """
 from rdfeval.harness import run_pair
 
 VERDICT = run_pair(
     __file__,
     entry='test_select_star_multiple_sub_select_star',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    calls=[((), {})],
 )

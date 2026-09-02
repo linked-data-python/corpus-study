@@ -1,6 +1,11 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v6_3_0.py
 # region: <module> (lines 162-163, stratum add_in_loop)
 # licence of the source repository: see meta.json
+# Executability: BASEDIR, load(), nodes and cls_iri -- defined earlier in
+# the same source file, just outside this region -- restored via
+# context_predecl.py (context shim, see meta.json).
+from rdflib import Graph, Namespace
+from context_predecl import BASEDIR, load, nodes, cls_iri
 en = load("enrichment_n", "v6_0_0")
 SEM = Namespace("http://example.org/semtech#")
 IRI = {n["id"]: cls_iri(n) for n in nodes}

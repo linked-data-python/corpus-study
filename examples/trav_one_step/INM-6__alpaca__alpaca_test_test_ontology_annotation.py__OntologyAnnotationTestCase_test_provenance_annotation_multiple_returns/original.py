@@ -5,6 +5,7 @@ import io
 from rdflib import Literal, URIRef, Namespace, Graph, RDF, PROV
 from alpaca import activate, deactivate, Provenance, save_provenance
 from alpaca.ontology import ALPACA
+from alpaca_context import InputObject, process_multiple  # context shim -- see meta.json
 
 def test_provenance_annotation_multiple_returns(self):
     activate(clear=True)
@@ -99,3 +100,18 @@ def test_provenance_annotation_multiple_returns(self):
                      RDF.type, ALPACA.DataObjectEntity) in prov_graph)
     self.assertTrue((output_node,
                      PROV.wasDerivedFrom, input_node) in prov_graph)
+
+
+# Test harness only (see meta.json): the region is a unittest.TestCase
+# method that only ever asserts and returns None, and it needs `self` (for
+# both self.ONTOLOGY and the assert* methods) which the extracted method no
+# longer has -- driver.py supplies a minimal real unittest.TestCase
+# instance. `demo` turns a failed assertion into a comparable value instead
+# of letting it abort the driver, same convention as the trav_existence /
+# trav_one_step siblings in this stratum that translate a bare `test_*`.
+def demo(self) -> object:
+    try:
+        test_provenance_annotation_multiple_returns(self)
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

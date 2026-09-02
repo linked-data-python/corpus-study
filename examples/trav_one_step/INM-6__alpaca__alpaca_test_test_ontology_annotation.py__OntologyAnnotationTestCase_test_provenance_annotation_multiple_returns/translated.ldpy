@@ -5,6 +5,7 @@ import io
 from rdflib import Literal, URIRef, Namespace, Graph, RDF, PROV
 from alpaca import activate, deactivate, Provenance, save_provenance
 from alpaca.ontology import ALPACA
+from alpaca_context import InputObject, process_multiple  # context shim -- see meta.json
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
@@ -27,37 +28,34 @@ def test_provenance_annotation_multiple_returns(self):
     # Check that the annotations exist (1 per class is expected. None
     # are expected for the classes of `process`)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.Parameter} })), 1)
+        m{ ?s rdf:type {self.ONTOLOGY.Parameter} }.count(), 1)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.ProcessFunctionMultiple} })), 1)
+        m{ ?s rdf:type {self.ONTOLOGY.ProcessFunctionMultiple} }.count(), 1)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.ProcessedDataMultiple} })), 1)
+        m{ ?s rdf:type {self.ONTOLOGY.ProcessedDataMultiple} }.count(), 1)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.InputObject} })), 1)
+        m{ ?s rdf:type {self.ONTOLOGY.InputObject} }.count(), 1)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.OutputObject} })), 1)
+        m{ ?s rdf:type {self.ONTOLOGY.OutputObject} }.count(), 1)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.ProcessFunction} })), 0)
+        m{ ?s rdf:type {self.ONTOLOGY.ProcessFunction} }.count(), 0)
     self.assertEqual(
-        len(list(m{ ?s rdf:type {self.ONTOLOGY.ProcessedData} })), 0)
+        m{ ?s rdf:type {self.ONTOLOGY.ProcessedData} }.count(), 0)
 
     # FunctionExecution is ProcessFunctionMultiple
-    execution_uri = list(
-        m{ ?s rdf:type {ALPACA.FunctionExecution} })[0]
+    execution_uri = m{ ?s rdf:type {ALPACA.FunctionExecution} }.first()
     self.assertTrue(bool(m{ {execution_uri} rdf:type
                      {self.ONTOLOGY.ProcessFunctionMultiple} }))
 
     # Check parameter name
-    parameter_node = list(
-        m{ ?s rdf:type {self.ONTOLOGY.Parameter} })[0]
+    parameter_node = m{ ?s rdf:type {self.ONTOLOGY.Parameter} }.first()
     self.assertTrue(bool(m{ {parameter_node}
                      {ALPACA.pairName} "param_1" }))
     self.assertTrue(bool(m{ {parameter_node}
                      {ALPACA.pairValue} 45 }))
 
     # Check returned value
-    output_node = list(
-        m{ ?s rdf:type {self.ONTOLOGY.ProcessedDataMultiple} })[0]
+    output_node = m{ ?s rdf:type {self.ONTOLOGY.ProcessedDataMultiple} }.first()
     self.assertTrue(bool(m{ {output_node}
                      prov:wasGeneratedBy {execution_uri} }))
     self.assertTrue(bool(m{ {output_node}
@@ -81,11 +79,25 @@ def test_provenance_annotation_multiple_returns(self):
                              {self.ONTOLOGY.Attribute} }))
 
     # Check input value
-    input_node = list(
-        m{ ?s rdf:type {self.ONTOLOGY.InputObject} })[0]
+    input_node = m{ ?s rdf:type {self.ONTOLOGY.InputObject} }.first()
     self.assertTrue(bool(m{ {execution_uri}
                      prov:used {input_node} }))
     self.assertTrue(bool(m{ {input_node}
                      rdf:type {ALPACA.DataObjectEntity} }))
     self.assertTrue(bool(m{ {output_node}
                      prov:wasDerivedFrom {input_node} }))
+
+
+# Test harness only (see meta.json): the region is a unittest.TestCase
+# method that only ever asserts and returns None, and it needs `self` (for
+# both self.ONTOLOGY and the assert* methods) which the extracted method no
+# longer has -- driver.py supplies a minimal real unittest.TestCase
+# instance. `demo` turns a failed assertion into a comparable value instead
+# of letting it abort the driver, same convention as the trav_existence /
+# trav_one_step siblings in this stratum that translate a bare `test_*`.
+def demo(self) -> object:
+    try:
+        test_provenance_annotation_multiple_returns(self)
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

@@ -20,3 +20,17 @@ def test_skos_round_trip() -> None:
     reloaded = Concept.from_rdf(turtle, format="turtle", subject=subjects[0])  # type: ignore[arg-type]
 
     assert reloaded.model_dump() == concept.model_dump()
+
+
+# Test harness only (see meta.json): the region is a pytest test that only
+# ever asserts, so `demo` turns a failed assertion into a comparable value
+# instead of letting it abort the driver -- same convention as the
+# trav_existence/trav_one_step siblings that translate a bare `test_*`
+# function (see e.g. OntoUML__ontouml-json2graph, IndustryFusion__DigitalTwin
+# in this same stratum). Identical on both sides.
+def demo() -> object:
+    try:
+        test_skos_round_trip()
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

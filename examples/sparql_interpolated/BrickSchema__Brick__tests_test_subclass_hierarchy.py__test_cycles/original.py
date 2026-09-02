@@ -1,9 +1,12 @@
 # Extracted from BrickSchema/Brick@c12949f236 : tests/test_subclass_hierarchy.py
 # region: test_cycles (lines 18-40, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
+from rdflib import Graph
+from context_shim import minify  # context shim, see meta.json
+
 g = Graph()
 
-def test_cycles():
+def test_cycles(g=g):
     # Find all the classes that make the hierarchy cyclic.
     classes_in_cycles = []
     res1 = g.query(

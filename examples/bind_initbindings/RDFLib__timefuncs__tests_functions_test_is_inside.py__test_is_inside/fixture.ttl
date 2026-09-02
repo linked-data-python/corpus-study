@@ -1,4 +1,81 @@
-# Input graph for RDFLib__timefuncs__tests_functions_test_is_inside.py__test_is_inside — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for RDFLib__timefuncs__tests_functions_test_is_inside.py__test_is_inside.
+#
+# `test_is_inside` loads its OWN fixture, at a path it hardcodes:
+# `tests_dir / "data" / "is_inside.ttl"` where `tests_dir = Path(__file__).parent`
+# -- so the real file both original.py and translated.ldpy read is
+# `data/is_inside.ttl`, at the exact same relative path as in the upstream
+# repository (RDFLib/timefuncs@dd3bde8727, tests/functions/data/is_inside.ttl),
+# copied here VERBATIM, unmodified, with no path-fixing code needed on either
+# side (see meta.json).
+#
+# This file mirrors data/is_inside.ttl for documentation/protocol consistency
+# (INSTRUCTIONS.md SS3: "le fixture est un acte de traduction a part entiere");
+# it is not read directly by either version -- see driver.py. It is the real
+# upstream test fixture, not one written for this study: it already covers
+# several solutions (a02, a07, a08, a09), the zero-solution case for most
+# other pairs (a01, a03-a06 all fail their respective clause), and a lone
+# Instant with no matching Interval at all (a08 has no :b08).
+PREFIX time: <http://www.w3.org/2006/time#>
+PREFIX : <https://w3id.org/timefuncs/testdata/inside/>
+
+:a01 a time:Instant .
+:b01 a time:Interval .
+
+:a02 a time:Instant .
+:b02 a time:Interval .
+
+:a03 a time:Instant .
+:b03 a time:Interval .
+
+:a04 a time:Instant .
+:b04 a time:Interval .
+
+:a05 a time:Instant .
+:b05 a time:Interval .
+
+:a06 a time:Instant .
+:b06 a time:Interval .
+
+:a07 a time:Instant .
+:b07 a time:Interval .
+
+:a08 a time:Instant .
+
+:a09 a time:Instant .
+:b09 a time:Interval .
+
+
+:a01 time:inside :b01 .
+:b02 time:inside :a02 .
+
+:a03 time:before :b03 .
+:b04 time:before :a04 .
+
+:a05 time:after :b05 .
+:b06 time:after :a06 .
+
+:b07
+    time:hasBeginning :b07_beginning ;
+    time:hasEnd :b07_end ;
+.
+
+:a07
+    time:after :b07_beginning ;
+    time:before :b07_end ;
+.
+
+# a second Instant inside :b7
+:a08
+    time:after :b07_beginning ;
+    time:before :b07_end ;
+.
+
+:a09 time:inXSDDateTime "2021-07-20T20:00:01" .
+:b09
+    time:hasBeginning [
+        time:inXSDDateTime "2021-07-20T12:34:56.0"
+    ] ;
+    time:hasEnd [
+        time:inXSDDate "2021-07-21"
+    ] ;
+.

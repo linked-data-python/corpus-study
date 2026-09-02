@@ -13,11 +13,24 @@
     "graph_read": 3,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: SV->sv"
+    "prefixes: SV->sv",
+    "CARDINALITY TRAP, not fused: the region is a 3-hop chain (urn -> node via sv:citedBy, node -> file via sv:citingFile, node -> line via sv:citingLine), the textbook trav_navigation shape, but the last two hops are `g.value()` (first-or-none), not loops. Fusing them into one join -- `m{ {URIRef(urn)} sv:citedBy ?node ; sv:citingFile ?file }` -- would make a node with two sv:citingFile triples yield two solutions where the original's g.value() only ever used the first, silently inflating the result (fixture would need to actually carry such a node to see it, which it deliberately does not need to for this to be a real risk). Kept as `for node in m{ {URIRef(urn)} sv:citedBy ?node }:` (the only hop that was already a full loop in the original, so fuses safely into itself as a single-pattern m{}) followed by two separate `.first()` reads -- the literal, most-specific-per-site translation of each `g.value()` call, per INSTRUCTIONS.md SS2's 'credit every island separately'.",
+    "`URIRef(urn)` interpolates as the bare term `{URIRef(urn)}`, not `f<{urn}>`: `f<...>` percent-encodes, `URIRef()` does not, and `urn` here is already meant to be used as-is (it is matched against subjects already in the graph, not built fresh) -- see INSTRUCTIONS.md SS2's URIRef(x)-vs-f<{x}> pitfall.",
+    "added context_shim.py for SV/PROV/CheckResult/CiteSite/Failure/FetcherResult/RepoResult (apysource.namespaces / apysource.results, undefined once the region is extracted from its package). `apysource` IS on PyPI (0.10.0, verified via `pip index versions`), but installing it -- and whatever it pulls in -- into the venv shared by every concurrent agent, only to end up pinned to a version that may not match this region's commit (f800ec97c1), was judged out of scope for one region; the shim reproduces the exact commit's namespaces.py/results.py verbatim instead.",
+    "fixture.ttl: ex:doc1 has three sv:citedBy sites (site_a: file+line: two solutions of the citedBy join collapse via .first() into one CiteSite each; site_b: file only, line stays None, exercising CiteSite's own optional-line case; site_c: no sv:citingFile at all, so `file is None` must skip it even though it IS a citedBy node), a neighbouring ex:doc_other with its own citing site (must not leak into ex:doc1's results -- proves the join is anchored on the given urn), ex:doc_no_sites present in the graph with zero sv:citedBy triples (the zero-solution case for a urn that DOES resolve), and the empty-string urn (must short-circuit on `if not urn` before the graph is even touched).",
+    "verified anti-hollow-green: replacing `{URIRef(urn)} sv:citedBy ?node` with `?anysubj sv:citedBy ?node` makes `rdfeval check` FAIL (the stray projected variable turns `node` into a 2-tuple, so every `.first()` read below it silently finds nothing and the region returns [] instead of the two expected sites) -- restored and re-verified OK afterwards."
   ],
   "draft_sha": "c25b42b516bb3eca",
   "provenance": {

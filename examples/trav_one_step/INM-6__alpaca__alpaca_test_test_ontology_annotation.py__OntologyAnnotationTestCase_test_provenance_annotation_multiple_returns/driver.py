@@ -1,49 +1,102 @@
 """Validation driver for INM-6__alpaca__alpaca_test_test_ontology_annotation.py__OntologyAnnotationTestCase_test_provenance_annotation_multiple_returns.
 
-EXCLUDED (see meta.json). Both original.py and translated.ldpy do
-`from alpaca import activate, deactivate, Provenance, save_provenance` at
-module level, and `alpaca` (alpaca-prov on PyPI, the real provenance-capture
-library this test is about) is not installed in this study's venv (verified:
-`~/.venvs/ldpy/bin/python -c "import alpaca"` -> ModuleNotFoundError).
-`_exec_python`/`_exec_ldpy` therefore fail identically at the very top of
-the region, on *both* sides, before `entry`/`calls` is ever reached.
+This region READS a graph, so the oracle is not isomorphism but the
+equality of the values both versions produce from the same input graph
+(design record corpus/405). But the graph here is not external input: the
+region runs `alpaca`'s real Provenance tracking over a call it makes itself
+(`process_multiple(input_object, 45)`, decorated with `@Provenance` in the
+context shim `alpaca_context.py`) and reads back the PROV graph that
+produces. There is nothing for a `fixture.ttl` to supply.
 
-The region's real body also calls `InputObject()` and `process_multiple(...)`
--- a class and an `@alpaca.Provenance`-decorated function defined earlier in
-the same ~1000-line test file, not carried by the extraction -- and reads
-`self.ONTOLOGY`, set by the test case's own `setUpClass`. None of this is a
-context-shim job: a shim restores a broken *binding* (an import path, a
-constant); `InputObject`/`process_multiple` only mean anything together with
-`alpaca.Provenance`'s real call-stack introspection, which actually builds
-the PROV graph this test then reads. Reproducing that would mean
-re-implementing the system under test, which AGENT_BATCH.md forbids
-("n'inventez pas de logique") -- and it would be moot regardless, since the
-`from alpaca import ...` line fails before either binding is ever needed.
+`entry` is the `demo` harness added identically to both original.py and
+translated.ldpy (see meta.json): the region is a unittest.TestCase method
+that only ever asserts, so `demo` turns a failed assertion into a
+comparable "ok" / ("assertion-failed", msg) value instead of letting an
+AssertionError abort the driver. `demo(self)` needs a `self` with both
+`.ONTOLOGY` (bound in OntologyAnnotationTestCase.setUpClass upstream) and
+the assert* methods the region calls (self.assertEqual, self.assertTrue) --
+supplied here as a minimal real unittest.TestCase instance, one fresh
+instance per side per call so alpaca's activate()/deactivate() session
+state (verified safe to invoke twice in the same process, see meta.json)
+never leaks between the two sides.
 
-alpaca's own requirements.txt (numpy, networkx, dill, joblib, rdflib, tqdm)
-is lighter than the repository's examples/docs extras (matplotlib, nixio,
-neo, elephant, quantities) might suggest, but installing it and its
-dependencies into this study's shared, version-pinned venv (rdflib==7.2.1,
-for reproducibility across the whole corpus study) is out of scope for a
-single region's translation and was not done.
+Originally marked EXCLUDED (translation_status: draft) because `alpaca` was
+not installed in this venv. Corrected: `alpaca-prov` IS published on PyPI
+(`pip index versions alpaca-prov` -> 0.2.0, 0.1.0 -- the "present but
+uninstalled" case, not "inexistent"), installed into ~/.venvs/ldpy, and the
+region genuinely executes end to end -- this is not a stand-in fixture, it
+is alpaca's own real call-stack introspection producing a real PROV graph,
+verified against the upstream source (INM-6/alpaca@2b8dd34fc6, see
+alpaca_context.py) before relying on it.
 
-The rdflib read sites themselves WERE translated in full (see translated.ldpy
-and translation_notes in meta.json) and checked independently: the file
-transpiles cleanly on its own --
-
-    ~/.venvs/ldpy/bin/python -c "from ldpy.transpiler import transpile; \
-        transpile(open('translated.ldpy').read(), filename='translated.ldpy')"
-
--- which only requires the island syntax to be valid, not `alpaca` to be
-importable. No `calls=` fixture can make this reach any of those sites: the
-import fails first, for both sides, so any fixture list would be theatre.
+Installing alpaca surfaced a second, more interesting obstacle, fixed by
+`_prime_linecache_for_transpiled_source` below: alpaca's own frame
+introspection chokes on the untranspiled .ldpy text it finds on disk. See
+that function's docstring, and meta.json, for the full account -- this is
+a genuine finding about running third-party source-introspecting code from
+a transpiled file, not a gap in what `m{ }`/`.first()`/`.count()`/`bool()`
+can express.
 """
+import linecache
+import unittest
+from pathlib import Path
+
 from rdfeval.harness import run_pair
+from alpaca_context import ONTOLOGY
+
+HERE = Path(__file__).resolve().parent
+TRANSLATED = HERE / "translated.ldpy"
+
+
+def _prime_linecache_for_transpiled_source() -> None:
+    """alpaca's @Provenance decorator introspects the CALLING frame's
+    source (inspect.getsourcelines -> linecache) to build a _SourceCode
+    (used e.g. for the alpaca:codeStatement triple) -- see
+    alpaca/code_analysis/source_code.py. The frame that calls activate()
+    from translated.ldpy has co_filename == str(TRANSLATED): the harness
+    compiles the TRANSPILED Python but tags the code object with the
+    original .ldpy path (rdfeval/harness.py:_exec_ldpy), which it must,
+    since that IS the region's file. A naive linecache read therefore
+    finds the raw .ldpy text on disk (`@graph prov_graph`, `m{ }`, ...) --
+    not valid Python -- and alpaca's own `ast.parse()` on it raises
+    SyntaxError, with no rdflib triple mismatch involved at all.
+
+    This primes linecache with the actual transpiled Python text instead,
+    exactly as `_exec_ldpy` compiled it -- the standard technique tools
+    like doctest/IPython use to make `inspect` see the source of
+    dynamically compiled code. It changes nothing about what runs (the
+    module was already compiled from this same transpiled text); it only
+    lets a third-party library's frame introspection see it too.
+    """
+    from ldpy.transpiler import transpile
+    r = transpile(TRANSLATED.read_text(), filename=str(TRANSLATED))
+    path = str(TRANSLATED)
+    linecache.cache[path] = (len(r.code), None,
+                              r.code.splitlines(keepends=True), path)
+
+
+_prime_linecache_for_transpiled_source()
+
+
+class _Case(unittest.TestCase):
+    """Stand-in for OntologyAnnotationTestCase: only .ONTOLOGY (bound by
+    the real class's setUpClass) and the assert* methods (inherited from
+    unittest.TestCase, unmodified) are needed by the extracted method."""
+    ONTOLOGY = ONTOLOGY
+
+    def runTest(self):
+        pass
+
+
+def call_default():
+    # A fresh _Case (and hence nothing shared) per invocation; alpaca's own
+    # activate(clear=True)/deactivate() resets its module-level session
+    # state inside the region itself.
+    return ((_Case(),), {})
+
 
 VERDICT = run_pair(
     __file__,
-    entry='test_provenance_annotation_multiple_returns',
-    calls=[((), {})],  # never reached: the ModuleNotFoundError above fires
-                        # while loading original.py/translated.ldpy, before
-                        # entry is looked up
+    entry='demo',
+    calls=[call_default],
 )

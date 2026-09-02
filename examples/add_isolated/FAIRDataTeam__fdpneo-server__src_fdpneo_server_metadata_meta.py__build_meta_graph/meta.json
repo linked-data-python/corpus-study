@@ -15,12 +15,18 @@
     "term_constructor": 9,
     "triple_add": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@graph", "+{ }", "interpolation {expr}", "prefixed name", "from … import p:"],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "The region's 12 graph.add() calls run in TWO runs of shared-subject writes (record_subject, then activity) rather than one isolated add each, so -- per INSTRUCTIONS.md SS2 'toujours la construction la plus specifique' -- this translation uses the add_run_shared_subject pattern (a single `;`-joined +{ } per contiguous run on one subject) instead of forcing 12 separate +{ } blocks, which would have been a degradation relative to what the language offers. Each `if`-guarded optional predicate (dct:creator, fdp-o:validatedAgainst, prov:wasAssociatedWith) stays its OWN single-line +{ } (0.4.0 compound-suite feature), since it is not part of the unconditional run.",
+    "activity's two rdf:type triples (prov:Activity and FDP_CREATE_OPERATION/FDP_MODIFY_OPERATION) share both subject AND predicate, so they are written as one Turtle object list (`a prov:Activity, {expr}`) rather than repeating `a` -- again the most specific construction for what the source code does (two `graph.add()` calls on the exact same (activity, rdf:type) pair).",
+    "rdf:type is written with the `a` keyword shortcut, not a `rdf:` prefix -- RDF.type never appears as a separate predicate elsewhere in the region, so no rdf: prefix was needed at all (draft's `RDF->rdf` note is therefore moot).",
+    "prefix `fdp-o:` for FDP_DEFAULT matches the project's own binding (see PREFIXES in fdpneo_server/shared/namespaces.py) rather than inventing a new prefix name; confirmed a hyphenated prefix name transpiles and imports correctly (`@prefix fdp-o: <...> .` / `from MODULE import fdp-o:`).",
+    "context_shim.py reproduces (copied, not invented) the private helpers _next_version/_extract_creation/_extract_state/_extract_validated_against from meta.py, record_graph_uri/meta_graph_uri from shared/graphs.py, and MetadataState/DEFAULT_STATE from metadata/states.py, since none of fdpneo_server.* is importable standalone; original.py's function body is otherwise byte-for-byte the same as the corpus source, only the import block was rebound to the shim.",
+    "Anti-hollow-green: changing translated.ldpy's `prov:atTime {Literal(now)}` to `{Literal(effective_created)}` makes `rdfeval check` correctly report equivalent: false (3 of 5 cases: graphs not isomorphic) -- the 2 CREATE-with-now cases happen to coincide since effective_created==now there, which is exactly why the driver's case C/D/E (MODIFY, and CREATE with an explicit `created=` override) exist. Restored afterwards."
   ],
+  "article_candidate": true,
   "draft_sha": "7545be1fd074c908",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.088925+00:00",

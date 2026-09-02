@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from context_shim import BASEDIR, S
 SEM = Namespace("http://example.org/semtech#")
 g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v5_4_0.ttl")
 

@@ -16,11 +16,23 @@
     "namespace_term": 9,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "f<…>",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: opcua_ns->opcua, RDF->rdf"
+    "prefixes: opcua_ns->opcua, RDF->rdf (both module-level literal Namespace() calls, static @prefix).",
+    "BASE = Namespace(base_ns) is local-in-a-function like the stratum's target, but base_ns is a PARAMETER, not a literal string: `@prefix` cannot hold it (no interpolation in `<IRI>` -- INSTRUCTIONS.md §1 only documents `{expr}` for `f<...>`, not for the bare `@prefix ex: <IRI> .` form). Used `@prefix base: f<{base_ns}> .` instead, right after the value is known (after g.parse, matching the source line's position) -- the same formatted-IRI escape already used by the sibling AI-SDC__ACRO__..._build_minimal_graph pair in this stratum for an imported (also non-literal) PREFIX constant. Confirmed directly with the transpiler on a minimal repro (function parameter interpolated in `@prefix base: f<{base_ns}> .`, called with two different base_ns values): it resolves the prefix against the value in force at that point in the block, so a parameter works exactly like the AI-SDC import did. This is NOT one of the three escape routes AGENT_BATCH primed for (DefinedNamespace._NS, dict/registry, g.bind) -- BASE never leaves the function as an object, it is used only via `.attr` -- the blocker is purely that the IRI itself is a runtime value, and `f<...>` already covers that case.",
+    "Went beyond the stratum's own idiom for the rest of the region (INSTRUCTIONS.md §2, 'toujours la construction la plus specifique'): `for s, p, o in g.triples((None, RDF.type, BASE.BoundMap))` with p/o discarded -> `for s in m{ ?s rdf:type base:BoundMap }` (single projected variable yields a bare term, exactly g.triples' first tuple element); each `g.value(s, BASE.pred)` -> `m{ {s} base:pred ?o }.first()` (trav_single_value's construction), kept as two SEPARATE m{ } (not fused into the outer pattern) precisely because fusing would change cardinality from 'first value or none' to a join, per the pitfall INSTRUCTIONS.md §2 warns about.",
+    "fixture.ttl deliberately excludes opcua:String and an unrecognised datatype: both make the region return the bare class `str` as a dict value, and rdfeval.harness.materialise() then tries to iterate `str` itself (`hasattr(str, '__iter__')` is True on the class though `str` is not iterable) -- 'type' object is not iterable, identically for original.py and translated.ldpy. This is a harness limitation on comparing bare Python `type` objects, unrelated to the translation: float/bool/int/None (the other four branches, all exercised) materialise fine. g.namespace_manager.store.namespace(...) and g.parse(...) are left as plain rdflib calls: no island in the vocabulary covers the namespace-manager's own prefix registry or file parsing, and binding_ns/uaentity_ns are supplied directly in driver.py so that unrelated branch is never exercised."
   ],
   "draft_sha": "67633569e2376273",
   "provenance": {

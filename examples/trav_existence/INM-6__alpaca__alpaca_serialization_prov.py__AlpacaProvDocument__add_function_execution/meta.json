@@ -12,11 +12,21 @@
   "categories": {
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, PROV->prov, XSD->xsd"
+    "prefixes: RDF->rdf, PROV->prov, XSD->xsd (RDF and XSD are unused both before and after translation; they come from the file-level import block the extractor kept, not from this region).",
+    "The region's single extracted operation (rdf_ops: 1, categories.namespace_term: 1) is one line: `PROV.wasAttributedTo not in self.graph.predicates(container_entity, script_agent)`, a trav_existence read via `Graph.predicates(s, o)` (filters by BOTH subject and object) rather than the more usual `(s, p, o) in g`. Direct translation: `not bool(m{ {container_entity} prov:wasAttributedTo {script_agent} })`. The other ~85 lines of the region (the `else` branch: `_add_Function`, `_add_FunctionExecution`, per-input/output entity loops, `wasDerivedFrom` products, `wasAssociatedWith`) touch no namespace term and are untranslated Python, unchanged -- there is nothing in that branch for this stratum to credit or debit, and INSTRUCTIONS.md SS2 forbids restructuring, so it stays exactly as extracted, including its own now-unresolved names (`Container`, `_get_function_name`, `ONTOLOGY_INFORMATION`) -- dead code in every fixture this driver runs, since `demo()` only exercises the `_is_membership` branch.",
+    "context_shim.py: minimal `AlpacaProvDocument` stand-in (self.graph, a recorded-not-executed `_wasAttributedTo`, identity `_create_entity`, no-op `_add_membership`) plus faithful namedtuple reproductions of `FunctionInfo`/`FunctionExecution` from alpaca/alpaca_types.py:29-44, and `membership_execution()` reproducing the exact `input={0: ...}, params={'index': ...}, output={0: ...}` shape that `Provenance._add_container_relationships` builds at alpaca/decorator.py:522-538 for subscript/attribute accesses -- confirmed by reading both files at the pinned commit via `gh api`. The `alpaca` package itself is NOT installed: it is not the same project as the unrelated 10 KB package named `alpaca` on PyPI (checked with `pip download alpaca==1.0.0 --no-deps`, a 10 KB unrelated tarball) and the real INM-6/alpaca has no matching PyPI distribution, so it is `classification: excluded`-worthy on its own, but is sidestepped entirely here by the shim (same pattern as the sibling `IndustryFusion.../Entity_add_contentclass_if_missing` region), so no dependency actually blocks this region.",
+    "demo() harness (identical on both sides, see meta.json): builds a fresh AlpacaProvDocument(graph) from caller-supplied Turtle, runs the region on a subscript-kind execution, returns the count of `_wasAttributedTo` calls -- the one bit of information the read decides. Four calls: (1) exact triple present -> not called; (2) absent entirely -> called; (3) same subject/predicate but a DIFFERENT object (agent) -> called, proving the object is part of the match; (4) same predicate/object but a DIFFERENT subject (container) -> called, proving the subject is part of the match too. `self.graph.predicates(s, o)` filters by both, so cases 3-4 are the neighbourhood a looser translation (e.g. dropping the object and matching on predicate+subject only) would silently pass without.",
+    "Deliberately broke the translation (replaced `{script_agent}` with an unbound `?anyagent` in the m{ } pattern, dropping the object from the match) to confirm rdfeval check catches it: FAIL call[2].result: values differ (1 vs 0) -- case 3 (attributed to a DIFFERENT agent) should still call _wasAttributedTo (1) but the loosened pattern matched on predicate+subject alone and wrongly returned 0. Restored, check is green again."
   ],
   "draft_sha": "2dfd7eb90474d8d2",
   "provenance": {

@@ -13,11 +13,20 @@
     "sparql": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDFS->rdfs"
+    "prefixes: RDFS->rdfs",
+    "Nested sub-selects (SELECT * inside SELECT * inside SELECT *, purrdf's own regression test for a parser bug on that exact shape) are plain SPARQL, so s{ } embeds the query text verbatim with no interpolation; only the inline PREFIX rdfs: line moves to a file-level @prefix (querying.md: the prologue is built from @prefix declarations in scope, not from the query string).",
+    "Context restored (see original.py/translated.ldpy headers): the extraction tool's context lines kept `_graph_with_label = Graph()` (line 3 of the real file) but not the `.add(...)` call two lines below that actually populates it (lines 4-6) -- restored verbatim, identical on both sides, per INSTRUCTIONS.md section 6 ('graph bound but context lines cannot carry the rest'). No fixture.ttl: the entry point takes no argument and reads this fixed module-level graph directly, the same situation as lazlop/semantic_objects's test_class_scope_or_roundtrip and RDFLib/timefuncs's test_is_after in this stratum -- driver.py uses calls=[((), {})].",
+    "The original test only asserts and returns nothing; `return results` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff (same pattern as the two precedents above).",
+    "Anti-hollow-green check performed: changed rdfs:label to rdfs:comment in the second sub-select of translated.ldpy -- rdfeval check FAILED (AssertionError: len(results) no longer 1, since the single real triple only has an rdfs:label, not an rdfs:comment). Reverted; check is green again."
   ],
   "draft_sha": "b9bda0f36231a09b",
   "provenance": {

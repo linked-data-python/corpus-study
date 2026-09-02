@@ -1,6 +1,15 @@
 # Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/shacl2flink/lib/shacl_properties_to_sql.py
 # region: translate (lines 2209-2209, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+# (added to make the region executable: `g` and `prefixes` are two of the
+# three parameters of the enclosing function, `translate(shaclefile,
+# knowledgefile, prefixes)` -- `shaclefile`/`knowledgefile` only matter to
+# build `g` upstream (`g = Graph(); g.parse(shaclefile); h = Graph();
+# h.parse(knowledgefile); g += h`), which this one-line region never reads,
+# so only the two parameters this line touches are restored, as a minimal
+# `def translate(g, prefixes):` wrapper -- see meta.json and
+# AGENT_BATCH.md's "restaurez la liaison". `lib.utils` is `lib/utils.py`
+# alongside this file, transcribed verbatim from the same commit.)
 import lib.utils as utils
 sparql_get_all_properties = """
 SELECT
@@ -104,4 +113,27 @@ GROUP BY ?nodeshape ?targetclass ?propertypath ?mincount ?maxcount ?attributecla
 order by ?inheritedTargetclass
 """  # noqa: E501
 
-qres = utils.in_stable_order(g.query(sparql_get_all_properties, initNs=prefixes))
+
+# NOT TRANSLATED (see meta.json, classification not-expressible): `prefixes`
+# is the function's OWN parameter -- a runtime dict, populated by the real
+# caller (create_sql_checks_from_shacl.py:main) by parsing an external
+# JSON-LD context file (`context_graph.parse(context, format="json-ld");
+# for prefix, namespace in context_graph.namespaces(): prefixes[prefix] =
+# rdflib.Namespace(namespace)`) chosen on the command line. `sh:`, `rdfs:`
+# and `rdf:` happen to be pre-bound by rdflib's own default NamespaceManager
+# (confirmed empirically: `Graph().query(q)` resolves them with no `initNs`
+# at all), but `ngsi-ld:` is not, and the query's own FILTER clause
+# (`?valuepath = ngsi-ld:hasValue || ...`) genuinely depends on it -- drop
+# `initNs=prefixes` and the query raises "Unknown namespace prefix :
+# ngsi-ld" (checked). `@prefix` takes a literal IRI known when the file is
+# transpiled (`@prefix ex: <{iri}> .` is a SyntaxError, checked against the
+# transpiler), and there is no `s{ }(bindings=...)` equivalent for a
+# namespace mapping -- only for term bindings. Since the value that would
+# have to fill `@prefix ngsi-ld: <...>` only exists once this function is
+# called with a caller-supplied dict, there is no island form here more
+# specific than plain rdflib -- the same limitation as the GPViz.__init__
+# region elsewhere in this stratum, except there BOTH the query text and the
+# namespace mapping were parameters; here only the mapping is.
+def translate(g, prefixes):
+    qres = utils.in_stable_order(g.query(sparql_get_all_properties, initNs=prefixes))
+    return qres

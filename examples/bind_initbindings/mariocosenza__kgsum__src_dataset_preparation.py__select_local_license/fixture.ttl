@@ -2,3 +2,15 @@
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# Several matches (the query is LIMIT 1, so the entry point only ever
+# returns one of these -- exercised by the "several solutions" requirement,
+# not by asserting on which one is picked).
+ex:dataset1 dcterms:license <http://creativecommons.org/licenses/by/4.0/> .
+ex:dataset2 dcterms:license <http://creativecommons.org/licenses/by-sa/4.0/> .
+
+# Neighbourhood that must NOT match: a different predicate, and a subject
+# with no license at all.
+ex:dataset1 dcterms:title "Dataset one" .
+ex:dataset3 dcterms:title "Untitled dataset" .

@@ -10,10 +10,24 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "translation_notes": [
+    "res1 (`SELECT ?brick_class WHERE { ?brick_class rdfs:subClassOf+ ?brick_class }`) is a literal query, no interpolation: `s{ }` verbatim.",
+    "res2 is the interesting one: the original builds it with `\"\"\"...brick:%s...brick:%s...\"\"\" % (minify(brick_class), minify(brick_class))`, a printf-splice reconstructing a prefixed name from a hand-rolled `node.split('#')[-1]`. Translated as `s{ ... {brick_class} rdfs:subClassOf+ ?s . ?o rdfs:subClassOf+ {brick_class} ... }`: `brick_class` is itself already the full URIRef the query needs, so the direct term-position interpolation IS the value `brick:{minify(brick_class)}` reconstructs -- minify-then-reprefix is an exact identity round-trip for any URIRef under the `brick:` namespace, which is the only namespace `rdfs:subClassOf` relations touch in this graph. This also means the translation needs no `@prefix brick:` at all: the term travels as the URIRef it already is, the `brick:` prefix was only ever a detour through text.",
+    "oracle overridden from the pipeline's default 'isomorphism' to a reading oracle (fixture.ttl + entry): the region only reads `g` and asserts, it builds nothing.",
+    "liaison restored: the extracted region has rdf_ops=0/categories={} because `g` is a bare module global, never a parameter -- same shape as the '163 regions' AGENT_BATCH.md describes, just via a global instead of `self.graph`. Fix: `def test_cycles(g=g):` (default = the existing empty global, so a bare `test_cycles()` call is unchanged) so `run_pair(fixture=...)` can hand it a fresh graph per side. Only the signature line changed, identically on both sides; the function body is byte-for-byte the extracted original. `minify` (the repo's own `node.split('#')[-1]` helper, used outside any island to build the `loops` label strings) came back via context_shim.py.",
+    "PROOF, not assumption, that the interpolated loop body cannot be positively exercised through run_pair: res1 finding `brick_class` self-reachable via subClassOf+ IS, by construction, a real cycle through `brick_class`; res2's own conditions (`X subClassOf+ s`, `o subClassOf+ X`, `s subClassOf o`) are then satisfied by that very cycle's own edges, so `classes_in_cycles` non-empty implies `loops` non-empty on ANY fixture, for both a correct and a correctly-translated version alike. The assert therefore raises on BOTH sides together whenever the positive branch is real -- and run_pair's per-call try/except calls fo() then ft() inside ONE try block, so if fo() (original) raises, ft() (translated) is never even invoked: there is no way to observe 'both sides agree that a cycle exists' through this harness, only 'the original raised, so we stopped looking.' This is a property of run_pair's exception model applied to this specific test's logic, not a gap this translation left open.",
+    "So the fixture (a small two-branch acyclic excerpt of real Brick classes, several hops deep, plus one redundant/skip edge -- brick:Air_Handling_Unit is subClassOf both brick:HVAC_Equipment and, redundantly, brick:Equipment) exercises only the always-true steady state of the real test (Brick.ttl is expected to have zero cycles): classes_in_cycles is empty, the res2 loop body never runs on the FINAL translation, and the check mostly proves (a) both sides transpile/parse/execute against real Brick-shaped data without raising and (b) a translated query that spuriously OVER-matches gets caught, because fo() completing lets ft() run.",
+    "ANTI-VERT-CREUX, two rounds. Round 1 (red herring, like generate_brick.py's dead reuse-branch): changed res1's `+` to `*` (zero-or-more) so `classes_in_cycles` becomes every class -- check stayed green, because on a pure parent-edge tree (no back-edge), no interpolated class ever has a DIRECT edge between its forced ancestor-set and descendant-set, so res2 still finds nothing regardless of which classes got spuriously flagged. Round 2 (caught): combined the same `*` with swapping which of the two `{brick_class}` occurrences plays the ancestor role vs the descendant role (`?s rdfs:subClassOf+ {brick_class} . {brick_class} rdfs:subClassOf+ ?o .` instead of the reverse) -- with the redundant skip edge in the fixture this now has something real to match, and `rdfeval check` FAILED with `AssertionError: Loops found in the class hierarchy! {'Air_Handling_Unit -> subClassOf -> Equipment'}`, exactly the spurious pair the swap predicts. Restored afterwards; `diff` against the pre-sabotage backup confirmed byte-identical restoration, and the check is green again.",
+    "article_candidate: no -- the interesting content here is the harness-limitation finding, not a three-line before/after."
+  ],
   "draft_sha": "27efe23020aaf4b7",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.137707+00:00",
@@ -24,5 +38,5 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values"
 }

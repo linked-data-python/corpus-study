@@ -16,10 +16,29 @@
     "namespace_term": 25,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "OWL/RDFS/PHYS = rdflib.Namespace(\"…\") are local variables assigned a literal string inside the function body -- the ns_def_local idiom (INSTRUCTIONS_403 SS2) -- so each became a `@prefix` declared in the block, and the four local Namespace assignments were removed (nothing references them any more, every use site became a prefixed name). RDF = rdflib.Namespace(rdf-syntax-ns) had exactly one use (RDF.type in every g.subjects call) and was dropped entirely in favour of Turtle's `a` shorthand rather than declaring an unused `@prefix rdf:`.",
+    "Each g.subjects(RDF.type, OWL.X) becomes `for v in m{ ?v a owl:X }:` -- arity 1, one unbound term, the target of this stratum, just in subject position rather than the table's canonical object-position example (g.objects(s, p)). Used four times (owl:Class twice -- once for entities, once for physical_entities/physical_rels -- owl:DatatypeProperty once, owl:ObjectProperty twice).",
+    "The 20 g.value(x, P) reads (rdfs:domain/range, six distinct phys: predicates) each became its own `m{ {x} p ?v }.first()`, one island per call site, never merged into the subject-set patterns above even though both read the same graph in the same loop body -- INSTRUCTIONS_403 SS2's 'fondre une lecture une-seule-valeur dans une jointure change la cardinalite' warning: g.value already treats 'first match or none' as its semantics, and .first() reproduces that per-site, so nothing here needed a join.",
+    "`g.value(x, P) or g.value(x, Q)` (the style/mappingStyle and edgeCollectionName/collectionName fallback pairs) carried over as `m{ }.first() or m{ }.first()` unchanged: .first() agrees with g.value on returning None for no match, so Python's `or` short-circuits identically.",
+    "_local_name and _xsd_to_simple are plain string/URI helpers (not RDF reads) and stayed exactly as written, now imported from the context shim.",
+    "Context shim owl_rdflib_context.py: MappingBundle/MappingSource (arango_query_core/mapping.py, ~770 lines total but only these two frozen dataclasses are needed) plus _local_name/_xsd_to_simple, which live in owl_rdflib.py itself but at lines 130-153, outside the extracted region (15-127). All four reproduced verbatim from ArthurKeen/arango-query-core@f75a6be90c. original.py's `from .mapping import …` (a relative import, invalid once the region runs standalone) became `from owl_rdflib_context import …`.",
+    "fixture.ttl is read as raw TEXT and passed to the string-typed `turtle_text` parameter (driver.py uses an explicit `calls=` rather than the default fixture=-parses-a-Graph behaviour, since this entry point parses the Turtle itself).",
+    "Anti-hollow-green check performed: retyped `phys:collectionName` to `phys:nonexistentCollectionName` on the coll= read -- rdfeval check FAILed as expected (physical_mapping.entities dropped ex:Person, since \"if coll:\" is never true). Restored; check is green again.",
+    "The returned MappingBundle's list-valued fields (entities/relationships) are compared with ordered=False (harness default for a fixture run): no rdflib store promises the enumeration order of g.subjects(), and this dataclass's default __eq__ is not itself order-blind past the top level -- verified this did not produce a false FAIL with the real (non-sabotaged) translation before relying on it."
+  ],
+  "article_candidate": true,
   "draft_sha": "5f0873fe4dcd9d0b",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.453399+00:00",

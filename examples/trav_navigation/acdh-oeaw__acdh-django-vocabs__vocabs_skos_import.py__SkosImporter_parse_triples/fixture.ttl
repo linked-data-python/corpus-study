@@ -1,0 +1,44 @@
+# Input graph for acdh-oeaw__acdh-django-vocabs__vocabs_skos_import.py__SkosImporter_parse_triples
+@prefix ex: <http://example.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# The one skos:ConceptScheme in the graph. Its fields exercise:
+#  - several solutions of the dc:/dct: predicate-alternation join (creator:
+#    BOTH predicates fire, one triple each -- order stays deterministic
+#    since allow_properties() visits dct: then dc: in a fixed Python list,
+#    and neither predicate here carries more than one triple, which would
+#    make the ";".join() order depend on store iteration order instead);
+#  - a field with exactly one predicate firing (contributor, language,
+#    license, source);
+#  - two zero-solution fields (subject, publisher -- neither predicate has
+#    any triple at all, so ";".join([]) == "");
+#  - both branches of language_check(), on the description field's nested
+#    double loop (one plain literal with no language tag -> falls back to
+#    self.language, one with an explicit tag -> the tag itself);
+#  - both branches of the title language handling (untouched g.preferredLabel
+#    call: one dc:title with a language tag, one without) -- driver.py sets
+#    self.language to a value distinct from every language tag used here, so
+#    the fallback and the tag-echo branches are visibly different, not
+#    coincidentally equal.
+ex:scheme1 a skos:ConceptScheme ;
+    dc:title "Scheme One"@en, "Scheme One (no lang)" ;
+    dct:creator "Alice" ;
+    dc:creator "Bob" ;
+    dct:contributor "Carol" ;
+    dc:language "en" ;
+    dct:license "CC-BY-4.0" ;
+    dct:description "A plain description, no language tag" ;
+    dc:description "Une description"@fr ;
+    dc:source "Some archive"@de ;
+    ex:unrelatedProp "noise -- must not affect any field" .
+
+# Neighbourhood that must NOT match: a resource carrying every one of the
+# properties above but NOT typed skos:ConceptScheme -- must never be
+# selected by `for cs in m{ ?cs a skos:ConceptScheme }`, and none of its
+# values may leak into ex:scheme1's fields.
+ex:notAScheme dc:title "Should never be read"@en ;
+    dct:creator "Should not leak in" ;
+    dct:description "Should not leak in either" .

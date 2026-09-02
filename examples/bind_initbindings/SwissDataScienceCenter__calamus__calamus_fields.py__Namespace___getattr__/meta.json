@@ -12,10 +12,18 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "not-expressible: `Namespace.__getattr__(self, name)` exists to serve Python's `__getattr__` reflection protocol -- `reference = IRIReference(self, name)` builds a plain Python object from `name`, the ARBITRARY attribute string the caller wrote at some other call site entirely (`SDO.foo`, `SDO.bar`, ...: `name` is never a literal in THIS file, it arrives however Python's attribute lookup happens to be invoked), and RETURNS it so it keeps living after this method returns -- typically embedded as a marshmallow field's IRI, compared/hashed elsewhere via IRIReference.__eq__/__lt__/__hash__ (calamus/fields.py). `@prefix` has no run-time object at all (confirmed with the transpiler: `@prefix ex: <{iri}> .` is a SyntaxError -- the same check as the GPViz.__init__ and IndustryFusion translate() precedents elsewhere in this stratum), and a prefixed name only resolves to a term inside the island that wrote it. Neither can stand in for a value manufactured from a dynamically-supplied name and handed back to arbitrary calling code -- there is no island form here at all, not just a less specific one.",
+    "the smaller `self.ontology.query(ONTOLOGY_QUERY, initBindings={\"property\": p})` ASK check, read in isolation, would fit the stratum's own rule (`?property` is not projected by an ASK, so a bare interpolation, no `s{ }(bindings=...)`) -- but `ONTOLOGY_QUERY` is a pre-parsed Query object SHARED across every `Namespace` instance process-wide (calamus/utils.py wraps `prepareQuery(...)` in a `LazyProxy` specifically because \"prepareQuery is rather slow\"); writing `s{ ask { ... } }` at this call site would inline and re-parse that query text here, abandoning the shared-query design of a module (calamus/utils.py) this region does not own. Left the whole method untranslated rather than credit a fragment whose translation would only be a fair characterisation of the construction if the method's actual reason for being (the reflection hook) were ALSO expressible, which it is not -- crediting only the ASK/initBindings sub-part here would overstate what this stratum's construction covers.",
+    "`IRIReference` is a sibling top-level class in the SAME source file (calamus/fields.py, defined just above Namespace) that the extraction dropped because only the `Namespace.__getattr__` qualname was selected -- an outright NameError in the unmodified draft. Restored via context_shim.py (transcribed verbatim, rdflib/stdlib-only).",
+    "`calamus` is on PyPI (checked: `pip index versions calamus` -> 0.4.3, present but not installed in the pinned study venv) but was NOT installed for this region: `ONTOLOGY_QUERY` is reproduced directly in context_shim.py as an eager `prepareQuery(...)` call rather than through calamus.utils's real `LazyProxy` wrapper, since the proxy only defers that identical call for performance and installing calamus's full dependency chain (marshmallow, lazy_object_proxy) for a not-expressible region's dead names would be scaffolding, not context. `Proxy`, `normalize_type`, `normalize_value` are named in the region's own context import line but never called by `__getattr__`'s body -- stand-in placeholders in context_shim.py, so the import resolves without inventing logic for names this region does not use.",
+    "`self` is restored as a call argument the driver builds directly (no shim module needed for it, same convention as the Terramorpha__minergym and RdfUtils.get_all_subreferences precedents elsewhere in this stratum): a minimal `_NS` class carrying only `.namespace`/`.ontology` and the `__str__` that `IRIReference.__str__` needs (via `str.format`'s implicit `str()` fallback) -- not the full `Namespace.__init__`'s ontology-file parsing, which this region never calls. Built ONCE per driver.py case and shared by both sides (not rebuilt per side): the region only reads `self`, and a fresh `_NS` per side would spuriously 'differ' in run_pair's post-call argument comparison since `_NS` defines no `__eq__`, only identity -- exactly the SimpleNamespace-sharing rationale in the Terramorpha driver.",
+    "two calls, both steering around the branch that raises ValueError: `ontology=None` (skips the query) and an ontology graph declaring the queried property as an owl:ObjectProperty (query succeeds, no raise). run_pair's entry=/calls= path treats ANY exception from EITHER side as a hard error for the whole call, not a value to compare -- it cannot represent 'both sides raise the same error' as equivalence, so a case built to raise was not used.",
+    "checked the anti-hollow-green discipline: changed `IRIReference(self, name)` to `IRIReference(self, name + \"X\")` in translated.ldpy only -- the check FAILS (the second call's ASK query no longer finds `knowsX`, so `__getattr__` raises ValueError where the original does not); restored before finalising."
+  ],
   "draft_sha": "26e76ba6f2008b62",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.437706+00:00",
@@ -26,5 +34,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:__getattr__",
+    "diffs": [],
+    "error": null
+  }
 }

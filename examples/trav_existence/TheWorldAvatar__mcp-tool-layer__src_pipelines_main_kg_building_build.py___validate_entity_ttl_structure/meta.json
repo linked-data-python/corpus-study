@@ -16,11 +16,23 @@
     "serialize_parse": 1,
     "term_constructor": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "prefixes: RDF->rdf, RDFS->rdfs (RDFS stays unused before and after, same as in original.py).",
+    "Four trav_existence-shaped reads translated to bool(m{ }), not just the one the static rdf_ops count would suggest (graph_read only tallies the two explicit .triples()/.objects() API calls; the two bare `in`/`not in` graph containment checks are not separately categorised here either, same as the ScaDS/KGpipe region in this batch): (1) `not any(g.triples((top_entity, None, None)))` -> `not bool(m{ {top_entity} ?any_p ?any_o })` (existence of ANY triple for that subject); (2) `(top_entity, RDF.type, URIRef(top_class_iri)) not in g` -> `not bool(m{ {top_entity} rdf:type {URIRef(top_class_iri)} })` (exact triple, elif of (1)); (4) `(o, RDF.type, target_cls) in g` inside a list-comprehension filter -> `bool(m{ {o} rdf:type {target_cls} })`, per element of the list built by (3).",
+    "(3) `g.objects(top_entity, pred)` is NOT itself existence-shaped -- it is the trav_one_step idiom (`for o in g.objects(s, p)`) -- but SS2 says the most specific construction always, not only for the region's own assigned stratum, so it becomes `[o for o in m{ {top_entity} {pred} ?o } if isinstance(o, URIRef)]`: since exactly one variable (`?o`) is projected, iterating m{ } yields the bare term directly, so the surrounding list comprehension and its `isinstance` filter are untouched.",
+    "Restored a missing binding (the 163-region 'liaison manquante' case, SS6): `_resolve_expected_top_entity_uri` is called but neither defined nor imported in the extracted window. It IS defined in the same source file, at build.py:125-176, well outside the region (854-914), and itself depends on three more helpers (`_normalize_entity_label_key`, `_first_label`, `_choose_preferred_typed_target`) that disambiguate `top_entity` by label-matching when several same-class candidates exist in the graph -- none of that is an RDF-existence read this stratum measures, and reproducing it in full would be translating a second, unassigned region. context_shim.py instead reproduces VERBATIM the one code path the real function takes whenever the caller already supplies `entity_uri` directly and no multi-candidate disambiguation is needed (confirmed against build.py:139-140 and :175-176, both of which return `entity_uri` unchanged in that case) -- the only path this driver's fixtures exercise, since every fixture graph is built so `entity_uri` already IS the expected top entity.",
+    "Driver note: `_validate_entity_ttl_structure` parses its OWN graph from a `ttl_path` file argument, so neither the plain `fixture=` flow (parses one file, passes a Graph positionally -- this entry point takes no positional Graph argument) nor a `demo()` wrapper was needed; each call writes Turtle to a temp file itself and passes `ttl_path=` as a kwarg. `run_pair` also compares kwargs across the two runs, so a naive `tempfile.NamedTemporaryFile` (a fresh random name every call) made `ttl_path` itself differ between the two sides for a reason unrelated to the translation -- fixed by hashing the content into a deterministic, shared, read-only path instead (see driver.py).",
+    "Six calls: A/B/C isolate reads (1)/(2) (require_entity_uri_subject=True, required_links=[]) across all three reachable outcomes -- subject entirely absent (A, fires 'missing subject'), subject present but untyped (B, fires 'missing rdf:type'), subject present and typed (C, valid). D/E/F isolate reads (3)/(4) (require_entity_uri_subject=False) in ONE graph with every kind of neighbour a looser pattern would wrongly admit: p1 (right predicate, right class -> counted), p2 (right predicate, WRONG class -> must be filtered by (4)), a plain Literal on the right predicate (must be filtered by the surrounding isinstance check, proving (3)'s translation still yields raw candidates to it), and p3 on a DIFFERENT predicate entirely (must be absent from (3)'s result). D uses min_count=2 (found=1 -> invalid), E the same graph with min_count=1 (found=1 -> valid), F a separate spec with no target_class_iri at all, so (4) never runs and `objs` is (3) alone.",
+    "Deliberately broke the translation three times to confirm rdfeval check catches each site: (2) `{top_entity} rdf:type {URIRef(top_class_iri)}` -> `{top_entity} ?any_type_p ?any_type_o` (dropped both predicate and object): FAIL call[1].result: values differ ((False, ['...missing required rdf:type...']) vs (True, [])) -- case B, correctly caught. (4) `{o} rdf:type {target_cls}` -> `{o} ?any_o_type ?any_o_cls` (dropped the class): FAIL call[3].result: values differ ((False, ['...found 1']) vs (True, [])) -- case D, p2 wrongly counted since it has SOME type. (3) `{top_entity} {pred} ?o` -> `{top_entity} ?any_pred ?o` (dropped the predicate): FAIL across call[3]/[4]/[5] -- counts collapsed to 0 everywhere once the predicate stopped narrowing the match (the `a rdf:type` triple's object is itself a URIRef the loosened pattern also picks up, but not one of p1/p2/r1/r2, so every case's found-count changed). All three restored, check is green again."
   ],
   "draft_sha": "7c13021c081532d8",
   "provenance": {

@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "SH is a run-time parameter here (rdflib.Namespace passed in by the caller), not a fixed constant, so every predicate is written as an interpolated `{SH.inversePath}` etc. rather than a `sh:` prefix declaration -- a `@prefix sh: <...>` would silently hard-code the namespace the original leaves open to the caller.",
+    "The region's `strata` lists both trav_single_value (line 426, `graph.value(path_node, SH.inversePath)`) and trav_existence (line 435, `graph.value(path_node, rdflib.RDF.first) is not None`); both sites got their own most-specific construction -- `.first()` and `bool(m{ })` respectively -- rather than degrading the existence check to `.first() is not None` just because the region lives under trav_single_value.",
+    "_local and _rdf_list are helpers this function calls but does not define; restored via shim.py, copied verbatim from the installed triplets==0.2.0 package (its shacl_ir.py matches the pinned commit's line numbers exactly, 412-440).",
+    "Anti-vert-creux: fixture.ttl covers a direct inverse hit, an alternativePath list whose FIRST item misses (zero-solution `.first()`) and second item hits (loop must not stop early), the 2-step ( assoc rdf:type ) via_type profile, a 3-step sequence that is existence-true but shape-false (falls through to None -- neighbourhood for the 2-step case), and the true zero-solution path_node with none of the three predicates. Broke the first `.first()` call's predicate (inversePath -> alternativePath) and confirmed `rdfeval check` failed on two fixture cases before restoring."
+  ],
   "draft_sha": "bf0da015c0d3e157",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.285251+00:00",

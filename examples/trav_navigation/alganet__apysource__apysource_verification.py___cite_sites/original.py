@@ -2,8 +2,7 @@
 # region: _cite_sites (lines 146-160, stratum trav_navigation)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef
-from apysource.namespaces import PROV, SV
-from apysource.results import CheckResult, CiteSite, Failure, FetcherResult, RepoResult
+from context_shim import PROV, SV, CheckResult, CiteSite, Failure, FetcherResult, RepoResult  # context shim -- see meta.json
 
 def _cite_sites(g: Graph, urn: str) -> list[CiteSite]:
     """The places that make this fragment's claim, as the graph holds them."""

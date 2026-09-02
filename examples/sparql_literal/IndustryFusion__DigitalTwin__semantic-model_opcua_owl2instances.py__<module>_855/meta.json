@@ -10,10 +10,22 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "IRI",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "prefixes: RDFS->rdfs (implicit, via file-level @prefix), OWL->owl",
+    "A literal CONSTRUCT query (no interpolation: the WHERE clause matches only against a fixed absolute IRI, <http://opcfoundation.org/UA/BaseObjectType>, already present verbatim in the source's query string, and the CONSTRUCT template's predicates are prefixed names rdfs:subClassOf/owl:Class) -- s{ } embeds it verbatim, called on `g` with the call-suffix form. Only the two inline PREFIX lines move to file-level @prefix declarations (querying.md: the prologue comes from @prefix in scope).",
+    "fixture.ttl (written for this translation, since the region's own module-level graph is parsed from a fixture rather than a CLI-supplied file) is trimmed from the real ontology this script reads, semantic-model/opcua/base.ttl in the same repository/commit -- same IRIs (opcua:BaseObjectType, opcua:BaseNodeClass, opcua:BaseInterfaceType, opcua:ModellingRuleType, ...), not invented. It covers: subClassOf* transitivity (a two-hop chain under BaseObjectType, and separately under BaseNodeClass for entity_shim.py's own subClassOf+ query, which this region also calls but which is not itself part of this stratum's construction); the UNION's two independent branches (one pair, UntypedIntermediateType/OddSubtype, where only one side is asserted owl:Class in the input, so the CONSTRUCT's added owl:Class triples on both sides are genuinely exercised, not just carried over from input); and a neighbourhood chain (opcua:BaseDataType/Number/UInt32, also real IRIs from base.ttl) disconnected from both roots, which must not appear in the output.",
+    "entitiesname was two different literal strings on the original vs translated side in the draft (\"..._original.ttl\" vs \"..._translated.ttl\", presumably to avoid a file collision) -- but run_pair's module-state comparison diffs every top-level non-Graph value the two sides share, so this made the check fail on a detail with no RDF meaning. Unified to the same literal path on both sides (original.py and translated.ldpy execute sequentially within one run_pair call, so a shared destination is harmless); noted in both files' headers.",
+    "Anti-hollow-green check performed: dropped the `*` from rdfs:subClassOf* in translated.ldpy's CONSTRUCT WHERE clause (transitivity to a plain single hop) -- rdfeval check FAILED (graph e_graph: 20 vs 16 triples, not isomorphic: the two-hop ExclusiveLimitStateMachineType/MethodNodeClassLeaf/OddSubtype entries dropped out). Reverted; check is green again, and the fixture's 20-triple, non-empty e_graph rules out a trivial empty-vs-empty pass."
+  ],
   "draft_sha": "50659bbc9dfd20ba",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.887688+00:00",

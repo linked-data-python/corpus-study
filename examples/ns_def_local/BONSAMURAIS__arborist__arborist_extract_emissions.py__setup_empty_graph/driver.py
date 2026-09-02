@@ -11,5 +11,5 @@ from rdfeval.harness import run_pair
 VERDICT = run_pair(
     __file__,
     entry='setup_empty_graph',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((), {})],  # setup_empty_graph() takes no arguments
 )

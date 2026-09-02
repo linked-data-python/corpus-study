@@ -13,10 +13,21 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "variable"
+  ],
+  "translation_notes": [
+    "Mirrors the sibling region OntoUML__ontouml-json2graph__json2graph_decoder_decode_obj_class.py__set_class_restrictedto_ontologicalnature (same repository, same idiom): the mechanical draft's 'ontouml_graph += g{ {...} {ontouml_ref(\"containsModelElement\")} {...} }' inside a plain 'for related_id in list_related_ids:' is the biais mecanique the batch instructions warn about. Rewrote as '@graph ontouml_graph' + 'for @bindings in (...)' + a single '+{ }' per row, binding only the varying term (?related_id); the subject (package_dict['id']) is constant across the loop and kept as a bare {expr} interpolation, matching the sibling's treatment of its own constant subject.",
+    "ontouml_ref(\"containsModelElement\") was a call on a STATIC string constant (unlike the sibling's ontouml_ref(restriction_nature_mapping[restriction]), which looks up a value computed per row): replaced with the static prefixed name ontouml:containsModelElement, so the shim's ontouml_ref import became genuinely unused and was dropped from translated.ldpy's imports (original.py still needs it; get_package_contents is kept).",
+    "Context shim (ontouml_shim.py): ARGUMENTS[\"base_uri\"] and ontouml_ref are the same shim content as the sibling region above, verified against the real repository at OntoUML/ontouml-json2graph@982f12b9c4 (arguments.py's initialize_args_test sets base_uri to exactly \"https://example.org#\"; utils_graph.py's ontouml_ref is METADATA[\"conformsTo\"] + \"#\" + entity, and metadata.py hardcodes conformsTo = \"https://w3id.org/ontouml\"). get_package_contents is new to this shim (the sibling region did not need it): copied verbatim from decode_obj_package.py, where it is defined just above this region in the same source file but outside the captured context lines -- this region's own package_dict always satisfies its base case on the first call (package_dict[\"id\"] == package_id), so the recursive branches never execute in the fixtures below, but the function is kept whole rather than trimmed to the base case only, since trimming would be inventing a simplified reimplementation instead of restoring the real one.",
+    "Sabotage-tested: replacing ?related_id with the constant subject term (both S and O the same URIRef) makes rdfeval check fail on the multi-element and single-element fixtures (graphs not isomorphic: 3 vs 1 and content differs); restored before finalising."
+  ],
   "draft_sha": "73129665af95e33a",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.832542+00:00",

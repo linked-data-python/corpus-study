@@ -1,4 +1,28 @@
-# Input graph for alganet__apysource__apysource_verification.py___cite_sites — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for alganet__apysource__apysource_verification.py___cite_sites
 @prefix ex: <http://example.org/> .
+@prefix sv: <https://alganet.github.io/apysource/vocab.ttl#> .
+
+# ex:doc1 has THREE citing sites -- several solutions of the sv:citedBy join:
+ex:doc1 sv:citedBy ex:site_a, ex:site_b, ex:site_c .
+
+# site_a: complete record (file + line).
+ex:site_a sv:citingFile "src/a.py" ;
+          sv:citingLine 10 ;
+          sv:unrelatedProp "noise -- must not affect the result" .
+
+# site_b: file only -- line stays None (CiteSite.line is optional).
+ex:site_b sv:citingFile "src/b.py" .
+
+# site_c: no sv:citingFile at all -- `file is None` must skip it entirely,
+# even though it IS a citedBy node and DOES have a citingLine.
+ex:site_c sv:citingLine 42 .
+
+# Neighbourhood that must NOT match: a different cited resource with its own
+# citing site -- proves the join is anchored on the given urn, not global.
+ex:doc_other sv:citedBy ex:site_other .
+ex:site_other sv:citingFile "other.py" ;
+              sv:citingLine 1 .
+
+# ex:doc_no_sites is a valid subject with no sv:citedBy at all: the
+# zero-solution case for a urn that IS in the graph but has nothing citing it.
+ex:doc_no_sites a ex:SomeType .

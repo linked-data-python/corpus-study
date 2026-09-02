@@ -1,0 +1,11 @@
+# Minimal placeholder for altunelyusuf/SemanticTechnologies@bad0fa7c46's
+# landscape/02-ontology/semtech_tbox_v6_2_0.ttl (see this region's
+# meta.json / context_predecl.py). This region's own two lines
+# (`for s_, p_, d_ in en.NEW_RELATIONS: g2.add((IRI[s_], SEM[p_], IRI[d_]))`)
+# only ADD triples to g2 -- they never read the graph's pre-existing
+# content -- so the real ~1000-triple tbox file's actual content cannot
+# affect this region's correctness. A single triple stands in for it.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sem: <http://example.org/semtech#> .
+
+sem:Ontology a owl:Ontology .

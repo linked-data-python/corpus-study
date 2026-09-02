@@ -2,8 +2,7 @@
 # region: _cite_sites (lines 146-160, stratum trav_navigation)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, URIRef
-from apysource.namespaces import PROV, SV
-from apysource.results import CheckResult, CiteSite, Failure, FetcherResult, RepoResult
+from context_shim import PROV, SV, CheckResult, CiteSite, Failure, FetcherResult, RepoResult  # context shim -- see meta.json
 @prefix sv: <https://alganet.github.io/apysource/vocab.ttl#> .
 
 
@@ -11,13 +10,14 @@ def _cite_sites(g: Graph, urn: str) -> list[CiteSite]:
     """The places that make this fragment's claim, as the graph holds them."""
     if not urn:
         return []
+    @graph g
 
     sites = []
-    for node in g.objects(URIRef(urn), sv:citedBy):
-        file = g.value(node, sv:citingFile)
+    for node in m{ {URIRef(urn)} sv:citedBy ?node }:
+        file = m{ {node} sv:citingFile ?file }.first()
         if file is None:
             continue
-        line = g.value(node, sv:citingLine)
+        line = m{ {node} sv:citingLine ?line }.first()
         sites.append(CiteSite(file=str(file),
                               line=int(str(line)) if line is not None else None))
 

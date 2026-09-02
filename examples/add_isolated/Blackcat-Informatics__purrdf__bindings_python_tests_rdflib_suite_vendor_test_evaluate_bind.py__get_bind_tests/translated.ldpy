@@ -6,7 +6,8 @@ from rdflib import Graph, Literal, URIRef, Variable
 def get_bind_tests():
     base = "http://example.org/"
     g = Graph()
-    g += g{ {URIRef(base + "thing")} {URIRef(base + "ns#comment")} "anything" }
+    @graph g
+    +{ {URIRef(base + "thing")} {URIRef(base + "ns#comment")} "anything" }
 
     def check(expr, var, obj):
         r = g.query(

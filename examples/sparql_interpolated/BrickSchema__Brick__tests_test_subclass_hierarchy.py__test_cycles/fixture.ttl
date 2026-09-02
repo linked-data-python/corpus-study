@@ -1,0 +1,22 @@
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# A small, acyclic excerpt of the real Brick class hierarchy (two branches,
+# several hops deep, so the subClassOf+ property path actually has more
+# than one step to traverse). No class is ever its own ancestor here --
+# this fixture documents the steady state the real test protects: Brick.ttl
+# is expected to have zero cycles, and that is the only branch reachable
+# through run_pair (see meta.json / driver.py for why).
+brick:Equipment rdfs:subClassOf brick:Entity .
+brick:HVAC_Equipment rdfs:subClassOf brick:Equipment .
+brick:Air_Handling_Unit rdfs:subClassOf brick:HVAC_Equipment .
+# Redundant transitive edge (AHU is already a subClassOf Equipment through
+# HVAC_Equipment): still acyclic, but it means "does any edge run directly
+# between two nodes that are indirectly related anyway" is no longer
+# vacuously false, so a query that gets the direction of the two
+# interpolated terms wrong has something real to (wrongly) match.
+brick:Air_Handling_Unit rdfs:subClassOf brick:Equipment .
+brick:Point rdfs:subClassOf brick:Entity .
+brick:Sensor rdfs:subClassOf brick:Point .
+brick:Temperature_Sensor rdfs:subClassOf brick:Sensor .
+brick:Zone_Air_Temperature_Sensor rdfs:subClassOf brick:Temperature_Sensor .

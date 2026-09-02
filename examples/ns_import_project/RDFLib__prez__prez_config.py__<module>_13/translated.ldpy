@@ -1,8 +1,24 @@
 # Extracted from RDFLib/prez@421ee0a9fe : prez/config.py
 # region: <module> (lines 13-13, stratum ns_import_project)
 # licence of the source repository: see meta.json
-from prez.reference_data.prez_ns import EP, REG, TERN
-@prefix ep: <https://prez.dev/endpoint/> .
-@prefix reg: <http://purl.org/linked-data/registry#> .
-@prefix tern: <https://w3id.org/tern/ontologies/tern/> .
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `prez.reference_data.prez_ns` rewritten to `prez_ns_context`, the shim
+# module next to this file (`prez` is not a published package -- not on
+# PyPI, checked directly -- so the real dotted path does not resolve for a
+# single extracted file).
+from prez_ns_context import ep:, reg:, tern:
 
+
+# Demo harness (identical on both sides, see meta.json): this region is a
+# single import line with rdf_ops=0 -- it binds names but performs no graph
+# operation of its own, so there is nothing for the harness's default
+# module-state comparison to observe UNLESS the bound namespaces are
+# actually dereferenced (the prefix import leaves no module-level Python
+# name at all -- declarations.md: "no name is captured"). demo()
+# dereferences one real term from each namespace -- the exact forms used
+# elsewhere in prez/config.py and prez/dependencies.py at the pinned commit
+# (EP["system/object"], REG.status, TERN.hasSimpleValue) -- and returns
+# their string forms.
+def demo():
+    return (str(ep:{"system/object"}), str(reg:status), str(tern:hasSimpleValue))

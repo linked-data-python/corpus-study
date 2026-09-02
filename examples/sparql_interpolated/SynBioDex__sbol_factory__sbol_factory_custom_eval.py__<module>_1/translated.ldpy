@@ -22,9 +22,9 @@ i.e. in your setup.py::
 import rdflib
 
 from rdflib.plugins.sparql.evaluate import evalBGP
-from rdflib.namespace import FOAF
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
 
@@ -60,9 +60,11 @@ if __name__ == "__main__":
     g = rdflib.Graph()
     g.load("foaf.n3")
 
+    @graph g
+
     # Add the subClassStmt so that we can query for it!
-    g += g{ foaf:Person {rdflib.RDFS.subClassOf} foaf:Agent }
+    +{ foaf:Person rdfs:subClassOf foaf:Agent }
 
     # Find all FOAF Agents
-    for x in g.query("PREFIX foaf: <%s> SELECT * WHERE { ?s a foaf:Agent . }" % FOAF):
+    for x in s{ SELECT * WHERE { ?s a foaf:Agent . } }(g):
         print(x)

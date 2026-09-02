@@ -2,7 +2,7 @@
 # region: PropertyConstraint.to_rdf (lines 88-141, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
-from .namespaces import SH
+from context_shim import SH, _create_rdf_list  # context shim, see meta.json
 
 def to_rdf(self, shapes_graph: Graph) -> BNode:
     """Convert constraint to RDF representation.

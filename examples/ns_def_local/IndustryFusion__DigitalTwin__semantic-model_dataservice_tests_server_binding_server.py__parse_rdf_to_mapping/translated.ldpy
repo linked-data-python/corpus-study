@@ -13,9 +13,8 @@ LocalizedText = None
 def parse_rdf_to_mapping(rdf_file, base_ns, binding_ns=None, uaentity_ns=None):
     g = Graph()
     g.parse(rdf_file, format="turtle")
-
-    # Define the base namespace for the vocabulary
-    BASE = Namespace(base_ns)
+    @graph g
+    @prefix base: f<{base_ns}> .
 
     # Check for binding and UA entity namespaces in RDF
     found_binding_ns = g.namespace_manager.store.namespace("binding")
@@ -35,9 +34,9 @@ def parse_rdf_to_mapping(rdf_file, base_ns, binding_ns=None, uaentity_ns=None):
     nsu_pattern = re.compile(r'nsu=(.*?);i=(\d+)')
 
     mapping_data = {}
-    for s, p, o in g.triples((None, rdf:type, BASE.BoundMap)):
-        connector_attribute = g.value(s, BASE.bindsConnectorParameter)
-        datatype_uri = g.value(s, BASE.bindsMapDatatype)
+    for s in m{ ?s rdf:type base:BoundMap }:
+        connector_attribute = m{ {s} base:bindsConnectorParameter ?o }.first()
+        datatype_uri = m{ {s} base:bindsMapDatatype ?o }.first()
 
         if connector_attribute and datatype_uri:
             # Parse namespace and identifier from connector_attribute

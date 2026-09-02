@@ -18,10 +18,22 @@
     "triple_add": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "s{ }",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: FOAF->foaf"
+    "prefixes: foaf->http://xmlns.com/foaf/0.1/, rdfs->http://www.w3.org/2000/01/rdf-schema# (FOAF-the-import retired from the draft: the only thing it fed was the runtime `% FOAF` splice, gone once the prefix is `@prefix`-static, so keeping the import would leave a dead binding and falsify the surface diff).",
+    "THE actual sparql_interpolated site (line 62 of the source): `g.query(\"PREFIX foaf: <%s> SELECT * WHERE { ?s a foaf:Agent . }\" % FOAF)`. The interpolation builds the query's PROLOGUE (a PREFIX declaration), not a term inside a triple pattern -- so it is not `s{ }`'s `{expr}` term-interpolation that replaces it, it is `@prefix foaf: <http://xmlns.com/foaf/0.1/> .` (declared once, lexically, at transpile time) making the runtime PREFIX clause unnecessary altogether: `s{ SELECT * WHERE { ?s a foaf:Agent . } }(g)`, no interpolation left to write. Verified by transpiling in isolation: the generated code calls `_ldpy_.prepared('SELECT * WHERE { ?s a foaf:Agent . }', (), __namespaces__, ...)` -- the PREFIX text is gone, prefix resolution happens through __namespaces__ instead. This is the strongest form of 'directly-expressible' this stratum offers: the interpolation is not relocated, it disappears.",
+    "the isolated `g.add((FOAF.Person, rdflib.RDFS.subClassOf, FOAF.Agent))` (not itself interpolated -- add_isolated shape, same file) became `@graph g` + `+{ foaf:Person rdfs:subClassOf foaf:Agent }`, the more specific construction over the draft's `g += g{ ... }` (which built a whole second graph just to union it back in for one triple).",
+    "NOT-EXPRESSIBLE, and deliberately left as plain, untouched Python on both sides: `customEval`/`inferredSubClass`/`CUSTOM_EVALS`. This is not a graph read or write -- it registers a custom evaluator into rdflib's OWN SPARQL algebra engine (`rdflib.plugins.sparql.evaluate.evalBGP`), rewriting `part.triples` (algebra-level (s,p,o) tuples, `p` sometimes a Path object built with `RDFS.subClassOf * \"*\"`) before delegating back to evalBGP. No island models 'intercept how the query engine itself evaluates a BGP': islands write/read graphs and queries, they do not reach into the evaluator that runs them. Confirmed by the language reference table (SS1 of INSTRUCTIONS.md) having no construct for algebra-node rewriting at all.",
+    "EXCLUDED at the whole-region level, for a reason unrelated to translation quality: the graph-touching code (`g.load`, the add, the query) sits inside `if __name__ == \"__main__\":`. rdfeval.harness executes both files with `__name__` set to `\"__original__\"`/`\"__translated__\"` (never `\"__main__\"`), so that block never runs on EITHER side under run_pair -- confirmed: `rdfeval check` reports FAIL, diff 'nothing observable to compare', not a crash. Left the guard untouched rather than rewriting it to `if True:` or similar: original.py must mirror the corpus source, and INSIDE that guard there is a SECOND, independent blocker anyway -- `g.load(\"foaf.n3\")` fails identically on both sides even run directly (`python -m ldpy translated.ldpy`, where __name__ genuinely is __main__): `Graph.load` does not exist on rdflib 7.2.1 (confirmed: `hasattr(Graph(), 'load')` is False -- an API rdflib actually removed, not a typo), and 'foaf.n3' is not shipped anywhere in this corpus clone even if `.load` still existed. See driver.py for the full chain.",
+    "what step 3 of the protocol (transpile) DOES confirm, independent of the __main__/foaf.n3 blockers: `python -m ldpy translated.ldpy` and a standalone `ldpy.transpiler.transpile()` call both succeed -- the `@prefix`, `+{ }` and `s{ }` islands are syntactically valid, and the `s{ }` query's SPARQL text parses (querying.md: parsed at transpile time, not run time) -- so the translation itself is sound; only its EXECUTION is blocked, by the file's own pre-existing dependency on rdflib's old `.load` API and a missing local fixture file, both inherited unchanged from the corpus source.",
+    "article_candidate left false despite the query-line finding being a strong three-line before/after (PREFIX splice -> nothing) precisely because it IS excluded: SS7 draws the publishable example from approved (verified-green) regions, and this pilot never runs end to end, so it should not stand in for one even though the snippet itself would read well."
   ],
   "draft_sha": "136cd42e65ce0e5b",
   "provenance": {
@@ -33,5 +45,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

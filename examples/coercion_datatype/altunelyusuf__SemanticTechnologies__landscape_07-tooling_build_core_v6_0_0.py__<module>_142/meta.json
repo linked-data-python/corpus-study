@@ -14,11 +14,26 @@
     "term_constructor": 3,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "language literal"
+  ],
   "translation_notes": [
-    "prefixes: SEM->sem, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "the site actually flagged (line 149) has no `datatype=` at all -- both Literal(...) calls on that line use `lang=\"en\"`, like the other two in the region (lines 147-148). This region exercises the LANGUAGE half of RDF-literal coercion, not the typed-datatype half the stratum's name suggests; confirming, not redescribing, since the sampler's site kind is a single label covering both `Literal(x, lang=...)` and `Literal(x, datatype=...)`.",
+    "used the glued-suffix form of interpolation, `{expr}@en`, inside `+{ }` (reference: graphs.md interpolation section, `{age}^^xsd:integer` sibling example) rather than embedding `Literal(clab, lang=\"en\")` as a bare Python call in `{ }` -- the latter is what the mechanical draft and the add_run_shared_subject sibling region (v6_4_0, same repo/commit, lines 145-152) both did, but it credits only `interpolation {expr}`, not `language literal`, which is exactly the construction this stratum measures. All three values (clab, cdef, and S(\"R-TOGAF\", \"R-DAMA\")) are already plain str in the source (S returns \" | \".join(...): confirmed by reading build_core_v6_0_0.py in corpus/repos), so `{expr}@en` reproduces `Literal(x, lang=\"en\")` exactly -- no coercion-policy edge case applies here (that's for datatype coercion of non-str values, not language tags).",
+    "folded the four `g2.add((c, ...))` calls per loop iteration into one `+{ {c} a owl:Class ; rdfs:label ... ; skos:definition ... ; dcterms:source ... }` -- same add_run_shared_subject idiom present in this region (one subject, four predicates), independent of which stratum this region was sampled for; INSTRUCTIONS.md #2 asks for the most specific construction throughout, not only where the stratum table points.",
+    "kept `SEM = Namespace(\"http://example.org/semtech#\")` and `c = SEM[cid]` as plain Python (interpolated as bare `{c}` in subject position) rather than rewriting to `sem:{cid}`, matching the add_run_shared_subject sibling's choice for the identical pattern.",
+    "prefixes actually declared: RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms -- the four that appear as literal prefixed names (owl:Class, rdfs:label, skos:definition, dcterms:source). RDF.type is written `a`; XSD, PROV and SEM never appear as prefixed names in this region, so were left undeclared rather than inflating the island count with unused prefixes.",
+    "context shim (context_shim.py): the region reads two names not defined within it, `BASEDIR` and `S(*keys)`, from altunelyusuf/SemanticTechnologies@bad0fa7c46 (fetched the real source to write this faithfully; identical shim to the add_run_shared_subject sibling, build_core_v6_4_0.py__<module>_145, which reads the same two names one version later). `S` is copied VERBATIM. The `REG` dict it closes over in the real file is assembled from ~20 dynamically-loaded versioned modules rooted at a hardcoded local path (`/home/claude/semtech-landscape`) that does not exist here -- reproducing it whole is out of a shim's scope, so only the two keys this call site actually looks up, 'R-TOGAF' and 'R-DAMA', are reproduced, copied verbatim from their real source (EXT6 in enrichment_l_v5_3_0.py, same commit).",
+    "`BASEDIR` also gates `g2 = Graph().parse(f\"{BASEDIR}/.../semtech_tbox_v5_4_0.ttl\")`: the real file (1329 lines) is irrelevant to what this region is measured on (both sides parse the exact same file, then add the exact same triples, so any valid base graph proves the same isomorphism). BASEDIR resolves to the shim's own directory, which holds a minimal stand-in `02-ontology/semtech_tbox_v5_4_0.ttl` instead of vendoring the full file.",
+    "anti-hollow-green: broke `dcterms:source {S(\"R-TOGAF\", \"R-DAMA\")}@en` to `{S(\"R-TOGAF\")}@en` (drops one citation) -- `rdfeval check` correctly failed (graphs not isomorphic, 14 vs 14 triples: same count, different content), then restored -- confirmed OK again."
   ],
   "draft_sha": "f9baeb9e6677da01",
   "provenance": {

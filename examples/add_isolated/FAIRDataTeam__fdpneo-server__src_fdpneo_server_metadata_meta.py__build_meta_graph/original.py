@@ -4,19 +4,28 @@
 from datetime import datetime
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import RDF
-from fdpneo_server.metadata.graphs import meta_graph_uri, record_graph_uri
-from fdpneo_server.metadata.states import DEFAULT_STATE, MetadataState, allowed_transitions
-from fdpneo_server.shared.namespaces import (
+# Context shim (see meta.json / context_shim.py): the real module paths are
+# `fdpneo_server.metadata.graphs`, `fdpneo_server.metadata.states` and
+# `fdpneo_server.shared.namespaces` -- not importable outside the package.
+from context_shim import (
     DCT,
-    FDP_ALLOWED_STATE_TRANSITION,
-    FDP_DEFAULT,
+    DEFAULT_STATE,
+    FDP_CREATE_OPERATION,
+    FDP_MODIFY_OPERATION,
     FDP_METADATA_STATE,
     FDP_VALIDATED_AGAINST,
+    MetaResult,
+    MetadataState,
+    Operation,
     OWL,
     PROV,
+    _extract_creation,
+    _extract_state,
+    _extract_validated_against,
+    _next_version,
+    meta_graph_uri,
+    record_graph_uri,
 )
-FDP_CREATE_OPERATION = FDP_DEFAULT["CreateOperation"]
-FDP_MODIFY_OPERATION = FDP_DEFAULT["ModifyOperation"]
 
 def build_meta_graph(
     *,

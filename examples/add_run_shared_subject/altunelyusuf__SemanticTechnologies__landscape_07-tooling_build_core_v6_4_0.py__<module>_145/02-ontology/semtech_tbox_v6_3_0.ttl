@@ -1,0 +1,16 @@
+# Context shim (see meta.json): stand-in for the real
+# landscape/02-ontology/semtech_tbox_v6_3_0.ttl from altunelyusuf/
+# SemanticTechnologies @ bad0fa7c46af (192 KB, verified present at that
+# commit). `g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v6_3_0.ttl")`
+# reads this file BEFORE the region's own `+{ }`/`.add()` calls extend g2
+# with three new classes -- its content is inert to what this region is
+# measured on (both sides parse the exact same file, then add the exact
+# same triples), so a minimal file with a couple of real-looking base
+# triples proves the same graph isomorphism a full 192 KB vendor copy
+# would, without carrying content unrelated to the translation.
+@prefix sem: <http://example.org/semtech#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+sem:RealWorldEntity a owl:Class ;
+    rdfs:label "Real-world entity"@en .

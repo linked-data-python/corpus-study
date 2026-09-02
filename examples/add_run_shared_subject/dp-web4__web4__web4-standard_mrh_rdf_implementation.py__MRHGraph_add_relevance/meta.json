@@ -14,11 +14,26 @@
     "term_constructor": 4,
     "triple_add": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: MRH->mrh, LCT_NS->lct, RDF->rdf, XSD->xsd"
+    "the mechanical draft wrote four `self.graph += g{ }`; per the batch's confirmed bias, corrected to a single `@graph self.graph` (self.graph is never reassigned in this function) followed by four `+{ }` writing straight into the live graph.",
+    "four groups, not one, and this is not under-fusion: an intermediate computation sits between each pair. `target_uri = LCT_NS[edge.target_lct]` intervenes between the type add and the target/probability add (so type stays alone); `rel_uri = MRH[edge.relation.value]` intervenes between the probability add and the relation add (so relation+distance+decay_rate is its own group). Only where two `.add()` calls are genuinely back to back (target+probability; relation+distance+decay_rate) does the fold use `;`. Fusing across a computation would require moving that computation, which the no-refactoring rule forbids -- this is the same shape as the neighbouring `remove`-stratum region in this repo family (redefine), just for add instead of remove/add.",
+    "`RDF.type` -> `a` (Turtle's shorthand), `MRH.Relevance`/`MRH.target`/`MRH.probability`/`MRH.relation`/`MRH.distance`/`MRH.decay_rate`/`MRH.conditional_on` -> `mrh:...`: all seven are static attribute access on a Namespace (constant local part), so all become prefixed names.",
+    "`LCT_NS[edge.target_lct]`, `MRH[edge.relation.value]` and `LCT_NS[condition]` are Namespace indexed BY A VARIABLE, not a constant -- kept as plain Python (`target_uri`/`rel_uri` stay assigned, interpolated as bare `{target_uri}`/`{rel_uri}`; the loop's `LCT_NS[condition]` interpolated as `{LCT_NS[condition]}`), per this batch's reusable precedent (NS[var] stays in Python). Consequently `lct:` is never written as a literal prefixed name anywhere in this region and was NOT declared as a @prefix -- an unused @prefix is not added. `mrh:` is the only prefix used, so it is the only one declared (the draft's rdf: and xsd: were dropped for the same reason: `a` replaces rdf:type, and every typed literal here is a *computed* value kept as `Literal(x, datatype=XSD.d)` in Python -- see the coercion_datatype note below -- so xsd: is never written as `^^xsd:...` either).",
+    "coercion_datatype (secondary stratum): probability/distance/decay_rate are computed (dataclass fields of `edge`, not string constants), so per INSTRUCTIONS.md piege 1/2 (Literal(x, datatype=...) on a computed, non-string value normalises its lexical form -- e.g. Literal(True, datatype=XSD.boolean) is 'true', f'{True}' is 'True') these stay `{Literal(edge.X, datatype=XSD.Y)}` Python-side coercion, never rewritten as a bare interpolation or `{expr}^^xsd:Y`.",
+    "imports pruned to what the rewrite actually still uses: `Graph` and `URIRef` were already dead in the extracted function body (kept in original.py, which is edited only to restore missing bindings, not to prune pre-existing dead imports); `RDF` becomes dead once `a` replaces `RDF.type`. Kept `Namespace` (MRH/LCT_NS construction), `Literal` and `XSD` (the coercion above), `BNode` (return type + `BNode()` call).",
+    "missing bindings: MRHEdge (a parameter type annotation, evaluated at def-time) and the enclosing MRHGraph instance (self.graph, self.edges) are not in the extracted context. Restored via context_shim.py: MRHEdge and MRHRelation copied verbatim from the pinned commit, MRHGraphStub duck-types only the two attributes this region touches. A demo(edge) harness (identical on both sides) wraps the call, since add_relevance returns a fresh BNode (random identity every run) and MRHGraphStub has no __eq__, so comparing `self` directly would always fail -- same pattern as the JonAnderAsua region in this stratum.",
+    "fixture (driver.py): one edge with two conditional_on entries (exercises the for-loop's per-condition +{ }, the branch a plain edge never reaches) and one with conditional_on left at its dataclass default None (must add none of those triples, and the falsy check must not error).",
+    "anti-vert-creux: mutated one datatype (XSD.decimal -> XSD.string) on the decay_rate literal in translated.ldpy, rdfeval check failed on both calls (isomorphism only, not a diff message, since the region's oracle is entry:demo comparing the full graph digest, not a value-by-value graph diff); restored, check OK again."
   ],
   "draft_sha": "446c052a86306baf",
   "provenance": {

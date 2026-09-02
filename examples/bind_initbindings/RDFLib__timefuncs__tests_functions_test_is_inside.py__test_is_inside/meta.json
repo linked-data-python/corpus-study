@@ -14,11 +14,23 @@
     "namespace_term": 8,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "@prefix",
+    "prefixed name",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: TFUN->tfun, INSIDE->inside, TIME->time"
+    "prefixes: TFUN->tfun, INSIDE->inside, TIME->time",
+    "This region is one of the 33/77 initNs-ONLY cases the batch warning describes (same as the test_finishes sibling in this stratum): `initNs={\"time\": TIME, \"tfun\": TFUN}` is the query's only rdflib binding kwarg -- there is no `initBindings` anywhere in this test. It needs NO interpolation, only `@prefix time: <http://www.w3.org/2006/time#> .` and `@prefix tfun: <https://w3id.org/timefuncs/> .` in scope; `TIME`/`TFUN` Namespace objects (and the `Namespace`/`rdflib.namespace.TIME` imports that built them) drop out, their only use having been that initNs kwarg. `INSIDE` likewise drops: `INSIDE.a02` etc. become the prefixed names `inside:a02` etc., with `@prefix inside: <https://w3id.org/timefuncs/testdata/inside/> .` replacing it in `expected`.",
+    "The query string (`q = \"\"\"...\"\"\"`) passed to `g.query(q, initNs=...)` collapses into an `s{ }` island written literally at the point of use (same structural consequence as the other SPARQL-string regions in this lot) -- `q` as a named variable disappears, along with the commented-out debug loop over it (`# for r in g.query(q, initNs=...): # print(r)`), which had no observable effect either way.",
+    "`FILTER tfun:isInside(?a, ?b)` calls a CUSTOM SPARQL extension function the real test registers by importing `is_inside` from `timefuncs` (via `sys.path.append`, a side-effecting import: `timefuncs/__init__.py` calls `register_custom_function` for the whole module at import time). `timefuncs` is not installed in the pinned study venv, so context_shim.py transcribes `is_inside` verbatim from `timefuncs/funcs.py`@dd3bde8727 (rdflib-only dependency, no BFS helper needed unlike `finishes`) and registers `tfun:isInside` itself. `import context_shim` needed on BOTH sides -- s{ } is still rdflib's SPARQL engine underneath (querying.md), so a FILTER function must be registered in the SAME rdflib function registry regardless of which notation wrote the query.",
+    "`test_is_inside` loads ITS OWN fixture at a path it hardcodes internally (`tests_dir / \"data\" / \"is_inside.ttl\"`, `tests_dir = Path(__file__).parent`) rather than receiving a graph argument. `Path(__file__).parent` resolves to the region directory for BOTH original.py and translated.ldpy (each gets its own path as `__file__` when exec'd, see rdfeval/harness.py), so the real upstream fixture (RDFLib/timefuncs@dd3bde8727 tests/functions/data/is_inside.ttl) was copied VERBATIM to `data/is_inside.ttl` at that exact relative path -- no path-fixing code needed. `fixture.ttl` at the top level mirrors it for documentation (INSTRUCTIONS.md SS3) but is not itself read by either version; see driver.py.",
+    "`test_is_inside` asserts internally and returns/prints/mutates nothing observable -- entry=/calls= on it directly would trip rdfeval.harness's 'nothing observable to compare' guard regardless of correctness. A `demo()` harness, appended identically to both original.py and translated.ldpy (same convention as the test_finishes sibling), calls `test_is_inside()` (an AssertionError on either side already fails the whole check -- the region's real pass/fail criterion) and returns a sentinel.",
+    "added `from pathlib import Path` to original.py: missing from the extracted region though used on its very next line (`tests_dir = Path(__file__).parent`) -- the real file imports it at the top alongside `sys.path.append(...)` and `from timefuncs import is_inside`; both restored (as `from context_shim import is_inside` on the ldpy side, see above).",
+    "checked the anti-hollow-green discipline: swapped `inside:a08` for `inside:a03` in one row of `expected` in translated.ldpy only -- the check FAILS with an AssertionError inside `test_is_inside` (caught by run_pair as a call error, not a silent value difference); restored before finalising."
   ],
   "draft_sha": "a37e7e060b56b728",
   "provenance": {
@@ -30,5 +42,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

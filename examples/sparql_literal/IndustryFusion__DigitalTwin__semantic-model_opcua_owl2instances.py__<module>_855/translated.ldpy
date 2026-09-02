@@ -14,7 +14,11 @@
 # `e = Entity(namespace_prefix, basens, opcuans)` (line 768; see
 # entity_shim.py, a trimmed but verbatim copy of lib/entity.py's `Entity`
 # -- only the methods this region calls), and `entitiesname` (line 691,
-# `args.entities`, here a fixed output path so the branch is exercised).
+# `args.entities`, here a fixed output path so the branch is exercised --
+# the SAME literal path on both sides, see meta.json: run_pair also diffs
+# non-Graph module-level values, and a path that differed only by an
+# "_original"/"_translated" suffix would fail the comparison on a detail
+# that carries no RDF meaning).
 from rdflib import Graph, Namespace
 
 from entity_shim import Entity
@@ -27,7 +31,7 @@ namespace_prefix = 'http://example.org/opcua-instances/'
 basens = next(Namespace(uri) for prefix, uri in list(g.namespaces()) if prefix == 'base')
 opcuans = next(Namespace(uri) for prefix, uri in list(g.namespaces()) if prefix == 'opcua')
 e = Entity(namespace_prefix, basens, opcuans)
-entitiesname = "/tmp/owl2instances_entities_translated.ttl"
+entitiesname = "/tmp/owl2instances_entities.ttl"
 
 if entitiesname is not None:
     result = s{ CONSTRUCT {

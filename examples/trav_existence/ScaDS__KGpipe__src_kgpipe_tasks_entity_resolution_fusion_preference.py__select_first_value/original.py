@@ -3,13 +3,12 @@
 # licence of the source repository: see meta.json
 from rdflib import OWL, Graph, URIRef, RDFS, RDF, SKOS
 from pathlib import Path
-from kgpipe.common.models import KgTask, DataFormat, Data
 from typing import Dict, List, Optional
 import json
-from kgpipe.common.registry import Registry
 import os
-from kgcore.api.ontology import OntologyUtil
-from kgpipe.common.config import TARGET_ONTOLOGY_NAMESPACE
+import tempfile
+from context_shim import (DataFormat, Data, Registry, OntologyUtil,
+                          TARGET_ONTOLOGY_NAMESPACE, TrackRecord)  # context shim -- see meta.json
 
 @Registry.task(
     input_spec={"source": DataFormat.RDF_NTRIPLES, "target": DataFormat.RDF_NTRIPLES},
@@ -19,8 +18,8 @@ from kgpipe.common.config import TARGET_ONTOLOGY_NAMESPACE
 )
 def select_first_value(inputs: Dict[str, Data], outputs: Dict[str, Data]):
     """
-    For two KGs A and B, merge A into B where for each s_p and 
-    1) p is fusable and B does not have any s_p_o or 
+    For two KGs A and B, merge A into B where for each s_p and
+    1) p is fusable and B does not have any s_p_o or
     2) p is not fusable erge all s_p_o
     """
     ontology_path = os.environ.get("ONTOLOGY_PATH", "false")
@@ -29,7 +28,7 @@ def select_first_value(inputs: Dict[str, Data], outputs: Dict[str, Data]):
 
     ontology = OntologyUtil.load_ontology_from_file(Path(ontology_path))
     allowed_predicates = set[str]([str(p.uri) for p in ontology.properties]+[str(RDFS.label), str(RDF.type), str(SKOS.altLabel)])
-    fusable_properties = set[str]([str(p.uri) for p in ontology.properties if p.max_cardinality == 1]+[str(RDFS.label), str(RDF.type)])  
+    fusable_properties = set[str]([str(p.uri) for p in ontology.properties if p.max_cardinality == 1]+[str(RDFS.label), str(RDF.type)])
 
     def is_fusable(p):
         return str(p) in fusable_properties
@@ -47,7 +46,7 @@ def select_first_value(inputs: Dict[str, Data], outputs: Dict[str, Data]):
     for s, p, o in source_graph:
         s_can = s
         p_can = p
-        o_can = o 
+        o_can = o
 
         if not isinstance(p_can, URIRef) or str(p_can) not in allowed_predicates:
             continue
@@ -85,3 +84,33 @@ def select_first_value(inputs: Dict[str, Data], outputs: Dict[str, Data]):
 
     # prov graph is skipped here as no uris are replaced (is done in previouse steps)
     seed_graph.serialize(outputs["output"].path, format="nt")
+
+
+# Demo harness (identical on both sides, see meta.json): `select_first_value`
+# reads two graphs from N-Triples FILES and writes its result back to one,
+# so `demo` builds a fresh, isolated temp directory per call, writes
+# `source_nt`/`target_nt` there, sets `ONTOLOGY_PATH` to a tiny JSON
+# ontology (see context_shim.OntologyUtil), runs the region, and returns
+# the resulting graph parsed back from `outputs["output"].path` -- the
+# comparable end state of every read/write this region performs, including
+# both trav_existence reads (`any(seed_graph.objects(...))` and
+# `(s, p, o) not in seed_graph`).
+def demo(source_nt, target_nt, ontology_props=()):
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        source_path = tmp / "source.nt"
+        source_path.write_text(source_nt)
+        target_path = tmp / "target.nt"
+        target_path.write_text(target_nt)
+        output_path = tmp / "output.nt"
+        ontology_path = tmp / "ontology.json"
+        ontology_path.write_text(json.dumps(list(ontology_props)))
+
+        os.environ["ONTOLOGY_PATH"] = str(ontology_path)
+        inputs = {"source": Data(path=source_path), "target": Data(path=target_path)}
+        outputs = {"output": Data(path=output_path)}
+        select_first_value(inputs, outputs)
+
+        result = Graph()
+        result.parse(output_path, format="nt")
+        return result

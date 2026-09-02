@@ -2,7 +2,7 @@
 # region: parse_owl_with_rdflib (lines 15-127, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from typing import Any
-from .mapping import MappingBundle, MappingSource
+from owl_rdflib_context import MappingBundle, MappingSource, _local_name, _xsd_to_simple  # context shim -- see meta.json
 
 def parse_owl_with_rdflib(turtle_text: str) -> MappingBundle:
     """Parse an OWL/Turtle ontology using rdflib and produce a MappingBundle.

@@ -2,8 +2,9 @@
 # region: set_package_containsmodelelement_modelelement (lines 60-87, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef
-from ..modules import arguments as args
-from ..modules.utils_graph import ontouml_ref
+import ontouml_shim as args
+from ontouml_shim import get_package_contents
+@prefix ontouml: <https://w3id.org/ontouml#> .
 
 def set_package_containsmodelelement_modelelement(package_dict: dict, ontouml_graph: Graph) -> None:
     """Set object property ontouml:containsModelElement between an ontouml:Package and an ontouml:ModelElement it \
@@ -25,5 +26,9 @@ def set_package_containsmodelelement_modelelement(package_dict: dict, ontouml_gr
             list_related_ids.append(content["id"])
 
         # Include found related elements in graph using ontouml:containsModelElement
-        for related_id in list_related_ids:
-            ontouml_graph += g{ {URIRef(args.ARGUMENTS["base_uri"] + package_dict["id"])} {ontouml_ref("containsModelElement")} {URIRef(args.ARGUMENTS["base_uri"] + related_id)} }
+        @graph ontouml_graph
+        for @bindings in (
+            {"related_id": URIRef(args.ARGUMENTS["base_uri"] + related_id)}
+            for related_id in list_related_ids
+        ):
+            +{ {URIRef(args.ARGUMENTS["base_uri"] + package_dict["id"])} ontouml:containsModelElement ?related_id }

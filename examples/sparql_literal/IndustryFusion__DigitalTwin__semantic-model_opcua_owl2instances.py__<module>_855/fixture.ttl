@@ -1,0 +1,66 @@
+# Input graph for IndustryFusion__DigitalTwin__semantic-model_opcua_owl2instances.py__<module>_855.
+#
+# Trimmed from the real ontology this script reads (semantic-model/opcua/base.ttl
+# in IndustryFusion/DigitalTwin@3b40088b88), same IRIs, same shape -- a
+# fragment of the real OPC-UA type hierarchy, not an invented one:
+#
+#   - opcua:BaseObjectType and opcua:BaseNodeClass are two of its real roots
+#     (base.ttl lines 339-345), each with real subClassOf chains beneath them
+#     (BaseInterfaceType, ModellingRuleType, DataTypeNodeClass, ... same
+#     file). Kept here across two hops so both `rdfs:subClassOf*` (the
+#     CONSTRUCT query, region under test) and `rdfs:subClassOf+`
+#     (add_subclasses_recursive, entity_shim.py, not this region but sharing
+#     the same graph) actually exercise transitivity, not just one direct
+#     edge.
+#   - one pair (UntypedIntermediateType / OddSubtype) where only ONE of a
+#     subclass/superclass pair is asserted `owl:Class`, so the CONSTRUCT
+#     query's `{ ?subclass a owl:Class } UNION { ?superclass a owl:Class }`
+#     is exercised on both branches, not just the (in the real file, always
+#     both-typed) common case.
+#   - opcua:BaseDataType / opcua:Number / opcua:UInt32 (base.ttl lines
+#     330-352) as neighbourhood: a real, disconnected subClassOf chain that
+#     must NOT appear in the output graph, since it hangs off neither
+#     BaseObjectType nor BaseNodeClass.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix base: <https://industryfusion.github.io/contexts/ontology/v0/base/> .
+@prefix opcua: <http://opcfoundation.org/UA/> .
+
+opcua:BaseObjectType a owl:Class .
+opcua:BaseNodeClass a owl:Class .
+
+# --- subclasses of BaseObjectType: direct + one transitive hop (subClassOf*) ---
+opcua:BaseInterfaceType a owl:Class ;
+    rdfs:subClassOf opcua:BaseObjectType .
+
+opcua:ModellingRuleType a owl:Class ;
+    rdfs:subClassOf opcua:BaseObjectType .
+
+opcua:ExclusiveLimitStateMachineType a owl:Class ;
+    rdfs:subClassOf opcua:BaseInterfaceType .
+
+# --- edge case: only one side of the pair is typed owl:Class ---
+opcua:UntypedIntermediateType rdfs:subClassOf opcua:BaseObjectType .
+
+opcua:OddSubtype a owl:Class ;
+    rdfs:subClassOf opcua:UntypedIntermediateType .
+
+# --- subclasses of BaseNodeClass: direct + one transitive hop (subClassOf+) ---
+opcua:ObjectNodeClass a owl:Class ;
+    rdfs:subClassOf opcua:BaseNodeClass .
+
+opcua:ObjectTypeNodeClass a owl:Class ;
+    rdfs:subClassOf opcua:BaseNodeClass .
+
+opcua:MethodNodeClassLeaf a owl:Class ;
+    rdfs:subClassOf opcua:ObjectNodeClass .
+
+# --- neighbourhood: a real, disconnected hierarchy that must NOT be picked up ---
+opcua:BaseDataType a owl:Class .
+
+opcua:Number a owl:Class ;
+    rdfs:subClassOf opcua:BaseDataType .
+
+opcua:UInt32 a owl:Class ;
+    rdfs:subClassOf opcua:Number .

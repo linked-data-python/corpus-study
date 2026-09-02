@@ -12,10 +12,16 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "s{ }", "prefixed name", "call suffix (g)"],
+  "translation_notes": [
+    "initNs-only case (no initBindings anywhere in this function): `initNs={\"dcterms\": 'http://purl.org/dc/terms/'}` is a static IRI known at transpile time, so it becomes a module-level `@prefix dcterms: <http://purl.org/dc/terms/> .`, and the query's prologue is inherited from it, per the stratum's correspondence rule. No interpolation is needed.",
+    "`prepareQuery(TEXT, initNs=...)` collapses into an `s{ }` island written literally at the point of use, still assigned to `Q_LOCAL_DCTERMS_LICENSE` -- an island is an expression, so binding it to a name and later calling `Q_LOCAL_DCTERMS_LICENSE(parsed_graph)` (`call suffix (g)`) behaves exactly like writing `s{ ... }(parsed_graph)` inline; verified with the transpiler.",
+    "`log_query(Q_LOCAL_DCTERMS_LICENSE)` (a project helper that only logs `str(query)`, see dataset_preparation_shim.py) is kept as-is: it receives the `s{ }` Query object itself, not a call result, on both sides.",
+    "added `import logging` to original.py (restored context: the real file imports it at the top and defines `logger`/`log_query` a few lines above this function, none of which are inside the extracted lines 264-278) and moved `log_query` into dataset_preparation_shim.py, transcribed verbatim from src/dataset_preparation.py -- it is a helper the region calls but does not define, per AGENT_BATCH.md's shim convention.",
+    "checked the anti-hollow-green discipline: corrupting translated.ldpy (dcterms:license -> dcterms:cheese) makes the check FAIL as expected; restored before finalising."
+  ],
   "draft_sha": "2893c533fdb6c956",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.345384+00:00",

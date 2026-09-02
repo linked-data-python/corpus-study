@@ -1,4 +1,7 @@
-# Input graph for INM-6__alpaca__alpaca_test_test_ontology_annotation.py__OntologyAnnotationTestCase_test_provenance_annotation_multiple_returns — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Not applicable for this region: the PROV graph it reads (prov_graph, built
+# from save_provenance()) is produced by alpaca's own real Provenance
+# tracking over a call the region makes itself
+# (process_multiple(input_object, 45), see alpaca_context.py) -- there is no
+# externally supplied input graph for this file to hold. See driver.py and
+# meta.json for the actual oracle (the `demo` harness, comparing "ok" /
+# ("assertion-failed", msg) across both sides).

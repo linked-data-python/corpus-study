@@ -1,6 +1,15 @@
 # Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/shacl2flink/lib/shacl_properties_to_sql.py
 # region: translate (lines 2209-2209, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+# (added to make the region executable: `g` and `prefixes` are two of the
+# three parameters of the enclosing function, `translate(shaclefile,
+# knowledgefile, prefixes)` -- `shaclefile`/`knowledgefile` only matter to
+# build `g` upstream (`g = Graph(); g.parse(shaclefile); h = Graph();
+# h.parse(knowledgefile); g += h`), which this one-line region never reads,
+# so only the two parameters this line touches are restored, as a minimal
+# `def translate(g, prefixes):` wrapper -- see meta.json and
+# AGENT_BATCH.md's "restaurez la liaison". `lib.utils` is `lib/utils.py`
+# alongside this file, transcribed verbatim from the same commit.)
 import lib.utils as utils
 sparql_get_all_properties = """
 SELECT
@@ -104,4 +113,7 @@ GROUP BY ?nodeshape ?targetclass ?propertypath ?mincount ?maxcount ?attributecla
 order by ?inheritedTargetclass
 """  # noqa: E501
 
-qres = utils.in_stable_order(g.query(sparql_get_all_properties, initNs=prefixes))
+
+def translate(g, prefixes):
+    qres = utils.in_stable_order(g.query(sparql_get_all_properties, initNs=prefixes))
+    return qres

@@ -1,15 +1,14 @@
 """Validation driver for Congruentsys__yurtle-rdflib__src_yurtle_rdflib_serializer.py__YurtleRDFlibSerializer__filter_provenance_triples.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+`demo()` (identical on both sides, appended after the extracted region --
+see meta.json) builds a minimal fake `self` (a `.store` graph) and calls
+`_filter_provenance_triples(self)`, returning the filtered graph -- the
+region's only observable effect (isomorphism-compared by the harness).
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
-    entry='_filter_provenance_triples',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    entry='demo',
+    calls=[((), {})],
 )

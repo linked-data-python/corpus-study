@@ -1,6 +1,8 @@
 # Extracted from Haigutus/triplets@7cf62970e8 : triplets/validation/shacl_ir.py
 # region: _resolve_path (lines 412-440, stratum trav_single_value)
 # licence of the source repository: see meta.json
+from shim import _local, _rdf_list  # context shim -- see meta.json
+
 def _resolve_path(graph, SH, path_node):
     """Resolve sh:path → (KEY name, inverse, via_type); handles sh:inversePath,
     sh:alternativePath with a nested inverse, and the two-step sequence

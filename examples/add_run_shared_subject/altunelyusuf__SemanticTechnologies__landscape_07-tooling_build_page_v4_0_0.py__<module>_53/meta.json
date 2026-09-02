@@ -14,11 +14,24 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "IRI",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "the mechanical draft wrote `g += g{ }`; per the batch's confirmed bias, corrected to `@graph g` + `+{ }`, the construction this stratum is meant to exercise",
+    "the sampler's site spans lines 53-54 (a run of two .add on ONT, the second at line 54: g.add((ONT, PROV.wasGeneratedBy, SEM.Release_v4_0_0))), but the extracted region (lineno/end_lineno 53-53) carries only line 53 -- one add, one triple. Translated exactly what the region contains: a single +{ }, no `;` fusion possible or invented. Confirms the known line-number-drift artifact on multi-line/multi-statement sites (INSTRUCTIONS.md SS5)",
+    "only rdfs: is used as a prefixed name in this region, so the six other mechanically-declared prefixes (rdf, owl, skos, dcterms, xsd, prov) were dropped, following the neighbouring batch's precedent (an unused @prefix is not added)",
+    "same pruning applied to the Python imports: Namespace/URIRef/Literal and the rdflib.namespace import become dead once ONT is a literal IRI and rdfs:label/the language literal replace RDFS.label/Literal(..., lang=...); kept only `from rdflib import Graph`",
+    "missing binding: HERE (upstream landscape/07-tooling/build_page_v4_0_0.py line 10) is not in the extracted context. Restored via context shim page_context.py, pointing HERE at the checked-out repository (corpus/repos/altunelyusuf__SemanticTechnologies/landscape) at the pinned commit, so Graph().parse(...) reads the real committed 04-page/semtech_page_abox_v3_0_0.ttl verbatim -- no fixture invented",
+    "anti-vert-creux: mutated the literal's text in translated.ldpy, rdfeval check failed (graphs not isomorphic); restored, check OK again"
   ],
   "draft_sha": "cd7aa68bd7bae86c",
   "provenance": {

@@ -11,17 +11,27 @@ def _sparql_rows(graph, SH, shape_uri, meta):
 
     The sparql node's own sh:message overrides the shape's.
     """
+    @graph graph
+
     rows = []
-    path = graph.value(shape_uri, SH.path)
-    for sparql in graph.objects(shape_uri, SH.sparql):
-        select = graph.value(sparql, SH.select)
+    path = m{ {shape_uri} {SH.path} ?o }.first()
+    for sparql in m{ {shape_uri} {SH.sparql} ?sparql }:
+        select = m{ {sparql} {SH.select} ?o }.first()
         if select is None:
             continue
-        prefixes = "".join(
-            f"PREFIX {graph.value(declaration, SH.prefix)}: <{graph.value(declaration, SH.namespace)}>\n"
-            for ontology in graph.objects(sparql, SH.prefixes)
-            for declaration in graph.objects(ontology, SH.declare))
-        message = graph.value(sparql, SH.message)
+        # An island cannot appear inside an f-string interpolation hole (see
+        # translation_notes): `m{ }.first()` is hoisted out of the f-string
+        # into `prefix`/`namespace` below, and the nested genexp becomes an
+        # equivalent nested for-loop -- same two graph.value reads, same
+        # join, same order, per declaration.
+        prefix_lines = []
+        for ontology in m{ {sparql} {SH.prefixes} ?ontology }:
+            for declaration in m{ {ontology} {SH.declare} ?declaration }:
+                prefix = m{ {declaration} {SH.prefix} ?o }.first()
+                namespace = m{ {declaration} {SH.namespace} ?o }.first()
+                prefix_lines.append(f"PREFIX {prefix}: <{namespace}>\n")
+        prefixes = "".join(prefix_lines)
+        message = m{ {sparql} {SH.message} ?o }.first()
         row = {**meta, "component": "sh:sparql",
                "params": {"select": str(select), "prefixes": prefixes,
                           # $PATH substitution needs the full IRI; only direct paths qualify

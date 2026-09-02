@@ -10,10 +10,16 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "not-expressible: `g.query(sparql_get_all_properties, initNs=prefixes)` -- `prefixes` is the enclosing function's OWN parameter, a dict populated at runtime by the real caller (create_sql_checks_from_shacl.py:main) by parsing an external JSON-LD context file chosen on the command line (`context_graph.parse(context, format=\"json-ld\"); for prefix, namespace in context_graph.namespaces(): prefixes[prefix] = rdflib.Namespace(namespace)`). `@prefix` takes a literal IRI known when the file is transpiled; confirmed with the transpiler that `@prefix ex: <{iri}> .` is a SyntaxError, same check as the GPViz.__init__ precedent elsewhere in this stratum. `sh:`, `rdfs:` and `rdf:` happen to be pre-bound by rdflib's own default NamespaceManager regardless of `initNs` (checked empirically: `Graph().query(q)` resolves `sh:NodeShape`/`rdfs:subClassOf`/`rdf:rest` with no initNs at all), but `ngsi-ld:` is not, and the query's FILTER clause (`?valuepath = ngsi-ld:hasValue || ...`) genuinely needs it -- dropping `initNs=prefixes` makes the query raise 'Unknown namespace prefix : ngsi-ld', checked directly (see the anti-hollow-green note below). Unlike GPViz.__init__, the query TEXT itself (`sparql_get_all_properties`) is a module-level literal, not a parameter -- only the namespace mapping is dynamic -- but that is exactly the part `@prefix` cannot stand for, so the outcome is the same: no island form here more specific than plain rdflib.",
+    "rdf_ops: 0, kind: statement -- this is one of the 163/1196 regions with no binding visible once extracted: the one-line region reads `g` and `prefixes`, both free names outside it (the real signature is `translate(shaclefile, knowledgefile, prefixes)`, with `g = Graph(); g.parse(shaclefile); h = Graph(); h.parse(knowledgefile); g += h` built from the first two parameters, which this line never touches). Restored in original.py as a minimal `def translate(g, prefixes):` wrapper around the one statement -- only the two parameters the line actually reads, per AGENT_BATCH.md's 'un paramètre annoté'. Reproducing the full upstream signature (parsing real SHACL/knowledge Turtle files) would add scaffolding this statement does not need to run.",
+    "`import lib.utils as utils` needs `lib.utils.in_stable_order` to be importable outside the shacl2flink package: added lib/__init__.py + lib/utils.py as a context shim transcribing `in_stable_order` verbatim from the same commit (semantic-model/shacl2flink/lib/utils.py) -- a plain sort key, no logic invented.",
+    "driver.py builds the fixture graph and `prefixes` as call arguments (entry=/calls=), the same pattern as the Terramorpha__minergym precedent in this stratum, rather than a shim module: the fixture satisfies exactly the query's non-OPTIONAL backbone (one sh:NodeShape with sh:targetClass, a property with its own sh:minCount taking the 'no connective' UNION arm, a value shape whose sh:path is ngsi-ld:hasValue taking the ?valuepath FILTER) and gives `prefixes = {'ngsi-ld': Namespace(...)}`, the one prefix the query cannot resolve on its own.",
+    "checked the anti-hollow-green discipline: changed `initNs=prefixes` to `initNs={}` in translated.ldpy only -- the check FAILS with 'Unknown namespace prefix : ngsi-ld' (the query cannot even parse), not a silent value difference; restored before finalising."
+  ],
   "draft_sha": "68fcbad0ca658e00",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.236983+00:00",
@@ -24,5 +30,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:translate",
+    "diffs": [],
+    "error": null
+  }
 }

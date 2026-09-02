@@ -1,13 +1,19 @@
-"""Validation driver for altunelyusuf__SemanticTechnologies__landscape_07-tooling_build_core_v6_0_0.py__<module>_142.
+"""Validation driver for
+altunelyusuf__SemanticTechnologies__landscape_07-tooling_build_core_v6_0_0.py__<module>_142.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+Module-level region (no function to call): entry=None executes both
+original.py and translated.ldpy and compares every rdflib Graph found in
+the module globals (here: g2, by isomorphism), plus every other
+module-level value both sides define (BASEDIR, SEM, and the loop's last
+cid/clab/cdef/c -- a hollow-green guard, see rdfeval.harness).
+
+`BASEDIR` and `S` are restored by context_shim.py (see meta.json): the
+region reads both but the extracted lines do not define them. `BASEDIR`
+also needs a `02-ontology/semtech_tbox_v5_4_0.ttl` to `Graph().parse(...)`
+-- see that file for why a minimal stand-in is enough.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry=None,

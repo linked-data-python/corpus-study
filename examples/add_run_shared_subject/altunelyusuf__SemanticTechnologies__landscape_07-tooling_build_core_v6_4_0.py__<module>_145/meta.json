@@ -14,11 +14,24 @@
     "term_constructor": 3,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "language literal"
+  ],
   "translation_notes": [
-    "prefixes: SEM->sem, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "the draft folded the three `g2.add((...))` calls per loop iteration into `g2 += g{ }`, the same mechanical-draft bias as the sibling region in this stratum (v6_7_0, and JonAnderAsua/TFG-KG-RelacionesClientelares in this batch): `g{ }` builds a disposable graph merged in after the fact, not the construction the stratum measures. Rewrote as `@graph g2` (declared once before the loop -- g2 is never reassigned, only mutated) followed by one `+{ {c} a owl:Class ; rdfs:label ... ; skos:definition ... ; dcterms:source ... }` per iteration.",
+    "kept `SEM = Namespace(\"http://example.org/semtech#\")` and `c = SEM[cid]` as plain Python (interpolated as bare `{c}` in subject position) rather than rewriting to `sem:{cid}`: the same choice the already-final BrickSchema__Brick region in this stratum makes for an analogous `NS[var]` pattern -- keep the Python-level namespace indexing the source actually uses, translate the triple pattern around it.",
+    "prefixes actually declared: RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms -- the four that appear as literal prefixed names in the fold (owl:Class, rdfs:label, skos:definition, dcterms:source). Following the Dewberry region's precedent in this same stratum, rdf:, xsd:, prov: and sem: were NOT declared: none appears as a literal prefixed name here (RDF.type never shows up, since it is written `a`; XSD, PROV and SEM are not referenced as prefixed names anywhere in this region), and an unused @prefix would inflate the island count without translating anything.",
+    "context shim (context_shim.py): the region reads two module names not defined within it, `BASEDIR` and `S(*keys)`, from altunelyusuf/SemanticTechnologies@bad0fa7c46 (fetched the real source to write this faithfully). `S` is copied VERBATIM. The `REG` dict it closes over in the real file is assembled from ~20 dynamically-loaded versioned modules (`{**tax.C, **rx.EXT, ..., **eo.EXT8}`) rooted at a hardcoded local path (`/home/claude/semtech-landscape`) that does not exist here -- reproducing it whole is out of a shim's scope, so only the two keys this call site actually looks up, 'R-TOGAF' and 'R-DAMA', are reproduced, copied verbatim from their real source (EXT6 in enrichment_l_v5_3_0.py, same commit).",
+    "`BASEDIR` also gates `g2 = Graph().parse(f\"{BASEDIR}/.../semtech_tbox_v6_3_0.ttl\")`: the real file is 192 KB and irrelevant to what this region is measured on (both sides parse the exact same file, then add the exact same triples, so any valid base graph proves the same isomorphism). BASEDIR resolves to the shim's own directory, which holds a minimal stand-in `02-ontology/semtech_tbox_v6_3_0.ttl` (a couple of real-looking base triples) instead of vendoring the full file.",
+    "anti-hollow-green: module-state comparison here checks graph g2 (isomorphism) plus BASEDIR/SEM/c/cid/clab/cdef (module-level values) -- confirmed non-hollow by inspecting the verdict directly (`graphs_compared: [\"g2\"]`, several `values_compared`)."
   ],
   "draft_sha": "2dcdf11dae5ec74d",
   "provenance": {

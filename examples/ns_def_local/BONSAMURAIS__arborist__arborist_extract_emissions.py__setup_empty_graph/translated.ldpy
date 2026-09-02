@@ -2,31 +2,37 @@
 # region: setup_empty_graph (lines 22-77, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
-from .graph_common import add_common_elements
+from context_shim import add_common_elements  # context shim, see meta.json
 
 def setup_empty_graph():
     global BONT, BRDFFO, BRDFLO, BRDFTIME, BRDFFAT, BRDFFOAF, BRDFDAT, BRDFPROV, dataset
     global CC, DC, DTYPE, NS0, NS1, OM2, OT, SCHEMA, TIME, XML, PROV, extent2011node
 
-    BONT = Namespace('http://ontology.bonsai.uno/core#')
-    BRDFFO = Namespace("http://rdf.bonsai.uno/flowobject/exiobase3_3_17#")
-    BRDFLO = Namespace("http://rdf.bonsai.uno/location/exiobase3_3_17#")
-    BRDFTIME = Namespace("http://rdf.bonsai.uno/time#")
-    BRDFFAT = Namespace("http://rdf.bonsai.uno/activitytype/exiobase3_3_17#")
-    BRDFFOAF = Namespace("http://rdf.bonsai.uno/foaf/bonsai#")
-    BRDFDAT = Namespace("http://rdf.bonsai.uno/data/exiobase3_3_17/emission#")
-    BRDFPROV = Namespace("http://rdf.bonsai.uno/prov/exiobase3_3_17#")
-    CC = Namespace('http://creativecommons.org/ns#')
-    DC = Namespace('http://purl.org/dc/elements/1.1/')
-    DTYPE = Namespace("http://purl.org/dc/dcmitype/")
-    NS0 = Namespace('http://purl.org/vocab/vann/')
-    NS1 = Namespace("http://creativecommons.org/ns#")
-    OM2 = Namespace('http://www.ontology-of-units-of-measure.org/resource/om-2/')
-    OT = Namespace("https://www.w3.org/TR/owl-time/")
-    SCHEMA = Namespace('http://schema.org/')
-    TIME = Namespace('http://www.w3.org/2006/time#')
-    XML = Namespace("http://www.w3.org/XML/1998/namespace")
-    PROV = Namespace("http://www.w3.org/ns/prov#")
+    # NOT-EXPRESSIBLE (see meta.json): every one of these 19 Namespace
+    # objects is later passed BY VALUE to `g.bind(prefix, NS)` below, and
+    # each is also exported as a module global by the `global` statement
+    # above. `@prefix` is a lexical, transpile-time binding: it defines no
+    # Python name at all, so `BONT` (and the other 18) stay undefined here.
+    # Left in place, substituted, so `rdfeval check` reproduces the failure.
+    @prefix bont: <http://ontology.bonsai.uno/core#> .
+    @prefix brdffo: <http://rdf.bonsai.uno/flowobject/exiobase3_3_17#> .
+    @prefix brdflo: <http://rdf.bonsai.uno/location/exiobase3_3_17#> .
+    @prefix brdftime: <http://rdf.bonsai.uno/time#> .
+    @prefix brdffat: <http://rdf.bonsai.uno/activitytype/exiobase3_3_17#> .
+    @prefix brdffoaf: <http://rdf.bonsai.uno/foaf/bonsai#> .
+    @prefix brdfdat: <http://rdf.bonsai.uno/data/exiobase3_3_17/emission#> .
+    @prefix brdfprov: <http://rdf.bonsai.uno/prov/exiobase3_3_17#> .
+    @prefix cc: <http://creativecommons.org/ns#> .
+    @prefix dc: <http://purl.org/dc/elements/1.1/> .
+    @prefix dtype: <http://purl.org/dc/dcmitype/> .
+    @prefix ns0: <http://purl.org/vocab/vann/> .
+    @prefix ns1: <http://creativecommons.org/ns#> .
+    @prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
+    @prefix ot: <https://www.w3.org/TR/owl-time/> .
+    @prefix schema: <http://schema.org/> .
+    @prefix time: <http://www.w3.org/2006/time#> .
+    @prefix xml: <http://www.w3.org/XML/1998/namespace> .
+    @prefix prov: <http://www.w3.org/ns/prov#> .
 
     extent2011node = URIRef("{}{}".format(BRDFTIME, '2011'))
 

@@ -14,11 +14,21 @@
     "graph_write": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "prefixed name",
+    "+{ }",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: BEING->being, PM->pm, PROVENANCE->provenance, YURTLE->yurtle"
+    "prefixes: BEING->being, PM->pm, PROVENANCE->provenance, YURTLE->yurtle -- all four verified as real `Namespace(...)` bindings in yurtle_rdflib/namespaces.py at the pinned commit, not guessed. `from .namespaces import BEING, PM, PROVENANCE, YURTLE` -> `from yurtle_context import being:, pm:, provenance:, yurtle:` (dynamic regime, the construction under test: the import, not ns_def_local -- no @prefix line with an inlined IRI). All four are imported (mirroring the real file's own import list) even though only PROVENANCE is dereferenced inside this specific region's body; kept as prefixes anyway because they ARE namespace objects genuinely imported by the real line, same convention as the ns_import_project sibling for this repository (YurtleStore._flush_file).",
+    "`if p == PROVENANCE.definedIn:` -> `if p == provenance:definedIn:` -- a prefixed name used directly as a term in a comparison, immediately followed by the if-statement's own trailing colon; transpiles cleanly and the fixture-corruption check below confirms it is not silently ignored.",
+    "`filtered.add((s, p, o))` -> `+{ {s} {p} {o} }(filtered)`, the call-suffix form: no ambient `@graph` is declared (the function receives/produces graphs by parameter and return value, not a module-level graph), so the island names its receiver graph explicitly, per current-graph.md's `+{ }(other)` example -- same pattern as the ns_import_project sibling (YurtleStore._flush_file) in this same repository.",
+    "`for s, p, o in self.store:` (a full, unconstrained 3-variable scan) is left as plain Python iteration rather than rewritten to `m{ ?s ?p ?o }(self.store)`: no idiom in INSTRUCTIONS.md SS2's correspondence table covers an unconstrained full-store scan, and turning it into a BGP with zero fixed terms buys nothing over the native rdflib iterator -- unlike the `trav_navigation`-style fixed-subject case in the sibling region, where `m{ }` genuinely lets a fixed term replace a filter. The `self.store.namespaces()` iteration a few lines above is likewise left untouched: it walks namespace *bindings*, not triples, and no construction in the closed vocabulary covers that.",
+    "Executability (AGENT_BATCH's 163-regions case): the region is a method body (`self.store`, set by `super().__init__(store)` in rdflib's own `Serializer` base class, serializer.py line 65) with no visible graph in its own three lines of context, so a minimal `FakeSerializer` (only the `.store` attribute this region's body reads) plus a `demo()` harness are appended identically to original.py and translated.ldpy. `.namespaces` rewritten to `yurtle_context`, a shim module transcribing the four real `Namespace(...)` objects verbatim from yurtle_rdflib/namespaces.py (plus the `__namespaces__` dict ldpy's `from … import p:` needs to resolve the prefix bindings).",
+    "Fixture designed to isolate the two independent filters in the region (provenance predicate vs. file:// object) so a break in either shows up on its own: the PROVENANCE.definedIn triple carries a non-file literal object (would slip through the file:// filter alone), the file:// triple carries an ordinary predicate (would slip through the predicate filter alone), plus one ordinary kept triple and one kept triple with a namespace-term object. Checked directly: replacing the predicate guard with `if False: continue` first passed unnoticed with an earlier fixture where the provenance triple's object also happened to be a file:// URI (the second filter masked the first) -- fixed by giving that triple a non-file object; re-broken afterward with `if False: continue` and confirmed `rdfeval check` now FAILs (2 vs 3 triples), then reverted and reconfirmed OK."
   ],
   "draft_sha": "048d508aaba63f07",
   "provenance": {
@@ -30,5 +40,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

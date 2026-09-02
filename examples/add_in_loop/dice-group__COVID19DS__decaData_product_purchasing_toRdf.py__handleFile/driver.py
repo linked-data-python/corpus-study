@@ -1,15 +1,25 @@
 """Validation driver for dice-group__COVID19DS__decaData_product_purchasing_toRdf.py__handleFile.
 
 Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+
+handleFile() takes no argument and returns nothing: it mutates the
+module-level graph `g` (closure over a global, not a parameter), so the
+entry-mode comparison (which only looks at a call's return value, its
+mutated args/kwargs and stdout) would see nothing to compare and report a
+hollow pass. Both original.py and translated.ldpy therefore carry an
+identical "demo harness" appendix (see meta.json) that calls handleFile()
+once at module level, so entry=None / module-state comparison picks up `g`
+by name and compares it by graph isomorphism -- the same pattern as
+examples/remove/DataDrivenCPS__acquirium__.../driver.py.
+
+The input CSV (COVID19_INDEX_SAMPLE_....csv, alongside this driver) and the
+context shim (context_shim.py: pandas, OrderedDict, repl()) are read by both
+representations identically; see meta.json.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
-    entry='handleFile',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    entry=None,
+    calls=None,
 )

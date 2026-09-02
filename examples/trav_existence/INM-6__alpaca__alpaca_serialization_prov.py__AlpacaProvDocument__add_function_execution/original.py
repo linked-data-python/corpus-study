@@ -2,15 +2,9 @@
 # region: AlpacaProvDocument._add_function_execution (lines 309-398, stratum trav_existence)
 # licence of the source repository: see meta.json
 from itertools import product, chain
+from rdflib import Graph
 from rdflib.namespace import RDF, PROV, XSD
-from alpaca.serialization.identifiers import (data_object_identifier,
-                                              file_identifier,
-                                              function_identifier,
-                                              script_identifier,
-                                              execution_identifier,
-                                              _get_function_name)
-from alpaca.alpaca_types import DataObject, File, Container
-from alpaca.ontology.annotation import _OntologyInformation, ONTOLOGY_INFORMATION
+from context_shim import AlpacaProvDocument, membership_execution  # context shim -- see meta.json
 
 def _add_function_execution(self, execution, script_agent, script_info,
                             session_id):
@@ -102,3 +96,23 @@ def _add_function_execution(self, execution, script_agent, script_info,
 
         # Associate the activity to the script
         self._wasAssociatedWith(activity=cur_activity, agent=script_agent)
+
+
+# Demo harness (identical on both sides, see meta.json): this region's
+# single extracted operation (`rdf_ops: 1`, a "namespace_term" use of
+# `PROV.wasAttributedTo`) is the existence read
+# `PROV.wasAttributedTo not in self.graph.predicates(container_entity,
+# script_agent)` that guards the call to `self._wasAttributedTo` -- reached
+# only through the `_is_membership` branch (attribute/subscript accesses;
+# the `else` branch, with no namespace-term use of its own, is untouched and
+# unreached here). `demo` builds a fresh `AlpacaProvDocument` stand-in
+# around a graph the caller supplies, runs the region on a `subscript`-kind
+# execution, and returns whether `_wasAttributedTo` was called -- the one
+# bit of information the read decides.
+def demo(graph_data, container, agent):
+    graph = Graph().parse(data=graph_data, format="turtle") if graph_data else Graph()
+    doc = AlpacaProvDocument(graph)
+    execution = membership_execution(container, agent)
+    _add_function_execution(doc, execution, agent, script_info=None,
+                            session_id=None)
+    return len(doc.was_attributed_to_calls)

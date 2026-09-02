@@ -1,8 +1,16 @@
 # Extracted from Congruentsys/yurtle-rdflib@8bbb378f5a : src/yurtle_rdflib/serializer.py
 # region: YurtleRDFlibSerializer._filter_provenance_triples (lines 117-143, stratum ns_import_project)
 # licence of the source repository: see meta.json
-from rdflib import Graph, URIRef
-from .namespaces import BEING, PM, PROVENANCE, YURTLE
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `.namespaces` rewritten to `yurtle_context`, the shim module next to this
+# file (relative imports do not resolve for a single extracted file). The
+# region reads `self.store` (set by `super().__init__(store)` in the real
+# rdflib `Serializer` base class that `YurtleRDFlibSerializer` extends,
+# serializer.py line 65); a minimal stand-in is appended below (identical
+# on both sides).
+from rdflib import Graph, URIRef, Literal
+from yurtle_context import BEING, PM, PROVENANCE, YURTLE
 
 def _filter_provenance_triples(self) -> Graph:
     """
@@ -31,3 +39,28 @@ def _filter_provenance_triples(self) -> Graph:
         filtered.add((s, p, o))
 
     return filtered
+
+
+# Demo harness (identical on both sides, see meta.json): _filter_provenance_triples
+# is a method body lifted out of YurtleRDFlibSerializer, so this appends the
+# minimal `self` the region's own body reads (a `.store` graph) with triples
+# that exercise both filters -- a provenance predicate, a file:// object
+# under another predicate -- plus ordinary triples that must survive.
+class FakeSerializer:
+    """Minimal stand-in for YurtleRDFlibSerializer: only `.store`, the sole
+    attribute this region's body reads."""
+
+    def __init__(self, store: Graph):
+        self.store = store
+
+
+def demo() -> Graph:
+    store = Graph()
+    subject = BEING.alice
+    store.add((subject, PM.status, Literal("active")))  # kept: ordinary triple
+    store.add((subject, PROVENANCE.definedIn, Literal("source.md")))  # filtered: provenance predicate ALONE (non-file object)
+    store.add((subject, YURTLE.source, URIRef("file:///another.md")))  # filtered: file:// object ALONE (other predicate)
+    store.add((subject, BEING.knows, BEING.bob))  # kept: ordinary triple, non-file object
+
+    self = FakeSerializer(store)
+    return _filter_provenance_triples(self)

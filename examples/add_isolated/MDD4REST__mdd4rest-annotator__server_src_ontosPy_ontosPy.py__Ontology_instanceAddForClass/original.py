@@ -2,12 +2,16 @@
 # region: Ontology.instanceAddForClass (lines 1168-1188, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Namespace, exceptions, URIRef, RDFS, RDF, BNode
+# Context shim (see meta.json / context_shim.py): restores self.allclasses /
+# self.sessionGraph / self.sessionNS, set up elsewhere in Ontology.__init__,
+# not carried by the extracted method lines.
+from context_shim import OntologyContext
 
-def instanceAddForClass(self, aClass, anInstance, ns = None):
-	""" 
-	2011-07-26: 
+def instanceAddForClass(self: OntologyContext, aClass, anInstance, ns = None):
+	"""
+	2011-07-26:
 	Adds or creates a class-instance to the session-graph (and returns the instance).
-	If a URIRef object is passed, that's ok. Also, if a string is passed, we create a URI using the 
+	If a URIRef object is passed, that's ok. Also, if a string is passed, we create a URI using the
 
 	default namespace for the Session graph.
 	p.s. No need to check for duplicates: rdflib does that already!

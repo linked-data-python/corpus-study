@@ -1,0 +1,37 @@
+# Input graph for RDFLib__VocPrez__vocprez_source_file.py__File_get_top_concepts.
+#
+# Covers the query's two UNION branches (skos:hasTopConcept from the scheme,
+# skos:topConceptOf from the concept), the FILTER's language selection
+# (an @en-tagged label, an @fr-tagged label on the SAME concept so a
+# different `language` argument genuinely changes which row is picked, and a
+# plain no-language label matched by the FILTER's `lang(?pl) = ""` arm),
+# the pl_cache de-duplication in the Python loop (ex:c4 repeats ex:c1's
+# English label under a different concept, in the same scheme, and must be
+# dropped), and a neighbouring scheme (ex:scheme2/ex:decoy) that must never
+# appear in ex:scheme1's results.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix ex: <http://example.org/> .
+
+ex:scheme1 a skos:ConceptScheme .
+
+ex:scheme1 skos:hasTopConcept ex:c1 .
+ex:c1 skos:prefLabel "Animal"@en .
+ex:c1 skos:prefLabel "Animal"@fr .
+
+ex:c2 skos:topConceptOf ex:scheme1 .
+ex:c2 skos:prefLabel "Plant"@en .
+
+ex:c3 skos:topConceptOf ex:scheme1 .
+ex:c3 skos:prefLabel "Fungus" .
+
+# same label as c1/@en, under a different top concept of the SAME scheme --
+# pl_cache must keep only the first ?tc seen for a given label, so c4 must
+# not appear in the "en" case.
+ex:c4 skos:topConceptOf ex:scheme1 .
+ex:c4 skos:prefLabel "Animal"@en .
+
+# neighbourhood: a top concept of a DIFFERENT scheme -- must never appear
+# in ex:scheme1's results.
+ex:scheme2 a skos:ConceptScheme .
+ex:other skos:hasTopConcept ex:decoy .
+ex:decoy skos:prefLabel "Decoy"@en .

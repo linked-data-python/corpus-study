@@ -10,11 +10,19 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: EP->ep, REG->reg, TERN->tern"
+    "`from prez.reference_data.prez_ns import EP, REG, TERN` -> `from prez_ns_context import ep:, reg:, tern:`. Verified against the pinned commit (prez/reference_data/prez_ns.py) that all three IRIs match exactly: EP=https://prez.dev/endpoint/, REG=http://purl.org/linked-data/registry#, TERN=https://w3id.org/tern/ontologies/tern/, all plain `Namespace(...)` bindings, not guessed.",
+    "rdf_ops=0: this region IS the import line, nothing else -- no body dereferences EP/REG/TERN, so the harness's default entry=None module-state comparison has nothing to observe, and would in fact be actively MISLEADING: the prefix-import form binds no module-level Python name at all (declarations.md: 'no name is captured'), so a raw globals diff would flag EP/REG/TERN as 'missing' on the translated side for a reason unrelated to correctness. Same shape and same fix as the ns_import_project sibling for MaxBerktoldRWTH/BRICKbuilder (also a bare re-export line, rdf_ops=0): a `demo()` function, appended identically to both sides, dereferences one real term from each namespace and returns the string forms -- the only way to observe that the dynamic prefix resolves to the SAME IRI as the plain import it replaces. The three terms used (EP[\"system/object\"], REG.status, TERN.hasSimpleValue) are not invented: grepped directly from prez/config.py and prez/dependencies.py at the pinned commit, real call sites of these exact namespaces.",
+    "EP[\"system/object\"] (item access, local part contains '/') -> `ep:{\"system/object\"}` (interpolated prefixed name): rdflib `Namespace.__getitem__` concatenates without percent-encoding (checked directly), exactly what `ex:{expr}` does too (INSTRUCTIONS.md's own warning) -- an exact substitution, not an approximation. REG.status and TERN.hasSimpleValue are plain attribute access, so `reg:status` / `tern:hasSimpleValue` need no interpolation at all.",
+    "Executability (AGENT_BATCH's 163-regions case, on top of the demo-harness need above): `prez` is not a published package -- checked directly, `pip index versions prez` finds no distribution on PyPI -- so `prez.reference_data.prez_ns`, an absolute dotted path that only resolves inside the full project checkout, cannot be imported for a single extracted file. Rewritten to `prez_ns_context`, a local shim transcribing the three real `Namespace(...)` objects verbatim (plus the `__namespaces__` dict ldpy's `from … import p:` needs -- the real module is an ordinary Python file and does not export one, same gap as ldpy/012 points 21/15bis, this time hitting executability rather than the `__namespaces__` protocol alone since the module cannot even be imported unshimmed).",
+    "Fixture strength checked directly: swapping reg:status for reg:wrongTerm in translated.ldpy's demo() flips `rdfeval check` to FAIL (differing tuple, the REG member shows the wrong IRI); reverted afterward, OK confirmed again."
   ],
   "draft_sha": "eabffb5b52aeae20",
   "provenance": {
@@ -26,5 +34,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

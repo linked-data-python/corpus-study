@@ -5,6 +5,9 @@ from rdflib import URIRef, BNode, Literal, Namespace, Graph, XSD
 from rdflib.namespace import RDF, RDFS, DCTERMS, OWL
 import re
 import zipcodes
+# Executability: pd, OrderedDict and repl() -- defined elsewhere in the same
+# source file -- restored via context_shim.py (context shim, see meta.json).
+from context_shim import pd, OrderedDict, repl
 g = Graph()
 resource = "https://covid-19ds.data.dice-research.org/resource/"
 schema = Namespace("http://schema.org/")
@@ -110,3 +113,11 @@ def handleFile():
 
 
 	print('csv has finished')
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# handleFile() takes no argument and returns nothing: it mutates the
+# module-level graph `g` in place, so entry=None / module-state comparison
+# (which inspects every rdflib Graph in the module's globals) is the right
+# oracle here, driven by calling the region's own entry point once.
+handleFile()

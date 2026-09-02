@@ -2,7 +2,7 @@
 # region: parse_owl_with_rdflib (lines 15-127, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from typing import Any
-from .mapping import MappingBundle, MappingSource
+from owl_rdflib_context import MappingBundle, MappingSource, _local_name, _xsd_to_simple  # context shim -- see meta.json
 
 def parse_owl_with_rdflib(turtle_text: str) -> MappingBundle:
     """Parse an OWL/Turtle ontology using rdflib and produce a MappingBundle.
@@ -24,26 +24,26 @@ def parse_owl_with_rdflib(turtle_text: str) -> MappingBundle:
 
     g = rdflib.Graph()
     g.parse(data=turtle_text, format="turtle")
+    @graph g
 
-    OWL = rdflib.Namespace("http://www.w3.org/2002/07/owl#")
-    RDFS = rdflib.Namespace("http://www.w3.org/2000/01/rdf-schema#")
-    RDF = rdflib.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
-    PHYS = rdflib.Namespace("http://arangodb.com/schema/physical#")
+    @prefix owl: <http://www.w3.org/2002/07/owl#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix phys: <http://arangodb.com/schema/physical#> .
 
     # ── Extract classes ──────────────────────────────────────────────
     entities: list[dict[str, Any]] = []
     entity_props: dict[str, list[dict[str, str]]] = {}
 
-    for cls in g.subjects(RDF.type, OWL.Class):
+    for cls in m{ ?cls a owl:Class }:
         name = _local_name(cls)
         entities.append({"name": name, "labels": [name], "properties": []})
         entity_props[name] = []
 
     # ── Extract datatype properties ──────────────────────────────────
-    for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
+    for prop in m{ ?prop a owl:DatatypeProperty }:
         prop_name = _local_name(prop)
-        domain = g.value(prop, RDFS.domain)
-        range_uri = g.value(prop, RDFS.range)
+        domain = m{ {prop} rdfs:domain ?v }.first()
+        range_uri = m{ {prop} rdfs:range ?v }.first()
         prop_entry: dict[str, str] = {"name": prop_name}
         if range_uri:
             prop_entry["type"] = _xsd_to_simple(str(range_uri))
@@ -57,10 +57,10 @@ def parse_owl_with_rdflib(turtle_text: str) -> MappingBundle:
 
     # ── Extract object properties (relationships) ────────────────────
     relationships: list[dict[str, Any]] = []
-    for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+    for prop in m{ ?prop a owl:ObjectProperty }:
         rel_name = _local_name(prop)
-        domain = g.value(prop, RDFS.domain)
-        range_ = g.value(prop, RDFS.range)
+        domain = m{ {prop} rdfs:domain ?v }.first()
+        range_ = m{ {prop} rdfs:range ?v }.first()
         relationships.append(
             {
                 "type": rel_name,
@@ -74,36 +74,36 @@ def parse_owl_with_rdflib(turtle_text: str) -> MappingBundle:
     physical_entities: dict[str, dict[str, Any]] = {}
     physical_rels: dict[str, dict[str, Any]] = {}
 
-    for cls in g.subjects(RDF.type, OWL.Class):
+    for cls in m{ ?cls a owl:Class }:
         name = _local_name(cls)
-        coll = g.value(cls, PHYS.collectionName)
-        style = g.value(cls, PHYS.style) or g.value(cls, PHYS.mappingStyle)
+        coll = m{ {cls} phys:collectionName ?v }.first()
+        style = m{ {cls} phys:style ?v }.first() or m{ {cls} phys:mappingStyle ?v }.first()
         if coll:
             pm_entry: dict[str, Any] = {
                 "style": str(style) if style else "COLLECTION",
                 "collectionName": str(coll),
                 "properties": {},
             }
-            type_field = g.value(cls, PHYS.typeField)
-            type_value = g.value(cls, PHYS.typeValue)
+            type_field = m{ {cls} phys:typeField ?v }.first()
+            type_value = m{ {cls} phys:typeValue ?v }.first()
             if type_field:
                 pm_entry["typeField"] = str(type_field)
             if type_value:
                 pm_entry["typeValue"] = str(type_value)
             physical_entities[name] = pm_entry
 
-    for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+    for prop in m{ ?prop a owl:ObjectProperty }:
         rel_name = _local_name(prop)
-        edge_coll = g.value(prop, PHYS.edgeCollectionName) or g.value(prop, PHYS.collectionName)
-        style = g.value(prop, PHYS.style) or g.value(prop, PHYS.mappingStyle)
+        edge_coll = m{ {prop} phys:edgeCollectionName ?v }.first() or m{ {prop} phys:collectionName ?v }.first()
+        style = m{ {prop} phys:style ?v }.first() or m{ {prop} phys:mappingStyle ?v }.first()
         if edge_coll:
             pm_entry = {
                 "style": str(style) if style else "DEDICATED_COLLECTION",
                 "edgeCollectionName": str(edge_coll),
                 "properties": {},
             }
-            domain = g.value(prop, RDFS.domain)
-            range_ = g.value(prop, RDFS.range)
+            domain = m{ {prop} rdfs:domain ?v }.first()
+            range_ = m{ {prop} rdfs:range ?v }.first()
             if domain:
                 pm_entry["domain"] = _local_name(domain)
             if range_:

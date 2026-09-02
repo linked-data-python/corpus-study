@@ -13,11 +13,26 @@
     "namespace_term": 2,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}",
+    "m{ }",
+    "call suffix (g)",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, HDL->hdl, FDOF->fdof, NPX->npx"
+    "Two DIFFERENT import lines, two different resolutions -- exactly ldpy/012 point 21's scenario, confirmed again here. `from nanopub.namespaces import HDL, FDOF, NPX` (declaration_site_line 11, the site the stratum actually sampled) is a genuine project-module import, so it takes `from … import p:` -> `from nanopub_ns_shim import hdl:, fdof:, npx:` (FDOF kept even though never dereferenced in this region's body, mirroring the whole import line as one unit -- same convention as the ns_import_project sibling for Congruentsys/yurtle-rdflib). `from rdflib import RDF, RDFS, DCTERMS` cannot: rdflib.namespace does not export `__namespaces__` and nothing can add it there (ldpy/012 point 21, word for word). Point 21's own stated resolution is `@prefix`, IRI typed out -- `@prefix rdfs: <...> .` / `@prefix dcterms: <...> .` -- which covers every use this region's body makes of RDFS/DCTERMS; RDF itself is never dereferenced (in original.py either), so no `@prefix rdf:` is declared for it.",
+    "`nanopub.namespaces` does not export `__namespaces__` (checked directly: `hasattr(nanopub.namespaces, '__namespaces__')` is False) even though the real module IS importable (a real PyPI dependency, no relative-import problem at all) -- confirms ldpy/012 point 15bis in the same breath as point 21: the fix for an ordinary third-party module is a hand-written shim re-exporting `__namespaces__` (`nanopub_ns_shim.py`, next to this pair), not a workaround for executability.",
+    "`HDL[FDO_PROFILE_HANDLE]` (rdflib `Namespace.__getitem__`, no percent-encoding: checked directly) is exactly what a prefixed-name-with-interpolated-local-part does too (`ex:{expr}` concatenates without encoding, per INSTRUCTIONS.md's own warning) -- so `HDL[FDO_PROFILE_HANDLE]` -> `hdl:{FDO_PROFILE_HANDLE}` and `HDL[FAKE_HANDLE]` (in the `@pytest.mark.parametrize` list) -> `hdl:{FAKE_HANDLE}` are exact, not approximating substitutions.",
+    "The three `assert (s, p, o) in graph` triple-membership checks are exactly `trav_existence`'s idiom (`(s, p, o) in g` -> `bool(m{ … })`, INSTRUCTIONS.md SS2's table) even though this region's assigned stratum is ns_import_project, not trav_existence -- translated per SS2's 'toujours la construction la plus specifique', same reasoning as (and same precedent set by) the Congruentsys/yurtle-rdflib sibling of this stratum. Checked directly before use: a ground `m{ }` pattern (zero variables) both matches and correctly fails to match on a minimal script (`bool(m{ {s} dcterms:conformsTo {uri} }(g))` true when the triple is present, false when only a neighbour with a different object is). Python-expression terms (`fdo.fdo_uri`, `uri`, `fdo.metadata.np_uri`) need `{…}` interpolation braces inside the pattern; prefixed names (`dcterms:conformsTo`, `hdl:{FDO_PROFILE_HANDLE}`, `npx:introduces`) do not.",
+    "`rdflib.Literal(\"FdoProfile\")`, used only as an m{ } pattern's object term, becomes the bare `\"FdoProfile\"` plain-literal form: inside an island a quoted string with no `@lang`/`^^dt` suffix is exactly `Literal(v)` with datatype=None, language=None (verified: this is the untyped case INSTRUCTIONS.md's own pitfall list contrasts with `Literal(v, datatype=xsd:string)`, and it applies here since `rdflib.Literal(\"FdoProfile\")` supplies neither). This one substitution also let `import rdflib` and the whole `from rdflib import RDF, RDFS, DCTERMS` plain-Python import drop out of translated.ldpy entirely: with RDFS.label/DCTERMS.conformsTo/rdflib.Literal(...) all moved into island syntax, none of the three names -- nor `rdflib` itself, nor RDF, already unused in original.py too -- has a remaining use.",
+    "`assert_introduces_in_pubinfo`: a module-level helper the region's own body calls but the extraction did not capture (test_fdo_nanopub.py, defined ~line 21) -- an AGENT_BATCH '163 regions' executability restoration, transcribed verbatim and appended identically to both sides (its own RDF operation -- npx:introduces -- gets the same trav_existence-style bool(m{ }) translation as the region's own asserts, for the same reason).",
+    "Dependency: `nanopub` is on PyPI (`pip index versions nanopub`: 2.2.2, ..., 0.1.0 -- present, not merely referenced) and was installed into ~/.venvs/ldpy; every transitive dependency (pycryptodome, pyshacl, rdflib>=6.3.2, requests, sparqlwrapper, typer, yatiml) was ALREADY satisfied in the venv, and rdflib stayed pinned at 7.2.1 after install (checked before and after) -- an ordinary dependency, not a network/database case. `FdoNanopub(FAKE_HANDLE, FAKE_LABEL)` with no `source_uri` and no `conf` (so `NanopubConf(profile=None)`) never reaches `nanopub.nanopub.Nanopub.__init__`'s `requests.get` branch (only taken when `source_uri` is given) -- verified by running the real call directly before writing this pair: no network access, no signing key needed.",
+    "Fixture-strength check: replacing `npx:introduces` with `npx:wrongPredicate` in `assert_introduces_in_pubinfo` flips `rdfeval check` to FAIL (translated.ldpy's own `assert bool(m{ ... })` raises AssertionError, caught by run_pair as an error); reverted afterward, OK confirmed again."
   ],
   "draft_sha": "d0dc98252294eab5",
   "provenance": {
@@ -29,5 +44,12 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_add_fdo_profile",
+    "diffs": [],
+    "error": null
+  }
 }

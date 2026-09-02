@@ -1,0 +1,36 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/> .
+
+# --- direct inverse path: sh:inversePath ex:prop2 --------------------------
+# matches m{ {path_node} sh:inversePath ?o }.first() -> ex:prop2
+_:pInverse sh:inversePath ex:prop2 .
+
+# --- alternative path: only the SECOND item carries sh:inversePath ---------
+# exercises the zero-solution case of .first() for the first item, then a
+# real match on the second (the loop must not stop after the first miss)
+_:altItem1 sh:path ex:noise .
+_:altItem2 sh:inversePath ex:prop3 .
+_:pAlt sh:alternativePath ( _:altItem1 _:altItem2 ) .
+
+# --- two-step sequence path ( ex:assocProp rdf:type ) -> via_type=True -----
+_:pSeq2 rdf:first ex:assocProp ;
+        rdf:rest  _:pSeq2Rest .
+_:pSeq2Rest rdf:first rdf:type ;
+            rdf:rest  rdf:nil .
+
+# --- a LONGER sequence path (3 steps): rdf:first exists (bool(m{ }) True)
+# but the 2-step ( X rdf:type ) shape does not match, so the function still
+# falls through to (None, False, False) -- neighbourhood that must not be
+# mistaken for the two-step profile above.
+_:pSeqLong rdf:first ex:stepA ;
+           rdf:rest  _:pSeqLongRest1 .
+_:pSeqLongRest1 rdf:first ex:stepB ;
+                rdf:rest  _:pSeqLongRest2 .
+_:pSeqLongRest2 rdf:first ex:stepC ;
+                rdf:rest  rdf:nil .
+
+# --- the zero-solution case proper: none of sh:inversePath,
+# sh:alternativePath or rdf:first is present at all.  Carries an unrelated
+# predicate as neighbourhood noise that a too-broad pattern could pick up.
+_:pNothing sh:path ex:decoy .

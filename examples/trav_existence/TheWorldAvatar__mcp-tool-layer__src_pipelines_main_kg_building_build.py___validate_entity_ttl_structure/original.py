@@ -4,6 +4,7 @@
 import os
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, RDFS
+from context_shim import _resolve_expected_top_entity_uri  # context shim -- see meta.json
 
 def _validate_entity_ttl_structure(
     *,

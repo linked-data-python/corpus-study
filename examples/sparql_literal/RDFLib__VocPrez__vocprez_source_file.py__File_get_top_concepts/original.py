@@ -1,6 +1,13 @@
 # Extracted from RDFLib/VocPrez@ce3c0ea42f : vocprez/source/file.py
 # region: File.get_top_concepts (lines 386-461, stratum sparql_literal)
 # licence of the source repository: see meta.json
+#
+# `g.VOCABS[self.vocab_id]` reads Flask's per-request `g` proxy (the real
+# app populates VOCABS once at start-up; `g` has been bound to the
+# *application* context, not the request, since Flask 0.10). driver.py
+# pushes one minimal Flask app's context before calling this function, so
+# `g.VOCABS[...]` resolves the same way without a real HTTP request --
+# no change needed here, this file is otherwise unmodified from the source.
 from flask import g, url_for
 
 def get_top_concepts(self):

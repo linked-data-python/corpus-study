@@ -10,10 +10,25 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "prefixes: skos: (only one used in the query text; PREFIX skos: moves to a file-level @prefix, querying.md).",
+    "The query is assembled with .format(concept_scheme_uri=vocab.uri, language=self.language) -- textual substitution, not initBindings -- but every hole sits in term position (an IRI wrapped in <...>, a FILTER comparison literal), so it translates as s{ } term-position interpolation, not string pasting (INSTRUCTIONS.md section 2, explicit prohibition on chaine de requete assemblee): <{concept_scheme_uri}> -> {URIRef(vocab.uri)}, \"{language}\" -> {self.language}.",
+    "vocab.uri is a plain str (vocprez/model/vocabulary.py's Vocabulary.uri, constructed as str(cs[0]) in file.py -- confirmed by reading the source), not a URIRef. coercion.md's default policy turns a bare str into a plain Literal (`f{\"a\"}.datatype is None`), so a bare {vocab.uri} in term position would silently match nothing: confirmed empirically (see meta note below) -- the exact shape of the pitfall documented in INSTRUCTIONS.md's piege 2 ('URIRef(x) n'est pas f<{x}>'), generalised here to 'ni juste {x}'. URIRef(vocab.uri) is the correct term-position coercion, and is exact: `<{concept_scheme_uri}>` in the original text meant exactly 'interpret this string as an IRI'.",
+    "self.language, by contrast, IS meant as a plain string comparison value in the original (`\"{language}\"`, a bare quoted SPARQL string, no @lang/^^dt) -- coercion.md's default (str -> plain Literal) already matches that, so {self.language} needs no wrapping.",
+    "Empirically verified (scratch harness, not shipped): with {vocab.uri} left bare instead of {URIRef(vocab.uri)}, the exact same query returns zero results against a graph that has real matches -- a silent, not a raised, failure, which is why this needed confirming by execution rather than by reading.",
+    "Genuine finding, not a translation artefact: the fallback query (reached whenever the first query finds nothing) wraps its first UNION branch in `GRAPH ?g { ... }`. `self.gr` is a plain rdflib.Graph everywhere in the real project (File.load_pickle_graph -> Graph().parse(...), never a ConjunctiveGraph/Dataset), and rdflib raises unconditionally when a GRAPH clause is evaluated against a plain Graph ('You performed a query operation requiring a dataset...'), regardless of what the pattern would have matched. So in the real project this fallback ALWAYS crashes, for every vocabulary with no skos:hasTopConcept/topConceptOf triple. Confirmed identical for both the raw query string and the s{ } island (same exception, same rdflib evaluate.py frame) in a scratch harness. Preserved verbatim on both sides (same program, same -- broken -- behaviour), not fixed; not exercised by driver.py because it would abort run_pair's entire calls loop on the first exception rather than reporting a per-case difference (see driver.py header). This is exactly the kind of defect INSTRUCTIONS.md section 5 asks to surface rather than route around.",
+    "Anti-hollow-green check performed: dropped the `|| lang(?pl) = \"\"` disjunct from the FIRST query's FILTER in translated.ldpy. rdfeval check FAILED on both calls (call[0].result and call[1].result differ: the no-language concept ex:c3/'Fungus' drops out of the translated side only). Reverted; check is green again.",
+    "driver.py shares one `self` stand-in (and its one parsed graph) between the original and translated call, rather than parsing fixture.ttl twice via a callable case: get_top_concepts only reads self.gr, so there is nothing to protect by giving each side its own graph, and rdflib.Graph has no content-based __eq__ outside rdflib.compare isomorphism -- two separately-parsed-but-identical graphs would make run_pair's own call[i].arg[j] argument diff report a false mismatch unrelated to the translation. Confirmed needed: the first driver.py draft used a fresh graph per side and rdfeval check failed on exactly that argument diff before this fix."
+  ],
   "draft_sha": "dd31cdf0010d6502",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.954142+00:00",
@@ -24,5 +39,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

@@ -13,11 +13,25 @@
     "term_constructor": 7,
     "triple_add": 13
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, SH->sh"
+    "prefixes actually bound by @prefix: sh only (rdf/rdfs/xsd stay plain Python imports, unused in this region's body, kept because original.py imports them -- same call as the DataArtifex precedent already in this corpus)",
+    "PropertyConstraint is a dataclass (verified against the real source, src/rdf_construct/shacl/converters.py) with EXACT field types: path/node_class/datatype/node_kind: URIRef; min_count/max_count/order: int|None; name/description/pattern: str|None; min_inclusive/max_inclusive: Literal|None; in_values: list[URIRef|Literal]. Every coercion_datatype site in this region is `Literal(x)` with NO explicit datatype=, x already of a type rdflib's own default inference lands on unambiguously (int->xsd:integer, str->plain literal with datatype None) -- so bare interpolation `{expr}` in term position (the language's default node() coercion, INSTRUCTIONS.md's `f{ }`/interpolation entry) reproduces every one of them exactly; verified case by case, not assumed from the type annotations alone",
+    "self.path/self.node_class/self.datatype/self.node_kind are URIRef already (never wrapped in Literal(...) in the original either) -- pass through unchanged under bare interpolation, matching coercion.md's 'an rdflib term itself passes through unchanged'",
+    "self.min_inclusive/self.max_inclusive are Literal|None already -- likewise pass through unchanged; not re-coerced, not written as `^^` (there is no raw value here to coerce, only an already-built term)",
+    "shapes_graph is a plain parameter (a bare name), unlike the sibling Concept region in this same batch where the graph sits behind `self._g`: translated with `@graph shapes_graph` once at the top of the function + thirteen bare `+{ }` (the add_isolated idiom), not the call-suffix form -- current-graph.md's own `@graph mine` example is exactly this case (an existing Python variable)",
+    "sh:class and sh:in: `class`/`in` are Python keywords, which is why the original spells them SH[\"class\"]/SH[\"in\"] rather than SH.class/SH.in -- inside an island a prefixed name's local part follows Turtle's PN_LOCAL grammar, not Python identifier rules, so `sh:class`/`sh:in` transpile with no special-casing; confirmed by `rdfeval check` passing (both branches are exercised by CALL_1)",
+    "_create_rdf_list(shapes_graph, self.in_values) -- a module-level helper defined just past the extracted region (lines 144-168 of converters.py, not inside 88-141) -- is kept as a plain, untouched Python call and restored via context_shim.py (copied verbatim), not reimplemented with the language's `( ... )` RDF-collection notation: the region's own boundary is the coercion_datatype construct on THIS function's 13 direct triple-adds, and reaching into a sibling helper's implementation would be the refactoring INSTRUCTIONS.md forbids ('meme programme, meme comportement RDF, notation differente'), not a restoration of a missing binding",
+    "self (PropertyConstraint) needed no demo() wrapper unlike the sibling Concept region: it is a plain @dataclass, so Python's generated __eq__ already gives run_pair's per-argument comparison true structural equality between the two sides' independently-built instances -- confirmed by the green check comparing call[0].arg[0] with no custom __eq__ added",
+    "sabotage check (INSTRUCTIONS.md anti-vert-creux): changed `sh:minCount {self.min_count}` to `sh:minCount {str(self.min_count)}` in translated.ldpy (str(1) -> plain literal '1' instead of Literal(1) with datatype xsd:integer) -- rdfeval check correctly failed (call[0].arg[1]: graphs not isomorphic, 17 vs 17 triples); reverted, check green again"
   ],
   "draft_sha": "198a1bf675e020f0",
   "provenance": {
@@ -29,5 +43,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

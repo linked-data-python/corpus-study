@@ -5,31 +5,34 @@ from rdflib import URIRef, BNode, Literal, Namespace, Graph, XSD
 from rdflib.namespace import RDF, RDFS, DCTERMS, OWL
 import re
 import zipcodes
-@prefix schema: <http://schema.org/> .
-@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
-@prefix bibtex: <http://purl.org/net/nknouf/ns/bibtex#> .
-@prefix swc: <http://data.semanticweb.org/ns/swc/ontology#> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> .
-@prefix its: <http://www.w3.org/2005/11/its/rdf#> .
-@prefix sdo: <http://salt.semanticauthoring.org/ontologies/sdo#> .
-@prefix bibo: <http://purl.org/ontology/bibo/> .
-@prefix fabio: <http://purl.org/spar/fabio/> .
+# Executability: pd, OrderedDict and repl() -- defined elsewhere in the same
+# source file -- restored via context_shim.py (context shim, see meta.json).
+from context_shim import pd, OrderedDict, repl
 @prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .
 @prefix ndice: <https://covid-19ds.data.dice-research.org/resource/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix geo: <http://www.opengis.net/ont/geosparql#> .
-@prefix ctr: <https://covid-19ds.data.dice-research.org/covidProductPurchasing#> .
 @prefix dowl: <http://dbpedia.org/ontology/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-
 g = Graph()
 resource = "https://covid-19ds.data.dice-research.org/resource/"
+schema = Namespace("http://schema.org/")
+vcard = Namespace("http://www.w3.org/2006/vcard/ns#")
+bibtex = Namespace("http://purl.org/net/nknouf/ns/bibtex#")
+swc = Namespace("http://data.semanticweb.org/ns/swc/ontology#")
+prov = Namespace("http://www.w3.org/ns/prov#")
+nif = Namespace("http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#")
+its = Namespace("http://www.w3.org/2005/11/its/rdf#")
+sdo = Namespace("http://salt.semanticauthoring.org/ontologies/sdo#")
+bibo = Namespace("http://purl.org/ontology/bibo/")
+fabio = Namespace("http://purl.org/spar/fabio/")
+cvdo = Namespace("https://covid-19ds.data.dice-research.org/ontology/")
+ndice = Namespace("https://covid-19ds.data.dice-research.org/resource/") #cvdr
+FOAF = Namespace('http://xmlns.com/foaf/0.1/')
+virtrdf = Namespace('http://www.openlinksw.com/schemas/virtrdf#')
+geo = Namespace('http://www.opengis.net/ont/geosparql#')
+ctr = Namespace("https://covid-19ds.data.dice-research.org/covidProductPurchasing#")
+dowl = Namespace("http://dbpedia.org/ontology/")
 reader = pd.read_csv('COVID19_INDEX_SAMPLE_2020_09_07_20200907_200000_COVID19_INDEX_RDX_2020_09_07_20200907_200000.csv', delimiter="|", keep_default_na=False).to_dict('records', into=OrderedDict)
 g = Graph()
 
@@ -61,64 +64,69 @@ def handleFile():
 
 	# COVID19_INDEX_SAMPLE_2020_09_07_20200907_200000_COVID19_INDEX_RDX_2020_09_07_20200907_200000.csv
 	rowNum = 0
+	@graph g
 	for row in reader:
 		rowNum = rowNum +1
 		for heading in row:
 			heading = str(heading)
 
 			strName = str(rowNum)
-			strCamelCase = re.sub(r"_(\w)", repl, strName)+"_ProductPurchasingBehavior" 
+			strCamelCase = re.sub(r"_(\w)", repl, strName)+"_ProductPurchasingBehavior"
 
 			dice = URIRef(resource+strCamelCase)
 
 			headingLower = heading.lower()
 			strCamelCase = re.sub(r"_(\w)", repl, headingLower)
 			metapredicate = cvdo[strCamelCase]
-			metaobject = Literal(row[heading],datatype=xsd:string)
+			metaobject = Literal(row[heading],datatype=XSD.string)
 
 			if heading == 'QTY' or heading == 'UPC':
-				metaobject = Literal(row[heading],datatype=xsd:integer)
+				metaobject = Literal(row[heading],datatype=XSD.integer)
 
 			if heading == 'QTY':
-				metapredicate = cvdo:quantity
+				metapredicate = cvdo.quantity
 
 			if heading == 'STORE_ZIP_CODE':
-				metapredicate = dowl:postalCode
-				metaobject = Literal(row[heading],datatype=xsd:integer)
+				metapredicate = dowl.postalCode
+				metaobject = Literal(row[heading],datatype=XSD.integer)
 
 				if row[heading] != "":
 					zipcodeInfo = zipcodes.matching(str(row[heading]))
 					# print(zipcodeInfo[0]['country'])
 					# Country
 					adm = zipcodeInfo[0]['country']
-					g += g{
-					    {dice} cvdo:hasCountry ndice:{adm} ;
-					       cvdo:hasCity {Literal(zipcodeInfo[0]['city'],datatype=XSD.string)} ;
-					       cvdo:hasCounty {Literal(zipcodeInfo[0]['county'],datatype=XSD.string)} ;
-					       geo:geometry {Literal('POINT('+zipcodeInfo[0]['lat']+' '+zipcodeInfo[0]['long']+')', datatype=virtrdf.Geometry)} .
-					    ndice:{adm} a dowl:Country ;
-					       rdfs:label {Literal(adm,datatype=XSD.string)}
-					}
+					@bindings {"country": ndice[adm], "city": Literal(zipcodeInfo[0]['city'],datatype=XSD.string), "county": Literal(zipcodeInfo[0]['county'],datatype=XSD.string), "geom": Literal('POINT('+zipcodeInfo[0]['lat']+' '+zipcodeInfo[0]['long']+')', datatype=virtrdf.Geometry), "admlabel": Literal(adm,datatype=XSD.string)}
+					+{ {dice} cvdo:hasCountry ?country ;
+					          cvdo:hasCity ?city ;
+					          cvdo:hasCounty ?county ;
+					          geo:geometry ?geom } # lat lon
+					+{ ndice:{adm} a dowl:Country ;
+					               rdfs:label ?admlabel }
 
 			if heading == 'NET_SALES' or heading == 'GROSS_SALES':
-				metaobject = Literal(row[heading],datatype=xsd:float)
+				metaobject = Literal(row[heading],datatype=XSD.float)
 
 			if heading == "DATE":
-				metaobject = Literal(row[heading],datatype=xsd:date)
+				metaobject = Literal(row[heading],datatype=XSD.date)
 
 			if row[heading] != "":
-				g += g{
-				    {dice} a cvdo:ProductPurchasing ;
-				       {metapredicate} {metaobject}
-				}
+				@bindings {"p": metapredicate, "o": metaobject}
+				+{ {dice} a cvdo:ProductPurchasing ;
+				          ?p ?o }
 
 			# the provenance
-			g += g{
-			    {dice} prov:hadPrimarySource ndice:ProductPurchasingCovidDataset .
-			    ndice:ProductPurchasingCovidDataset a prov:Entity ;
-			       prov:generatedAtTime "2021-02-22T02:52:02Z"^^xsd:dateTime ;
-			       prov:wasDerivedFrom "http://decadata.io/"^^xsd:string
-			}
+			+{ {dice} prov:hadPrimarySource ndice:ProductPurchasingCovidDataset .
+			   ndice:ProductPurchasingCovidDataset a prov:Entity ;
+			      prov:generatedAtTime {Literal("2021-02-22T02:52:02Z",datatype=XSD.dateTime)} ;
+			      prov:wasDerivedFrom {Literal("http://decadata.io/",datatype=XSD.string)} }
 
 
 	print('csv has finished')
+
+
+# --- demo harness (added identically to both representations; see meta.json) ---
+# handleFile() takes no argument and returns nothing: it mutates the
+# module-level graph `g` in place, so entry=None / module-state comparison
+# (which inspects every rdflib Graph in the module's globals) is the right
+# oracle here, driven by calling the region's own entry point once.
+handleFile()

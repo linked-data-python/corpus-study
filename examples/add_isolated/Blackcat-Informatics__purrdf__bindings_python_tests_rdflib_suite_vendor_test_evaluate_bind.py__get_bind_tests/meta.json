@@ -15,10 +15,16 @@
     "term_constructor": 7,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@graph", "+{ }", "interpolation {expr}", "plain literal", "IRI"],
+  "translation_notes": [
+    "Mechanical draft wrote `g += g{ {URIRef(base + \"thing\")} {URIRef(base + \"ns#comment\")} \"anything\" }` (the known add_isolated draft bias): rewritten as `@graph g` + `+{ }`, the construction the stratum targets.",
+    "The bare `<http://example.org/other>` / `<http://example.org/ns#Thing>` terms in the yielded tuples were already correct in the draft (IRI island used directly as a Python value, outside any g{ }/+{ } block) and are kept as-is.",
+    "The graph `g` built inside get_bind_tests is local to the generator and never returned or assigned at module level, so the driver cannot rely on run_pair's built-in entry=/calls= comparison (it would compare the yielded `check` NESTED FUNCTION objects with ==, which are never equal across two module executions -- a false FAIL unrelated to the translation). driver.py instead reaches the graph via `check.__closure__` (co_freevars == ('g',)) and compares it by isomorphism -- the true add_isolated oracle here.",
+    "The nested check() function's own `g.query(\"...\" % expr)` (categories.sparql=1) was left as plain rdflib: `expr` there is spliced in as raw SPARQL clause TEXT (e.g. 'bind(\"thing\" as ?name)'), not a term, and `s{ }` only interpolates `{expr}` in term position (never string pasting, per INSTRUCTIONS.md SS2). This region's `strata` is add_isolated only -- the tirage did not tag it sparql_literal/sparql_interpolated -- so this untouched call is scaffolding around the region under test, not a missed credit.",
+    "Anti-hollow-green: with the object literal changed from \"anything\" to \"wrongthing\" in translated.ldpy, `rdfeval check` (equivalently: transpile + driver.py) correctly reports equivalent: false (graphs not isomorphic); restored afterwards."
+  ],
   "draft_sha": "9153350b9712b253",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.137284+00:00",

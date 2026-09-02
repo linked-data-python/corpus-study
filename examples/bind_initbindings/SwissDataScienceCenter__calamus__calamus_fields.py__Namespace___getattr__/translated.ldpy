@@ -1,8 +1,41 @@
 # Extracted from SwissDataScienceCenter/calamus@c59d6fe968 : calamus/fields.py
 # region: Namespace.__getattr__ (lines 92-103, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from calamus.utils import ONTOLOGY_QUERY, Proxy, normalize_type, normalize_value
+# (added to make the region executable: `calamus` is not installed in the
+# pinned study venv -- see context_shim.py for why a shim was used instead
+# of installing it -- and `IRIReference` is a sibling class in the same
+# source file, calamus/fields.py, dropped by the extraction because only
+# the Namespace.__getattr__ qualname was selected; both restored from
+# context_shim.py, see meta.json)
+from context_shim import ONTOLOGY_QUERY, Proxy, normalize_type, normalize_value  # noqa: F401 (Proxy/normalize_* unused, see context_shim.py)
+from context_shim import IRIReference
 
+# NOT TRANSLATED (see meta.json, classification not-expressible): this
+# method's whole point is Python's `__getattr__` reflection hook --
+# `reference = IRIReference(self, name)` builds a plain Python object from
+# `name`, the ARBITRARY attribute name the caller wrote (`SDO.foo`,
+# `SDO.bar`, ...; `name` is not a literal in this file's source, it comes
+# from Python's attribute-access machinery at the call site), and RETURNS
+# it so it keeps living after this method returns -- typically as a
+# marshmallow field's IRI, compared and hashed elsewhere via
+# IRIReference.__eq__/__lt__/__hash__ (calamus/fields.py). `@prefix` has no
+# run-time object at all (confirmed with the transpiler: `@prefix ex:
+# <{iri}> .` is a SyntaxError, same check as the GPViz.__init__ and
+# translate() precedents elsewhere in this stratum) and a prefixed name
+# resolves to a term only inside the island that wrote it -- neither can
+# stand in for a value manufactured from a dynamically-supplied name and
+# handed back to arbitrary calling code. The smaller
+# `self.ontology.query(ONTOLOGY_QUERY, initBindings={"property": p})` ASK
+# check, taken alone, would fit the stratum's own rule (`?property` is not
+# projected by an ASK, so a bare interpolation) -- but `ONTOLOGY_QUERY` is a
+# pre-parsed Query object SHARED across every Namespace instance
+# process-wide (calamus/utils.py wraps prepareQuery in a LazyProxy
+# specifically "because prepareQuery is rather slow"); writing `s{ ask {
+# ... } }` here would inline and re-parse that query text at this one call
+# site, abandoning the shared-query design of a module this region does not
+# own. Left untranslated as a whole rather than credit a fragment whose
+# translation would only be legitimate if this method's actual reason for
+# being (the reflection hook) were also expressible, which it is not.
 def __getattr__(self, name):
     reference = IRIReference(self, name)
 

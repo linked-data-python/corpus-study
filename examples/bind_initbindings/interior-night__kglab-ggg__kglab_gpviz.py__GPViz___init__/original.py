@@ -7,7 +7,14 @@ import typing
 import rdflib.paths  # type: ignore # pylint: disable=E0401
 import rdflib.plugins.sparql  # type: ignore # pylint: disable=E0401
 import rdflib.term  # type: ignore # pylint: disable=E0401
+import gpviz_shim
 
+# Context shim (see meta.json): the extracted region is a *method body* with
+# no enclosing class. Restoring the class statement is what the shim module
+# (gpviz_shim.py) is for -- it supplies `_find_triples`, the one method this
+# constructor calls that lies outside the extracted region, so the region
+# stays exactly the constructor body, unmodified.
+class GPViz(gpviz_shim.GPVizBase):
     def __init__ (
         self,
         sparql: str,
@@ -32,3 +39,7 @@ the namespaces for the corresponding RDF graph
         self.blank_nodes: typing.List[str] = []
         self.values: typing.Dict[str, list] = collections.defaultdict(list)
         self.triples: list = self._find_triples(pq.algebra)
+
+# driver helper (see gpviz_shim.py) -- not part of the extracted region.
+def _summarize(sparql, namespaces):
+    return gpviz_shim.summarize(GPViz, sparql, namespaces)

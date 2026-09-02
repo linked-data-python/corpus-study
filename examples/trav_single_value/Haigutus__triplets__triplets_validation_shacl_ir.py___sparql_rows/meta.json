@@ -10,10 +10,22 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "LANGUAGE LIMITATION (not an assumed one -- confirm/report, see INSTRUCTIONS.md §5): an island cannot appear inside an f-string interpolation hole. Minimal repro: `f\"val: {m{ ?s ex:p ?o }.first()}\"` fails to transpile with `SyntaxError: f-string: expecting '=', or '!', or ':', or '}'` even outside any comprehension -- the island parser does not recurse into an f-string's `{...}` expression parts (m{ } works fine as the iterable of a genexp `for` clause, or as any other plain expression; only nesting it inside an f-string hole fails). The original's `f\"PREFIX {graph.value(declaration, SH.prefix)}: <{graph.value(declaration, SH.namespace)}>\\n\"` inside a `\"\".join(genexp)` had to be rewritten as an equivalent nested `for ontology in m{ }: for declaration in m{ }:` loop that hoists both `.first()` calls into `prefix`/`namespace` locals before building the same f-string -- same two reads, same nesting order, same join, only the Python-level shape (genexp -> explicit loop) differs. That is why this is classified minor-restructuring rather than directly-expressible.",
+    "SH is a run-time parameter (rdflib.Namespace passed by the caller), so every predicate is an interpolated `{SH.path}` / `{SH.sparql}` / ... rather than a `sh:` prefix declaration, matching the same reasoning as the sibling region _resolve_path in this batch.",
+    "`for sparql in m{ {shape_uri} {SH.sparql} ?sparql }:` and the ontology/declare loops use `m{ }` as a plain iterable in an ordinary Python `for`, not the `for @bindings in` construct -- that construct is for driving @bindings row-by-row, not for iterating the bare terms a single-variable m{ } projects.",
+    "ordered=False in driver.py: `rows` is built from `graph.objects(shape_uri, SH.sparql)` / the equivalent m{ }, and the original never sorts -- no store promises that order, so the row list is compared as a multiset (see rdfeval.harness docstring; its coded default when `fixture=` is not used is `ordered=True`, so this needed to be passed explicitly rather than relying on the default).",
+    "Anti-vert-creux: fixture.ttl's Shape1 has a sh:sparql child with no sh:select at all (must be skipped -- zero-solution `.first()`), a full child with sh:message and TWO sh:prefixes/sh:declare declarations (exercises the nested loop with more than one item), and a bare child with neither sh:prefixes nor sh:message (prefixes must come back \"\", and the row must have no \"message\" key at all, not message=None). Shape2 has a blank-node sh:path (path field must come back None) and zero sh:sparql children (rows == []). A decoy shape with its own sh:sparql/prefixes checks the pattern does not leak across shapes. Broke `select`'s predicate (SH.select -> SH.message) and confirmed `rdfeval check` failed -- the no-select child wrongly surfaced in the output -- before restoring."
+  ],
   "draft_sha": "88b0edf64e141db9",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.303858+00:00",

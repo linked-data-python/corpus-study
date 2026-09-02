@@ -10,11 +10,23 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SEM->sem"
+    "prefixes: SEM->sem",
+    "The mechanical draft wrote 'g2 += g{ {IRI[s_]} sem:{p_} {IRI[d_]} }' inside a plain 'for s_, p_, d_ in en.NEW_RELATIONS:' -- the biais mecanique the batch instructions warn about. Rewrote as the stratum's target idiom: '@graph g2' once before the loop, 'for @bindings in [...]:' reshaping each (s_, p_, d_) tuple into a row dict ({\"s\": IRI[s_], \"p\": p_, \"d\": IRI[d_]}), and a single '+{ ?s sem:{?p} ?d }' per row. Classified minor-restructuring for that reshaping (NEW_RELATIONS is a list of positional tuples, not already an iterable of mappings), not for anything RDF-semantic: same triples, same graph.",
+    "?s and ?d carry IRI[s_]/IRI[d_] -- URIRef objects already computed via cls_iri(n) = SEM[id + '_' + sanitised label], which concatenates the taxonomy id with a regex-cleaned label, not just the bare id -- so they cannot be rebuilt from a bare id via sem:{?id} local-part instantiation the way ?p can. Kept as pre-resolved terms passed through bindings (node() coercion passes an already-RDF term through unchanged, confirmed in terms.md's f{URIRef(...)} example and empirically for '?var' the same way). ?p uses sem:{?p} instead, since SEM[p_] in the original is exact string concatenation of the property name onto the sem: namespace -- the same idiom as ex:{name} in terms.md -- and p_ is always a plain camelCase identifier (stewardedBy, buildsOn, informs, ...) with no space or slash, so concatenation is safe and e<...> is not needed.",
+    "Context shim (context_predecl.py): BASEDIR, load(), nodes and cls_iri are all defined earlier in the same source file, outside this 2-line region. nodes is reduced to the 15 taxonomy entries en.NEW_RELATIONS references (verified against the real repository at altunelyusuf/SemanticTechnologies@bad0fa7c46: taxonomy_v1_0_0.py's TAX, real id/label pairs copied verbatim), not the full 59-entry taxonomy the real file builds -- the other 44 leaves are never read by this region. enrichment_n_v6_0_0.py (holding NEW_RELATIONS) is copied verbatim in full. semtech_tbox_v6_2_0.ttl is a minimal placeholder: this region only ADDS to g2, it never reads the pre-existing ~1000-triple ontology, so the placeholder's actual content cannot affect correctness (see that file's own header).",
+    "Sabotage-tested: retargeting the object of +{ } from ?d to ?s (so every relation triple wrongly points back at its own subject) makes rdfeval check fail (graphs not isomorphic, 9 vs 9 triples -- same count, different edges); restored before finalising."
   ],
   "draft_sha": "c98e9ef136a48b51",
   "provenance": {

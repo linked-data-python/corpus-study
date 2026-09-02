@@ -1,0 +1,68 @@
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+@prefix ex: <http://example.org/> .
+
+# 1. Happy path: forClass is a URIRef, instanceContainer is inside the
+#    storage root -- no findings, ends up in container_classes and heads.
+ex:RegA a solid:TypeRegistration ;
+    solid:forClass ex:Task ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/tasks/> .
+
+# 2. forClass is a plain literal, not an IRI -- WARN typeindex:forClass-literal;
+#    the container itself is still fine (a second, independent branch).
+ex:RegB a solid:TypeRegistration ;
+    solid:forClass "Not An IRI" ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/notes/> .
+
+# 3-4. Two registrations sharing ONE instanceContainer -- exercises the
+#      per-container class accumulation (container_classes[ctr] grows to
+#      two entries). The module never sorts that list, so the fixture does
+#      not assume an order between RegC1 and RegC2.
+ex:RegC1 a solid:TypeRegistration ;
+    solid:forClass ex:Alpha ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/shared/> .
+ex:RegC2 a solid:TypeRegistration ;
+    solid:forClass ex:Beta ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/shared/> .
+
+# 5. No solid:forClass at all -- WARN typeindex:missing-forClass, cls_iri
+#    stays None; the container is otherwise fine, so it still reaches the
+#    accumulation step with an empty class contribution.
+ex:RegNoForClass a solid:TypeRegistration ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/other/> .
+
+# 6. No solid:instanceContainer AND no solid:instance -- WARN
+#    typeindex:missing-instanceContainer, then the loop body `continue`s
+#    (never reaches container_classes/heads).
+ex:RegMissingContainerNoInstance a solid:TypeRegistration ;
+    solid:forClass ex:Doc .
+
+# 7. No solid:instanceContainer, but a solid:instance IS present (a
+#    single-resource registration) -- no warning at all, silent `continue`.
+ex:RegMissingContainerHasInstance a solid:TypeRegistration ;
+    solid:forClass ex:Doc2 ;
+    solid:instance <https://canon.example/vault/somefile.ttl> .
+
+# 8. instanceContainer is a literal, not an IRI -- WARN
+#    typeindex:instanceContainer-literal, then `continue`.
+ex:RegContainerLiteral a solid:TypeRegistration ;
+    solid:forClass ex:Doc3 ;
+    solid:instanceContainer "not-an-iri" .
+
+# 9. instanceContainer on a DIFFERENT origin than the storage root -- ERROR
+#    typeindex:container-outside-root (integrity violation), then `continue`.
+ex:RegOffOrigin a solid:TypeRegistration ;
+    solid:forClass ex:Doc4 ;
+    solid:instanceContainer <https://evil.example/hijacked/> .
+
+# 10. instanceContainer on the SAME origin as the storage root but outside
+#     the /vault/ root path -- WARN typeindex:container-outside-root
+#     (D100: notable, not a violation), then `continue`.
+ex:RegSameOriginOutsideRoot a solid:TypeRegistration ;
+    solid:forClass ex:Doc5 ;
+    solid:instanceContainer <https://canon.example/biz/equipment/> .
+
+# --- neighbourhood noise: right predicates, WRONG rdf:type -- must never
+# be picked up by `for reg in m{ ?reg rdf:type solid:TypeRegistration }`.
+ex:NotARegistration a ex:SomeOtherType ;
+    solid:forClass ex:ShouldNeverAppear ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/noise/> .

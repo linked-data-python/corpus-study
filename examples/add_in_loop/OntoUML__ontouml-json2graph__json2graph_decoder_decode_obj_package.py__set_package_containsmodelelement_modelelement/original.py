@@ -2,8 +2,8 @@
 # region: set_package_containsmodelelement_modelelement (lines 60-87, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef
-from ..modules import arguments as args
-from ..modules.utils_graph import ontouml_ref
+import ontouml_shim as args
+from ontouml_shim import ontouml_ref, get_package_contents
 
 def set_package_containsmodelelement_modelelement(package_dict: dict, ontouml_graph: Graph) -> None:
     """Set object property ontouml:containsModelElement between an ontouml:Package and an ontouml:ModelElement it \

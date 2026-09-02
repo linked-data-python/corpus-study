@@ -4,6 +4,7 @@
 from SPARQLWrapper import SPARQLWrapper, BASIC, INSERT, POST, SELECT, GET, JSON,RDF
 from rdflib import Graph,URIRef, RDFS, Literal
 from rdflib.namespace import RDF
+from context_shim import TextToTripleStub
 
 def grafoaSortu(self,json):
     for i in json:
@@ -18,3 +19,15 @@ def grafoaSortu(self,json):
                     self.grafoa.add((subjektua,RDFS.label,Literal(i['annotationText']['value'])))
         except:
             pass
+
+
+# Demo harness (identical on both sides, see meta.json): grafoaSortu takes
+# `self` and mutates `self.grafoa` rather than returning anything, and a
+# TextToTripleStub has no `__eq__`, so comparing it as a call argument would
+# compare object identity and always fail. This wraps the call in a fresh
+# stub per invocation and hands back the graph it wrote to, compared by
+# isomorphism as usual.
+def demo(annotations, validations, uris):
+    self = TextToTripleStub(validations, uris)
+    grafoaSortu(self, annotations)
+    return self.grafoa

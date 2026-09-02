@@ -1,4 +1,50 @@
-# Input graph for IndustryFusion__DigitalTwin__semantic-model_dataservice_tests_server_binding_server.py__parse_rdf_to_mapping — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for IndustryFusion__DigitalTwin__semantic-model_dataservice_tests_server_binding_server.py__parse_rdf_to_mapping
+#
+# `base_ns` is passed to the call as "http://example.org/vocab#" (see
+# driver.py) so `base:` below matches BASE = Namespace(base_ns) at run time.
+# Covers: three recognised OPC UA datatypes (several solutions of the
+# bs:BoundMap / bindsConnectorParameter / bindsMapDatatype pattern), the
+# zero-solution case for each g.value() read (a BoundMap missing one of the
+# two properties -> excluded from the mapping), and a neighbouring resource
+# that has the same properties but the wrong rdf:type -> must NOT match.
+#
+# opcua:String and an unrecognised datatype are deliberately NOT exercised
+# here: both make the region return the bare class `str` as a dict value
+# (`datatype = str`), and rdfeval.harness.materialise() tries to iterate
+# `str` itself (`hasattr(str, "__iter__")` is True even though `str` the
+# class is not iterable) -- "'type' object is not iterable", identically on
+# both sides. That is a harness limitation on comparing bare Python `type`
+# objects, not a translation difference (see meta.json translation_notes).
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix opcua: <http://opcfoundation.org/UA/> .
+@prefix bs: <http://example.org/vocab#> .
+
+bs:map1 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns1;i=1001" ;
+    bs:bindsMapDatatype opcua:Double .
+
+bs:map2 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns2;i=1002" ;
+    bs:bindsMapDatatype opcua:Boolean .
+
+bs:map3 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns3;i=1003" ;
+    bs:bindsMapDatatype opcua:Int32 .
+
+bs:map5 a bs:BoundMap ;
+    bs:bindsConnectorParameter "plainAttrNoNsuPrefix" ;
+    bs:bindsMapDatatype opcua:LocalizedText .
+
+# Zero-solution case: a BoundMap with no datatype -> connector_attribute is
+# set but datatype_uri is None, so the `if` guard excludes it.
+bs:map7 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns7;i=1007" .
+
+# Zero-solution case: a BoundMap with no connector attribute -> excluded too.
+bs:map8 a bs:BoundMap ;
+    bs:bindsMapDatatype opcua:Double .
+
+# Neighbour that must NOT match: same properties, wrong rdf:type.
+bs:notabound a bs:SomethingElse ;
+    bs:bindsConnectorParameter "nsu=http://example.org/nsX;i=9999" ;
+    bs:bindsMapDatatype opcua:Double .

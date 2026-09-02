@@ -2,7 +2,7 @@
 # region: setup_empty_graph (lines 22-77, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
-from .graph_common import add_common_elements
+from context_shim import add_common_elements  # context shim, see meta.json
 
 def setup_empty_graph():
     global BONT, BRDFFO, BRDFLO, BRDFTIME, BRDFFAT, BRDFFOAF, BRDFDAT, BRDFPROV, dataset

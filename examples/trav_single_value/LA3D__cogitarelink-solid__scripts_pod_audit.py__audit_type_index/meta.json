@@ -13,12 +13,26 @@
     "namespace_term": 1,
     "term_constructor": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "prefixed name"
   ],
+  "translation_notes": [
+    "Not the expected network dependency: this region is the BODY of `for reg in ti_g.subjects(...)`, extracted from inside `async def audit_type_index(client, sd_g, storage, canon_base, pod_base, findings)`. The one HTTP call (`r = await client.get(ti_url)`) and the parse into `ti_g` happen at lines 323-330, BEFORE line 337 where the extracted region starts -- everything the region itself touches (`ti_g`, `rewrite`, `finding`) is pure/in-memory. So this ran locally after all, unlike the batch instructions' expectation for this region.",
+    "Restored bindings (kind=statement, no visible graph): wrapped the extracted for-loop in audit_type_index_body(ti_g, findings, canon_base, pod_base, container_classes, heads), matching the pattern already used elsewhere in this study (e.g. examples/add_in_loop/.../graph_construct_qs_notes) -- ti_g/container_classes/heads are exactly the bindings the real enclosing function supplies just before this region (see original.py's docstring for the exact lines).",
+    "SOLID = \"http://www.w3.org/ns/solid/terms#\" is a plain Python string used only as `URIRef(SOLID + \"X\")` (four of the region's five rdf_ops), functionally a namespace though not spelled `Namespace(...)` -- promoted to `@prefix solid: <...> .` per the ns_def_local idiom (INSTRUCTIONS.md §2), which is why translated.ldpy drops the now-unused `SOLID = ...` assignment entirely rather than keeping it as dead code. `RDF.type` became `rdf:type` the same way (the pre-existing draft note \"prefixes: RDF->rdf\").",
+    "`for reg in ti_g.subjects(RDF.type, URIRef(SOLID + \"TypeRegistration\")):` is the one-step traversal that drives the whole region -- translated as `for reg in m{ ?reg rdf:type solid:TypeRegistration }:`, a plain Python `for` over the m{ } expression (not the `for @bindings in` construct, which is for binding ROWS, not for iterating the single bare term m{ } projects).",
+    "`has_instance = ti_g.value(reg, URIRef(SOLID + \"instance\")) is not None` only ever tests for existence (the term itself is never used) -- translated as `bool(m{ {reg} solid:instance ?o })`, the trav_existence idiom, rather than degrading it to `.first() is not None`; the other two `ti_g.value(...)` calls (forClass, instanceContainer) keep and use the term, so they are `m{ }.first()`.",
+    "Anti-vert-creux: fixture.ttl carries ten solid:TypeRegistration resources, one per branch of the if/elif chain (forClass missing / literal / ok; instanceContainer missing-with-and-without solid:instance / literal / off-origin ERROR / same-origin-outside-root WARN / inside-root ok), two registrations sharing one container to exercise the per-container class accumulation, and a decoy resource with the right predicates but the WRONG rdf:type that must never enter the loop at all. Broke `has_instance`'s existence check (replaced `bool(m{ {reg} solid:instance ?o })` with a hardcoded `False`) and confirmed `rdfeval check` failed -- the has-solid:instance registration wrongly produced a spurious missing-instanceContainer WARN -- before restoring.",
+    "article_candidate: `has_instance = ti_g.value(reg, URIRef(SOLID + \"instance\")) is not None` -> `bool(m{ {reg} solid:instance ?o })` next to `ctr_node = ti_g.value(reg, URIRef(SOLID + \"instanceContainer\"))` -> `m{ {reg} solid:instanceContainer ?o }.first()` is a clean three-line illustration of the .first()/bool(m{ }) distinction this batch's stratum is about, on the SAME graph in the SAME function."
+  ],
+  "article_candidate": true,
   "draft_sha": "238ae5f39c0eea46",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.995003+00:00",

@@ -1,28 +1,30 @@
 # Extracted from BrickSchema/Brick@c12949f236 : tests/test_subclass_hierarchy.py
 # region: test_cycles (lines 18-40, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
+from rdflib import Graph
+from context_shim import minify  # context shim, see meta.json
+
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
 g = Graph()
 
-def test_cycles():
+def test_cycles(g=g):
     # Find all the classes that make the hierarchy cyclic.
     classes_in_cycles = []
-    res1 = g.query(
-        "SELECT ?brick_class WHERE { ?brick_class rdfs:subClassOf+ ?brick_class .}"
-    )
+    res1 = s{ SELECT ?brick_class WHERE { ?brick_class rdfs:subClassOf+ ?brick_class . } }(g)
     for row in res1:
         classes_in_cycles.append(row[0])
 
     # Find all the triples involved.
     loops = set()
     for brick_class in classes_in_cycles:
-        res2 = g.query(
-            """SELECT DISTINCT ?s ?o WHERE {
-                              ?s rdfs:subClassOf ?o .
-                              brick:%s rdfs:subClassOf+ ?s .
-                              ?o rdfs:subClassOf+ brick:%s .
-                        }"""
-            % (minify(brick_class), minify(brick_class))
-        )
+        res2 = s{
+            SELECT DISTINCT ?s ?o WHERE {
+                ?s rdfs:subClassOf ?o .
+                {brick_class} rdfs:subClassOf+ ?s .
+                ?o rdfs:subClassOf+ {brick_class} .
+            }
+        }(g)
         for s, o in res2:
             loops.add("%s -> subClassOf -> %s" % (minify(s), minify(o)))
     assert len(loops) == 0, f"Loops found in the class hierarchy! {loops}"

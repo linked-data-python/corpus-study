@@ -1,6 +1,8 @@
 # Extracted from Haigutus/triplets@7cf62970e8 : triplets/validation/shacl_ir.py
 # region: _resolve_path (lines 412-440, stratum trav_single_value)
 # licence of the source repository: see meta.json
+from shim import _local, _rdf_list  # context shim -- see meta.json
+
 def _resolve_path(graph, SH, path_node):
     """Resolve sh:path → (KEY name, inverse, via_type); handles sh:inversePath,
     sh:alternativePath with a nested inverse, and the two-step sequence
@@ -11,20 +13,22 @@ def _resolve_path(graph, SH, path_node):
     callers skip the shape."""
     import rdflib
 
+    @graph graph
+
     if path_node is None:
         return None, False, False
     if isinstance(path_node, rdflib.URIRef):
         return _local(path_node), False, False
-    inverse = graph.value(path_node, SH.inversePath)
+    inverse = m{ {path_node} {SH.inversePath} ?o }.first()
     if inverse is not None:
         return _local(inverse), True, False
-    alternative = graph.value(path_node, SH.alternativePath)
+    alternative = m{ {path_node} {SH.alternativePath} ?o }.first()
     if alternative is not None:
         for item in _rdf_list(graph, alternative, lambda node: node):
-            nested_inverse = graph.value(item, SH.inversePath)
+            nested_inverse = m{ {item} {SH.inversePath} ?o }.first()
             if nested_inverse is not None:
                 return _local(nested_inverse), True, False
-    if graph.value(path_node, rdflib.RDF.first) is not None:   # sequence path
+    if bool(m{ {path_node} {rdflib.RDF.first} ?o }):   # sequence path
         steps = _rdf_list(graph, path_node, lambda node: node)
         if (len(steps) == 2 and isinstance(steps[0], rdflib.URIRef)
                 and steps[1] == rdflib.RDF.type):
