@@ -50,24 +50,40 @@ def _reduction(row: dict, metric: str) -> float | None:
     return round(100.0 * (a - b) / a, 3)
 
 
-def run(config: dict, study: Study = STUDY) -> None:
+def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
+    """Aggregate the measured pairs.
+
+    ``force`` aggregates over every pair with a finished translation instead
+    of the approved subset. The numbers are then PROVISIONAL: an agent's
+    translation is a hypothesis until a human has read it, and the gate exists
+    so that no published figure quietly rests on one. Every artefact says
+    which basis it used — ``pairs_reviewed_basis`` in the JSON, a banner on
+    the console — so a forced run can never be mistaken for a reviewed one.
+    """
     pairs = load_pairs(study)
     translated = len(pairs)
-    if study.incremental_review:
+    approved = [p for p in pairs if p.get("review_status") == "approved"]
+    if study.incremental_review and not force:
         # Record corpus/403: the published aggregates are recomputed on demand over
         # the APPROVED subset only, and always say over how many.  A draft an
         # agent produced is a hypothesis, not a measurement.
-        approved = [p for p in pairs if p.get("review_status") == "approved"]
         print(f"aggregate: {len(approved)} approved of {translated} translated")
         pairs = approved
+    elif force:
+        print(f"aggregate: --force — {translated} translated, "
+              f"{len(approved)} of them approved; "
+              f"the numbers below are PROVISIONAL")
     ok = [p for p in pairs if p["validation_status"] == "equivalent"]
     other = [p for p in pairs if p["validation_status"] != "equivalent"]
 
     agg: dict = {"provenance": provenance(config),
                  "study": study.name,
                  "pairs_translated": translated,
-                 "pairs_reviewed_basis": ("approved" if study.incremental_review
-                                          else "all final"),
+                 "pairs_reviewed_basis": (
+                     "all final (--force, PROVISIONAL)" if force
+                     else "approved" if study.incremental_review
+                     else "all final"),
+                 "pairs_approved": len(approved),
                  "pairs_total": len(pairs),
                  "pairs_equivalent": len(ok),
                  "pairs_other": [

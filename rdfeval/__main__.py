@@ -47,6 +47,11 @@ def main(argv: list[str] | None = None) -> int:
     # `--study` accepted and ignored: there is one study now, and a command
     # line copied from an old note must not fail for saying so.
     parser.add_argument("--study", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--force", action="store_true",
+                        help="aggregate over every finished translation "
+                             "instead of the approved subset; the "
+                             "numbers are then PROVISIONAL and every "
+                             "artefact says so")
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
 
@@ -75,7 +80,7 @@ def main(argv: list[str] | None = None) -> int:
             compare.run(config, study)
         elif stage == "aggregate":
             from . import aggregate
-            aggregate.run(config, study)
+            aggregate.run(config, study, force=args.force)
         elif stage == "audit":
             from . import audit
             audit.run(config)
