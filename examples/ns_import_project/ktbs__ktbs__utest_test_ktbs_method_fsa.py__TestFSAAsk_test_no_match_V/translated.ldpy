@@ -1,14 +1,22 @@
 # Extracted from ktbs/ktbs@4f9f50c770 : utest/test_ktbs_method_fsa.py
 # region: TestFSAAsk.test_no_match_V (lines 327-335, stratum ns_import_project)
 # licence of the source repository: see meta.json
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `ktbs.namespace` rewritten to `ktbs_namespace_context`, the shim module
+# next to this file. This is necessary even just to IMPORT the region:
+# the real `ktbs.namespace` itself does `from rdfrest.cores.local import
+# LocalCore, Service`, and `rdfrest` is not on PyPI at all (verified,
+# see meta.json) -- so the real module cannot be imported here regardless
+# of whether `ktbs` itself were installed.
 from json import dumps, loads
 from rdflib import Literal, XSD
-from ktbs.namespace import KTBS, KTBS_NS_URI
+from ktbs_namespace_context import KTBS_NS_URI, ktbs:
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 def test_no_match_V(self):
-    ctr = self.base.create_computed_trace("ctr/", KTBS.fsa,
+    ctr = self.base.create_computed_trace("ctr/", ktbs:fsa,
                                      {"fsa": dumps(self.base_structure),
                                       "model": self.model_dst.uri,},
                                      [self.src],)

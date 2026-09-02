@@ -12,10 +12,25 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "+{ }",
+    "-{ }",
+    "call suffix (g)",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "`self` here is not a plain rdflib.Graph but an rdflib.resource.Resource (via the local IPR/MultimediaPlaylistResource subclasses, restored by context_shim.py): self.add(p, o) and self.remove(p, o=None) are rdflib's OWN Resource API, writing/removing (self.identifier, p, o) against self.graph. Both are attribute-style access (self.graph, self.identifier are properties on Resource, verified via rdflib.resource.Resource source, not settable) -- INSTRUCTIONS.md's attribute rule applies: every +{ }/-{ } uses the call-suffix form `(self.graph)`, not `@graph self.graph` (a read-only property is a known pitfall for `@graph`, per INSTRUCTIONS.md #5's list of confirmed constats -- sidestepped entirely by using the call suffix instead).",
+    "the coercion_datatype site is `Literal(len(self.track))`: no explicit `datatype=`, but rdflib's own default inference for a bare Python int is xsd:integer, exactly what `len(...)` returns -- translated as bare interpolation `{len(self.track)}`, per INSTRUCTIONS.md's established rule (int -> xsd:integer, no coercion-policy edge case since the value's Python type already matches the target datatype's default inference).",
+    "self.remove(term('numTracks'), None): the second argument is a CONSTANT `None` written at the call site (always-wildcard), not a runtime value threaded through a generic API -- this is NOT the pattern INSTRUCTIONS.md's pitfall warns about (a wildcard pattern RECEIVED AS DATA, e.g. a Store API or a delete(pattern) helper's parameter, which -{ } cannot express safely). Translated directly as an unbound SPARQL variable, `-{ {self.identifier} {term('numTracks')} ?o }(self.graph)`, which is rdflib.resource.Resource.remove's own None-is-wildcard convention read literally.",
+    "term('track')/term('numTracks') (ipsTermUri, aliased `term`, restored by context_shim.py) were kept as plain Python calls, bare-interpolated (`{term('track')}`), rather than promoted to a `@prefix ips: <ips://galacteek.ld/> .` + `ips:track` prefixed name. At these two call sites ipsTermUri('track')/('numTracks') is provably equivalent to such a namespace binding (fragment=None, ips='galacteek.ld' both defaulted) -- but ipsTermUri is a general 3-argument helper function, not an rdflib Namespace object, so promoting it stretches INSTRUCTIONS.md's `ns_def_local` row (which is specifically about `NS = Namespace(...)`) further than the evidence in this 4-line region supports. Flagging the choice rather than silently taking the more decorated construction.",
+    "self.add(term('track'), rsc): rdflib.resource.Resource.add unwraps a Resource-typed `o` to its `.identifier` before writing the triple (`if isinstance(o, Resource): o = o._identifier` -- read directly from rdflib 7.2.1's source). The one real call site found in the source repository (galacteek/ui/mediaplayer/__init__.py:1075, `self.model.rsc.addTrack(rsc)`) passes a Resource-typed rsc, so this is not a hypothetical edge: original.py gets the unwrap for free through inheritance (self.add is Resource's own method); translated.ldpy's `+{ }` writes directly to self.graph and bypasses that method, so the unwrap is reproduced explicitly, one line before the island: `trk = rsc.identifier if isinstance(rsc, Resource) else rsc`. This preserves 'meme comportement RDF' for both call shapes rather than narrowing addTrack to only the URIRef case the extracted 4 lines happen to show in isolation.",
+    "context shim (context_shim.py): the extracted lines call self.add/self.remove/self.track and reference `term` (ipsTermUri), none defined within the region -- and `galacteek` cannot be imported standalone (a PyQt5/asyncio-IPFS desktop application, not an installable library; checked, no pip install applies here). Reproduced verbatim from isaacgravenor/neo-galacteek@e201b39d78: ipsTermUri (galacteek/ld/__init__.py:16-20), IPR (galacteek/ld/rdf/resources/__init__.py:1-7), and only the `track` property of MultimediaPlaylistResource (galacteek/ld/rdf/resources/multimedia.py:65-67) -- the class's other members (trackResource, name, removeTrack, findByPath) are not read by addTrack and were left out.",
+    "demo(rsc1, rsc2, wrap_as_resource) harness (identical on both sides): calls addTrack twice so the second call exercises addTrack's own remove-then-readd of numTracks against a graph that already has one, under both call shapes a real rsc argument takes (bare URIRef, or -- the shape actually used at the one real call site -- a Resource instance). Returns self.graph, not self, matching the established SimpleNamespace-harness precedent in this stratum (Informasjonsforvaltning/concepttordf region already in this corpus): only the graph is the observable effect.",
+    "anti-hollow-green: changed the translated `+{ {self.identifier} {term('track')} {trk} }` to `{self.identifier}` (self-loop instead of the track object) -- rdfeval check correctly failed on both calls (graphs not isomorphic, 3 vs 2 triples each), then restored -- confirmed OK again."
+  ],
   "draft_sha": "ea05974d84f5bb80",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.684640+00:00",

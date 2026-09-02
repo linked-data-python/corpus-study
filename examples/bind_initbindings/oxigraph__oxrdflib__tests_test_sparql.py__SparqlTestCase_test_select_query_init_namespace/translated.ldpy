@@ -3,12 +3,12 @@
 # licence of the source repository: see meta.json
 import json
 from rdflib import RDF, ConjunctiveGraph, Dataset, Graph, Namespace
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.com/> .
 
 
 def test_select_query_init_namespace(self) -> None:
     g = Graph("Oxigraph")
-    result = g.query("SELECT (ex:foo AS ?s) WHERE {}", initNs={"ex": "http://example.com/"})
+    result = s{ SELECT (ex:foo AS ?s) WHERE {} }(g).execute()
     self.assertEqual(
         json.loads(result.serialize(format="json").decode("utf-8")),
         {

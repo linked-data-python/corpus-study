@@ -14,10 +14,18 @@
     "serialize_parse": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: nothing in this region maps to any ldpy island. `dquery` assembles its WHOLE SPARQL query text at run time, not just a term inside an otherwise-written query -- and it is the STRUCTURE that is dynamic, not merely the terms, on two independent counts.",
+    "(1) the PREFIX prologue is a variable number of lines built by looping over the `context` dict the caller passes in: `prefixes = \"\".join([f\"PREFIX {k}: <{p}>\\n\" for k, p in context.items() if not k.startswith('@')])`. `s{ }` is parsed when the FILE is transpiled (INSTRUCTIONS.md SS1); its prologue comes from `@prefix` declarations resolved at that point, never from a dict only known at call time -- there is no construct for 'one `@prefix` per key of a runtime dict of unknown size'.",
+    "(2) `subject` is spliced as raw SPARQL syntax at `?id a {subject}.`, not coerced as a term: the docstring's own example, `dquery(subject='prov:Agent', ...)`, only resolves because the string lands unparsed inside a query text that also carries a matching PREFIX line built the same dynamic way. `s{ }`'s `{expr}` interpolation always runs the default term coercion (a bare `str` becomes a `Literal`, per INSTRUCTIONS.md's `{URIRef(x)}` trap) -- it has no mode for 'this string is already a fragment of SPARQL syntax, splice it verbatim', which is what this call site actually relies on.",
+    "So the name `dquery` is apt in the strongest sense the strata's question anticipates: the STRUCTURE of the query (its prologue) is assembled dynamically, not just its terms -- confirmed, not just feared. See driver.py for the full argument and the minimal excerpt.",
+    "Context shim: `expand_sparql_res` (and everything it calls: `process_object`, `_query_by_id`, `_is_type_definition`, `split_uri`) is a sibling function in the same source file, called by `dquery` but not part of the sampled region -- copied verbatim into context_shim.py. `import logging` was also restored in original.py: the sampled context lines kept `logger = logging.getLogger('ontolutils')` but dropped the import that makes `logging` resolve.",
+    "fixture.ttl is Turtle, for readability and consistency with the rest of the study, even though dquery only ever reads JSON-LD (`format='json-ld'` is hard-coded): driver.py parses it once with rdflib and re-serialises it to the JSON-LD string both calls pass as `data=`, since the generic `fixture=` shortcut (a Turtle-parsed Graph as the entry's one positional argument) does not match dquery's signature (subject:str is the first parameter, not a graph).",
+    "Anti-vert-creux check performed: with translated.ldpy deliberately broken (`?id a {subject}.` changed to the always-false `?id a ex:NoSuchClass.`), `rdfeval check` correctly reports FAIL -- call[0].result: values differ ([alice, bob] vs []). Restored (verified byte-identical to original.py again) before finishing."
+  ],
   "draft_sha": "f68cb2674eed86e0",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.068675+00:00",

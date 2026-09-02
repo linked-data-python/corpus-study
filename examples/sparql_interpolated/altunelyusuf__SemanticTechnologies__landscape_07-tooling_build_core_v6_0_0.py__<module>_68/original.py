@@ -2,7 +2,8 @@
 # region: <module> (lines 68-75, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
-eg = load("enrichment_g", "v3_0_0")
+import context_shim as eg  # context shim, see meta.json
+nodes = [{"id": cid} for cid in eg.SNIPPETS]
 byid = {n["id"]: n for n in nodes}
 errs = []
 from rdflib.plugins.sparql import prepareQuery

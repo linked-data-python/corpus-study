@@ -1,4 +1,28 @@
-# Input graph for matthiasprobst__ontology-utils__ontolutils_classes_query_util.py__dquery — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for matthiasprobst__ontology-utils__ontolutils_classes_query_util.py__dquery
+# -- written during translation.
+#
+# `dquery` never receives this graph directly: it parses its OWN graph
+# internally from `data=`/`source=` as JSON-LD (`format='json-ld'`). So
+# driver.py parses this Turtle file once and re-serialises it to the JSON-LD
+# string both sides pass as `data=` -- see driver.py for why.
+#
+# Covers what the pattern `?id a {subject}. ?id ?p ?o .` reads:
+#   - several solutions: two ex:Agent individuals, with a DIFFERENT number
+#     of properties each (alice: name + age: 2 non-type rows; bob: name
+#     only: 1 non-type row), so both the scalar-value and the "only one
+#     property" shapes of expand_sparql_res run;
+#   - the zero-solution case: driver.py queries subject="ex:Ghost", a class
+#     with no instance here;
+#   - neighbouring data that must NOT match: ex:cog is typed ex:Robot, not
+#     ex:Agent -- querying for ex:Agent must not return it.
 @prefix ex: <http://example.org/> .
+
+ex:alice a ex:Agent ;
+    ex:name "Alice" ;
+    ex:age 30 .
+
+ex:bob a ex:Agent ;
+    ex:name "Bob" .
+
+ex:cog a ex:Robot ;
+    ex:name "Cog" .

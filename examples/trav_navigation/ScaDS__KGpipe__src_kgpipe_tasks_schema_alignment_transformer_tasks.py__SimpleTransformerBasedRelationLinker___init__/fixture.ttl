@@ -1,4 +1,40 @@
-# Input graph for ScaDS__KGpipe__src_kgpipe_tasks_schema_alignment_transformer_tasks.py__SimpleTransformerBasedRelationLinker___init__ — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for ScaDS__KGpipe__src_kgpipe_tasks_schema_alignment_transformer_tasks.py__SimpleTransformerBasedRelationLinker___init__
+#
+# Written during translation even though the pilot cannot execute it (see
+# meta.json): documents what the join would need to prove, for a reader and
+# for whenever the dependency gap closes.
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Several solutions: two owl:ObjectProperty resources, each with a label.
+ex:hasPart a owl:ObjectProperty ;
+    rdfs:label "has part" .
+ex:hasParent a owl:ObjectProperty ;
+    rdfs:label "has parent" .
+
+# One owl:DatatypeProperty resource with a label -- exercises the SECOND
+# loop (a different owl:* type, same shape as the first).
+ex:hasAge a owl:DatatypeProperty ;
+    rdfs:label "has age" .
+
+# The zero-solution case within a matched type: an ObjectProperty with no
+# rdfs:label at all -- `if label:` must skip it, matching what g.value()
+# returns (None) for a subject with no matching triple.
+ex:hasSibling a owl:ObjectProperty .
+
+# Neighbourhood that must NOT match: an owl:Class (neither ObjectProperty
+# nor DatatypeProperty) that also carries an rdfs:label.
+ex:SomeClass a owl:Class ;
+    rdfs:label "not a property" .
+
+# CARDINALITY-TRAP shape (see meta.json): a property with TWO rdfs:label
+# triples. g.value() uses only the first one the store happens to return;
+# a FUSED `m{ ?s a owl:ObjectProperty ; rdfs:label ?label }` would instead
+# yield two rows for ex:hasWeight, one per label -- the exact inflation
+# AGENT_BATCH's cardinality-trap warning is about, and the reason this
+# region's translation does NOT fuse the type-selector with the label read.
+# Present so this fixture documents the trap's shape even though the pilot
+# cannot execute to demonstrate it directly.
+ex:hasWeight a owl:ObjectProperty ;
+    rdfs:label "has weight", "hat Gewicht"@de .

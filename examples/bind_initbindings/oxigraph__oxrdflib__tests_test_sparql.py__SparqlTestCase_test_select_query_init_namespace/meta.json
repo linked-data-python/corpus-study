@@ -13,11 +13,16 @@
     "graph_ctor": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": ["@prefix", "prefixed name", "s{ }", "call suffix (g)", ".execute()"],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "initNs-only case (no initBindings anywhere in this test method): `initNs={\"ex\": \"http://example.com/\"}` is a static IRI known at transpile time, so it becomes a module-level `@prefix ex: <http://example.com/> .`, and the query's prologue is inherited from it, per the stratum's correspondence rule. No interpolation is needed.",
+    "`g.query(TEXT, initNs=...)` collapses into an `s{ }` island written literally at the point of use. `SELECT (ex:foo AS ?s) WHERE {}` returns a lazy `PreparedQuery` when called on a graph (`s{ }(g)`); the region calls `.serialize()` on the result, which `PreparedQuery` does not proxy, so `.execute()` is needed to obtain rdflib's actual `Result` object -- verified directly against ldpy/runtime.py's `PreparedQuery`: iterating or testing an island's truth value is enough for SELECT/ASK/CONSTRUCT, but getting the `Result` itself (to call a method on it) needs the explicit `.execute()`.",
+    "the region's WHERE clause is empty (`WHERE {}`): an empty basic graph pattern matches exactly once, unconditionally, independent of any triple in `g`. The stratum's usual fixture requirement (several solutions / zero solutions / non-matching neighbourhood) does not apply -- there is no graph data this query reads at all. fixture.ttl documents this rather than fabricating triples the query would never look at; see driver.py.",
+    "`self` (the test's own `self.assertEqual`) is not a graph, so the default `fixture=` wiring does not fit; `calls=` supplies a plain `unittest.TestCase('assertEqual')` instead -- `SparqlTestCase(unittest.TestCase)` in the source file defines no setUp of its own. The region's `self.assertEqual(...)` against the hard-coded expected JSON (copied verbatim into both original.py and translated.ldpy) is itself the oracle: a mismatch on either side already raises inside the call and fails the check.",
+    "installed oxrdflib==0.5.0 (and its pyoxigraph~=0.5.0 dependency) into ~/.venvs/ldpy to register the 'Oxigraph' rdflib store plugin the region needs (`Graph(\"Oxigraph\")`) -- present on PyPI, absent from the venv; rdflib stayed pinned at 7.2.1 (oxrdflib requires rdflib>=6.3,<8.0). Registration is via the package's setuptools entry points (rdf.plugins.store), not an import side effect, so no shim import is needed on either side.",
+    "checked the anti-hollow-green discipline: corrupting translated.ldpy (ex:foo -> ex:bar) makes the check FAIL as expected (self.assertEqual raises); restored before finalising."
   ],
   "draft_sha": "dce266fe8337e5c8",
   "provenance": {

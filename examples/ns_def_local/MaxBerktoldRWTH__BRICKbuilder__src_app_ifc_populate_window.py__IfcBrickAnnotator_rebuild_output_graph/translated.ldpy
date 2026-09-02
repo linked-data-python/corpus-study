@@ -5,12 +5,16 @@ import rdflib
 from rdflib import Graph, Namespace, RDF
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-
 def rebuild_output_graph(self):
     """Clears and re-serializes components according to active configuration settings mapping definitions."""
     self.output_graph = Graph()
+    @graph self.output_graph
 
     # 1. Bind core standard and target custom namespaces
+    # self.BRICK / self.REF are NOT-EXPRESSIBLE here (see meta.json): they
+    # are set up elsewhere (IfcBrickAnnotator.load_brick_schema, sibling
+    # region) and bound onto the graph below BY VALUE, so they must stay
+    # plain Namespace objects reachable under these names.
     self.output_graph.bind("brick", self.BRICK)
     self.output_graph.bind("ref", self.REF)
 
@@ -19,6 +23,11 @@ def rebuild_output_graph(self):
     if not str(base_inst).endswith(('#', '/')):
         base_inst = str(base_inst) + '#'
 
+    # ifc_inst_ns / brick_inst_ns / bacnet_ns / bldg_ns / ifc_core_ns are
+    # NOT-EXPRESSIBLE as `@prefix` (see meta.json): every one of them is
+    # bound onto self.output_graph BY VALUE a few lines below
+    # (`self.output_graph.bind(..., ns)`), and `@prefix` has no run-time
+    # object to hand to `.bind()`. Kept as plain Namespace(...), unchanged.
     ifc_inst_ns = Namespace(base_inst + "ifcInst:")
     brick_inst_ns = Namespace(base_inst + "brickInst:")
     bacnet_ns = Namespace("http://buildingsmart.org/bacnet#")
@@ -37,35 +46,52 @@ def rebuild_output_graph(self):
     self.output_graph.bind("ifc", ifc_core_ns)
 
     # 2. Sequential structural iteration over individual items
-    for _key, data in self.annotations_registry.items():
-        eq_uri = ifc_inst_ns[data["eq_guid"]]
-        ifc_type_name = data["ifc_type"] if data.get("ifc_type") else "IfcSensor"
-        self.output_graph += g{ {eq_uri} a {ifc_core_ns[ifc_type_name]} }
+    # add_in_loop (this region's second stratum): self.annotations_registry
+    # is a dict of dicts (one row of fields per annotation), and `_key` was
+    # never read in the original body -- iterating .values() drops exactly
+    # that, nothing else. `.raw[...]`/`.raw.get(...)` read the fields the
+    # same way `data[...]`/`data.get(...)` did (namespace-subscript keys,
+    # a Python truthiness test, string munging: all need the raw value, not
+    # an RDF term -- INSTRUCTIONS.md §2 bis on `b.raw`).
+    for @bindings as data in self.annotations_registry.values():
+        eq_uri = ifc_inst_ns[data.raw["eq_guid"]]
+        ifc_type_name = data.raw["ifc_type"] if data.raw.get("ifc_type") else "IfcSensor"
+        pt_uri = brick_inst_ns[data.raw["point_id"]]
 
-        pt_uri = brick_inst_ns[data["point_id"]]
-        self.output_graph += g{
-            {pt_uri} a {self.BRICK[data["point_type"]]} ;
-               {self.BRICK.isPointOf} {eq_uri}
+        +{ {eq_uri} rdf:type {ifc_core_ns[ifc_type_name]} }
+
+        # Link Brick point to physical asset -- two .add() sharing subject
+        # pt_uri, fused per add_run_shared_subject's construction.
+        +{
+            {pt_uri} rdf:type {self.BRICK[data.raw["point_type"]]} ;
+                     {self.BRICK.isPointOf} {eq_uri}
         }
 
         # 3. Handle BACnet nested blank node structures
-        if data.get("bacnet_name"):
+        if data.raw.get("bacnet_name"):
             bacnet_bnode = rdflib.BNode()
-            self.output_graph += g{
-                {pt_uri} {self.REF.hasExternalReference} {bacnet_bnode} .
-                {bacnet_bnode} a {self.REF.BACnetReference}
-            }
+
+            +{ {pt_uri} {self.REF.hasExternalReference} {bacnet_bnode} }
 
             raw_type = (
-                str(data.get("bacnet_type", ""))
+                str(data.raw.get("bacnet_type", ""))
                 .lower()
                 .replace("analoginput", "analog-input")
                 .replace("analogvalue", "analog-value")
             )
-            obj_id_string = f"{raw_type},{data.get('bacnet_instance')}"
+            obj_id_string = f"{raw_type},{data.raw.get('bacnet_instance')}"
 
-            self.output_graph += g{
-                {bacnet_bnode} {bacnet_ns["object-identifier"]} {rdflib.Literal(obj_id_string, datatype=bacnet_ns.objectIdentifier)} ;
-                   {bacnet_ns["object-name"]} {rdflib.Literal(data.get("bacnet_name"))} ;
-                   {bacnet_ns["objectOf"]} {bldg_ns["sample-device"]}
+            # Four .add() sharing subject bacnet_bnode, fused the same way.
+            # rdflib.Literal(obj_id_string, datatype=bacnet_ns.objectIdentifier)
+            # is a typed literal whose text is computed -- the quoted part
+            # must be an f-string (f"{obj_id_string}", not a bare
+            # "{obj_id_string}") for `{expr}` to interpolate there.
+            # rdflib.Literal(data.get("bacnet_name")) is exactly what
+            # `?bacnet_name` (the current @bindings, coerced) already is: a
+            # plain literal from the row's raw string.
+            +{
+                {bacnet_bnode} rdf:type {self.REF.BACnetReference} ;
+                    {bacnet_ns["object-identifier"]} f"{obj_id_string}"^^{bacnet_ns.objectIdentifier} ;
+                    {bacnet_ns["object-name"]} ?bacnet_name ;
+                    {bacnet_ns["objectOf"]} {bldg_ns["sample-device"]}
             }

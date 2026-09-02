@@ -14,11 +14,30 @@
     "term_constructor": 10,
     "triple_add": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "f<…>",
+    "prefixed name",
+    "typed literal",
+    "language literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SHUI->shui, DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, SH->sh, XSD->xsd"
+    "two coercion sites in this region: `Literal(name, lang=\"en\")` (four call sites: node-shape and property-shape sh:name/rdfs:label) and `Literal(\"true\", datatype=XSD.boolean)` (two call sites: SHUI.showAlways, SHUI.inversePath). `name` is a plain str (ShapesPlugin.get_name returns str, verified in the real source) -> translated as the glued-suffix form `{name}@en`, a language literal, not an embedded `Literal(...)` call. The boolean site is `Literal(\"true\", ...)` on the CONSTANT string \"true\" (not the Python bool True, which is the case the piege in INSTRUCTIONS.md #2bis warns about) -> translated as the typed-literal constant `\"true\"^^xsd:boolean`. Checked on rdflib 7.2.1: Literal(\"true\", datatype=XSD.boolean) == \"true\"^^xsd:boolean transpiled (same lexical form 'true', same datatype) -- confirmed by direct test, not by the True/'True' pitfall reasoning (that pitfall does not apply to an already-lowercase string constant).",
+    "self.shapes_graph is a plain instance attribute (`self.shapes_graph = self.init_shapes_graph()` in __init__, not a property -- verified in the real source), reached only through `self`, so every `+{ }` in this region uses the call-suffix form `+{ ... }(self.shapes_graph)` per the attribute rule, not `@graph self.shapes_graph`.",
+    "URIRef(f\"{format_namespace(...)}{uuid}\") (node_shape_uri, property_shape_uri) -> `f<{format_namespace(...)}{uuid}>`, a formatted IRI with two holes. URIRef(cls) and URIRef(prop[\"property\"]) (both already-absolute IRI strings from get_class_dict) -> `f<{cls}>` / `f<{prop[\"property\"]}>`, a formatted IRI with a single hole spanning the whole string. No `@base` is declared anywhere in this translation, so INSTRUCTIONS.md's pitfall 2 (`URIRef(x)` is not `f<{x}>` under a `@base`) does not apply; checked directly (rdfeval console test): `f<{x}>` and `URIRef(x)` produce an equal URIRef with the identical lexical string, and neither percent-encodes its holes (verified empirically -- `f<...>` joins each `{expr}` with plain `str()`, unlike the deferred `e<...>` form, which does percent-encode; INSTRUCTIONS.md section 1's generated table description of `f<...>` as percent-encoding contradicts both `ldpy/docs/reference/language/terms.md` and this direct test -- flagging as a documentation inconsistency between the generated table and the hand-written reference/actual behaviour, not a language defect: the transpiler and terms.md agree with each other, only the generated summary table disagrees with both).",
+    "sh:nodeKind {sh:Literal if prop[\"data\"] else sh:IRI}: a prefixed name is valid syntax nested inside an interpolation hole (confirmed directly: term islands like `ex:Name` are themselves expression-level islands, usable anywhere a Python expression can appear, including inside another island's `{ }`) -- used `sh:Literal`/`sh:IRI` rather than keeping the Python-level `SH.Literal`/`SH.IRI` constants, since the region already declares `@prefix sh:` for every other SH.* term.",
+    "folded the per-subject runs of `.add()` into one `+{ s p1 o1 ; p2 o2 ; ... }` per subject (node-shape block, property-shape block, the inverse-path add kept separate since it is conditional and a `-{ }`/`+{ }` block cannot conditionally omit one triple of a `;`-joined group) -- most-specific-construction throughout the region (INSTRUCTIONS.md #2), independent of which stratum sampled this site.",
+    "prefixes declared: SH->sh, RDFS->rdfs, SHUI->shui, XSD->xsd -- the four namespaces whose terms appear as prefixed names in the translated body. RDF.type is written `a`. DCTERMS is imported in original.py but never referenced inside this region's extracted lines (395-446) -- confirmed by reading the source -- so dcterms: was left undeclared rather than inflating the island count with an unused prefix.",
+    "context shim (context_shim.py): the region calls a module-level helper, `format_namespace(iri)`, not defined within the extracted lines. Copied VERBATIM from eccenca/cmem-plugin-shapes@52d5b16c0550, plugin_shapes.py:50-52 (3-line pure function, no further dependency).",
+    "no missing-dependency case here despite this repository's name (cmem-plugin-shapes): the extracted `create_shapes` body and the demo() harness only need `rdflib`/`uuid`/`types` (stdlib + already-installed rdflib) -- `cmem_client`/`cmem_plugin_base`, which the rest of the module imports for the `@Plugin(...)` decorator and the real get_class_dict/get_name (SPARQL + network calls), are never reached once those two methods are stubbed out by demo()'s SimpleNamespace. Checked: no pip install needed, nothing to classify as excluded.",
+    "demo harness (identical on both sides): create_shapes(self) reads self.shapes_graph / self.shapes_graph_iri / self.shapes_count (plain state) and calls self.get_class_dict() (a SPARQL SELECT over the plugin's configured data graph in the real plugin) and self.get_name(iri) (a network call to Corporate Memory's /explore/title endpoint) -- neither reachable outside a running Corporate Memory instance. `self` is a SimpleNamespace exposing stub callables for both plus the three plain attributes; demo(class_dict) calls create_shapes(self) and returns self.shapes_graph (the observable effect), not self.",
+    "driver calls: CALL_1 (two classes, a property shared between them to exercise the prop_uuid dedup-but-still-link branch, and one inverse property to exercise SHUI.inversePath + the arrow-prefixed name) exercises every construction and both coercion_datatype call-site shapes at once; CALL_2 (empty class_dict) is the zero-triples edge, checking no triple is written outside the loop.",
+    "anti-hollow-green: changed `shui:showAlways \"true\"^^xsd:boolean` to `\"false\"^^xsd:boolean` in translated.ldpy -- rdfeval check correctly failed (call[0].result: graphs not isomorphic, 24 vs 24 triples: same count, different content), then restored -- confirmed OK again."
   ],
   "draft_sha": "a37be6995460f787",
   "provenance": {

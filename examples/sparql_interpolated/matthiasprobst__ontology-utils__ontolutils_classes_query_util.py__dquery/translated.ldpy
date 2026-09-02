@@ -1,9 +1,19 @@
 # Extracted from matthiasprobst/ontology-utils@668f1b884a : ontolutils/classes/query_util.py
 # region: dquery (lines 200-240, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
+#
+# `import logging` restores a binding the sampled context lines dropped (the
+# region only got `logger = logging.getLogger('ontolutils')`, not the import
+# that makes it resolve) -- see meta.json / AGENT_BATCH.md "shim de contexte".
+# `expand_sparql_res` is not part of the region either (it is a sibling
+# function in the same source file, called by `dquery` but never sampled by
+# it): context_shim.py carries it, and everything it in turn calls,
+# verbatim.
+import logging
 import pathlib
 from typing import Union, Dict, List, Optional, Type
 import rdflib
+from context_shim import expand_sparql_res
 logger = logging.getLogger('ontolutils')
 
 def dquery(subject: str,

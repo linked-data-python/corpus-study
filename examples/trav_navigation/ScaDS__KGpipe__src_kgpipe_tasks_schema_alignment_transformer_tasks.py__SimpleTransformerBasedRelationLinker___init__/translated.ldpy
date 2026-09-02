@@ -5,7 +5,6 @@ from sentence_transformers import SentenceTransformer, util
 from rdflib import Graph, OWL, RDFS, RDF
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 
 def __init__(self, ontology_file, model_name="all-MiniLM-L6-v2"):
@@ -13,17 +12,18 @@ def __init__(self, ontology_file, model_name="all-MiniLM-L6-v2"):
 
     g = Graph()
     g.parse(ontology_file)
+    @graph g
 
     ontology_relations = {}
     # Extract ObjectProperties
-    for s in g.subjects(rdf:type, owl:ObjectProperty):
-        label = g.value(s, rdfs:label)
+    for s in m{ ?s a owl:ObjectProperty }:
+        label = m{ {s} rdfs:label ?label }.first()
         if label:
             ontology_relations[str(label)] = str(s)
 
     # Extract DatatypeProperties
-    for s in g.subjects(rdf:type, owl:DatatypeProperty):
-        label = g.value(s, rdfs:label)
+    for s in m{ ?s a owl:DatatypeProperty }:
+        label = m{ {s} rdfs:label ?label }.first()
         if label:
             ontology_relations[str(label)] = str(s)
 

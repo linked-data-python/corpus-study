@@ -17,11 +17,27 @@
     "term_constructor": 3,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "for @bindings in",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "typed literal",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "prefixes: RDF->rdf (RDF is only ever used as RDF.type here, never bound or exported -- a clean @prefix).",
+    "NOT-EXPRESSIBLE (the ns_def_local target idiom, decisively so): all 5 local Namespace(...) objects this region defines (ifc_inst_ns, brick_inst_ns, bacnet_ns, bldg_ns, ifc_core_ns) are, without exception, passed BY VALUE to self.output_graph.bind(prefix, ns) a few lines later -- exactly the escape route AGENT_BATCH.md names as #3 (g.bind(prefix, NS) passes the object). `@prefix` has no run-time object (INSTRUCTIONS.md §1), so none of the 5 can become `@prefix ns: <IRI> .` without breaking the very next `.bind()` call -- same 'no partial win' situation and same convention as the sibling BONSAMURAIS__arborist__..._setup_empty_graph in this stratum: kept as plain Namespace(...), unchanged, rather than doubling up a redundant @prefix beside the object .bind() still needs. self.BRICK/self.REF are the SAME situation one level up (bound at lines 12-13) but are not even constructed IN this region -- they come from the sibling region IfcBrickAnnotator.load_brick_schema (same file, same class), where they are themselves `self.X = Namespace(self.settings.value(...))`, i.e. dynamic AND self-exported -- doubly not-expressible, just out of this region's own scope.",
+    "Went beyond the stratum's own idiom for the rest of the region (INSTRUCTIONS.md §2, 'toujours la construction la plus specifique'), since none of that depends on whether the 5 namespaces above are @prefix or plain objects: the standalone .add() (eq_uri) -> `+{ }`; the two .add() sharing subject pt_uri -> one fused `+{ s p1 o1 ; p2 o2 }` (add_run_shared_subject's construction); the four .add() sharing subject bacnet_bnode -> likewise fused, moving the `bacnet_bnode rdf:type ref:BACnetReference` triple's write a few lines later (after obj_id_string is computed) so it can join the fused block -- invisible to the isomorphism oracle (order is not part of a graph's identity) and explicitly the kind of contiguous merge INSTRUCTIONS.md's add_run_shared_subject row prescribes, not the 'refactoring' the same section forbids.",
+    "add_in_loop (this region's second stratum, INSTRUCTIONS.md's own tirage): `for _key, data in self.annotations_registry.items():` with `_key` never read -> `for @bindings as data in self.annotations_registry.values():`. Confirmed by direct experiment with the transpiler (see scratch repro) that `data.raw[key]`/`data.raw.get(key[, default])` behave exactly like the original dict's `data[key]`/`data.get(...)`, including a MISSING key returning None rather than raising -- needed because the original reads are all either a Python truthiness test (`if data.get('bacnet_name'):`, `data.get('ifc_type')`) or a namespace-subscript key (`ifc_inst_ns[data['eq_guid']]`), never an RDF term directly: exactly the `if row[col] != \"\":`-shaped case INSTRUCTIONS.md §2 bis flags for `.raw` (`Literal('') != ''`). The one place a raw field value becomes an RDF term with no other transformation -- `rdflib.Literal(data.get('bacnet_name'))` -- became `?bacnet_name` (the current @bindings, term-coerced): confirmed by the same scratch repro that a plain string field coerces to an untyped/unlangtagged Literal identical to `rdflib.Literal(str_value)`.",
+    "New finding, worth flagging beyond this pair: inside a typed-literal's quoted part, `{expr}` does NOT interpolate on its own -- a bare `\"{obj_id_string}\"^^{dt}` produced the LITERAL TEXT `{obj_id_string}` (an f-string-shaped brace left un-evaluated), verified with the transpiler on a minimal repro. The quoted part must be spelled as an f-string, `f\"{obj_id_string}\"^^{dt}` -- INSTRUCTIONS.md §1 does say 'The quoted part may be an f-string' but reads, on a first pass, as an optional convenience rather than a requirement for `{expr}` to fire at all; an agent who copies the bare-`{expr}` habit from `+{ }`'s subject/predicate/object positions into a typed literal's string body gets a SILENT wrong translation (valid syntax, wrong value: the literal '{obj_id_string}' instead of 'analog-input,3'), not a transpile error -- this is exactly the kind of thing INSTRUCTIONS.md §5 asks to remit as a defect-or-documentation-gap finding.",
+    "No context_shim.py: everything the region's own body references beyond rdflib is a self.* attribute (self.BRICK, self.REF, self.settings, self.annotations_registry), supplied by driver.py's _FakeSelf the same way the sibling TestShaclCreateShaclPropertyName_setUp driver supplies its _FakeSelf -- nothing is imported from outside the file that original.py doesn't already import.",
+    "driver.py reuses that sibling's comparator verbatim (Graph attributes by graphs_isomorphic(), str-subclass attributes -- Namespace/URIRef/Literal -- by value, everything else by vars() recursion) rather than plain ==, per AGENT_BATCH.md's ANTI-VERT-CREUX warning: checked directly by corrupting one predicate (BRICK.isPointOf -> BRICK.isPointOfWRONG) in translated.ldpy and confirming rdfeval check turns FAIL ('call[0].arg[0]: values differ'), then restoring."
   ],
   "draft_sha": "6494c9bd916b2506",
   "provenance": {

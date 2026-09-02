@@ -14,11 +14,23 @@
     "namespace_term": 18,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: TFUN->tfun, ID->id, TIME->time"
+    "prefixes: TFUN->tfun, ID->id, TIME->time",
+    "The FILTER calls a custom SPARQL extension function, tfun:isDuring(?a, ?b), registered on rdflib's global operator table by importing the `timefuncs` package (register_custom_function in timefuncs/__init__.py). That registration is orthogonal to the island construction: s{ } embeds the query text verbatim and rdflib validates it as plain SPARQL syntax at transpile time -- a FunctionCall to an unregistered IRI is syntactically valid and only fails at evaluation time if the function is not registered when the query actually runs. `timefuncs` IS on PyPI (`pip index versions timefuncs` -> 0.1.4, requiring only rdflib>=6.0.0, satisfied by the pinned 7.2.1) but is not installed in this shared venv, and this session does not install packages into it while other agents translate other strata concurrently -- same shim approach as the sibling test_is_after region (whose note says merely 'not installable', which this note corrects), so `_context.py` reproduces the registration side effect, copying `is_during`, the private helper `is_contained_by` it delegates to, and `is_contained_by`'s own helper `_path_exists` verbatim from RDFLib/timefuncs@dd3bde8727 (real logic needed: the region's `expected` list only matches the real predicate semantics against the real data).",
+    "Context restored (see original.py/translated.ldpy headers): `from pathlib import Path`, elided by line-range extraction (used one context line down by `tests_dir = Path(__file__).parent`, which WAS captured). The real input graph, `tests/functions/data/is_during.ttl`, is restored verbatim at data/is_during.ttl since `test_is_during` builds its own graph from that fixed relative path rather than taking one as an argument -- so there is no fixture.ttl for this region (see driver.py); the real file covers 9 a/b pairs, all designed to be tfun:isDuring matches by construction (declared intervalDuring/intervalContains, transitive chains of both, hasBeginning/hasEnd interval comparisons, and inXSDDateTimeStamp-based calculation) -- the assert's `expected` list is exactly these 9 pairs, so any spurious extra match (e.g. a cross pair like a01/b02) or missing one fails the comparison; this is the actual regression fixture the real project checks tfun:isDuring against.",
+    "The query itself is a plain two-variable SELECT with one FILTER calling the custom function -- no UNION/OPTIONAL/paths/aggregates, but FILTER alone already puts it outside m{ }'s coverage (querying.md: 'No FILTER, OPTIONAL, UNION, property paths or aggregates'), so s{ } is the correct, not just the sampled, construction here.",
+    "initNs={\"time\": TIME, \"tfun\": TFUN} disappears entirely: the prologue is built from @prefix time:/tfun: declared at file scope (querying.md 'The prologue is the block's'), a single vocabulary declaration instead of a dict rebuilt at every call site -- and ID, used only in Python code (never in the query text), becomes an ordinary @prefix too, so `str(ID.a01)` reads `str(id:a01)`.",
+    "The original test only asserts and returns nothing (same situation as lazlop/semantic_objects's test_class_scope_or_roundtrip and the sibling test_is_after in this stratum): `return actual` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff; it changes nothing about the RDF behaviour under test.",
+    "Anti-hollow-green check performed: dropped the `FILTER tfun:isDuring(?a, ?b)` clause from translated.ldpy's query (leaving only the two `a time:Interval` patterns, which match every declared interval pairwise). rdfeval check FAILED with an AssertionError (actual no longer equals the 9-pair expected list). Reverted; check is green again.",
+    "id: as a prefix label shadows the Python builtin `id`; only ever used as `id:aNN`/`id:bNN` prefixed names, never as a bare Python identifier, so no collision observed -- noted per INSTRUCTIONS.md 2bis's warning about a declared prefix matching a Python name."
   ],
   "draft_sha": "78aeadea94fc6639",
   "provenance": {
@@ -31,5 +43,11 @@
     "sparql_literal",
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_is_during",
+    "diffs": [],
+    "error": null
+  }
 }

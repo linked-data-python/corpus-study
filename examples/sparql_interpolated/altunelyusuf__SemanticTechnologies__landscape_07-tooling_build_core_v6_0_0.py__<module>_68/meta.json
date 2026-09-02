@@ -13,10 +13,16 @@
     "graph_ctor": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "THE case this stratum's own instructions flag as the sharpest one: a STRUCTURE, not a term, assembled dynamically. `code` is an arbitrary documentation-example snippet (`eg.SNIPPETS[cid]`, a runtime dict) of whatever shape its author wrote, and the region's whole job is to check that text parses. `Graph().parse(data=eg.SNIPPET_PREFIXES + code, format=\"turtle\")` and `prepareQuery(\"PREFIX ...\\n\" + code)` both concatenate a fixed prologue onto that opaque runtime string. Neither `g{ }` nor `s{ }` has anywhere to receive it: both require their Turtle/SPARQL text to be written IN THE ldpy SOURCE, parsed when the file transpiles (querying.md) -- there is no island for 'parse whatever text a runtime variable holds', because the whole point of an island is that its content is known statically. This is not `s{ }`'s term-position `{expr}` failing to reach far enough (INSTRUCTIONS.md SS2's `-{ }`/`m{ }` limit, or region 1's algebra-rewriter finding) -- there is no query/graph literal in the source AT ALL to attach an island to; the literal-to-be-checked only exists at run time, as data.",
+    "translation is therefore IDENTITY: translated.ldpy is byte-for-byte original.py except for the context shim import (see below). Still verified by real execution, not asserted: rdfeval check is green via entry=None/module-state, comparing the `errs` list both sides build.",
+    "liaison restored: `eg = load(\"enrichment_g\", \"v3_0_0\")` used `load()`, a custom loader defined earlier in the source FILE (importlib.util.spec_from_file_location against a hardcoded /home/claude/... BASEDIR) that is not part of this region and pulls in the file's entire upstream pipeline (a dozen sibling `load()` calls: taxonomy, content_a/b, six enrichment modules...) -- far beyond 'restore one binding'. Replaced with `import context_shim as eg`; context_shim.py carries the REAL `SNIPPETS`/`SNIPPET_PREFIXES` data copied verbatim from the actual enrichment_g_v3_0_0.py in this repository's corpus clone (corpus/repos/altunelyusuf__SemanticTechnologies/landscape/07-tooling/), trimmed to the subset this region reads (checked entries + one `check==\"none\"` entry for the skip branch), plus two clearly-marked SYNTHETIC invalid snippets (the real ones are all valid, reviewed documentation examples, so nothing in the real data reaches the `except Exception` branch). `nodes` (built far upstream from `tax.TAX`) is stubbed minimally as `[{\"id\": cid} for cid in eg.SNIPPETS]`, exactly enough for the `cid not in byid` guard already in the region to behave sensibly, no invented logic beyond that.",
+    "fixture coverage, confirmed by running original.py standalone: errs comes back with exactly the two synthetic entries flagged invalid (SYN1: unterminated turtle triple, SYN2: malformed SPARQL) and none of the 7 real turtle/sparql/json-checked snippets (T1C2, T1C3, T1C4, T1C6, T2C1, T6C2, T12C1) -- several real, valid solutions across all three checked formats, plus T1C1 (check==\"none\", real) as the non-matching neighbour that must NOT trigger validation.",
+    "ANTI-VERT-CREUX: shortened the exception-message truncation in translated.ldpy from `str(e)[:60]` to `str(e)[:6]` -- `rdfeval check` FAILED as expected (`value errs: values differ`, showing the truncated vs. full messages). Restored afterwards; diff against the pre-sabotage backup confirmed byte-identical restoration, and the check is green again."
+  ],
   "draft_sha": "136ee11378cfe7dc",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.999639+00:00",
@@ -27,5 +33,5 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values"
 }

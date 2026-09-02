@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef, Literal, Namespace, BNode
 from rdflib.namespace import RDF, RDFS, XSD, OWL
+from context_shim import ShapeAdjustmentStub
 
 def adjust_pom(self, pom_list):
     if self.findNS == []:
@@ -13,8 +14,8 @@ def adjust_pom(self, pom_list):
                 path = path_list[0]
                 for shape_identifier in self.shape_path:
                     if "NodeShape" in shape_identifier:
-                        continue 
-                    for initial_path in self.shape_path[shape_identifier]:   
+                        continue
+                    for initial_path in self.shape_path[shape_identifier]:
                         if (initial_path == path) or path.endswith(initial_path) or (pom["constant"] == True and initial_path == self.iterator) or ("parent:" in path and self.validatePath(path, initial_path)):
                             shape_identifier = URIRef(shape_identifier)
                             if shape_identifier in self.adjusted_shape:
@@ -59,7 +60,7 @@ def adjust_pom(self, pom_list):
                                 shape_identifier = shape_identifier_temp
                                 constraints = self.getConstraints(URIRef(shape_identifier_temp), constraints)
                 if constraints!={}:
-                    # new_shape_identifier = shape_identifier + "/" + pom["property"].split("/")[-1]     
+                    # new_shape_identifier = shape_identifier + "/" + pom["property"].split("/")[-1]
                     shape_identifier = shape_identifier + "/" + pom["property"].split("/")[-1] + str(self.random_number.pop())
                     self.adjusted_shape.append(URIRef(shape_identifier))
                     self.updateCombinationShape(URIRef(shape_identifier), pom["property"], constraints,pom["template_length"])
@@ -84,3 +85,18 @@ def adjust_pom(self, pom_list):
             self.adjusted_shape.append(shape_identifier)
 
         self.findPS = []
+
+
+# Demo harness (identical on both sides, see meta.json): adjust_pom takes
+# `self` and mutates it (self.initial_graph, self.adjusted_shape, self.findPS)
+# rather than returning anything, and ShapeAdjustmentStub has no __eq__, so
+# comparing `self` as a call argument would compare object identity and
+# always fail. This wraps the call in a fresh stub per invocation, built from
+# plain fixture arguments, and hands back the three pieces of mutated state
+# that matter: the graph (isomorphism), and adjusted_shape/findPS as their
+# string form (URIRef has no meaningful __eq__ across the two module
+# namespaces' separately-imported rdflib classes here, but str() does).
+def demo(initial_graph, shape_path, findNS, pom_list, iterator=""):
+    self = ShapeAdjustmentStub(initial_graph, shape_path, findNS, iterator)
+    adjust_pom(self, pom_list)
+    return self.initial_graph, [str(x) for x in self.adjusted_shape], [str(x) for x in self.findPS]

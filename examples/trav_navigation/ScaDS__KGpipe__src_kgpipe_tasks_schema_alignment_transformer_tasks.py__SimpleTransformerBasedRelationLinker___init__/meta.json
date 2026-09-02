@@ -16,10 +16,23 @@
     "serialize_parse": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDFS->rdfs, RDF->rdf"
+    "prefixes: OWL->owl, RDFS->rdfs. RDF retired: both RDF.type sites are written with the Turtle `a` shorthand, never as a prefixed name, so an @prefix rdf: would go unused -- same convention as the sibling trav_navigation regions in this batch.",
+    "CARDINALITY TRAP, not fused: this is `for s in g.subjects(RDF.type, OWL.ObjectProperty): label = g.value(s, RDFS.label)`, repeated for OWL.DatatypeProperty -- the textbook trav_navigation shape (a multi-valued selector feeding a per-item read), but the inner read is `g.value()` (first-or-none), not a loop. Fusing into `m{ ?s a owl:ObjectProperty ; rdfs:label ?label }` would make an ObjectProperty with two rdfs:label triples yield two rows where the original's g.value() only ever used one, silently inflating ontology_relations (one extra key -> the same IRI, harmless here only by accident of the field being a dict; a list-shaped result would visibly grow). fixture.ttl carries exactly such a property (ex:hasWeight, two rdfs:label triples) so the shape of the trap is on record even though the pilot cannot execute to demonstrate it (see EXCLUDED note below). Kept as `for s in m{ ?s a owl:ObjectProperty }:` (the one hop that was already a full loop, so it fuses safely into itself as a single-pattern m{}) followed by a separate `.first()` -- the literal, most-specific-per-site translation of `g.value()`, per INSTRUCTIONS.md SS2's 'credit every island separately'. Same shape, same reasoning, for the DatatypeProperty loop -- two structurally identical but textually separate translations, matching the original's own two separate loops (not merged: the original never merges them either, and doing so would be the kind of restructuring SS2 forbids).",
+    "`g.subjects(RDF.type, OWL.ObjectProperty)` and `...DatatypeProperty` are DIFFERENT rdf:type values, not alternatives over the same predicate -- unlike the acdh-django-vocabs sibling in this batch, there is no OR/alternation question here at all, just two ordinary single-pattern reads.",
+    "EXCLUDED, not because any translation choice is in doubt (translated.ldpy transpiles cleanly on its own, verified directly with `ldpy.transpiler.transpile()`, independent of the pilot -- same check as the alpaca precedent in this corpus) but because the PILOT cannot execute: both original.py and translated.ldpy fail identically at their very first line, `from sentence_transformers import SentenceTransformer, util` (confirmed via `rdfeval check`: ModuleNotFoundError in original.py, before translated.ldpy is even reached). This is NOT the ordinary 'present on PyPI but not installed' gap this batch's instructions say to just install (`pip index versions sentence-transformers` -> 6.0.1, 6.0.0, ... -- it genuinely is on PyPI, and the package alone would install painlessly): the constructor this __init__ calls, `SentenceTransformer(model_name)`, downloads real pretrained model weights from the Hugging Face Hub the first time it runs in an environment without a warm cache -- a standing network dependency at CALL time, not a one-time package install, so 'is it installed' is the wrong question. Installing the package would not by itself make the region reproducibly executable; only a successful, uncached network fetch of the model would, and that is not something this study's `rdfeval check` should depend on for a green result (this venv happens to have outbound network access right now, which is exactly the kind of incidental, non-reproducible condition INSTRUCTIONS.md's oracle discipline is meant to rule out). Kept draft/excluded rather than installed-and-run, per this batch's own explicit guidance for this region.",
+    "fixture.ttl was still written in full (two ObjectProperty + one DatatypeProperty resource with labels, an ObjectProperty with no label for the zero-solution case, an owl:Class neighbour that must not match either loop, and the cardinality-trap property described above) even though it cannot be run -- same discipline as the alpaca precedent: a region translated in full is a result of the study either way, and the fixture records what the join would need to prove.",
+    "anti-hollow-green break/restore step (AGENT_BATCH's ANTI-VERT-CREUX) was NOT performed for this region: there is no green to falsify -- `rdfeval check` already fails, identically on both sides, at the sentence_transformers import, before either m{ } site is ever reached."
   ],
   "draft_sha": "5aefdb7afd334183",
   "provenance": {

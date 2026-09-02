@@ -12,11 +12,28 @@
   "categories": {
     "namespace_term": 9
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: SKOS->skos, DC->dc, DCT->dct, RDFS->rdfs, RDF->rdf"
+    "prefixes: SKOS->skos, DC->dc, DCT->dct, RDFS->rdfs. RDF retired: rdf:type is written with the Turtle `a` shorthand (both the existence check and the `for cs in ...` loop), never as a prefixed name, so an @prefix rdf: would go unused -- same convention already used for a sibling trav_navigation region in this batch.",
+    "oracle CORRECTED from 'isomorphism' to 'values' in this file: the region only reads (bool/subjects/objects/preferredLabel calls building a plain concept_scheme dict), it never constructs or mutates a graph, so isomorphism does not apply -- see corpus/405. driver.py uses fixture.ttl + entry='parse_triples' accordingly.",
+    "kind=statement, one of AGENT_BATCH's '163 regions': concept_scheme={}, the two nested helpers (allow_properties/language_check) and `self` are all bound just above the sampled range in the real method (vocabs/skos_import.py lines 47, 50-64) -- restored verbatim as a wrapper in original.py/translated.ldpy identically (harness-only, excluded from surface metrics like a shim; see the note there). `self` is an explicit parameter rather than an implicit method receiver, so driver.py can hand it a plain SimpleNamespace(language=...) instead of a full SkosImporter/Django stack.",
+    "the existence guard `(None, RDF.type, SKOS.ConceptScheme) in g` is the trav_existence idiom (bool(m{ })) even though the region was sampled for trav_navigation -- INSTRUCTIONS.md SS2's 'the most specific construction, credited separately' applies at every site, not only the one the stratum sampled on.",
+    "NOT fused into one multi-pattern m{ }, anywhere in this region -- every read here is single-pattern, for two DIFFERENT reasons depending on the site (see AGENT_BATCH's cardinality-trap warning): (1) the five `[x for xp in allow_properties(name) for x in g.objects(cs, xp)]` fields (creator/contributor/language/subject/publisher) and the two nested ones (description/source) are PREDICATE ALTERNATION over a fixed 2-element Python list (dct: then dc:), not a graph-derived second hop -- there is no OR/property-path alternation in m{ }'s vocabulary (empirically confirmed: `m{ {cs} dc:creator|dct:creator ?c }` fails to parse, 'terme RDF attendu'), so each candidate predicate needs its own `m{ {cs} {cp} ?c }`, `cp` interpolated bare as an already-materialised term, exactly like `{s}` in the reference's own trav_one_step example. (2) fusing the OUTER existence/type guard with any per-field predicate as one join (e.g. `?cs a skos:ConceptScheme ; dct:creator ?c`) would be wrong for a different reason: it would make dct:creator REQUIRED for cs to be selected at all, when the original processes every concept scheme regardless and simply emits \"\" for a field with no matching triples -- a join here would silently drop concept schemes that have no creator, not just the creator field.",
+    "`g.preferredLabel(cs, labelProperties=(dc:title, rdfs:label, dct:title, skos:prefLabel))` is kept as a plain, untouched rdflib API call on both sides (only its argument tuple's namespace terms become prefixed names, dc:title etc, valid as bare Python-level term literals outside any island -- same as `owl_thing = owl:Thing` in a sibling region of this batch): preferredLabel's own fallback-priority/language-filter algorithm has no m{ }-shaped equivalent in this study's construction vocabulary and rewriting it would be exactly the 'redesigned implementation' INSTRUCTIONS.md SS2 forbids.",
+    "DEPENDENCY GAP, not a translation issue: rdflib 7.2.1 (this study's pinned venv) has no Graph.preferredLabel at all (confirmed: hasattr is False) -- it was removed from the series some time after the project's OWN pin (`rdflib>=5.0.0,<7`, checked in the corpus clone's requirements.txt/setup.py). Restored via context_shim.py: Graph.preferredLabel monkeypatched back verbatim from rdflib 5.0.0's rdflib/graph.py (downloaded via `pip download rdflib==5.0.0 --no-deps --no-binary :all:` to read, not installed into the shared venv), imported identically by original.py and translated.ldpy. This is a missing-BINDING shim (rdflib's, not the project's) restoring API surface, not a rewrite of the region's own preferredLabel call site, and not the system under test -- unlike the wntr/ontokit/alpaca precedents in this corpus where the missing piece WAS the system under test and the region was excluded, only one incidental call in a 9-op region was affected here, so the rest of the region's translation work is not lost to an exclusion.",
+    "fixture.ttl: ex:scheme1's creator field gets 2 solutions (dct:creator + dc:creator, one triple each -- deliberately at most one triple per single predicate throughout the fixture, so the join() order stays governed by allow_properties()'s fixed Python list order rather than by store iteration order, which m{ }'s matcher does not promise -- see corpus/405); contributor/language/license/source each get exactly 1 solution (single predicate firing); subject/publisher get 0 (neither candidate predicate has any triple: join([]) == empty string); description exercises BOTH language_check() branches (one plain literal falls back to self.language, one tagged literal echoes its tag); title exercises both branches of the untouched preferredLabel-adjacent language logic the same way. driver.py sets self.language to 'und', distinct from every @lang tag used (en/fr/de), so the fallback and tag-echo branches are visibly different values, not coincidentally equal. ex:notAScheme carries every property above but is not typed skos:ConceptScheme: neighbourhood that must not be selected by the `for cs in m{ ?cs a skos:ConceptScheme }` loop nor leak into ex:scheme1's fields.",
+    "the region's OWN `else: raise Exception(...)` branch (no skos:ConceptScheme at all) is not exercised by driver.py: run_pair aborts the whole comparison the instant either side raises during a call (see rdfeval/harness.py), so there is no way to turn 'both sides raise identically' into a pass/fail through this harness -- every fixture concept scheme is therefore typed skos:ConceptScheme, and the zero-solution case is exercised at the FIELD level (subject/publisher) instead of at the whole-region level.",
+    "verified anti-hollow-green: pinning the creator field's second m{ } call to a fixed `dct:creator` (dropping the `{cp}` interpolation so the dc:creator predicate never fires) makes `rdfeval check` FAIL (\"Alice;Bob\" vs \"Alice;Alice\") -- restored and re-verified OK afterwards."
   ],
   "draft_sha": "61bd14de6ab7cef0",
   "provenance": {
@@ -28,5 +45,5 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values"
 }

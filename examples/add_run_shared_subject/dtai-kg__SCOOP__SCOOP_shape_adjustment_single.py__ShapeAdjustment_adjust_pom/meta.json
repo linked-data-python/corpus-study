@@ -15,12 +15,32 @@
     "term_constructor": 9,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, OWL->owl"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "the mechanical draft wrote `self.initial_graph += g{ }` at every one of the six add sites; per the batch's confirmed bias, corrected to one `@graph self.initial_graph` (declared once, function-level, never reassigned) followed by six `+{ }`/`-{ }` writing straight into the live graph.",
+    "two real `;`-fusions, no more: `shacl:path` and (in the fallback block) `a shacl:PropertyShape ; shacl:path` are each two back-to-back .add() with nothing between them. Every OTHER add in this function is separated from its neighbour by an `if pom[\"datatype\"]/[\"termType\"]/[\"template_length\"] is not None:` guard or a `for` loop -- fusing across those would require moving the guard/loop, which the no-refactoring rule forbids. Same shape as the two add_run_shared_subject regions already done in this batch (the redefine-style region and MRHGraph.add_relevance): most of a shared-subject run's adds are NOT fusable once real control flow sits between them, and this region is the extreme case of that (six candidate adds, only two pairs actually adjacent).",
+    "each remove/add here is an 'erase then repose' pair on ONE predicate at a time (self.initial_graph.remove((s, p, None)) then .add((s, p, new))), same pattern as the redefine precedent in the remove stratum -- but the datatype guard removes on TWO predicates (nodeKind AND datatype) before adding one. Piege 'a -{ } multi-motifs JOINT': -{ shacl:nodeKind ?o ; shacl:datatype ?o } would be a DELETE WHERE needing BOTH to exist before deleting either, which is not what two independent .remove() calls mean. Kept as two separate -{ }, never merged, exactly as the remove stratum's own guidance says.",
+    "self.initial_graph.value(shape_identifier, self.shaclNS.minLength) -> m{ {shape_identifier} shacl:minLength ?o }.first(): the mechanical draft left this g.value() call untouched even though it sits inside this very region (trav_single_value's idiom, INSTRUCTIONS.md SS2). Translated it too, since 'always the most specific construction' is not limited to the region's primary stratum. Not fused into the surrounding m{ }/+{ } (there are none it could join without changing cardinality) and the subsequent remove uses the interpolated {value} it read, not a wildcard -- .remove((s, p, value)) targets one specific term, not every match, so -{ } does too.",
+    "self.shaclNS.X (predicate/class names, e.g. .path, .datatype, .PropertyShape) -> shacl:X: constant attribute access on a Namespace instance ALWAYS bound to the same fixed IRI (http://www.w3.org/ns/shacl#) in the real ShapeAdjustment.__init__ (verified against the pinned commit) and in ShapeAdjustmentStub here -- same ns_def_local idiom as `NS = Namespace(...) in a function -> @prefix`, just instance-attribute-scoped rather than function-local. RDF.type -> `a`. rdf:/rdfs:/xsd:/owl: (the draft's four prefixes) were never written as a single literal prefixed name anywhere in this function's actual body and were dropped; shacl: is the only one this region uses.",
+    "self.updateShape/self.getConstraints/self.updateCombinationShape/self.validatePath are NOT part of the extracted region (sibling methods on the same class) and stay opaque Python calls -- no island syntax to write for them. context_shim.py copies all four VERBATIM from the pinned commit (none do I/O) so the fixtures below exercise the real logic.",
+    "missing bindings: adjust_pom is a bare method (self.initial_graph, self.shape_path, self.findNS, self.findPS, self.adjusted_shape, self.iterator, self.shaclNS, self.random_number, plus the four sibling methods above) -- none in the extracted context. Restored via context_shim.ShapeAdjustmentStub, duck-typing only what this region touches, not the rest of the real ShapeAdjustment (RML parsing, adjust_sm's shared_sm_identifier bookkeeping). self.random_number (upstream: 3000 random.randint(1000,9999) values, only ever .pop()'d) is a fixed deterministic list here -- this region never inspects its values, only consumes them, so determinism matters and the RNG's actual distribution does not.",
+    "a demo(initial_graph, shape_path, findNS, pom_list, iterator) harness (identical on both sides) wraps the call, since adjust_pom mutates `self` rather than returning anything and ShapeAdjustmentStub has no __eq__ (comparing self directly would always fail) -- same pattern as the JonAnderAsua and MRHGraph regions in this stratum. Returns the graph plus adjusted_shape/findPS as strings.",
+    "driver.py: four fixtures, each its own zero-arg callable (not a plain (args, kwargs) tuple) so run_pair's one-call-per-side gives each side a FRESH Graph() -- demo mutates its graph in place, and a shared Graph object would let the original run's writes leak into the translated run's starting state, a silent false-green. Together the four cover: (1) a fresh shape_identifier with datatype+termType+template_length all firing against a pre-seeded graph, (2) the same shape_identifier matched twice so the second pass takes the self.adjusted_shape re-adjustment branch (self.updateShape), (3) the multi-path branch reaching self.getConstraints/self.updateCombinationShape, (4) no shape_path match at all, reaching the fallback block including its for/else -- which has no `break`, so the else is UNCONDITIONAL in real Python and was translated that way, not 'fixed'.",
+    "anti-vert-creux: swapped shacl:targetObjectsOf for shacl:targetSubjectsOf in the fallback block's fused +{ }; rdfeval check failed on exactly call[3] (the only fixture reaching that block, graphs not isomorphic, 5 vs 5 triples but different predicate); restored, check OK again."
+  ],
+  "article_candidate": true,
   "draft_sha": "d5d5d676d757997e",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.335729+00:00",

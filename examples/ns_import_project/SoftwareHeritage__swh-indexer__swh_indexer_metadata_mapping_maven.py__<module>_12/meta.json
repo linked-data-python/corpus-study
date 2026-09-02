@@ -10,10 +10,18 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "`from swh.indexer.namespaces import SCHEMA` -> `from swh_namespaces_context import schema:`. `swh.indexer.namespaces` is itself nothing but a set of `Namespace(...)` bindings (SCHEMA, CODEMETA, FORGEFED, ACTIVITYSTREAMS, SPDX_LICENSES, XSD) plus a re-export of rdflib's own RDF -- the textbook namespace-definitions module. Should swh.indexer.namespaces itself have been migrated to ldpy? Yes, squarely: it is exactly the shape of module the language's `from … import p:` is designed to feed from -- if it were an ldpy module with `@prefix schema: <http://schema.org/> .` etc. at top level, the transpiler's own `__namespaces__` export (ldpy/transpiler/core.py PRELUDE) would make this import resolve with no shim at all. Since it is an ordinary, unmigrated rdflib module (verified: `swh.indexer` is on PyPI -- `pip index versions swh.indexer` -> 4.12.0 -- but even installed it exports no `__namespaces__`), the shim (swh_namespaces_context.py) is the whole reason the construction is usable here.",
+    "Dependency check: `swh.indexer` is present on PyPI (case (a) of the batch instructions) but not installed in this venv (verified: `ModuleNotFoundError`). Not installed: the shim reproduces only the one binding this region touches (SCHEMA), verbatim from swh/indexer/namespaces.py at the pinned commit, so both original.py and translated.ldpy import from the same local shim rather than depending on a real install that would still need the same shim for `__namespaces__` anyway.",
+    "rdf_ops=0: this region IS the import line, nothing else -- no body dereferences SCHEMA, so the harness's default entry=None module-state comparison has nothing to observe, and would in fact be MISLEADING here: the prefix-import form binds no module-level Python name at all (declarations.md: 'no name is captured'), so a raw globals diff would report SCHEMA 'missing' on the translated side for a reason unrelated to correctness. A `demo()` function, appended identically to both sides, dereferences one real term instead (SCHEMA.codeRepository) -- not invented: grepped directly from swh/indexer/metadata_mapping/maven.py:81 at the pinned commit, the same file this import is extracted from (`add_url_if_valid(graph, root, SCHEMA.codeRepository, repo)`).",
+    "Anti-hollow-green, verified by sabotage: swapping `schema:codeRepository` for `schema:wrongTerm` in translated.ldpy's demo() flips `rdfeval check` to FAIL (`values differ ('http://schema.org/codeRepository' vs 'http://schema.org/wrongTerm')`); reverted afterward, OK confirmed again."
+  ],
   "draft_sha": "e748794f763112ba",
   "provenance": {
     "generated_at": "2026-08-28T17:54:57.725136+00:00",
