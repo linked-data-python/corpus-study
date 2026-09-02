@@ -27,10 +27,10 @@ Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
 
 | forme | ce que c'est |
 |---|---|
-| `@prefix ex: <IRI> .` | Binds `ex:` to a namespace IRI for the rest of the enclosing block. A prefix is lexical: it has no run-time object, and `ex:` on its own is never a value. Declaring it again in a deeper block shadows it, the way a Python name would. |
+| `@prefix ex: <IRI> [as EX] .` | Binds `ex:` to a namespace IRI for the rest of the enclosing block. A prefix is lexical: `ex:` on its own is never a value. When the code needs the Namespace as an OBJECT — to `bind()` it on a graph, to export it, to put it in a registry — `as EX` binds that object to a Python name too. Declaring the prefix again in a deeper block shadows it, the way a Python name would. |
 | `@base <IRI> .` | Sets the base against which relative IRIs are resolved for the rest of the block, so that `<sensor/1>` means `<IRI>sensor/1`. |
 | `from MODULE import ex:, unit: as u:` | Imports prefixes declared by another module, optionally renaming them. The module is imported as usual; what travels is the prefix bindings, which have no value to import by ordinary means. |
-| `@graph EXPR \| @graph as NAME -> Graph` | Designates the current graph for the block — the one `+{ }`, `-{ }` and a receiver-less `m{ }` act on. `as NAME` creates a fresh graph and binds it to NAME; `global` and `nonlocal` widen the scope. |
+| `@graph EXPR \| @graph as NAME -> Graph` | Designates the current graph for the block — the one `+{ }`, `-{ }` and a receiver-less `m{ }` act on. `as NAME` creates a fresh graph and binds it to NAME; `global` and `nonlocal` widen the scope. Either way the graph inherits the block's prefixes, so it serialises with them. |
 | `@bindings EXPR \| @bindings as NAME -> Bindings` | Designates the current bindings: the mapping that gives `?name` its value in the enclosing block. Any mapping will do, and `as NAME` creates an empty one. |
 | `for @bindings [as NAME] in ITER:` | Loops over an iterable of mappings, making each row the current bindings for the body. A `csv.DictReader` and the solutions of `m{ }` are both iterables of mappings, so both drive this loop. |
 
@@ -42,7 +42,7 @@ Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
 | `ex:local -> URIRef` | A prefixed name: the local part is appended to the IRI bound to `ex:`. Turtle's character set applies inside an island, so `o-pizza:topping` and `ex:café` are names here although neither is a legal Python expression. `ex:{expr}` computes the local part. |
 | `"..."@lang \| "..."^^dt -> Literal` | An RDF literal carrying a language tag or a datatype. The quoted part may be an f-string, and `{expr}` may supply the datatype itself. |
 | `?name \| $name -> Variable` | A SPARQL variable. In a pattern it is what gets matched and projected; in `g{ }` or `+{ }` it takes its value from the current bindings, and leaves the triple out when it has none. |
-| `f<...{expr}...> -> URIRef` | A formatted IRI: the braces interpolate as in an f-string, the result is percent-encoded and then resolved against `@base`. Encoding first is what keeps a space or a slash in a value from changing the IRI's structure. |
+| `f<...{expr}...> -> URIRef` | A formatted IRI: the braces interpolate as in an f-string, and the result is resolved against `@base` if it is relative. It does NOT percent-encode — the shape of the IRI is yours. To mint one from data that may hold a space or a slash, use `e<...>`, which encodes. |
 | `f{expr} \| ?{expr} -> Node` | Coerces any Python value into an RDF term, by the coercion policy in scope. Two spellings of one operation: `?{ }` reads better in term position, `f{ }` beside `f<...>`. |
 | `_:{expr} -> BNode` | A blank node whose identity is its data: the same value gives the same node anywhere in the program, so two rows that share a key join without inventing an IRI for them. |
 
@@ -59,14 +59,14 @@ Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
 | forme | ce que c'est |
 |---|---|
 | `m{ ... } -> Solutions` | Matches a basic graph pattern against the current graph, lazily. Iterating yields a bare term when one variable is projected and a tuple otherwise; `.one()`, `.first()`, `.count()` and `bool()` are the usual reductions. A `(graph)` suffix names another source. |
-| `s{ ... } -> Query` | A SPARQL query or update, parsed when the file is transpiled rather than at run time. `{expr}` in term position becomes an initial binding — never string pasting, so nothing here can be injected. Call it on a graph to run it; `.execute()` runs an update. |
+| `s{ ... } -> Query` | A SPARQL query or update, parsed when the file is transpiled rather than at run time. `{expr}` in term position becomes an initial binding — never string pasting, so nothing here can be injected. Calling it on a graph gives a LAZY query; `.execute()` is what forces it — for an update, and for any query whose rdflib `Result` you then call a method on. |
 
 **Évaluation différée**
 
 | forme | ce que c'est |
 |---|---|
 | `e{ ... } -> Expr` | A deferred SPARQL expression. It is not evaluated where it is written, but against the bindings in force when the island holding it is instantiated — once per row of a `for @bindings` loop. `{python}` holes are evaluated where they are written. |
-| `e<...{?var}...> -> Expr` | A deferred IRI: `f<...>`'s interpolation, except that the holes are SPARQL expressions re-evaluated for each set of bindings. |
+| `e<...{?var}...> -> Expr` | A deferred IRI: `f<...>`'s interpolation, except that the holes are SPARQL expressions re-evaluated for each set of bindings — and that it percent-encodes what it interpolates. This is the form for minting an IRI from a data column. |
 
 *(Engendré depuis `ldpy/lsp/islanddoc.py` — la table que le survol de l'éditeur affiche, en anglais comme tout le code. `ldpy/tests/test_islanddoc.py` garantit qu'elle décrit **toutes** les sortes d'îlot et que chacun de ses liens tombe sur une ancre vivante de la documentation. Ne l'éditez pas à la main : `python scripts/sync_language_reference.py`.)*
 
