@@ -46,5 +46,5 @@ def test_instructions_carry_the_language_reference_inline():
     assert "BEGIN island-reference" in text
     # the constructions a translator reaches for most, all present
     for form in ("g{ ... }", "m{ ... }", "+{ ... }", "-{ ... }",
-                 "@prefix ex: <IRI> .", "?name", "e{ ... }"):
+                 "@prefix ex: <IRI> [as EX] .", "?name", "e{ ... }"):
         assert form in text, form
