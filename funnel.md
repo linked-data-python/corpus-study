@@ -309,27 +309,76 @@ d'un même dépôt toutes strates confondues (`jupyter-naas/abi`,
 `altunelyusuf/SemanticTechnologies`). 1 152 régions sont des fonctions,
 44 des fichiers entiers.
 
-### 5.3 De la région à la paire mesurée
+### 5.3 Du tirage à l'échantillon final : 1 196 → 350
+
+Le tirage a produit 1 196 régions ; **l'échantillon de l'article en compte
+350, exactement 25 par strate** (arbitrage de Maxime, 2026-09-03). C'est un
+étage de l'entonnoir à part entière, et il est reproductible.
+
+La règle, qui **reproduit l'ordre de `scripts/make_batches.py`** pour que la
+sélection soit la même que celle qu'ont suivie les campagnes :
+
+1. strates en ordre alphabétique ;
+2. un **unique** `Random(20260828)`, partagé entre les strates — c'est ce que
+   fait le script, et c'est pourquoi l'ordre ne se reproduit qu'ainsi ;
+3. dans chaque strate, les non-final triées par `sorted()` puis mélangées par
+   ce générateur — la liste mélangée est la liste NON filtrée, comme dans le
+   script ;
+4. on prend les premières de cette liste jusqu'à compléter 25 avec les
+   finales, **en sautant** les non-final classées `excluded` ou
+   `not-expressible`.
+
+| | régions |
+|---|---:|
+| tirées | 1 196 |
+| **gardées** | **350** (14 × 25) |
+| dont finales | 210 |
+| dont brouillons à traduire | 140 |
+| supprimées | 846 |
+| dont non-final `excluded` | 25 |
+| dont non-final `not-expressible` | 5 |
+
+**Les dix-neuf `not-expressible` FINALES sont conservées.** Ce sont les
+résultats négatifs de l'étude — la limite de `@prefix`, la requête assemblée
+à l'exécution, le motif reçu en donnée — et non des déchets. Seules les
+non-final portant ces classifications partent, parce qu'elles n'ont pas de
+traduction à montrer.
+
+Les mesures ne bougent pas d'un chiffre : toutes les paires mesurées viennent
+des finales, toutes conservées. Deux dénominateurs changent, eux : les
+régions tentées se lisent sur 350 et non sur 1 196, et la couverture passe de
+190/215 à **190/210**, les 25 régions non évaluables en isolation ayant quitté
+l'échantillon. Leur constat reste vrai et documenté ; il n'a simplement plus
+de support dans l'arbre, seulement dans l'historique git.
+
+### 5.4 De la région à la paire mesurée
+
+Chiffres du 2026-09-03, sur l'échantillon final de 350.
 
 | étape | critère | reste |
 |---|---|---:|
-| régions tirées | § 5.2 | **1 196** |
-| brouillon mécanique | écrit pour **toutes** dès le tirage (`materialise = true`) | 1 196 |
-| **tentées** par un agent | par lots, strates les plus déficitaires d'abord | **154** |
-| non exprimables | le langage ne l'atteint pas — c'est un **résultat**, pas une perte | −18 |
-| non évaluables en isolation | dépendance absente (les deux catégories encore mélangées) | −19 |
-| malaisées / exprimables | classées `awkward` (1) ou `expressible` (116) | **117** |
-| **traduites, statut `final`** | traduction + pilote + équivalence prouvée | **131** |
-| paires mesurées | métriques calculées | 117 |
-| **approuvées** | revue humaine — **verrou : rien d'agrégé ne sort avant** | **0** |
+| régions tirées | § 5.2 | 1 196 |
+| **retenues pour l'article** | § 5.3 | **350** |
+| brouillon mécanique | écrit pour toutes dès le tirage (`materialise = true`) | 350 |
+| **tentées** par un agent | par lots, strates les plus déficitaires d'abord | **210** |
+| non exprimables | le langage ne l'atteint pas — c'est un **résultat**, pas une perte | −19 |
+| malaisées / exprimables | classées `awkward` (1) ou `expressible` (190) | **191** |
+| **traduites, statut `final`** | traduction + pilote + équivalence prouvée | **210** |
+| paires mesurées | métriques calculées | **190** |
+| **approuvées** | revue humaine — **verrou : `--force` ne rend que des chiffres provisoires** | **0** |
 
-Couverture d'expressivité sur ce qui a pu être évalué : **116 / 135**.
+Couverture d'expressivité sur ce qui a pu être évalué : **190 / 210**.
 
-Les 1 042 régions non tentées gardent leur brouillon mécanique intact et se
-reprennent sans re-tirage : `strata` complète l'échantillon, il ne le refait
-jamais.
+Les 140 régions non tentées gardent leur brouillon mécanique intact et se
+reprennent sans re-tirage. Elles sont exactement ce qui reste à traduire pour
+que l'échantillon de l'article soit complet.
 
-### 5.4 `examples/` est-il obsolète ?
+Sur les 190 paires, l'oracle se partage en **113 par isomorphisme de graphe**
+(la région construit) et **77 par égalité des valeurs produites** (elle lit) —
+c'est ce second oracle (fiche corpus/405) qui permet aux régions de lecture
+d'entrer dans une évaluation.
+
+### 5.5 `examples/` est-il obsolète ?
 
 Pas encore, et c'est un point à trancher plutôt qu'à laisser dériver. Les deux
 arbres sont **disjoints** (7 identifiants de région en commun sur 163 et
