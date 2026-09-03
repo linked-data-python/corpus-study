@@ -11,7 +11,7 @@ from .config import load_config
 STAGES = ("discover", "select", "acquire", "analyze",
           "validate", "compare", "aggregate", "audit",
           "surface", "strata", "check", "status", "article", "review",
-          "userstudy", "all")
+          "digest", "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
 # acquire) and the human-in-the-loop stage (translate review) stay explicit.
@@ -31,7 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--limit", type=int, default=None,
                         help="select: cap the number of repositories")
     parser.add_argument("--stratum", default=None,
-                        help="review: restrict to one stratum")
+                        help="review, digest: restrict to one stratum")
     parser.add_argument("--set", dest="set_to", default=None,
                         choices=("approved", "rejected", "needs-work",
                                  "unreviewed"),
@@ -96,6 +96,9 @@ def main(argv: list[str] | None = None) -> int:
                        set_to=args.set_to, region=args.region,
                        comment=args.comment, reviewer=args.reviewer,
                        list_only=args.list_only)
+        elif stage == "digest":
+            from . import digest
+            digest.run(config, study, stratum=args.stratum)
         elif stage == "article":
             from . import article
             article.run(config, study)

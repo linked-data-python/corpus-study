@@ -82,13 +82,25 @@ Driving the campaign:
 ```
 python -m rdfeval check examples/<stratum>/<id>   # transpile + run the driver
 python -m rdfeval status [--run-checks]  # where the campaign stands
+python -m rdfeval digest [--stratum s]   # the review pages -> results/review/
 python -m rdfeval review                 # the human review, pair by pair
 python -m rdfeval compare                # pair metrics (final pairs)
 python -m rdfeval aggregate              # APPROVED pairs only
 python -m rdfeval article                # one publishable example per stratum
 python scripts/make_batches.py           # plan what is LEFT, up to the
-                                         #   per-stratum budget (20)
+                                         #   per-stratum budget (25)
 ```
+
+`digest` renders the pairs as HTML — one page per stratum plus an index,
+opened straight from `results/review/index.html` (generated, gitignored). It
+shows each pair side by side with the driver, the fixture and the context
+shim that make it evidence, the measured metrics, and a short list of **risk
+flags**: everything a machine can notice about a pair that might be green
+without demonstrating anything — a fixture of three triples, a function
+region compared only as module state, a `demo()` harness that differs between
+the two sides. A flag decides nothing; it says where to look. Verdicts are
+held in the browser and rendered as `rdfeval review --set` commands to paste,
+so the pages never write to the study.
 
 Translators follow [INSTRUCTIONS.md](INSTRUCTIONS.md) (what to
 translate into what) and [AGENT_BATCH.md](AGENT_BATCH.md) (how a batch is

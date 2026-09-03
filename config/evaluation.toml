@@ -147,7 +147,7 @@ target_per_stratum = 100
 # At most this many regions from one repository in one stratum: without it a
 # single large project would define what "real use" looks like.
 max_per_repo_per_stratum = 4
-# Write one example directory per drawn region (examples403/<stratum>/<id>/)
+# Write one example directory per drawn region (examples/<stratum>/<id>/)
 # as part of `rdfeval strata`.
 materialise = true
 
@@ -158,8 +158,12 @@ materialise = true
 # number, one more pair of the same stratum tells you nothing you did not
 # already know, and the effort is better spent on a stratum that is short.
 # 20 was chosen (2026-08-29) as the highest count any stratum had actually
-# reached; `scripts/make_batches.py --target` defaults to it.
-max_pairs_per_stratum = 20
+# reached.  Raised to 25 on 2026-09-02, when the drawn population was pruned
+# to exactly 25 regions per stratum (funnel.md SS5.3): the budget and the
+# population now coincide, so the campaign ends when every kept region is
+# translated -- a finite, countable objective.
+# `scripts/make_batches.py --target` defaults to it.
+max_pairs_per_stratum = 25
 
 [regions]
 # A region is a function/method/class or the module top level.
