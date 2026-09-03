@@ -66,7 +66,12 @@ def _highlighters():
     def render(text, kind):
         return highlight(text, lexers.get(kind, lexers["txt"]), fmt)
 
-    return render, lexers, HtmlFormatter().get_style_defs(".hl")
+    # Two palettes: pygments' default is written for a white page and goes
+    # nearly unreadable on the dark one the digest also renders.
+    css = HtmlFormatter(style="default").get_style_defs(".hl")
+    css += "\n@media (prefers-color-scheme: dark) {\n%s\n}\n" % (
+        HtmlFormatter(style="github-dark").get_style_defs(".hl"))
+    return render, lexers, css
 
 
 _RENDER, _LEXERS, _PYGMENTS_CSS = _highlighters()
@@ -482,9 +487,9 @@ main { padding:1rem; max-width:2000px; margin:0 auto }
 .flags li.warn { border-color:var(--warn) }
 .flags li.info { border-color:var(--info); color:var(--dim) }
 .flags li.clean { border-color:var(--ok); color:var(--dim) }
-.cols { display:grid; grid-template-columns:1fr 1fr; gap:.8rem;
+.cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:.8rem;
         margin-top:.6rem }
-@media (max-width:1100px) { .cols { grid-template-columns:1fr } }
+@media (max-width:1100px) { .cols { grid-template-columns:minmax(0,1fr) } }
 .col h4 { margin:0 0 .3rem; font-size:.8rem; font-weight:600 }
 .col h4 span { color:var(--dim); font-weight:400 }
 pre.hl { margin:0; overflow-x:auto; background:var(--bg); border-radius:6px;
