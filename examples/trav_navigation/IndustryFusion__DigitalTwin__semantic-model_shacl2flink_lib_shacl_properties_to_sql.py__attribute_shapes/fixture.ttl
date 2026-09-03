@@ -1,0 +1,53 @@
+# Input graph for IndustryFusion__DigitalTwin__semantic-model_shacl2flink_lib_shacl_properties_to_sql.py__attribute_shapes
+@prefix ex: <http://example.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ngsi-ld: <https://uri.etsi.org/ngsi-ld/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# Root node shape WITH a target class: visited. Carries one direct
+# sh:property list (several candidates, some excluded) plus an sh:and
+# collection and an sh:not branch to walk.
+ex:DeviceShape a sh:NodeShape ;
+    sh:targetClass ex:Device ;
+    sh:property ex:NamePropertyShape, ex:ValuePropertyShape, ex:TypePropertyShape, ex:AmbiguousPropertyShape ;
+    sh:and ( ex:BranchA ex:BranchB ) ;
+    sh:not ex:NegatedBranch .
+
+# ---- direct attribute candidates on the root shape ----
+
+# a single sh:path, not an NGSI-LD value path, not rdf:type -> MUST yield.
+ex:NamePropertyShape sh:path ex:name .
+
+# an NGSI-LD value path (ngsi-ld:hasValue): names the attribute's own
+# value, not a new attribute -- excluded by NGSILD_VALUE_PATHS.
+ex:ValuePropertyShape sh:path ngsi-ld:hasValue .
+
+# rdf:type as the path -- excluded explicitly (`paths[0] != RDF.type`).
+ex:TypePropertyShape sh:path rdf:type .
+
+# more than one sh:path on the same property shape -- excluded by
+# `len(paths) == 1`.
+ex:AmbiguousPropertyShape sh:path ex:altName, ex:otherName .
+
+# ---- reached through sh:and's rdf:List (Collection) ----
+ex:BranchA sh:property ex:TemperaturePropertyShape .
+ex:TemperaturePropertyShape sh:path ex:temperature .
+
+# second sh:and branch, itself carrying a nested sh:or -- two levels of
+# connective descent.
+ex:BranchB sh:or ( ex:SubBranchC ex:SubBranchD ) .
+ex:SubBranchC sh:property ex:PressurePropertyShape .
+ex:PressurePropertyShape sh:path ex:pressure .
+ex:SubBranchD sh:property ex:HumidityPropertyShape .
+ex:HumidityPropertyShape sh:path ex:humidity .
+
+# ---- reached through sh:not ----
+ex:NegatedBranch sh:property ex:BatteryPropertyShape .
+ex:BatteryPropertyShape sh:path ex:batteryLevel .
+
+# ---- neighbourhood that must NOT match: a whole separate node shape with
+# no sh:targetClass -- never even visited, so its own well-formed attribute
+# shape must never appear in the output.
+ex:UntargetedShape a sh:NodeShape ;
+    sh:property ex:OrphanPropertyShape .
+ex:OrphanPropertyShape sh:path ex:orphanAttribute .

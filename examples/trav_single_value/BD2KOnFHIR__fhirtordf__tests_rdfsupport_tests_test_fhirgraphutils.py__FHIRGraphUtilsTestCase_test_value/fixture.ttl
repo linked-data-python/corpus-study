@@ -1,4 +1,43 @@
-# Input graph for BD2KOnFHIR__fhirtordf__tests_rdfsupport_tests_test_fhirgraphutils.py__FHIRGraphUtilsTestCase_test_value — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# BD2KOnFHIR__fhirtordf__tests_rdfsupport_tests_test_fhirgraphutils.py__FHIRGraphUtilsTestCase_test_value.
+#
+# A trimmed, faithful subset of the real fixture the region was extracted
+# against (tests/data/account-example.ttl in the source repo), keeping
+# exactly the predicates test_value() reads:
+#   * fhir:Resource.id, fhir:nodeRole    -- read via the untouched value()
+#     helper (not this region's own construct, see meta.json).
+#   * fhir:Account.servicePeriod / fhir:Period.start / fhir:Period.end --
+#     the region's OWN trav_single_value site: two chained g.value(s, p)
+#     calls -> m{ {s} p ?o }.first().
+#   * fhir:Account.type -- present but with NO direct fhir:value under its
+#     nested bnode: exercises value()'s zero-solution fallback (must
+#     answer None), unrelated to the two m{ }.first() sites themselves.
+#   * fhir:foo -- absent altogether: a second, direct zero-solution case.
+#
+# NEIGHBOURHOOD that must not match: <Patient/example> has ITS OWN,
+# differently-valued fhir:Account.servicePeriod -- proves the m{ }.first()
+# reads are scoped to the exact subject given (Account/example, then its
+# own servicePeriod bnode), not merely to the predicate.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/Account/example> a fhir:Account ;
+    fhir:nodeRole fhir:treeRoot ;
+    fhir:Resource.id [ fhir:value "example" ] ;
+    fhir:Account.type [
+        fhir:CodeableConcept.coding [
+            fhir:Coding.system [ fhir:value "http://terminology.hl7.org/CodeSystem/v3-ActCode" ] ;
+            fhir:Coding.code [ fhir:value "PBILLACCT" ]
+        ] ;
+        fhir:CodeableConcept.text [ fhir:value "patient" ]
+    ] ;
+    fhir:Account.servicePeriod [
+        fhir:Period.start [ fhir:value "2016-01-01"^^xsd:date ] ;
+        fhir:Period.end   [ fhir:value "2016-06-30"^^xsd:date ]
+    ] .
+
+<http://hl7.org/fhir/Patient/example> a fhir:Patient ;
+    fhir:Account.servicePeriod [
+        fhir:Period.start [ fhir:value "1900-01-01"^^xsd:date ] ;
+        fhir:Period.end   [ fhir:value "1900-12-31"^^xsd:date ]
+    ] .

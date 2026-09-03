@@ -13,10 +13,19 @@
     "namespace_ctor": 6,
     "term_constructor": 5
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "eleven sites of the stratum in this `main`: 6x `rdflib.Namespace(...)` (config-file branch, -b/--base, -p/--propbase) assigned to `csv2rdf.BASE` / `csv2rdf.PROPBASE`, and 5x `rdflib.URIRef(...)` (config-file branch, -c/--class, --col*/--prop* loop) assigned to `csv2rdf.CLASS` / `csv2rdf.PROPS[...]`. Each site is an ASSIGNMENT to an attribute (or a dict entry) of a `CSV2RDF` object -- @prefix is purely lexical, it produces no value, so it can never cover any of these eleven assignments. Same pattern as the sibling of this batch (JustlyAI__lmss_entity_extractor__..._OntologyClassifier___init__, `self.LMSS = Namespace(...)`) and as the near-duplicate region shubhamjakhete__nvda_reader__..._csv2rdf.py__main elsewhere in this stratum -- this file (recipe-importer/rdflib/tools/csv2rdf.py) is itself another vendored copy of rdflib.tools.csv2rdf, so the two regions share essentially the same accounting.",
+    "escape confirmed, not assumed, and INTO A DIFFERENT FUNCTION: `CSV2RDF.convert` (context_shim.py, verified against the real repository via the local clone corpus/repos/LexMalta__recipes/recipe-importer/rdflib/tools/csv2rdf.py) dereferences `self.BASE[\"%d\" % rows]` and `self.PROPBASE[toProperty(x)]` by SUBSCRIPT -- outside this region (`main` only assigns, it never dereferences). Even if @prefix produced a value, its block scope is the body of `main` (declarations.md#block-scope): it would not survive to reach `convert`, a sibling method -- the escape is double: out of scope AND out of the function.",
+    "region is pure configuration/CLI (getopt + configparser): no triple write (`.triple()`) and no local `ns:Term` dereference happens INSIDE `main` itself -- any `+{ }` would live in `CSV2RDF.convert`/`CSV2RDF.triple`, outside the region. Nothing else in this block would justify an ldpy construction.",
+    "context shim (context_shim.py): CSV2RDF, toProperty, index, prefixuri, csv_reader and the module-level `uris` dict transcribed VERBATIM (local clone, lines 90-137 and 300-439). Left out, because never reached by the driver's path (-b, -p, -o, one CSV file, no -f/-D/--default/--col*/--prop*/-i non-auto/-C): the NodeMaker/NodeUri/NodeFloat/... family, `column()`, `config_functions`. Python only resolves a name when the line using it executes, so the CSV2RDF class is otherwise left complete and identical to the repository, including the branches this run never takes.",
+    "`demo` harness added identically to both files (same convention as the sibling): `main` reads `sys.argv` directly and returns nothing -- no Graph, no module-level value to compare via the driver's module-state mode. `demo(csv_path, out_path)` sets a minimal argv (-b, -p, -o, one CSV file), calls `main`, reads back the file written by -o, and returns it -- the region's only RDF-observable effect. meta.oracle says isomorphism but the region never builds an rdflib.Graph -- it writes n3 text via `.n3()` -- hence a text comparison rather than a graph isomorphism; see driver.py.",
+    "known trap confirmed: `csv2rdf.OUT` defaults to `sys.stdout` (CSV2RDF.__init__); without -o the call would run under the harness's `redirect_stdout(io.StringIO())`, and `CSV2RDF.convert` does `self.OUT.name` -- absent on an `io.StringIO`, which crashes. -o (a real file, which has `.name`) is therefore required by the driver, not an arbitrary choice.",
+    "output compared as an ordered string (ordered=True, the default outside fixture=): both CSV rows are scanned sequentially on both sides, and that order is part of the region's meaning, not a store artefact.",
+    "confirmed via deliberate breakage: swapping the -p argument's namespace (\"http://example.org/props/\" -> \"http://example.org/WRONG/\" in translated.ldpy's demo() only) turns `rdfeval check` red (every predicate IRI in the written n3 differs), then green again once reverted -- the driver is sensitive to real content, not a hollow pass."
+  ],
   "draft_sha": "80c1d6b675fc1c08",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.426028+00:00",

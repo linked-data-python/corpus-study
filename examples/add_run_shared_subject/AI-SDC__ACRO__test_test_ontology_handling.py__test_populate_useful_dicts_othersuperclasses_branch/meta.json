@@ -14,10 +14,25 @@
     "term_constructor": 8,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "IRI",
+    "f<…>",
+    "plain literal",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "the three predicate variables (subclass_ref, definition_ref, preflabel_ref) are built from string-literal IRIs, not via Namespace, so they become bare `<IRI>` terms (rdflib.URIRef(\"...\") -> <...>), not prefixed names; no @prefix was declared since none of the predicates come from a Namespace attribute.",
+    "subject = rdflib.URIRef(PREFIX + \"TestClass\") is a formatted IRI (PREFIX from an import, joined to a literal suffix), so it becomes `f<{PREFIX}TestClass>` -- f<...> joins holes verbatim with no percent-encoding, matching the original's plain string concatenation, same case as the ns_def_local sibling region in this repo.",
+    "two `+{ }` blocks, not one: the four `.add()` calls do share the subject `subject`, but `parent1`/`parent2` are assigned BETWEEN the first pair (definition/prefLabel) and the second pair (subClassOf x2) -- fusing across that intervening computation would require moving it, which the no-refactoring rule forbids. Same shape as the dp-web4 MRHGraph region in this stratum: fuse only what is genuinely adjacent.",
+    "context_shim.py keeps populate_useful_dicts as the REAL function (verbatim from AI-SDC/ACRO@eb1d6e370a), not a stub: this region's own assertions (`assert key in othersuperclasses`, `assert len(...) >= 2`) exercise it, so a stub would not discriminate a correct translation from a broken one. The other imported names (is_uri, make_ischeckedby, ...) are imported but never called here and are stubbed, matching the sibling ns_def_local region's shim for the same module.",
+    "the test function builds `g` as a local variable, calls populate_useful_dicts(g), and returns nothing -- a plain call is unobservable to run_pair (no return value, no mutated argument, no stdout). context_shim's populate_useful_dicts now also records the graph it receives in LAST_GRAPH; a demo() harness (identical on both sides, appended after the extracted function, itself untouched) calls the test function -- which still raises if either side's own downstream assertions fail -- then returns that captured graph for isomorphism comparison, the region's stated oracle.",
+    "anti-vert-creux: swapped the second subClassOf triple's object (parent2 -> parent1 again) in translated.ldpy; rdfeval check failed with an AssertionError from populate_useful_dicts's own `assert len(othersuperclasses[key]) >= 2` (the RDF store deduplicates the now-repeated triple, so the count drops to 1); restored, check OK again."
+  ],
+  "article_candidate": true,
   "draft_sha": "45330258fa319c14",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.577168+00:00",
@@ -28,5 +43,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

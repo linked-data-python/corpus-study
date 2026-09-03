@@ -12,10 +12,29 @@
   "categories": {
     "graph_read": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "s{ }",
+    "call suffix (g)",
+    "IRI",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "translation_notes": [
+    "the mechanical draft only covered the two .add() runs (g{ } + Python +=); this batch redid them as `+{ }` proper -- `@graph g` declared once, right after `g = graph.get_context(graphuri)`, covers every island that targets `g` (2 add sites folded to 1, 3 reads, 1 remove) with no receiver of its own; `g2` is a second, distinct graph live in the SAME function, so its 2 touches use the explicit call suffix `(g2)` instead -- `@graph` names ONE current graph per declaration, and this region genuinely has two.",
+    "every OTHER rdflib idiom the region contains was translated too, not only the 'remove' one the stratum sampled -- precedent: ArangoRDB.__add_adb_col_statement and OntologyDeprecator.deprecate elsewhere in this same batch do the same (translate every applicable island, credit each construction separately, regardless of which stratum picked the region). `g.query(LITERAL)` -> `s{ LITERAL }` (sparql_literal, this region's OTHER listed stratum); `g.query(LITERAL, initBindings={'s': tarek})` -> `s{ LITERAL }(bindings={'s': tarek})` -- ?s IS projected (SELECT *) so INSTRUCTIONS SS2's rule applies ('sinon s{ }(bindings=...)', not a bare interpolation); `g.triples(pattern)` (three call sites, two with a wildcard subject/none, one fully bound) -> `m{ pattern }`, kept inside the SAME `len(list(r)) == N` shape the original asserts, not rewritten to bool()/.count() -- no restructuring.",
+    "g.remove((tarek, likes, pizza)) -> -{ {tarek} {likes} {pizza} }, the remove stratum's own idiom: no wildcard is present (unlike the sibling YurtleStore.remove/ArangoRDB regions in this batch), so this is the direct, undegraded form.",
+    "NOT a hollow green: every read this region performs is guarded by the ORIGINAL's own `assert len(list(r)) == N`, which run_pair's fo(*args)/ft(*args) call executes for real -- a wrong m{ }/s{ } translation raises AssertionError inside the entry point itself, which run_pair reports as an error (checked: narrowing `m{ ?s {likes} {pizza} }` to `m{ ?s {likes} {cheese} }` makes the SECOND assert in the region fail with exactly that traceback). Only the graph's FINAL state additionally needs the Dataset-argument comparison (see driver.py) because the very last line, `r = s{ ... }` after the remove, has no trailing assert in the real upstream test either (confirmed against the fetched source at the pinned commit: the function genuinely ends there) -- so that one line is translated for consistency with the rest but is, like in the source, unverified either way.",
+    "verified the remove specifically is not a hollow green: widening it to `-{ ?anything {likes} {pizza} }` (subject wildcard) makes the driver FAIL on `call[0].arg[0]` (the two Datasets no longer isomorphic) -- because at that point in the run `g` holds BOTH tarek-likes-pizza and bob-likes-pizza, so a subject-wildcard removal deletes one triple too many where the fully-bound form deletes exactly one. Restored before finalising.",
+    "the real `getgraph` pytest fixture is `ConjunctiveGraph(store='LevelDB')`, an external C-extension store out of reach; the region's own body only ever calls get_context/.add/.remove/.query/.triples, all of which an in-memory `rdflib.Dataset` supports identically, so the driver substitutes one -- see driver.py for why it goes through a `_DatasetProxy` (a pre-existing rdflib/rdfeval interaction: `to_isomorphic` -- what run_pair's generic argument comparison uses for a bare Graph -- raises on a quad-yielding Dataset; same sidestep as the sibling region testUpdateWithInitNs/driver.py, which hits the identical issue from the same source file).",
+    "fixture.ttl seeds unrelated data in the DEFAULT graph only, to prove get_context() isolation; the region's own asserted counts (3, 1, 2, 2, 1, 1, 0 triples/solutions at each step) already are the several-solutions / zero-solution / non-matching-neighbour cases the reading oracle asks for, so the fixture does not need to duplicate them -- see its own header.",
+    "article_candidate: the -{ } line by itself is unremarkable (one-for-one with g.remove), but the region as a whole -- two graphs, a literal query, initBindings, three .triples() patterns and a remove, ALL translated, ALL still checked by the source test's own asserts -- is a compact demonstration that `m{ }`/`s{ }`/`+{ }`/`-{ }` interoperate under a shared `@graph` without the reads and writes needing to agree on which island form to use."
+  ],
   "draft_sha": "0c4611a364810306",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.060236+00:00",
@@ -27,5 +46,12 @@
     "remove",
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:testSimpleGraph",
+    "diffs": [],
+    "error": null
+  }
 }

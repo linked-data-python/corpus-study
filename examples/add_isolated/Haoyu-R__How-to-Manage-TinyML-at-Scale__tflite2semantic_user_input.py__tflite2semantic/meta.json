@@ -14,11 +14,21 @@
     "term_constructor": 2,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: nnet->nnet, RDF->rdf, RDFS->rdfs, SDO->sdo"
+    "prefixes: nnet->nnet, RDF->rdf, RDFS->rdfs, SDO->sdo (RDFS and SDO are unused in this region, same as in the original -- kept for parity with the source import line)",
+    "The region is a nested function DEFINITION (addCommonInfo) that closes over a per-model `g` from an enclosing scope it is not part of, rather than taking it as a parameter; its three .add() calls became one @graph g (first line of the function body) plus three +{ } statements, each guarded exactly where the original had it (input_layer / output_layer / unconditional) -- no restructuring.",
+    "addCommonInfo also calls addTrainable/addLayer/addActivation, three sibling closures defined outside the region (source lines 292-372) that also write to the same `g`. They are plain Python, untranslated (outside the assigned region), reproduced verbatim in the context shim tflite_context.py via a factory bound to each side's own `g` -- importing one shared, pre-built Graph from the shim would make both sides' runs mutate the SAME object (Python caches the shim module on the second import within the same process), which would make the check pass regardless of what the translation says.",
+    "Explicit invocations of addCommonInfo were added at the end of original.py/translated.ldpy, identically on both sides, because a function definition alone writes nothing to compare (entry=None/module-state oracle, since addCommonInfo does not take `g` as an argument the entry=/calls= harness could otherwise inspect). The three calls mirror the real source's own three call sites (lines 391/397/404): input layer, output layer, and a middle layer with neither flag -- the last is the neighbourhood that must NOT get shapeIn/shapeOut triples.",
+    "Verified the fixture is not a hollow green: corrupting nnet:shapeIn to nnet:shapeInWRONG in translated.ldpy flips the check to FAIL (14 vs 14 triples, not isomorphic)."
   ],
   "draft_sha": "a46a2246e72aab25",
   "provenance": {
@@ -32,5 +42,11 @@
     "add_in_loop",
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

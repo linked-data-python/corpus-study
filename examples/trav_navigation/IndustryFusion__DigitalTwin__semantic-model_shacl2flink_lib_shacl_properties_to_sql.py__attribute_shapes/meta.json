@@ -12,11 +12,24 @@
   "categories": {
     "namespace_term": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, SH->sh"
+    "`oracle` corrected from the pipeline's `isomorphism` to `values`: `attribute_shapes` only reads `g` (`categories` above shows no `graph_read` at all -- a pipeline artifact, since the source itself never annotates the `g` parameter, so the static heuristic that looks for `Graph`-typed parameters missed every read in this region). Nothing here is compared by RDF isomorphism; the driver proves it by materialised value equality against fixture.ttl, per design record corpus/405.",
+    "prefixes: RDF->rdf, SH->sh from the draft are both kept, but for different reasons than usual: `sh:` is used inside `m{ }` patterns (`sh:NodeShape`, `sh:targetClass`, `sh:property`, `sh:path`), while `rdf:` is needed only as a bare prefixed-name TERM (`paths[0] != rdf:type`) -- the pattern's own rdf:type check uses the Turtle `a` shorthand instead (`?nodeshape a sh:NodeShape`), so `rdf:` would otherwise be unused.",
+    "three single-hop reads translate directly, each the most specific construction for that idiom even though the surrounding stratum is trav_navigation: `g.subjects(RDF.type, SH.NodeShape)` -> `m{ ?nodeshape a sh:NodeShape }`; `g.objects(shape, SH.property)` -> `m{ {shape} sh:property ?prop }`; `g.objects(prop, SH.path)` -> `m{ {prop} sh:path ?path }`.",
+    "`if not list(g.objects(nodeshape, SH.targetClass)): continue` is an existence check on a materialised list used only for truthiness (matching `trav_existence`'s idiom, not `trav_navigation`'s): `m{ {nodeshape} sh:targetClass [] }` with `[]` as a non-distinguished variable (querying.md, blank-node position) rather than a named `?t` nobody projects -- `not m{ ... }` reduces through the same `bool()` the reference calls the 'usual reduction' for `m{ }`, with no separate construction label since the vocabulary has no standalone `bool()` entry.",
+    "the region's outer nested-loop shape -- `for nodeshape in ...: ... while frontier: shape = frontier.pop(); ...` -- does NOT fuse into a single `m{ }` join, unlike a genuine positive AND-chain (see the sibling trav_navigation region `CatholicOS/ontokit-api::_check_undefined_parent` in this same batch, which DOES fuse two nested loops on a shared subject). The reason here is different from that region's negation counter-example: this is an unbounded-depth WORKLIST traversal (`seen`/`frontier`) over `connective_clauses`, which itself unwinds `sh:and`/`sh:or`/`sh:xone` RDF-list members (`rdflib.collection.Collection`) and `sh:not` branches -- a fixpoint over a graph shape `m{ }` cannot express as one static bounded pattern, the same way SPARQL property paths could not either without a fixed single predicate. Each LEAF read inside the loop is still translated with its own most-specific `m{ }` (see above); only the graph-shaped recursion itself stays Python control flow.",
+    "`connective_clauses(g, shape)` (called, not defined, in this region) and the `VALUE_PATH_ATTRIBUTE_TYPES` constant it and the region's own `NGSILD_VALUE_PATHS = frozenset(VALUE_PATH_ATTRIBUTE_TYPES)` line close over are restored via context_shim.py, copied verbatim from the same source file (around lines 1693 and 1729) -- neither is part of the extracted region, so `connective_clauses`'s own three graph reads stay untranslated plain rdflib, exactly as the pipeline's context window would show a called-but-not-extracted function.",
+    "fixture.ttl's root node shape reaches five attribute shapes by three distinct routes -- a plain sh:property list, an sh:and collection, a nested sh:or two connectives deep inside that sh:and branch, and an sh:not branch -- proving the worklist traversal itself, not just the leaf `m{ }` reads. Neighbours that must NOT match: an sh:property whose sh:path is an NGSI-LD value path (ngsi-ld:hasValue), one whose path is rdf:type, one with two sh:path values (`len(paths) == 1` fails), and a whole second node shape with no sh:targetClass (never entered at all). A second driver call passes an empty graph for the zero-solution case (verified directly: exactly the 5 expected shapes and no more on the main fixture, see driver run)."
   ],
   "draft_sha": "1b153f74ac8b76e9",
   "provenance": {
@@ -28,5 +41,12 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:attribute_shapes",
+    "diffs": [],
+    "error": null
+  }
 }

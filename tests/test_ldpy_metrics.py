@@ -140,3 +140,22 @@ def test_a_reading_region_has_a_pattern_denominator():
     assert r["ldpy"]["corr_scaffolding_tokens_per_pattern"] is not None
     assert r["python"]["patterns_read"] == 2
     assert r["python"]["triples_added"] == 0
+
+
+def test_a_global_prefix_declaration_is_masked_with_its_modifier():
+    """`global @prefix ex: <IRI> as EX .` is one statement.
+
+    The language map leaves `global` to Python — it IS a Python keyword —
+    so masking only the island left `global pass`, which does not parse, and
+    the region silently lost every metric. The corpus has one function that
+    declares nineteen prefixes this way.
+    """
+    from rdfeval.ldpy_metrics import measure_ldpy_source
+    m = measure_ldpy_source(
+        "def f():\n"
+        "    global @prefix ex: <http://e/> as EX .\n"
+        "    global @base <http://e/> .\n"
+        "    return EX\n")
+    assert "global pass" not in m.masked_source
+    assert m.islands == 2
+    assert m.syntax_nodes > 0

@@ -1,0 +1,12 @@
+# Fourth input graph — the FALSE branch of the third assertion
+# (`not any(ontouml_graph.triples((text_shape_uri, ONTOUML.value, None)))`):
+# view-1_shape is correctly typed ontouml:Text and carries no ontouml:text,
+# but (simulating a decoder bug) carries a leftover ontouml:value triple ->
+# the first two assertions pass, the third fails, demo() reports
+# ("assertion-failed", ...).
+@prefix ex:       <https://example.org#> .
+@prefix ontouml:  <https://w3id.org/ontouml#> .
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:view-1_shape rdf:type ontouml:Text ;
+    ontouml:value "leaked legacy value" .

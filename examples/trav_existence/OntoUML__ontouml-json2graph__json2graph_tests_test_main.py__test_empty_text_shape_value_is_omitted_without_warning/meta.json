@@ -14,11 +14,25 @@
     "namespace_term": 4,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: ONTOUML->ontouml, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: ONTOUML->ontouml, RDF->rdf, RDFS->rdfs, XSD->xsd (RDF/RDFS/XSD/Graph/Literal/Namespace stay imported but unused by this region's own body, mirroring original.py's own unused imports).",
+    "`text_shape_uri = URIRef(BASE_URI + \"view-1_shape\")` -> `f<{BASE_URI}view-1_shape>` (the 'term_constructor: 1' category): no @base is in scope, so this is a plain formatted-IRI concatenation, exactly matching URIRef(str + str) with no percent-encoding on either side.",
+    "the three read assertions, each the stratum's own idiom: `(text_shape_uri, RDF.type, ONTOUML.Text) in ontouml_graph` -> `bool(m{ {text_shape_uri} a ontouml:Text })` (a fully-ground pattern, no variable at all -- confirmed the transpiler accepts this, compiling to a zero-arity match); `not any(ontouml_graph.triples((text_shape_uri, ONTOUML.text, None)))` and the ONTOUML.value sibling -> `not bool(m{ {text_shape_uri} ontouml:text [] })` / `... ontouml:value [] })`, `[]` as the non-distinguished (matched, not projected) object, per how-to/migrate-from-rdflib.md.",
+    "`from ..decode import decode_ontouml_json2graph, write_graph_file` and `from ..modules.text_values import UnsupportedTextValueWarning` are relative imports into the ontouml-json2graph PACKAGE itself: they cannot resolve once this region is extracted to a standalone file (no parent package). context_shim.py stands in for both, plus `write_text_shape_project` (a sibling test helper defined earlier in the same test_main.py, not part of this region's own lines) -- same shim-instead-of-running-the-real-pipeline convention as the trav_existence sibling `test_cli_default_writes_no_metadata_or_sidecar` in this repository: the region is graded on its own three read assertions, not on the whole JSON->RDF decoder. `write_graph_file` (imported but never called by this region) is a NotImplementedError stub; `UnsupportedTextValueWarning` is transcribed verbatim so `warnings.simplefilter(\"error\", ...)` arms a real warning class.",
+    "the shim's decode_ontouml_json2graph reads a `_fixture_name` marker file the driver drops next to the JSON input, and copies the named Turtle fixture into a fresh graph instead of running the real decoder -- same marker-file mechanism as the sibling shim.",
+    "demo() harness (identical both sides, see meta.json), same convention as the sibling: the region is a pytest test that only ever asserts, and the upstream test itself only ever exercises the all-pass path -- without demo() catching AssertionError, the FALSE side of any of the three `bool(m{ })` checks would never be observable by the oracle, since an uncaught assertion would abort the driver outright.",
+    "anti-hollow-green: broke each of the three assertions in turn (wrong rdf:type object; wrong predicate on the second and third checks) -- each break made rdfeval check FAIL on a different call index with a genuine 'ok' vs ('assertion-failed', ...) mismatch, confirming all three islands are independently exercised by the four fixtures rather than passing vacuously. Restored before finalising."
   ],
   "draft_sha": "7f306c7a1486aaf0",
   "provenance": {
@@ -30,5 +44,12 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

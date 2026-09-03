@@ -21,10 +21,11 @@ def add_table_data(self, g: Graph) -> Graph:
     Returns:
         Graph: Input Graph return with triples of table added
     """
+    @graph g
     for table, data in self.tables.items():
         print("table: {}, about_url: {}".format(table, data["about_url"]))
         # g.add((table_group,csvw:table, table))
-        g += g{ {table} a csvw:Table }
+        +{ {table} a csvw:Table }
         if data["about_url"]:
             row_uri = data["about_url"]
         else:
@@ -34,7 +35,7 @@ def add_table_data(self, g: Graph) -> Graph:
             # print(index, row)
             row_node = BNode()
             values_node = URIRef(row_uri.format(GID=index))
-            g += g{
+            +{
                 {table} csvw:row {row_node} .
                 {row_node} a csvw:Row ;
                    csvw:describes {values_node}
@@ -44,7 +45,7 @@ def add_table_data(self, g: Graph) -> Graph:
                 + data["dialect"][csvw:skipRows]
                 + data["dialect"][csvw:headerRowCount]
             )
-            g += g{ {row_node} csvw:url {URIRef("{}/row={}".format(self.csv_url, row_num))} }
+            +{ {row_node} csvw:url {URIRef("{}/row={}".format(self.csv_url, row_num))} }
             for cell_index, cell in enumerate(row):
                 # print(self.columns[cell_index])
                 column_data = columns[cell_index][1]
@@ -58,12 +59,12 @@ def add_table_data(self, g: Graph) -> Graph:
 
                 if format in XSD_NUMERIC:
                     value_node = BNode()
-                    g += g{
+                    +{
                         {value_node} a qudt:QuantityValue ;
                            qudt:value {Literal(cell)}
                     }
                     if unit:
-                        g += g{ {value_node} qudt:unit {unit} }
+                        +{ {value_node} qudt:unit {unit} }
                 elif format == xsd:anyURI:
                     # see if its a list of uris
                     if len(cell.split(" ")) >= 1:
@@ -75,12 +76,12 @@ def add_table_data(self, g: Graph) -> Graph:
                 else:
                     value_node = BNode()
                     body_node = BNode()
-                    g += g{
+                    +{
                         {value_node} a oa:Annotation ;
                            oa:hasBody {body_node} .
                         {body_node} a oa:TextualBody ;
                            oa:format "text/plain" ;
-                           oa:value {Literal(cell, datatype=format)}
+                           oa:value {cell}^^{format}
                     }
 
                 # if isinstance(column,URIRef) and str(self.meta_root)!='file:///src/': #has proper uri
@@ -88,8 +89,8 @@ def add_table_data(self, g: Graph) -> Graph:
 
                 if csvw:aboutUrl in column_data.keys():
                     aboutUrl = column_data[csvw:aboutUrl]
-                    g += g{ {values_node} {URIRef(aboutUrl.format(GID=index))} {value_node} }
+                    +{ {values_node} {URIRef(aboutUrl.format(GID=index))} {value_node} }
                 else:
                     name = column_data[csvw:name]
-                    g += g{ {values_node} {URIRef(name)} {value_node} }
+                    +{ {values_node} {URIRef(name)} {value_node} }
     return g

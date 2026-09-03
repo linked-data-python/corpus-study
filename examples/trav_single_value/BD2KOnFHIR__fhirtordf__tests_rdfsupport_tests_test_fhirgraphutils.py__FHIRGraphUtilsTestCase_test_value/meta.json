@@ -15,10 +15,27 @@
     "serialize_parse": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "The region's OWN trav_single_value site is the two chained calls `period = g.value(s, FHIR.Account.servicePeriod)` and `period_end = g.value(period, FHIR.Period.end)` -> `m{ {s} fhir:Account.servicePeriod ?o }.first()` / `m{ {period} fhir:Period.end ?o }.first()`. FHIR's namespace uses a dotted local-name convention via a custom DottedNamespace/DottedURIRef (fhirtordf.rdfsupport.dottednamespace, in the shim) whose __getattr__ chain does plain string concatenation -- `FHIR.Account.servicePeriod` == URIRef('http://hl7.org/fhir/Account.servicePeriod'). Turtle's PN_LOCAL grammar allows an internal '.' (not at the very end), so the prefixed name `fhir:Account.servicePeriod` resolves to the identical IRI: verified both by transpiling and by rdfeval check passing.",
+    "`value()` (imported from fhirtordf.rdfsupport.fhirgraphutils) is NOT part of this region -- it is a module-level helper defined elsewhere that the region only calls, restored verbatim in the context shim (fhirtordf/rdfsupport/fhirgraphutils.py, trimmed to that one function) and left as plain rdflib code on both sides, unchanged -- same convention as `_term_label` in mapsa__blathers__src_blathers_extract.py___extract_nested_node. Its own internal `g.value(v, FHIR.value)` read is therefore out of scope too.",
+    "Test harness restored (kind=function, unittest.TestCase method, see original.py): a minimal real unittest.TestCase (_Case, driver.py) supplies `.base_dir` (bound by the real class's setUpClass) and the assert* methods; `demo(self)` turns a failed assertion into a comparable ('assertion-failed', msg) / 'ok' value instead of letting run_pair abort on the first raise -- identical convention to examples/trav_one_step/INM-6__alpaca__.../test_provenance_annotation_multiple_returns, the only other unittest.TestCase-method region finalised in this study so far.",
+    "`g.load(...)` -> `g.parse(...)`: Graph.load was a deprecated alias for Graph.parse, REMOVED in rdflib 7.2.1 (this study's pinned version) -- without this rename the region does not execute at all, on either side. Same finding already made independently for examples/sparql_interpolated/SynBioDex__sbol_factory__custom_eval.py__<module>_1; a second occurrence worth confirming in the corpus/403 constats.",
+    "\"account-example.ttl\" -> \"fixture.ttl\": the real on-disk fixture is not part of this region's captured context (kind=function with a hardcoded relative filename, one of the corpus/403 \"restore the binding\" cases, but for a FILENAME rather than a graph/attribute). fixture.ttl (this directory) is the corpus/405 reading oracle's own authored input graph; the string literal is renamed identically on both sides -- no RDF meaning changed, and `self.base_dir` (driver.py) points at this directory on both sides too.",
+    "fixture.ttl is a trimmed, faithful subset of the real tests/data/account-example.ttl the region was extracted against (kept: Resource.id, nodeRole, Account.type as a bnode with no direct fhir:value, Account.servicePeriod/Period.start/Period.end; dropped: identifier, text/narrative, coverage, owner, description, meta, ontology header -- none of it read by this region). Zero-solution branches: fhir:foo (absent) and Account.type's CodeableConcept bnode (present, but no direct fhir:value under it, exercising value()'s own fallback -- not the region's m{ }.first() sites, whose own zero-case is untested since `assertIsNotNone(period)`/`assertIsNotNone(period_end)` require a hit; a fixture without Account.servicePeriod would abort the SAME call via run_pair's single-call-aborts-on-first-raise limitation, already documented for the LA3D addressbook-managers sibling in this stratum). Neighbourhood: <Patient/example> carries its OWN, differently-dated Account.servicePeriod -- deliberately matching the wrong predicate (fhir:Account.type) AND deliberately widening the subject to a wildcard were both verified to make rdfeval check FAIL on this fixture, confirming neither the predicate specificity nor the subject scoping is decorative.",
+    "article_candidate: `g.value(s, FHIR.Account.servicePeriod)` -> `m{ {s} fhir:Account.servicePeriod ?o }.first()` is a clean three-line illustration of two things at once -- the standard (subject, predicate) -> object .first() idiom, AND that a hand-rolled dotted-namespace convention (FHIR's Account.servicePeriod-as-one-local-name) survives the move to a genuine Turtle prefixed name unchanged, because PN_LOCAL already allows internal dots."
+  ],
+  "article_candidate": true,
   "draft_sha": "01841198d4a6c728",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.074317+00:00",
@@ -29,5 +46,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

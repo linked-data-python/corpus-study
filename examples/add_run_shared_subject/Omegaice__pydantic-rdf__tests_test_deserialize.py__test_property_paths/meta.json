@@ -14,12 +14,23 @@
     "term_constructor": 5,
     "triple_add": 11
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "plain literal",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "no @prefix: EX is a function PARAMETER (a pytest fixture), not a Namespace bound to a literal IRI at parse time, so `EX.Organization`, `EX.name`, ... cannot become static prefixed names -- they stay plain Python attribute access, interpolated bare as `{EX.Organization}` etc. Same precedent as the dp-web4 region's `LCT_NS[edge.target_lct]` (a Namespace indexed/accessed by something not known until runtime stays in Python), generalised from indexing to attribute access. RDF.type still becomes `a` (RDF is a real module-level constant, not parameterised) -- the draft's `rdf:`/`xsd:` prefixes were both dropped: rdf: for the same unused-after-`a` reason as the other regions in this batch, xsd: because XSD is imported but never referenced anywhere in this region (pre-existing dead import, left alone in original.py, pruned from translated.ldpy along with the equally-dead RDF import).",
+    "three fusion groups, not one, and not four: (1) the five org-subject add()s (type, name, department x2, project) are genuinely back to back (only comments intervene) -> one `+{ org a EX.Organization ; EX.name \"Test Org\" ; EX.department dept1 ; EX.department dept2 ; EX.project proj1 }`; (2) the per-person loop's two add()s per iteration fuse into one `+{ }` inside the (unchanged) plain `for` loop -- this is not an `add_in_loop`-style `for @bindings`, since the loop iterates a literal Python list via enumerate(), not rows of bindings; (3) the closing four add()s (dept1/employee, dept2/employee, dept1/manager, proj1/leader) do NOT share an adjacent subject -- dept1's two triples are separated by dept2's, and reordering them to fuse would violate the no-refactoring rule -- so this group is written as one `+{ }` with four `.`-terminated triples (plain Turtle, no `;` run), the correct rendering of what is actually four independent add_isolated-shaped writes rather than a genuine add_run_shared_subject instance, despite sitting inside a region sampled under that stratum.",
+    "the region's real complexity is not RDF at all: Organization/Person are pydantic_rdf.BaseRdfModel subclasses whose WithPredicate(...) fields use rdflib property-path operators (EX.department / EX.employee, ... | ...), and the test is @pytest.mark.xfail'd upstream because pydantic_rdf does not support them -- none of that is part of what the add_run_shared_subject stratum samples here (the eleven graph.add() calls upstream of the parse_graph() call).",
+    "pydantic_rdf is not installed in the shared study venv (its own pyproject.toml requires pydantic>=2.11.3, the venv pins 2.5.3) and its vendored source under corpus/repos/ is gitignored scratch data, not something a region should depend on to run -- so context_shim.py stands in for BaseRdfModel/WithPredicate/the two exception classes rather than installing the package or vendoring its ~300-line model.py. The stand-in's parse_graph() ignores its arguments and returns two dummy 2-element lists (exactly what this region's own `assert len(...) == 2` lines need), which is safe for the driver's own oracle: run_pair compares the `graph` ARGUMENT itself (isomorphism) after the call returns, and that comparison is settled by the region's own +{ }/`.add()` lines, entirely before parse_graph is ever reached.",
+    "fixture (driver.py): mirrors the real graph/EX pytest fixtures in tests/conftest.py (EX = Namespace(\"http://example.com/\"), a fresh Graph bound to \"ex\") rather than inventing a different namespace.",
+    "anti-vert-creux: in translated.ldpy, redirected the last triple's object from EX.person2 to EX.person3 (proj1 EX.leader EX.person3 instead of EX.person2); rdfeval check failed with 'graphs not isomorphic (15 vs 15 triples)'; restored, check OK again."
+  ],
+  "article_candidate": false,
   "draft_sha": "c228c6d4207f990d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.285991+00:00",
@@ -30,5 +41,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_property_paths",
+    "diffs": [],
+    "error": null
+  }
 }

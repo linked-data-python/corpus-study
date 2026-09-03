@@ -14,11 +14,19 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: res->res, DC->dc, DCTERMS->dcterms, DOAP->doap, FOAF->foaf, SKOS->skos, OWL->owl, RDF->rdf, RDFS->rdfs, VOID->void, XMLNS->xmlns, XSD->xsd"
+    "Only OWL.sameAs is used inside this 6-line region, so only @prefix owl: is declared -- the draft's blanket 'prefixes: res->res, DC->dc, ...' listed a prefix for every name rdflib.namespace exports at the top of the whole source file, most of them unused here.",
+    "Dropped the draft's `@prefix res: <...>` on purpose: `res` is not used as a res:local term anywhere in this region, only as a plain Python value (res+\"R-\"+str(nytid)), i.e. Namespace string concatenation, not a prefixed name. Declaring `@prefix res:` shadows that Python name (the transpiler's own 'prefixed name = Python name' warning) and breaks the region with 'undefined name res'. Kept `res = Namespace(...)` as plain Python instead, exactly as in the original.",
+    "Context shim (context_shim.py): nyt, relation and rel_data are defined earlier in the same function (create_rdf), outside the extracted lines (193-198), inside a `for i, (rel, info) in enumerate(output.items()):` loop this region does not otherwise need. Restored with a real row copied verbatim from the repository's own AllRelationWithCrossCheck.csv (WikidataIds=P19, 'place of birth'/'place_of_birth', Nrid=4001) plus one neighbouring row whose RE-NYT-Relation is blank in the real file, so rel_data.loc[...] is not trivially the whole table and nyt='place_of_birth' takes the `if str(nyt) != 'nan':` branch that is this region's only RDF-producing path -- an empty-branch fixture would have been a hollow green.",
+    "Sabotage-tested: retargeting the object from {URIRef(res+\"R-\"+str(nytid))} to {URIRef(relation)} (the subject's own value) makes rdfeval check fail (1 vs 1 triples, not isomorphic); restored before finalising."
   ],
   "draft_sha": "e70735eb797c1fa1",
   "provenance": {
@@ -30,5 +38,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

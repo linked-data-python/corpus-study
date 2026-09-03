@@ -1,6 +1,15 @@
 # Extracted from alganet/apysource@f800ec97c1 : tests/test_yaml_input.py
 # region: test_deterministic_uris (lines 192-199, stratum ns_import_project)
 # licence of the source repository: see meta.json
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `_write_yaml`, a module-level test helper the region's own body calls
+# (test_yaml_input.py, defined at line 82), transcribed verbatim -- it
+# only writes `content` to `tmp_path / "sources.yaml"`, unrelated to this
+# stratum's construction. `apysource.namespaces`/`apysource.yaml_input`
+# are left UNMODIFIED (the real project import, not a shim): see meta.json
+# for why this pair stays `excluded` rather than restored.
+from pathlib import Path
 from rdflib.namespace import DCTERMS, RDF, RDFS
 from apysource.namespaces import OA, SCHEMA, SV
 from apysource.yaml_input import load_yaml, _slugify, _make_uri
@@ -18,6 +27,13 @@ sources:
         section: "Article 1"
         snippet: "The Purposes of the United Nations are"
 """
+
+
+def _write_yaml(tmp_path: Path, content: str) -> Path:
+    p = tmp_path / "sources.yaml"
+    p.write_text(content)
+    return p
+
 
 def test_deterministic_uris(tmp_path):
     """Same YAML produces identical URIs on repeated loads."""

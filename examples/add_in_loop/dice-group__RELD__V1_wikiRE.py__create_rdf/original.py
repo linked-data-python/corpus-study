@@ -1,14 +1,18 @@
 # Extracted from dice-group/RELD@7ca93acbb6 : V1/wikiRE.py
 # region: create_rdf (lines 193-198, stratum add_in_loop)
 # licence of the source repository: see meta.json
+# Executability: nyt, relation, rel_data -- defined earlier in the same
+# function, outside this region -- restored via context_shim.py (context
+# shim, see meta.json).
 from rdflib.namespace import DC, DCTERMS, DOAP, FOAF, SKOS, OWL, RDF, RDFS, VOID, XMLNS, XSD
 from rdflib import Graph, URIRef, Literal, Namespace # here is some error
+from context_shim import nyt, relation, rel_data
 g = Graph()
 res = Namespace("https://reld.dice-research.org/resource/")
 
 if str(nyt) != 'nan':
     nytid = rel_data.loc[rel_data['RE-NYT-Relation'] == nyt, 'Nrid'].iloc[0]
     g.add((URIRef(relation), # nyt
-      OWL.sameAs, 
+      OWL.sameAs,
       URIRef(res+"R-"+str(nytid))
      ))

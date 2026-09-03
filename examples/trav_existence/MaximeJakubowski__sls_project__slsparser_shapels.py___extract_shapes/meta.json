@@ -14,11 +14,24 @@
     "graph_write": 1,
     "namespace_term": 42
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SH->sh, RDF->rdf, RDFS->rdfs"
+    "prefixes: SH->sh, RDF->rdf, RDFS->rdfs (RDFS is imported but unused by this region's body, mirroring original.py's own unused import).",
+    "sampled under trav_existence, but nothing in the region's own body is an `(s, p, o) in g` / `any(...)` membership check on its own -- it is FOUR independent one-step reads unioned into a Python set: `graph.objects(predicate=parameter)` and `graph.subjects(predicate=parameter)` over two lists of SH terms (both the trav_one_step idiom, `g.objects`/`g.subjects` -> `m{ }`, with the unused position spelled `[]`, a non-distinguished/matched-but-not-projected node per how-to/migrate-from-rdflib.md), `graph.subjects(RDF.type, SH.NodeShape)`/`PropertyShape` (also trav_one_step, RDF.type -> `a`), and a trav_existence check nested two loops deep: `SH.path not in graph.predicates(shapename)` -> `not m{ {shapename} sh:path [] }` -- this is the one spot in the region that is actually the stratum's own idiom. Translated each with its own most specific construction per INSTRUCTIONS.md §2, not degraded to a uniform stratum-matching shape.",
+    "`Collection(graph, llist)` (reading the sh:or/sh:and/sh:xone RDF list) is left as plain rdflib -- no island form covers RDF collections; not forced.",
+    "`shapes.update(...)`/`shapes.add(...)` are Python `set` operations, not graph writes -- despite meta.categories showing `graph_write: 1` (a static-analysis false positive on `.add(`), this region performs no `graph.add`.",
+    "no context shim needed: every import (`Graph`, `SH`, `RDF`, `RDFS`, `URIRef`, `Literal`, `BNode`, `Node`, `Collection`) resolves from rdflib itself; `graph` is the function's own annotated parameter, one of the regions that already carries its own binding.",
+    "fixture.ttl gives each of the four unioned reads a shape reachable ONLY through it (ex:ShapeByType/ex:ShapeByTypeProp via rdf:type; ex:ShapeBySubjectParam via sh:minCount and no other route; ex:ShapeByObjectParam via being the object of ex:ParentShape's sh:property and no other route; ex:ListMember1 via the sh:or list with no sh:path of its own), plus explicit neighbours that must not be picked up: ex:ListMember2 (a fellow list member that DOES carry sh:path, the exact case the nested `not m{ }` exists to exclude -- sh:path is deliberately absent from subject_parameters so it cannot sneak back in through branch 2 either), sh:severity/sh:Violation/sh:message on ex:ParentShape (untracked predicates whose object/literal must not surface as a shape), and ex:UnrelatedNode (typed, but not sh:NodeShape/PropertyShape).",
+    "anti-hollow-green: broke each of the four reads in turn (object_parameters and subject_parameters predicate swapped to a nonexistent one; rdf:type target swapped; the sh:path exclusion replaced with `if True`) -- each break made rdfeval check FAIL with a genuine set difference isolating exactly the shape(s) that read was responsible for (ShapeByObjectParam; ShapeBySubjectParam; ShapeByType+ShapeByTypeProp; ListMember2 respectively), confirming all four branches are independently exercised rather than passing vacuously. Restored before finalising."
   ],
   "draft_sha": "84da25dd6e5c3299",
   "provenance": {
@@ -30,5 +43,12 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_extract_shapes",
+    "diffs": [],
+    "error": null
+  }
 }

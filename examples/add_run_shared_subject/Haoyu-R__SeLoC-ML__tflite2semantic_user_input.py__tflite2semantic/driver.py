@@ -1,13 +1,15 @@
 """Validation driver for Haoyu-R__SeLoC-ML__tflite2semantic_user_input.py__tflite2semantic.
 
 Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+
+The region is a module-level for-loop, not a function: `g` is a
+module-level Graph both sides build in place, so module-state comparison
+(every rdflib Graph in the module globals) is the region's own oracle --
+isomorphism, matching meta.json's "oracle": "isomorphism". No entry/calls
+needed.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry=None,

@@ -13,10 +13,16 @@
     "graph_ctor": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `query_tpl % \"GROUP_CONCAT\"` splices the SPARQL AGGREGATE FUNCTION NAME into `(%s(DISTINCT ?z_) as ?z)` -- a syntax position, not a term. `s{ }`'s interpolation ({expr}) is legal only in TERM position and lowers to initBindings; there is no island for 'a keyword chosen by string formatting', the same limit already recorded for the sibling region test_agg_undef.py::template_tst in this same stratum.",
+    "the value is fixed (\"GROUP_CONCAT\") at this call site, but `query_tpl` is the same module-level template reused with a different aggregate name (\"SUM\") by the sibling test test_sum_distinct in the real file (not itself extracted as a region) -- so this is genuinely the parametrised idiom, not an incidental one-off string, even though only one instantiation is visible in this region.",
+    "minimal excerpt showing the limit: `query_tpl % \"GROUP_CONCAT\"` where `query_tpl` is `\"SELECT ?x (MIN(?y_) as ?y) (%s(DISTINCT ?z_) as ?z) { VALUES (?x ?y_ ?z_) {...} } GROUP BY ?x ORDER BY ?x\"` -- `s{ }` cannot even parse this text at transpile time, since `%s` is not valid SPARQL.",
+    "no fixture graph: `g = Graph()` is built empty inside the function, and all data comes from the query's own inline VALUES clause -- fixture.ttl is unused (see its header).",
+    "test_group_concat_distinct only asserts (no return, no mutated argument to compare); `return results` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff (same pattern already used for sparql_literal's test_select_star_multiple_sub_select_star and this stratum's template_tst)."
+  ],
   "draft_sha": "a2288142640edf23",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.170203+00:00",

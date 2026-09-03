@@ -1,0 +1,22 @@
+# Input graph for OntoUML__ontouml-json2graph__json2graph_tests_test_main.py__test_empty_text_shape_value_is_omitted_without_warning
+# — the scenario the upstream test actually exercises (an empty legacy
+# Text.value): view-1_shape is typed ontouml:Text and carries neither
+# ontouml:text nor ontouml:value -> all three assertions pass, demo()
+# reports "ok".
+#
+# Neighbourhood that must not match: a DIFFERENT shape (view-2_shape) does
+# carry ontouml:text and ontouml:value, and an unrelated resource has some
+# other rdf:type -- proves the reads are scoped to view-1_shape
+# specifically, not to "any Text shape" or "any rdf:type".
+@prefix ex:       <https://example.org#> .
+@prefix ontouml:  <https://w3id.org/ontouml#> .
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:view-1_shape rdf:type ontouml:Text ;
+    ontouml:isViewOf ex:diagram-1 .
+
+ex:view-2_shape rdf:type ontouml:Text ;
+    ontouml:text "unrelated label"@en ;
+    ontouml:value "unrelated value" .
+
+ex:diagram-1 rdf:type ontouml:Diagram .

@@ -1,6 +1,8 @@
 # Extracted from Informasjonsforvaltning/concepttordf@b06016d2ff : src/concepttordf/concept.py
 # region: Concept._add_subject_to_graph (lines 509-518, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+from __future__ import annotations
+from types import SimpleNamespace
 from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef
 DCT = Namespace("http://purl.org/dc/terms/")
 
@@ -14,3 +16,20 @@ def _add_subject_to_graph(self: Concept) -> None:
                     Literal(self.subject[key], lang=key),
                 )
             )
+
+
+# Demo harness (identical on both sides, see meta.json): `self: Concept` is a
+# bound-method extraction -- Concept is the enclosing class, defined outside
+# the extracted region, and the region only reaches through `self._g`,
+# `self.identifier` and `self.subject` (matching the SimpleNamespace-harness
+# precedent already in this corpus for the sibling region
+# Concept._add_modified_to_bs_graph). `self` stands in as a plain
+# SimpleNamespace exposing exactly those three attributes: Concept could not
+# be instantiated from these 10 lines alone. demo() calls the extracted
+# method and returns the graph it wrote into, not `self` (comparing the stub
+# instance itself would need an __eq__ for no benefit; the graph is the only
+# observable effect).
+def demo(identifier, subject):
+    self = SimpleNamespace(_g=Graph(), identifier=identifier, subject=subject)
+    _add_subject_to_graph(self)
+    return self._g

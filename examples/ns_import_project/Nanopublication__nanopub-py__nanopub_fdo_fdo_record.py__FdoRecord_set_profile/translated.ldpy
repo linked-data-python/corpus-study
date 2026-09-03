@@ -1,15 +1,23 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : nanopub/fdo/fdo_record.py
 # region: FdoRecord.set_profile (lines 137-139, stratum ns_import_project)
 # licence of the source repository: see meta.json
+#
+# `from rdflib.namespace import RDFS, DCTERMS, PROV` cannot become `from …
+# import p:` (ldpy/012 point 21: rdflib.namespace does not export
+# `__namespaces__`, and nothing can add it there). Only DCTERMS is ever
+# dereferenced in this region's body (RDFS, PROV never are, here or in
+# original.py), so a single `@prefix dcterms:` covers every use; RDFS/PROV
+# drop out, same as RDF dropped out of the ns_import_project sibling for
+# this same repository. `from nanopub.namespaces import FDOF, FDOC` DOES
+# take `from … import p:`, through `nanopub_ns_shim` (see its header) --
+# same fix, same repository as that sibling
+# (Nanopublication__nanopub-py__tests_test_fdo_nanopub.py__test_add_fdo_profile).
+# FDOF is kept even though this body never dereferences it, mirroring the
+# whole import line as one unit, same convention as that sibling's FDOF.
 from typing import Optional, Union, List
 from rdflib import Graph, URIRef, Literal
-from rdflib.namespace import RDFS, DCTERMS, PROV
-from nanopub.namespaces import FDOF, FDOC
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+from nanopub_ns_shim import fdof:, fdoc:
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix fdof: <https://w3id.org/fdof/ontology#> .
-@prefix fdoc: <https://w3id.org/fdoc/o/terms/> .
 
 
 def set_profile(self, uri: Union[str, URIRef], use_fdof: bool = False) -> None:

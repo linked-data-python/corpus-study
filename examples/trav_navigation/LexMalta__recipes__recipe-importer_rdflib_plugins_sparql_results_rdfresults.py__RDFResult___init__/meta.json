@@ -16,11 +16,25 @@
     "serialize_parse": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RS->rs, RDF->rdf"
+    "prefixes: RS->rs, RDF->rdf from the draft narrow to rs: alone: the region's only rdf:type read (`graph.value(predicate=RDF.type, object=RS.ResultSet)`) becomes the pattern `?rs a rs:ResultSet`, using the Turtle `a` shorthand rather than the prefixed name -- RDF.type never appears as a bare term anywhere else in this region (contrast the sibling trav_navigation region IndustryFusion::attribute_shapes in this same batch, which keeps `rdf:` because it DOES need `rdf:type` as a bare term for a comparison) -- so `rdf:` would be unused.",
+    "the transpiler's 'declared prefix = Python name' warning fires on this file (`rs:` the prefix vs. `rs` the Python variable the region itself assigns from `graph.value(predicate=RDF.type, object=RS.ResultSet)`) -- a genuine collision, not renamed away since the variable name is the source's own (`rs = graph.value(...)`, unchanged since rdflib's own vendored rdfresults.py). Verified by inspecting the transpiled output directly (`python -c \"from ldpy.transpiler import transpile; ...\"`): every `rs:something` in the file compiles to the fixed IRI, and every bare `{rs}` interpolates the Python variable -- the two never collide in practice here because the file never writes the one genuinely ambiguous shape, `{rs:x}` (a set/dict literal), only `rs:x` as a term and `{rs}` as an interpolation.",
+    "four `.value()` single-value reads translate directly to `m{ }.first()`, the most specific construction for that idiom even though the surrounding stratum is trav_navigation: `graph.value(predicate=RDF.type, object=RS.ResultSet)` (subject wildcard, kept the SAME cardinality -- `.first()`, not `.one()`, since `g.value()` does not raise on multiple matches and 'there better be only one :)' is a comment, not an enforced constraint) -> `m{ ?rs a rs:ResultSet }.first()`; `graph.value(rs, RS.boolean)` -> `m{ {rs} rs:boolean ?boolean }.first()`; the two `graph.value(b, RS.variable)`/`graph.value(b, RS.value)` calls inside the innermost loop likewise.",
+    "three `.objects()` full-iteration reads translate to their own most-specific single-hop `m{ }`, matching trav_one_step: resultVariable listing, `for s in graph.objects(rs, RS.solution)`, `for b in graph.objects(s, RS.binding)`.",
+    "the nested `for s in ...solution: for b in ...binding:` loops do NOT fuse into one `m{ }` join, even though both are full (non-`.value()`) iterations and the fuse would be cardinality-safe on its own (unlike the two 'do not fuse' counter-examples elsewhere in this batch, negation and unbounded recursion): fusing here would still be wrong because the outer loop body is STATEFUL per `s` -- a fresh `sol = {}` dict opened per solution and appended to `self.bindings` once per `s`, AFTER its inner loop finishes. A flat join over `(s, b)` pairs loses that grouping boundary and would need an explicit group-by to reconstruct it: a restructuring the 'no refactoring' rule forbids, not a translation.",
+    "`self` has no methods this region calls (only attribute assignment, plus the genuinely-installed `rdflib.query.Result.__init__`), so no context_shim.py is needed -- a plain stand-in class is enough, defined in driver.py since it exists only to make `self` comparable (see driver.py's docstring for why a custom, order-insensitive `__eq__` is needed there: `self.vars`/`self.bindings` are lists whose order is not part of the region's meaning, but `self` is opaque to run_pair's generic `_unordered()`).",
+    "fixture.ttl's SELECT case carries one ResultSet with three solutions of different shape (two bindings, one binding, and zero bindings -- the zero-solution case for the inner rs:binding join, proving an emptied `sol = {}` is still appended rather than skipped) plus neighbours that must NOT match: a resource typed something else with its own rs:resultVariable, and a binding/solution pair not reachable from ex:rset at all. Two further driver calls exercise the ASK and CONSTRUCT (no rs:ResultSet at all -- the zero-solution case for the region's very first read) branches directly, since fixture.ttl alone cannot hold three mutually exclusive ResultSet shapes at once."
   ],
   "draft_sha": "7ff212f16391b501",
   "provenance": {
@@ -33,5 +47,12 @@
     "trav_navigation",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:__init__",
+    "diffs": [],
+    "error": null
+  }
 }

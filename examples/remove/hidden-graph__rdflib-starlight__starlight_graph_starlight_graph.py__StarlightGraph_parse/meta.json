@@ -11,10 +11,13 @@
   "rdf_ops": 0,
   "categories": {},
   "translation_status": "draft",
-  "classification": null,
+  "classification": "excluded",
   "constructions": [],
   "translation_notes": [
-    "unparsable: invalid syntax (<unknown>, line 8)"
+    "CONFIRMED unparsable: the extraction is a bare `elif format in (...):` chain (5 branches: nt12/nq12, trig12, trix12, rdfxml12, jsonld12) sliced out of the middle of StarlightGraph.parse's own if/elif ladder, with no leading `if` and no enclosing `def`/`self`. `python -m rdfeval check` confirms: `compile(original.py)` raises `SyntaxError: invalid syntax` at line 8 (the first `elif`) before either side can even be imported -- there is nothing to transpile or run.",
+    "not just a syntax fix: restoring valid Python (turning the first `elif` into an `if`, wrapping in `def parse(self, format, text): ...`) would still leave the body calling starlight.parsers.ntriples12/trig12/trix12/rdfxml12/turtle_parser and starlight.model.conformance -- real RDF-1.2 parser modules of the host repository, not stdlib/rdflib, and not reproducible as a context shim without inventing the parsing logic itself (forbidden per INSTRUCTIONS SS 'n'inventez pas de logique'). This is the same exclusion criterion as AGENT_BATCH SS'Quand ca ne passe pas' point 1 (external dependency out of reach), just five independent instances of it stacked in one region.",
+    "the only RDF write in the whole slice is `temp.remove((tt_uri, RDF.type, URIRef(_RDF_TRIPLE_TERM)))` inside the jsonld12 branch (the 'remove' stratum's sample site) -- a fully-bound triple removal that WOULD be a direct `-{ {tt_uri} rdf:type {URIRef(_RDF_TRIPLE_TERM)} }` if it were reachable in isolation, but it depends on `temp` having first been populated by `temp.parse(data=text, format='json-ld')` and by `decode_tt_encoded_triples`/`_native_add_many` from starlight.parsers.turtle_parser two lines later -- so isolating just the remove would not exercise the region's own logic, only a restated island example.",
+    "EXCLUDED rather than not-expressible: the blocker is executability (an unreachable external dependency graph), not a gap in the language -- ldpy is never actually tried against the remove call itself."
   ],
   "draft_sha": "054ebff0b2eab510",
   "provenance": {

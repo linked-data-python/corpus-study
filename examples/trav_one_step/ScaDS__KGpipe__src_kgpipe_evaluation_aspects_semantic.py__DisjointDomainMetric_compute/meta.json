@@ -13,10 +13,14 @@
     "graph_read": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["m{ }", "@graph", "+{ }"],
   "translation_notes": [
-    "prefixes: RDF->rdf, OWL->owl, RDFS->rdfs, XSD->xsd"
+    "prefixes: RDF->rdf, OWL->owl, RDFS->rdfs, XSD->xsd",
+    "the credited trav_one_step site, subjects = set([str(s) for s in graph.subjects()]), translates to subjects = {str(s) for s, p in m{ ?s ?p [] }} per the documented set(g.subjects()) idiom (../ldpy/docs/how-to/migrate-from-rdflib.md): [] is a non-distinguished variable, ?p is an ordinary (projected) variable so the pattern's arity is 2 and the result must be unpacked. Smoke-tested standalone (outside this pair): matches graph.subjects() exactly.",
+    "the for s, p, o in ontology_graph.triples((None, None, None)): graph.add((s, p, o)) loop's SOURCE stays raw rdflib (.triples((None, None, None)) is a full unfiltered traversal, the documented 'what not to rewrite' case -- forcing m{ ?s ?p ?o } here would name three variables the original never had to for the identical rows). Its .add() DESTINATION, however, is translated to @graph graph + +{ {s} {p} {o} } per section 2's explicit rule against keeping .add() where +{ } covers the case.",
+    "graph.query(\"\"\"SELECT DISTINCT ?subject WHERE {...}\"\"\") is left as raw rdflib .query(): it is not the site this region's trav_one_step stratum credits (categories.graph_read counts exactly 1, matching only the .subjects() call), and getting its ResultRow/isinstance handling right under s{ }'s lazy/.execute() semantics is unrelated to what this region is meant to exercise. Left as a candidate for a sparql_literal-strata sample instead of guessing at it here.",
+    "excluded: two independent blockers. (1) from ...common.models import KG, Data, DataFormat and from ..base import ... are package-relative imports that only resolve inside the kgpipe package; restoring them means vendoring a chain of further internal modules (a pydantic-based Data model, kgpipe.common.graph.systemgraph, kgpipe.common.config, ...), not a single self-contained binding, so this is the actual failure rdfeval check reports. (2) even past that, enrich_type_information (IS in the same source file, just outside the extracted window, and would be restorable) and OntologyUtil.load_ontology_from_graph both bottom out in ontology.get_domain_range(...), real behaviour of kgcore.api.ontology.Ontology. kgcore is an external git dependency of this repository (kgcore @ git+https://github.com/Vehnem/kgcore.git in pyproject.toml), not vendored anywhere in the corpus -- reconstructing its domain/range resolution would mean inventing or importing a third repository's logic. Not attempting blocker (1)'s deep vendoring since blocker (2) would stop execution right after regardless."
   ],
   "draft_sha": "cb6562984b875d64",
   "provenance": {

@@ -1,6 +1,7 @@
 # Extracted from RDFLib/rdflib-leveldb@a0f3386c71 : test/test_functionality.py
 # region: testSimpleGraph (lines 68-102, stratum remove)
 # licence of the source repository: see meta.json
+from rdflib import URIRef
 michel = URIRef("urn:michel")
 tarek = URIRef("urn:tarek")
 bob = URIRef("urn:bob")

@@ -12,11 +12,17 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "f{ }"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "no @prefix declared: RDF/XSD are imported by original.py but never dereferenced in this 10-line body (they are read by the sibling operator functions in the same source file, not by Builtin_STRSTARTS) -- keeping the unused Python import for surface parity, per INSTRUCTIONS.md, without inventing an @prefix that would never be used",
+    "the coercion_datatype site is `Literal(a.startswith(b))`: no explicit datatype=, so it relies on rdflib's own default inference for a bare Python bool (xsd:boolean, lexical 'true'/'false') -- `f{a.startswith(b)}` goes through the language's `node()` coercion, which is documented to apply that same default inference, and empirically verified equal on both outcomes (see driver.py)",
+    "context shim (context_shim.py): `_compatibleStrings` (and the `string` helper it calls) live outside the extracted 10 lines, at lines 309-315/1017-1026 of the same source file -- both are themselves plain vendored rdflib code (rdflib.plugins.sparql.operators, copied unmodified into recipe-importer/), reproduced verbatim from LexMalta/recipes@b861b7ccea rather than paraphrased",
+    "expr/ctx: `expr` stands for whatever rdflib's SPARQL evaluator passes at the real call site -- an object exposing `.arg1`/`.arg2` (already-evaluated Literal terms). Only those two attributes are read here, so the driver uses a plain SimpleNamespace rather than constructing a real rdflib.plugins.sparql.parserutils.Expr (which needs a parsed CompValue). `ctx` is never read in this region and is passed as None throughout",
+    "anti-hollow-green (INSTRUCTIONS.md): changed `f{a.startswith(b)}` to `f{not a.startswith(b)}` in translated.ldpy -- rdfeval check correctly failed on all three calls (values differ, true vs false each time); reverted, check green again"
   ],
   "draft_sha": "fe07882591f909e2",
   "provenance": {
@@ -28,5 +34,12 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:Builtin_STRSTARTS",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,18 +1,26 @@
 # Extracted from INCATools/kgcl-rdflib@7af638bbd7 : kgcl_rdflib/diff/owlstar_sublanguage.py
 # region: get_bnodes_2_triple_annotations (lines 303-343, stratum trav_single_value)
 # licence of the source repository: see meta.json
+#
+# `for s, p, o in g.triples((i, None, None))` -> `for p, o in m{ {i} ?p ?o }`
+# (see meta.json): a term interpolated into a pattern's subject position is
+# a FIXED filter, not a projected variable (the language's own non-
+# distinguished-variable rule, the same one that lets `[]` stand for "any
+# object, don't care" a few lines below) -- so the solution is a 2-tuple
+# (p, o), not the 3-tuple g.triples() yields. `s` was always exactly `i`
+# here (the pattern's own fixed subject), so the one place `s` was read in
+# the loop body -- `annotations[i].append((s, p, o))` -- becomes
+# `annotations[i].append((i, p, o))`. No RDF meaning changed.
 from rdflib import BNode
-from rdflib.namespace import OWL, RDF, RDFS
+from rdflib.namespace import RDF, RDFS
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 
 def get_bnodes_2_triple_annotations(g):
     """Get blank nodes to triple annotations."""
-    source = set(g.subjects(predicate=owl:annotatedSource))
-    property = set(g.subjects(predicate=owl:annotatedProperty))
-    target = set(g.subjects(predicate=owl:annotatedTarget))
+    @graph g
+    source = set(m{ ?s owl:annotatedSource [] })
+    property = set(m{ ?s owl:annotatedProperty [] })
+    target = set(m{ ?s owl:annotatedTarget [] })
 
     # get blank nodes that have all three required predicates
     intersection = source & property & target
@@ -28,16 +36,16 @@ def get_bnodes_2_triple_annotations(g):
     for i in intersection:
         annotations[i] = []
         if isinstance(i, BNode):  # this check should be unnecessary
-            # NB these generators are singletons
-            source = next(g.objects(subject=i, predicate=owl:annotatedSource))
-            property = next(g.objects(subject=i, predicate=owl:annotatedProperty))
-            target = next(g.objects(subject=i, predicate=owl:annotatedTarget))
+            # NB these matches are singletons
+            source = m{ {i} owl:annotatedSource ?o }.first()
+            property = m{ {i} owl:annotatedProperty ?o }.first()
+            target = m{ {i} owl:annotatedTarget ?o }.first()
 
             annotations[i].append((i, owl:annotatedSource, source))
             annotations[i].append((i, owl:annotatedProperty, property))
             annotations[i].append((i, owl:annotatedTarget, target))
 
-            for s, p, o in g.triples((i, None, None)):
+            for p, o in m{ {i} ?p ?o }:
                 if (
                     p not in exclude
                     and not isinstance(o, BNode)
@@ -46,6 +54,35 @@ def get_bnodes_2_triple_annotations(g):
                     and not isinstance(property, BNode)
                     and not isinstance(target, BNode)
                 ):
-                    annotations[i].append((s, p, o))
+                    annotations[i].append((i, p, o))
 
     return annotations
+
+
+# Test harness only (see meta.json): rdflib mints a FRESH internal id for
+# every blank node on every parse (verified by hand -- even an explicitly
+# labelled `_:ann1` does not keep that label across two independent
+# parses of the same file), so `annotations`, keyed by BNode for every
+# non-decoy entry, can never compare equal by plain dict equality between
+# the two sides' independently-parsed fixture graphs -- run_pair's
+# normalise() canonicalises a bare BNode VALUE but not a BNode used as a
+# DICT KEY. `demo` repackages the result as a sorted, bnode-identity-free
+# structure before handing it to run_pair, identically on both sides --
+# the same kind of test-harness repackaging as `demo` in
+# examples/trav_one_step/INM-6__alpaca__.../test_provenance_annotation_multiple_returns
+# (there: assertions -> a comparable string; here: a bnode-keyed dict -> a
+# comparable, order-independent list).
+def _term_key(t):
+    return ("bnode",) if isinstance(t, BNode) else ("term", repr(t))
+
+
+def demo(g) -> object:
+    annotations = get_bnodes_2_triple_annotations(g)
+    entries = []
+    for key, triples in annotations.items():
+        key_entry = ("bnode",) if isinstance(key, BNode) else ("named", str(key))
+        triple_entries = sorted(
+            (_term_key(p), _term_key(o)) for (_, p, o) in triples
+        )
+        entries.append((key_entry, triple_entries))
+    return sorted(entries, key=repr)

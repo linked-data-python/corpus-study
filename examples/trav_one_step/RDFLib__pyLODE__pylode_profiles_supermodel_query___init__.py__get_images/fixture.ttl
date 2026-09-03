@@ -1,4 +1,47 @@
 # Input graph for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__get_images — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+#
+# ex:thing-with-images has two sdo:image blank nodes (several solutions of
+# the sdo:image pattern the region reads, and of each per-image
+# sdo:name/.../sh:order single-value read); ex:thing-without-images has none
+# (the zero-solution case for both patterns); ex:neighbour carries a third
+# image that must NOT show up in either call, and thing-with-images also
+# carries an unrelated predicate (sdo:url) that must not be picked up by
+# any of the single-valued reads.
 @prefix ex: <http://example.org/> .
+@prefix sdo: <https://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:thing-with-images
+    sdo:url <https://example.org/thing-with-images> ;
+    sdo:image ex:image-1, ex:image-2 .
+
+ex:image-1
+    a sdo:ImageObject ;
+    sdo:name "Logical diagram" ;
+    sdo:encodingFormat "image/png" ;
+    dcterms:source <https://example.org/source-1> ;
+    sdo:caption "First diagram." ;
+    sdo:contentUrl "https://example.org/img1.png"^^xsd:anyURI ;
+    sh:order 0 .
+
+ex:image-2
+    a sdo:ImageObject ;
+    sdo:name "Physical diagram" ;
+    sdo:encodingFormat "image/jpeg" ;
+    dcterms:source <https://example.org/source-2> ;
+    sdo:caption "Second diagram." ;
+    sdo:contentUrl "https://example.org/img2.jpg"^^xsd:anyURI ;
+    sh:order 1 .
+
+ex:thing-without-images
+    dcterms:title "No images on this one" .
+
+ex:neighbour
+    sdo:image ex:image-3 .
+
+ex:image-3
+    a sdo:ImageObject ;
+    sdo:name "Unrelated neighbour image" ;
+    sh:order 0 .

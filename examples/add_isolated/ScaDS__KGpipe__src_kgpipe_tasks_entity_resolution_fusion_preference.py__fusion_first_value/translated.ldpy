@@ -1,14 +1,25 @@
 # Extracted from ScaDS/KGpipe@67ca171cfd : src/kgpipe_tasks/entity_resolution/fusion/preference.py
 # region: fusion_first_value (lines 180-212, stratum add_isolated)
 # licence of the source repository: see meta.json
+from logging import getLogger
 from rdflib import OWL, Graph, URIRef, RDFS, RDF, SKOS
-from kgpipe.common.config import TARGET_ONTOLOGY_NAMESPACE
+from kgpipe_context import (
+    TARGET_ONTOLOGY_NAMESPACE, TrackRecord,
+    canonicalize_entity_term, canonicalize_property_term,
+    allowed_predicates, is_fusable, build_fixture_graphs,
+)
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 logger = getLogger(__name__)
+
+source_graph, seed_graph = build_fixture_graphs()
+@graph seed_graph
+current_subjects = set([str(s) for s in seed_graph.subjects(unique=True)])
+selected = []
+discarded = []
 
 for s, p, o in source_graph:
     # Canonicalize
@@ -28,7 +39,7 @@ for s, p, o in source_graph:
     if is_fusable(p_can):
         # Add exactly one value if none exists yet
         if not any(seed_graph.objects(s_can, p_can)):
-            seed_graph += g{ {s_can} {p_can} {o_can} }
+            +{ {s_can} {p_can} {o_can} }
             selected.append(
                 TrackRecord(subject=s_can,predicate=p_can,object=o,original_subject=s,original_predicate=p,original_object=o))
             # keep subjects set fresh for subsequent matches
@@ -40,6 +51,6 @@ for s, p, o in source_graph:
     else:
         # Non-fusable: copy if not already present (avoid dupes)
         if (s_can, p_can, o_can) not in seed_graph:
-            seed_graph += g{ {s_can} {p_can} {o_can} }
+            +{ {s_can} {p_can} {o_can} }
             if isinstance(s_can, URIRef):
                 current_subjects.add(str(s_can))

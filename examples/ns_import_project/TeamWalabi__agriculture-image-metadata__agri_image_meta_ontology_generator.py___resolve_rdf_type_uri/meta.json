@@ -12,11 +12,20 @@
   "categories": {
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "IRI",
+    "f<…>"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, XSD->xsd, AGIMAGE->agimage, SH->sh, DCT->dct, FOAF->foaf, SOSA->sosa, EXIF->exif"
+    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, XSD->xsd, AGIMAGE->agimage, SH->sh, DCT->dct, FOAF->foaf, SOSA->sosa, EXIF->exif -- superseded: see below, this region does not end up using any of these",
+    "This region's own `ns_map = {\"sosa\": SOSA, \"foaf\": FOAF, ...}` reads SOSA/FOAF as OBJECTS (put in a dict, later `str()`-ed), not dereferenced as `sosa:Thing`-style prefixed names -- so `from … import p:` (the idiom this ns_import_project stratum otherwise exercises, see the two Nanopublication__nanopub-py siblings) does NOT apply here: 'what travels is the prefix bindings, which have no value to import by ordinary means' (INSTRUCTIONS.md SS1). This is exactly the case the batch's own briefing flagged: ldpy 0.4.0/0.6.4's `@prefix ex: <IRI> as EX .` names the Python `Namespace` object `@prefix` builds, so `@prefix sosa: <http://www.w3.org/ns/sosa/> as SOSA .` / `@prefix foaf: <http://xmlns.com/foaf/0.1/> as FOAF .` supply SOSA/FOAF as objects directly, IRIs typed out rather than imported from the project's own `agri_image_meta.utils.namespaces` module (whose values they nonetheless match verbatim -- fetched from the pinned commit, see agri_image_meta_ns.py). AGIMAGE, SH, DCT, EXIF (imported by the real file, never dereferenced in this region's body) drop out, same convention as unused names elsewhere in this stratum.",
+    "`URIRef(\"http://www.w3.org/ns/dcat#\")` is a constant string with no `@base` in scope (piege 2 of how-to/migrate-from-rdflib.md does not apply), so it becomes the bare IRI term `<http://www.w3.org/ns/dcat#>` -- confirmed by fetching agri_image_meta/utils/namespaces.py at the pinned commit: this project's own (unimported-here) DCAT constant has the identical value, so the hand-typed literal was already correct, not a guess.",
+    "`return URIRef(str(ns) + local)` is the region's second term_constructor site (meta.json's own `categories`): concatenating a namespace object with a local-part variable, unencoded. This is exactly `f<...{expr}...>`'s own documented semantics ('does NOT percent-encode', INSTRUCTIONS.md SS1) -- and since rdflib's `Namespace`/`URIRef` are both `str` subclasses, `f<{ns}{local}>` interpolates to the identical string as `str(ns) + local`. Translated as such rather than left as plain Python, per SS2's 'toujours la construction la plus specifique'.",
+    "Fixture-strength check: substituting FOAF's IRI for SOSA's in the `@prefix … as SOSA` declaration flips `rdfeval check` to FAIL (`call[0].result` returns the foaf-namespaced URIRef instead of the sosa-namespaced one); reverted afterward, OK confirmed again.",
+    "Executability restoration (AGENT_BATCH's 163-regions case, applied here for a different reason -- an unreachable non-PyPI project package, not a missing liaison): `agri_image_meta.utils.namespaces` rewritten to `agri_image_meta_ns`, a shim transcribing all six real Namespace IRIs verbatim from the pinned commit (agri_image_meta is not published to PyPI, so it cannot be installed to run this extracted file standalone)."
   ],
   "draft_sha": "1967e3fe8f1c6cb3",
   "provenance": {
@@ -28,5 +37,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_resolve_rdf_type_uri",
+    "diffs": [],
+    "error": null
+  }
 }

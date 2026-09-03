@@ -1,16 +1,38 @@
 # Extracted from alganet/apysource@f800ec97c1 : tests/test_yaml_input.py
 # region: test_deterministic_uris (lines 192-199, stratum ns_import_project)
 # licence of the source repository: see meta.json
+#
+# EXCLUDED (see meta.json): this translation is believed correct -- it is
+# what the transpiler accepts and what SS2's table prescribes -- but
+# `rdfeval check` cannot confirm it by execution, because `apysource` (a
+# real but non-installable-here PyPI dependency, see meta.json) is needed
+# on BOTH sides regardless of translation quality.
+#
+# `from rdflib.namespace import DCTERMS, RDF, RDFS` cannot take `from …
+# import p:` (ldpy/012 point 21); only RDF is dereferenced in this
+# region's body (RDFS, DCTERMS never are), so `@prefix rdf:` alone covers
+# it. `from apysource.namespaces import OA, SCHEMA, SV` DOES take `from …
+# import p:` -- project-owned module, the idiom this stratum exercises --
+# but is left pointed at the real (unshimmed) `apysource.namespaces`
+# module rather than a hand-written shim, since `apysource.yaml_input`
+# right below it cannot be shimmed at any reasonable scope (see meta.json)
+# and shimming just the namespaces half would not change the verdict. OA
+# and SCHEMA are imported but never dereferenced in this region's body;
+# kept anyway, mirroring the whole import line as one unit, same
+# convention as the two Nanopublication__nanopub-py siblings of this
+# stratum. `g1.subjects(RDF.type, SV.Source)` -- one bound predicate, one
+# bound object, one projected variable -- is exactly `trav_one_step`'s
+# idiom read backwards (`g.objects(s, p)` -> `for o in m{ {s} p ?o }`,
+# here subjects instead of objects), translated per SS2's 'toujours la
+# construction la plus specifique' even though the region's assigned
+# stratum is ns_import_project, same reasoning as (and same precedent set
+# by) the Congruentsys/yurtle-rdflib and Nanopublication/nanopub-py
+# siblings of this stratum.
+from pathlib import Path
 from rdflib.namespace import DCTERMS, RDF, RDFS
-from apysource.namespaces import OA, SCHEMA, SV
+from apysource.namespaces import oa:, schema:, sv:
 from apysource.yaml_input import load_yaml, _slugify, _make_uri
-@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix oa: <http://www.w3.org/ns/oa#> .
-@prefix schema: <https://schema.org/> .
-@prefix sv: <https://alganet.github.io/apysource/vocab.ttl#> .
-
 SIMPLE_YAML = """\
 sources:
   - label: "UN Charter"
@@ -26,11 +48,18 @@ sources:
         snippet: "The Purposes of the United Nations are"
 """
 
+
+def _write_yaml(tmp_path: Path, content: str) -> Path:
+    p = tmp_path / "sources.yaml"
+    p.write_text(content)
+    return p
+
+
 def test_deterministic_uris(tmp_path):
     """Same YAML produces identical URIs on repeated loads."""
     g1 = load_yaml(_write_yaml(tmp_path, SIMPLE_YAML))
     g2 = load_yaml(_write_yaml(tmp_path, SIMPLE_YAML))
 
-    sources1 = sorted(str(s) for s in g1.subjects(rdf:type, sv:Source))
-    sources2 = sorted(str(s) for s in g2.subjects(rdf:type, sv:Source))
+    sources1 = sorted(str(s) for s in m{ ?s rdf:type sv:Source }(g1))
+    sources2 = sorted(str(s) for s in m{ ?s rdf:type sv:Source }(g2))
     assert sources1 == sources2

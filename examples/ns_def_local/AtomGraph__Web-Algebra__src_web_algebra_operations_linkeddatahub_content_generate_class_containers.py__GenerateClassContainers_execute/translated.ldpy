@@ -1,6 +1,21 @@
 # Extracted from AtomGraph/Web-Algebra@128e184aa8 : src/web_algebra/operations/linkeddatahub/content/generate_class_containers.py
 # region: GenerateClassContainers.execute (lines 57-163, stratum ns_def_local)
 # licence of the source repository: see meta.json
+# Draft only (see meta.json): translation_status stays "draft" and
+# classification "excluded" -- the driver cannot execute this region.
+# CreateItem/POST/AddObjectBlock (imported below, unchanged) perform real
+# HTTP requests against a live LinkedDataHub server via LinkedDataClient
+# (src/web_algebra/client.py); the upstream repository's own unit tests
+# confirm this is unreachable outside such a server (tests/unit/test_post.py
+# TestPOSTLive is @pytest.mark.skip(reason="No safe public POST endpoint to
+# test against"); tests/unit/test_ldh_create_item.py similarly skips with
+# reason="Need live LDH for end-to-end happy path"). Shimming those three
+# operations to avoid the network would mean inventing the LinkedDataHub
+# item-creation/view-posting protocol they implement -- forbidden per
+# INSTRUCTIONS.md "n'inventez pas de logique". The ns_def_local construction
+# itself is still translated below (the four `Namespace(...)` calls this
+# region's stratum sample targets) so the study can credit/debit it even
+# though `rdfeval check` cannot be run end-to-end here.
 import logging
 from rdflib import URIRef, Literal, Namespace, Graph
 from rdflib.namespace import RDF, RDFS, XSD, DCTERMS
@@ -40,10 +55,10 @@ def execute(self, ontology: Graph, parent_container: URIRef, endpoint: URIRef, s
             f"GenerateClassContainers operation expects 'endpoint' to be URIRef, got {type(endpoint)}"
         )
     # Define namespaces
-    LDH = Namespace("https://w3id.org/atomgraph/linkeddatahub#")
-    SP = Namespace("http://spinrdf.org/sp#")
-    SPIN = Namespace("http://spinrdf.org/spin#")
-    AC = Namespace("https://w3id.org/atomgraph/client#")
+    @prefix ldh: <https://w3id.org/atomgraph/linkeddatahub#> as LDH .
+    @prefix sp: <http://spinrdf.org/sp#> as SP .
+    @prefix spin: <http://spinrdf.org/spin#> as SPIN .
+    @prefix ac: <https://w3id.org/atomgraph/client#> as AC .
 
     # Query to find all classes in the ontology
     query = """

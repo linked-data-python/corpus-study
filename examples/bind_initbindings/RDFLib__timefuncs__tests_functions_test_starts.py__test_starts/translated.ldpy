@@ -1,8 +1,14 @@
 # Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_starts.py
 # region: test_starts (lines 15-49, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from rdflib import Graph, Namespace
-from rdflib.namespace import TIME
+# (added to make the region executable: the real file imports Path and
+# `starts` at the top -- `from pathlib import Path` and
+# `from timefuncs import starts`, the latter's side effect being to
+# register `tfun:starts`; see context_shim.py and meta.json)
+from pathlib import Path
+
+from rdflib import Graph
+from context_shim import starts
 @prefix tfun: <https://w3id.org/timefuncs/> .
 @prefix starts: <https://w3id.org/timefuncs/testdata/starts/> .
 @prefix time: <http://www.w3.org/2006/time#> .
@@ -12,18 +18,6 @@ tests_dir = Path(__file__).parent
 def test_starts():
     g = Graph().parse(str(tests_dir / "data" / "starts.ttl"))
 
-    q = """
-        SELECT ?a ?b
-        WHERE {
-            VALUES ?a_type { time:Interval time:ProperInterval }
-            VALUES ?b_type { time:Interval time:ProperInterval }
-
-            ?a a ?a_type .
-            ?b a ?b_type .
-
-            FILTER tfun:starts(?a, ?b)
-        }
-        """        
     expected = [
         (str(starts:a01), str(starts:b01)),
         # (str(starts:a02), str(starts:b02)), false
@@ -37,10 +31,29 @@ def test_starts():
 
     actual = sorted([
         (str(r[0]), str(r[1]))
-        for r in g.query(
-            q,
-            initNs={"time": TIME, "tfun": TFUN}
-        )
+        for r in s{
+            SELECT ?a ?b
+            WHERE {
+                VALUES ?a_type { time:Interval time:ProperInterval }
+                VALUES ?b_type { time:Interval time:ProperInterval }
+
+                ?a a ?a_type .
+                ?b a ?b_type .
+
+                FILTER tfun:starts(?a, ?b)
+            }
+        }(g)
     ])
 
     assert actual == expected
+
+
+# Demo harness (identical on both sides, see meta.json): `test_starts`
+# asserts internally and returns nothing, printing nothing and mutating no
+# argument -- entry=/calls= would have nothing to compare on its own (the
+# "nothing observable" guard in rdfeval.harness). `demo` runs it -- an
+# AssertionError on either side already fails the whole check, which is the
+# region's own pass/fail criterion -- and returns a sentinel.
+def demo():
+    test_starts()
+    return "ok"

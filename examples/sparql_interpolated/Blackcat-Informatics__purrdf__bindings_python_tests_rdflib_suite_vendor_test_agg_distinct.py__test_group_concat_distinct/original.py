@@ -25,3 +25,7 @@ def test_group_concat_distinct():
         ["x1", 10, "1"],
         ["x2", 20, "2"],
     ], results
+
+    # `return results` added for the pilot (see meta.json): the original
+    # test only asserts and returns nothing, which run_pair cannot observe.
+    return results

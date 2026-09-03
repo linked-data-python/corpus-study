@@ -1,8 +1,12 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_page_v6_4_0.py
 # region: <module> (lines 90-97, stratum add_in_loop)
 # licence of the source repository: see meta.json
+# Executability: T, HERE, SP, byid and S() -- defined earlier in the same
+# source file, just outside this region -- restored via context_shim.py
+# (context shim, see meta.json).
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from context_shim import T, HERE, SP, byid, S
 SEM = Namespace(T.BASE); IPO = Namespace("http://example.org/rdodi/interactive-page-ontology#")
 g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_3_0.ttl")
 lo15 = SP.LO15

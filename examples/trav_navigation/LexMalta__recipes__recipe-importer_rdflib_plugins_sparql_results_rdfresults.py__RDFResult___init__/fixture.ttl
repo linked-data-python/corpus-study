@@ -1,4 +1,32 @@
-# Input graph for LexMalta__recipes__recipe-importer_rdflib_plugins_sparql_results_rdfresults.py__RDFResult___init__ — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for LexMalta__recipes__recipe-importer_rdflib_plugins_sparql_results_rdfresults.py__RDFResult___init__
 @prefix ex: <http://example.org/> .
+@prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# The single ResultSet resource -- "there better be only one".
+ex:rset a rs:ResultSet ;
+    rs:resultVariable "x", "y" ;
+    rs:solution ex:sol1, ex:sol2, ex:sol3 .
+
+# sol1: two bindings -- several solutions, several bindings each.
+ex:sol1 rs:binding ex:sol1_x, ex:sol1_y .
+ex:sol1_x rs:variable "x" ; rs:value "1" .
+ex:sol1_y rs:variable "y" ; rs:value "2" .
+
+# sol2: a single binding -- proves the binding count isn't hard-coded to two.
+ex:sol2 rs:binding ex:sol2_x .
+ex:sol2_x rs:variable "x" ; rs:value "3" .
+
+# sol3: NO bindings at all -- the zero-solution case for the inner
+# rs:binding join: its dict must come out empty, not be skipped entirely.
+ex:sol3 a ex:EmptySolutionMarker .
+
+# Neighbourhood that must NOT match:
+# a resource typed something else entirely -- must never be picked as `rs`.
+ex:NotAResultSet a ex:SomeOtherType ;
+    rs:resultVariable "z" .
+# a binding-shaped resource not linked from any rs:solution of OUR result
+# set -- must never appear in any sol dict.
+ex:strayBinding rs:variable "stray" ; rs:value "should-not-appear" .
+# a solution-shaped resource not linked from ex:rset via rs:solution.
+ex:strayOrphanSolution rs:binding ex:strayBinding .

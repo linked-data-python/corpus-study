@@ -14,10 +14,19 @@
     "namespace_ctor": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "kb = Namespace(\"https://yurtle.dev/kanban/\") declared inside the test body becomes @prefix kb: <https://yurtle.dev/kanban/> . at the same point in the block; kb.statusChange (attribute access used only to build a term for graph.triples()) becomes the bare term kb:statusChange -- no `as EX` needed, since the Namespace object itself never escapes this one term-position use (contrast with the AtomGraph sibling in this batch, where LDH/SP/SPIN/AC are passed as objects to other functions).",
+    "yurtle_rdflib is not installed in the pinned study venv (not on PyPI there); context_shim.py transcribes verbatim the subset of Congruentsys/yurtle-rdflib@8bbb378f5a src/yurtle_rdflib/core.py this region's fixture actually exercises (YAML frontmatter, one ```turtle and one ```yurtle fenced block, no ```yurtle-table block) -- see the shim's own header for exactly what was left out and why.",
+    "the region is a pytest test method (`self`, and `sample_doc_with_fenced_blocks` injected by a conftest.py fixture); the driver calls it directly with self=None and the fixture text (fixture.md, transcribed verbatim from conftest.py) rather than going through pytest.",
+    "the original test only asserts and returns None (a hollow green per AGENT_BATCH.md); both files gained an identical `return len(status_changes)` harness line, the same count the assertion already checks.",
+    "confirmed via deliberate breakage: renaming kb:statusChange to kb:wrongPredicate in translated.ldpy alone turns `rdfeval check` red (AssertionError, count 0 instead of >=1), then green again once reverted -- fixture.md's ```turtle distractor block (ylayer:Feature/rdfs:label) is what makes a wrong predicate actually miss rather than accidentally match."
+  ],
   "draft_sha": "b212c0171c5fdefa",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.654547+00:00",
@@ -28,5 +37,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_fenced_yurtle_block_parsed",
+    "diffs": [],
+    "error": null
+  }
 }

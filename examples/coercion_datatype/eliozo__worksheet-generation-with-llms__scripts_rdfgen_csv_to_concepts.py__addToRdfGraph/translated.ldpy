@@ -4,21 +4,18 @@
 import rdflib
 eliozo_ns = "http://www.dudajevagatve.lv/eliozo#"
 RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+@prefix eliozo: <http://www.dudajevagatve.lv/eliozo#> .
 
 def addToRdfGraph(g, conceptID, termLV, descLV, termEN=None):
-    rdf_type_property = rdflib.URIRef(RDF_NS + 'type')
-    topic_node = rdflib.URIRef(eliozo_ns + "TRM-" + conceptID)
-    g += g{ {topic_node} {rdf_type_property} {rdflib.URIRef(eliozo_ns + "Concept")} }
+    @graph g
+    topic_node = eliozo:{"TRM-" + conceptID}
+    +{ {topic_node} a eliozo:Concept }
     if not termEN:
         termEN = conceptID.replace("-", " ")
-    termEN_property = rdflib.URIRef(eliozo_ns + 'termEN')
-    termLV_property = rdflib.URIRef(eliozo_ns + 'termLV')
-    descLV_property = rdflib.URIRef(eliozo_ns + 'descLV')
-    conceptID_property = rdflib.URIRef(eliozo_ns + 'conceptID')
-    g += g{
-        {topic_node} {termEN_property} {rdflib.term.Literal(termEN, lang=u'en')} ;
-           {termLV_property} {rdflib.term.Literal(termLV, lang=u'lv')} ;
-           {conceptID_property} {rdflib.term.Literal(conceptID, lang=u'en')}
+    +{
+        {topic_node} eliozo:termEN {termEN}@en ;
+                     eliozo:termLV {termLV}@lv ;
+                     eliozo:conceptID {conceptID}@en
     }
     if descLV and descLV != "" and descLV != "NA":
-        g += g{ {topic_node} {descLV_property} {rdflib.term.Literal(descLV, lang=u'lv')} }
+        +{ {topic_node} eliozo:descLV {descLV}@lv }

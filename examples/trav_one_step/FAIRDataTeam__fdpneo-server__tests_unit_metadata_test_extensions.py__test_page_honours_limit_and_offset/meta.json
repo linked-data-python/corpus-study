@@ -16,9 +16,13 @@
     "term_constructor": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": ["m{ }", "f<…>", "call suffix (g)"],
+  "translation_notes": [
+    "The trav_one_step site (g.objects(URIRef(BASE_URL), URIRef(DCAT_CATALOG))) translates cleanly to m{ f<{BASE_URL}> f<{DCAT_CATALOG}> ?o }(g) -- BASE_URL/DCAT_CATALOG are plain Python str constants holding already-absolute IRIs, so f<...> (no percent-encoding) is the right form, not e<...>. transpiles OK on its own.",
+    "excluded: the graph this test reads is not supplied to the region at all -- it is the Turtle body of an HTTP response from a FastAPI app the test itself builds (_repo_with_catalogs/_build_app/_FakePDP/_two_level_cache), none of which are in the extracted context (they live earlier in the same test file, tests/unit/metadata/test_extensions.py:56-174 in the source repo) and none of which this study's venv can execute: fastapi is not installed, and even if it were, _build_app wires in the production fdpneo_server.metadata/.policy/.identity/.shared modules that implement the very pagination the read exercises. Restoring that is reimplementing production application code, not restoring a binding -- out of scope for a context shim, so none is provided.",
+    "driver.py calls the (0-argument) entry directly (no fixture=-driven single-arg wiring, which does not fit this signature) so that `rdfeval check` surfaces the real blocker: original.py already fails at `from fastapi.testclient import TestClient` (ModuleNotFoundError), before the read is ever reached."
+  ],
   "draft_sha": "8395057147a35b5f",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.309878+00:00",

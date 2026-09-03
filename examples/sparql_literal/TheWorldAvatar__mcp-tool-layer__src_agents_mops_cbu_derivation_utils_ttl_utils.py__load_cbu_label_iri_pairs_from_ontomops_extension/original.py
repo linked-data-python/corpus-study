@@ -4,6 +4,7 @@
 import os
 from rdflib import Graph, Namespace
 from rdflib.namespace import RDF, RDFS
+from ttl_utils_shim import load_graph_from_file  # context shim, see meta.json
 
 def load_cbu_label_iri_pairs_from_ontomops_extension(hash_value: str) -> list[tuple[str, str]]:
     """Return list of (label, iri) for all ontomops:ChemicalBuildingUnit individuals."""

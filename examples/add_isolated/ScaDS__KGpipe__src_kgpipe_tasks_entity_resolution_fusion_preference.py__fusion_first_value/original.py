@@ -1,9 +1,19 @@
 # Extracted from ScaDS/KGpipe@67ca171cfd : src/kgpipe_tasks/entity_resolution/fusion/preference.py
 # region: fusion_first_value (lines 180-212, stratum add_isolated)
 # licence of the source repository: see meta.json
+from logging import getLogger
 from rdflib import OWL, Graph, URIRef, RDFS, RDF, SKOS
-from kgpipe.common.config import TARGET_ONTOLOGY_NAMESPACE
+from kgpipe_context import (
+    TARGET_ONTOLOGY_NAMESPACE, TrackRecord,
+    canonicalize_entity_term, canonicalize_property_term,
+    allowed_predicates, is_fusable, build_fixture_graphs,
+)
 logger = getLogger(__name__)
+
+source_graph, seed_graph = build_fixture_graphs()
+current_subjects = set([str(s) for s in seed_graph.subjects(unique=True)])
+selected = []
+discarded = []
 
 for s, p, o in source_graph:
     # Canonicalize

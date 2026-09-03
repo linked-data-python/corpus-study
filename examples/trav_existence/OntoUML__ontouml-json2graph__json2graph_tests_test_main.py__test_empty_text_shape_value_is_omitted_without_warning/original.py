@@ -4,8 +4,9 @@
 import warnings
 from pathlib import Path
 from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
-from ..decode import decode_ontouml_json2graph, write_graph_file
-from ..modules.text_values import UnsupportedTextValueWarning
+from context_shim import decode_ontouml_json2graph, write_graph_file  # context shim -- see meta.json
+from context_shim import UnsupportedTextValueWarning  # context shim -- see meta.json
+from context_shim import write_text_shape_project  # context shim -- see meta.json
 BASE_URI = "https://example.org#"
 ONTOUML = Namespace("https://w3id.org/ontouml#")
 
@@ -21,3 +22,18 @@ def test_empty_text_shape_value_is_omitted_without_warning(tmp_path: Path) -> No
     assert (text_shape_uri, RDF.type, ONTOUML.Text) in ontouml_graph
     assert not any(ontouml_graph.triples((text_shape_uri, ONTOUML.text, None)))
     assert not any(ontouml_graph.triples((text_shape_uri, ONTOUML.value, None)))
+
+
+# Demo harness (identical on both sides, see meta.json): the region is a
+# pytest test that only ever asserts. The upstream test only ever exercises
+# the scenario where all three assertions pass (an empty legacy value); to
+# also exercise their FALSE side -- so a broken translation has something
+# to be caught by (see corpus/405, the anti-hollow-green discipline) --
+# `demo` calls the region and turns a failed assertion into a comparable
+# value instead of letting it propagate and abort the driver.
+def demo(tmp_path: Path) -> object:
+    try:
+        test_empty_text_shape_value_is_omitted_without_warning(tmp_path)
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

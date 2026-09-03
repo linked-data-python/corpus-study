@@ -12,12 +12,28 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: S223->s223"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    ".execute()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "`?from` is bound by `initBindings={\"from\": S223[term]}` and never PROJECTED (SELECT ?path only) -- the strate's 'not projected' case, so the target is a term interpolated directly at `?from`'s one occurrence.",
+    "First attempt tried `s223:{term}` (a prefixed name with a COMPUTED local part, per section 1's `ex:{expr}` form, which is what `S223[term]`'s no-encoding concatenation matches most literally) -- the transpiler rejects this inside `s{ }` with a SPARQL parse error ('Expected SelectQuery, found ...'): real SPARQL syntax has no notion of a prefixed name with a variable local part, so there is nothing for the query-text validation oracle to substitute there. `ex:{expr}` only works in ldpy's own grammar (m{ }/+{ }/-{ }/g{ }), not inside s{ }, which delegates entirely to rdflib's parser. Confirmed as a genuine gap, not a mistake: minimal extract is `s{ SELECT ?x WHERE { s223:{term} a ?x } }`.",
+    "Fix: `@prefix s223: <...> as S223 .` revives the Namespace object (section 1: 'as EX binds that object to a Python name too'), and the query uses a BARE interpolation `{S223[term]}` in ?from's term position instead -- literally the same Python expression the original passed to initBindings, now written where the term appears rather than smuggled in through a kwarg. This is the same 'not projected -> bare interpolation' move as the TheWorldAvatar and Terramorpha precedents in this stratum, just with a Namespace lookup instead of a bare URIRef/Node value.",
+    "PREFIX owl:/rdfs:/s223:/rdf: (embedded literally inside the query-text string in the original) move to @prefix declarations at file scope, inherited into s{ }'s prologue, same mechanical move as other regions in this stratum. `sh:` is NOT among the original's inline PREFIX lines -- it resolves at runtime through rdflib's default `initNs=dict(self.namespaces())` (Graph.query, confirmed by reading rdflib's own source: `initNs = initNs or dict(self.namespaces())`), since a fresh rdflib Graph binds `sh` among its ~20 default namespaces. Restored explicitly as `@prefix sh: <http://www.w3.org/ns/shacl#> .`, confirming the 'prologue heritee des @prefix' half of the strate's correspondence line applies to an rdflib DEFAULT binding just as much as to an explicit initNs= dict or an inline PREFIX line.",
+    "`.bindings` (a list of raw {Variable: term} dicts, as opposed to iterating ResultRow tuples) is an attribute of rdflib's OWN `Result` class, not of ldpy's `PreparedQuery` (which has its own, differently-typed `.bindings` slot -- the query's initBindings input, not its output rows). `s{ ... }(ontology).execute()` is required before `.bindings` to get the real rdflib Result; skipping `.execute()` would silently read the wrong attribute.",
+    "Context restoration: the given original.py was missing `from rdflib import Graph, Namespace` entirely (Graph/Namespace used, never imported) and `FastMCP` (from `mcp.server.fastmcp`, a package not installed in the pinned study venv -- verified: `ModuleNotFoundError: No module named 'mcp'`). `Graph`/`Namespace` restored verbatim from the real file's own top-of-file imports. `FastMCP` comes from context_shim.py: a minimal stand-in whose `.tool()` returns the decorated function unchanged, checked against the real `mcp` package (downloaded mcp 2.1.1 to inspect `mcp/server/mcpserver/server.py`: `FastMCP.tool`'s decorator body is `self.add_tool(fn, ...); return fn`) -- no invented logic, a verified pass-through.",
+    "NETWORK CAVEAT for reviewers and for `rdfeval validate`: `ontology = Graph().parse(\"https://open223.info/223p.ttl\")` is a MODULE-LEVEL live fetch of a real third-party ontology, present unconditionally in the region's own context (not something a fixture could substitute without changing what the function does -- it is not a graph passed as an argument or bound via self/attribute, the two shim-eligible cases AGENT_BATCH.md describes). `rdfeval check` is genuinely green here (network reachable while translating; verified non-hollow by deliberately weakening `rdfs:subClassOf*` to `rdfs:subClassOf`, which changed the ?path results and made check FAIL as expected, then reverted) -- but this is the same category design record corpus/403 (revision 2026-08-29) names as '7 regions ... non evaluables en isolation (service reseau, base, paquet du depot d'origine)': a machine without network, or a future change to the live ontology, would make this driver flaky in a way no local fixture-based region can be. Left as `final` per AGENT_BATCH's literal gate (translation is directly-expressible, check is green, not a hollow one) rather than downgraded to `excluded` on my own initiative -- but flagged here explicitly so a human reviewer or a later offline `validate` run is not surprised if this specific driver behaves differently without network access.",
+    "`driver.py`'s two calls were chosen by querying the real live ontology while translating: `\"Zone\"` (5 property paths through the `rdfs:subClassOf*` walk) and `\"NoSuchClass223Term\"` (zero paths, the empty-result case)."
+  ],
+  "article_candidate": true,
   "draft_sha": "9c769e552836fbab",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.276275+00:00",
@@ -28,5 +44,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_possible_properties",
+    "diffs": [],
+    "error": null
+  }
 }

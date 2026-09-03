@@ -1,0 +1,15 @@
+# Second input graph — the FALSE branch of the first assertion
+# (`(text_shape_uri, RDF.type, ONTOUML.Text) in ontouml_graph`):
+# view-1_shape exists but is never typed ontouml:Text -> the first
+# assertion fails and demo() reports ("assertion-failed", ...).
+@prefix ex:       <https://example.org#> .
+@prefix ontouml:  <https://w3id.org/ontouml#> .
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:view-1_shape ontouml:isViewOf ex:diagram-1 .
+
+ex:view-2_shape rdf:type ontouml:Text ;
+    ontouml:text "unrelated label"@en ;
+    ontouml:value "unrelated value" .
+
+ex:diagram-1 rdf:type ontouml:Diagram .

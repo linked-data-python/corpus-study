@@ -1,4 +1,43 @@
-# Input graph for MaximeJakubowski__sls_project__slsparser_shapels.py___extract_shapes — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for MaximeJakubowski__sls_project__slsparser_shapels.py___extract_shapes
+# — written during translation. `_extract_shapes` unions FOUR independent
+# reads (object_parameters, subject_parameters, rdf:type NodeShape/
+# PropertyShape, and shacl-list members of sh:or/sh:and/sh:xone without
+# their own sh:path); this fixture gives each branch a shape reachable
+# ONLY through it, plus explicit neighbours that must not be picked up, so
+# a translation that drops or widens any one read is caught.
+@prefix ex:  <http://example.org/> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# --- branch 3 (rdf:type sh:NodeShape / sh:PropertyShape) ---
+ex:ShapeByType a sh:NodeShape .
+ex:ShapeByTypeProp a sh:PropertyShape .
+
+# --- branch 2 (subject of a "subject parameter": constraint component or
+# target). sh:minCount is a subject_parameter but NOT an object_parameter,
+# and ex:ShapeBySubjectParam carries no type and is never the object of an
+# object_parameter -- reached ONLY via branch 2.
+ex:ShapeBySubjectParam sh:minCount 1 .
+
+# --- branch 1 (object of an "object parameter"): ex:ShapeByObjectParam
+# carries no type of its own and no subject_parameter -- reached ONLY as
+# the object of sh:property below.
+ex:ParentShape a sh:NodeShape ;
+    sh:property ex:ShapeByObjectParam ;
+    # neighbour: sh:severity/sh:message are not tracked at all, so neither
+    # the predicate nor sh:Violation as an object must produce a shape.
+    sh:severity sh:Violation ;
+    sh:message "unrelated literal, not a shape"@en .
+
+# --- branch 4 (shacl-list members of sh:or/sh:and/sh:xone without sh:path)
+# ex:ListMember1 carries no other triple at all -- reached ONLY via branch 4.
+# ex:ListMember2 DOES have sh:path, so it must be EXCLUDED by branch 4's own
+# `not ... sh:path ...` check (sh:path is not itself a subject_parameter,
+# so it cannot sneak back in through branch 2 either) -- the neighbour that
+# must not match.
+ex:ParentShape2 a sh:NodeShape ;
+    sh:or ( ex:ListMember1 ex:ListMember2 ) .
+ex:ListMember2 sh:path ex:someProperty .
+
+# --- neighbourhood unrelated to any branch ---
+ex:UnrelatedNode a ex:SomeOtherClass .

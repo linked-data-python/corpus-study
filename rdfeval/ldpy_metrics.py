@@ -473,6 +473,7 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
     m.islands = len(spans)
     # replace from the end to keep offsets valid
     for start, end, kind in sorted(offsets, reverse=True):
+        start = _widen_over_modifier(masked, start, kind)
         masked = masked[:start] + _placeholder(kind) + masked[end:]
     m.masked_source = masked
 
@@ -514,6 +515,25 @@ _PARTIAL = {
     "island:for-bindings": "for __I__ in",
     "island:for-bindings-close": ":",
 }
+
+
+#: `global` and `nonlocal` widen the scope of a declaration island, and the
+#: language map leaves them to Python — they ARE Python keywords, and that is
+#: what the highlighters colour them as.  For masking, though, the modifier
+#: and its island are one statement: replacing only the island leaves
+#: `global pass`, which does not parse, and the whole region loses its
+#: metrics.  That silently hit the one function in the corpus that declares
+#: nineteen prefixes at once.
+_MODIFIER_RE = re.compile(r"(?:global|nonlocal)[ \t]+$")
+
+
+def _widen_over_modifier(text: str, start: int, kind: str) -> int:
+    """Where the mask of a statement island really begins."""
+    if _placeholder(kind) != "pass":
+        return start
+    line_start = text.rfind("\n", 0, start) + 1
+    m = _MODIFIER_RE.search(text, line_start, start)
+    return m.start() if m else start
 
 
 def _placeholder(kind: str) -> str:

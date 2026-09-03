@@ -16,10 +16,15 @@
     "term_constructor": 7
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, DCTERMS->dcterms"
+    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, DCTERMS->dcterms (module-level, from the rdflib.namespace import already in scope) and, this stratum's own sample site, the four local `Namespace(...)` calls inside `execute`: LDH/SP/SPIN/AC become `@prefix ldh: <...> as LDH .` / `@prefix sp: <...> as SP .` / `@prefix spin: <...> as SPIN .` / `@prefix ac: <...> as AC .`, at the same point in the block the originals occupied. `as NAME` (ldpy 0.6.4) is required here, not optional: unlike the sibling test_report_metadata (prov/dcterms/sh used only in term position), LDH/SP/SPIN/AC are passed as OBJECTS to `self._build_query_graph(...)`/`self._build_view_graph(...)` (both outside this region, methods of the same class) which call `g.bind(\"sp\", SP)` etc. -- the plain island (`@prefix ldh: <...> .` alone) only binds the lexical prefix, not a Python value, so the call site would break without `as EX`. Verified independently: `python -m ldpy -t` on the isolated construct (see scratchpad probe) round-trips `_ldpy_.Namespace(...)` objects identical in API to `rdflib.Namespace`.",
+    "EXCLUDED, not just draft: `rdfeval check` cannot even import original.py (`ModuleNotFoundError: No module named 'web_algebra'`), and reaching further would not help -- `python -m ldpy translated.ldpy` (transpile-only) succeeds cleanly (confirmed), but the region's own body calls CreateItem/POST/AddObjectBlock, which perform real HTTP requests to a live LinkedDataHub instance via `LinkedDataClient` (src/web_algebra/client.py: TLS context, `urllib` opener, `Web-Algebra/1.0` user agent). This is not a guess: the upstream repository's OWN unit tests cannot exercise these operations either -- tests/unit/test_post.py's `TestPOSTLive.test_returns_result` is `@pytest.mark.skip(reason=\"No safe public POST endpoint to test against\")`, and tests/unit/test_ldh_create_item.py skips its happy-path test with reason=\"Need live LDH for end-to-end happy path\". Shimming CreateItem/POST/AddObjectBlock to dodge the network would mean inventing the LinkedDataHub item-creation/query-posting/view-posting protocol they implement -- exactly what INSTRUCTIONS.md \"n'inventez pas de logique\" forbids (these are not incidental missing bindings like a namespace constant; they are the region's own subject of study, same reasoning as the Haigutus__triplets sibling elsewhere in this stratum keeping `violations_to_report_graph` unshimmed, except there the real function WAS runnable locally and here it structurally cannot be).",
+    "matches AGENT_BATCH.md SS\"Quand ca ne passe pas\" point 1 verbatim: translation is judged correct (transpiles, and the construction choice is the most specific one available -- see above) but the driver cannot execute it (external network dependency) -> translation_status stays draft, classification excluded, reason recorded here. driver.py/fixture.ttl were left as the stratum's generic oracle:values scaffold (unfilled) rather than hand-tuned toward a check that cannot pass regardless of fixture content."
   ],
   "draft_sha": "56e699d63e94cb72",
   "provenance": {

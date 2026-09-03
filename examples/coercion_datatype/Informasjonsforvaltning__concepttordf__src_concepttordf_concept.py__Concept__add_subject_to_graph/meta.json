@@ -14,11 +14,22 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DCT->dct, RDF->rdf, RDFS->rdfs"
+    "prefixes: DCT->dct, RDF->rdf, RDFS->rdfs (rdf/rdfs unused in this region's body, kept because original.py imports them, same call as the sibling region Concept._add_modified_to_bs_graph already in this corpus)",
+    "self._g is a plain instance attribute (Graph(), set in Concept.__init__, not a property) reached only through `self`, which the extracted region never assigns to a local @graph-able name; translated with the call-suffix form `+{ ... }(self._g)`, matching the sibling region's own choice (current-graph.md's attribute-receiver example) rather than `@graph self._g`",
+    "`from __future__ import annotations` added to both sides (matching the sibling region and 7 other regions already in this corpus): the extracted function's own `self: Concept` annotation would otherwise raise NameError at module load -- Concept is the enclosing class, defined outside the extracted lines, and is never otherwise referenced by the region",
+    "demo(identifier, subject) harness appended identically to both sides (same SimpleNamespace pattern as the sibling region Concept._add_modified_to_bs_graph): `self` is a SimpleNamespace stand-in exposing only the attributes the region reads (`_g`, `.identifier`, `.subject`) -- Concept could not be instantiated from these 10 lines alone. demo() returns self._g, not self, so the driver compares the resulting graph (isomorphism) rather than needing an __eq__ on the stub",
+    "language-tag finding: `\"...\"@lang` requires a LITERAL tag written in source -- the transpiler refuses a computed one (`@{key}` -> \"'}' attendu pour fermer l'ilot de graphe\", confirmed empirically on a standalone probe). Here `key` (the dict's language code, e.g. 'en'/'nb') is itself a runtime value, so the dedicated literal-suffix notation does not reach this site; the natural fallback is to keep building `Literal(self.subject[key], lang=key)` in plain Python and let `{expr}` in term position pass the already-built term through unchanged (node()'s documented pass-through for rdflib terms) -- not awkward, just a boundary of the @lang notation worth recording: a dict keyed by language code (SKOS/DCAT-style multilingual data) is exactly the shape where it doesn't apply",
+    "anti-hollow-green (INSTRUCTIONS.md): changed dct:subject to dct:description in translated.ldpy -- rdfeval check correctly failed (call[0].result: graphs not isomorphic, 2 vs 2 triples); reverted, check green again"
   ],
   "draft_sha": "715151455d92db6e",
   "provenance": {
@@ -30,5 +41,12 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

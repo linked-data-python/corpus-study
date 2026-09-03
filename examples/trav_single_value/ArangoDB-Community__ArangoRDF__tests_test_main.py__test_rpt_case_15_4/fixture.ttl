@@ -1,0 +1,41 @@
+# Input graph for
+# ArangoDB-Community__ArangoRDF__tests_test_main.py__test_rpt_case_15_4.
+#
+# get_mary_likes_matt_05(rdf_graph, certainty, certainty_val_05) reads the
+# trav_single_value site: `rdf_graph.value(predicate=certainty,
+# object=certainty_val_05)` -> `m{ ?s {certainty} {certainty_val_05} }.first()`,
+# a lookup by (predicate, object) that finds the SUBJECT.
+#
+# Modelled after the real ex:certainty / RDF-reification shape the region
+# was extracted from (tests/data/rdf/cases/15_4.trig in the source repo,
+# simplified to a plain graph -- the region reads no named graph, so the
+# trig file's ex:Graph1/ex:Graph2 split is not part of what this construct
+# is about):
+#
+#   * SEVERAL solutions -- three different reified statements, each
+#     carrying its OWN ex:certainty value (0.5, 0.75, 1): the driver's
+#     three calls each pick out one by its exact object value.
+#   * ZERO solutions -- the driver also calls with a certainty value
+#     (0.42) that appears nowhere in the graph: g.value() and m{ }.first()
+#     must both answer None.
+#   * NEIGHBOURHOOD that must not match -- ex:weight carries the SAME
+#     literal value (0.5) as one of the certainty triples, on an unrelated
+#     subject: proves the read is keyed on the exact predicate, not merely
+#     the object value. ex:certainty 0.9 (different object) on yet another
+#     subject proves the converse: keyed on the exact object, not merely
+#     the predicate.
+@prefix ex:  <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:mary_likes_matt_05  a ex:Statement ;
+    ex:certainty "0.5"^^xsd:decimal .
+
+ex:mary_likes_matt_075 a ex:Statement ;
+    ex:certainty "0.75"^^xsd:decimal .
+
+ex:mary_likes_matt_1   a ex:Statement ;
+    ex:certainty 1 .
+
+ex:other_statement ex:weight "0.5"^^xsd:decimal .
+
+ex:another_statement ex:certainty "0.9"^^xsd:decimal .

@@ -13,10 +13,16 @@
     "graph_ctor": 1,
     "sparql": 3
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE, structurally the same 'prepareQuery on a runtime value' case the TDCC-NES/askwol `_prepare` region elsewhere in this stratum found: `prepareQuery(cls.sparql, initNs=cls.initNs)` compiles `cls.sparql`, a class attribute set by WHICHEVER subclass of SPARQLQueryFramer calls this -- not a literal at this call site -- and the ELSE branch, `tmp_graph.query(cls.query)`, runs an already-prepared, opaque Query OBJECT that carries no text at all by the time this method sees it. `s{ }` is parsed and validated against rdflib at TRANSPILE time (querying.md: 'a SPARQL query or update, parsed when the file is transpiled rather than at run time'), so it needs its query text written literally where it stands; there is no island for either 'compile this string I was just handed' or 'run this already-compiled query object'. Minimal extract showing the gap is the whole region: both of its two branches, not just one.",
+    "Consequence: translated.ldpy is byte-identical to original.py -- `constructions` is empty on purpose, not an oversight (same convention as the TDCC-NES precedent).",
+    "Context restoration (see AGENT_BATCH.md's shim protocol -- one of the 163/1196 regions with no visible binding once extracted): `print_vars` is a classmethod reading `cls.query`/`cls.sparql`/`cls.initNs`, three attributes declared on `SPARQLQueryFramer` OUTSIDE the captured lines. Restored directly in original.py/translated.ldpy (not a separate shim module, since the missing context is the SAME method's own enclosing class, not a third-party dependency) as a minimal class carrying exactly those three attributes, with their real default values from the source at this commit (initNs = {}, sparql = '', query = None) -- src/ipyradiant/query/framer.py, checked against the local checkout at corpus/repos/jupyrdf__ipyradiant, same commit.",
+    "`print_vars` prints rather than returning a value, and is a classmethod reading class state rather than a function taking arguments to vary -- entry=/calls= directly on it would exercise only the class's untouched default (empty sparql, no query), and a `calls` callable cannot reach into `original.py`'s and `translated.ldpy`'s own, separately-executed `SPARQLQueryFramer` class objects (rdfeval.harness runs each module in its own namespace) to configure them from driver.py. `demo()`, appended identically to both files, sidesteps this by building two subclasses INSIDE the module under test -- one exercising each branch of print_vars -- and calling `.print_vars()` on each; run_pair's per-call stdout capture (fixture-free: no fixture.ttl, the region never reads real graph data -- `tmp_graph = Graph()` is always empty, the 'read' here is introspecting a compiled query's `.vars`, not matching a pattern) is what actually gets compared. Broken-translation check: adding a projected variable to one subclass's SPARQL text changes the printed `Vars:` line and makes `rdfeval check` fail as expected -- the pilot is not a hollow green.",
+    "meta.oracle was 'values' from the pipeline; kept, though the actual comparison basis here is stdout (module-level 'nothing observable' guard would otherwise trip, per rdfeval.harness) rather than a fixture.ttl-driven return value -- same class of oracle mismatch as the Terramorpha precedent in this stratum (a region tagged for one oracle that, once actually read, needs the reading discipline applied differently)."
+  ],
   "draft_sha": "670a9736a9fa7081",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.424846+00:00",

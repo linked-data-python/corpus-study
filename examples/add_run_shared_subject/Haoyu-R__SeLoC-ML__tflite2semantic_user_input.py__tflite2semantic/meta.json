@@ -14,12 +14,26 @@
     "term_constructor": 2,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: ssn_extend->ssnextend, sosa_extend->sosaextend, RDF->rdf, RDFS->rdfs, SDO->sdo"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "prefixes: ssn_extend->ssnextend, sosa_extend->sosaextend, SDO->sdo. RDF and RDFS RETIRED from the draft: RDF.type -> `a` (Turtle shorthand) leaves rdf: unused, and RDFS is imported by the source file but never referenced in this six-line region -- an unused @prefix would falsify the island count, same reasoning as the CatholicOS region in this stratum.",
+    "sensorOfNN = URIRef(\"...sensor\" + \"_\" + \"{}\".format(i + 1) + \"_\" + idOfNN) is a formatted IRI (literal text with two computed holes), so it becomes `f<.../sensor_{i + 1}_{idOfNN}>` -- f<...> joins holes verbatim with no percent-encoding, matching the original's plain concatenation (idOfNN is a uuid4 string, no characters that would need escaping either way).",
+    "the four `.add()` calls share the subject sensorOfNN and sit back to back inside the loop body (no intervening computation), so they fuse into one `+{ s p1 o1 ; p2 o2 ; p3 o3 ; p4 o4 }` per iteration, under a single `@graph g` declared once before the loop (g is never reassigned).",
+    "addHardware(value) returns a URIRef looked up from a plain Python dict keyed by an int code -- not a Namespace attribute with a constant local part -- so it stays a Python call, interpolated bare as `{addHardware(value)}`, not a prefixed name.",
+    "Literal(sensor_info_) kept as an explicit Python call (interpolated as `{Literal(sensor_info_)}`) rather than bare `{sensor_info_}`, for the same reason as the dp-web4 region in this stratum: no ambiguity about the coercion policy producing the same plain literal.",
+    "missing bindings: this is a module-level for-loop extracted from inside `tflite2semantic`, so sensor_list_, sensor_info_ (the function's own parameters), idOfNN and inputOfNN (computed earlier in the same function body) and addHardware (a nested function defined just above the loop) are not in the extracted context. Restored via context_shim.py: addHardware and the input-URI construction copied verbatim from the pinned commit; idOfNN/sensor_info_/sensor_list_ are illustrative call-site values of the right shape (two of addHardware's recognised sensor codes, so the loop runs twice with two different RDF.type values).",
+    "anti-vert-creux: pointed ssnextend:provideInput at sensorOfNN instead of inputOfNN in translated.ldpy; rdfeval check failed with 'graphs not isomorphic (8 vs 8 triples)' (same triple count, different content); restored, check OK again."
+  ],
+  "article_candidate": true,
   "draft_sha": "151cb55d561cc771",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.524210+00:00",
@@ -30,5 +44,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

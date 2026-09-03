@@ -1,0 +1,42 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sbol: <http://sbols.org/v3#> .
+@prefix ex:   <http://example.org/> .
+
+# Directly-declared domain: matches class_uri = ex:ClassA with zero hops of
+# the property path.
+ex:comprisesDirect a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain ex:ClassA .
+
+# Domain declared as a union listing ex:ClassA as one of its members:
+# exercises the (owl:unionOf/rdf:rest*/rdf:first)* hop of the first query.
+ex:comprisesUnion a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain ex:UnionOfOtherAndA .
+
+ex:UnionOfOtherAndA owl:unionOf ( ex:ClassOther ex:ClassA ) .
+
+# Reached only through an owl:Restriction on ex:ClassA -- the SECOND query
+# (rdfs:subClassOf / owl:onProperty), not the domain path at all.
+ex:comprisesRestricted a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises .
+
+ex:ClassA rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ex:comprisesRestricted
+] .
+
+# Neighbourhood that must NOT match: right domain, wrong property type
+# (owl:DatatypeProperty, not owl:ObjectProperty).
+ex:hasNote a owl:DatatypeProperty ;
+    rdfs:domain ex:ClassA .
+
+# Neighbourhood that must NOT match: an ObjectProperty with the right
+# domain, but not a sub-property of sbol:directlyComprises.
+ex:associatesWith a owl:ObjectProperty ;
+    rdfs:domain ex:ClassA .
+
+# Isolated class, connected to nothing above: the zero-solution call.
+ex:ClassZ a owl:Class .

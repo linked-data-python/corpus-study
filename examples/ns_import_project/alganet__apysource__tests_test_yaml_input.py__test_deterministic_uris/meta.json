@@ -13,10 +13,18 @@
     "namespace_term": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "m{ }"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, OA->oa, SCHEMA->schema, SV->sv"
+    "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, OA->oa, SCHEMA->schema, SV->sv",
+    "EXCLUDED, not a translation limit: `apysource` is a real, clean PyPI dependency (0.10.0; pip dry-run confirms only rdflib>=7.0/requests/pyyaml/beautifulsoup4, all satisfiable in ~/.venvs/ldpy) but `pip install apysource` was denied by the auto-mode permission classifier this session. The region's own body (`RDF.type`/`SV.Source`, `from apysource.namespaces import OA, SCHEMA, SV`) is directly-expressible -- see translated.ldpy -- but `load_yaml` (called by the region, not part of it) pulls in `apysource.schema` (126 lines, unconditionally importing `apysource.formats`, 921 lines, which needs BeautifulSoup -- not installed either) and `apysource.patterns` (267 lines, importing six `apysource.repos.*` fetcher classes) at module import time, regardless of which of their functions the region actually calls. Hand-transcribing ~1400 lines unrelated to ns_import_project to work around a sandbox restriction is exactly the risk AGENT_BATCH's shim rule warns against (\"n'inventez pas de logique\"); a partial shim (e.g. skipping `apysource.formats`' HTML/Markdown machinery) would still not avoid the blocker, since `apysource.schema` imports it unconditionally.",
+    "`_write_yaml` (test_yaml_input.py line 82, a module-level helper the region's own body calls) IS restored verbatim in both original.py and translated.ldpy -- that part is the ordinary AGENT_BATCH '163 regions' case (a tiny, dependency-free file-write helper) and is unrelated to the apysource blocker.",
+    "Confirmed directly (`rdfeval check`): `_exec_python` on original.py fails at its own top-level `from apysource.namespaces import OA, SCHEMA, SV`, before `test_deterministic_uris` is even defined, with `ModuleNotFoundError: No module named 'apysource'` -- the same failure translated.ldpy's `from apysource.namespaces import oa:, schema:, sv:` would hit, so this is the dependency, not a difference between the two representations.",
+    "translated.ldpy nonetheless applies the stratum's specific constructions for documentation: `from rdflib.namespace import DCTERMS, RDF, RDFS` cannot take `from … import p:` (ldpy/012 point 21; only RDF is dereferenced here, so `@prefix rdf:` alone suffices), `from apysource.namespaces import OA, SCHEMA, SV` DOES (project-owned module -- left pointed at the real, unshimmed module rather than invented, since shimming only the namespaces half would not change the verdict), and `g1.subjects(RDF.type, SV.Source)` becomes `m{ ?s rdf:type sv:Source }(g1)` per SS2's 'toujours la construction la plus specifique' (same reasoning as the ns_import_project siblings for Congruentsys/yurtle-rdflib and Nanopublication/nanopub-py)."
   ],
   "draft_sha": "b24bfc9b492f3401",
   "provenance": {

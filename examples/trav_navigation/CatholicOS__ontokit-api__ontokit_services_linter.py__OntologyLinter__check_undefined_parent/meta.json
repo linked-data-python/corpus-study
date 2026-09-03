@@ -13,11 +13,23 @@
     "graph_read": 3,
     "namespace_term": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd from the draft are narrowed to owl/rdfs only: the region's own body never writes RDF.* as a prefixed name (rdf:type is written with the Turtle `a` shorthand instead) or SKOS.*/XSD.* at all -- an unused @prefix is noise.",
+    "the two nested loops -- `for class_uri in graph.subjects(RDF.type, OWL.Class): ... for parent_uri in graph.objects(class_uri, RDFS.subClassOf):` -- fuse into ONE `m{ ?class_uri a owl:Class ; rdfs:subClassOf ?parent_uri }`, projecting both variables as a tuple. This is the positive case the correspondence table calls for: a genuine AND-join on the shared subject, with no negation gating it (contrast the sibling region `_check_orphan_class` in this same batch/repo, whose `if not parents and not children` is a conjunction of two NEGATED existence checks and does NOT fuse -- `m{ }` has no FILTER/NOT EXISTS). Fusing here does not change cardinality: the original already produces the cross-product of (class_uri, parent_uri) pairs via the nested loop, which is exactly what the join computes.",
+    "the leading `defined_classes = {str(c) for c in graph.subjects(RDF.type, OWL.Class) ...}` comprehension is a SEPARATE query from the nested loop below (it builds a lookup set, not part of the join) and stays its own single-pattern `m{ ?c a owl:Class }`, matching trav_one_step rather than being folded into the navigation join.",
+    "`isinstance(class_uri, URIRef)` and `isinstance(parent_uri, URIRef)` cannot move into the pattern -- `m{ }` has no term-kind filter -- and stay exactly where Python would run them, now applied to a solution from `m{ }` instead of from `graph.subjects()`/`graph.objects()`.",
+    "`self._get_label`/`self._get_local_name` are plain method calls, untouched by the translation; `self` is a shared, stateless context_shim.OntologyLinter instance reused for every call on both sides (see driver.py), matching the same pattern used for the sibling `_check_orphan_class` region in this batch.",
+    "`_check_undefined_parent` is `async def` with no `await` in its own body (declared async only for consistency with its sibling `_check_*` methods, which the real `OntologyLinter.lint()` awaits); `run_check_undefined_parent`, added identically to both files and excluded from surface metrics like a context shim, drives the coroutine synchronously since the harness calls its entry point with no event loop.",
+    "fixture.ttl carries two undefined-parent violations (one with an rdfs:label, exercising `_get_label`'s non-None branch; one without, exercising the None branch) plus neighbours that must NOT match: a parent that is owl:Thing (implicitly defined), a parent that IS defined in the graph, a class with no rdfs:subClassOf at all, a subject not typed owl:Class, a blank-node class, a blank-node parent, and a literal parent. A second driver call passes an empty graph for the zero-solution case (verified directly: exactly the 2 expected violations and no more on the main fixture, see driver run)."
   ],
   "draft_sha": "582745c542e95d3d",
   "provenance": {
@@ -29,5 +41,12 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:run_check_undefined_parent",
+    "diffs": [],
+    "error": null
+  }
 }

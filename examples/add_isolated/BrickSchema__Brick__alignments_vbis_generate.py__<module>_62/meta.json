@@ -15,12 +15,23 @@
     "term_constructor": 9,
     "triple_add": 15
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: BRICK->brick, SH->sh, VBIS->vbis, RDF->rdf, RDFS->rdfs, XSD->xsd, OWL->owl"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
   ],
+  "translation_notes": [
+    "prefixes: BRICK->brick, SH->sh, VBIS->vbis, RDF->rdf, RDFS->rdfs, XSD->xsd, OWL->owl",
+    "15 .add() call sites on the single module-level `graph`: one @graph graph right after `graph = Graph()` designates it for the rest of the module, and every .add() becomes +{ }. Adjacent, unconditional, same-subject triples were merged with `;` (add_run_shared_subject shape) at each of the four spots where that happens (NodeShape+targetClass; PropertyShape+path[+pattern]); triples that switch subject, or that sit behind a further if/else, stay separate +{ } statements exactly where the original had a separate .add() -- no restructuring.",
+    "rdflib.collection.Collection(graph, listNode, items) builds an rdf:Collection (rdf:first/rdf:rest chain) via repeated low-level graph mutation; there is no island for it in the language (only single triple patterns), so it is left as plain Python, unchanged, same as the already-approved BrickSchema__Brick__generate_brick.py__define_relationships pair in this same stratum.",
+    "Context shim vbis_context.py restores get_brick_class, get_vbis_tags and rewrite_vbis_pattern verbatim from the source file's lines 21-57 (above the extracted region, which starts at line 62). vbis-brick-v5.csv is a hand-written fixture (the real file has thousands of rows) covering: one pattern, two patterns (SH:or branch), two full tags (SH:in branch), one full tag (SH:hasValue branch), a duplicate class (must be skipped), a blank Brick Class (must be skipped), and a class with zero VBIS tags (must be skipped) -- see driver.py.",
+    "Verified the fixture is not a hollow green: corrupting `brick:{bc}` to `brick:Wrong{bc}` in translated.ldpy flips the check to FAIL (35 vs 35 triples, not isomorphic)."
+  ],
+  "article_candidate": true,
   "draft_sha": "afa8481c378882da",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.742069+00:00",
@@ -32,5 +43,11 @@
     "add_isolated",
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

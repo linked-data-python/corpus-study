@@ -5,6 +5,7 @@ import csv
 from rdflib import Graph, Namespace, Literal, BNode
 from rdflib import RDF, RDFS, XSD, OWL
 from rdflib.collection import Collection
+from vbis_context import get_brick_class, get_vbis_tags, rewrite_vbis_pattern
 graph = Graph()
 BRICK = Namespace("https://brickschema.org/schema/Brick#")
 SH = Namespace("http://www.w3.org/ns/shacl#")

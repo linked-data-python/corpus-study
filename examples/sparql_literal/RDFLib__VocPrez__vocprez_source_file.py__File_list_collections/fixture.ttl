@@ -1,0 +1,19 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:   <http://example.org/> .
+
+ex:Concept1 a skos:Concept ;
+    rdfs:label "Alpha" .
+
+ex:Concept2 a skos:Concept ;
+    rdfs:label "Beta" .
+
+# Neighbourhood that must NOT match: a skos:Concept with no rdfs:label at
+# all (only a skos:prefLabel) -- the join with the second pattern drops it.
+ex:Concept3 a skos:Concept ;
+    skos:prefLabel "Gamma" .
+
+# Neighbourhood that must NOT match: has an rdfs:label, but is not a
+# skos:Concept.
+ex:NotAConcept a skos:Collection ;
+    rdfs:label "Delta" .

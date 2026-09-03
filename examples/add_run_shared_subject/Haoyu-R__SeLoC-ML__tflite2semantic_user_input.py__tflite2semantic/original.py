@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, URIRef, Namespace
 from rdflib.namespace import RDF, RDFS, SDO
+from context_shim import addHardware, idOfNN, inputOfNN, sensor_info_, sensor_list_  # context shim -- see meta.json
 ssn_extend = Namespace("https://w3id.org/tinyml-schema/neural-network-schema/ssn_extend/")
 sosa_extend = Namespace("https://w3id.org/tinyml-schema/neural-network-schema/sosa_extend/")
 g = Graph()

@@ -13,11 +13,22 @@
     "graph_write": 1,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, SH->sh"
+    "prefixes: RDF->rdf, SH->sh (RDF/rdf: is imported/declared but unused by this region's own body, mirroring the unused import already present in original.py).",
+    "sampled under trav_existence, but the region's own body has no `(s, p, o) in g` / `any(...)` shape at all: it is an rdf:List read (`Collection(g, path)`, left as plain rdflib -- no island covers RDF collections) followed by two `g.value(steps[i], SH.inversePath)` calls, which is the trav_single_value idiom (`g.value` -> `m{ }.first()`), not trav_existence. Translated with the most specific construction per INSTRUCTIONS.md §2 rather than degrading to a stratum-matching form: `g.value(steps[0], SH.inversePath) != NGSILD.hasObject` -> `m{ {steps[0]} sh:inversePath ?v }.first() != NGSILD.hasObject`, same for steps[1]. The trav_existence check this region exists to feed is one hop up, in the caller (`unsupported_shapes`, not part of this region): `if inverse is None: problems.append(...)`.",
+    "lib/utils.py context shim: NGSILD and UnsupportedShape transcribed verbatim from semantic-model/shacl2flink/lib/utils.py at the same commit; get_full_path_of_shacl_property (imported but never called by this region's body) left as a NotImplementedError stub -- same convention as the sibling shim in ns_import_project/IndustryFusion__DigitalTwin__semantic-model_opcua_lib_entity.py__Entity___init__.",
+    "driver.py builds `(g, path)` directly as call arguments (meta.oracle is isomorphism, not values, and the region is a function -- AGENT_BATCH.md's 'fournissez les arguments d'appel'), same pattern as the bind_initbindings/IndustryFusion...__translate precedent in this repository. Five cases cover: the canonical two-hop shape (returns the predicate), a first hop not walking back through ngsi-ld:hasObject, a one-step list (wrong length), a second hop with no sh:inversePath at all (plus an unrelated neighbouring triple on that node), and a second hop whose sh:inversePath is itself a blank node (the nested-expression case the function's own docstring names).",
+    "anti-hollow-green: broke `sh:inversePath` (second occurrence) to `sh:path` in translated.ldpy -- check FAILed on call[0] (URIRef vs None), confirming the fixture exercises the read rather than passing vacuously; restored before finalising."
   ],
   "draft_sha": "55dbeacfba30cd5b",
   "provenance": {
@@ -29,5 +40,12 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:inverse_relationship_predicate",
+    "diffs": [],
+    "error": null
+  }
 }

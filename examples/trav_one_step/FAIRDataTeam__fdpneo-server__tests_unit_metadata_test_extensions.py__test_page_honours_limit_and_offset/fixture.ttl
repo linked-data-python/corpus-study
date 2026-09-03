@@ -1,4 +1,5 @@
-# Input graph for FAIRDataTeam__fdpneo-server__tests_unit_metadata_test_extensions.py__test_page_honours_limit_and_offset — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Not used: see meta.json / driver.py. This region does not read an
+# externally-supplied graph -- it parses the Turtle body of an HTTP response
+# returned by a FastAPI app the test builds itself, so there is nothing for
+# a driver-supplied fixture.ttl to feed. classification: excluded.
 @prefix ex: <http://example.org/> .

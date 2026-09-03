@@ -1,4 +1,39 @@
-# Input graph for CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_undefined_parent — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_undefined_parent
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Several solutions: two classes each referencing an undefined parent.
+ex:ClassA a owl:Class ;
+    rdfs:subClassOf ex:UndefinedB ;
+    rdfs:label "Class A" .
+ex:ClassC a owl:Class ;
+    rdfs:subClassOf ex:UndefinedD .
+
+# owl:Thing is always implicitly defined -- must NOT flag this parent.
+ex:ClassE a owl:Class ;
+    rdfs:subClassOf owl:Thing .
+
+# A class whose parent IS defined in the graph -- must NOT flag.
+ex:ClassF a owl:Class ;
+    rdfs:subClassOf ex:ClassG .
+ex:ClassG a owl:Class .
+
+# A class with no rdfs:subClassOf at all -- contributes to defined_classes,
+# never enters the join, never an issue.
+ex:ClassH a owl:Class .
+
+# Neighbourhood that must NOT match:
+# typed something else entirely -- never even a candidate class (the join's
+# own "a owl:Class" pattern excludes it, before any Python guard runs).
+ex:NotAClass a ex:SomeOtherType ;
+    rdfs:subClassOf ex:UndefinedZ .
+# a blank-node "class": excluded by isinstance(class_uri, URIRef).
+_:bc a owl:Class ;
+    rdfs:subClassOf ex:UndefinedZ .
+# a parent that is itself a blank node: excluded by isinstance(parent_uri, URIRef).
+ex:ClassI a owl:Class ;
+    rdfs:subClassOf _:bp .
+# a parent that is a literal (malformed data): excluded the same way.
+ex:ClassJ a owl:Class ;
+    rdfs:subClassOf "not-a-class" .

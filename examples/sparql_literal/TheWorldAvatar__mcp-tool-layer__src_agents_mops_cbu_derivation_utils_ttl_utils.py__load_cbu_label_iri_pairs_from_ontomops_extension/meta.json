@@ -13,11 +13,22 @@
     "namespace_ctor": 1,
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "Main (try) path: `q = \"\"\"...\"\"\"`; `g.query(q, initNs={\"ontomops\": ONTOMOPS, \"rdfs\": RDFS})` became `s{ ... }(g)` directly in the for-loop -- a fully literal query once the two namespaces are declared as prefixes, no interpolation. `initNs=` disappears entirely: s{ }'s prologue is built from the @prefix declarations in scope, so nothing is passed at the call any more.",
+    "`ONTOMOPS = Namespace(\"https://www.theworldavatar.com/kg/ontomops/\")` is the ns_def_local idiom (a Namespace constructed inside the function), even though this region is filed under sparql_literal -- translated as `@prefix ontomops: <...> as ONTOMOPS .` in the block, not just `@prefix ontomops: <...> .`, because the OBJECT is still needed two lines later for `g.bind(\"ontomops\", ONTOMOPS)` and, in the except-fallback, `ONTOMOPS.ChemicalBuildingUnit` -- declarations.md's own motivating case for `as NAME` (\"some code genuinely needs the Namespace object: to bind() it on a graph\").",
+    "RDF/RDFS are rdflib's own namespaces (imported, not project-constructed), so `@prefix rdf:`/`@prefix rdfs:` at MODULE scope (no `as`, no object ever needed) is the more specific translation -- matching the mechanical draft's own choice, kept unchanged: `RDF.type` -> `rdf:type`, `RDFS.label` -> `rdfs:label` are exact constant-for-constant substitutions (same absolute IRI), true by construction, not something that needs runtime proof.",
+    "except-fallback branch (`g.subjects(RDF.type, ONTOMOPS.ChemicalBuildingUnit)` / nested `g.objects(s, RDFS.label)`) is a defensive path that only runs if the SPARQL query above raises -- under a well-formed graph it never does, and this driver cannot exercise it without patching rdflib.Graph.query globally (which would also break s{ }'s own engine, since s{ }'s docs describe it as running on 'rdflib's own'). Deliberately left as plain rdflib calls with only the constant substitution above (rdf:type/rdfs:label, provably identical, not a restructuring) rather than collapsing the nested loops into a joined m{ ?s a ontomops:ChemicalBuildingUnit ; rdfs:label ?label } (the trav_navigation idiom, which WOULD be the more specific construction) -- doing that would be presenting an unverified rewrite as checked. Flagged here rather than silently done: a genuine `m{ }` opportunity exists in this branch, just not one this fixture can prove.",
+    "163-regions case, two bindings restored, both verified against the pinned commit and kept minimal (no invented logic): `load_graph_from_file` is a SIBLING function in the SAME source file, stripped by line-range extraction like every other function in that module -- restored verbatim in ttl_utils_shim.py. `models.locations.DATA_DIR` is a real project constant, but the real models/locations.py (repository root) also loads .env via python-dotenv and raises FileNotFoundError at IMPORT time unless several real directories exist on disk -- irrelevant to what THIS region reads (only DATA_DIR's value matters, as in the MepaToEDM/BASE precedent elsewhere in this corpus); reproduced as a bare, fixed path next to the shim instead.",
+    "Because `from models.locations import DATA_DIR` is a LOCAL import inside the function (read at CALL time, not module load time) and the region reads its graph from a FILE PATH rather than receiving one as an argument, the usual `fixture=\"fixture.ttl\"` pattern does not by itself put data where the region looks: fixture.ttl is duplicated verbatim at data/sample-hash/ontomops_extension.ttl, the exact path DATA_DIR/hash_value/ontomops_extension.ttl resolves to for the driver's `sample-hash` call (see that file's header and driver.py) -- fixture.ttl itself stays the reviewable copy at the conventional name.",
+    "anti-hollow-green check performed by hand: weakening the query's class to `ontomops:MetalOrganicPolyhedron` (the neighbour's own type) made the check FAIL as expected -- the two real (label, iri) pairs were replaced by the one neighbour that must NOT match, and the dedup behaviour (cbu1's 'Benzene ring' survives, cbu2's duplicate is dropped) was visible in the passing run's own diff output before reverting."
   ],
   "draft_sha": "c4e71f8063880c3a",
   "provenance": {
@@ -29,5 +40,12 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": false,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:load_cbu_label_iri_pairs_from_ontomops_extension",
+    "diffs": [],
+    "error": null
+  }
 }

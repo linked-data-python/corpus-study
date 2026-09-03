@@ -13,37 +13,35 @@ othergraphuri = <urn:othergraph>
 def testSimpleGraph(getgraph):
     graph = getgraph
     g = graph.get_context(graphuri)
-    g += g{
+    @graph g
+    +{
         {tarek} {likes} {pizza} .
         {bob} {likes} {pizza} ;
            {likes} {cheese}
     }
 
     g2 = graph.get_context(othergraphuri)
-    g2 += g{ {michel} {likes} {pizza} }
+    +{ {michel} {likes} {pizza} }(g2)
 
     assert len(g) == 3  # "graph contains 3 triples")
     assert len(g2) == 1  # "other graph contains 1 triple")
 
-    r = g.query("SELECT * WHERE { ?s <urn:likes> <urn:pizza> . }")
+    r = s{ SELECT * WHERE { ?s <urn:likes> <urn:pizza> . } }
     assert len(list(r)) == 2  # "two people like pizza")
 
-    r = g.triples((None, likes, pizza))
+    r = m{ ?s {likes} {pizza} }
     assert len(list(r)) == 2  # "two people like pizza")
 
     # Test initBindings
-    r = g.query(
-        "SELECT * WHERE { ?s <urn:likes> <urn:pizza> . }",
-        initBindings={"s": tarek},
-    )
+    r = s{ SELECT * WHERE { ?s <urn:likes> <urn:pizza> . } }(bindings={"s": tarek})
     assert len(list(r)) == 1  # "i was asking only about tarek")
 
-    r = g.triples((tarek, likes, pizza))
+    r = m{ {tarek} {likes} {pizza} }
     assert len(list(r)) == 1  # "i was asking only about tarek")
 
-    r = g.triples((tarek, likes, cheese))
+    r = m{ {tarek} {likes} {cheese} }
     assert len(list(r)) == 0  # "tarek doesn't like cheese")
 
-    g2 += g{ {tarek} {likes} {pizza} }
-    g.remove((tarek, likes, pizza))
-    r = g.query("SELECT * WHERE { ?s <urn:likes> <urn:pizza> . }")
+    +{ {tarek} {likes} {pizza} }(g2)
+    -{ {tarek} {likes} {pizza} }
+    r = s{ SELECT * WHERE { ?s <urn:likes> <urn:pizza> . } }

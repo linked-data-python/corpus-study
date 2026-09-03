@@ -1,8 +1,15 @@
 # Extracted from RDFLib/timefuncs@dd3bde8727 : tests/functions/test_starts.py
 # region: test_starts (lines 15-49, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+# (added to make the region executable: the real file imports Path and
+# `starts` at the top -- `from pathlib import Path` and
+# `from timefuncs import starts`, the latter's side effect being to
+# register `tfun:starts`; see context_shim.py and meta.json)
+from pathlib import Path
+
 from rdflib import Graph, Namespace
 from rdflib.namespace import TIME
+from context_shim import starts
 TFUN = Namespace("https://w3id.org/timefuncs/")
 STARTS = Namespace("https://w3id.org/timefuncs/testdata/starts/")
 tests_dir = Path(__file__).parent
@@ -21,7 +28,7 @@ def test_starts():
 
             FILTER tfun:starts(?a, ?b)
         }
-        """        
+        """
     expected = [
         (str(STARTS.a01), str(STARTS.b01)),
         # (str(STARTS.a02), str(STARTS.b02)), false
@@ -42,3 +49,14 @@ def test_starts():
     ])
 
     assert actual == expected
+
+
+# Demo harness (identical on both sides, see meta.json): `test_starts`
+# asserts internally and returns nothing, printing nothing and mutating no
+# argument -- entry=/calls= would have nothing to compare on its own (the
+# "nothing observable" guard in rdfeval.harness). `demo` runs it -- an
+# AssertionError on either side already fails the whole check, which is the
+# region's own pass/fail criterion -- and returns a sentinel.
+def demo():
+    test_starts()
+    return "ok"

@@ -18,7 +18,10 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+# pylode is not installed in this study's venv: both dotted imports below
+# point at pylode_context.py (see meta.json), which merges the two real
+# source modules the region needs.
+from pylode_context import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -33,8 +36,6 @@ from pylode.profiles.supermodel.model import (
     Resource,
     SimpleCodedProperty,
     TextObject,
-)
-from pylode.profiles.supermodel.query.common import (
     get_class,
     get_descriptions,
     get_is_defined_by,
@@ -73,17 +74,18 @@ def get_images(iri: URIRef, graph: Graph) -> list[ImageObject]:
     .
     ```
     """
+    @graph graph
     images = []
-    image_ids = graph.objects(iri, sdo:image)
+    image_ids = m{ {iri} sdo:image ?image_id }
 
     for image_id in image_ids:
-        name = graph.value(image_id, sdo:name)
+        name = m{ {image_id} sdo:name ?v }.first()
         description = get_descriptions(image_id, graph)
-        encoding_format = graph.value(image_id, sdo:encodingFormat)
-        source = graph.value(image_id, dcterms:source)
-        caption = graph.value(image_id, sdo:caption)
-        url = graph.value(image_id, sdo:contentUrl)
-        order = graph.value(image_id, sh:order)
+        encoding_format = m{ {image_id} sdo:encodingFormat ?v }.first()
+        source = m{ {image_id} dcterms:source ?v }.first()
+        caption = m{ {image_id} sdo:caption ?v }.first()
+        url = m{ {image_id} sdo:contentUrl ?v }.first()
+        order = m{ {image_id} sh:order ?v }.first()
 
         images.append(
             ImageObject(name, description, encoding_format, source, caption, url, order)

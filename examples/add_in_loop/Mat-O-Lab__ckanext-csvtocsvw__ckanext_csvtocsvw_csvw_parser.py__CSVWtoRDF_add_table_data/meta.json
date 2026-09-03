@@ -15,12 +15,24 @@
     "term_constructor": 14,
     "triple_add": 15
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: QUDT->qudt, OA->oa, CSVW->csvw, RDF->rdf, XSD->xsd"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "plain literal",
+    "typed literal"
   ],
+  "translation_notes": [
+    "prefixes: QUDT->qudt, OA->oa, CSVW->csvw, RDF->rdf, XSD->xsd",
+    "self.g is a mutated-in-place function parameter, never reassigned: one `@graph g` at the top of the function covers the whole body, so every g.add(...) becomes a bare +{ } (no per-triple (g) suffix needed).",
+    "oa:value's Literal(cell, datatype=format) has a datatype decided at run time from the CSVW column's format; `{cell}^^{format}` (interpolation with a glued, itself-interpolated datatype) reproduces it exactly -- a genuine 'typed literal' use, safe here because cell is already a str (see instructions Sec.2bis on the Literal(x, datatype=) pitfall).",
+    "preserved two pre-existing bugs verbatim rather than fixing them: row_uri = \"table-{TABLE}-gid-{GID}\".format(table) (positional arg into named placeholders, only reachable when about_url is falsy -- the fixture keeps about_url truthy for every table to avoid an unrelated crash on both sides), and the anyURI branch's `else: value_node = URIRef(cell)`, which len(cell.split(' ')) >= 1 makes unreachable for any string including \"\"."
+  ],
+  "article_candidate": true,
   "draft_sha": "2f7155d435c8cb90",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.937011+00:00",
@@ -31,5 +43,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:add_table_data",
+    "diffs": [],
+    "error": null
+  }
 }

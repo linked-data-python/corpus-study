@@ -4,8 +4,12 @@
 from typing import Annotated, Self
 import pytest
 from rdflib import RDF, XSD, BNode, Graph, Literal, Namespace
-from pydantic_rdf.annotation import WithPredicate
-from pydantic_rdf.model import BaseRdfModel, CircularReferenceError, UnsupportedFieldTypeError
+from context_shim import (  # context shim -- see meta.json
+    BaseRdfModel,
+    CircularReferenceError,
+    UnsupportedFieldTypeError,
+    WithPredicate,
+)
 
 @pytest.mark.xfail(reason="We don't support SPARQL-like property paths.")
 def test_property_paths(graph: Graph, EX: Namespace):

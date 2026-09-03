@@ -45,3 +45,32 @@ def get_bnodes_2_triple_annotations(g):
                     annotations[i].append((s, p, o))
 
     return annotations
+
+
+# Test harness only (see meta.json): rdflib mints a FRESH internal id for
+# every blank node on every parse (verified by hand -- even an explicitly
+# labelled `_:ann1` does not keep that label across two independent
+# parses of the same file), so `annotations`, keyed by BNode for every
+# non-decoy entry, can never compare equal by plain dict equality between
+# the two sides' independently-parsed fixture graphs -- run_pair's
+# normalise() canonicalises a bare BNode VALUE but not a BNode used as a
+# DICT KEY. `demo` repackages the result as a sorted, bnode-identity-free
+# structure before handing it to run_pair, identically on both sides --
+# the same kind of test-harness repackaging as `demo` in
+# examples/trav_one_step/INM-6__alpaca__.../test_provenance_annotation_multiple_returns
+# (there: assertions -> a comparable string; here: a bnode-keyed dict -> a
+# comparable, order-independent list).
+def _term_key(t):
+    return ("bnode",) if isinstance(t, BNode) else ("term", repr(t))
+
+
+def demo(g) -> object:
+    annotations = get_bnodes_2_triple_annotations(g)
+    entries = []
+    for key, triples in annotations.items():
+        key_entry = ("bnode",) if isinstance(key, BNode) else ("named", str(key))
+        triple_entries = sorted(
+            (_term_key(p), _term_key(o)) for (_, p, o) in triples
+        )
+        entries.append((key_entry, triple_entries))
+    return sorted(entries, key=repr)

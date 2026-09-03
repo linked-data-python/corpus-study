@@ -13,10 +13,16 @@
     "graph_ctor": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: `Graph().parse(data=eg.SNIPPET_PREFIXES + code, format=\"turtle\")` and `prepareQuery(\"PREFIX rdfs: <...> PREFIX ex: <...>\\n\" + code)` both build their ENTIRE text from `code`, a value read at RUNTIME from eg.SNIPPETS -- not a term, not one hole in an otherwise-fixed query, the whole query/graph text. `g{ }` and `s{ }` are parsed when the file is TRANSPILED, not at run time (querying.md); there is no island that accepts a runtime-unknown string and validates whatever RDF/SPARQL notation (or invalid notation) happens to be in it. Out of reach by construction, a stronger case of the same limit already recorded for test_evaluate_bind.py::get_bind_tests.check in this stratum (there a whole clause held in a variable; here a whole query/graph body, including snippets that are deliberately NOT valid SPARQL or Turtle).",
+    "minimal excerpt showing the limit: `prepareQuery(PROLOGUE + code)` where `code` ranges over turtle/sparql/json/other text pulled from a dict populated elsewhere in the real file, some of it expected to fail parsing (that failure is exactly what the surrounding try/except is for).",
+    "Context restored (see context_shim.py): `eg` and `nodes` are free variables of the real file, not carried by the extractor's context lines -- `import context_shim` stands in for both. context_shim.py keeps two real entries (T1C2, T1C3, trimmed from enrichment_g_v3_0_0.py at the pinned commit) but the real eg.SNIPPETS is entirely syntactically valid in the actual repo (the real build script exits on the first pre-check failure, so nothing broken is ever committed) -- a literal copy would leave `errs` empty on both sides regardless of whether the translation is right, a hollow green. The shim adds deliberately invalid/unknown entries so `errs` covers every branch: valid+known (silent), known+broken (\"snippet invalid\"), unknown+valid (\"snippet class unknown\"), unknown+broken (both), and known+check==\"none\" (skipped despite garbage code -- the neighbourhood that must not match).",
+    "No Graph survives at module level to compare (each Graph() is throwaway, built only for its parse-or-raise side effect); `errs`, a plain list of strings built identically by both sides from context_shim's SNIPPETS, is what run_pair's module-state comparison actually diffs here (values_compared includes errs; its content is 4 entries: T2C1 and GHOST2 invalid, GHOST1 and GHOST2 unknown -- confirmed non-empty by running original.py directly).",
+    "Anti-hollow-green check: changed translated.ldpy's `if check == \"turtle\":` to `if check == \"bogus\":` -- rdfeval check FAILED (value errs differ: the T1C2/T2C1 turtle entries stop being validated at all, dropping T2C1's \"snippet invalid\" and, transitively, reordering the list). Reverted; check is green again."
+  ],
   "draft_sha": "f9afe02e2e5ccbf2",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.062844+00:00",

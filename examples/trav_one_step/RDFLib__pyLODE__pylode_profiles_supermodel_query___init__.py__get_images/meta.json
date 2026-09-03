@@ -13,11 +13,19 @@
     "graph_read": 7,
     "namespace_term": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann",
+    "context shim pylode_context.py: pylode is not installed in this study's venv, so both dotted imports (pylode.profiles.supermodel.model, pylode.profiles.supermodel.query.common) are rewritten in original.py and translated.ldpy to import from a single local pylode_context.py, which merges the two real source files verbatim from RDFLib/pyLODE@0d0471fb99b201182db9d3142de13fbcaee393f2. Only the unused Metadata dataclass was dropped; everything else, including fields the region never touches, is kept whole rather than trimmed field-by-field.",
+    "graph.objects(iri, SDO.image) -> for image_id in m{ {iri} sdo:image ?image_id }; each graph.value(image_id, PRED) -> m{ {image_id} pred ?v }.first() -- both trav_one_step and trav_single_value are exercised in the same region.",
+    "the region's own ImageObject(name, description, encoding_format, source, caption, url, order) call passes positional arguments in a different order than the dataclass's fields (order, url, caption), so the constructed object's .order actually holds the caption text and .caption the sh:order value. This is a real bug in the source repository, not a translation artefact: both original.py and translated.ldpy exercise the identical shim class and the identical (buggy) call, so the oracle still holds -- confirmed by driver.py's printed output showing the swapped values identically on both sides."
   ],
   "draft_sha": "084ac13e8d091475",
   "provenance": {
@@ -30,5 +38,12 @@
     "trav_one_step",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:get_images",
+    "diffs": [],
+    "error": null
+  }
 }

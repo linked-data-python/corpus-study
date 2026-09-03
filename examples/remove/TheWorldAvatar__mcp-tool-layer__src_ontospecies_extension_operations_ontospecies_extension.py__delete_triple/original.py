@@ -2,6 +2,7 @@
 # region: delete_triple (lines 603-622, stratum remove)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
+from context_shim import locked_graph, _is_abs_iri
 
 def delete_triple(subject_iri: str, predicate_iri: str, object_value: str) -> str:
     """Remove one RDF triple matching the given subject, predicate, and object."""

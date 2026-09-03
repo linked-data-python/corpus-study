@@ -4,6 +4,7 @@
 import os
 from rdflib import Graph, Namespace
 from rdflib.namespace import RDF, RDFS
+from ttl_utils_shim import load_graph_from_file  # context shim, see meta.json
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
@@ -13,18 +14,15 @@ def load_cbu_label_iri_pairs_from_ontomops_extension(hash_value: str) -> list[tu
     from models.locations import DATA_DIR
     path = os.path.join(DATA_DIR, hash_value, "ontomops_extension.ttl")
     g = load_graph_from_file(path)
-    ONTOMOPS = Namespace("https://www.theworldavatar.com/kg/ontomops/")
+    @prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> as ONTOMOPS .
     g.bind("ontomops", ONTOMOPS)
     pairs: list[tuple[str, str]] = []
     try:
-        q = (
-            """
+        for row in s{
             SELECT DISTINCT ?s ?label WHERE {
               ?s a ontomops:ChemicalBuildingUnit ; rdfs:label ?label .
             }
-            """
-        )
-        for row in g.query(q, initNs={"ontomops": ONTOMOPS, "rdfs": RDFS}):
+        }(g):
             iri = str(row[0])
             lbl = str(row[1])
             if lbl and iri:

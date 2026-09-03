@@ -14,11 +14,22 @@
     "namespace_term": 12,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }",
+    "@prefix",
+    "prefixed name",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: TFUN->tfun, STARTS->starts, TIME->time"
+    "This is the initNs-ONLY case the batch warning describes: `initNs={\"time\": TIME, \"tfun\": TFUN}` is the query's only rdflib binding kwarg -- there is no `initBindings` anywhere in this test. It needs NO interpolation, only `@prefix time: <http://www.w3.org/2006/time#> .` and `@prefix tfun: <https://w3id.org/timefuncs/> .` in scope; `TIME`/`TFUN` Namespace objects (and the `Namespace`/`rdflib.namespace.TIME` imports that built them) drop out, their only use having been that initNs kwarg. `STARTS` likewise drops: `STARTS.a01` etc. become the prefixed names `starts:a01` etc., with `@prefix starts: <https://w3id.org/timefuncs/testdata/starts/> .` replacing it in `expected`.",
+    "The query string (`q = \"\"\"...\"\"\"`) passed to `g.query(q, initNs=...)` collapses into an `s{ }` island written literally at the point of use -- `q` as a named variable disappears.",
+    "`FILTER tfun:starts(?a, ?b)` calls a CUSTOM SPARQL extension function the real test registers by importing `timefuncs` (`from timefuncs import starts`, a side-effecting import: `timefuncs/__init__.py` calls `register_custom_function` for the whole module at import time). `timefuncs` is not installed in the pinned study venv, so context_shim.py transcribes `starts` and its BFS helper `_path_exists` verbatim from `timefuncs/funcs.py`@dd3bde8727 (rdflib-only dependency, checked against the local checkout at corpus/repos/RDFLib__timefuncs, same commit) and registers `tfun:starts` itself. `import context_shim` needed on BOTH sides -- s{ } is still rdflib's SPARQL engine underneath, so a FILTER function must be registered in the SAME rdflib function registry regardless of which notation wrote the query.",
+    "`test_starts` loads ITS OWN fixture at a path it hardcodes internally (`tests_dir / \"data\" / \"starts.ttl\"`, `tests_dir = Path(__file__).parent`) rather than receiving a graph argument. `Path(__file__).parent` resolves to the region directory for BOTH original.py and translated.ldpy (each gets its own path as `__file__` when exec'd), so the real upstream fixture (RDFLib/timefuncs@dd3bde8727 tests/functions/data/starts.ttl) was copied VERBATIM to `data/starts.ttl` at that exact relative path -- no path-fixing code needed. `fixture.ttl` at the top level mirrors it for documentation but is not itself read by either version; see driver.py.",
+    "`test_starts` asserts internally and returns/prints/mutates nothing observable -- entry=/calls= on it directly would trip rdfeval.harness's 'nothing observable to compare' guard regardless of correctness. A `demo()` harness, appended identically to both original.py and translated.ldpy (same convention as the test_finishes sibling region in this same stratum), calls `test_starts()` (an AssertionError on either side already fails the whole check -- the region's real pass/fail criterion) and returns a sentinel.",
+    "added `from pathlib import Path` to original.py: missing from the extracted region though used on its very next line (`tests_dir = Path(__file__).parent`) -- the real file imports it at the top alongside `from timefuncs import starts`; both restored (as `from context_shim import starts` on the ldpy side).",
+    "Broken-translation check: swapping the FILTER's argument order (`tfun:starts(?b, ?a)`) makes `rdfeval check` fail with an AssertionError inside `test_starts` -- the pilot is not a hollow green."
   ],
   "draft_sha": "ac0549489f6837a3",
   "provenance": {
@@ -30,5 +41,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, RDF, BNode
 from rdflib.namespace import SH
+from context_shim import VALUE_PATH_ATTRIBUTE_TYPES, connective_clauses  # context shim -- see meta.json
 NGSILD_VALUE_PATHS = frozenset(VALUE_PATH_ATTRIBUTE_TYPES)
 
 def attribute_shapes(g):

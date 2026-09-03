@@ -4,7 +4,6 @@
 from rdflib import RDF, Graph, Namespace, Variable
 from rdflib.query import Result, ResultParser
 @prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 
 def __init__(self, source, **kwargs):
@@ -14,8 +13,9 @@ def __init__(self, source, **kwargs):
         graph.parse(source, **kwargs)
     else:
         graph = source
+    @graph graph
 
-    rs = graph.value(predicate=rdf:type, object=rs:ResultSet)
+    rs = m{ ?rs a rs:ResultSet }.first()
     # there better be only one :)
 
     if rs is None:
@@ -27,7 +27,7 @@ def __init__(self, source, **kwargs):
 
     else:
 
-        askAnswer = graph.value(rs, rs:boolean)
+        askAnswer = m{ {rs} rs:boolean ?boolean }.first()
 
         if askAnswer is not None:
             type_ = "ASK"
@@ -37,16 +37,14 @@ def __init__(self, source, **kwargs):
     Result.__init__(self, type_)
 
     if type_ == "SELECT":
-        self.vars = [Variable(v) for v in graph.objects(rs, rs:resultVariable)]
+        self.vars = [Variable(v) for v in m{ {rs} rs:resultVariable ?v }]
 
         self.bindings = []
 
-        for s in graph.objects(rs, rs:solution):
+        for s in m{ {rs} rs:solution ?s }:
             sol = {}
-            for b in graph.objects(s, rs:binding):
-                sol[Variable(graph.value(b, rs:variable))] = graph.value(
-                    b, rs:value
-                )
+            for b in m{ {s} rs:binding ?b }:
+                sol[Variable(m{ {b} rs:variable ?var }.first())] = m{ {b} rs:value ?val }.first()
             self.bindings.append(sol)
     elif type_ == "ASK":
         self.askAnswer = askAnswer.value

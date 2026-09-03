@@ -18,7 +18,10 @@ from rdflib.namespace import (
     SKOS,
     VANN,
 )
-from pylode.profiles.supermodel.model import (
+# pylode is not installed in this study's venv: both dotted imports below
+# point at pylode_context.py (see meta.json), which merges the two real
+# source modules the region needs.
+from pylode_context import (
     Class,
     CodedProperty,
     ComponentModel,
@@ -33,8 +36,6 @@ from pylode.profiles.supermodel.model import (
     Resource,
     SimpleCodedProperty,
     TextObject,
-)
-from pylode.profiles.supermodel.query.common import (
     get_class,
     get_descriptions,
     get_is_defined_by,

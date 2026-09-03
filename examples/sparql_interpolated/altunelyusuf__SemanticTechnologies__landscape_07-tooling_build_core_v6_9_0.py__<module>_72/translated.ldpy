@@ -1,8 +1,25 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v6_9_0.py
 # region: <module> (lines 72-79, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
+#
+# Context restored (see meta.json / context_shim.py): `eg` and `nodes` are
+# free variables of the real file (`eg = load("enrichment_g", "v3_0_0")` at
+# line 20; `nodes` built at lines 34-41), neither carried by the extractor's
+# context lines. `import context_shim as eg` / `from context_shim import
+# nodes` stand in for both, identically on both sides -- see
+# context_shim.py's header for what it reproduces verbatim and what it
+# adds to avoid an empty-`errs` hollow green.
+#
+# IDENTITY translation (see meta.json): both `Graph().parse(data=... +
+# code, ...)` and `prepareQuery("PREFIX ... \n" + code)` build their whole
+# text from `code`, a value read at RUNTIME from eg.SNIPPETS -- not known
+# until the module executes. `g{ }`/`s{ }` are parsed at TRANSPILE time
+# (querying.md), so neither can hold a runtime-unknown query/graph text;
+# there is no island for "validate a string that might not even be valid
+# SPARQL/Turtle syntax". See translation_notes for the argument.
 from rdflib import Graph, Namespace, URIRef, Literal
-eg = load("enrichment_g", "v3_0_0")
+import context_shim as eg
+from context_shim import nodes
 byid = {n["id"]: n for n in nodes}
 errs = []
 from rdflib.plugins.sparql import prepareQuery

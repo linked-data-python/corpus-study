@@ -3,12 +3,13 @@
 # licence of the source repository: see meta.json
 from typing import Annotated, Self
 import pytest
-from rdflib import RDF, XSD, BNode, Graph, Literal, Namespace
-from pydantic_rdf.annotation import WithPredicate
-from pydantic_rdf.model import BaseRdfModel, CircularReferenceError, UnsupportedFieldTypeError
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from rdflib import BNode, Graph, Literal, Namespace
+from context_shim import (  # context shim -- see meta.json
+    BaseRdfModel,
+    CircularReferenceError,
+    UnsupportedFieldTypeError,
+    WithPredicate,
+)
 
 @pytest.mark.xfail(reason="We don't support SPARQL-like property paths.")
 def test_property_paths(graph: Graph, EX: Namespace):
@@ -38,9 +39,11 @@ def test_property_paths(graph: Graph, EX: Namespace):
     dept1 = BNode()
     dept2 = BNode()
     proj1 = BNode()
+    @graph graph
 
     # Add basic org data
-    graph += g{
+    # Add departments and employees
+    +{
         {org} a {EX.Organization} ;
            {EX.name} "Test Org" ;
            {EX.department} {dept1} ;
@@ -50,13 +53,13 @@ def test_property_paths(graph: Graph, EX: Namespace):
 
     # Add people
     for i, uri in enumerate([EX.person1, EX.person2, EX.person3]):
-        graph += g{
+        +{
             {uri} a {EX.Person} ;
                {EX.name} {Literal(f"Person {i}")}
         }
 
     # Add relationships
-    graph += g{
+    +{
         {dept1} {EX.employee} {EX.person1} .
         {dept2} {EX.employee} {EX.person2} .
         {dept1} {EX.manager} {EX.person3} .

@@ -10,10 +10,20 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "Fully literal query (no interpolation at all): `q = \"\"\"...\"\"\"` then `self.gr.query(q)` became `q = s{ ... }` then `q(self.gr)`, preserving the original's own two-step shape (build, then call) rather than collapsing it to a single expression.",
+    "163-regions case: `self.gr` has no visible binding in the extracted region (no annotation, no assignment) -- restored only in driver.py, as a `_Self` stand-in exposing the single `.gr` attribute the region reads; original.py/translated.ldpy are untouched (the region already takes `self` as an explicit parameter, so nothing to restore in the pair itself).",
+    "anti-hollow-green pitfall found and worked around: `run_pair` also compares the ARGUMENTS a call was made with (to catch a region that mutates its input), but `rdflib.Graph.__eq__` compares by `.identifier` -- a random blank node unless one is given -- not by content (verified directly: `Graph().parse(x) == Graph().parse(x)` is False for identical Turtle). Wrapping the fixture graph in a plain object made every call FAIL on `call[i].arg[0]` even though the region's actual output (its return value) was correct. `_Self.__eq__` says explicitly that this argument is never mutated and so is not part of what the call proves, instead of leaving an unexplained bnode mismatch. `graphs_isomorphic`/content comparison only triggers when the harness sees a bare `Graph`, not one wrapped in a self-stand-in -- worth generalising if more `sparql_literal`/reading regions need a `self` restored this way.",
+    "anti-hollow-green check performed by hand: weakening the pattern to `?c a skos:Collection` (wrong class) made the check FAIL as expected (both real matches replaced by the unrelated neighbour), confirming fixture.ttl actually exercises the query rather than passing on an empty result both sides."
+  ],
   "draft_sha": "b4b95c6c9fdaf8c9",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.717661+00:00",
@@ -24,5 +34,12 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": false,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:list_collections",
+    "diffs": [],
+    "error": null
+  }
 }

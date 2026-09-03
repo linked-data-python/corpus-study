@@ -10,10 +10,22 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "rdf_graph.value(predicate=certainty, object=certainty_val_05) is the (predicate, object) -> subject form of g.value() (subject omitted): translated as m{ ?s {certainty} {certainty_val_05} }.first(), a single projected variable (?s) so .first() yields the bare subject term, matching g.value()'s any=True (no error on multiple matches, None on zero) exactly like the mapsa/blathers precedent in this stratum.",
+    "Restored bindings (kind=statement, no visible graph, rdf_ops=0 -- the pipeline's categoriser did not recognise the keyword-only .value(predicate=, object=) call as a graph read): wrapped the statement in get_mary_likes_matt_05(rdf_graph, certainty, certainty_val_05), matching the bindings the real enclosing test_rpt_case_15_4(name, rdf_graph) builds a few lines above this statement (certainty = URIRef(...); certainty_val_05 = Literal('0.5', datatype=xsd:decimal)) -- see original.py.",
+    "fixture.ttl is modelled on the real ex:certainty reification shape the region was extracted from (tests/data/rdf/cases/15_4.trig), simplified to a plain graph since the region itself never reads a named graph. Three statements carry three DIFFERENT ex:certainty values (0.5/0.75/1.0), driven by three separate calls in driver.py, each supplying its own (certainty, certainty_val) pair -- proving the lookup is keyed on the exact object, not merely the predicate. A fourth call supplies a certainty value (0.42) absent from the graph: the zero-solution case, None on both sides. Neighbourhood: ex:weight carries the SAME literal value (0.5) as one certainty triple on an unrelated predicate/subject, and ex:certainty 0.9 is the right predicate with the wrong object -- deliberately breaking the translation to ignore the predicate (m{ ?s ?p {certainty_val_05} }) was verified to make rdfeval check FAIL on this fixture, confirming the neighbourhood is not decorative.",
+    "article_candidate: one line before, one line after, and the construction (m{ }.first() with the SUBJECT unbound, predicate and object both given) is a case the trav_single_value idioms table only states in the (subject, predicate) direction -- worth showing the mirror case."
+  ],
+  "article_candidate": true,
   "draft_sha": "c542f6981c8c6087",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.222217+00:00",
@@ -24,5 +36,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:get_mary_likes_matt_05",
+    "diffs": [],
+    "error": null
+  }
 }

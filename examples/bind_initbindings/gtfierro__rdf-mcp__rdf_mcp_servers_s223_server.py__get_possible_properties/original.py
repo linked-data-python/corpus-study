@@ -1,7 +1,13 @@
 # Extracted from gtfierro/rdf-mcp@b6aa50fd53 : rdf_mcp/servers/s223_server.py
 # region: get_possible_properties (lines 59-79, stratum bind_initbindings)
 # licence of the source repository: see meta.json
+# (added to make the region executable: the real file imports Graph and
+# Namespace from rdflib, and FastMCP from mcp.server.fastmcp -- neither
+# import survived extraction. `from rdflib import Graph, Namespace` is
+# restored verbatim; FastMCP comes from context_shim.py, see meta.json.)
+from rdflib import Graph, Namespace
 from rdflib.term import Variable
+from context_shim import FastMCP
 mcp = FastMCP("GraphDemo", dependencies=["rdflib", "oxrdflib"])
 S223 = Namespace("http://data.ashrae.org/standard223#")
 ontology = Graph().parse("https://open223.info/223p.ttl")

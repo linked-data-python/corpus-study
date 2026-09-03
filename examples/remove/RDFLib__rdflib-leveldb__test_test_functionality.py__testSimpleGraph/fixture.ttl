@@ -1,4 +1,17 @@
 # Input graph for RDFLib__rdflib-leveldb__test_test_functionality.py__testSimpleGraph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+#
+# testSimpleGraph builds ALL of its own data (via .add()/+{ }) inside the two
+# named graphs it opens through get_context(<urn:graph>) and
+# get_context(<urn:othergraph>) — it never reads pre-existing content there.
+# What this fixture exercises is that get_context() correctly ISOLATES named
+# graphs: it seeds unrelated data in the DEFAULT graph (distinct from both
+# <urn:graph> and <urn:othergraph>) that must not leak into either -- if it
+# did, the region's own strict counts (assert len(g) == 3, len(g2) == 1, the
+# "two people like pizza" / "tarek doesn't like cheese" query and pattern
+# assertions) would fail identically on both sides, so the several-solutions,
+# zero-solution and non-matching-neighbour cases the study asks for are
+# already exercised by the region's own body against a graph seeded exactly
+# this way. <urn:graph> and <urn:othergraph> are left empty here on purpose.
 @prefix ex: <http://example.org/> .
+
+ex:someone ex:likes ex:coffee .

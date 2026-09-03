@@ -14,11 +14,23 @@
     "term_constructor": 5,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "language literal"
+  ],
   "translation_notes": [
-    "prefixes: IPO->ipo, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "prefixes: IPO->ipo, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov",
+    "Context shim (context_shim.py): T, HERE, SP, byid and S() are defined earlier in the same source file, outside the extracted lines (90-97); restored with values copied verbatim from the real repository (T.BASE, SP's namespace IRI, byid['T1C3']['refs'], and the four REG citations S() reads) -- see the shim's own header for exact provenance per key.",
+    "The loop is `for tr in [(p1,o1), (p2,o2), ...]: g.add((w20, tr[0], tr[1]))` -- syntactically add_in_loop, but every item shares the SAME fixed subject w20 and the predicates are ad hoc / heterogeneous (rdf:type twice, then rdfs:label, skos:definition, dcterms:source, skos:scopeNote, skos:note, ipo:coversLearningObjective), not a homogeneous row schema. This is RDF-semantically a single-subject property bundle (the add_run_shared_subject idiom), not row-shaped data, so it is translated as one grouped +{ w20 p1 o1 ; p2 o2 ; ... } with no loop and no `for @bindings`, rather than reshaping each (p,o) pair into a {\"p\":...,\"o\":...} binding row and templating a variable predicate ?p -- which would force a mapping shape onto data that has none. Classified minor-restructuring because the Python for-loop itself is eliminated, even though the RDF payload (same 8 triples on the same subject) is untouched.",
+    "Contrast with the sibling region altunelyusuf__SemanticTechnologies__...build_core_v5_3_0.py__<module>_147 in this same repository, whose loop DOES vary the subject per row over a homogeneous named-field schema (pid/plab/pdef/prange) and was correctly translated with `for @bindings in` -- the two loops look alike at the surface (a Python for over a list of tuples calling g.add) but differ exactly on the property that decides which idiom fits: whether the subject and predicate shape are per-row data or a fixed one-off bundle.",
+    "dcterms:source keeps a plain Python expression (S(*n13[\"refs\"]) + \" | \" + S(\"NR-PYODIDE\")) glued to `@en` as `{...}@en`, per terms.md's 'an interpolation may carry a glued RDF suffix' -- not rewritten as `^^`/bindings machinery since it is unrelated to the graph template's terms, only its language tag.",
+    "Sabotage-tested: retargeting the last predicate-object pair from {lo15} to {w20} makes rdfeval check fail (9 vs 9 triples, not isomorphic, since w20 already appears as the block's own subject); restored before finalising."
   ],
   "draft_sha": "6741d385ecc6e762",
   "provenance": {
@@ -30,5 +42,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

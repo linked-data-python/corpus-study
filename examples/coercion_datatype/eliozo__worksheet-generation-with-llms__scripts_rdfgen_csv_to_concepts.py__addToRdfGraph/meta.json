@@ -13,10 +13,25 @@
     "term_constructor": 11,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "the coercion_datatype sites are four `rdflib.term.Literal(value, lang=...)` calls on computed strings, each with a LITERAL (source-constant) language tag -- unlike the sibling region Concept._add_subject_to_graph, where the tag itself is a runtime value, here the tag is always known at translation time (u'en'/u'lv' hard-coded at each call site), so the language's dedicated `{expr}@lang` notation applies directly: `Literal(termEN, lang=u'en')` -> `{termEN}@en`",
+    "topic_node = eliozo:{\"TRM-\" + conceptID}: original.py builds the IRI by plain string concatenation (eliozo_ns + \"TRM-\" + conceptID), never percent-encoding conceptID -- ex:{expr} matches that exactly (concatenates, does not encode). Not translated as e<eliozo_ns/TRM-{?id}> (which would percent-encode) since that would change behaviour for a conceptID containing a space or slash -- no such guarantee is visible in this region alone",
+    "rdf:type / RDF_NS: translated with the Turtle `a` shortcut (`+{ {topic_node} a eliozo:Concept }`) rather than declaring an @prefix rdf: only to spell out rdf:type -- no @prefix rdf: is declared since nothing in the translated body dereferences it (RDF_NS, a plain Python string constant, not a Namespace object, is left unused at module level, same as in original.py's own dead `rdf_type_property` local before this translation)",
+    "the three .add() calls that share `topic_node` as subject (termEN/termLV/conceptID) are combined into one +{ s p1 o1 ; p2 o2 ; p3 o3 } predicate-object list, per INSTRUCTIONS.md's add_run_shared_subject row -- this is the direct Turtle reading of three .add() calls on the same subject, not a restructuring: no reordering, no merged logic, same five triples either way",
+    "the rdf:type add and the conditional descLV add are kept as their own separate +{ } islands (not folded into the shared-subject block): the former precedes termEN's fallback computation in program order, the latter is conditional -- folding either in would change what depends on what, or write into the graph a triple the original's guard would have skipped",
+    "@graph g: `g` (the function parameter) is never reassigned in this region's body, only added to, so `@graph g` at the top of the function captures a graph reference that stays valid for the whole call -- see INSTRUCTIONS.md's warning about `@graph` capturing a value, not a name, for the case where that would not hold",
+    "anti-hollow-green (INSTRUCTIONS.md): changed eliozo:termLV's language tag from @lv to @en in translated.ldpy -- rdfeval check correctly failed on all three calls (graphs not isomorphic, 5 vs 5 / 4 vs 4 / 4 vs 4 triples); reverted, check green again"
+  ],
   "draft_sha": "70866d0836402453",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.739918+00:00",
@@ -27,5 +42,12 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:addToRdfGraph",
+    "diffs": [],
+    "error": null
+  }
 }

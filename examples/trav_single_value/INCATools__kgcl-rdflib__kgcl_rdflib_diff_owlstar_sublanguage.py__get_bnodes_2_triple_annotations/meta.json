@@ -13,12 +13,27 @@
     "graph_read": 1,
     "namespace_term": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "The region's OWN trav_single_value site: three `next(g.objects(subject=i, predicate=P))` reads (comment: \"NB these generators are singletons\") -> `m{ {i} P ?o }.first()`. `.first()` over `.one()`: `next()` on an EMPTY iterator raises StopIteration (like `.one()` would, unlike `.first()`, which returns None), but `next()` on a MULTI-item iterator silently takes the first (like `.first()`, unlike `.one()`, which would raise). Neither island matches `next()` exactly; `.first()` was chosen because the loop only ever runs for `i` already confirmed (by `intersection = source & property & target`) to carry all three predicates, so the zero-case divergence (raise vs None) is unreachable on any input this code can actually see -- `.first()`'s 'silently take first on multiple' matches `next()` exactly, which is the behaviour that IS reachable.",
+    "The OTHER graph reads in the same function -- per INSTRUCTIONS.md SS2, translated too, not just the flagged site: `set(g.subjects(predicate=OWL.annotatedSource))` -> `set(m{ ?s owl:annotatedSource [] })`. The object position is a genuine don't-care here (g.subjects(predicate=P) never constrains it), and `m{ }`'s own rule for that -- 'a blank node in a pattern is matched but not projected' (docs/reference/language/querying.md) -- is exactly what keeps `?s` the SOLE projected variable, so `m{ }` yields bare subject terms and `set(m{ ... })` has the same shape as `set(g.subjects(...))`. Writing `?o` there instead (a second projected variable) would silently change the values from subjects to (subject, object) tuples -- verified by hand, not kept as a diff.",
+    "`for s, p, o in g.triples((i, None, None))` -> `for p, o in m{ {i} ?p ?o }` (see translated.ldpy's own header comment): a term interpolated into a pattern position is a FIXED filter, not a projected variable -- the same non-distinguished-term rule as `[]` above, applied to an explicit value instead of an anonymous blank node. The solution is therefore a 2-tuple (p, o), not the 3-tuple g.triples() yields; `s` was always exactly `i` (the pattern's own fixed subject), so the one place `s` was read in the loop body becomes `i` directly. No RDF meaning changed -- verified: deliberately widening `{i}` to a wildcard `?any` was caught -- with 3 variables now projected (any, p, o), `for p, o in m{ ?any ?p ?o }:` raises ValueError: too many values to unpack, a hard, visible failure rather than a silent wrong answer.",
+    "Import cleanup, mechanical consequence of the prefix substitution (same category as the SOLID precedent in LA3D__cogitarelink-solid__scripts_pod_audit.py__audit_type_index): `OWL` dropped from `from rdflib.namespace import OWL, RDF, RDFS` since nothing resolves through it anymore (owl:annotatedSource/Property/Target replaced every OWL.* use); `RDF`, `RDFS` were ALREADY unused in the ORIGINAL (only appear inside a comment, `# RDF.type,`) and are left untouched on both sides -- not this translation's doing.",
+    "Harness finding, not a language gap (see original.py's and driver.py's own comments): the region returns `annotations`, a dict KEYED BY BNODE for every non-decoy entry. rdflib mints a FRESH internal id for every blank node on every parse -- verified by hand, true even for an explicitly labelled `_:ann1` -- and run_pair's normalise() canonicalises a bare BNode VALUE but not a BNode used as a dict KEY, so comparing `annotations` directly between the two sides' independently-parsed fixture graphs fails on EVERY correct translation, not just wrong ones (confirmed: the untouched draft failed this way before `demo` was added). `demo(g)` (identical on both sides) repackages the result into a sorted, bnode-identity-free list before handing it to run_pair -- the same kind of test-harness repackaging as `demo` in examples/trav_one_step/INM-6__alpaca__.../test_provenance_annotation_multiple_returns. Worth a corpus/403-level note: any region returning a BNode-keyed container will hit this, independent of which stratum or construction it exercises.",
+    "fixture.ttl anti-vert-creux, verified by deliberate mutation (not kept as diffs): (1) swapping the single-value site's predicate (annotatedSource -> annotatedTarget) makes rdfeval check FAIL; (2) swapping the full-collection `source` read's predicate to annotatedProperty was NOT initially caught -- source and property collected the exact same subject set on the first fixture draft -- fixed by adding ex:Decoy2 (annotatedProperty + annotatedTarget, deliberately missing annotatedSource), which now makes that mutation FAIL (an extra, wrongly-admitted entry); (3) dropping the `not isinstance(o, BNode)` filter surfaces ex:ann1's ex:extra bnode object as an extra triple -- FAILs; (4) widening the inner scan's fixed subject `{i}` to a wildcard crashes outright. All four restored to green afterwards.",
+    "article_candidate: `set(g.subjects(predicate=OWL.annotatedSource))` -> `set(m{ ?s owl:annotatedSource [] })` is a compact illustration of the 'blank node in a pattern is a non-distinguished, matched-but-not-projected variable' rule doing real work -- it is what keeps `m{ }` a drop-in replacement for a one-predicate `g.subjects()` scan, without inventing a throwaway `?o` the original code never had to name."
+  ],
+  "article_candidate": true,
   "draft_sha": "93f0d865b1fca08c",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.143034+00:00",
@@ -29,5 +44,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

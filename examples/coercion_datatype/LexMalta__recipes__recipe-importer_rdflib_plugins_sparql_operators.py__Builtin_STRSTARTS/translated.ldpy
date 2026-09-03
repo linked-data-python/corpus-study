@@ -2,9 +2,7 @@
 # region: Builtin_STRSTARTS (lines 318-327, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import RDF, XSD, BNode, Literal, URIRef, Variable
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from context_shim import _compatibleStrings  # context shim, see meta.json
 
 def Builtin_STRSTARTS(expr, ctx):
     """
@@ -15,4 +13,4 @@ def Builtin_STRSTARTS(expr, ctx):
     b = expr.arg2
     _compatibleStrings(a, b)
 
-    return Literal(a.startswith(b))
+    return f{a.startswith(b)}

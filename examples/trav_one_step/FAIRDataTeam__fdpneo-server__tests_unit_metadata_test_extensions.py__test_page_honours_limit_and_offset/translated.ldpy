@@ -15,7 +15,7 @@ def test_page_honours_limit_and_offset() -> None:
     assert response.status_code == 200
     g = Graph()
     g.parse(data=response.text, format="turtle")
-    children = sorted(str(o) for o in g.objects(URIRef(BASE_URL), URIRef(DCAT_CATALOG)))
+    children = sorted(str(o) for o in m{ f<{BASE_URL}> f<{DCAT_CATALOG}> ?o }(g))
     # We asked for 3 starting at offset 4. Catalogs are sorted by IRI,
     # so c-04, c-05, c-06.
     assert children == [

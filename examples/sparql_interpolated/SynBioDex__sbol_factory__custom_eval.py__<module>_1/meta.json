@@ -17,11 +17,26 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: FOAF->foaf"
+    "prefixes: FOAF->foaf",
+    "The idiom under study: `\"PREFIX foaf: <%s> SELECT * WHERE { ?s a foaf:Agent . }\" % FOAF` splices the namespace's IRI into a hand-written PREFIX line. This vanishes entirely in ldpy: `s{ }`'s prologue is derived from `@prefix` declarations in scope (querying.md), so the whole PREFIX-templating idiom is replaced by one file-level `@prefix foaf: <...> .` and a query with no interpolation at all -- `s{ SELECT * WHERE { ?s a foaf:Agent . } }(g)`. Directly-expressible, and the gain is visible in three lines: article_candidate.",
+    "the standalone `g.add((FOAF.Person, rdflib.RDFS.subClassOf, FOAF.Agent))` is the add_isolated idiom (INSTRUCTIONS.md SS2): `@graph g` + `+{ foaf:Person {rdflib.RDFS.subClassOf} foaf:Agent }`, keeping `rdflib.RDFS.subClassOf` as a term interpolation exactly as the original referenced it via the rdflib API (RDFS is not otherwise given a ldpy prefix here, faithful to the source which only imports FOAF).",
+    "Execution restored: the whole region's RDF logic sat inside `if __name__ == \"__main__\":`, which run_pair's exec() never triggers (see original.py/translated.ldpy header) -- dropped identically on both sides, the same restoration already used for sparql_literal's owl2instances.py__<module>_855.",
+    "`g.load(\"foaf.n3\")` -> `g.parse(\"foaf.n3\")`: `Graph.load` was a deprecated alias removed in rdflib 7.2.1, the version this study is pinned to -- same rename on both sides, no RDF meaning changed.",
+    "foaf.n3 restored: never committed to SynBioDex/sbol_factory (this file is an unmodified copy of rdflib's own docs/examples/custom_eval.py, referencing a fixture that only exists upstream) -- copied verbatim from RDFLib/rdflib-rdfstar@bceab0a444a : examples/foaf.n3, the real dataset this exact script was written against (see foaf.n3's header).",
+    "Anti-hollow-green check: 213 triples parsed, 26 typed foaf:Person, 0 directly typed foaf:Agent -- the query's 26 solutions only appear if the custom SPARQL eval (BGP rewriting rdf:type via a bnode + subClassOf* path) and the added subClassOf triple actually combine; verified interactively before writing the pilot (see driver.py). Also removed the `+{ }` island from translated.ldpy -- rdfeval check FAILED (graph g: 214 vs 213 triples not isomorphic; stdout differs, 25 solutions instead of 26). Reverted; check is green again.",
+    "run_pair execs original.py then translated.ldpy in the SAME process, so rdflib's process-global BNode-id counter had already advanced by the time the second side parsed the same foaf.n3 -- the one inline blank node in the data (\"Danny Ayers\") gets two different auto-generated labels across the two sides even though nothing about the translation changed it. driver.py's stdout_filter blanks BNode labels before comparing (rdfeval.harness's own documented use of stdout_filter: a fresh identifier is not the program's meaning)."
   ],
   "draft_sha": "076c26245e3b13d7",
   "provenance": {
@@ -33,5 +48,12 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

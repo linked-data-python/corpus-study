@@ -12,10 +12,24 @@
   "categories": {
     "term_constructor": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "-{ }",
+    "m{ }",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "translation_notes": [
+    "unlike the sibling region YurtleStore.remove in the same batch, s/p/o here are NOT a pattern held as a value with None wildcards -- subject_iri, predicate_iri and object_value are three independent str parameters, each turned into its OWN bound term (s = URIRef(subject_iri), etc.) before the removal. So the piege INSTRUCTIONS SS2 warns about (a wildcard arriving as data, silently swallowed by node(None) -> Literal('None')) does not apply: there is no wildcard anywhere in this region, s/p/o are always fully bound by the time -{ } sees them, and both islands are the direct, undegraded form.",
+    "`if (s, p, o) in g:` -> `bool(m{ {s} {p} {o} })` (trav_existence idiom, applied here even though the region's own stratum is 'remove' -- precedent: ArangoRDB.__add_adb_col_statement in this same batch translates its membership test the same way for the same reason: the construction is the most specific one available, regardless of which stratum sampled the region). `g.remove((s, p, o))` -> `-{ {s} {p} {o} }`, the remove stratum's own idiom, fully bound. `@graph g` declared once (right after entering `with locked_graph() as g:`) covers both islands, following the ArangoRDB precedent's style for a graph touched more than once.",
+    "s = URIRef(subject_iri), p = URIRef(predicate_iri), o = URIRef(object_value)/Literal(object_value) are LEFT as plain rdflib term construction, not turned into f<{...}> or coerced -- this region's stratum is 'remove', not coercion_datatype/ns_def_local, and the precedent set by OntologyDeprecator.deprecate (also 'remove' stratum, entity_uri = URIRef(entity) left untouched) in this same batch is to leave untargeted term construction as plain Python. No @base is in scope, so URIRef(x) and f<{x}> would in fact coincide here (Trap 2 of migrate-from-rdflib.md does not bite), but translating it would credit a construction this region was not sampled to exercise.",
+    "context_shim.py restores locked_graph and _is_abs_iri (both module-level helpers delete_triple calls but that are defined elsewhere in the same source file, see the shim's own header for exact line numbers, fetched from the real commit). locked_graph is simplified away from its real FileLock+TTL persistence (an external dependency out of reach, same precedent as add_atomic_weight_to_element's shim in the add_isolated batch) -- but UNLIKE that sibling, this region checks for and removes an EXISTING triple rather than only adding to an empty graph, so a fresh-empty-graph-every-call simplification would make every case a 'not found' case. The shim instead exposes SEED_GRAPH (set by the driver before each call, is what `g` starts with) and LAST_GRAPH (the post-`with` state, read back by the driver) -- see driver.py.",
+    "AVOIDED HOLLOW GREEN: delete_triple returns only a string built from s/p/o, which is IDENTICAL whether or not the -{ } site actually ran (the 'Removed triple (...)' message does not depend on the graph afterward) -- run_pair's built-in return-value/argument comparison could not have told a working -{ } from a no-op one. driver.py bypasses run_pair (precedent: add_atomic_weight_to_element/driver.py) and inspects context_shim.LAST_GRAPH by isomorphism, in addition to the returned string.",
+    "verified not a hollow green a second way, empirically: widening the removal to `-{ ?anything {p} {o} }` (subject wildcard) makes case[0] FAIL -- graphs not isomorphic (2 vs 1 triples), because the fixture seeds S1 and S2 with the SAME (likes, o1) pair on purpose, so an over-wide remove is visible. Restored before finalising.",
+    "four cases: subject/predicate/object present with an IRI object (removed), present with a literal object (removed, exercises the Literal(object_value) branch), a neighbour with the same subject+predicate but a DIFFERENT absolute-IRI object (must not match -- proves precision), and a non-absolute subject_iri (earliest return, graph never touched)."
+  ],
   "draft_sha": "aaf7344bf6b32448",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.846718+00:00",
@@ -26,5 +40,12 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:delete_triple",
+    "diffs": [],
+    "error": null
+  }
 }

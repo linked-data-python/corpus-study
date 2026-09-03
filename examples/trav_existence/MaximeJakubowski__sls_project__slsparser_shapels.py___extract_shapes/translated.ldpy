@@ -32,19 +32,20 @@ def _extract_shapes(graph: Graph) -> Set[Node]:
         sh:targetSubjectsOf, sh:property,
     ]
 
+    @graph graph
     shapes: Set[Node] = set()
     for parameter in object_parameters:
-        shapes.update(graph.objects(predicate=parameter))
+        shapes.update(m{ [] {parameter} ?o })
     for parameter in subject_parameters:
-        shapes.update(graph.subjects(predicate=parameter))
-    shapes.update(graph.subjects(rdf:type, sh:NodeShape))
-    shapes.update(graph.subjects(rdf:type, sh:PropertyShape))
+        shapes.update(m{ ?s {parameter} [] })
+    shapes.update(m{ ?s a sh:NodeShape })
+    shapes.update(m{ ?s a sh:PropertyShape })
 
     # also members of a shacl list which are objects of sh:and, sh:or, sh:xone
     for parameter in [sh:or, sh:and, sh:xone]:
-        for llist in graph.objects(predicate=parameter):
+        for llist in m{ [] {parameter} ?llist }:
             for shapename in Collection(graph, llist):
-                if sh:path not in graph.predicates(shapename):
+                if not m{ {shapename} sh:path [] }:
                     shapes.add(shapename)
 
     return shapes

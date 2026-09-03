@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, RDF, BNode
 from rdflib.namespace import SH
+from context_shim import VALUE_PATH_ATTRIBUTE_TYPES, connective_clauses  # context shim -- see meta.json
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
@@ -18,8 +19,10 @@ def attribute_shapes(g):
     rdf:type -- rather than naming an attribute of its own, and the compiler
     folds those into the attribute's constraint instead of emitting one.
     """
-    for nodeshape in g.subjects(rdf:type, sh:NodeShape):
-        if not list(g.objects(nodeshape, sh:targetClass)):
+    @graph g
+
+    for nodeshape in m{ ?nodeshape a sh:NodeShape }:
+        if not m{ {nodeshape} sh:targetClass [] }:
             continue
         seen, frontier = set(), [nodeshape]
         while frontier:
@@ -28,8 +31,8 @@ def attribute_shapes(g):
                 continue
             seen.add(shape)
             frontier.extend(connective_clauses(g, shape))
-            for prop in g.objects(shape, sh:property):
-                paths = list(g.objects(prop, sh:path))
+            for prop in m{ {shape} sh:property ?prop }:
+                paths = list(m{ {prop} sh:path ?path })
                 if len(paths) == 1 and str(paths[0]) not in NGSILD_VALUE_PATHS \
                         and paths[0] != rdf:type:
                     yield nodeshape, prop, paths[0]

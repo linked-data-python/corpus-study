@@ -22,15 +22,16 @@ def inverse_relationship_predicate(g, path):
     Anything else -- a bare inverse, a longer sequence, a nested expression
     in the second hop -- returns None and is reported by unsupported_shapes.
     """
+    @graph g
     try:
         steps = list(Collection(g, path))
     except Exception:
         return None
     if len(steps) != 2:
         return None
-    if g.value(steps[0], sh:inversePath) != NGSILD.hasObject:
+    if m{ {steps[0]} sh:inversePath ?v }.first() != NGSILD.hasObject:
         return None
-    predicate = g.value(steps[1], sh:inversePath)
+    predicate = m{ {steps[1]} sh:inversePath ?v }.first()
     if predicate is None or isinstance(predicate, BNode):
         return None
     return predicate

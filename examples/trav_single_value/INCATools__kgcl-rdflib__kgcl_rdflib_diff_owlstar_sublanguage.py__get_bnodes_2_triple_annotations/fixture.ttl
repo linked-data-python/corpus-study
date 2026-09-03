@@ -1,4 +1,63 @@
-# Input graph for INCATools__kgcl-rdflib__kgcl_rdflib_diff_owlstar_sublanguage.py__get_bnodes_2_triple_annotations — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# INCATools__kgcl-rdflib__kgcl_rdflib_diff_owlstar_sublanguage.py__get_bnodes_2_triple_annotations.
+#
+# get_bnodes_2_triple_annotations(g) reads two different shapes:
+#   * a full-collection read (set(g.subjects(predicate=P))) for each of the
+#     three OWL reification predicates, intersected -> the bnodes that
+#     carry all three;
+#   * for each such bnode, the trav_single_value site itself: THREE
+#     next(g.objects(subject=i, predicate=P)) singleton reads, plus a
+#     subject-rooted g.triples((i, None, None)) scan of everything else.
+#
+@prefix ex:  <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# SEVERAL solutions -- two complete reified-triple annotations, each with
+# its own extra triples: ex:comment/ex:weight (plain objects, must be
+# collected) and, on _:ann1, ex:extra pointing at a BLANK NODE object
+# (must be EXCLUDED by the `not isinstance(o, BNode)` filter).
+_:ann1 owl:annotatedSource   ex:Alice ;
+       owl:annotatedProperty ex:knows ;
+       owl:annotatedTarget   ex:Bob ;
+       ex:comment "friendly" ;
+       ex:extra [ ex:nested "must be excluded: BNode object" ] .
+
+_:ann2 owl:annotatedSource   ex:Carol ;
+       owl:annotatedProperty ex:knows ;
+       owl:annotatedTarget   ex:Dave ;
+       ex:weight 5 .
+
+# Structural ZERO-solution case: missing owl:annotatedTarget, so this bnode
+# is absent from source & property & target -- it must not appear in
+# `annotations` at all (not even as an empty list). This is the fixture's
+# zero-solution branch: `next()`/`m{ }.first()` divergence on an EMPTY
+# per-bnode read is otherwise unreachable here, since the intersection
+# construction guarantees every `i` the inner reads run against already
+# has all three predicates (see meta.json).
+_:partial owl:annotatedSource   ex:Erin ;
+          owl:annotatedProperty ex:knows .
+
+# Edge case: a NAMED (non-blank) subject satisfying all three predicates.
+# It DOES enter the intersection (the read is keyed on the predicates, not
+# on node kind) but `isinstance(i, BNode)` then skips it entirely -- it
+# must appear in `annotations` with an EMPTY list, and ex:comment below
+# must never be read.
+ex:NamedAnnotation owl:annotatedSource   ex:Frank ;
+                    owl:annotatedProperty ex:knows ;
+                    owl:annotatedTarget   ex:Grace ;
+                    ex:comment "must never be read" .
+
+# NEIGHBOURHOOD that must not match -- only ONE of the three required
+# predicates: matches the individual `source` read but must drop out of
+# the source & property & target intersection.
+ex:Decoy owl:annotatedSource ex:Henry .
+
+# NEIGHBOURHOOD, asymmetric the other way -- annotatedProperty AND
+# annotatedTarget, but NOT annotatedSource. Distinguishes the `source`
+# read from the `property` read: a translation that collected `source`
+# from the wrong predicate (e.g. annotatedProperty) would wrongly pull
+# this decoy into the intersection too (verified: swapping `source`'s
+# predicate for owl:annotatedProperty was NOT caught before this decoy
+# was added, and IS caught now -- see meta.json).
+ex:Decoy2 owl:annotatedProperty ex:knows ;
+          owl:annotatedTarget   ex:Ivy .

@@ -19,9 +19,10 @@ def compute(self, kg: KG, config: SemanticConfig, **kwargs) -> MetricResult:
     ontology_graph: Graph = kg.get_ontology_graph()
     ontology = OntologyUtil.load_ontology_from_graph(ontology_graph)
     graph = enrich_type_information(raw_graph, ontology)
+    @graph graph
 
     for s, p, o in ontology_graph.triples((None, None, None)):
-        graph += g{ {s} {p} {o} }
+        +{ {s} {p} {o} }
 
     # Get all disjoint domains
     disjoint_domains_qr: Result = graph.query(
@@ -36,7 +37,7 @@ def compute(self, kg: KG, config: SemanticConfig, **kwargs) -> MetricResult:
     )
     subjects_with_disjoint_domains = set([row["subject"] for row in disjoint_domains_qr if isinstance(row, ResultRow)])
 
-    subjects = set([str(s) for s in graph.subjects()])
+    subjects = {str(s) for s, p in m{ ?s ?p [] }}
 
     return MetricResult(
         name=self.name,

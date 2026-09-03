@@ -12,11 +12,22 @@
   "categories": {
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDFS->rdfs, RDF->rdf, SKOS->skos"
+    "prefixes: OWL->owl, RDFS->rdfs, RDF->rdf, SKOS->skos",
+    "The two seed_graph.add((s_can, p_can, o_can)) call sites are add_isolated in the strict sense of the stratum table (an isolated .add() call, no chaining) but unusual in that all three positions -- subject, predicate AND object -- are variables computed earlier in the loop, not literal namespace terms. +{ {s_can} {p_can} {o_can} } is still the right construction: {expr} interpolates in term position regardless of which position, and this is a plain add (no wildcard/matching semantics the way -{ }/m{ } have), so it is behaviourally identical to the .add() call it replaces. One @graph seed_graph designates the graph once, right after it is built, for the whole region.",
+    "`if p_can == RDF.type` became `if p_can == rdf:type`: a prefixed name used directly as a Python expression (comparison operand), not inside any g{ }/+{ } island -- the same pattern as `A = rdf:type` in the already-approved BrickSchema__Brick__generate_brick.py__define_relationships pair.",
+    "Context shim kgpipe_context.py restores TrackRecord (verbatim) and the real TARGET_ONTOLOGY_NAMESPACE value copied from the sibling kgpipe/common/config.py at the same commit (\"http://kg.org/ontology/\"). canonicalize_entity_term/canonicalize_property_term are reduced to the identity function: their real bodies depend on an external match file (entity/relation matching is not what this region does or what add_isolated measures); allowed_predicates/fusable_properties are concrete hand-picked sets standing in for ones the real code builds from an external ontology file. build_fixture_graphs() is a factory returning a fresh (source_graph, seed_graph) pair per call -- not a shared Graph object imported from the shim, which would make original.py's run and translated.ldpy's run silently mutate the SAME graph (Python caches the shim module on the second import within the same process) and pass regardless of what the translation says.",
+    "Fixture covers: a fusable predicate with no existing seed value (added), a fusable predicate whose subject already has one (discarded), an rdf:type triple outside TARGET_ONTOLOGY_NAMESPACE (skipped before the fusable check runs), a predicate absent from allowed_predicates (skipped), a non-fusable but allowed predicate not yet in the seed graph (copied), and the same non-fusable predicate where the exact triple already sits in the seed graph (skipped -- zero triples added for that one).",
+    "Coverage caveat: because canonicalize_entity_term/canonicalize_property_term are identity in this fixture, s_can/p_can/o_can are always equal to s/p/o, so this fixture alone could not catch a translation that wrote {s}/{p}/{o} instead of {s_can}/{p_can}/{o_can}. Verified the check is not a hollow green on a corruption that IS within its reach: hardcoding the predicate of the first +{ } to rdfs:comment flips the check to FAIL (7 vs 7 triples, not isomorphic)."
   ],
   "draft_sha": "25ab9a5277a0ba29",
   "provenance": {
@@ -28,5 +39,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

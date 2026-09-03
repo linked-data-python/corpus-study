@@ -10,10 +10,23 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "call suffix (g)",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "Stratifier boundary worth recording: this region is filed under sparql_literal, but both queries are actually built with `'''...'''.format(class_uri)` -- a genuine term-position interpolation, the sparql_interpolated idiom, not a literal query. It reads as sparql_literal only because the `.format()` call sits on the `query = ...` assignment, one statement away from the `self.graph.query(query)` call that the stratifier's site-detection anchors on -- a sibling method three lines below in the SAME file, query_cardinality, does the format+query call on one line and IS classified sparql_interpolated. Translated with the construction the CODE actually needs (`s{ }` + `{URIRef(class_uri)}`), not the one the stratum label suggested; noting the mismatch here since it may be worth teaching the stratifier to look one assignment back.",
+    "`<{}>.format(class_uri)` -> `{URIRef(class_uri)}`: verified directly against sbol_factory/query.py@5d01ec7f4c that class_uri arrives as a plain Python str at every real call site (query_superclass/query_base_class, which feed values back into this method, both return str(row[0])), not an rdflib.URIRef. ldpy's default coercion turns a bare str interpolated into s{ } term position into a Literal (no datatype), not a URIRef -- confirmed by hand: removing the URIRef() wrap made the fixture's first call return [] instead of the three real property IRIs, silently matching nothing rather than raising. The explicit URIRef(class_uri) is therefore load-bearing, not decoration; `<...>` disappears from the query text because s{ }'s interpolation is a term itself, never string pasting (same pattern as the BrickSchema/get_tag_sets sibling in sparql_interpolated).",
+    "ns_def_local inside a query, not restated: rdf:/rdfs:/owl:/sbol: are all fixed W3C/project vocabularies used as bare constants in the query text (never `Namespace(...)`-constructed at run time), so `@prefix` alone (no `as NAME`) at module scope is the direct, most specific translation -- no Python object is ever needed for them.",
+    "Preserved the original's own two-query, two-`query =`-then-`self.graph.query(query)` shape exactly (two `query = s{ ... }` / `response = query(self.graph)` pairs) rather than collapsing either query into a single `s{ ... }(self.graph)` expression -- matching structure, not refactoring it.",
+    "163-regions case (same shape as the RDFLib/VocPrez/list_collections sibling in this batch): `self.graph` has no visible binding in the extracted region -- restored only in driver.py as a `_Self` stand-in exposing `.graph`, with `__eq__` always agreeing because `run_pair` also compares call arguments and `rdflib.Graph.__eq__` compares by `.identifier` (a random blank node), not content -- a bare wrapper otherwise fails on call[i].arg[0] for a reason unrelated to the translation.",
+    "anti-hollow-green checks performed by hand, each reverted after: (1) weakening the first query's property path to a plain `rdfs:domain` (dropping the `(owl:unionOf/rdf:rest*/rdf:first)*` hop) made ex:comprisesUnion disappear from call[0]'s result, as expected; (2) breaking the second query's subject to an unrelated constant made the transpiler itself reject the file (an undeclared prefix in the substituted text), also a legitimate FAIL; (3) removing `URIRef(...)` (see above) collapsed call[0]'s three solutions to an empty list. All three confirm fixture.ttl exercises real, distinguishing behaviour rather than passing on an empty result both sides."
+  ],
   "draft_sha": "a56e06093a6e5a1a",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.678246+00:00",
@@ -24,5 +37,12 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:query_compositional_properties",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,0 +1,28 @@
+# This file is the human-reviewable copy at the conventional name; a
+# verbatim duplicate lives at data/sample-hash/ontomops_extension.ttl (see
+# driver.py and meta.json), because the region loads its graph from a file
+# path it builds itself (DATA_DIR/hash_value/ontomops_extension.ttl), not
+# from an argument -- the actual input has to sit at that exact path.
+@prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:       <http://example.org/> .
+
+ex:cbu1 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "Benzene ring" .
+
+# Same label as cbu1, a DIFFERENT individual: exercises "deduplicate by
+# label, first seen wins" -- one of cbu1/cbu2 must be dropped from the
+# result, never both kept.
+ex:cbu2 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "Benzene ring" .
+
+ex:cbu3 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "Amine linker" .
+
+# Neighbourhood that must NOT match: right type, no rdfs:label at all.
+ex:cbu4 a ontomops:ChemicalBuildingUnit .
+
+# Neighbourhood that must NOT match: labelled, but not a
+# ontomops:ChemicalBuildingUnit.
+ex:notACbu a ontomops:MetalOrganicPolyhedron ;
+    rdfs:label "Should not appear" .

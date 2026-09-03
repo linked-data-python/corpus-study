@@ -2,6 +2,7 @@
 # region: Builtin_STRSTARTS (lines 318-327, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import RDF, XSD, BNode, Literal, URIRef, Variable
+from context_shim import _compatibleStrings  # context shim, see meta.json
 
 def Builtin_STRSTARTS(expr, ctx):
     """
