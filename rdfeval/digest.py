@@ -94,17 +94,22 @@ def _code(text: str, kind: str, numbered: bool = True) -> str:
 # ------------------------------------------------------------- what a pair is
 
 def _files(ex_dir: Path) -> dict:
-    """The pair's files, by role.  Anything that is not one of the four
-    known names and is a module is a context shim: the translator chooses
-    its name, and more than one is allowed."""
+    """The pair's files, by role.
+
+    Only five names are fixed.  Every other module is a **context shim** —
+    the translator chooses its name, may need more than one, and may put it
+    in a package directory when the region's own imports are relative.
+    Fixtures are the same: one ``fixture.ttl`` is the common case, but a
+    region with four branches may carry one Turtle file per branch."""
     known = {"original.py", "driver.py", "translated.ldpy", "meta.json",
-             "review.json", "fixture.ttl"}
-    shims = sorted(p for p in ex_dir.glob("*.py") if p.name not in known)
+             "review.json"}
+    shims = sorted(q for q in ex_dir.rglob("*.py")
+                   if q.name not in known and "__pycache__" not in q.parts)
     return {
         "original": ex_dir / "original.py",
         "translated": ex_dir / "translated.ldpy",
         "driver": ex_dir / "driver.py",
-        "fixture": ex_dir / "fixture.ttl",
+        "fixtures": sorted(ex_dir.rglob("*.ttl")),
         "shims": shims,
     }
 
@@ -145,16 +150,23 @@ def _driver_facts(path: Path) -> dict:
     return facts
 
 
-def _fixture_size(path: Path) -> int | None:
-    if not path.exists():
+def _fixture_size(paths) -> int | None:
+    """Triples over every Turtle fixture of the pair.
+
+    ``None`` when the pair has none; ``-1`` when one of them is not Turtle."""
+    paths = [q for q in paths if q.exists()]
+    if not paths:
         return None
-    try:
-        from rdflib import Graph
-        g = Graph()
-        g.parse(data=_read(path), format="turtle")
-        return len(g)
-    except Exception:                                    # noqa: BLE001
-        return -1                                        # present, unparsable
+    total = 0
+    for path in paths:
+        try:
+            from rdflib import Graph
+            g = Graph()
+            g.parse(data=_read(path), format="turtle")
+            total += len(g)
+        except Exception:                                # noqa: BLE001
+            return -1
+    return total
 
 
 def _demo_bodies(files: dict) -> tuple[str | None, str | None]:
@@ -201,7 +213,7 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
             "are not compared")
 
     oracle = meta.get("oracle", "isomorphism")
-    size = _fixture_size(files["fixture"])
+    size = _fixture_size(files["fixtures"])
     if oracle == "values":
         if size is None:
             add(WARN, "reading region, no fixture file",
@@ -209,7 +221,8 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
                 "input graph must then be built inside the pair — confirm "
                 "it holds more than the region trivially finds")
         elif size == -1:
-            add(DANGER, "fixture unparsable", "fixture.ttl is not Turtle")
+            add(DANGER, "fixture unparsable",
+                "a .ttl file of the pair is not Turtle")
         elif size < 4:
             add(DANGER, "thin fixture",
                 "%d triple(s): too little for several solutions, a zero-"
@@ -238,7 +251,7 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
     for shim in files["shims"]:
         n = len(_read(shim).splitlines())
         level = WARN if n > 80 else INFO
-        add(level, "context shim: %s" % shim.name,
+        add(level, "context shim: %s" % shim.relative_to(ex_dir),
             "%d lines of restored context — it must reproduce the origin "
             "repository, not invent logic" % n)
 
@@ -390,17 +403,18 @@ def _pair_html(ex_dir: Path, meta: dict, row: dict) -> str:
                ", fixture " + html.escape(str(facts["fixture"]))
                if facts["fixture"] else "",
                _code(driver, "py")))
-    if files["fixture"].exists():
-        size = _fixture_size(files["fixture"])
+    for fixture in files["fixtures"]:
+        size = _fixture_size([fixture])
         extras.append(
-            "<details><summary>fixture.ttl — the input graph (%s)</summary>"
+            "<details><summary>%s — an input graph (%s)</summary>"
             "%s</details>"
-            % ("unparsable" if size == -1 else "%d triples" % size,
-               _code(_read(files["fixture"]), "ttl")))
+            % (html.escape(fixture.name),
+               "unparsable" if size == -1 else "%d triples" % size,
+               _code(_read(fixture), "ttl")))
     for shim in files["shims"]:
         extras.append(
             "<details><summary>%s — restored context (%d lines)</summary>%s"
-            "</details>" % (html.escape(shim.name),
+            "</details>" % (html.escape(str(shim.relative_to(ex_dir))),
                             len(_read(shim).splitlines()),
                             _code(_read(shim), "py")))
 

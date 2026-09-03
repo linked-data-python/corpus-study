@@ -241,3 +241,33 @@ def test_asking_for_one_stratum_leaves_the_index_alone(study, tmp_path):
     digest.run({}, study, stratum="add_isolated", out_dir=out)
     assert (out / "add_isolated.html").exists()
     assert (out / "index.html").read_text() == "older index"
+
+
+def test_a_shim_in_a_package_directory_is_found(study):
+    """A region whose own imports are relative needs its shim in a package;
+    the digest must still show it."""
+    ex = _dir(study)
+    (ex / "lib").mkdir()
+    (ex / "lib" / "__init__.py").write_text("")
+    (ex / "lib" / "utils.py").write_text("NGSILD = 1\n")
+    names = {str(p.relative_to(ex)) for p in digest._files(ex)["shims"]}
+    assert names == {"lib/__init__.py", "lib/utils.py"}
+
+
+def test_several_fixtures_are_counted_together(study):
+    """One Turtle file per branch is a legitimate shape: the screen must
+    weigh the evidence as a whole, not fire on each file's small count."""
+    ex = _dir(study)
+    for i in range(4):
+        (ex / ("fixture_%d.ttl" % i)).write_text("".join(
+            "<http://e/a%d> <http://e/p%d> <http://e/b> .\n" % (i, j)
+            for j in range(3)))
+    assert digest._fixture_size(digest._files(ex)["fixtures"]) == 12
+    assert not _labels(_flags(ex, {"oracle": "values"}), digest.DANGER)
+
+
+def test_pycache_is_not_mistaken_for_a_shim(study):
+    ex = _dir(study)
+    (ex / "__pycache__").mkdir()
+    (ex / "__pycache__" / "original.cpython-312.py").write_text("x = 1\n")
+    assert digest._files(ex)["shims"] == []
