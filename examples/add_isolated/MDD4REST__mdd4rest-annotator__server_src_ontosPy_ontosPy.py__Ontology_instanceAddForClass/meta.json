@@ -15,7 +15,11 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@graph", "+{ }", "interpolation {expr}"],
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
     "The region is a method (`self` is its first parameter); the extracted lines (1168-1188) don't carry self.allclasses/self.sessionGraph/self.sessionNS, set up elsewhere in Ontology.__init__ / setOntology. Restored the liaison per AGENT_BATCH.md's 163-region note: context_shim.py's OntologyContext reproduces just those three attributes (a plain list, a fresh rdflib.Graph, a Namespace on the real DEFAULT_SESSION_NAMESPACE constant), and `self` is annotated `self: OntologyContext` in both original.py and translated.ldpy (the annotation only documents the restored liaison -- Python does not enforce it at runtime).",
     "Two independent g.add() sites, each the sole write in its own if/elif branch (never both in one call) -- genuinely isolated, so each becomes its own `+{ }`. `@graph self.sessionGraph` is declared once above the if/elif rather than repeated in each branch: self.sessionGraph is read (never reassigned) between the declaration and both +{ } sites, so per INSTRUCTIONS.md SS2bis capturing its value once is safe -- both +{ } mutate the same Graph object in place.",
@@ -33,5 +37,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:instanceAddForClass (hand-rolled: self.sessionGraph compared by isomorphism, result/error by equality)",
+    "diffs": [],
+    "error": null
+  }
 }

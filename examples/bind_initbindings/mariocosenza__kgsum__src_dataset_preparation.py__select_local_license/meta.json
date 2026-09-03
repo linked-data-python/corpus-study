@@ -14,7 +14,12 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "s{ }", "prefixed name", "call suffix (g)"],
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "prefixed name",
+    "call suffix (g)"
+  ],
   "translation_notes": [
     "initNs-only case (no initBindings anywhere in this function): `initNs={\"dcterms\": 'http://purl.org/dc/terms/'}` is a static IRI known at transpile time, so it becomes a module-level `@prefix dcterms: <http://purl.org/dc/terms/> .`, and the query's prologue is inherited from it, per the stratum's correspondence rule. No interpolation is needed.",
     "`prepareQuery(TEXT, initNs=...)` collapses into an `s{ }` island written literally at the point of use, still assigned to `Q_LOCAL_DCTERMS_LICENSE` -- an island is an expression, so binding it to a name and later calling `Q_LOCAL_DCTERMS_LICENSE(parsed_graph)` (`call suffix (g)`) behaves exactly like writing `s{ ... }(parsed_graph)` inline; verified with the transpiler.",
@@ -32,5 +37,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:select_local_license",
+    "diffs": [],
+    "error": null
+  }
 }

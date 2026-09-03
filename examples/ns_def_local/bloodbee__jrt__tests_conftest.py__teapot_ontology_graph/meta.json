@@ -17,12 +17,16 @@
     "term_constructor": 2,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "plain literal"
   ],
+  "translation_notes": "TRADUITE le 2026-09-03, après ldpy 0.6.3 (fiche ldpy/027) — la région était restée en brouillon parce que STUFF était lié au graphe PAR VALEUR. L'héritage des préfixes par un graphe désigné supprime le g.bind(), et STUFF disparaît avec lui : il ne servait qu'à construire des termes, donc pas besoin de 'as'. Les quatre g.add() se groupent en un seul +{ } à deux sujets. Pilote : la région est une fixture pytest, donc demo() atteint le corps par __wrapped__. Casse délibérée : FAIL puis OK.\n\n[note antérieure] prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
   "draft_sha": "7a17c77297ed330e",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.634688+00:00",
@@ -33,5 +37,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

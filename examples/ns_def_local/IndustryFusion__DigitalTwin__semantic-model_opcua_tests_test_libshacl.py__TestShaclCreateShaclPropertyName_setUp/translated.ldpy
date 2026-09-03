@@ -4,10 +4,16 @@
 from rdflib import Graph, Namespace, URIRef, Literal, BNode
 from context_shim import Shacl, Validation  # context shim, see meta.json
 
+
+# `as` binds the Namespace OBJECT: both are stored on `self` and read by
+# the other methods of the TestCase, long after this block (ldpy/027).
+@prefix base:   <http://base/> as BASENS .
+@prefix opcuans: <http://opcuans/> as OPCUANS .
+
 def setUp(self):
     # Minimal setup for Shacl instance
     self.namespace_prefix = "http://example.org/"
-    self.basens = Namespace("http://base/")
-    self.opcuans = Namespace("http://opcuans/")
+    self.basens = BASENS
+    self.opcuans = OPCUANS
     self.data_graph = Graph()
     self.shacl = Shacl(self.data_graph, self.namespace_prefix, self.basens, self.opcuans)

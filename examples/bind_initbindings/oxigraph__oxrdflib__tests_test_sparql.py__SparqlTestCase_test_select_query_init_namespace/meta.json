@@ -15,7 +15,13 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@prefix", "prefixed name", "s{ }", "call suffix (g)", ".execute()"],
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "s{ }",
+    "call suffix (g)",
+    ".execute()"
+  ],
   "translation_notes": [
     "initNs-only case (no initBindings anywhere in this test method): `initNs={\"ex\": \"http://example.com/\"}` is a static IRI known at transpile time, so it becomes a module-level `@prefix ex: <http://example.com/> .`, and the query's prologue is inherited from it, per the stratum's correspondence rule. No interpolation is needed.",
     "`g.query(TEXT, initNs=...)` collapses into an `s{ }` island written literally at the point of use. `SELECT (ex:foo AS ?s) WHERE {}` returns a lazy `PreparedQuery` when called on a graph (`s{ }(g)`); the region calls `.serialize()` on the result, which `PreparedQuery` does not proxy, so `.execute()` is needed to obtain rdflib's actual `Result` object -- verified directly against ldpy/runtime.py's `PreparedQuery`: iterating or testing an island's truth value is enough for SELECT/ASK/CONSTRUCT, but getting the `Result` itself (to call a method on it) needs the explicit `.execute()`.",
@@ -34,5 +40,11 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_select_query_init_namespace",
+    "diffs": [],
+    "error": null
+  }
 }

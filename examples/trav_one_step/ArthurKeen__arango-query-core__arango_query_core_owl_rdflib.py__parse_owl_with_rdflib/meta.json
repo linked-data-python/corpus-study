@@ -50,5 +50,11 @@
     "trav_one_step",
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:parse_owl_with_rdflib",
+    "diffs": [],
+    "error": null
+  }
 }

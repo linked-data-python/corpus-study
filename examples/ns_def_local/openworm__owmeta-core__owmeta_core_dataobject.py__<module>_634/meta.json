@@ -13,15 +13,13 @@
     "namespace_ctor": 1
   },
   "translation_status": "final",
-  "classification": "not-expressible",
-  "constructions": [],
-  "translation_notes": [
-    "site de la strate : `base_data_namespace = R.Namespace(BASE_DATA_URL + \"/\")`. @prefix est purement lexical, il ne produit aucune valeur -- il ne peut donc jamais apparaitre a droite d'une AFFECTATION. Meme motif que le siblings de ce lot `JustlyAI__lmss_entity_extractor__..._OntologyClassifier___init__` (`self.LMSS = Namespace(...)`), ici sans `self.` : c'est une affectation de niveau classe.",
-    "verifie sur le depot reel (clone local corpus/repos/openworm__owmeta-core/owmeta_core/dataobject.py:634) : la ligne extraite est en realite le corps de la classe `BaseDataObject` (six.with_metaclass(ContextMappedClass, ...)), pas une instruction de module comme le laisse croire le `qualname: \"<module>\"` du pipeline d'extraction et le fichier original.py fourni (aplati a la portee module). Ce n'est pas une simple imprecision : le classifieur de rdfeval (rdfeval/surface.py:360-373) empile bien les ClassDef dans `depth_of_function`, donc la strate est correctement `ns_def_local` (une classe EST un bloc au sens de declarations.md#block-scope) -- seule l'extraction du code source a perdu l'enveloppe `class BaseDataObject:`. Cela ne change pas la conclusion : que le bloc soit une classe ou une fonction, une AFFECTATION echappe au bloc de la meme facon, et re-envelopper la region dans un stub `class BaseDataObject:` aurait en outre casse l'oracle automatique (entry=None ne compare que les valeurs de PORTEE MODULE ; un attribut de classe n'y apparait pas) sans rien changer au verdict -- non fait, note ici a la place.",
-    "echappement confirme, pas suppose : `owmeta_core/mapped_class.py:52` dereference `self.base_data_namespace[self.__name__] + '#'` (souscription, hors de cette region, dans un AUTRE fichier). Namespace doit rester un vrai objet supportant `__getitem__` -- un `<...>` (URIRef nu / IRI figee) le casserait silencieusement, et une regression ainsi introduite ne se verrait PAS dans le pilote de cette region puisque mapped_class.py n'y est pas.",
-    "shim de contexte (context_shim.py) : BASE_SCHEMA_URL / BASE_DATA_URL transcrits verbatim depuis owmeta_core/__init__.py (lignes 25-26, clone local). DEF_CTX / RDF_CONTEXT sont des stubs a nom seul (None) : importes par le fichier reel mais jamais derefEnces par cette region d'une ligne ; leur vraie valeur (Context()/ClassContext(...)) est une machinerie sans rapport que cette region n'exerce pas -- meme convention que le stub SentenceTransformer du sibling.",
-    "`from . import ...` (import relatif du package) remplace par `from context_shim import ...` -- meme jeu de quatre noms, regle du shim de contexte."
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "f<…>",
+    "interpolation {expr}"
   ],
+  "translation_notes": "REJUGÉE le 2026-09-03 après ldpy 0.6.3 (fiche ldpy/027). 'base_data_namespace = R.Namespace(BASE_DATA_URL + \"/\")' cumulait les deux obstacles : une IRI calculée à l'exécution ET un objet qui doit survivre au bloc. Les deux formes se combinent — '@prefix basedata: f<{BASE_DATA_URL}/> as base_data_namespace .' — le préfixe dynamique existait déjà, 'as' lui a été étendu en 0.6.3. Casse délibérée : FAIL puis OK.\n\n[note antérieure] site de la strate : `base_data_namespace = R.Namespace(BASE_DATA_URL + \"/\")`. @prefix est purement lexical, il ne produit aucune valeur -- il ne peut donc jamais apparaitre a droite d'une AFFECTATION. Meme motif que le siblings de ce lot `JustlyAI__lmss_entity_extractor__..._OntologyClassifier___init__` (`self.LMSS = Namespace(...)`), ici sans `self.` : c'est une affectation de niveau classe. verifie sur le depot reel (clone local corpus/repos/openworm__owmeta-core/owmeta_core/dataobject.py:634) : la ligne extraite est en realite le corps de la classe `BaseDataObject` (six.with_metaclass(ContextMappedClass, ...)), pas une instruction de module comme le laisse croire le `qualname: \"<module>\"` du pipeline d'extraction et le fichier original.py fourni (aplati a la portee module). Ce n'est pas une simple imprecision : le classifieur de rdfeval (rdfeval/surface.py:360-373) empile bien les ClassDef dans `depth_of_function`, donc la strate est correctement `ns_def_local` (une classe EST un bloc au sens de declarations.md#block-scope) -- seule l'extraction du code source a perdu l'enveloppe `class BaseDataObject:`. Cela ne change pas la conclusion : que le bloc soit une classe ou une fonction, une AFFECTATION echappe au bloc de la meme facon, et re-envelopper la region dans un stub `class BaseDataObject:` aurait en outre casse l'oracle automatique (entry=None ne compare que les valeurs de PORTEE MODULE ; un attribut de classe n'y apparait pas) sans rien changer au verdict -- non fait, note ici a la place. echappement confirme, pas suppose : `owmeta_core/mapped_class.py:52` dereference `self.base_data_namespace[self.__name__] + '#'` (souscription, hors de cette region, dans un AUTRE fichier). Namespace doit rester un vrai objet supportant `__getitem__` -- un `<...>` (URIRef nu / IRI figee) le casserait silencieusement, et une regression ainsi introduite ne se verrait PAS dans le pilote de cette region puisque mapped_class.py n'y est pas. shim de contexte (context_shim.py) : BASE_SCHEMA_URL / BASE_DATA_URL transcrits verbatim depuis owmeta_core/__init__.py (lignes 25-26, clone local). DEF_CTX / RDF_CONTEXT sont des stubs a nom seul (None) : importes par le fichier reel mais jamais derefEnces par cette region d'une ligne ; leur vraie valeur (Context()/ClassContext(...)) est une machinerie sans rapport que cette region n'exerce pas -- meme convention que le stub SentenceTransformer du sibling. `from . import ...` (import relatif du package) remplace par `from context_shim import ...` -- meme jeu de quatre noms, regle du shim de contexte.",
   "draft_sha": "b7e1901d9a3b7f96",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.607537+00:00",
@@ -32,5 +30,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

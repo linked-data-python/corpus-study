@@ -1,38 +1,31 @@
 # Extracted from BONSAMURAIS/arborist@da18f3d17c : arborist/extract_emissions.py
 # region: setup_empty_graph (lines 22-77, stratum ns_def_local)
 # licence of the source repository: see meta.json
-from rdflib import Graph, Namespace, URIRef, Literal
+from rdflib import Graph, URIRef
 from context_shim import add_common_elements  # context shim, see meta.json
 
 def setup_empty_graph():
-    global BONT, BRDFFO, BRDFLO, BRDFTIME, BRDFFAT, BRDFFOAF, BRDFDAT, BRDFPROV, dataset
-    global CC, DC, DTYPE, NS0, NS1, OM2, OT, SCHEMA, TIME, XML, PROV, extent2011node
+    global dataset, extent2011node
 
-    # NOT-EXPRESSIBLE (see meta.json): every one of these 19 Namespace
-    # objects is later passed BY VALUE to `g.bind(prefix, NS)` below, and
-    # each is also exported as a module global by the `global` statement
-    # above. `@prefix` is a lexical, transpile-time binding: it defines no
-    # Python name at all, so `BONT` (and the other 18) stay undefined here.
-    # Left in place, substituted, so `rdfeval check` reproduces the failure.
-    @prefix bont: <http://ontology.bonsai.uno/core#> .
-    @prefix brdffo: <http://rdf.bonsai.uno/flowobject/exiobase3_3_17#> .
-    @prefix brdflo: <http://rdf.bonsai.uno/location/exiobase3_3_17#> .
-    @prefix brdftime: <http://rdf.bonsai.uno/time#> .
-    @prefix brdffat: <http://rdf.bonsai.uno/activitytype/exiobase3_3_17#> .
-    @prefix brdffoaf: <http://rdf.bonsai.uno/foaf/bonsai#> .
-    @prefix brdfdat: <http://rdf.bonsai.uno/data/exiobase3_3_17/emission#> .
-    @prefix brdfprov: <http://rdf.bonsai.uno/prov/exiobase3_3_17#> .
-    @prefix cc: <http://creativecommons.org/ns#> .
-    @prefix dc: <http://purl.org/dc/elements/1.1/> .
-    @prefix dtype: <http://purl.org/dc/dcmitype/> .
-    @prefix ns0: <http://purl.org/vocab/vann/> .
-    @prefix ns1: <http://creativecommons.org/ns#> .
-    @prefix om2: <http://www.ontology-of-units-of-measure.org/resource/om-2/> .
-    @prefix ot: <https://www.w3.org/TR/owl-time/> .
-    @prefix schema: <http://schema.org/> .
-    @prefix time: <http://www.w3.org/2006/time#> .
-    @prefix xml: <http://www.w3.org/XML/1998/namespace> .
-    @prefix prov: <http://www.w3.org/ns/prov#> .
+    global @prefix bont:     <http://ontology.bonsai.uno/core#> as BONT .
+    global @prefix brdffo:   <http://rdf.bonsai.uno/flowobject/exiobase3_3_17#> as BRDFFO .
+    global @prefix brdflo:   <http://rdf.bonsai.uno/location/exiobase3_3_17#> as BRDFLO .
+    global @prefix brdftime: <http://rdf.bonsai.uno/time#> as BRDFTIME .
+    global @prefix brdffat:  <http://rdf.bonsai.uno/activitytype/exiobase3_3_17#> as BRDFFAT .
+    global @prefix bfoaf:    <http://rdf.bonsai.uno/foaf/bonsai#> as BRDFFOAF .
+    global @prefix brdfdat:  <http://rdf.bonsai.uno/data/exiobase3_3_17/emission#> as BRDFDAT .
+    global @prefix brdfprov: <http://rdf.bonsai.uno/prov/exiobase3_3_17#> as BRDFPROV .
+    global @prefix cc:       <http://creativecommons.org/ns#> as CC .
+    global @prefix dc:       <http://purl.org/dc/elements/1.1/> as DC .
+    global @prefix dtype:    <http://purl.org/dc/dcmitype/> as DTYPE .
+    global @prefix ns0:      <http://purl.org/vocab/vann/> as NS0 .
+    global @prefix ns1:      <http://creativecommons.org/ns#> as NS1 .
+    global @prefix om2:      <http://www.ontology-of-units-of-measure.org/resource/om-2/> as OM2 .
+    global @prefix ot:       <https://www.w3.org/TR/owl-time/> as OT .
+    global @prefix schema:   <http://schema.org/> as SCHEMA .
+    global @prefix time:     <http://www.w3.org/2006/time#> as TIME .
+    global @prefix xml:      <http://www.w3.org/XML/1998/namespace> as XML .
+    global @prefix prov:     <http://www.w3.org/ns/prov#> as PROV .
 
     extent2011node = URIRef("{}{}".format(BRDFTIME, '2011'))
 
@@ -45,24 +38,24 @@ def setup_empty_graph():
         author="BONSAI Team",
     )
 
-    g.bind("bont", BONT)
-    g.bind("brdffo", BRDFFO)
-    g.bind("brdflo", BRDFLO)
-    g.bind("brdftime", BRDFTIME)
-    g.bind("brdffat", BRDFFAT)
-    g.bind("brdfdat", BRDFDAT)
-    g.bind("brdfprov", BRDFPROV)
-    g.bind("bfoaf", BRDFFOAF)
-    g.bind("cc", CC)
-    g.bind("dc", DC)
-    g.bind("dtype", DTYPE)
-    g.bind("ns0", NS0)
-    g.bind("ns1", NS1)
-    g.bind("om2", OM2)
-    g.bind("ot", OT)
-    g.bind("schema", SCHEMA)
-    g.bind("time", TIME)
-    g.bind("xml", XML)
-    g.bind("prov", PROV)
+    # The nineteen `g.bind(...)` calls of the original are gone: a graph
+    # DESIGNATED by `@graph` inherits the block's prefixes (record ldpy/027).
+    @graph g
 
     return g
+
+
+# --- harness, identical on both sides: the region sets module globals and
+# --- binds prefixes on the graph, neither of which a triple comparison sees.
+def demo():
+    g = setup_empty_graph()
+    return {
+        "namespaces": sorted((p, str(u)) for p, u in g.namespaces()),
+        "globals": {n: str(v) for n, v in sorted(globals().items())
+                    if n in ("BONT", "BRDFFO", "BRDFLO", "BRDFTIME", "BRDFFAT",
+                             "BRDFFOAF", "BRDFDAT", "BRDFPROV", "CC", "DC",
+                             "DTYPE", "NS0", "NS1", "OM2", "OT", "SCHEMA",
+                             "TIME", "XML", "PROV", "extent2011node",
+                             "dataset")},
+        "triples": sorted(map(str, g)),
+    }

@@ -17,7 +17,13 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@graph", "+{ }", "interpolation {expr}", "plain literal", "IRI"],
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "plain literal",
+    "IRI"
+  ],
   "translation_notes": [
     "Mechanical draft wrote `g += g{ {URIRef(base + \"thing\")} {URIRef(base + \"ns#comment\")} \"anything\" }` (the known add_isolated draft bias): rewritten as `@graph g` + `+{ }`, the construction the stratum targets.",
     "The bare `<http://example.org/other>` / `<http://example.org/ns#Thing>` terms in the yielded tuples were already correct in the draft (IRI island used directly as a Python value, outside any g{ }/+{ } block) and are kept as-is.",
@@ -35,5 +41,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_bind_tests (hand-rolled: graph reached via check.__closure__, compared by isomorphism)",
+    "diffs": [],
+    "error": null
+  }
 }

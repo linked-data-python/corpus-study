@@ -1,15 +1,10 @@
-"""Validation driver for bloodbee__jrt__tests_conftest.py__teapot_ontology_graph.
+"""Validation driver for bloodbee/jrt teapot_ontology_graph.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region is a pytest fixture: `@pytest.fixture` wraps the function, so the
+entry point cannot be called directly. `demo()` — identical on both sides —
+calls the undecorated body through the wrapper's `__wrapped__` and returns
+the graph, which the harness compares by isomorphism.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='teapot_ontology_graph',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
-)
+VERDICT = run_pair(__file__, entry='demo', calls=[((), {})])

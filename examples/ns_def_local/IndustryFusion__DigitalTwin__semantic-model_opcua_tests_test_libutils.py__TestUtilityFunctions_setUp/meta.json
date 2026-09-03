@@ -13,12 +13,11 @@
     "namespace_ctor": 1
   },
   "translation_status": "final",
-  "classification": "not-expressible",
-  "constructions": [],
-  "translation_notes": [
-    "self.basens = Namespace(\"http://example.org/base/\") is assigned to self and must outlive setUp for other test methods to read it; `@prefix` has no run-time object (INSTRUCTIONS.md #1, #5), so there is nothing to bind on self. Kept as a plain Namespace(...) call, unchanged from original.py -- the minimal, purest instance of this stratum's expected limit (a single namespace_ctor, no other RDF op in the region).",
-    "driver.py: setUp(self) has no Graph involved, only a Namespace assigned to self.basens, so a plain SimpleNamespace() stand-in with its default __dict__ equality is enough to compare the resulting attribute across the two runs (no isomorphism concern, unlike the sibling TestShaclCreateShaclPropertyName_setUp region)."
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix"
   ],
+  "translation_notes": "REJUGÉE le 2026-09-03 après ldpy 0.6.3 (fiche ldpy/027). C'était le cas minimal et pur de la limite : un seul Namespace, assigné à self.basens pour que les autres méthodes du TestCase le lisent après la fin du bloc. 'as BASENS' lie exactement cet objet. Le préfixe est déclaré au niveau module, si bien que les autres méthodes peuvent aussi écrire 'basens:term' — c'est tout l'intérêt de le garder lexical EN PLUS. Casse délibérée vérifiée : FAIL puis OK.\n\n[note antérieure] self.basens = Namespace(\"http://example.org/base/\") is assigned to self and must outlive setUp for other test methods to read it; `@prefix` has no run-time object (INSTRUCTIONS.md #1, #5), so there is nothing to bind on self. Kept as a plain Namespace(...) call, unchanged from original.py -- the minimal, purest instance of this stratum's expected limit (a single namespace_ctor, no other RDF op in the region). driver.py: setUp(self) has no Graph involved, only a Namespace assigned to self.basens, so a plain SimpleNamespace() stand-in with its default __dict__ equality is enough to compare the resulting attribute across the two runs (no isomorphism concern, unlike the sibling TestShaclCreateShaclPropertyName_setUp region).",
   "draft_sha": "d63a08efbaf3ec65",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.465492+00:00",
@@ -29,5 +28,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:setUp",
+    "diffs": [],
+    "error": null
+  }
 }

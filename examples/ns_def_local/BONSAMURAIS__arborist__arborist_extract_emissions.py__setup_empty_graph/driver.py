@@ -1,15 +1,11 @@
-"""Validation driver for BONSAMURAIS__arborist__arborist_extract_emissions.py__setup_empty_graph.
+"""Validation driver for BONSAMURAIS/arborist setup_empty_graph.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region's whole effect is invisible to a triple comparison: it sets
+nineteen module globals and binds nineteen prefixes on a graph whose triples
+come from a helper. `demo()` — identical in both files — returns the three
+things that ARE the region's output: the graph's prefix bindings, the globals
+it exports, and the triples.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
-VERDICT = run_pair(
-    __file__,
-    entry='setup_empty_graph',
-    calls=[((), {})],  # setup_empty_graph() takes no arguments
-)
+VERDICT = run_pair(__file__, entry='demo', calls=[((), {})])

@@ -8,42 +8,29 @@ from rdflib import Graph, Namespace, RDF
 def rebuild_output_graph(self):
     """Clears and re-serializes components according to active configuration settings mapping definitions."""
     self.output_graph = Graph()
-    @graph self.output_graph
-
-    # 1. Bind core standard and target custom namespaces
-    # self.BRICK / self.REF are NOT-EXPRESSIBLE here (see meta.json): they
-    # are set up elsewhere (IfcBrickAnnotator.load_brick_schema, sibling
-    # region) and bound onto the graph below BY VALUE, so they must stay
-    # plain Namespace objects reachable under these names.
-    self.output_graph.bind("brick", self.BRICK)
-    self.output_graph.bind("ref", self.REF)
 
     # Consistent prefix generation definitions
     base_inst = self.settings.value("ns_inst", "http://example.org/project#")
     if not str(base_inst).endswith(('#', '/')):
         base_inst = str(base_inst) + '#'
 
-    # ifc_inst_ns / brick_inst_ns / bacnet_ns / bldg_ns / ifc_core_ns are
-    # NOT-EXPRESSIBLE as `@prefix` (see meta.json): every one of them is
-    # bound onto self.output_graph BY VALUE a few lines below
-    # (`self.output_graph.bind(..., ns)`), and `@prefix` has no run-time
-    # object to hand to `.bind()`. Kept as plain Namespace(...), unchanged.
-    ifc_inst_ns = Namespace(base_inst + "ifcInst:")
-    brick_inst_ns = Namespace(base_inst + "brickInst:")
-    bacnet_ns = Namespace("http://buildingsmart.org/bacnet#")
-    bldg_ns = Namespace(base_inst + "bldg:")
+    # Every prefix of this function is a DYNAMIC one — its IRI is a runtime
+    # value (a Qt setting, an attribute of self) — so each is declared with a
+    # formatted IRI, and `as` keeps the Namespace OBJECT, which the loops
+    # below index by a runtime key (`ifc_inst_ns[data["eq_guid"]]`).
+    @prefix brick:     f<{self.BRICK}> as _brick .
+    @prefix ref:       f<{self.REF}> as _ref .
+    @prefix ifcInst:   f<{base_inst}ifcInst:> as ifc_inst_ns .
+    @prefix brickInst: f<{base_inst}brickInst:> as brick_inst_ns .
+    @prefix bacnet:    <http://buildingsmart.org/bacnet#> as bacnet_ns .
+    @prefix bldg:      f<{base_inst}bldg:> as bldg_ns .
+    @prefix ifc:       f<{self.settings.value("ns_ifc", "http://standards.buildingsmart.org/IFC/RELEASE/IFC4/Ontology#")}> as ifc_core_ns .
 
-    self.output_graph.bind("ifcInst", ifc_inst_ns)
-    self.output_graph.bind("brickInst", brick_inst_ns)
-    self.output_graph.bind("bacnet", bacnet_ns)
-    self.output_graph.bind("bldg", bldg_ns)
-
-    ifc_core_ns = Namespace(
-        self.settings.value(
-            "ns_ifc", "http://standards.buildingsmart.org/IFC/RELEASE/IFC4/Ontology#"
-        )
-    )
-    self.output_graph.bind("ifc", ifc_core_ns)
+    # The seven `self.output_graph.bind(...)` calls of the original are gone:
+    # a graph DESIGNATED by `@graph` inherits the prefixes in scope at that
+    # point (record ldpy/027), which is why the designation now follows the
+    # declarations instead of preceding them.
+    @graph self.output_graph
 
     # 2. Sequential structural iteration over individual items
     # add_in_loop (this region's second stratum): self.annotations_registry

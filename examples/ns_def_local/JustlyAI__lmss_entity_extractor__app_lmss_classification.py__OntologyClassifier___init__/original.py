@@ -38,4 +38,6 @@ def __init__(
 def demo(graph_path, index_path, top_classes_path):
     instance = OntologyClassifier()
     __init__(instance, graph_path, index_path, top_classes_path)
-    return instance.graph
+    # `self.LMSS` is part of what the region sets up and no triple shows it:
+    # return it alongside the graph, or a wrong namespace passes unnoticed.
+    return instance.graph, str(instance.LMSS)

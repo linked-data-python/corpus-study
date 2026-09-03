@@ -2,24 +2,29 @@
 # region: teapot_ontology_graph (lines 28-40, stratum ns_def_local)
 # licence of the source repository: see meta.json
 import pytest
-from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import OWL, RDF, RDFS, Namespace
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+from rdflib import Graph
 
+@prefix stuff: <http://example.org/stuff#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
 @pytest.fixture
 def teapot_ontology_graph():
-    STUFF = Namespace("http://example.org/stuff#")
     g = Graph()
-    g.bind("stuff", STUFF)
+    # `g.bind("stuff", STUFF)` is gone: a designated graph inherits the
+    # block's prefixes (record ldpy/027). And STUFF itself is gone with it —
+    # it only ever built terms, so no `as` is needed.
+    @graph g
 
-    g += g{
-        {STUFF.TeaPot} a owl:Class ;
-           rdfs:label "TeaPot" .
-        {STUFF.stuffs} a owl:ObjectProperty ;
-           rdfs:label "stuffs"
-    }
+    +{ stuff:TeaPot a owl:Class ;
+                    rdfs:label "TeaPot" .
+       stuff:stuffs a owl:ObjectProperty ;
+                    rdfs:label "stuffs" }
 
     return g
+
+
+# Harness, identical on both sides: reach the fixture body past its decorator.
+def demo():
+    fn = getattr(teapot_ontology_graph, "__wrapped__", teapot_ontology_graph)
+    return fn()

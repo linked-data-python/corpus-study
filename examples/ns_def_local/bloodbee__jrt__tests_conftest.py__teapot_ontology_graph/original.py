@@ -18,3 +18,9 @@ def teapot_ontology_graph():
     g.add((STUFF.stuffs, RDFS.label, Literal("stuffs")))
 
     return g
+
+
+# Harness, identical on both sides: reach the fixture body past its decorator.
+def demo():
+    fn = getattr(teapot_ontology_graph, "__wrapped__", teapot_ontology_graph)
+    return fn()

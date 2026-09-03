@@ -24,4 +24,6 @@
 import rdflib as R
 from context_shim import BASE_DATA_URL, BASE_SCHEMA_URL, DEF_CTX, RDF_CONTEXT
 
-base_data_namespace = R.Namespace(BASE_DATA_URL + "/")
+# A DYNAMIC prefix — the IRI is a run-time constant — whose object must
+# survive the block: the two together (record ldpy/027).
+@prefix basedata: f<{BASE_DATA_URL}/> as base_data_namespace .

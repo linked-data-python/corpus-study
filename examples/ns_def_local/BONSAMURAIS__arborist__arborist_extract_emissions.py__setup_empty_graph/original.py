@@ -60,3 +60,19 @@ def setup_empty_graph():
     g.bind("prov", PROV)
 
     return g
+
+
+# --- harness, identical on both sides: the region sets module globals and
+# --- binds prefixes on the graph, neither of which a triple comparison sees.
+def demo():
+    g = setup_empty_graph()
+    return {
+        "namespaces": sorted((p, str(u)) for p, u in g.namespaces()),
+        "globals": {n: str(v) for n, v in sorted(globals().items())
+                    if n in ("BONT", "BRDFFO", "BRDFLO", "BRDFTIME", "BRDFFAT",
+                             "BRDFFOAF", "BRDFDAT", "BRDFPROV", "CC", "DC",
+                             "DTYPE", "NS0", "NS1", "OM2", "OT", "SCHEMA",
+                             "TIME", "XML", "PROV", "extent2011node",
+                             "dataset")},
+        "triples": sorted(map(str, g)),
+    }

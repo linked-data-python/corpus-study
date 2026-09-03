@@ -17,7 +17,13 @@
   },
   "translation_status": "final",
   "classification": "directly-expressible",
-  "constructions": ["@graph", "+{ }", "interpolation {expr}", "prefixed name", "from … import p:"],
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "from … import p:"
+  ],
   "translation_notes": [
     "The region's 12 graph.add() calls run in TWO runs of shared-subject writes (record_subject, then activity) rather than one isolated add each, so -- per INSTRUCTIONS.md SS2 'toujours la construction la plus specifique' -- this translation uses the add_run_shared_subject pattern (a single `;`-joined +{ } per contiguous run on one subject) instead of forcing 12 separate +{ } blocks, which would have been a degradation relative to what the language offers. Each `if`-guarded optional predicate (dct:creator, fdp-o:validatedAgainst, prov:wasAssociatedWith) stays its OWN single-line +{ } (0.4.0 compound-suite feature), since it is not part of the unconditional run.",
     "activity's two rdf:type triples (prov:Activity and FDP_CREATE_OPERATION/FDP_MODIFY_OPERATION) share both subject AND predicate, so they are written as one Turtle object list (`a prov:Activity, {expr}`) rather than repeating `a` -- again the most specific construction for what the source code does (two `graph.add()` calls on the exact same (activity, rdf:type) pair).",
@@ -37,5 +43,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:build_meta_graph (hand-rolled: MetaResult.graph compared by isomorphism, other fields by equality)",
+    "diffs": [],
+    "error": null
+  }
 }
