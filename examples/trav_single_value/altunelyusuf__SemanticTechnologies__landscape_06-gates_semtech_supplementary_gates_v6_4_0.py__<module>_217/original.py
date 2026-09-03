@@ -1,8 +1,0 @@
-# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v6_4_0.py
-# region: <module> (lines 217-217, stratum trav_single_value)
-# licence of the source repository: see meta.json
-SEM = Namespace("http://example.org/semtech#")
-tb = Graph().parse(f"{HERE}/02-ontology/semtech_tbox_v6_4_0.ttl")
-IRI = {n["id"]: cls_iri(n) for n in nodes}
-
-sn = sum(1 for n in nodes if tb.value(IRI[n["id"]], SEM.syntacticExample))

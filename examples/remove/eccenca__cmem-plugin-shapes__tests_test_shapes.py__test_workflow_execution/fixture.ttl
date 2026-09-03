@@ -1,9 +1,0 @@
-# No input graph can be written for this region, and that is the finding.
-#
-# The graph it reads -- `Graph().parse(data=get_graph_content(client,
-# graph_setup.shapes_iri))` -- is the SHAPES GRAPH THE PLUGIN JUST WROTE into
-# a live eccenca Corporate Memory deployment, read back over HTTP.  Its
-# `dcterms:created` stamp is produced by that deployment at execution time and
-# is asserted against DATETIME_PATTERN *before* being removed, so a fixture
-# standing in for it would be validating a double of the plugin rather than
-# the region.  See driver.py and meta.json: classification "excluded".

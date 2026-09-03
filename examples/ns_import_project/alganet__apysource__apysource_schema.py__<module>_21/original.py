@@ -1,4 +1,0 @@
-# Extracted from alganet/apysource@f800ec97c1 : apysource/schema.py
-# region: <module> (lines 21-21, stratum ns_import_project)
-# licence of the source repository: see meta.json
-from apysource.namespaces import BIBO, SCHEMA, SV

@@ -1,8 +1,0 @@
-# Extracted from jgimitola/knowledge-template@f8a44ad259 : src/knowledge/graph.py
-# region: run_query (lines 55-56, stratum sparql_interpolated)
-# licence of the source repository: see meta.json
-from rdflib import RDF, Graph, URIRef
-from knowledge.vocab import Vocabulary
-
-def run_query(g: Graph, vocab: Vocabulary, sparql: str) -> list[tuple[str, ...]]:
-    return [tuple(str(value) for value in row) for row in g.query(vocab.sparql_prefixes + sparql)]

@@ -1,8 +1,0 @@
-# Extracted from LexMalta/recipes@b861b7ccea : recipe-importer/rdflib/plugins/sparql/operators.py
-# region: Builtin_DAY (lines 457-459, stratum coercion_datatype)
-# licence of the source repository: see meta.json
-from rdflib import RDF, XSD, BNode, Literal, URIRef, Variable
-
-def Builtin_DAY(e, ctx):
-    d = date(e.arg)
-    return Literal(d.day)
