@@ -701,6 +701,15 @@ def run(config: dict, study: Study = STUDY, stratum: str | None = None,
     for ex_dir, meta in iter_examples(study):
         by_stratum.setdefault(meta.get(study.group, "?"), []).append(
             (ex_dir, meta))
+    # Follow the directory listing, so a reader can hold the page and
+    # `ls examples/<stratum>/` side by side.  `iter_examples` sorts by code
+    # point (every capital before every lowercase); a listing sorts
+    # case-insensitively, and that order is the one a human reads the
+    # directory in.  Sorting here rather than in `iter_examples` is
+    # deliberate: the draw of `make_batches.py` shuffles a `sorted()` list,
+    # and changing that order would change which regions the campaign picks.
+    for pairs in by_stratum.values():
+        pairs.sort(key=lambda p: p[0].name.lower())
 
     out.mkdir(parents=True, exist_ok=True)
     index_rows, totals = [], {"final": 0, "draft": 0, "danger": 0,

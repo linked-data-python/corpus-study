@@ -284,3 +284,27 @@ def test_data_that_is_not_turtle_is_still_shown(study, tmp_path):
     digest.run({}, study, out_dir=tmp_path / "r")
     page = (tmp_path / "r" / "add_isolated.html").read_text()
     assert "vbis-brick.csv — pair data (2 lines)" in page
+
+
+def test_pairs_follow_the_directory_listing(study, tmp_path):
+    """A reader holds the page and `ls examples/<stratum>/` side by side.
+
+    `iter_examples` sorts by code point, which puts every capital before
+    every lowercase; a listing sorts case-insensitively. The page follows
+    the listing.
+    """
+    import re
+    stratum = study.examples_dir / "add_isolated"
+    for name in ("Zebra__repo__m.py__z", "alpha__repo__m.py__a",
+                 "Beta__repo__m.py__b"):
+        ex = stratum / name
+        ex.mkdir()
+        (ex / "original.py").write_text(ORIGINAL)
+        (ex / "translated.ldpy").write_text(TRANSLATED)
+        (ex / "driver.py").write_text(DRIVER)
+        (ex / "meta.json").write_text(json.dumps(dict(META, region_id=name)))
+    digest.run({}, study, out_dir=tmp_path / "r")
+    page = (tmp_path / "r" / "add_isolated.html").read_text()
+    ids = re.findall(r'<section class="pair" id="([^"]+)"', page)
+    assert ids == sorted(ids, key=str.lower)
+    assert ids.index("alpha__repo__m.py__a") < ids.index("Beta__repo__m.py__b")
