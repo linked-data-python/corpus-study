@@ -271,3 +271,16 @@ def test_pycache_is_not_mistaken_for_a_shim(study):
     (ex / "__pycache__").mkdir()
     (ex / "__pycache__" / "original.cpython-312.py").write_text("x = 1\n")
     assert digest._files(ex)["shims"] == []
+
+
+def test_data_that_is_not_turtle_is_still_shown(study, tmp_path):
+    """A region that builds its graph from a CSV needs that CSV: it is as
+    much part of the evidence as a Turtle fixture, and must not vanish."""
+    ex = _dir(study)
+    (ex / "vbis-brick.csv").write_text("a,b\n1,2\n")
+    files = digest._files(ex)
+    assert [p.name for p in files["data"]] == ["vbis-brick.csv"]
+    assert files["fixtures"] == []
+    digest.run({}, study, out_dir=tmp_path / "r")
+    page = (tmp_path / "r" / "add_isolated.html").read_text()
+    assert "vbis-brick.csv — pair data (2 lines)" in page

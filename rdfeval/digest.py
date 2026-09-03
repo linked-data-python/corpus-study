@@ -103,13 +103,19 @@ def _files(ex_dir: Path) -> dict:
     region with four branches may carry one Turtle file per branch."""
     known = {"original.py", "driver.py", "translated.ldpy", "meta.json",
              "review.json"}
-    shims = sorted(q for q in ex_dir.rglob("*.py")
-                   if q.name not in known and "__pycache__" not in q.parts)
+    kept = lambda q: q.name not in known and "__pycache__" not in q.parts
+    shims = sorted(q for q in ex_dir.rglob("*.py") if kept(q))
+    fixtures = sorted(q for q in ex_dir.rglob("*")
+                      if q.suffix in (".ttl", ".nt", ".n3") and kept(q))
+    data = sorted(q for q in ex_dir.rglob("*")
+                  if q.is_file() and kept(q) and q not in fixtures
+                  and q.suffix not in (".py", ".ldpy"))
     return {
         "original": ex_dir / "original.py",
         "translated": ex_dir / "translated.ldpy",
         "driver": ex_dir / "driver.py",
-        "fixtures": sorted(ex_dir.rglob("*.ttl")),
+        "fixtures": fixtures,
+        "data": data,
         "shims": shims,
     }
 
@@ -411,6 +417,14 @@ def _pair_html(ex_dir: Path, meta: dict, row: dict) -> str:
             % (html.escape(fixture.name),
                "unparsable" if size == -1 else "%d triples" % size,
                _code(_read(fixture), "ttl")))
+    for datum in files["data"]:
+        # A fixture is not always Turtle: a region that reads a CSV to build
+        # its graph needs that CSV, and it is as much part of the evidence.
+        extras.append(
+            "<details><summary>%s — pair data (%d lines)</summary>%s"
+            "</details>" % (html.escape(str(datum.relative_to(ex_dir))),
+                            len(_read(datum).splitlines()),
+                            _code(_read(datum), "txt")))
     for shim in files["shims"]:
         extras.append(
             "<details><summary>%s — restored context (%d lines)</summary>%s"
