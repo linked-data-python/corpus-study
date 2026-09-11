@@ -243,6 +243,10 @@ class _Bindings:
         self.module_aliases: dict[str, str] = {}
         self.namespace_vars: set[str] = set()
         self.graph_vars: set[str] = set()
+        # Dataset / ConjunctiveGraph receivers, a SUBSET of graph_vars: the
+        # quad space is a second space, and record ldpy/028 asks how much of
+        # the plain reading actually happens there (`m{ }` reads a Graph).
+        self.dataset_vars: set[str] = set()
 
     def rdflib_callee(self, node: ast.expr) -> str | None:
         """Return the rdflib entity name a call target resolves to, or None."""
@@ -327,7 +331,9 @@ class _Analyzer(ast.NodeVisitor):
             if callee in NAMESPACE_CONSTRUCTORS and callee != "NamespaceManager":
                 return "namespace"
             if callee in GRAPH_CONSTRUCTORS:
-                return "graph"
+                return ("dataset"
+                        if callee in ("Dataset", "ConjunctiveGraph")
+                        else "graph")
             if (isinstance(value.func, ast.Attribute)
                     and value.func.attr in GRAPH_RETURNING_METHODS
                     and self._is_graph(value.func.value)):
@@ -351,8 +357,10 @@ class _Analyzer(ast.NodeVisitor):
         kind = self._classify_value(node.value)
         if kind == "namespace":
             self.b.namespace_vars.update(self._targets(node))
-        elif kind == "graph":
+        elif kind in ("graph", "dataset"):
             self.b.graph_vars.update(self._targets(node))
+            if kind == "dataset":
+                self.b.dataset_vars.update(self._targets(node))
         self.generic_visit(node)
 
     def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
@@ -360,8 +368,10 @@ class _Analyzer(ast.NodeVisitor):
             kind = self._classify_value(node.value)
             if kind == "namespace":
                 self.b.namespace_vars.update(self._targets(node))
-            elif kind == "graph":
+            elif kind in ("graph", "dataset"):
                 self.b.graph_vars.update(self._targets(node))
+                if kind == "dataset":
+                    self.b.dataset_vars.update(self._targets(node))
         if self._annotation_is_graph(node.annotation):
             self.b.graph_vars.update(self._targets(node))
         self.generic_visit(node)

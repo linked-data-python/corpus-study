@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at": "2026-08-28T22:33:01.267871+00:00",
-    "pipeline_revision": "4b28470d6ffc7b13c1218f4a6e57486db1bb0dbc",
+    "generated_at": "2026-09-11T13:14:22.076583+00:00",
+    "pipeline_revision": "cbd43d1d59eeba3600a88031b21feebb3ed28f3d",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
   },
@@ -337,6 +337,7 @@
     "trav_navigation_depth_3": 50,
     "trav_navigation_depth_4": 29,
     "trav_navigation_loop": 1039,
+    "trav_on_dataset": 270,
     "trav_other_read": 51,
     "trav_single_value": 412,
     "trav_term_selector": 6139,
@@ -399,6 +400,7 @@
     "trav_navigation_depth_3": 12,
     "trav_navigation_depth_4": 7,
     "trav_navigation_loop": 242,
+    "trav_on_dataset": 38,
     "trav_other_read": 24,
     "trav_single_value": 125,
     "trav_term_selector": 831,
@@ -461,6 +463,7 @@
     "trav_navigation_depth_3": 12,
     "trav_navigation_depth_4": 7,
     "trav_navigation_loop": 99,
+    "trav_on_dataset": 23,
     "trav_other_read": 15,
     "trav_single_value": 37,
     "trav_term_selector": 186,
@@ -723,6 +726,11 @@
       "description": ".first() / .one() (016)",
       "sites": 2252,
       "repositories": 111
+    },
+    "trav_on_dataset": {
+      "description": "selector on a Dataset — no island reads (028)",
+      "sites": 270,
+      "repositories": 23
     },
     "trav_existence": {
       "description": "m{ } as a condition, ASK (016)",

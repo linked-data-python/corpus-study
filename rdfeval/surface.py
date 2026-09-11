@@ -170,6 +170,7 @@ class Surface:
     query_forms: Counter = field(default_factory=Counter)
     query_text_forms: Counter = field(default_factory=Counter)
     graph_names: Counter = field(default_factory=Counter)
+    selectors_on_dataset: Counter = field(default_factory=Counter)
     examples: list[dict] = field(default_factory=list)
     # Every located occurrence of a stratum shape (corpus/403), uncapped.
     sites: list[dict] = field(default_factory=list)
@@ -191,6 +192,8 @@ class Surface:
             "query_forms": dict(sorted(self.query_forms.items())),
             "query_text_forms": dict(sorted(self.query_text_forms.items())),
             "graph_names": dict(sorted(self.graph_names.items())),
+            "selectors_on_dataset": dict(
+                sorted(self.selectors_on_dataset.items())),
             "examples": self.examples,
             "sites": self.sites,
         }
@@ -210,6 +213,7 @@ STRATA = {
     "trav_one_step":        "m{ } arity 1 (016)",
     "trav_navigation":      "m{ } multi-pattern join (016)",
     "trav_single_value":    ".first() / .one() (016)",
+    "trav_on_dataset":      "selector on a Dataset — no island reads (028)",
     "trav_existence":       "m{ } as a condition, ASK (016)",
     "sparql_literal":       "s{ } (015)",
     # NB: counts a query whose TEXT is assembled (f-string, concat, %,
@@ -260,6 +264,21 @@ class _SurfaceVisitor(ast.NodeVisitor):
             return expr.id in self.b.graph_vars
         if isinstance(expr, ast.Attribute):
             return expr.attr in self.b.graph_vars
+        return False
+
+    def _is_dataset(self, expr: ast.expr) -> bool:
+        """Is the receiver a Dataset / ConjunctiveGraph rather than a Graph?
+
+        The quad space is a second space: `m{ }` reads a Graph, and record
+        ldpy/028 leaves open whether a quad-reading form is warranted. The
+        argument for one is that record 016 found plain reading, not
+        querying, to be what costs in the corpus — so what is needed is the
+        same count, one notch up.
+        """
+        if isinstance(expr, ast.Name):
+            return expr.id in self.b.dataset_vars
+        if isinstance(expr, ast.Attribute):
+            return expr.attr in self.b.dataset_vars
         return False
 
     def _is_namespace(self, expr: ast.expr) -> bool:
@@ -669,6 +688,12 @@ class _SurfaceVisitor(ast.NodeVisitor):
         if method in SELECTORS:
             self.s.counts["trav_calls"] += 1
             self.s.selectors[method] += 1
+            if self._is_dataset(func.value):
+                # The measurement record ldpy/028 asks for: how much of the
+                # plain reading happens on a Dataset, where no island reads.
+                self.s.counts["trav_on_dataset"] += 1
+                self.s.selectors_on_dataset[method] += 1
+                self._site("trav_on_dataset", node)
             if method == "value":
                 self._site("trav_single_value", node)
             if method in TERM_SELECTORS:

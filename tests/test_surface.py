@@ -435,10 +435,15 @@ def test_import_resolution_feeds_the_counter(tmp_path):
 # --- the site index of the strata study (design record corpus/403) ----------
 
 STRATA_SOURCE = '''\
-from rdflib import Graph, Namespace, Literal, RDF, XSD, URIRef
+from rdflib import Graph, Dataset, Namespace, Literal, RDF, XSD, URIRef
 
 EX = Namespace("http://example.org/")
 g = Graph()
+db = Dataset()
+
+def read_quads():
+    """A selector on a Dataset: no island reads there (record ldpy/028)."""
+    return db.value(EX.a, EX.order)
 
 def build(rows):
     LOCAL = Namespace("http://local/")
@@ -486,7 +491,9 @@ def test_site_kinds_on_a_representative_file():
     assert k["add_run_shared_subject"] == 1    # the two adds on `s`
     assert k["add_in_loop"] == 1               # same run, second stratum
     assert k["remove"] == 1
-    assert k["trav_single_value"] == 2         # .value(...) and next(...)
+    # .value() on the graph, next(...), and .value() on the Dataset
+    assert k["trav_single_value"] == 3
+    assert k["trav_on_dataset"] == 1           # db.value(...) alone
     assert k["trav_existence"] == 1            # any(...)
     assert k["trav_navigation"] == 1           # objects(s, …) inside subjects
     assert k["sparql_literal"] == 2
