@@ -14,10 +14,19 @@
     "serialize_parse": 1,
     "term_constructor": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "f{ }"
+  ],
+  "translation_notes": [
+    "the region is a bare if/elif/else with a return in each branch, extracted mid-method: not runnable standalone. Restored the binding (AGENT_BATCH.md sec. 'shim de contexte' / kind:statement note) by wrapping it in `def query(response, content_type):` in BOTH original.py and translated.ldpy, identically -- the two names the extracted lines read but do not define. No other restructuring.",
+    "4 term_constructor sites build a Literal from a value computed at run time: `Literal(int(value_str), datatype=URIRef(datatype))`, `Literal(value_str, datatype=URIRef(datatype))` (twice, one inside the except: fallback), `Literal(value_str, lang=lang)`, and the untyped `Literal(value_str)`.",
+    "only the last (untyped) site gains anything: `f{value_str}` -- node()'s default coercion of a str produces a Literal with datatype None, matching Literal(value_str) exactly (checked against terms.md: `f{\"a\"}.datatype is None`).",
+    "the other 3 sites CANNOT use the `{v}^^dt` / `{v}@lang` sugar: that suffix only parses inside a graph term position (g{ }, m{ }, +{ }, -{ }) -- confirmed by transpiling `value = {value_str}^^{dt}` as a bare statement, which is a SyntaxError. Outside an island the only route is `f{Literal(v, datatype=dt)}` / `f{Literal(v, lang=lang)}`, which is a no-op passthrough of an already-built Literal through node() (verified: same term, same .datatype/.language). Applied it for consistency (constructions used: f{ }), but it buys nothing over the bare rdflib call -- this is the corpus/012-class limitation the parent lot's reminder flagged: `^^dt` at term position does not exist off-island.",
+    "datatype here is itself data (parsed from a JSON response, not a compile-time constant), so a `Coercion` policy keyed by field name or Python type (coercion.md) does not fit either: the datatype varies per row and per XSD facet code path, not per field.",
+    "driver: two calls exercise both return branches (SPARQL-results JSON, and CONSTRUCT/DESCRIBE Turtle); the JSON fixture covers all 4 literal branches plus a uri, a bnode, and a variable absent from a row (-> None). _FakeResponse needed __eq__ because run_pair also compares call arguments by value."
+  ],
   "draft_sha": "f162b52ad2663adf",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.696269+00:00",
@@ -28,5 +37,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:query",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,15 +1,17 @@
 # Extracted from chin-rcip/CRITERIA@dfc7e5b74e : criteria.py
 # region: shapeProc (lines 195-228, stratum trav_navigation)
 # licence of the source repository: see meta.json
+import json
+from pathlib import Path
+
 from rdflib import Graph, URIRef, Namespace, util
-from rdflib.namespace import NamespaceManager, RDFS, RDF, XSD, SKOS, SH
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-nodeLabels = {} # URI: {Property, Node Label} for node 
+nodeLabels = {} # URI: {Property, Node Label} for node
 nodeLink = {} # Node Label and URL link to node documentation
 
 def shapeProc(dataGraph,shapeInput):
@@ -17,25 +19,34 @@ def shapeProc(dataGraph,shapeInput):
 	shape = Graph()
 	shape.parse(shapeInput, format=shapeFormat)
 
-	for s,p,o in shape.triples((None, skos:example, None)):
-		if (s,rdf:type,sh:NodeShape) in shape:
+	# Each of s, propShape, path, nodeLb, nodeURL, nodeVal, nodeValLb below is
+	# an independent single-step read (trav_one_step), NOT one conjunctive
+	# join: sh:path / sh:name / sh:description / sh:defaultValue are optional,
+	# independently-cardinalitied properties of the same propShape, and the
+	# original keeps the "last value seen, or the previous iteration's
+	# leftover if the predicate is absent" behaviour of a bare `for` loop.
+	# Fusing them into one m{ } would drop any propShape missing one of the
+	# four predicates (a parasitic conjunction) instead of leaving the loop
+	# variable untouched the way the original does.
+	for s, o in m{ ?s skos:example ?o }(shape):
+		if bool(m{ {s} rdf:type sh:NodeShape }(shape)):
 			inst = "(["+o.n3(shape.namespace_manager)+"])"
 			inst = inst.replace('<','').replace('>','')
 			nodeLb =''
-			for propShape in shape.objects(s,sh:property):
-				for path in shape.objects(propShape,sh:path):
+			for propShape in m{ {s} sh:property ?propShape }(shape):
+				for path in m{ {propShape} sh:path ?path }(shape):
 					path = path.n3(shape.namespace_manager)
-				for nodeLb in shape.objects(propShape,sh:name):
+				for nodeLb in m{ {propShape} sh:name ?nodeLb }(shape):
 					nodeLb = nodeLb.n3(shape.namespace_manager).replace('"','')
-				for nodeURL in shape.objects(propShape,sh:description):
+				for nodeURL in m{ {propShape} sh:description ?nodeURL }(shape):
 					nodeURL = nodeURL.n3(shape.namespace_manager).replace('"','')
 				if nodeURL:
 					nodeLink[nodeLb] = nodeURL
-				for nodeVal in shape.objects(propShape,sh:defaultValue):
+				for nodeVal in m{ {propShape} sh:defaultValue ?nodeVal }(shape):
 					nodeLb = nodeLb+'|||'+nodeVal.n3(shape.namespace_manager)
 					nodeValURL = nodeVal
 					nodeVal = nodeVal.n3(shape.namespace_manager)
-					for nodeValLb in dataGraph.objects(nodeValURL,rdfs:label):
+					for nodeValLb in m{ {nodeValURL} rdfs:label ?nodeValLb }(dataGraph):
 						nodeValLb = nodeValLb.n3(shape.namespace_manager).replace('"',"''").replace('^^xsd:string','')
 						nodeLb = nodeLb+'<br><em>'+str(nodeValLb)+'</em>'
 						nodeVal = nodeVal+'<br><em>'+str(nodeValLb)+'</em>'
@@ -45,4 +56,14 @@ def shapeProc(dataGraph,shapeInput):
 				if not inst in nodeLabels:
 					nodeLabels[inst] = {path: nodeLb}
 				else:
-					nodeLabels[inst][path] = nodeLb		
+					nodeLabels[inst][path] = nodeLb
+
+# Driving code (not part of the extracted region): the region mutates the
+# module-level nodeLabels/nodeLink dicts and returns nothing, so we call it
+# against the fixture graphs and print the mutated dicts, sorted, to make the
+# region's effect observable to the driver.
+_HERE = Path(__file__).resolve().parent
+_data_graph = Graph().parse(str(_HERE / "fixture.ttl"), format="turtle")
+shapeProc(_data_graph, str(_HERE / "shape.ttl"))
+print(json.dumps({"nodeLabels": nodeLabels, "nodeLink": nodeLink},
+                  sort_keys=True, default=str))

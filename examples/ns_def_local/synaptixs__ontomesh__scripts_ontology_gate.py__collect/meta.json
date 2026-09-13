@@ -10,10 +10,17 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix"
+  ],
+  "translation_notes": [
+    "rdf_ops is 0 because the region's own lines never touch a graph directly: it only computes counts through helper functions (_turtle_files, _parse_all, _authored_graph, _count_predicate_objects, _multi_domain, _alignment_unbound, _malformed_iris, _cq_rows, _pitfall_counts). Context shim (_shim.py) restores all nine, copied verbatim from scripts/ontology_gate.py in synaptixs/ontomesh@f771c8c4ee, plus the `import rdflib` the region itself does not carry.",
+    "Only the two `X = rdflib.Namespace(\"…\")` local definitions are the ns_def_local construction: `prov_ns` becomes `@prefix prov: <http://www.w3.org/ns/prov#> .` (the prefix is never referenced again in the original either -- a genuinely unused namespace, kept unused in the translation rather than invented a use for it); `ns` becomes `@prefix ent: <https://ontology.example.com/enterprise/> as ns .`, keeping the `as ns` binding because the function goes on to use `ns.DerivationActivity` etc. as a Python attribute access four times.",
+    "`owl_ns = rdflib.OWL` was left untouched: it aliases rdflib's own predefined OWL namespace rather than defining a new one, so it is not an instance of the NS = Namespace(\"…\") idiom this stratum targets.",
+    "driver.py builds a fixture_output/ directory (ontology/*.ttl, reports/*.csv) exercising every metric collect() computes -- multi-domain properties, an owl:Thing range, restrictions, a derived .ttl excluded from the authored merge, CQ pass/fail/row counts, and pitfall firing/critical counts -- since the oracle is isomorphism on the returned metrics dict, not a graph."
+  ],
   "draft_sha": "d6b2940c393c0e42",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.285270+00:00",
@@ -24,5 +31,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:collect",
+    "diffs": [],
+    "error": null
+  }
 }

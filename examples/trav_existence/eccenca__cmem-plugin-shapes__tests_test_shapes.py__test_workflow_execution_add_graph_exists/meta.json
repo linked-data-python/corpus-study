@@ -17,10 +17,11 @@
     "term_constructor": 4
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "prefixed name", "m{ }", ".first()", "-{ }"],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms"
+    "prefixes: DCTERMS->dcterms",
+    "translated the RDF-touching lines (result_graph.value(...) -> m{ }.first(), the objects()-count existence check -> bool(m{ }), the two independent .remove(pattern) calls -> two separate -{ } islands, one per predicate, not fused since they target different graphs), but the pilot cannot execute this region standalone: it requires a live cmem client/server (`from cmem_client.client import Client`, ModuleNotFoundError), plus pytest fixtures (graph_setup: GraphSetupFixture, client) and a helper (get_graph_content) that are not part of the extracted context. excluded per AGENT_BATCH.md rule 1 (translation plausible, driver blocked by an external dependency); confirmed by running `rdfeval check` (FAIL: ModuleNotFoundError: cmem_client)."
   ],
   "draft_sha": "33fdef9c9169dba4",
   "provenance": {

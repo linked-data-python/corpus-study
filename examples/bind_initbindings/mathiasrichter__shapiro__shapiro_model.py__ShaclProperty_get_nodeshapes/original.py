@@ -5,6 +5,10 @@ from rdflib import Graph, URIRef, BNode
 from typing import Tuple, List
 from urllib.parse import urlparse
 
+# Context shim: NodeShape lived elsewhere in shapiro_model.py; restoring the
+# binding so the region executes standalone (see shim.py).
+from shim import NodeShape
+
 def get_nodeshapes(self) -> List[NodeShape]:
     prop = None
     if urlparse(self.iri).scheme == "":  #  if this is a blank node

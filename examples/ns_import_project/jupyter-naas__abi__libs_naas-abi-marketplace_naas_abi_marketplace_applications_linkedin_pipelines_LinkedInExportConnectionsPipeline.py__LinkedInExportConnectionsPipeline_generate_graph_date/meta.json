@@ -15,11 +15,23 @@
     "term_constructor": 2,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "typed literal"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd (RDF is actually unused in the region's own body -- RDF.type is not called anywhere here, only OWL.NamedIndividual and rdflib's RDFS.label -- kept as a plain, unused @prefix consistent with the mixed-list convention on this stratum's siblings). ABI is naas_abi_core's own project namespace (naas_abi_core/utils/Graph.py, plain Namespace(...)); BFO and CCO are imported by the region's own context line but never used inside its body, so only ABI became `from naas_abi_context import abi:`, BFO/CCO stayed plain imports.",
+    "`ABI[str(date_epoch)]` and `ABI[date_str]` are the local part COMPUTED at run time -- exactly `abi:{expr}` (ex:{expr} computes the local part). Deliberately not `e<...>`: neither value can contain a space or slash here (an epoch-millisecond int, and an ISO-8601 string with no such characters), so plain concatenation without percent-encoding is the region's own semantics, not a corner cut. `ABI.ISO8601UTCDateTime` is a fixed local part, so it became the plain prefixed name `abi:ISO8601UTCDateTime`.",
+    "The three `graph.add((...))` calls on a freshly-constructed local `graph` share the same subject (`date_uri`) across all three, and NEVER just once each independently: this is the run_shared_subject idiom even though the stratum under test is ns_import_project, matching INSTRUCTIONS_403 sec2's directive to always use the construction the idiom actually calls for -- became one `@graph graph` + `+{ {date_uri} a owl:NamedIndividual ; a abi:ISO8601UTCDateTime ; rdfs:label {date_literal} }`, not three separate `+{ }` islands.",
+    "`Literal(date_str, datatype=XSD.dateTime)` (the `datetime` branch) -> `datatype=xsd:dateTime` is a plain prefixed-name substitution inside the kept `Literal(...)` call -- the value `date_str` is a string already (`date.strftime(...)`), not a coercion_datatype site of the kind INSTRUCTIONS_403 warns about (a non-string value normalised through Literal(...)), so no `\"...\"^^xsd:...` rewrite was attempted or needed here; the plain `Literal(date_str)` in the `str` branch is untouched.",
+    "No restoration needed for this region (unlike its siblings in this batch): `self` is never read anywhere in generate_graph_date's own body -- verified directly against the extracted lines -- so `None` in the driver's calls is a faithful argument, not a stand-in for a lost binding."
   ],
   "draft_sha": "d63ec5e72d7407b6",
   "provenance": {
@@ -31,5 +43,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:generate_graph_date",
+    "diffs": [],
+    "error": null
+  }
 }

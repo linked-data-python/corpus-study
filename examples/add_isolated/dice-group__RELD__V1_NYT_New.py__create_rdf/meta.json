@@ -14,11 +14,21 @@
     "term_constructor": 40,
     "triple_add": 16
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: prop->prop, res->res, dbo->dbo, DC->dc, DCTERMS->dcterms, DOAP->doap, FOAF->foaf, SKOS->skos, OWL->owl, RDF->rdf, RDFS->rdfs, VOID->void, XMLNS->xmlns, XSD->xsd"
+    "prefixes: prop->prop, res->res, dbo->dbo, DC->dc, DCTERMS->dcterms, DOAP->doap, FOAF->foaf, SKOS->skos, OWL->owl, RDF->rdf, RDFS->rdfs, VOID->void, XMLNS->xmlns, XSD->xsd",
+    "`res:` doubles as an ID factory in the original: `res+'sub_'+dsName+str(val[0])` builds a plain Python str consumed later by two different URIRef(...) calls, not a term construction on its own. Declared `@prefix res: <...> as RES .` so the string-building keeps using the Namespace object (RES) exactly as before, while every position that actually places a triple term uses the res: prefixed name instead of URIRef(res+'literal').",
+    "constant local parts (distribution, hasSentence, hasText, hasNamedEntity, numOfRelation, hasSubject, hasObject) became bare prefixed names (prop:hasSentence); the two data-driven ones (prop+key, dbo+remove_alphaNumeric(...)) became prop:{key} and dbo:{remove_alphaNumeric(nam_e[1])} -- the 0.4.0 instantiated local part, safe here since key and the sanitised entity type never contain a space or slash.",
+    "missing module-level bindings (relation, dsName, sent_counter, ne_counter, info, subject_dict, object_dict) restored identically in original.py and translated.ldpy as a minimal fixture, since the region is a bare script fragment (kind: statement) rather than a function; validate.py is a context shim reproducing only the four functions the region calls, subset of V1/validate.py at the pinned commit.",
+    "one @graph g at the top designates the receiver for the whole loop body; each .add() becomes exactly one +{ } at its original nesting depth, including inside the deeply nested if/elif/else branches."
   ],
   "draft_sha": "951b944916b9d0aa",
   "provenance": {
@@ -31,5 +41,11 @@
     "add_isolated",
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

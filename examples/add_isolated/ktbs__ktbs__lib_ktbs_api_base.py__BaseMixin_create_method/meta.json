@@ -15,11 +15,19 @@
     "term_constructor": 2,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, SKOS->skos"
+    "prefixes: RDF->rdf, SKOS->skos",
+    "context shim: KTBS/SKOS are the real namespaces from ktbs/ktbs's lib/ktbs/namespace.py and lib/ktbs/utils.py; coerce_to_node/coerce_to_uri/parent_uri are a best-effort reconstruction (rdfrest has no PyPI release and its GitHub mirror has no source at any tag) -- see context.py header.",
+    "the two triple_add sequences that share subject self.uri or node are grouped into two @graph + +{ } islands (draft had used graph += g{ } per add, which is the add_isolated pattern for a fresh graph, not the shared-subject one; here it is a single Graph mutated by reference so @graph + +{ } is the direct match)."
   ],
   "draft_sha": "32e200b79eef797a",
   "provenance": {
@@ -31,5 +39,12 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:create_method",
+    "diffs": [],
+    "error": null
+  }
 }

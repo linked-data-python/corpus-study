@@ -12,10 +12,20 @@
   "categories": {
     "graph_read": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@base",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "IRI"
+  ],
+  "translation_notes": [
+    "Every next(graph.objects(subject=..., predicate=...), None) becomes m{ }.first(); the loop over graph.objects(...) becomes a bare `for x in m{ }`.",
+    "AAS predicates are e.g. AASNameSpace.AAS[\"Referable/category\"], a local part with a slash -- not a legal Turtle prefixed name. Used @base <https://admin-shell.io/aas/3/0/> . and wrote each predicate as a relative <Referable/category> IRI rather than a prefixed name, since PN_LOCAL cannot carry an unescaped '/'.",
+    "shim.py supplies minimal pydantic stand-ins for AASNameSpace/HasExtensions/Referable/LangString*Type (the real ones live in app.models, unreachable outside the package); HasExtensions.from_rdf keeps its own one-step read, exercised by the fixture's zero-extensions case."
+  ],
   "draft_sha": "2ecac437206f9de8",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.464280+00:00",
@@ -27,5 +37,11 @@
     "trav_one_step",
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:from_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

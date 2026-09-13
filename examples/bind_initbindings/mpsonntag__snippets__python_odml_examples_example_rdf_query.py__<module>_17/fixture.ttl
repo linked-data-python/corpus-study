@@ -1,0 +1,23 @@
+@prefix odml: <https://g-node.org/projects/odml-rdf#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/> .
+
+# ex:doc1 has two sections whose type matches -> two solutions
+ex:doc1 rdf:type odml:Document .
+ex:doc1 odml:hasSection ex:sec1, ex:sec2 .
+ex:sec1 rdf:type odml:Section ;
+    odml:hasType "setup/daq" .
+ex:sec2 rdf:type odml:Section ;
+    odml:hasType "setup/daq" .
+
+# neighbouring data that must NOT match: right document/section shape, wrong type
+ex:doc1 odml:hasSection ex:sec3 .
+ex:sec3 rdf:type odml:Section ;
+    odml:hasType "setup/daq/preprocessing" .
+
+# ex:doc2 has no matching section at all -> exercises the zero-solution case
+# for that document (it simply contributes nothing to the result set)
+ex:doc2 rdf:type odml:Document .
+ex:doc2 odml:hasSection ex:sec4 .
+ex:sec4 rdf:type odml:Section ;
+    odml:hasType "stimulus/white_noise" .

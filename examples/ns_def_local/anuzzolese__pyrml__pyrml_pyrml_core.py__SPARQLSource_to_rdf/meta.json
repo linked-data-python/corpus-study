@@ -15,11 +15,20 @@
     "namespace_term": 4,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "prefixes: RDF->rdf, XSD->xsd, plus the ns_def_local local sd = Namespace(\"...\") as a third @prefix.",
+    "sd is only ever used through attribute access (sd.Service, sd.endpoint, sd.resultFormat) to build terms, so no `as NAME` binding is needed.",
+    "The three isolated g.add(...) calls become one @graph g declaration plus one +{ } per add (add_isolated pattern), rather than g{ } literals merged with +=: same cardinality, no refactoring.",
+    "driver.py fixture: `self` is stood in for by a URIRef subclass carrying .endpoint/.result_format, since the original passes an IdentifiedNode straight into the triples; two calls cover both optional attributes present and both absent."
   ],
   "draft_sha": "882c018b38b29c3f",
   "provenance": {
@@ -31,5 +40,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:to_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

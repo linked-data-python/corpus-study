@@ -1,19 +1,111 @@
 """Validation driver for TheWorldAvatar__mcp-tool-layer__src_ontospecies_extension_operations_ontospecies_extension.py__add_elemental_analysis_data_to_species.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
+add_elemental_analysis_data_to_species opens its graph through `with
+locked_graph() as g:` and returns only a plain string (str(ea), or an error
+message) -- never the graph itself, which is also not one of its own
+parameters. run_pair's built-in entry=/calls= comparison only ever looks at
+a function's RETURN VALUE and its own positional/keyword ARGUMENTS, so it
+cannot see what got written to `g`: comparing just the returned string would
+be exactly the "hollow green" INSTRUCTIONS SS5 warns about, since the string
+(built from a deterministic stand-in `ea`, see context_shim.py) is identical
+whether or not the tail +{ }(g) call under test actually ran.
 
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+So, following the precedent set by the sibling region
+add_isolated/..._add_atomic_weight_to_element/driver.py (also bypassing
+run_pair's call loop for a region whose real state does not travel through a
+return value or an argument), this driver drives both sides by hand: call
+the "original" fully, snapshot the graph context_shim.locked_graph handed it
+(context_shim.LAST_GRAPH), THEN call the "translated" version and snapshot
+ITS graph, THEN compare the two snapshots by isomorphism. The two calls
+never overlap -- call, snapshot, reset, call, snapshot -- so there is no
+race on the shared context_shim.LAST_GRAPH slot (module imports are cached,
+so both sides' `from context_shim import ...` resolve to the same module
+object).
+
+Unlike that sibling, this region READS the graph first (the "species
+exists" check, the trav_existence construction this stratum exercises) --
+so the graph must arrive PRE-POPULATED. `fixture.ttl` supplies it: parsed
+once here, its triples are replayed into `context_shim.SEED` before every
+call, so locked_graph() seeds each side's fresh Graph() identically. It
+holds two os:Species (several solutions of the pattern) and a same-shaped
+neighbour typed os:Element (must not satisfy the check); the zero-solution
+case is exercised by querying a species IRI absent from the fixture
+altogether (case 2 below).
+
+Five cases exercise every path through the region:
+  * an existing species, calculated-value branch (reaches the exists=True
+    path, the calculated WeightPercentage node, and the tail add);
+  * a second existing species, experimental-value AND molecular-formula
+    branches (the other two conditional adds);
+  * a species IRI absent from the fixture (exists=False, the bool(m{ })
+    construction returning false, the catalog-error return -- proves no
+    spurious triple is written on this path);
+  * missing species_iri/data_label (earliest return, graph never touched);
+  * a non-absolute species_iri (the _is_abs_iri guard, graph never
+    touched).
 """
-from rdfeval.harness import run_pair
+from __future__ import annotations
 
-VERDICT = run_pair(
-    __file__,
-    entry='add_elemental_analysis_data_to_species',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
-)
+import traceback
+from pathlib import Path
+
+from rdflib import Graph
+
+from rdfeval.harness import _exec_ldpy, _exec_python, _emit, graphs_isomorphic, fixture_graph
+
+import context_shim
+
+HERE = Path(__file__).resolve().parent
+
+SEED_TRIPLES = list(fixture_graph(HERE / "fixture.ttl"))
+
+CASES = [
+    dict(species_iri="https://example.org/species/S1", data_label="EA1",
+         calculated_value_text="12.3"),
+    dict(species_iri="https://example.org/species/S2", data_label="EA2",
+         experimental_value_text="9.5", empirical_molecular_formula="H2O"),
+    dict(species_iri="https://example.org/species/S9", data_label="EAx"),
+    dict(species_iri="", data_label="EAy"),
+    dict(species_iri="not-an-absolute-iri", data_label="EAz"),
+]
+
+verdict = {"example": HERE.name, "equivalent": False,
+           "method": "entry:add_elemental_analysis_data_to_species",
+           "diffs": [], "error": None}
+
+try:
+    ns_o, out_o = _exec_python(HERE / "original.py")
+    ns_t, out_t = _exec_ldpy(HERE / "translated.ldpy")
+    fo = ns_o.get("add_elemental_analysis_data_to_species")
+    ft = ns_t.get("add_elemental_analysis_data_to_species")
+    if not callable(fo) or not callable(ft):
+        raise RuntimeError("entry point not found in both modules")
+
+    diffs: list[str] = []
+    for i, kwargs in enumerate(CASES):
+        context_shim.SEED = SEED_TRIPLES
+        context_shim.LAST_GRAPH = None
+        ro = fo(**kwargs)
+        go = context_shim.LAST_GRAPH or Graph()
+
+        context_shim.SEED = SEED_TRIPLES
+        context_shim.LAST_GRAPH = None
+        rt = ft(**kwargs)
+        gt = context_shim.LAST_GRAPH or Graph()
+
+        if ro != rt:
+            diffs.append(f"case[{i}]: result differs ({ro!r} vs {rt!r})")
+        if not graphs_isomorphic(go, gt):
+            diffs.append(f"case[{i}]: graphs not isomorphic "
+                         f"({len(go)} vs {len(gt)} triples)")
+
+    if out_o != out_t:
+        diffs.append(f"stdout differs ({out_o[:200]!r} vs {out_t[:200]!r})")
+
+    verdict["diffs"] = diffs
+    verdict["equivalent"] = not diffs
+except Exception:
+    verdict["error"] = traceback.format_exc(limit=8)
+
+_emit(verdict)
+VERDICT = verdict

@@ -2,7 +2,7 @@
 # region: LinkedInExportConnectionsPipeline.generate_graph_date (lines 132-149, stratum ns_import_project)
 # licence of the source repository: see meta.json
 from datetime import UTC, datetime
-from naas_abi_core.utils.Graph import ABI, BFO, CCO
+from naas_abi_context import ABI, BFO, CCO
 from rdflib import OWL, RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
 
 def generate_graph_date(

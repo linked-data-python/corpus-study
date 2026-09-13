@@ -14,9 +14,12 @@ Original file is located at
 
 from rdflib import Graph, Namespace, Literal
 
-github_storage = "../rdf/"
+# Context shim (see meta.json): the notebook parses "../rdf/example3.rdf",
+# a file that is not shipped with the extracted region. Substituted here
+# with the local fixture.ttl written for this region so the region can
+# execute; the query logic below is unmodified.
 g = Graph()
-g.parse(github_storage+"example3.rdf", format="xml")
+g.parse("fixture.ttl", format="turtle")
 
 """Listamos todos los recursos que contienen la propiedad VCARD:FN"""
 

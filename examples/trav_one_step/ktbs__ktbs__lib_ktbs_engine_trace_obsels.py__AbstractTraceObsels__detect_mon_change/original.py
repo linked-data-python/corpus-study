@@ -2,7 +2,7 @@
 # region: AbstractTraceObsels._detect_mon_change (lines 483-541, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from itertools import chain
-from ..namespace import KTBS
+from namespace import KTBS
 
 def _detect_mon_change(self, graph, prepared):
     """Detect monotonicity changed induced by 'graph', and update `prepared` accordingly.

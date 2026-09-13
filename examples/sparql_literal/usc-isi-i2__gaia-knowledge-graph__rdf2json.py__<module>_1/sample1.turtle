@@ -1,0 +1,30 @@
+# Fixture graph for usc-isi-i2__gaia-knowledge-graph__rdf2json.py__<module>_1
+# — written during translation. Covers: several reified statements matched by
+# the query's pattern (several solutions, two encodings of a "statement": an
+# explicit rdf:Statement with rdf:predicate, and a node whose own rdf:type is
+# the predicate), and neighbouring triples that must NOT match (a plain
+# triple with no reification, and an rdf:Statement missing rdf:object so it
+# stays outside both UNION branches).
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ex: <http://example.org/> .
+
+_:st1 a rdf:Statement ;
+    rdf:predicate ex:worksFor ;
+    rdf:subject ex:alice ;
+    rdf:object ex:acme .
+
+_:st2 a ex:locatedIn ;
+    rdf:subject ex:acme ;
+    rdf:object ex:springfield .
+
+_:st3 a rdf:Statement ;
+    rdf:predicate ex:hasRole ;
+    rdf:subject ex:alice ;
+    rdf:object ex:manager .
+
+# neighbouring triples that must not contribute a solution
+ex:alice ex:name "Alice" .
+
+_:incomplete a rdf:Statement ;
+    rdf:predicate ex:hasRole ;
+    rdf:subject ex:bob .

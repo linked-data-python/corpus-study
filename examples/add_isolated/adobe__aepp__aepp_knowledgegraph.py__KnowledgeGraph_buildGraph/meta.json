@@ -14,11 +14,23 @@
     "term_constructor": 18,
     "triple_add": 22
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, DCAT->dcat, DCTERMS->dcterms"
+    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, DCAT->dcat, DCTERMS->dcterms",
+    "this is a statement-kind region (163/1196 pattern): kwargs/df_datasets/graph/*_NODE/*_flow_managers/audiences are free variables of KnowledgeGraph.buildGraph's body. Restored by wrapping the untouched body in a function taking them as parameters, per AGENT_BATCH.md's prescribed remedy -- same wrapping in original.py and translated.ldpy.",
+    "context.py's Namespace bindings (self.SCHEMA/CATALOG/PROFILE/FLOWS/AUDIENCES/SANDBOX) are the real f-string patterns from KnowledgeGraph.__init__ (aepp/knowledgegraph.py:96-104), instantiated for a fixed sandbox name instead of a live self.sandbox. FakeFlowManager exposes flowservice.FlowManager's documented public attributes (id, name, datasetId, frequency, attributes, audiences) without its network-backed constructor. self.segmentationAPI.extractPaths is mocked to return a fixture path list rather than reimplementing the PQL/JSON AST walker it normally delegates to -- the region under test only consumes that list, never the parsing algorithm, so this is a fixture substitution (like fixture.ttl for a reading region), not invented logic.",
+    "the draft's original.py/translated.ldpy could not run standalone (self, kwargs, df_datasets, graph and the four *_NODE/*_managers/audiences names were all undefined); context.py plus the driver's hand-built fixture (2 dataset rows, 3 flow managers across source/destination, 2 audiences exercising batch/continuous/synchronous evaluation and Profile-based/Event-based/Relationship-based path behaviours) makes both sides produce a 57-triple graph, confirmed isomorphic.",
+    "driver.py bypasses run_pair's generic entry=/calls= argument comparison: one argument is a pandas DataFrame (`==` between two DataFrames is elementwise, so the generic comparator's truth-value check would raise) and another is the self fixture (two fresh instances per side, no natural __eq__). Only the returned graph -- what buildGraph is meant to produce -- is compared, by isomorphism, using the same harness helper run_pair itself uses.",
+    "each same-subject run of graph.add() calls became one +{ } island (subject as first term, `;` for the following predicate-object pairs, `.` between distinct subjects, matching the add_run_shared_subject convention where a run happens to share a subject) rather than one +{ } per add(), since the draft's per-call graph += g{ } pattern both used the wrong construction for an add_isolated stratum item (g{ } builds a FRESH graph; here graph is one mutable object read across the whole function) and lost the shared-subject grouping the source already had."
   ],
   "draft_sha": "272b6ba5705accbc",
   "provenance": {
@@ -32,5 +44,11 @@
     "add_in_loop",
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:build_graph_region (custom: isomorphism only)",
+    "diffs": [],
+    "error": null
+  }
 }

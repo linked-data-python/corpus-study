@@ -1,4 +1,32 @@
 # Input graph for aminedouiri__knowledge-formalization-web-application__apps_visualisation_views.py__visualisation — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# The region parses six real ontology files (viz_tache.ttl, viz_activite.ttl,
+# viz_historique.ttl, viz_phenomene.ttl, viz_domaine.ttl, viz_strategie.ttl),
+# one per SPARQL query it runs; here all six path parameters are pointed at
+# this single fixture, which carries several instances of every class each
+# query selects, a class with zero instances (Domaine — the zero-solution
+# case), and neighbouring triples (a different class, a property assertion)
+# that must not match any of the six patterns.
+@prefix : <http://dig.isi.edu/> .
+
+:t1 a :Tache .
+:t2 a :Tache .
+
+:a1 a :Activite .
+:a2 a :Activite .
+:a3 a :Activite .
+
+:g1 a :Generation .
+
+:p1 a :Phenomene_Metier .
+:p2 a :Phenomene_Metier .
+
+# :Domaine has zero instances on purpose: g_domaine.query(...) must yield
+# no rows, and the translation's .first()-free SELECT must handle that the
+# same way rdflib does — an empty iteration, not an error.
+
+:s1 a :Strategie .
+:s2 a :Strategie .
+
+# neighbourhood that must not match any of the six patterns above
+:x1 a :NotATrackedClass .
+:t1 :relatedTo :a1 .

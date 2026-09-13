@@ -5,11 +5,31 @@ Filled in during translation review; see rdfeval.harness for helpers.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
+
+def _input_graph():
+    """A fresh bald:Container graph, matching the SPARQL pattern the region
+    queries (?c a bald:Container ; ?c ?pred ?value), with values covering
+    the mapping table (bald2schemaorg_mappings.json): a plain field, a
+    'keywords' field with several comma-separated entries (including one
+    that is blank, to exercise the skip), and an unmapped predicate that
+    must NOT produce any output triple.
+    """
+    from rdflib import Graph, Literal, Namespace, RDF, URIRef
+
+    BALD = Namespace("http://binary-array-ld.net/latest/")
+    NC = Namespace("http://example.org/nc/")
+    g = Graph()
+    c = URIRef("http://example.org/dataset/1")
+    g.add((c, RDF.type, BALD.Container))
+    g.add((c, NC.summary, Literal("A test dataset")))
+    g.add((c, NC.keywords, Literal("alpha, beta, , gamma")))
+    # Unmapped predicate: must not appear at all in the schema.org graph.
+    g.add((c, NC.unmapped_field, Literal("ignored")))
+    return g
+
+
 VERDICT = run_pair(
     __file__,
     entry='baldgraph2schemaorg',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[lambda: ((_input_graph(),), {})],
 )

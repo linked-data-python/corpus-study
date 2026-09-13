@@ -3,7 +3,10 @@
 Establishes semantic equivalence of original.py and translated.ldpy.
 Filled in during translation review; see rdfeval.harness for helpers.
 """
+import os
 from rdfeval.harness import run_pair
+
+_OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "fixture_output")
 
 # entry=None executes both modules and compares every rdflib Graph found in
 # the module globals (plus captured stdout).  For function regions, set
@@ -11,5 +14,5 @@ from rdfeval.harness import run_pair
 VERDICT = run_pair(
     __file__,
     entry='collect',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((_OUTPUT_DIR,), {})],
 )

@@ -16,10 +16,22 @@
     "term_constructor": 1,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "call suffix (g)",
+    "variable"
+  ],
+  "translation_notes": [
+    "the draft kept `g += g{ {subj} {pred} {obj} }` -- a construction step disguised as a graph-builder island -- for what is really a single triple written into an already-designated current graph; rewritten to `@graph g` once at the top plus `+{ {subj} {pred} {obj} }` at each of the two write sites (no `.add()` left, per instructions section 2).",
+    "`Config.g.triples((URIRef(self.uri), None, None))` reads from a DIFFERENT graph than the one being built (`g`), so both `m{ }` reads take a `(Config.g)` call suffix naming their source, while the two `+{ }` writes go to the `@graph`-designated `g`.",
+    "the outer read projects two variables (pred, obj) rather than three: `m{ {subj} ?pred ?obj }` cannot also re-project the subject term `subj` supplied as a bound value, so `subj = URIRef(self.uri)` is bound once before the loop and reused literally in both the pattern and the `+{ }` write -- same value, same iteration count as `Config.g.triples((URIRef(self.uri), None, None))`, just not re-unpacked from each solution. The inner loop over the blank node's own triples is translated the same way (`m{ {obj} ?p ?o }(Config.g)`, `obj` reused rather than re-bound to `s`).",
+    "`_render_skos_rdf(self)` reads a module global (`config.Config.g`) rather than taking a graph parameter, and returns a Flask `Response`, which the harness cannot compare directly (see harness.py's `_comparable`). A `render(uri, fmt)` wrapper -- identical in original.py and translated.ldpy, and excluded from surface metrics like a context shim -- supplies a minimal `self` and reparses the Response body back into a Graph, so the driver's oracle ends up being RDF isomorphism per call rather than a raw string/byte comparison.",
+    "fixture.ttl (in config.Config.g, parsed once and shared read-only by both sides -- see config.py's header for why that is safe for a read-only region) covers all three cases the design record asks for: concept1 has several direct triples PLUS a blank-node object whose own triples must be pulled in, concept2 is the neighbourhood that must not leak into concept1's rendering or vice versa, and a third call renders a URI (`ex:absent`) that is nowhere a subject -- the zero-solution case, an empty graph on both sides."
+  ],
   "draft_sha": "1dd937bc42d3401c",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.959266+00:00",
@@ -30,5 +42,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:render",
+    "diffs": [],
+    "error": null
+  }
 }

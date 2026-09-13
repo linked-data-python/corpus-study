@@ -16,8 +16,9 @@ def _declared_local_names(output_dir: str, filename: str) -> set[str]:
         import rdflib
         g = rdflib.Graph()
         g.parse(path, format="turtle")
+        @graph g
         return {str(s).rsplit("/", 1)[-1].rsplit("#", 1)[-1]
-                for s in g.subjects() if isinstance(s, rdflib.URIRef)}
+                for s, _p, _o in m{ ?s ?p ?o } if isinstance(s, rdflib.URIRef)}
     except Exception:
         names: set[str] = set()
         try:

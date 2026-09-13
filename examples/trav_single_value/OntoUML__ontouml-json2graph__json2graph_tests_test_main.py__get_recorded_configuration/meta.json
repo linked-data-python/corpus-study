@@ -13,11 +13,23 @@
     "graph_read": 3,
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: PROV->prov, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "only `prov:` was needed: rdf:/rdfs:/xsd: (the draft note) are never used as prefixed names in this function's body -- dropped.",
+    "get_output_artifact is a sibling function (lines 1737-1741 of the same test module) that get_recorded_configuration calls but the extracted region (1744-1753) does not define. Restored via ontouml_shim.py, copied VERBATIM (subjects()/set/assert, no I/O) from the pinned commit -- same treatment as the batch's other sibling-call regions.",
+    "metadata_graph.value(get_output_artifact(metadata_graph), PROV.wasGeneratedBy) and .value(configuration_entities[0], PROV.value) -> m{ }.first(): neither call passes an explicit default=, so rdflib's own None-on-zero-solutions coincides with .first() -- no degraded g.value kept.",
+    "metadata_graph.objects(transformation, PROV.used) -> m{ {transformation} prov:used ?entity }, single variable projected, same cardinality as .objects() (trav_one_step's idiom, used here inside a list comprehension exactly as g.value's idiom is elsewhere in this file -- INSTRUCTIONS.md SS2 says translate every op in the region, not only the stratum's headline one).",
+    "(entity, PROV.value, None) in metadata_graph -> bool(m{ {entity} prov:value ?o }): trav_existence's idiom, kept as its own bool() rather than folded into the m{ } above it -- fusing would turn the existence check into a join and could multiply solutions if an entity had more than one prov:value, changing what the filter selects.",
+    "@graph metadata_graph is declared once at the top of the function body; metadata_graph is a parameter, never reassigned, so one declaration covers all three m{ } sites per INSTRUCTIONS.md SS2bis.",
+    "fixture.ttl: ex:transformation prov:used three entities -- ex:config1 (has prov:value, the one survivor the assert requires), ex:config2 and ex:decoyUsed (no prov:value, the zero-solution case for the existence filter) -- plus ex:otherSubject, neighbouring data that must not match get_output_artifact's own subjects(PROV.wasGeneratedBy, None) pattern."
   ],
   "draft_sha": "3b0e20ca115898a5",
   "provenance": {
@@ -29,5 +41,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:get_recorded_configuration",
+    "diffs": [],
+    "error": null
+  }
 }

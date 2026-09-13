@@ -12,11 +12,24 @@
   "categories": {
     "namespace_term": 16
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: SCHEMA->schema, RDF->rdf, SKOS->skos, OWL->owl, DCTERMS->dcterms, RDFS->rdfs"
+    "prefixes narrowed to rdf/dcterms/schema/dh: the draft's skos/owl/rdfs are unused by the region's own body (same noise noted for other trav_navigation regions in this batch).",
+    "dh: is bound to a LITERAL IRI equal to shim.BASE + \"ontology#\" (see shim.py): `DH = Namespace(BASE + \"ontology#\")` is a runtime-constructed Namespace in the source, but BASE is itself a fixed top-of-file constant there too, so its value is known at translation time and `@prefix dh: <...>` is exact, not an approximation.",
+    "ELEVEN separate `g.value(s, DH.pred)` calls each become their own `m{ {s} dh:pred ?v }.first()` (trav_single_value) instead of fusing into one `m{ }` join: fusing them would compute a Cartesian product over independently-optional predicates (most Haushaltsposten lack several of einzelplan/bereich/digiKlasse/gruppe/funktion/jahr/isPartOf/description), each producing 0 or 1 solutions on its own but a combinatorial mess joined -- and the original explicitly wants 'this predicate's value, or None', not a joined row. The one genuine navigation is the outer `for s in m{ ?s rdf:type dh:Haushaltsposten }` (trav_navigation) plus the inner `for o in m{ {s} dcterms:subject ?o }` list comprehension (trav_one_step).",
+    "the closure `def num(pred): v = g.value(s, pred)` receives its PREDICATE as a plain Python parameter (soll/ist/istDigitalWeit/sollDigitalEng/istDigitalEng, all called via `num(DH.x)`) -- translated as `m{ {s} {pred} ?v }.first()`, interpolating the predicate in TERM position exactly as the language allows; no static prefixed name would fit since `pred` varies per call.",
+    "`local_name`, `first_label`, `get_top_level`, `extract_phrases`, `keywords`, `concept_labels` are ordinary Python helpers/lookup tables built earlier in the source's `main()`, outside this region; reconstructed minimally in shim.py (no RDF logic invented) and left untouched -- only the region's own direct rdflib calls (`g.subjects`, `g.objects`, `g.value`) are translated.",
+    "fixture.ttl gives one Haushaltsposten with every optional field present (P1, also exercising a keyword whose label matches a description phrase and one that does not), one that hits the mid-loop `continue` on digiKlasse '0' after its bereich is already read (P2), one that reaches the end but is filtered by the trailing soll<=0 check (P3), one with NONE of the optional predicates -- the zero-solution case for all eleven `.first()` calls (P4), and a neighbouring resource carrying the same predicates but not typed dh:Haushaltsposten, which the outer loop must never visit (P5)."
   ],
   "draft_sha": "487048bfd6deacaa",
   "provenance": {
@@ -29,5 +42,11 @@
     "trav_navigation",
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

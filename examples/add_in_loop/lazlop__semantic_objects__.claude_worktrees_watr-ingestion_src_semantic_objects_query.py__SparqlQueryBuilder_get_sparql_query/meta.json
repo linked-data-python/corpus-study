@@ -15,10 +15,13 @@
     "triple_add": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@graph", "+{ }", "interpolation {expr}"],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "prefixes: RDF->rdf",
+    "Translation itself is straightforward: @graph self.graph once, then each self.graph.add((...)) becomes +{ {expr} {expr} {expr} } in place, no restructuring. Transpiles cleanly (python -m ldpy -t translated.ldpy succeeds).",
+    "Marked excluded, not final: the region depends on self.resource_class (a dataclass with _infer_relation_for_field/_resolve_fixed_default classmethods and a PARAM sentinel namespace), plus self._get_query/self._add_exact_values_to_query, none of which are in the extracted context. Reconstructing a faithful minimal shim (a bare-bones @semantic_object decorator, a Resource base class, PARAM, a couple of typed fields) is on the order of 100-200 lines -- disproportionate scaffolding for one region when the same triple_add-in-loop construction is already proven and checked green by the other two regions in this batch (morph-kgc, vlizBE).",
+    "This is the same class of gap as the 163 graph-less regions the protocol already expects (missing self.graph binding), just one level deeper: here the whole surrounding object model is missing, not only the graph reference."
   ],
   "draft_sha": "7403e7bf66aade0a",
   "provenance": {

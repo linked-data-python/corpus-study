@@ -1,0 +1,26 @@
+@prefix rmlf: <http://w3id.org/rml/> .
+@prefix fnmlold: <http://semweb.mmlab.be/ns/fnml#> .
+@prefix rmlold: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ex: <http://example.org/> .
+
+# fe1: two inputs, one direct reference, one nested functionExecution
+# (mixing the new-style and old-style predicate variants).
+ex:fe1 rmlf:input ex:inp1, ex:inp2 .
+
+ex:inp1 rmlf:inputValueMap ex:ivm1 .
+ex:ivm1 rmlf:reference "colA" .
+
+# neighbour that must not match: an inputValueMap with neither a reference
+# predicate nor a functionExecution predicate contributes nothing.
+ex:inp1 rmlf:inputValueMap ex:ivm_noise .
+ex:ivm_noise ex:unrelated "colX" .
+
+ex:inp2 rmlf:inputValueMap ex:ivm2 .
+ex:ivm2 rmlf:functionExecution ex:fe2 .
+
+ex:fe2 fnmlold:input ex:inp3 .
+ex:inp3 fnmlold:inputValueMap ex:ivm3 .
+ex:ivm3 rmlold:reference "colB" .
+
+# fe3: no inputs at all -> zero-solution case.
+ex:fe3 ex:unrelated ex:something .

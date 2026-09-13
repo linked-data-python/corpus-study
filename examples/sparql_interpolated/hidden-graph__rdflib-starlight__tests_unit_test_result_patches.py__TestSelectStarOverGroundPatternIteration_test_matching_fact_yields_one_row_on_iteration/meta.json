@@ -11,9 +11,18 @@
   "rdf_ops": 0,
   "categories": {},
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": [
+    "@graph",
+    "s{ }",
+    "IRI"
+  ],
+  "translation_notes": [
+    "translation itself follows the same pattern as the sibling region test_matching_fact_agrees_with_ask (which is final): EX_A/EX_B/EX_C become real bare-IRI terms and `g.query(f\"SELECT * WHERE {{ ... }}\")` becomes `s{ SELECT * WHERE { {EX_A} {EX_B} {EX_C} . } }` under `@graph g`.",
+    "but the driver cannot execute EITHER side: this specific test exists to prove that `import starlight` (hidden-graph/rdflib-starlight itself) patches a genuine rdflib bug in `Result.__iter__` over a SELECT * with zero projected variables. Without that import-time patch, plain rdflib.query already returns 0 rows here (`assert len(rows) == 1` fails on original.py alone, confirmed by running it directly) -- so the bug this test exercises is exactly the external dependency's own patch, which is neither a generic vocabulary/namespace context (shim territory) nor something the study should reproduce as invented logic.",
+    "excluded per AGENT_BATCH.md SS 'Quand ca ne passe pas' case 1: translation is correct but the pilot cannot run without the external package under test; installing/reimplementing that patch would fabricate the very behaviour being measured.",
+    "the sibling test_matching_fact_agrees_with_ask (ASK form) is unaffected by the bug and is already final; this SELECT * form and the sibling test_nonmatching_fact_yields_zero_rows are the ones the patch actually changes."
+  ],
   "draft_sha": "4001b5ab44cf4d8c",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.015932+00:00",

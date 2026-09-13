@@ -12,10 +12,16 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "f{ }"
+  ],
+  "translation_notes": [
+    "the region reads two names bound elsewhere in the enclosing test method (`root`, an ElementTree; `expected_data`, an accumulator dict): restored per AGENT_BATCH.md's kind:statement note, identically in original.py and translated.ldpy.",
+    "`rdflib.Literal(elem.text)` -> `f{elem.text}`: elem.text is a plain str, so node()'s default coercion produces a Literal with datatype None and language None, matching Literal(elem.text) exactly (terms.md: `f{\"a\"}.datatype is None`) -- the clean case of this stratum, no `^^`/`@` suffix needed since the original never passed one.",
+    "kept `root.iter(\".//Viscoelastic//MeasurementMode\")` byte-for-byte: ElementTree's .iter() matches an exact tag, not an XPath, so this is a pre-existing bug in the source repository, not something to fix (no refactoring). Built the fixture tree with ET.Element(...) instead of parsing XML text, so an element's .tag can hold that literal string with slashes (real XML forbids it) and the site actually executes over several matches plus a non-matching neighbour."
+  ],
   "draft_sha": "4034ec8a60cf757f",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.969530+00:00",
@@ -26,5 +32,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

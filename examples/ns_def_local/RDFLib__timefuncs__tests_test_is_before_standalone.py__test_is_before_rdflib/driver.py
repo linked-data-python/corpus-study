@@ -11,5 +11,5 @@ from rdfeval.harness import run_pair
 VERDICT = run_pair(
     __file__,
     entry='test_is_before_rdflib',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((), {})],
 )

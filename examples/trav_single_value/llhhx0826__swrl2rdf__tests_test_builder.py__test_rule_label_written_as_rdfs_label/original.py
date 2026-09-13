@@ -1,10 +1,14 @@
 # Extracted from llhhx0826/swrl2rdf@190ffb3068 : tests/test_builder.py
 # region: test_rule_label_written_as_rdfs_label (lines 40-49, stratum trav_single_value)
 # licence of the source repository: see meta.json
+#
+# swrl2rdf is not an installable dependency here: imports of
+# swrl2rdf.builder/model/prefixmap replaced by swrl2rdf_shim (see meta.json),
+# a verbatim subset of those three modules. Nothing else changed.
 from rdflib.namespace import Namespace, RDF, RDFS
-from swrl2rdf.builder import rules_to_graph
-from swrl2rdf.model import ClassAtom, Rule, SameIndividualAtom, Variable
-from swrl2rdf.prefixmap import PrefixMap
+from swrl2rdf_shim import rules_to_graph
+from swrl2rdf_shim import ClassAtom, Rule, SameIndividualAtom, Variable
+from swrl2rdf_shim import PrefixMap
 SWRL = Namespace("http://www.w3.org/2003/11/swrl#")
 EX = "http://example.org/"
 

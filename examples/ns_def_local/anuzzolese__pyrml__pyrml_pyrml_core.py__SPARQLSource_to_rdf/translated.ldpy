@@ -9,15 +9,16 @@ from rdflib.namespace import RDF, Namespace, XSD
 
 def to_rdf(self):
     g: Graph = Graph()
+    @graph g
 
-    sd: Namespace = Namespace('http://www.w3.org/ns/sparql-service-description#')
+    @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-    g += g{ {self} a {sd.Service} }
+    +{ {self} a sd:Service }
 
     if self.endpoint:
-        g += g{ {self} {sd.endpoint} {self.endpoint} }
+        +{ {self} sd:endpoint {self.endpoint} }
 
     if self.result_format:
-        g += g{ {self} {sd.resultFormat} {self.result_format} }
+        +{ {self} sd:resultFormat {self.result_format} }
 
     return g

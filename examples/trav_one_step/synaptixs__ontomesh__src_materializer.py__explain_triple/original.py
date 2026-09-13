@@ -6,6 +6,7 @@ import os
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from rdflib import BNode, Graph, Literal, Namespace, URIRef, Variable
 from rdflib.namespace import OWL, PROV, RDF, RDFS, XSD
+from helpers import _parse_term
 TOOLKIT_NS = Namespace("https://ontology.example.com/toolkit/materializer/")
 
 def explain_triple(lineage_path: str, subject: str, predicate: str,

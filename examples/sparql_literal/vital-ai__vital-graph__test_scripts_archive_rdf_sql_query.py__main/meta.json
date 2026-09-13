@@ -16,9 +16,14 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "s{ }", "call suffix (g)"],
+  "translation_notes": [
+    "Translation of the two literal SPARQL strings to s{ } is mechanical and done in translated.ldpy (s{ SELECT ?s ?p ?o WHERE { ?s ?p ?o . } } and, with @prefix foaf: added, s{ SELECT DISTINCT ?person WHERE { ?person a foaf:Person . } }), called as sparql(g) in place of g.query(sparql).",
+    "The driver cannot exercise this region: `rdfeval check` fails before either version runs, with ModuleNotFoundError: No module named 'sqlalchemy' (original.py imports sqlalchemy.engine.URL and vitalgraph.store.store.VitalGraphSQLStore, neither installed, and vitalgraph's own store additionally needs a live PostgreSQL instance at g.open(db_url)).",
+    "Even with those dependencies installed, main() takes no argument -- the graph is created and opened INSIDE the function against a hardcoded Postgres DSN -- so the fixture.ttl mechanism (which calls entry with one fixture-graph argument) could not drive it without restructuring main() to accept a graph, which the no-refactoring rule forbids.",
+    "Per AGENT_BATCH.md 'quand ca ne passe pas' #1: classified excluded rather than forced green, to avoid another hollow-graph pass in this stratum."
+  ],
   "draft_sha": "b0b322100aba05c9",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.695955+00:00",

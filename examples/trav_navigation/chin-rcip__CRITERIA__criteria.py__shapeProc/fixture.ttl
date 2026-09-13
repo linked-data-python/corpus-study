@@ -1,4 +1,12 @@
-# Input graph for chin-rcip__CRITERIA__criteria.py__shapeProc — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input (data) graph for chin-rcip__CRITERIA__criteria.py__shapeProc — this is
+# `dataGraph`, the argument shapeProc reads sh:defaultValue's rdfs:label from.
+# The shape graph itself is a separate file, shape.ttl, because shapeProc
+# parses it from a path rather than receiving it as a graph.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix ex: <http://example.org/> .
+
+ex:defaultAgeValue rdfs:label "Default Age"^^xsd:string .
+
+# Neighbour that must NOT match: a label on an unrelated resource.
+ex:someOtherValue rdfs:label "Unrelated"^^xsd:string .

@@ -1,8 +1,17 @@
 # Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/generate-hed-bundle.py
 # region: read_sweep (lines 175-201, stratum trav_navigation)
 # licence of the source repository: see meta.json
+# Context restored (meta.json): SSTIM and local() are module-level helpers
+# defined earlier in scripts/generate-hed-bundle.py (lines 70, 109-111).
 from rdflib import Graph, URIRef
-S = lambda name: URIRef(SSTIM + name)  # noqa: E731
+
+@prefix sstim: <https://w3id.org/sstim#> .
+
+
+def local(term) -> str:
+    text = str(term)
+    return text.rsplit("#", 1)[-1] if "#" in text else text.rsplit("/", 1)[-1]
+
 
 def read_sweep(graph: Graph) -> dict | None:
     """The one declarative modulation in SSTIM that a single row cannot express.
@@ -16,12 +25,17 @@ def read_sweep(graph: Graph) -> dict | None:
 
     Returns None when the configuration is fixed.
     """
-    for track in graph.subjects(S("martigliPeriodInitial"), None):
-        mp0 = next(graph.objects(track, S("martigliPeriodInitial")), None)
-        mp1 = next(graph.objects(track, S("martigliPeriodFinal")), None)
-        md = next(graph.objects(track, S("martigliTransitionDuration")), None)
-        if mp0 is None or mp1 is None or md is None:
-            continue
+    # track is a genuine join key across the three predicates (the region
+    # already treats "no value at this predicate for this track" as absence
+    # via next(..., None), and each predicate is single-valued per track in
+    # this data), so a single conjunctive m{ } replaces the fan-out of
+    # `next(graph.objects(...), None)` calls with an actual missing-value
+    # guard instead of the original's implicit one.
+    for track, mp0, mp1, md in m{
+        ?track sstim:martigliPeriodInitial ?mp0 .
+        ?track sstim:martigliPeriodFinal ?mp1 .
+        ?track sstim:martigliTransitionDuration ?md
+    }(graph):
         if float(mp0) == float(mp1):
             continue  # declared, but not actually sweeping
         return {

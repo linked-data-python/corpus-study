@@ -1,8 +1,32 @@
 # Extracted from kumagallium/asterism@f0977d4d3a : ingest/tests/test_papers_dataset.py
 # region: test_structure_round_trip (lines 121-159, stratum sparql_literal)
 # licence of the source repository: see meta.json
+#
+# Test harness only (see meta.json): test_structure_round_trip() calls
+# `_seed_ttl()`, a module-level helper defined elsewhere in the same test
+# file that reads datasets/papers/seed/paper.ttl (521 KB, produced by a JATS
+# parser) from disk. That file is not part of this region's captured
+# context, and restoring it verbatim would dwarf the region it feeds -- so
+# `_seed_ttl()` is redefined here to read `fixture.ttl` (this directory),
+# the corpus/405 reading oracle's own authored input graph, identically on
+# both sides. Same convention as the on-disk-fixture rename already used for
+# examples/trav_single_value/BD2KOnFHIR__fhirtordf__.../test_value.
+#
+# The function itself only asserts and returns None; `demo()` turns a failed
+# assertion into a comparable value instead of letting run_pair abort on the
+# first raise, same convention as that example.
+import os
+
 import rdflib
+
 PAPER = "https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533"
+
+
+def _seed_ttl() -> str:
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, "fixture.ttl"), encoding="utf-8") as f:
+        return f.read()
+
 
 def test_structure_round_trip() -> None:
     g = rdflib.Graph()
@@ -43,3 +67,11 @@ def test_structure_round_trip() -> None:
     u_para, u_sec, u_paper, ctx = (str(x) for x in up[0])
     assert u_para == para and u_sec == sec and u_paper == PAPER
     assert ctx == PAPER + "/fulltext"
+
+
+def demo() -> object:
+    try:
+        test_structure_round_trip()
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

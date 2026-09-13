@@ -12,10 +12,15 @@
   "categories": {
     "graph_ctor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Identity translation: the query is assembled from two runtime pieces, neither of which is a term. `self._filter` (real shape, see driver.py: `FILTER STRSTARTS(STR(?g), \"prefix\")`, set in __init__ from a constructor argument) is spliced straight after the `GRAPH ?g { ... }` block -- an opaque SPARQL FILTER fragment, not a value: s{ }'s {expr} only stands where a term may stand, and there is no island for 'a filter clause held in a variable'.",
+    "When `triple` is given, `inner_where = \"%s %s %s\" % tuple(i.n3() for i in triple)` builds a WHOLE triple pattern from data received as an argument -- the same limit INSTRUCTIONS.md SS2 notes for -{ }/m{ } (a WRITTEN pattern only, never one received as data), here on rdflib's own query engine rather than a BGP island. Subject, predicate and object all vary independently across callers, so there is no fixed term slot to interpolate even after the fact.",
+    "The source's own comment shows the author already considered and rejected the term-interpolation shape this stratum expects: 'the right thing to do would be initBindings[...] but this would not work with Virtuoso'. Same limit, same shape, as the sibling city-knowledge-graphs/python-2023 checkEntailment region in this stratum.",
+    "contexts(self, triple=None) is a generator on PrefixConjunctiveView (a ConjunctiveGraph subclass); driver.py restores only the three attributes it reads (store, _whole, _filter) as a minimal stand-in class, not the ktbs/rdfrest resource machinery its sibling region (lib/ktbs/engine/trace.py post_graph) needed -- that one is excluded, this one is fully executable."
+  ],
   "draft_sha": "be91063444ab5536",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.080171+00:00",

@@ -12,11 +12,21 @@
   "categories": {
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SKOS->skos, RDFS->rdfs, OWL->owl"
+    "prefixes: SKOS->skos, RDFS->rdfs, OWL->owl",
+    "graph.objects(term, SKOS.definition) -> m{ {term} skos:definition ?d }, the plain trav_one_step idiom.",
+    "The nested `for predicate in (SKOS.prefLabel, RDFS.label) for l in graph.objects(term, predicate)` keeps the outer loop over the two predicates untouched (it is not itself reading a graph) and only rewrites the inner .objects() call to m{ {term} {predicate} ?l }, interpolating the loop variable `predicate` bare in predicate position -- it is not a compile-time-known prefixed name here, which is the correct outcome, not a workaround.",
+    "graph.subjects(RDF.type, SKOS.Concept)/(OWL.Class)/(...) calls further up main() (lines building `subjects`) are outside this region's line range and were left as rdflib calls, restored verbatim in original.py/translated.ldpy only so the extracted loop has real data to run over.",
+    "context: `graph` is loaded exactly as the real main() loads it -- same manifest.json, same 18 real ontology modules from the w3c-cg/sstim checkout at this commit (14132 triples, 1016 concept/class/property terms checked, 0 failures on this commit) -- not a synthetic stand-in, since checking real term definitions is the region's whole point."
   ],
   "draft_sha": "914895c815a0af4b",
   "provenance": {
@@ -28,5 +38,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

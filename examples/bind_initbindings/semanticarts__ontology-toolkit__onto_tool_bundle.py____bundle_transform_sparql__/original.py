@@ -5,8 +5,11 @@ from os.path import basename, isdir, isfile, join, splitext
 from rdflib import Graph, Literal
 from rdflib.namespace import OWL, RDFS, SKOS, XSD, Namespace
 from rdflib.util import guess_format
-from .utils import parse_rdf, find_single_ontology, perform_export, \
-                   add_defined_by
+# Context shim: __bundle_file_list, parse_rdf, replace_patterns_in_file and
+# __parse_update_query__ live elsewhere in bundle.py/utils.py; restoring the
+# bindings so the region executes standalone (see shim.py).
+from shim import parse_rdf, __bundle_file_list, __parse_update_query__, \
+                  replace_patterns_in_file
 
 def __bundle_transform_sparql__(action, tool, variables):
     query = tool['query'].format(**variables)

@@ -1,6 +1,7 @@
 # Extracted from mpsonntag/snippets@164fac3966 : python/odml/scripts/rdf_crcns_query.py
 # region: <module> (lines 86-88, stratum sparql_literal)
 # licence of the source repository: see meta.json
+from _context import Graph, prepareQuery, NAMESPACE_MAP
 curr_graph = Graph()
 q = prepareQuery("""SELECT *
                    WHERE {

@@ -12,10 +12,22 @@
   "categories": {
     "sparql": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "same shape as the sibling region VocabularyStore.narrower: the query text never concatenates a TERM (`concept`/`v` already travel via `initBindings`); what is assembled by `+` is the PROLOGUE (`VocabularyStore._PFX + \"\"\"SELECT ...\"\"\"`), which is why the extractor's sparql_interpolated detector fires even though no term-injection risk is present here.",
+    "`?child` and `?vocabulary` are NOT projected (only `?s` is in SELECT), so per the bind_initbindings cross-reference they become direct term interpolations: `{concept}` in subject position of `?child skos:broader ?s`, `{v}` in place of `?vocabulary`. This drops the need for `VocabularyStore._PFX` in translated.ldpy: the prologue is inherited from a single `@prefix skos:` instead of the concatenated 4-line PREFIX header (rdf:/rdfs:/owl: were unused by these two queries anyway).",
+    "classified minor-restructuring rather than directly-expressible for the same reason as narrower: correctness depends on recognising which variables are unprojected before inlining them as terms, and on retiring the _PFX concatenation in favour of @prefix.",
+    "s{ } iteration yields rdflib ResultRow objects supporting r[0] indexing exactly like g.query() (confirmed empirically), so `self._one_res(qres, ...)` needed no change.",
+    "driver: `_Store` stand-in reproduces the three upstream methods the region reads (expand_name, compact_name, _one_res, verbatim from tools/navocab/__init__.py:214-238); navocab_shim.py (copied from the narrower region) supplies only `VocabularyStore._PFX` for original.py -- translated.ldpy does not import it. Fixture: Dog has two broader concepts (several solutions), Mammal is in a different skos:inScheme and must be excluded once v is given, Rock has none (zero solutions), Cat/Fish are broader-than-Animal/skos:related distractors that must not leak into Dog's result."
+  ],
   "draft_sha": "aa2ac307afc93c75",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.109512+00:00",
@@ -26,5 +38,11 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:broader",
+    "diffs": [],
+    "error": null
+  }
 }

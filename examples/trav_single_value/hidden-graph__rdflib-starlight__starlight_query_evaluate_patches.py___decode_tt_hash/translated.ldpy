@@ -35,13 +35,13 @@ def _decode_tt_hash(graph, node):
     identically to (and is the same technique as) `StarlightGraph.
     _build_registry_from_store()`'s own reconstruction.
     """
-    from starlight.model.encoding import TT_NS
+    from shim_encoding import TT_NS  # see meta.json: context shim
 
     if not (isinstance(node, URIRef) and str(node).startswith(TT_NS)):
         return None
-    s = graph.value(node, rdf:subject)
-    p = graph.value(node, rdf:predicate)
-    o = graph.value(node, rdf:object)
+    s = m{ {node} rdf:subject ?s }(graph).first()
+    p = m{ {node} rdf:predicate ?p }(graph).first()
+    o = m{ {node} rdf:object ?o }(graph).first()
     if s is None or p is None or o is None:
         return None
     return (s, p, o)

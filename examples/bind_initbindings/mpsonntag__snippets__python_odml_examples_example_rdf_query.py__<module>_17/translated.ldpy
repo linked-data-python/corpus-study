@@ -1,13 +1,17 @@
 # Extracted from mpsonntag/snippets@164fac3966 : python/odml/examples/example_rdf_query.py
 # region: <module> (lines 17-23, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from rdflib.plugins.sparql import prepareQuery
-NAMESPACE_MAP = {"odml": Namespace(ODML_NS), "rdf": RDF, "rdfs": RDFS}
+# Context shim: ODML_NS lived in odml.tools.rdf_converter; restoring the
+# binding so the region executes standalone (see shim.py).
+from shim import ODML_NS
+@prefix odml: f<{ODML_NS}> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-q = prepareQuery("""SELECT *
+q = s{ SELECT *
             WHERE {
                ?d rdf:type odml:Document .
                ?d odml:hasSection ?s .
                ?s rdf:type odml:Section .
                ?s odml:hasType "setup/daq" .
-            }""", initNs=NAMESPACE_MAP)
+            } }

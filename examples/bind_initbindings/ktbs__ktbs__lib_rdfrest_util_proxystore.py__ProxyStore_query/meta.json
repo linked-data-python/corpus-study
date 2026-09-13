@@ -10,10 +10,14 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "Pure pass-through: `query`, `initNs` and `initBindings` are opaque runtime parameters forwarded to `self._graph.query(...)`; there is no SPARQL text written in the region for `s{ }` to parse at transpile time (s{ } parses its query when the file is transpiled, not at run time), and no fixed set of prefixes or bound variables to express as `@prefix`/interpolation either. Nothing in the language covers a generic forwarding method like this one; translated.ldpy is unchanged from original.py.",
+    "article_candidate: no -- this is a non-finding (absence of applicable construction), not a three-line gain."
+  ],
+  "article_candidate": false,
   "draft_sha": "4bb55847ea7004e8",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.388151+00:00",

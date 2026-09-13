@@ -6,11 +6,12 @@ from rdflib import Graph, Namespace, URIRef, Literal, BNode
 import random
 
 def __init__(self, shapes: List, output: str):
-    self.shaclNS = Namespace('http://www.w3.org/ns/shacl#')
-    self.rdfSyntax = Namespace(
-        'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
-    self.targetDeclarationNS = [self.shaclNS.targetClass, self.shaclNS.targetNode, self.shaclNS.targetSubjectsOf, self.shaclNS.targetObjectsOf]
-    self.propertyPathNS = [self.shaclNS.path]
+    @prefix shacl: <http://www.w3.org/ns/shacl#> as SHACL_NS .
+    @prefix rdfsyntax: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> as RDF_SYNTAX_NS .
+    self.shaclNS = SHACL_NS
+    self.rdfSyntax = RDF_SYNTAX_NS
+    self.targetDeclarationNS = [shacl:targetClass, shacl:targetNode, shacl:targetSubjectsOf, shacl:targetObjectsOf]
+    self.propertyPathNS = [shacl:path]
     self.shapes = shapes
     self.output = output
     self.SHACL = Graph()

@@ -13,10 +13,17 @@
     "namespace_ctor": 1,
     "namespace_term": 30
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "Context shim (_shim.py) restores is_before_rdflib, its _path_exists helper, and tests_dir from RDFLib/timefuncs@dd3bde8727 tests/test_is_before_standalone.py, since the region does not carry the function it exercises.",
+    "The 30 BEFORE.xNN accesses (namespace_term) translate one-for-one to prefixed names (before:xNN); the single namespace_ctor becomes @prefix ... as BEFORE, kept bound to BEFORE since only the prefix form is used inside the function body.",
+    "Harness-only addition (both sides, identical): the function only asserted and returned None, giving run_pair nothing to compare, so it now returns True on the line after all assertions pass."
+  ],
   "draft_sha": "ce3f20b170be8656",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.473136+00:00",
@@ -27,5 +34,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_is_before_rdflib",
+    "diffs": [],
+    "error": null
+  }
 }

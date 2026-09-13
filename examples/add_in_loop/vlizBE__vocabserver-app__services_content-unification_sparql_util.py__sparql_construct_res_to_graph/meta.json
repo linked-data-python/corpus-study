@@ -14,10 +14,18 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Textbook add_in_loop: a single .add() on a fresh Graph() inside a for loop becomes @graph g + +{ {s} {p} {o} }, one island replacing the .add call, no restructuring.",
+    "Context shim json_to_term_shim.py reconstructs json_to_term from the same source file (services/content-unification/sparql_util.py) at the pinned commit; it is not itself an RDF operation, just SPARQL-JSON-to-term glue the region depends on."
+  ],
+  "article_candidate": true,
   "draft_sha": "1ddc0285e52384ed",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.418990+00:00",
@@ -28,5 +36,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:sparql_construct_res_to_graph",
+    "diffs": [],
+    "error": null
+  }
 }

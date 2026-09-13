@@ -1,206 +1,206 @@
 {
   "provenance": {
-    "generated_at": "2026-09-03T05:42:42.073238+00:00",
-    "pipeline_revision": "d0d71ffb72779a43299a395cf832a4f5e2bbaab1",
+    "generated_at": "2026-09-03T10:30:28.383463+00:00",
+    "pipeline_revision": "cbd43d1d59eeba3600a88031b21feebb3ed28f3d",
     "config_version": "1.0.0",
     "metrics_version": "1.0.0"
   },
   "study": "corpus",
-  "pairs_translated": 224,
+  "pairs_translated": 303,
   "pairs_reviewed_basis": "all final (--force, PROVISIONAL)",
   "pairs_approved": 0,
-  "pairs_total": 224,
-  "pairs_equivalent": 224,
+  "pairs_total": 303,
+  "pairs_equivalent": 303,
   "pairs_other": [],
   "by_metric": {
     "code_loc": {
       "reduction_pct": {
-        "n": 224,
-        "mean": -6.9738,
-        "median": -3.884,
-        "q1": -13.333,
-        "q3": 2.0615,
+        "n": 303,
+        "mean": -6.2962,
+        "median": -3.636,
+        "q1": -12.5,
+        "q3": 2.439,
         "min": -160.0,
         "max": 43.396
       },
       "ratio": {
-        "n": 224,
-        "mean": 1.0697,
-        "median": 1.0389,
-        "q1": 0.9794,
-        "q3": 1.1333,
+        "n": 303,
+        "mean": 1.063,
+        "median": 1.0364,
+        "q1": 0.9756,
+        "q3": 1.125,
         "min": 0.566,
         "max": 2.6
       },
       "paired": {
-        "n_pairs": 224,
-        "median_a": 27.5,
-        "median_b": 29.0,
-        "median_difference": -1.0,
+        "n_pairs": 303,
+        "median_a": 30,
+        "median_b": 30,
+        "median_difference": -1,
         "hodges_lehmann_shift": -1.0,
         "difference_ci": {
-          "point": -1.0,
-          "lo": -1.0,
-          "hi": -1.0,
+          "point": -1,
+          "lo": -1,
+          "hi": -1,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 190,
-          "n_zero": 34,
-          "W": 5944.0,
-          "W_plus": 5944.0,
-          "W_minus": 12201.0,
-          "z": -4.1427,
-          "p_two_sided": 3.4e-05,
+          "n": 255,
+          "n_zero": 48,
+          "W": 11404.5,
+          "W_plus": 11404.5,
+          "W_minus": 21235.5,
+          "z": -4.1865,
+          "p_two_sided": 2.8e-05,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": -0.0296,
+          "delta": -0.0223,
           "magnitude": "negligible"
         }
       }
     },
     "tokens": {
       "reduction_pct": {
-        "n": 224,
-        "mean": -6.1527,
-        "median": -1.207,
-        "q1": -7.7888,
-        "q3": 7.952,
-        "min": -313.514,
+        "n": 303,
+        "mean": -7.55,
+        "median": -1.333,
+        "q1": -9.677,
+        "q3": 6.263,
+        "min": -670.435,
         "max": 48.113
       },
       "ratio": {
-        "n": 224,
-        "mean": 1.0615,
-        "median": 1.012,
-        "q1": 0.9205,
-        "q3": 1.0779,
+        "n": 303,
+        "mean": 1.0755,
+        "median": 1.0133,
+        "q1": 0.9374,
+        "q3": 1.0968,
         "min": 0.5189,
-        "max": 4.1351
+        "max": 7.7043
       },
       "paired": {
-        "n_pairs": 224,
-        "median_a": 192.0,
-        "median_b": 200.5,
-        "median_difference": -1.0,
-        "hodges_lehmann_shift": 0.0,
+        "n_pairs": 303,
+        "median_a": 201,
+        "median_b": 210,
+        "median_difference": -2,
+        "hodges_lehmann_shift": -1.0,
         "difference_ci": {
-          "point": -1.0,
-          "lo": -4.0,
-          "hi": 2.0,
+          "point": -2,
+          "lo": -5,
+          "hi": 1,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 220,
-          "n_zero": 4,
-          "W": 12113.0,
-          "W_plus": 12113.0,
-          "W_minus": 12197.0,
-          "z": -0.0439,
-          "p_two_sided": 0.964974,
+          "n": 298,
+          "n_zero": 5,
+          "W": 21178.0,
+          "W_plus": 21178.0,
+          "W_minus": 23373.0,
+          "z": -0.7369,
+          "p_two_sided": 0.461153,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": -0.0156,
+          "delta": -0.0207,
           "magnitude": "negligible"
         }
       }
     },
     "chars": {
       "reduction_pct": {
-        "n": 224,
-        "mean": -4.6151,
-        "median": -1.092,
-        "q1": -7.996,
-        "q3": 2.3145,
+        "n": 303,
+        "mean": -4.6164,
+        "median": -1.757,
+        "q1": -8.359,
+        "q3": 2.164,
         "min": -150.619,
         "max": 50.656
       },
       "ratio": {
-        "n": 224,
-        "mean": 1.0461,
-        "median": 1.011,
-        "q1": 0.9768,
-        "q3": 1.0799,
+        "n": 303,
+        "mean": 1.0462,
+        "median": 1.0176,
+        "q1": 0.9784,
+        "q3": 1.0836,
         "min": 0.4934,
         "max": 2.5062
       },
       "paired": {
-        "n_pairs": 224,
-        "median_a": 1748.5,
-        "median_b": 1855.0,
-        "median_difference": -22.0,
-        "hodges_lehmann_shift": -41.5,
+        "n_pairs": 303,
+        "median_a": 1900,
+        "median_b": 1965,
+        "median_difference": -26,
+        "hodges_lehmann_shift": -45.0,
         "difference_ci": {
-          "point": -22.0,
-          "lo": -52.5,
-          "hi": -7.0,
+          "point": -26,
+          "lo": -55,
+          "hi": -10,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 223,
+          "n": 302,
           "n_zero": 1,
-          "W": 8744.5,
-          "W_plus": 8744.5,
-          "W_minus": 16231.5,
-          "z": -3.8806,
-          "p_two_sided": 0.000104,
+          "W": 15598.0,
+          "W_plus": 15598.0,
+          "W_minus": 30155.0,
+          "z": -4.792,
+          "p_two_sided": 2e-06,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": -0.0285,
+          "delta": -0.0277,
           "magnitude": "negligible"
         }
       }
     },
     "syntax_nodes": {
       "reduction_pct": {
-        "n": 224,
-        "mean": 8.5022,
-        "median": 4.621,
+        "n": 303,
+        "mean": 8.4307,
+        "median": 4.412,
         "q1": -2.222,
-        "q3": 18.7605,
+        "q3": 18.459,
         "min": -60.0,
         "max": 66.762
       },
       "ratio": {
-        "n": 224,
-        "mean": 0.915,
-        "median": 0.9537,
-        "q1": 0.8124,
+        "n": 303,
+        "mean": 0.9157,
+        "median": 0.9559,
+        "q1": 0.8154,
         "q3": 1.0222,
         "min": 0.3324,
         "max": 1.6
       },
       "paired": {
-        "n_pairs": 224,
-        "median_a": 122.0,
-        "median_b": 110.5,
-        "median_difference": 6.5,
-        "hodges_lehmann_shift": 11.5,
+        "n_pairs": 303,
+        "median_a": 129,
+        "median_b": 115,
+        "median_difference": 6,
+        "hodges_lehmann_shift": 10.5,
         "difference_ci": {
-          "point": 6.5,
-          "lo": 2.0,
-          "hi": 10.0,
+          "point": 6,
+          "lo": 3,
+          "hi": 8,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 218,
-          "n_zero": 6,
-          "W": 5011.5,
-          "W_plus": 18859.5,
-          "W_minus": 5011.5,
-          "z": -7.4279,
+          "n": 296,
+          "n_zero": 7,
+          "W": 9796.0,
+          "W_plus": 34160.0,
+          "W_minus": 9796.0,
+          "z": -8.2676,
           "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.0815,
+          "delta": 0.0746,
           "magnitude": "negligible"
         }
       }
@@ -208,273 +208,273 @@
   },
   "by_band": {
     "add_in_loop": {
-      "n": 19,
+      "n": 24,
       "code_loc": {
-        "n": 19,
-        "mean": -9.9683,
-        "median": -4.412,
-        "q1": -18.644,
-        "q3": 4.762,
+        "n": 24,
+        "mean": -9.4184,
+        "median": -7.3925,
+        "q1": -13.8235,
+        "q3": 4.3067,
         "min": -50.0,
         "max": 9.091
       },
       "tokens": {
-        "n": 19,
-        "mean": 3.1018,
-        "median": 2.688,
-        "q1": -2.809,
-        "q3": 9.494,
-        "min": -27.66,
+        "n": 24,
+        "mean": 0.7948,
+        "median": 1.6675,
+        "q1": -4.111,
+        "q3": 9.0185,
+        "min": -54.667,
         "max": 48.113
       },
       "chars": {
-        "n": 19,
-        "mean": -5.1906,
-        "median": -3.37,
-        "q1": -12.484,
-        "q3": -0.225,
+        "n": 24,
+        "mean": -4.2359,
+        "median": -2.1175,
+        "q1": -11.731,
+        "q3": -0.1475,
         "min": -32.776,
         "max": 23.766
       },
       "syntax_nodes": {
-        "n": 19,
-        "mean": 15.9147,
-        "median": 15.205,
-        "q1": 6.509,
-        "q3": 25.0,
+        "n": 24,
+        "mean": 17.2386,
+        "median": 15.9795,
+        "q1": 4.9363,
+        "q3": 25.423,
         "min": -18.033,
-        "max": 54.45
+        "max": 59.761
       }
     },
     "add_isolated": {
-      "n": 19,
+      "n": 25,
       "code_loc": {
-        "n": 19,
-        "mean": -7.5927,
+        "n": 25,
+        "mean": -6.9403,
         "median": -7.143,
-        "q1": -13.636,
-        "q3": -3.704,
-        "min": -21.333,
-        "max": 7.692
+        "q1": -13.961,
+        "q3": -1.852,
+        "min": -29.787,
+        "max": 28.302
       },
       "tokens": {
-        "n": 19,
-        "mean": 1.8094,
-        "median": 0.247,
-        "q1": -2.577,
-        "q3": 7.258,
+        "n": 25,
+        "mean": 1.8775,
+        "median": 1.176,
+        "q1": -2.206,
+        "q3": 7.1115,
         "min": -14.179,
         "max": 14.576
       },
       "chars": {
-        "n": 19,
-        "mean": -3.6865,
+        "n": 25,
+        "mean": -3.5853,
         "median": -3.699,
-        "q1": -5.802,
-        "q3": 0.135,
+        "q1": -6.1965,
+        "q3": 0.159,
         "min": -19.443,
-        "max": 5.134
+        "max": 7.73
       },
       "syntax_nodes": {
-        "n": 19,
-        "mean": 13.9976,
+        "n": 25,
+        "mean": 15.1923,
         "median": 12.766,
-        "q1": 4.233,
-        "q3": 23.81,
-        "min": -4.405,
-        "max": 32.18
+        "q1": 4.4975,
+        "q3": 25.5535,
+        "min": -8.571,
+        "max": 56.492
       }
     },
     "add_run_shared_subject": {
-      "n": 19,
+      "n": 24,
       "code_loc": {
-        "n": 19,
-        "mean": -16.0062,
-        "median": -15.556,
-        "q1": -20.732,
-        "q3": -3.947,
-        "min": -69.231,
+        "n": 24,
+        "mean": -20.2151,
+        "median": -16.1115,
+        "q1": -29.0292,
+        "q3": -0.9868,
+        "min": -133.333,
         "max": 29.333
       },
       "tokens": {
-        "n": 19,
-        "mean": 14.0445,
-        "median": 12.06,
-        "q1": 8.108,
-        "q3": 17.883,
-        "min": -1.536,
+        "n": 24,
+        "mean": 10.2734,
+        "median": 10.92,
+        "q1": 3.7215,
+        "q3": 14.8125,
+        "min": -33.784,
         "max": 39.189
       },
       "chars": {
-        "n": 19,
-        "mean": -0.5394,
-        "median": 1.486,
-        "q1": -8.762,
-        "q3": 4.593,
-        "min": -17.292,
+        "n": 24,
+        "mean": -3.8695,
+        "median": -1.1365,
+        "q1": -8.8198,
+        "q3": 4.1553,
+        "min": -58.503,
         "max": 19.307
       },
       "syntax_nodes": {
-        "n": 19,
-        "mean": 29.9262,
-        "median": 32.374,
-        "q1": 20.37,
-        "q3": 39.766,
-        "min": 4.545,
-        "max": 54.386
+        "n": 24,
+        "mean": 25.8748,
+        "median": 28.089,
+        "q1": 15.6015,
+        "q3": 39.4865,
+        "min": -46.512,
+        "max": 58.881
       }
     },
     "bind_initbindings": {
-      "n": 15,
+      "n": 17,
       "code_loc": {
-        "n": 15,
-        "mean": 9.2545,
-        "median": 10.0,
-        "q1": 2.778,
+        "n": 17,
+        "mean": 7.7981,
+        "median": 6.667,
+        "q1": 0.0,
         "q3": 15.0,
         "min": -8.333,
         "max": 28.125
       },
       "tokens": {
-        "n": 15,
-        "mean": -22.8706,
+        "n": 17,
+        "mean": -22.1219,
         "median": -11.209,
-        "q1": -37.232,
+        "q1": -33.1995,
         "q3": -3.571,
         "min": -102.151,
         "max": 2.083
       },
       "chars": {
-        "n": 15,
-        "mean": 4.928,
+        "n": 17,
+        "mean": 4.4675,
         "median": 4.116,
-        "q1": 2.391,
-        "q3": 7.568,
+        "q1": 1.722,
+        "q3": 7.1295,
         "min": -11.103,
         "max": 20.606
       },
       "syntax_nodes": {
-        "n": 15,
-        "mean": 6.6268,
+        "n": 17,
+        "mean": 7.3517,
         "median": 7.143,
-        "q1": 0.0,
+        "q1": 1.25,
         "q3": 15.441,
         "min": -14.545,
         "max": 26.087
       }
     },
     "coercion_datatype": {
-      "n": 16,
+      "n": 24,
       "code_loc": {
-        "n": 16,
-        "mean": -2.7865,
-        "median": 1.2195,
+        "n": 24,
+        "mean": -4.1212,
+        "median": 0.0,
         "q1": -12.8843,
-        "q3": 13.4887,
+        "q3": 6.7462,
         "min": -69.231,
         "max": 43.396
       },
       "tokens": {
-        "n": 16,
-        "mean": 7.8868,
-        "median": 5.825,
+        "n": 24,
+        "mean": 6.9611,
+        "median": 3.261,
         "q1": -2.9072,
         "q3": 19.3113,
         "min": -30.769,
         "max": 47.297
       },
       "chars": {
-        "n": 16,
-        "mean": 0.736,
-        "median": 0.2685,
-        "q1": -7.67,
-        "q3": 6.3488,
+        "n": 24,
+        "mean": 0.1448,
+        "median": -0.126,
+        "q1": -8.0172,
+        "q3": 3.913,
         "min": -15.093,
         "max": 31.497
       },
       "syntax_nodes": {
-        "n": 16,
-        "mean": 19.662,
-        "median": 15.51,
-        "q1": 1.094,
-        "q3": 37.7803,
+        "n": 24,
+        "mean": 16.8453,
+        "median": 11.5275,
+        "q1": 0.2117,
+        "q3": 34.814,
         "min": -5.263,
         "max": 59.477
       }
     },
     "ns_def_local": {
-      "n": 12,
+      "n": 20,
       "code_loc": {
-        "n": 12,
-        "mean": -2.8747,
-        "median": -3.2805,
+        "n": 20,
+        "mean": -3.6153,
+        "median": -2.565,
         "q1": -6.9197,
         "q3": 0.0,
         "min": -33.333,
         "max": 29.231
       },
       "tokens": {
-        "n": 12,
-        "mean": 13.0111,
-        "median": 6.1145,
-        "q1": -1.2463,
-        "q3": 31.513,
+        "n": 20,
+        "mean": 11.3329,
+        "median": 3.463,
+        "q1": 1.115,
+        "q3": 23.2278,
         "min": -10.811,
         "max": 44.904
       },
       "chars": {
-        "n": 12,
-        "mean": -26.8269,
-        "median": -9.6005,
-        "q1": -41.298,
-        "q3": 4.3042,
+        "n": 20,
+        "mean": -17.0769,
+        "median": -0.319,
+        "q1": -26.085,
+        "q3": 1.428,
         "min": -132.271,
         "max": 10.932
       },
       "syntax_nodes": {
-        "n": 12,
-        "mean": 16.5375,
+        "n": 20,
+        "mean": 13.8482,
         "median": 6.627,
-        "q1": -1.6335,
-        "q3": 43.753,
+        "q1": 1.356,
+        "q3": 29.1008,
         "min": -21.429,
         "max": 60.199
       }
     },
     "ns_import_project": {
-      "n": 16,
+      "n": 20,
       "code_loc": {
-        "n": 16,
-        "mean": -0.8705,
+        "n": 20,
+        "mean": -0.718,
         "median": 0.0,
         "q1": -1.3155,
         "q3": 0.0,
-        "min": -10.0,
-        "max": 5.556
+        "min": -33.333,
+        "max": 23.81
       },
       "tokens": {
-        "n": 16,
-        "mean": 5.6758,
-        "median": 4.167,
+        "n": 20,
+        "mean": 5.0072,
+        "median": 3.7175,
         "q1": 0.527,
-        "q3": 11.7335,
+        "q3": 9.357,
         "min": -4.321,
         "max": 16.667
       },
       "chars": {
-        "n": 16,
-        "mean": -18.9552,
-        "median": -2.858,
+        "n": 20,
+        "mean": -15.8883,
+        "median": -1.5135,
         "q1": -4.9675,
         "q3": -0.02,
         "min": -150.619,
         "max": 3.663
       },
       "syntax_nodes": {
-        "n": 16,
-        "mean": -4.7504,
+        "n": 20,
+        "mean": -3.4339,
         "median": 0.0,
-        "q1": -3.2845,
+        "q1": -1.8882,
         "q3": 3.2455,
         "min": -60.0,
         "max": 5.994
@@ -520,235 +520,235 @@
       }
     },
     "sparql_interpolated": {
-      "n": 8,
+      "n": 11,
       "code_loc": {
-        "n": 8,
-        "mean": 3.7002,
-        "median": 1.1905,
+        "n": 11,
+        "mean": 10.1582,
+        "median": 7.692,
         "q1": 0.0,
-        "q3": 8.445,
+        "q3": 24.138,
         "min": -12.5,
-        "max": 23.333
+        "max": 30.0
       },
       "tokens": {
-        "n": 8,
-        "mean": -15.2804,
-        "median": -4.4765,
-        "q1": -31.3733,
-        "q3": 3.0075,
+        "n": 11,
+        "mean": -10.6665,
+        "median": -2.536,
+        "q1": -17.647,
+        "q3": 9.434,
         "min": -78.125,
         "max": 13.462
       },
       "chars": {
-        "n": 8,
-        "mean": 4.8274,
-        "median": 2.8145,
-        "q1": -1.032,
-        "q3": 13.0973,
-        "min": -14.481,
-        "max": 28.02
+        "n": 11,
+        "mean": 3.7816,
+        "median": 4.647,
+        "q1": -1.127,
+        "q3": 24.775,
+        "min": -60.606,
+        "max": 38.81
       },
       "syntax_nodes": {
-        "n": 8,
-        "mean": 21.1045,
-        "median": 15.1545,
-        "q1": 1.926,
-        "q3": 45.658,
+        "n": 11,
+        "mean": 24.9726,
+        "median": 31.373,
+        "q1": 2.532,
+        "q3": 42.857,
         "min": 1.639,
         "max": 50.0
       }
     },
     "sparql_literal": {
-      "n": 15,
+      "n": 21,
       "code_loc": {
-        "n": 15,
-        "mean": 3.7841,
-        "median": 11.111,
-        "q1": -4.167,
-        "q3": 15.0,
+        "n": 21,
+        "mean": 6.8638,
+        "median": 11.538,
+        "q1": -2.8695,
+        "q3": 15.959,
         "min": -28.571,
-        "max": 19.048
+        "max": 30.526
       },
       "tokens": {
-        "n": 15,
-        "mean": -92.3769,
-        "median": -73.333,
-        "q1": -120.879,
-        "q3": -32.131,
-        "min": -313.514,
+        "n": 21,
+        "mean": -102.9273,
+        "median": -45.122,
+        "q1": -117.0695,
+        "q3": -13.214,
+        "min": -670.435,
         "max": 15.287
       },
       "chars": {
-        "n": 15,
-        "mean": -1.7034,
-        "median": -0.694,
-        "q1": -3.913,
-        "q3": 2.339,
+        "n": 21,
+        "mean": 0.0592,
+        "median": 1.065,
+        "q1": -3.0425,
+        "q3": 3.585,
         "min": -14.973,
         "max": 10.983
       },
       "syntax_nodes": {
-        "n": 15,
-        "mean": -9.6261,
-        "median": -6.452,
-        "q1": -22.222,
-        "q3": 0.571,
+        "n": 21,
+        "mean": -5.0691,
+        "median": -3.846,
+        "q1": -13.8455,
+        "q3": 6.5665,
         "min": -45.0,
-        "max": 18.841
+        "max": 28.049
       }
     },
     "trav_existence": {
-      "n": 17,
+      "n": 22,
       "code_loc": {
-        "n": 17,
-        "mean": -10.2784,
-        "median": -5.263,
-        "q1": -19.4445,
-        "q3": -1.6665,
-        "min": -44.444,
-        "max": 8.333
+        "n": 22,
+        "mean": -10.0636,
+        "median": -4.7315,
+        "q1": -18.0558,
+        "q3": 0.0,
+        "min": -75.0,
+        "max": 25.0
       },
       "tokens": {
-        "n": 17,
-        "mean": -6.4476,
-        "median": -5.614,
-        "q1": -10.0265,
-        "q3": -1.982,
+        "n": 22,
+        "mean": -5.7524,
+        "median": -4.678,
+        "q1": -10.277,
+        "q3": -1.8115,
         "min": -24.731,
         "max": 19.242
       },
       "chars": {
-        "n": 17,
-        "mean": -6.7423,
-        "median": -4.087,
-        "q1": -10.772,
-        "q3": -3.088,
+        "n": 22,
+        "mean": -6.2437,
+        "median": -4.068,
+        "q1": -10.5465,
+        "q3": -2.1325,
         "min": -23.077,
         "max": -0.306
       },
       "syntax_nodes": {
-        "n": 17,
-        "mean": -3.5319,
-        "median": -2.222,
-        "q1": -9.505,
-        "q3": -0.691,
+        "n": 22,
+        "mean": -0.9875,
+        "median": -1.489,
+        "q1": -7.278,
+        "q3": 7.296,
         "min": -25.455,
-        "max": 19.588
+        "max": 20.408
       }
     },
     "trav_navigation": {
-      "n": 16,
+      "n": 25,
       "code_loc": {
-        "n": 16,
-        "mean": -8.0304,
-        "median": -4.0015,
-        "q1": -7.8053,
+        "n": 25,
+        "mean": -5.8446,
+        "median": -4.396,
+        "q1": -8.705,
         "q3": 0.0,
         "min": -57.143,
-        "max": 6.061
+        "max": 15.179
       },
       "tokens": {
-        "n": 16,
-        "mean": -1.3908,
-        "median": -1.825,
-        "q1": -4.3678,
-        "q3": 1.0825,
-        "min": -10.063,
-        "max": 7.895
+        "n": 25,
+        "mean": -1.183,
+        "median": -1.852,
+        "q1": -4.79,
+        "q3": 0.4985,
+        "min": -15.544,
+        "max": 26.341
       },
       "chars": {
-        "n": 16,
-        "mean": -0.6254,
-        "median": -4.927,
-        "q1": -11.2412,
-        "q3": 7.1433,
-        "min": -20.088,
+        "n": 25,
+        "mean": -4.4417,
+        "median": -6.231,
+        "q1": -11.3665,
+        "q3": 1.5745,
+        "min": -35.691,
         "max": 50.656
       },
       "syntax_nodes": {
-        "n": 16,
-        "mean": 2.4079,
-        "median": 1.3765,
-        "q1": -2.1143,
-        "q3": 5.1765,
-        "min": -10.0,
-        "max": 17.391
+        "n": 25,
+        "mean": 2.902,
+        "median": 1.282,
+        "q1": -2.377,
+        "q3": 5.133,
+        "min": -10.656,
+        "max": 36.957
       }
     },
     "trav_one_step": {
-      "n": 13,
+      "n": 23,
       "code_loc": {
-        "n": 13,
-        "mean": -19.844,
-        "median": -13.043,
-        "q1": -20.294,
-        "q3": -3.6585,
+        "n": 23,
+        "mean": -13.0704,
+        "median": -8.0,
+        "q1": -15.556,
+        "q3": 0.0,
         "min": -108.333,
-        "max": 18.605
+        "max": 20.0
       },
       "tokens": {
-        "n": 13,
-        "mean": -11.6413,
-        "median": -7.353,
-        "q1": -15.1,
-        "q3": -3.545,
+        "n": 23,
+        "mean": -9.2968,
+        "median": -5.128,
+        "q1": -14.815,
+        "q3": -2.139,
         "min": -39.271,
-        "max": -0.146
+        "max": 10.099
       },
       "chars": {
-        "n": 13,
-        "mean": -11.3153,
-        "median": -13.259,
-        "q1": -19.4135,
-        "q3": -1.1705,
+        "n": 23,
+        "mean": -8.2995,
+        "median": -5.724,
+        "q1": -16.781,
+        "q3": -0.442,
         "min": -34.588,
-        "max": 7.255
+        "max": 15.453
       },
       "syntax_nodes": {
-        "n": 13,
-        "mean": -6.8437,
-        "median": -3.448,
-        "q1": -13.7635,
-        "q3": 0.1715,
+        "n": 23,
+        "mean": -4.4847,
+        "median": -2.787,
+        "q1": -11.538,
+        "q3": 2.222,
         "min": -39.86,
         "max": 21.053
       }
     },
     "trav_single_value": {
-      "n": 16,
+      "n": 24,
       "code_loc": {
-        "n": 16,
-        "mean": -8.0749,
-        "median": -6.5125,
+        "n": 24,
+        "mean": -7.9849,
+        "median": -5.798,
         "q1": -10.3945,
-        "q3": -3.448,
+        "q3": -3.0362,
         "min": -33.333,
         "max": 11.111
       },
       "tokens": {
-        "n": 16,
-        "mean": -11.6772,
-        "median": -10.7135,
-        "q1": -18.9688,
-        "q3": -4.225,
+        "n": 24,
+        "mean": -11.6146,
+        "median": -10.771,
+        "q1": -16.677,
+        "q3": -4.6695,
         "min": -31.915,
         "max": 5.361
       },
       "chars": {
-        "n": 16,
-        "mean": -6.4363,
+        "n": 24,
+        "mean": -7.6908,
         "median": -4.8545,
-        "q1": -6.1788,
-        "q3": -0.9935,
-        "min": -33.817,
+        "q1": -10.7415,
+        "q3": -1.6013,
+        "min": -39.385,
         "max": 2.164
       },
       "syntax_nodes": {
-        "n": 16,
-        "mean": -5.6324,
-        "median": -4.597,
-        "q1": -12.9165,
-        "q3": 2.2058,
+        "n": 24,
+        "mean": -5.0326,
+        "median": -3.2165,
+        "q1": -11.3545,
+        "q3": 1.0665,
         "min": -20.0,
         "max": 8.088
       }
@@ -1139,6 +1139,18 @@
         "max": 7.971
       }
     },
+    "Mat-O-Lab/RDFConverter": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -8.46,
+        "median": -8.46,
+        "q1": -8.46,
+        "q3": -8.46,
+        "min": -8.46,
+        "max": -8.46
+      }
+    },
     "Mat-O-Lab/ckanext-csvtocsvw": {
       "n": 1,
       "tokens_reduction": {
@@ -1212,13 +1224,13 @@
       }
     },
     "OntoUML/ontouml-json2graph": {
-      "n": 6,
+      "n": 7,
       "tokens_reduction": {
-        "n": 6,
-        "mean": -4.6283,
-        "median": -5.158,
-        "q1": -11.7585,
-        "q3": 0.5395,
+        "n": 7,
+        "mean": -5.4199,
+        "median": -7.383,
+        "q1": -11.628,
+        "q3": -2.083,
         "min": -12.15,
         "max": 8.407
       }
@@ -1236,15 +1248,15 @@
       }
     },
     "RDFLib/VocPrez": {
-      "n": 2,
+      "n": 3,
       "tokens_reduction": {
-        "n": 2,
-        "mean": -99.277,
-        "median": -99.277,
-        "q1": -120.2515,
-        "q3": -78.3025,
+        "n": 3,
+        "mean": -65.4803,
+        "median": -85.294,
+        "q1": -113.26,
+        "q3": 2.113,
         "min": -113.26,
-        "max": -85.294
+        "max": 2.113
       }
     },
     "RDFLib/prez": {
@@ -1308,26 +1320,38 @@
       }
     },
     "RDFLib/timefuncs": {
-      "n": 5,
+      "n": 6,
       "tokens_reduction": {
-        "n": 5,
-        "mean": 3.5608,
-        "median": 2.083,
+        "n": 6,
+        "mean": 6.9647,
+        "median": 4.8295,
         "q1": -3.571,
-        "q3": 11.4315,
+        "q3": 17.4612,
         "min": -3.571,
-        "max": 15.287
+        "max": 23.984
+      }
+    },
+    "SAWGraph/water-kg": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 5.047,
+        "median": 5.047,
+        "q1": 5.047,
+        "q3": 5.047,
+        "min": 5.047,
+        "max": 5.047
       }
     },
     "ScaDS/KGpipe": {
-      "n": 3,
+      "n": 4,
       "tokens_reduction": {
-        "n": 3,
-        "mean": -4.151,
-        "median": -5.0,
-        "q1": -5.46,
-        "q3": -1.993,
-        "min": -5.46,
+        "n": 4,
+        "mean": -6.2382,
+        "median": -5.23,
+        "q1": -10.74,
+        "q3": -2.7447,
+        "min": -12.5,
         "max": -1.993
       }
     },
@@ -1392,13 +1416,13 @@
       }
     },
     "TheWorldAvatar/mcp-tool-layer": {
-      "n": 9,
+      "n": 11,
       "tokens_reduction": {
-        "n": 9,
-        "mean": -5.6671,
-        "median": -3.742,
-        "q1": -8.002,
-        "q3": 3.7195,
+        "n": 11,
+        "mean": -4.7905,
+        "median": -3.242,
+        "q1": -4.795,
+        "q3": 1.55,
         "min": -39.267,
         "max": 7.33
       }
@@ -1427,15 +1451,27 @@
         "max": 4.608
       }
     },
-    "aigora-de/rdf-construct": {
-      "n": 6,
+    "adobe/aepp": {
+      "n": 1,
       "tokens_reduction": {
-        "n": 6,
-        "mean": 1.1952,
-        "median": 0.391,
-        "q1": -3.4865,
-        "q3": 5.5228,
-        "min": -9.419,
+        "n": 1,
+        "mean": 13.989,
+        "median": 13.989,
+        "q1": 13.989,
+        "q3": 13.989,
+        "min": 13.989,
+        "max": 13.989
+      }
+    },
+    "aigora-de/rdf-construct": {
+      "n": 7,
+      "tokens_reduction": {
+        "n": 7,
+        "mean": -1.1961,
+        "median": -1.333,
+        "q1": -9.419,
+        "q3": 2.387,
+        "min": -15.544,
         "max": 14.93
       }
     },
@@ -1452,15 +1488,39 @@
       }
     },
     "altunelyusuf/SemanticTechnologies": {
-      "n": 13,
+      "n": 16,
       "tokens_reduction": {
-        "n": 13,
-        "mean": 9.6899,
-        "median": 11.504,
-        "q1": -0.349,
-        "q3": 21.384,
-        "min": -27.66,
+        "n": 16,
+        "mean": 4.3826,
+        "median": 4.814,
+        "q1": -8.4955,
+        "q3": 19.027,
+        "min": -33.784,
         "max": 39.189
+      }
+    },
+    "aminedouiri/knowledge-formalization-web-application": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -12.018,
+        "median": -12.018,
+        "q1": -12.018,
+        "q3": -12.018,
+        "min": -12.018,
+        "max": -12.018
+      }
+    },
+    "anuzzolese/pyrml": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": -4.566,
+        "median": -4.566,
+        "q1": -15.96,
+        "q3": 6.828,
+        "min": -12.162,
+        "max": 3.03
       }
     },
     "asmirnov69/pyjviz-poc": {
@@ -1485,6 +1545,18 @@
         "q3": 6.965,
         "min": 6.965,
         "max": 6.965
+      }
+    },
+    "binary-array-ld/bald": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -1.582,
+        "median": -1.582,
+        "q1": -1.582,
+        "q3": -1.582,
+        "min": -1.582,
+        "max": -1.582
       }
     },
     "biokb/biokb_wfo": {
@@ -1512,27 +1584,39 @@
       }
     },
     "boricles/ontosphere": {
-      "n": 1,
+      "n": 2,
       "tokens_reduction": {
-        "n": 1,
-        "mean": 9.494,
-        "median": 9.494,
-        "q1": 9.494,
-        "q3": 9.494,
-        "min": 9.494,
+        "n": 2,
+        "mean": -8.6675,
+        "median": -8.6675,
+        "q1": -35.9098,
+        "q3": 18.5748,
+        "min": -26.829,
         "max": 9.494
       }
     },
     "calipho-sib/nextprot-scripts": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": 1.316,
+        "median": 1.316,
+        "q1": -0.001,
+        "q3": 2.633,
+        "min": 0.438,
+        "max": 2.194
+      }
+    },
+    "chin-rcip/CRITERIA": {
       "n": 1,
       "tokens_reduction": {
         "n": 1,
-        "mean": 2.194,
-        "median": 2.194,
-        "q1": 2.194,
-        "q3": 2.194,
-        "min": 2.194,
-        "max": 2.194
+        "mean": -5.908,
+        "median": -5.908,
+        "q1": -5.908,
+        "q3": -5.908,
+        "min": -5.908,
+        "max": -5.908
       }
     },
     "cognitedata/neat": {
@@ -1557,6 +1641,18 @@
         "q3": -5.072,
         "min": -5.072,
         "max": -5.072
+      }
+    },
+    "danilipp17/thesis_code": {
+      "n": 3,
+      "tokens_reduction": {
+        "n": 3,
+        "mean": -0.9583,
+        "median": -0.843,
+        "q1": -2.242,
+        "q3": 0.21,
+        "min": -2.242,
+        "max": 0.21
       }
     },
     "deepin-community/lv2": {
@@ -1596,15 +1692,15 @@
       }
     },
     "dice-group/RELD": {
-      "n": 1,
+      "n": 2,
       "tokens_reduction": {
-        "n": 1,
-        "mean": -4.545,
-        "median": -4.545,
-        "q1": -4.545,
-        "q3": -4.545,
+        "n": 2,
+        "mean": -0.5595,
+        "median": -0.5595,
+        "q1": -6.5378,
+        "q3": 5.4188,
         "min": -4.545,
-        "max": -4.545
+        "max": 3.426
       }
     },
     "dp-web4/web4": {
@@ -1620,14 +1716,14 @@
       }
     },
     "dtai-kg/SCOOP": {
-      "n": 4,
+      "n": 6,
       "tokens_reduction": {
-        "n": 4,
-        "mean": 23.918,
-        "median": 22.4445,
-        "q1": 12.5542,
-        "q3": 36.7552,
-        "min": 11.776,
+        "n": 6,
+        "mean": 16.8443,
+        "median": 13.3325,
+        "q1": 5.826,
+        "q3": 32.2518,
+        "min": -3.561,
         "max": 39.007
       }
     },
@@ -1668,14 +1764,14 @@
       }
     },
     "eliozo/worksheet-generation-with-llms": {
-      "n": 1,
+      "n": 2,
       "tokens_reduction": {
-        "n": 1,
-        "mean": 47.297,
-        "median": 47.297,
-        "q1": 47.297,
-        "q3": 47.297,
-        "min": 47.297,
+        "n": 2,
+        "mean": 17.9195,
+        "median": 17.9195,
+        "q1": -26.1467,
+        "q3": 61.9857,
+        "min": -11.458,
         "max": 47.297
       }
     },
@@ -1691,6 +1787,18 @@
         "max": -15.385
       }
     },
+    "fair-workflows/fairworkflows": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -10.811,
+        "median": -10.811,
+        "q1": -10.811,
+        "q3": -10.811,
+        "min": -10.811,
+        "max": -10.811
+      }
+    },
     "gtfierro/rdf-mcp": {
       "n": 1,
       "tokens_reduction": {
@@ -1704,14 +1812,14 @@
       }
     },
     "hidden-graph/rdflib-starlight": {
-      "n": 1,
+      "n": 3,
       "tokens_reduction": {
-        "n": 1,
-        "mean": -1.923,
-        "median": -1.923,
-        "q1": -1.923,
+        "n": 3,
+        "mean": -14.4743,
+        "median": -17.647,
+        "q1": -23.853,
         "q3": -1.923,
-        "min": -1.923,
+        "min": -23.853,
         "max": -1.923
       }
     },
@@ -1740,14 +1848,14 @@
       }
     },
     "isamplesorg/vocabularies": {
-      "n": 1,
+      "n": 3,
       "tokens_reduction": {
-        "n": 1,
-        "mean": 13.462,
-        "median": 13.462,
-        "q1": 13.462,
+        "n": 3,
+        "mean": 12.007,
+        "median": 13.125,
+        "q1": 9.434,
         "q3": 13.462,
-        "min": 13.462,
+        "min": 9.434,
         "max": 13.462
       }
     },
@@ -1764,15 +1872,27 @@
       }
     },
     "jupyter-naas/abi": {
-      "n": 3,
+      "n": 7,
       "tokens_reduction": {
-        "n": 3,
-        "mean": -2.4327,
-        "median": -4.184,
-        "q1": -11.009,
-        "q3": 7.895,
+        "n": 7,
+        "mean": -0.0016,
+        "median": 2.273,
+        "q1": -4.184,
+        "q3": 3.673,
         "min": -11.009,
         "max": 7.895
+      }
+    },
+    "kracr/cog-csv-owl-bridge": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 5.577,
+        "median": 5.577,
+        "q1": 5.577,
+        "q3": 5.577,
+        "min": 5.577,
+        "max": 5.577
       }
     },
     "ksahlmann/myno": {
@@ -1788,63 +1908,87 @@
       }
     },
     "ktbs/ktbs": {
-      "n": 2,
+      "n": 5,
       "tokens_reduction": {
-        "n": 2,
-        "mean": -39.0625,
-        "median": -39.0625,
-        "q1": -97.6562,
-        "q3": 19.5312,
+        "n": 5,
+        "mean": -21.4212,
+        "median": -9.091,
+        "q1": -49.822,
+        "q3": 0.8145,
         "min": -78.125,
-        "max": 0.0
+        "max": 1.629
       }
     },
     "kumagallium/asterism": {
-      "n": 1,
+      "n": 6,
       "tokens_reduction": {
-        "n": 1,
-        "mean": 2.688,
-        "median": 2.688,
-        "q1": 2.688,
-        "q3": 2.688,
-        "min": 2.688,
-        "max": 2.688
+        "n": 6,
+        "mean": -4.2263,
+        "median": -1.9955,
+        "q1": -14.288,
+        "q3": 8.1562,
+        "min": -44.348,
+        "max": 24.561
       }
     },
     "laBioSynCare/laBioSynCare.github.io": {
-      "n": 1,
+      "n": 5,
       "tokens_reduction": {
-        "n": 1,
-        "mean": -3.731,
-        "median": -3.731,
-        "q1": -3.731,
-        "q3": -3.731,
-        "min": -3.731,
-        "max": -3.731
+        "n": 5,
+        "mean": 1.9718,
+        "median": -3.366,
+        "q1": -7.421,
+        "q3": 14.0335,
+        "min": -11.111,
+        "max": 26.341
       }
     },
     "lazlop/semantic_objects": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": -71.6,
+        "median": -71.6,
+        "q1": -183.9185,
+        "q3": 40.7185,
+        "min": -146.479,
+        "max": 3.279
+      }
+    },
+    "linkml/linkml": {
       "n": 1,
       "tokens_reduction": {
         "n": 1,
-        "mean": -146.479,
-        "median": -146.479,
-        "q1": -146.479,
-        "q3": -146.479,
-        "min": -146.479,
-        "max": -146.479
+        "mean": -1.136,
+        "median": -1.136,
+        "q1": -1.136,
+        "q3": -1.136,
+        "min": -1.136,
+        "max": -1.136
       }
     },
     "llhhx0826/swrl2rdf": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": -10.813,
+        "median": -10.813,
+        "q1": -10.9615,
+        "q3": -10.6645,
+        "min": -10.912,
+        "max": -10.714
+      }
+    },
+    "lync-cyber/CataForge": {
       "n": 1,
       "tokens_reduction": {
         "n": 1,
-        "mean": -10.912,
-        "median": -10.912,
-        "q1": -10.912,
-        "q3": -10.912,
-        "min": -10.912,
-        "max": -10.912
+        "mean": 1.645,
+        "median": 1.645,
+        "q1": 1.645,
+        "q3": 1.645,
+        "min": 1.645,
+        "max": 1.645
       }
     },
     "mapsa/blathers": {
@@ -1871,6 +2015,54 @@
         "max": -1.124
       }
     },
+    "mathiasrichter/shapiro": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -3.846,
+        "median": -3.846,
+        "q1": -3.846,
+        "q3": -3.846,
+        "min": -3.846,
+        "max": -3.846
+      }
+    },
+    "mhrimaz/aasbrain-concept-description-repo": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": 20.903,
+        "median": 20.903,
+        "q1": 4.697,
+        "q3": 37.109,
+        "min": 10.099,
+        "max": 31.707
+      }
+    },
+    "morph-kgc/morph-kgc": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": -17.034,
+        "median": -17.034,
+        "q1": -73.4835,
+        "q3": 39.4155,
+        "min": -54.667,
+        "max": 20.599
+      }
+    },
+    "mpsonntag/snippets": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": -349.801,
+        "median": -349.801,
+        "q1": -830.752,
+        "q3": 131.15,
+        "min": -670.435,
+        "max": -29.167
+      }
+    },
     "openworm/owmeta-core": {
       "n": 1,
       "tokens_reduction": {
@@ -1893,6 +2085,18 @@
         "q3": -11.65,
         "min": -11.65,
         "max": -11.65
+      }
+    },
+    "pyscal/atomRDF": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 3.268,
+        "median": 3.268,
+        "q1": 3.268,
+        "q3": 3.268,
+        "min": 3.268,
+        "max": 3.268
       }
     },
     "sebneu/portalwatch": {
@@ -1919,6 +2123,18 @@
         "max": 14.583
       }
     },
+    "statnett/KGraphPy": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": -0.268,
+        "median": -0.268,
+        "q1": -4.6705,
+        "q3": 4.1345,
+        "min": -3.203,
+        "max": 2.667
+      }
+    },
     "steve-bate/firm": {
       "n": 1,
       "tokens_reduction": {
@@ -1931,71 +2147,227 @@
         "max": -2.372
       }
     },
-    "tetherless-world/materialsmine": {
+    "stevereiner/flexible-graphrag": {
       "n": 1,
       "tokens_reduction": {
         "n": 1,
-        "mean": 3.243,
-        "median": 3.243,
-        "q1": 3.243,
-        "q3": 3.243,
+        "mean": -14.41,
+        "median": -14.41,
+        "q1": -14.41,
+        "q3": -14.41,
+        "min": -14.41,
+        "max": -14.41
+      }
+    },
+    "synaptixs/ontomesh": {
+      "n": 3,
+      "tokens_reduction": {
+        "n": 3,
+        "mean": -4.609,
+        "median": -5.128,
+        "q1": -9.934,
+        "q3": 1.235,
+        "min": -9.934,
+        "max": 1.235
+      }
+    },
+    "tableau/altimeter": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -9.901,
+        "median": -9.901,
+        "q1": -9.901,
+        "q3": -9.901,
+        "min": -9.901,
+        "max": -9.901
+      }
+    },
+    "technologiestiftung/digital-budget-network-explorer": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -7.486,
+        "median": -7.486,
+        "q1": -7.486,
+        "q3": -7.486,
+        "min": -7.486,
+        "max": -7.486
+      }
+    },
+    "temcdrm/emthub": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 26.451,
+        "median": 26.451,
+        "q1": 26.451,
+        "q3": 26.451,
+        "min": 26.451,
+        "max": 26.451
+      }
+    },
+    "ternaustralia/vocview": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 0.0,
+        "median": 0.0,
+        "q1": 0.0,
+        "q3": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "tetherless-world/materialsmine": {
+      "n": 2,
+      "tokens_reduction": {
+        "n": 2,
+        "mean": 4.2255,
+        "median": 4.2255,
+        "q1": 2.7517,
+        "q3": 5.6993,
         "min": 3.243,
-        "max": 3.243
+        "max": 5.208
+      }
+    },
+    "tteon/seocho": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 7.592,
+        "median": 7.592,
+        "q1": 7.592,
+        "q3": 7.592,
+        "min": 7.592,
+        "max": 7.592
+      }
+    },
+    "usc-gria/sw-kg": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 3.586,
+        "median": 3.586,
+        "q1": 3.586,
+        "q3": 3.586,
+        "min": 3.586,
+        "max": 3.586
+      }
+    },
+    "usc-isi-i2/etk": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 6.024,
+        "median": 6.024,
+        "q1": 6.024,
+        "q3": 6.024,
+        "min": 6.024,
+        "max": 6.024
+      }
+    },
+    "usc-isi-i2/gaia-knowledge-graph": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -38.194,
+        "median": -38.194,
+        "q1": -38.194,
+        "q3": -38.194,
+        "min": -38.194,
+        "max": -38.194
+      }
+    },
+    "vemonet/rdflib-endpoint": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": 8.772,
+        "median": 8.772,
+        "q1": 8.772,
+        "q3": 8.772,
+        "min": 8.772,
+        "max": 8.772
+      }
+    },
+    "vlizBE/vocabserver-app": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -2.273,
+        "median": -2.273,
+        "q1": -2.273,
+        "q3": -2.273,
+        "min": -2.273,
+        "max": -2.273
+      }
+    },
+    "w3c-cg/sstim": {
+      "n": 1,
+      "tokens_reduction": {
+        "n": 1,
+        "mean": -1.132,
+        "median": -1.132,
+        "q1": -1.132,
+        "q3": -1.132,
+        "min": -1.132,
+        "max": -1.132
       }
     }
   },
   "correspondence": {
     "corr_scaffolding_tokens_per_triple": {
       "python": {
-        "n": 97,
-        "mean": 9.448,
+        "n": 128,
+        "mean": 9.4372,
         "median": 9.0,
         "q1": 9.0,
-        "q3": 9.333,
+        "q3": 9.0623,
         "min": 9.0,
-        "max": 12.0
+        "max": 19.0
       },
       "ldpy": {
-        "n": 99,
-        "mean": 3.3303,
-        "median": 2.167,
+        "n": 129,
+        "mean": 3.4182,
+        "median": 2.25,
         "q1": 1.5,
         "q3": 4.0,
         "min": 0.364,
         "max": 20.0
       },
       "paired": {
-        "n_pairs": 96,
+        "n_pairs": 124,
         "median_a": 9.0,
-        "median_b": 2.1835,
+        "median_b": 2.225,
         "median_difference": 7.0,
-        "hodges_lehmann_shift": 6.55,
+        "hodges_lehmann_shift": 6.5455,
         "difference_ci": {
           "point": 7.0,
-          "lo": 6.666,
-          "hi": 7.267,
+          "lo": 6.646,
+          "hi": 7.25,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 96,
+          "n": 124,
           "n_zero": 0,
-          "W": 120.5,
-          "W_plus": 4535.5,
-          "W_minus": 120.5,
-          "z": -8.0673,
+          "W": 216.5,
+          "W_plus": 7533.5,
+          "W_minus": 216.5,
+          "z": -9.1246,
           "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.8787,
+          "delta": 0.8888,
           "magnitude": "large"
         }
       }
     },
     "corr_nesting_per_term": {
       "python": {
-        "n": 97,
+        "n": 128,
         "mean": 3.0,
         "median": 3.0,
         "q1": 3.0,
@@ -2004,8 +2376,8 @@
         "max": 3.0
       },
       "ldpy": {
-        "n": 223,
-        "mean": 0.0009,
+        "n": 302,
+        "mean": 0.0011,
         "median": 0.0,
         "q1": 0.0,
         "q3": 0.0,
@@ -2013,7 +2385,7 @@
         "max": 0.2
       },
       "paired": {
-        "n_pairs": 97,
+        "n_pairs": 128,
         "median_a": 3.0,
         "median_b": 0.0,
         "median_difference": 3.0,
@@ -2026,12 +2398,12 @@
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 97,
+          "n": 128,
           "n_zero": 0,
           "W": 0,
-          "W_plus": 4753.0,
+          "W_plus": 8256.0,
           "W_minus": 0,
-          "z": -9.7979,
+          "z": -11.2276,
           "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
@@ -2043,8 +2415,8 @@
     },
     "corr_constructors_per_triple": {
       "python": {
-        "n": 224,
-        "mean": 1.6573,
+        "n": 303,
+        "mean": 1.6728,
         "median": 1.0,
         "q1": 0.0,
         "q3": 2.0,
@@ -2052,142 +2424,142 @@
         "max": 21.0
       },
       "ldpy": {
-        "n": 99,
-        "mean": 0.8092,
+        "n": 129,
+        "mean": 0.8449,
         "median": 0.4,
-        "q1": 0.143,
+        "q1": 0.155,
         "q3": 1.0,
         "min": 0.0,
         "max": 9.0
       },
       "paired": {
-        "n_pairs": 99,
-        "median_a": 1.167,
+        "n_pairs": 129,
+        "median_a": 1.188,
         "median_b": 0.4,
-        "median_difference": 0.6,
-        "hodges_lehmann_shift": 0.625,
+        "median_difference": 0.572,
+        "hodges_lehmann_shift": 0.643,
         "difference_ci": {
-          "point": 0.6,
-          "lo": 0.429,
+          "point": 0.572,
+          "lo": 0.428,
           "hi": 0.75,
           "level": 0.95,
           "method": "percentile bootstrap, 10000 resamples, seed 20260827"
         },
         "wilcoxon": {
-          "n": 79,
-          "n_zero": 20,
-          "W": 251.0,
-          "W_plus": 2909.0,
-          "W_minus": 251.0,
-          "z": -6.4966,
+          "n": 100,
+          "n_zero": 29,
+          "W": 424.5,
+          "W_plus": 4625.5,
+          "W_minus": 424.5,
+          "z": -7.2248,
           "p_two_sided": 0.0,
           "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
         },
         "cliffs_delta": {
-          "delta": 0.4551,
+          "delta": 0.461,
           "magnitude": "medium"
         }
       }
     },
-    "python_staging_assignments_total": 226
+    "python_staging_assignments_total": 329
   },
   "classification_counts": {
-    "directly-expressible": 203,
-    "minor-restructuring": 20,
-    "awkward": 1
+    "directly-expressible": 271,
+    "minor-restructuring": 26,
+    "awkward": 6
   },
   "by_subgroup": {
     "inline-construction": {
-      "n": 97,
+      "n": 128,
       "byte_identical": 0,
       "code_loc": {
-        "n": 97,
-        "mean": -8.9736,
-        "median": -4.651,
-        "q1": -14.834,
-        "q3": 2.2775,
+        "n": 128,
+        "mean": -10.1871,
+        "median": -5.1315,
+        "q1": -14.993,
+        "q3": 1.2712,
         "min": -160.0,
         "max": 43.396
       },
       "tokens": {
-        "n": 97,
-        "mean": 6.7713,
-        "median": 4.651,
-        "q1": -1.731,
-        "q3": 13.794,
-        "min": -44.828,
+        "n": 128,
+        "mean": 5.1425,
+        "median": 3.553,
+        "q1": -1.8207,
+        "q3": 11.989,
+        "min": -54.667,
         "max": 48.113
       },
       "chars": {
-        "n": 97,
-        "mean": -2.4229,
-        "median": -0.883,
-        "q1": -7.8525,
-        "q3": 2.8945,
-        "min": -41.449,
+        "n": 128,
+        "mean": -3.3207,
+        "median": -1.8415,
+        "q1": -8.6758,
+        "q3": 2.1365,
+        "min": -58.503,
         "max": 31.497
       },
       "syntax_nodes": {
-        "n": 97,
-        "mean": 19.6183,
-        "median": 17.361,
-        "q1": 5.664,
-        "q3": 31.362,
-        "min": -18.033,
+        "n": 128,
+        "mean": 18.1883,
+        "median": 15.3385,
+        "q1": 4.5992,
+        "q3": 30.0705,
+        "min": -46.512,
         "max": 66.762
       },
       "correspondence": {
         "corr_scaffolding_tokens_per_triple": {
           "python": {
-            "n": 97,
-            "mean": 9.448,
+            "n": 128,
+            "mean": 9.4372,
             "median": 9.0,
             "q1": 9.0,
-            "q3": 9.333,
+            "q3": 9.0623,
             "min": 9.0,
-            "max": 12.0
+            "max": 19.0
           },
           "ldpy": {
-            "n": 96,
-            "mean": 3.3583,
-            "median": 2.1835,
+            "n": 124,
+            "mean": 3.3802,
+            "median": 2.225,
             "q1": 1.5,
             "q3": 4.0,
             "min": 0.364,
             "max": 20.0
           },
           "paired": {
-            "n_pairs": 96,
+            "n_pairs": 124,
             "median_a": 9.0,
-            "median_b": 2.1835,
+            "median_b": 2.225,
             "median_difference": 7.0,
-            "hodges_lehmann_shift": 6.55,
+            "hodges_lehmann_shift": 6.5455,
             "difference_ci": {
               "point": 7.0,
-              "lo": 6.666,
-              "hi": 7.267,
+              "lo": 6.646,
+              "hi": 7.25,
               "level": 0.95,
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 96,
+              "n": 124,
               "n_zero": 0,
-              "W": 120.5,
-              "W_plus": 4535.5,
-              "W_minus": 120.5,
-              "z": -8.0673,
+              "W": 216.5,
+              "W_plus": 7533.5,
+              "W_minus": 216.5,
+              "z": -9.1246,
               "p_two_sided": 0.0,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
             "cliffs_delta": {
-              "delta": 0.8787,
+              "delta": 0.8888,
               "magnitude": "large"
             }
           }
         },
         "corr_nesting_per_term": {
           "python": {
-            "n": 97,
+            "n": 128,
             "mean": 3.0,
             "median": 3.0,
             "q1": 3.0,
@@ -2196,8 +2568,8 @@
             "max": 3.0
           },
           "ldpy": {
-            "n": 97,
-            "mean": 0.0021,
+            "n": 128,
+            "mean": 0.0025,
             "median": 0.0,
             "q1": 0.0,
             "q3": 0.0,
@@ -2205,7 +2577,7 @@
             "max": 0.2
           },
           "paired": {
-            "n_pairs": 97,
+            "n_pairs": 128,
             "median_a": 3.0,
             "median_b": 0.0,
             "median_difference": 3.0,
@@ -2218,12 +2590,12 @@
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 97,
+              "n": 128,
               "n_zero": 0,
               "W": 0,
-              "W_plus": 4753.0,
+              "W_plus": 8256.0,
               "W_minus": 0,
-              "z": -9.7979,
+              "z": -11.2276,
               "p_two_sided": 0.0,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
@@ -2235,48 +2607,48 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 97,
-            "mean": 1.6209,
+            "n": 128,
+            "mean": 1.5927,
             "median": 1.167,
-            "q1": 0.646,
+            "q1": 0.667,
             "q3": 2.0,
             "min": 0.0,
             "max": 9.0
           },
           "ldpy": {
-            "n": 96,
-            "mean": 0.8102,
+            "n": 124,
+            "mean": 0.8198,
             "median": 0.4,
-            "q1": 0.149,
+            "q1": 0.167,
             "q3": 1.0,
             "min": 0.0,
             "max": 9.0
           },
           "paired": {
-            "n_pairs": 96,
-            "median_a": 1.146,
+            "n_pairs": 124,
+            "median_a": 1.1715,
             "median_b": 0.4,
-            "median_difference": 0.586,
-            "hodges_lehmann_shift": 0.5955,
+            "median_difference": 0.5625,
+            "hodges_lehmann_shift": 0.625,
             "difference_ci": {
-              "point": 0.586,
-              "lo": 0.428,
+              "point": 0.5625,
+              "lo": 0.4225,
               "hi": 0.75,
               "level": 0.95,
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 76,
-              "n_zero": 20,
-              "W": 245.0,
-              "W_plus": 2681.0,
-              "W_minus": 245.0,
-              "z": -6.3078,
+              "n": 96,
+              "n_zero": 28,
+              "W": 413.5,
+              "W_plus": 4242.5,
+              "W_minus": 413.5,
+              "z": -6.9989,
               "p_two_sided": 0.0,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
             "cliffs_delta": {
-              "delta": 0.4469,
+              "delta": 0.4549,
               "magnitude": "medium"
             }
           }
@@ -2284,41 +2656,41 @@
       }
     },
     "no-source-rdf": {
-      "n": 26,
+      "n": 31,
       "byte_identical": 1,
       "code_loc": {
-        "n": 26,
-        "mean": -9.7455,
+        "n": 31,
+        "mean": -5.2582,
         "median": 0.0,
-        "q1": -15.625,
-        "q3": 0.0,
+        "q1": -8.333,
+        "q3": 5.714,
         "min": -108.333,
-        "max": 28.125
+        "max": 30.526
       },
       "tokens": {
-        "n": 26,
-        "mean": -8.5207,
-        "median": -8.5335,
-        "q1": -14.5607,
+        "n": 31,
+        "mean": -7.9143,
+        "median": -7.692,
+        "q1": -14.286,
         "q3": 0.0,
         "min": -37.069,
         "max": 13.462
       },
       "chars": {
-        "n": 26,
-        "mean": -9.8133,
-        "median": -0.787,
-        "q1": -14.7912,
-        "q3": 0.9997,
+        "n": 31,
+        "mean": -9.1121,
+        "median": -0.746,
+        "q1": -13.742,
+        "q3": 2.561,
         "min": -132.271,
         "max": 50.656
       },
       "syntax_nodes": {
-        "n": 26,
-        "mean": -2.8262,
-        "median": 0.0,
-        "q1": -9.455,
-        "q3": 5.758,
+        "n": 31,
+        "mean": -0.0406,
+        "median": 1.724,
+        "q1": -6.818,
+        "q3": 7.143,
         "min": -60.0,
         "max": 32.632
       },
@@ -2331,7 +2703,7 @@
         "corr_nesting_per_term": {
           "python": null,
           "ldpy": {
-            "n": 25,
+            "n": 30,
             "mean": 0.0,
             "median": 0.0,
             "q1": 0.0,
@@ -2343,13 +2715,13 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 26,
-            "mean": 0.4615,
+            "n": 31,
+            "mean": 0.6129,
             "median": 0.0,
             "q1": 0.0,
             "q3": 1.0,
             "min": 0.0,
-            "max": 3.0
+            "max": 6.0
           },
           "ldpy": null,
           "paired": null
@@ -2357,43 +2729,43 @@
       }
     },
     "string-embedded": {
-      "n": 28,
+      "n": 38,
       "byte_identical": 0,
       "code_loc": {
-        "n": 28,
-        "mean": 4.1578,
-        "median": 5.965,
-        "q1": -3.4545,
-        "q3": 14.8215,
+        "n": 38,
+        "mean": 4.385,
+        "median": 4.4835,
+        "q1": -2.2725,
+        "q3": 14.4645,
         "min": -28.571,
-        "max": 20.0
+        "max": 28.0
       },
       "tokens": {
-        "n": 28,
-        "mean": -59.8135,
-        "median": -38.2495,
-        "q1": -84.3003,
-        "q3": -3.571,
-        "min": -313.514,
+        "n": 38,
+        "mean": -65.511,
+        "median": -28.7625,
+        "q1": -75.3295,
+        "q3": -3.2492,
+        "min": -670.435,
         "max": 15.287
       },
       "chars": {
-        "n": 28,
-        "mean": -0.5765,
-        "median": 1.702,
-        "q1": -3.8147,
-        "q3": 5.9002,
+        "n": 38,
+        "mean": 0.7551,
+        "median": 2.372,
+        "q1": -3.9317,
+        "q3": 5.144,
         "min": -34.588,
-        "max": 20.606
+        "max": 38.81
       },
       "syntax_nodes": {
-        "n": 28,
-        "mean": -3.2316,
-        "median": 0.222,
-        "q1": -14.4802,
-        "q3": 13.7465,
+        "n": 38,
+        "mean": -0.6377,
+        "median": 0.4175,
+        "q1": -10.548,
+        "q3": 12.4255,
         "min": -45.0,
-        "max": 26.087
+        "max": 42.857
       },
       "correspondence": {
         "corr_scaffolding_tokens_per_triple": {
@@ -2404,7 +2776,7 @@
         "corr_nesting_per_term": {
           "python": null,
           "ldpy": {
-            "n": 28,
+            "n": 38,
             "mean": 0.0,
             "median": 0.0,
             "q1": 0.0,
@@ -2416,9 +2788,9 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 28,
-            "mean": 1.4643,
-            "median": 0.5,
+            "n": 38,
+            "mean": 1.4474,
+            "median": 1.0,
             "q1": 0.0,
             "q3": 3.0,
             "min": 0.0,
@@ -2430,62 +2802,62 @@
       }
     },
     "terms-only": {
-      "n": 73,
+      "n": 106,
       "byte_identical": 0,
       "code_loc": {
-        "n": 73,
-        "mean": -7.599,
-        "median": -4.545,
-        "q1": -13.333,
+        "n": 106,
+        "mean": -5.7305,
+        "median": -4.215,
+        "q1": -10.1315,
         "q3": 0.0,
         "min": -60.0,
         "max": 29.231
       },
       "tokens": {
-        "n": 73,
-        "mean": -1.9,
-        "median": -2.4,
-        "q1": -7.368,
-        "q3": 3.1535,
+        "n": 106,
+        "mean": -1.9917,
+        "median": -2.804,
+        "q1": -9.529,
+        "q3": 3.2492,
         "min": -78.125,
         "max": 39.007
       },
       "chars": {
-        "n": 73,
-        "mean": -7.2255,
-        "median": -3.623,
-        "q1": -9.0575,
-        "q3": 0.301,
+        "n": 106,
+        "mean": -6.792,
+        "median": -3.4775,
+        "q1": -9.3102,
+        "q3": 0.2985,
         "min": -150.619,
         "max": 17.099
       },
       "syntax_nodes": {
-        "n": 73,
-        "mean": 2.267,
-        "median": -0.413,
-        "q1": -3.526,
-        "q3": 5.3895,
-        "min": -25.455,
+        "n": 106,
+        "mean": 2.3765,
+        "median": 0.0,
+        "q1": -3.218,
+        "q3": 5.197,
+        "min": -28.0,
         "max": 54.386
       },
       "correspondence": {
         "corr_scaffolding_tokens_per_triple": {
           "python": null,
           "ldpy": {
-            "n": 3,
-            "mean": 2.4333,
-            "median": 1.8,
-            "q1": 1.0,
-            "q3": 4.5,
+            "n": 5,
+            "mean": 4.36,
+            "median": 4.5,
+            "q1": 1.4,
+            "q3": 7.25,
             "min": 1.0,
-            "max": 4.5
+            "max": 9.5
           },
           "paired": null
         },
         "corr_nesting_per_term": {
           "python": null,
           "ldpy": {
-            "n": 73,
+            "n": 106,
             "mean": 0.0,
             "median": 0.0,
             "q1": 0.0,
@@ -2497,8 +2869,8 @@
         },
         "corr_constructors_per_triple": {
           "python": {
-            "n": 73,
-            "mean": 2.2055,
+            "n": 106,
+            "mean": 2.1604,
             "median": 1.0,
             "q1": 0.0,
             "q3": 3.0,
@@ -2506,39 +2878,39 @@
             "max": 21.0
           },
           "ldpy": {
-            "n": 3,
-            "mean": 0.7777,
+            "n": 5,
+            "mean": 1.4666,
             "median": 0.333,
             "q1": 0.0,
-            "q3": 2.0,
+            "q3": 3.5,
             "min": 0.0,
-            "max": 2.0
+            "max": 5.0
           },
           "paired": {
-            "n_pairs": 3,
+            "n_pairs": 5,
             "median_a": 5.0,
             "median_b": 0.333,
-            "median_difference": 3.0,
-            "hodges_lehmann_shift": 3.6667,
+            "median_difference": 2.0,
+            "hodges_lehmann_shift": 2.0,
             "difference_ci": {
-              "point": 3.0,
-              "lo": 0.667,
+              "point": 2.0,
+              "lo": 0.0,
               "hi": 8.0,
               "level": 0.95,
               "method": "percentile bootstrap, 10000 resamples, seed 20260827"
             },
             "wilcoxon": {
-              "n": 3,
-              "n_zero": 0,
+              "n": 4,
+              "n_zero": 1,
               "W": 0,
-              "W_plus": 6.0,
+              "W_plus": 10.0,
               "W_minus": 0,
-              "z": -1.3363,
-              "p_two_sided": 0.181449,
+              "z": -1.6432,
+              "p_two_sided": 0.100348,
               "method": "wilcoxon-signed-rank (normal approx., continuity + tie corrected)"
             },
             "cliffs_delta": {
-              "delta": 0.7778,
+              "delta": 0.64,
               "magnitude": "large"
             }
           }
@@ -2674,11 +3046,46 @@
       "tokens_reduction_pct": 2.688
     },
     {
+      "region_id": "laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__build_validation_graph",
+      "stratum": "add_in_loop",
+      "rdf_ops": 10,
+      "rdf_op_share": 0.06803,
+      "tokens_reduction_pct": -11.111
+    },
+    {
+      "region_id": "morph-kgc__morph-kgc__src_morph_kgc_mapping_mapping_parser.py___complete_termtypes",
+      "stratum": "add_in_loop",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.07171,
+      "tokens_reduction_pct": -54.667
+    },
+    {
+      "region_id": "morph-kgc__morph-kgc__src_morph_kgc_mapping_yarrrml.py___translate_yarrrml_to_rml",
+      "stratum": "add_in_loop",
+      "rdf_ops": 95,
+      "rdf_op_share": 0.09286,
+      "tokens_reduction_pct": 20.599
+    },
+    {
       "region_id": "steve-bate__firm__firm_ld_jsonld_utils.py___insert_resource",
       "stratum": "add_in_loop",
       "rdf_ops": 11,
       "rdf_op_share": 0.06509,
       "tokens_reduction_pct": -2.372
+    },
+    {
+      "region_id": "tteon__seocho__src_seocho_ontology_serialization.py__ontology_to_ttl",
+      "stratum": "add_in_loop",
+      "rdf_ops": 66,
+      "rdf_op_share": 0.13415,
+      "tokens_reduction_pct": 7.592
+    },
+    {
+      "region_id": "vlizBE__vocabserver-app__services_content-unification_sparql_util.py__sparql_construct_res_to_graph",
+      "stratum": "add_in_loop",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.07018,
+      "tokens_reduction_pct": -2.273
     },
     {
       "region_id": "AtomGraph__Web-Algebra__tests_unit_test_values.py___bnode_value",
@@ -2779,6 +3186,13 @@
       "tokens_reduction_pct": -5.46
     },
     {
+      "region_id": "ScaDS__KGpipe__src_kgpipe_tasks_transform_interop_transform.py____rdf_to_wide_csv_v2_filter_graph_by_subjects",
+      "stratum": "add_isolated",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.05714,
+      "tokens_reduction_pct": -12.5
+    },
+    {
       "region_id": "SoftwareHeritage__swh-indexer__swh_indexer_metadata_mapping_github.py__GitHubMapping_translate_parent",
       "stratum": "add_isolated",
       "rdf_ops": 4,
@@ -2807,11 +3221,46 @@
       "tokens_reduction_pct": 4.608
     },
     {
+      "region_id": "adobe__aepp__aepp_knowledgegraph.py__KnowledgeGraph_buildGraph",
+      "stratum": "add_isolated",
+      "rdf_ops": 169,
+      "rdf_op_share": 0.16749,
+      "tokens_reduction_pct": 13.989
+    },
+    {
       "region_id": "beyonai__ByDC__packages_datacloud-knowledge_src_datacloud_knowledge_ingestion_owl_generate_graph_builder.py__GraphBuilder_add_entity_mapping",
       "stratum": "add_isolated",
       "rdf_ops": 10,
       "rdf_op_share": 0.08197,
       "tokens_reduction_pct": 6.965
+    },
+    {
+      "region_id": "calipho-sib__nextprot-scripts__src_polish-rdf_pylode_pyLODE-2.13.2_pylode_profiles_base.py__BaseProfile__make_schemaorg_metadata",
+      "stratum": "add_isolated",
+      "rdf_ops": 40,
+      "rdf_op_share": 0.0907,
+      "tokens_reduction_pct": 0.438
+    },
+    {
+      "region_id": "dice-group__RELD__V1_NYT_New.py__create_rdf",
+      "stratum": "add_isolated",
+      "rdf_ops": 77,
+      "rdf_op_share": 0.14922,
+      "tokens_reduction_pct": 3.426
+    },
+    {
+      "region_id": "kracr__cog-csv-owl-bridge__src_csv_to_owl_csv_owl_code.py__csv_to_owl_subclass",
+      "stratum": "add_isolated",
+      "rdf_ops": 46,
+      "rdf_op_share": 0.06845,
+      "tokens_reduction_pct": 5.577
+    },
+    {
+      "region_id": "ktbs__ktbs__lib_ktbs_api_base.py__BaseMixin_create_method",
+      "stratum": "add_isolated",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.08955,
+      "tokens_reduction_pct": 1.629
     },
     {
       "region_id": "AI-SDC__ACRO__test_test_ontology_handling.py__test_populate_useful_dicts_othersuperclasses_branch",
@@ -2905,6 +3354,20 @@
       "tokens_reduction_pct": 12.06
     },
     {
+      "region_id": "RDFLib__VocPrez__vocprez_model_concept.py__ConceptRenderer__render_skos_rdf",
+      "stratum": "add_run_shared_subject",
+      "rdf_ops": 32,
+      "rdf_op_share": 0.12308,
+      "tokens_reduction_pct": 2.113
+    },
+    {
+      "region_id": "SAWGraph__water-kg__datasets_sdwis_sdwa_pws.py__triplify",
+      "stratum": "add_run_shared_subject",
+      "rdf_ops": 40,
+      "rdf_op_share": 0.09732,
+      "tokens_reduction_pct": 5.047
+    },
+    {
       "region_id": "altunelyusuf__SemanticTechnologies__landscape_07-tooling_build_core_v6_4_0.py__<module>_145",
       "stratum": "add_run_shared_subject",
       "rdf_ops": 15,
@@ -2917,6 +3380,13 @@
       "rdf_ops": 5,
       "rdf_op_share": 0.11628,
       "tokens_reduction_pct": 39.189
+    },
+    {
+      "region_id": "altunelyusuf__SemanticTechnologies__landscape_07-tooling_build_page_v6_7_0.py__<module>_59",
+      "stratum": "add_run_shared_subject",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.11628,
+      "tokens_reduction_pct": -33.784
     },
     {
       "region_id": "biokb__biokb_wfo__src_biokb_wfo_rdf_turtle.py__TurtleCreator_create_nodes_ttl",
@@ -2940,11 +3410,25 @@
       "tokens_reduction_pct": 14.889
     },
     {
+      "region_id": "jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_services_triple_store_adaptors_secondary_Oxigraph.py__<module>_583",
+      "stratum": "add_run_shared_subject",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.04469,
+      "tokens_reduction_pct": 3.673
+    },
+    {
       "region_id": "shijx12__KQAPro_Baselines__SPARQL_sparql_engine.py__SparqlEngine__new_fact_node",
       "stratum": "add_run_shared_subject",
       "rdf_ops": 1,
       "rdf_op_share": 0.01754,
       "tokens_reduction_pct": 14.583
+    },
+    {
+      "region_id": "statnett__KGraphPy__tests_test_header.py__test_repair_blank_header_subject_dctidentifier",
+      "stratum": "add_run_shared_subject",
+      "rdf_ops": 9,
+      "rdf_op_share": 0.0989,
+      "tokens_reduction_pct": 2.667
     },
     {
       "region_id": "IndustryFusion__DigitalTwin__semantic-model_opcua_lib_utils.py__RdfUtils_get_all_subreferences",
@@ -3043,6 +3527,20 @@
       "rdf_ops": 1,
       "rdf_op_share": 0.01818,
       "tokens_reduction_pct": -1.124
+    },
+    {
+      "region_id": "mathiasrichter__shapiro__shapiro_model.py__ShaclProperty_get_nodeshapes",
+      "stratum": "bind_initbindings",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.0375,
+      "tokens_reduction_pct": -3.846
+    },
+    {
+      "region_id": "mpsonntag__snippets__python_odml_examples_example_rdf_query.py__<module>_17",
+      "stratum": "bind_initbindings",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.07692,
+      "tokens_reduction_pct": -29.167
     },
     {
       "region_id": "oxigraph__oxrdflib__tests_test_sparql.py__SparqlTestCase_test_select_query_init_namespace",
@@ -3157,6 +3655,62 @@
       "tokens_reduction_pct": -30.769
     },
     {
+      "region_id": "jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_services_object_storage_ontologies_modules_ObjectStorageEventOntology.py__RDFEntity_rdf",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 39,
+      "rdf_op_share": 0.11017,
+      "tokens_reduction_pct": 2.273
+    },
+    {
+      "region_id": "jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_services_triple_store_adaptors_secondary_Oxigraph.py__Oxigraph_query",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.05578,
+      "tokens_reduction_pct": -1.902
+    },
+    {
+      "region_id": "ktbs__ktbs__lib_ktbs_api_trace.py__StoredTraceMixin_set_trace_begin_dt",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.13636,
+      "tokens_reduction_pct": -9.091
+    },
+    {
+      "region_id": "kumagallium__asterism__api_tests_test_orphan_reclaim_api.py___add_version",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.17647,
+      "tokens_reduction_pct": 24.561
+    },
+    {
+      "region_id": "lazlop__semantic_objects__.claude_worktrees_watr-ingestion_src_semantic_objects_exporters.py__RdfExporter_generate_rdf_class_definition",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 17,
+      "rdf_op_share": 0.08057,
+      "tokens_reduction_pct": 3.279
+    },
+    {
+      "region_id": "tableau__altimeter__altimeter_core_graph_links.py__SimpleLink_to_rdf",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.04918,
+      "tokens_reduction_pct": -9.901
+    },
+    {
+      "region_id": "temcdrm__emthub__src_emthub_examples_ic_to_rdf.py__create_cim_ic",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 81,
+      "rdf_op_share": 0.10916,
+      "tokens_reduction_pct": 26.451
+    },
+    {
+      "region_id": "tetherless-world__materialsmine__tests_ingest_tester.py__autoparse",
+      "stratum": "coercion_datatype",
+      "rdf_ops": 1,
+      "rdf_op_share": 0.01515,
+      "tokens_reduction_pct": 5.208
+    },
+    {
       "region_id": "tetherless-world__materialsmine__tests_test_L155_S2_Roy_2005.py__IngestTestRunner_no_test_dielectric_real_permittivity",
       "stratum": "coercion_datatype",
       "rdf_ops": 5,
@@ -3234,6 +3788,34 @@
       "tokens_reduction_pct": 20.959
     },
     {
+      "region_id": "RDFLib__timefuncs__tests_test_is_before_standalone.py__test_is_before_rdflib",
+      "stratum": "ns_def_local",
+      "rdf_ops": 32,
+      "rdf_op_share": 0.20779,
+      "tokens_reduction_pct": 23.984
+    },
+    {
+      "region_id": "TheWorldAvatar__mcp-tool-layer__scripts_output_conversion_ttl_to_json_ontosynthesis_characterisation_conversion.py___find_species_for_synthesis",
+      "stratum": "ns_def_local",
+      "rdf_ops": 16,
+      "rdf_op_share": 0.0625,
+      "tokens_reduction_pct": 1.55
+    },
+    {
+      "region_id": "anuzzolese__pyrml__pyrml_pyrml_core.py__SPARQLSource_to_rdf",
+      "stratum": "ns_def_local",
+      "rdf_ops": 9,
+      "rdf_op_share": 0.15254,
+      "tokens_reduction_pct": 3.03
+    },
+    {
+      "region_id": "binary-array-ld__bald__nc2rdf_nc2rdf.py__baldgraph2schemaorg",
+      "stratum": "ns_def_local",
+      "rdf_ops": 15,
+      "rdf_op_share": 0.06912,
+      "tokens_reduction_pct": -1.582
+    },
+    {
       "region_id": "bloodbee__jrt__tests_conftest.py__teapot_ontology_graph",
       "stratum": "ns_def_local",
       "rdf_ops": 19,
@@ -3241,11 +3823,39 @@
       "tokens_reduction_pct": 40.0
     },
     {
+      "region_id": "dtai-kg__SCOOP__SCOOP_shape_integration_priority.py__ShapeIntegrationPriority___init__",
+      "stratum": "ns_def_local",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.09756,
+      "tokens_reduction_pct": 8.955
+    },
+    {
+      "region_id": "lync-cyber__CataForge__scripts_codegen_kg_schema.py___canonicalize_shacl",
+      "stratum": "ns_def_local",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.07,
+      "tokens_reduction_pct": 1.645
+    },
+    {
+      "region_id": "mhrimaz__aasbrain-concept-description-repo__app_models_aas_namespace.py__<module>_1",
+      "stratum": "ns_def_local",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.18519,
+      "tokens_reduction_pct": 31.707
+    },
+    {
       "region_id": "openworm__owmeta-core__owmeta_core_dataobject.py__<module>_634",
       "stratum": "ns_def_local",
       "rdf_ops": 1,
       "rdf_op_share": 0.06667,
       "tokens_reduction_pct": 8.333
+    },
+    {
+      "region_id": "synaptixs__ontomesh__scripts_ontology_gate.py__collect",
+      "stratum": "ns_def_local",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.02985,
+      "tokens_reduction_pct": 1.235
     },
     {
       "region_id": "Congruentsys__yurtle-rdflib__src_yurtle_rdflib_serializer.py__YurtleRDFlibSerializer__filter_provenance_triples",
@@ -3358,6 +3968,34 @@
       "rdf_ops": 23,
       "rdf_op_share": 0.13218,
       "tokens_reduction_pct": 1.684
+    },
+    {
+      "region_id": "jupyter-naas__abi__libs_naas-abi-marketplace_naas_abi_marketplace_applications_linkedin_pipelines_LinkedInExportConnectionsPipeline.py__LinkedInExportConnectionsPipeline_generate_graph_date",
+      "stratum": "ns_import_project",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.11475,
+      "tokens_reduction_pct": 3.243
+    },
+    {
+      "region_id": "pyscal__atomRDF__atomrdf_datamodels_defects_grainboundary.py__GrainBoundary_from_graph",
+      "stratum": "ns_import_project",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.04348,
+      "tokens_reduction_pct": 3.268
+    },
+    {
+      "region_id": "statnett__KGraphPy__kgraphpy_header.py__CIMMetadataHeader_from_manifest",
+      "stratum": "ns_import_project",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.04571,
+      "tokens_reduction_pct": -3.203
+    },
+    {
+      "region_id": "usc-isi-i2__etk__etk_unit_tests_test_kg_shacl.py__TestSHACLOntoConverter_test_cnode",
+      "stratum": "ns_import_project",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.01724,
+      "tokens_reduction_pct": 6.024
     },
     {
       "region_id": "Aleksander-Drozd__csvwlib__csvwlib_converter_ToRDFConverter.py__ToRDFConverter__parse_table",
@@ -3563,11 +4201,32 @@
       "tokens_reduction_pct": -1.923
     },
     {
+      "region_id": "hidden-graph__rdflib-starlight__tests_unit_test_result_patches.py__TestSelectStarOverGroundPatternIteration_test_nonmatching_fact_yields_zero_rows",
+      "stratum": "sparql_interpolated",
+      "rdf_ops": 1,
+      "rdf_op_share": 0.01961,
+      "tokens_reduction_pct": -17.647
+    },
+    {
+      "region_id": "isamplesorg__vocabularies__tools_navocab___init__.py__VocabularyStore_broader",
+      "stratum": "sparql_interpolated",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02041,
+      "tokens_reduction_pct": 13.125
+    },
+    {
       "region_id": "isamplesorg__vocabularies__tools_navocab___init__.py__VocabularyStore_narrower",
       "stratum": "sparql_interpolated",
       "rdf_ops": 2,
       "rdf_op_share": 0.02105,
       "tokens_reduction_pct": 13.462
+    },
+    {
+      "region_id": "isamplesorg__vocabularies__tools_vocab2md.py__getNarrower",
+      "stratum": "sparql_interpolated",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.02857,
+      "tokens_reduction_pct": 9.434
     },
     {
       "region_id": "ktbs__ktbs__lib_ktbs_engine_obsel.py__<module>_328",
@@ -3661,6 +4320,13 @@
       "tokens_reduction_pct": -4.183
     },
     {
+      "region_id": "aminedouiri__knowledge-formalization-web-application__apps_visualisation_views.py__visualisation",
+      "stratum": "sparql_literal",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.05844,
+      "tokens_reduction_pct": -12.018
+    },
+    {
       "region_id": "interior-night__kglab-ggg__scripts_oxrdf.py__run_query",
       "stratum": "sparql_literal",
       "rdf_ops": 0,
@@ -3675,11 +4341,46 @@
       "tokens_reduction_pct": -45.122
     },
     {
+      "region_id": "kumagallium__asterism__ingest_tests_test_papers_dataset.py__test_structure_round_trip",
+      "stratum": "sparql_literal",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.04054,
+      "tokens_reduction_pct": -44.348
+    },
+    {
       "region_id": "lazlop__semantic_objects__tests_ingest_test_shacl_roundtrip_parity.py__test_class_scope_or_roundtrip",
       "stratum": "sparql_literal",
       "rdf_ops": 2,
       "rdf_op_share": 0.04651,
       "tokens_reduction_pct": -146.479
+    },
+    {
+      "region_id": "mpsonntag__snippets__python_odml_scripts_rdf_crcns_query.py__<module>_86",
+      "stratum": "sparql_literal",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.10526,
+      "tokens_reduction_pct": -670.435
+    },
+    {
+      "region_id": "stevereiner__flexible-graphrag__flexible-graphrag_rdf_ontology_manager.py__OntologyManager_get_xsd_type_map",
+      "stratum": "sparql_literal",
+      "rdf_ops": 0,
+      "rdf_op_share": 0.0,
+      "tokens_reduction_pct": -14.41
+    },
+    {
+      "region_id": "usc-gria__sw-kg__materials_rdflib_python_task04.py__<module>_1",
+      "stratum": "sparql_literal",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.10976,
+      "tokens_reduction_pct": 3.586
+    },
+    {
+      "region_id": "usc-isi-i2__gaia-knowledge-graph__rdf2json.py__<module>_1",
+      "stratum": "sparql_literal",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.02941,
+      "tokens_reduction_pct": -38.194
     },
     {
       "region_id": "DataDrivenCPS__acquirium__src_acquirium_Storage_graph_store.py___graph_affects_closure",
@@ -3773,6 +4474,13 @@
       "tokens_reduction_pct": -1.993
     },
     {
+      "region_id": "TheWorldAvatar__mcp-tool-layer__src_ontospecies_extension_operations_ontospecies_extension.py__add_elemental_analysis_data_to_species",
+      "stratum": "trav_existence",
+      "rdf_ops": 13,
+      "rdf_op_share": 0.05179,
+      "tokens_reduction_pct": -3.242
+    },
+    {
       "region_id": "TheWorldAvatar__mcp-tool-layer__src_pipelines_main_kg_building_build.py___validate_entity_ttl_structure",
       "stratum": "trav_existence",
       "rdf_ops": 10,
@@ -3787,6 +4495,13 @@
       "tokens_reduction_pct": -1.333
     },
     {
+      "region_id": "altunelyusuf__SemanticTechnologies__landscape_06-gates_semtech_supplementary_gates_v6_6_0.py__<module>_282",
+      "stratum": "trav_existence",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.12245,
+      "tokens_reduction_pct": -10.526
+    },
+    {
       "region_id": "deepin-community__lv2__scripts_lv2_check_specification.py___has_property",
       "stratum": "trav_existence",
       "rdf_ops": 1,
@@ -3799,6 +4514,27 @@
       "rdf_ops": 8,
       "rdf_op_share": 0.07619,
       "tokens_reduction_pct": -22.826
+    },
+    {
+      "region_id": "fair-workflows__fairworkflows__fairworkflows_rdf_wrapper.py__RdfWrapper__uri_is_subject_in_rdf",
+      "stratum": "trav_existence",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.04444,
+      "tokens_reduction_pct": -10.811
+    },
+    {
+      "region_id": "linkml__linkml__tests_linkml_test_issues_test_linkml_issue_384.py___contains_restriction",
+      "stratum": "trav_existence",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.10204,
+      "tokens_reduction_pct": -1.136
+    },
+    {
+      "region_id": "vemonet__rdflib-endpoint__src_rdflib_endpoint_sparql_router.py__SparqlRouter_prepare_sd_graph",
+      "stratum": "trav_existence",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.17647,
+      "tokens_reduction_pct": 8.772
     },
     {
       "region_id": "BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__extension",
@@ -3892,6 +4628,13 @@
       "tokens_reduction_pct": -9.419
     },
     {
+      "region_id": "aigora-de__rdf-construct__src_rdf_construct_shacl_converters.py__DomainRangeConverter_convert_for_class",
+      "stratum": "trav_navigation",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.06557,
+      "tokens_reduction_pct": -15.544
+    },
+    {
       "region_id": "alganet__apysource__apysource_verification.py___cite_sites",
       "stratum": "trav_navigation",
       "rdf_ops": 7,
@@ -3906,11 +4649,67 @@
       "tokens_reduction_pct": 0.787
     },
     {
+      "region_id": "chin-rcip__CRITERIA__criteria.py__shapeProc",
+      "stratum": "trav_navigation",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.0596,
+      "tokens_reduction_pct": -5.908
+    },
+    {
+      "region_id": "danilipp17__thesis_code__oscin_reader.py__OntologyReader__read_agents",
+      "stratum": "trav_navigation",
+      "rdf_ops": 19,
+      "rdf_op_share": 0.13869,
+      "tokens_reduction_pct": -2.242
+    },
+    {
+      "region_id": "danilipp17__thesis_code__oscin_reader.py__OntologyReader__read_flow_steps",
+      "stratum": "trav_navigation",
+      "rdf_ops": 14,
+      "rdf_op_share": 0.04575,
+      "tokens_reduction_pct": 0.21
+    },
+    {
+      "region_id": "danilipp17__thesis_code__oscin_reader.py__OntologyReader__read_teams",
+      "stratum": "trav_navigation",
+      "rdf_ops": 81,
+      "rdf_op_share": 0.17647,
+      "tokens_reduction_pct": -0.843
+    },
+    {
       "region_id": "jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_utils_onto2py_onto2py.py__extract_shacl_constraints",
       "stratum": "trav_navigation",
       "rdf_ops": 3,
       "rdf_op_share": 0.04348,
       "tokens_reduction_pct": 7.895
+    },
+    {
+      "region_id": "kumagallium__asterism__ingest_src_asterism_rml_validate.py___tm_transcribed_columns",
+      "stratum": "trav_navigation",
+      "rdf_ops": 0,
+      "rdf_op_share": 0.0,
+      "tokens_reduction_pct": -1.852
+    },
+    {
+      "region_id": "laBioSynCare__laBioSynCare.github.io__scripts_generate-hed-bundle.py__read_sweep",
+      "stratum": "trav_navigation",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.03623,
+      "tokens_reduction_pct": 26.341
+    },
+    {
+      "region_id": "technologiestiftung__digital-budget-network-explorer__preprocess_graph.py__main",
+      "stratum": "trav_navigation",
+      "rdf_ops": 18,
+      "rdf_op_share": 0.03766,
+      "tokens_reduction_pct": -7.486
+    },
+    {
+      "region_id": "ternaustralia__vocview__skos_concept.py__ConceptRenderer__render_skos_rdf",
+      "stratum": "trav_navigation",
+      "rdf_ops": 9,
+      "rdf_op_share": 0.07438,
+      "tokens_reduction_pct": 0.0
     },
     {
       "region_id": "ArthurKeen__arango-query-core__arango_query_core_owl_rdflib.py__parse_owl_with_rdflib",
@@ -3990,6 +4789,13 @@
       "tokens_reduction_pct": -1.485
     },
     {
+      "region_id": "boricles__ontosphere__backend_app_api_import_rdf.py___label_for",
+      "stratum": "trav_one_step",
+      "rdf_ops": 2,
+      "rdf_op_share": 0.04,
+      "tokens_reduction_pct": -26.829
+    },
+    {
       "region_id": "emmo-repo__domain-electrochemistry__.github_scripts_check_iri_resolution.py__ontology_subject",
       "stratum": "trav_one_step",
       "rdf_ops": 1,
@@ -3997,11 +4803,74 @@
       "tokens_reduction_pct": -15.385
     },
     {
+      "region_id": "ktbs__ktbs__lib_ktbs_engine_trace_obsels.py__AbstractTraceObsels__detect_mon_change",
+      "stratum": "trav_one_step",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.02564,
+      "tokens_reduction_pct": -21.519
+    },
+    {
+      "region_id": "kumagallium__asterism__ingest_src_asterism_rml_validate.py___fn_source_columns",
+      "stratum": "trav_one_step",
+      "rdf_ops": 0,
+      "rdf_op_share": 0.0,
+      "tokens_reduction_pct": -2.139
+    },
+    {
+      "region_id": "kumagallium__asterism__ingest_tests_test_samples_curves.py__test_curves_aggregates",
+      "stratum": "trav_one_step",
+      "rdf_ops": 16,
+      "rdf_op_share": 0.07111,
+      "tokens_reduction_pct": -4.268
+    },
+    {
+      "region_id": "laBioSynCare__laBioSynCare.github.io__scripts_check-band-scope-notes.py__main",
+      "stratum": "trav_one_step",
+      "rdf_ops": 36,
+      "rdf_op_share": 0.06327,
+      "tokens_reduction_pct": 1.726
+    },
+    {
+      "region_id": "laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__check_positive_contract",
+      "stratum": "trav_one_step",
+      "rdf_ops": 23,
+      "rdf_op_share": 0.06866,
+      "tokens_reduction_pct": -3.366
+    },
+    {
       "region_id": "laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__check_real_public_artifact",
       "stratum": "trav_one_step",
       "rdf_ops": 17,
       "rdf_op_share": 0.06693,
       "tokens_reduction_pct": -3.731
+    },
+    {
+      "region_id": "mhrimaz__aasbrain-concept-description-repo__app_models_referable.py__Referable_from_rdf",
+      "stratum": "trav_one_step",
+      "rdf_ops": 16,
+      "rdf_op_share": 0.0613,
+      "tokens_reduction_pct": 10.099
+    },
+    {
+      "region_id": "synaptixs__ontomesh__src_alignment_generator.py___declared_local_names",
+      "stratum": "trav_one_step",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.02326,
+      "tokens_reduction_pct": -5.128
+    },
+    {
+      "region_id": "synaptixs__ontomesh__src_materializer.py__explain_triple",
+      "stratum": "trav_one_step",
+      "rdf_ops": 27,
+      "rdf_op_share": 0.09408,
+      "tokens_reduction_pct": -9.934
+    },
+    {
+      "region_id": "w3c-cg__sstim__scripts_sstim-definition-coverage.py__main",
+      "stratum": "trav_one_step",
+      "rdf_ops": 17,
+      "rdf_op_share": 0.03812,
+      "tokens_reduction_pct": -1.132
     },
     {
       "region_id": "ArangoDB-Community__ArangoRDF__tests_test_main.py__test_rpt_case_15_4",
@@ -4067,6 +4936,20 @@
       "tokens_reduction_pct": -4.348
     },
     {
+      "region_id": "Mat-O-Lab__RDFConverter__app.py__apply_mapping",
+      "stratum": "trav_single_value",
+      "rdf_ops": 67,
+      "rdf_op_share": 0.13929,
+      "tokens_reduction_pct": -8.46
+    },
+    {
+      "region_id": "OntoUML__ontouml-json2graph__json2graph_tests_test_main.py__get_recorded_configuration",
+      "stratum": "trav_single_value",
+      "rdf_ops": 8,
+      "rdf_op_share": 0.10667,
+      "tokens_reduction_pct": -10.169
+    },
+    {
       "region_id": "RDFLib__prez__tests_test_endpoints_spaceprez.py__test_feature",
       "stratum": "trav_single_value",
       "rdf_ops": 3,
@@ -4079,6 +4962,41 @@
       "rdf_ops": 1,
       "rdf_op_share": 0.02778,
       "tokens_reduction_pct": -18.182
+    },
+    {
+      "region_id": "altunelyusuf__SemanticTechnologies__landscape_06-gates_rdodi_procedure_audit_v6_4_0.py__<module>_60",
+      "stratum": "trav_single_value",
+      "rdf_ops": 5,
+      "rdf_op_share": 0.10417,
+      "tokens_reduction_pct": -11.538
+    },
+    {
+      "region_id": "anuzzolese__pyrml__pyrml_pyrml_core.py__Source_from_rdf",
+      "stratum": "trav_single_value",
+      "rdf_ops": 15,
+      "rdf_op_share": 0.11364,
+      "tokens_reduction_pct": -12.162
+    },
+    {
+      "region_id": "dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_parseRML",
+      "stratum": "trav_single_value",
+      "rdf_ops": 6,
+      "rdf_op_share": 0.02844,
+      "tokens_reduction_pct": -3.561
+    },
+    {
+      "region_id": "eliozo__worksheet-generation-with-llms__scripts_weaviate_utils.py__WeaviateUtils_ingest_to_weaviate",
+      "stratum": "trav_single_value",
+      "rdf_ops": 11,
+      "rdf_op_share": 0.03406,
+      "tokens_reduction_pct": -11.458
+    },
+    {
+      "region_id": "hidden-graph__rdflib-starlight__starlight_query_evaluate_patches.py___decode_tt_hash",
+      "stratum": "trav_single_value",
+      "rdf_ops": 3,
+      "rdf_op_share": 0.04286,
+      "tokens_reduction_pct": -23.853
     },
     {
       "region_id": "jupyter-naas__abi__libs_naas-abi-core_naas_abi_core_utils_validate_bfo_ontology.py__check_inverse_of_itself",
@@ -4102,6 +5020,13 @@
       "tokens_reduction_pct": -10.912
     },
     {
+      "region_id": "llhhx0826__swrl2rdf__tests_test_builder.py__test_rule_label_written_as_rdfs_label",
+      "stratum": "trav_single_value",
+      "rdf_ops": 4,
+      "rdf_op_share": 0.04651,
+      "tokens_reduction_pct": -10.714
+    },
+    {
       "region_id": "mapsa__blathers__src_blathers_extract.py___extract_nested_node",
       "stratum": "trav_single_value",
       "rdf_ops": 4,
@@ -4118,389 +5043,430 @@
   ],
   "by_stratum": {
     "add_in_loop": {
-      "n": 22,
-      "n_surface_comparable": 22,
+      "n": 29,
+      "n_surface_comparable": 29,
       "n_string_embedded": 0,
       "classification": {
-        "directly-expressible": 18,
+        "directly-expressible": 25,
         "minor-restructuring": 4
       },
-      "expressible": 22,
+      "expressible": 29,
       "by_subgroup": {
-        "inline-construction": 22
+        "inline-construction": 28,
+        "terms-only": 1
       },
       "code_loc": {
-        "n": 22,
-        "mean": -8.0735,
-        "median": -4.206,
-        "q1": -17.1613,
-        "q3": 6.1513,
+        "n": 29,
+        "mean": -7.4396,
+        "median": -6.452,
+        "q1": -15.6505,
+        "q3": 6.2415,
         "min": -50.0,
-        "max": 20.755
+        "max": 28.302
       },
       "tokens": {
-        "n": 22,
-        "mean": 3.4717,
-        "median": 1.6675,
-        "q1": -2.5053,
-        "q3": 9.9965,
-        "min": -27.66,
+        "n": 29,
+        "mean": 1.8598,
+        "median": 2.688,
+        "q1": -2.6065,
+        "q3": 10.499,
+        "min": -54.667,
         "max": 48.113
       },
       "chars": {
-        "n": 22,
-        "mean": -6.74,
-        "median": -3.4605,
-        "q1": -12.6915,
-        "q3": -0.221,
+        "n": 29,
+        "mean": -4.9451,
+        "median": -1.926,
+        "q1": -10.978,
+        "q3": 0.435,
         "min": -41.449,
         "max": 23.766
       },
       "syntax_nodes": {
-        "n": 22,
-        "mean": 16.1701,
-        "median": 15.126,
-        "q1": 5.9848,
-        "q3": 25.141,
+        "n": 29,
+        "mean": 19.2574,
+        "median": 16.754,
+        "q1": 5.4605,
+        "q3": 29.427,
         "min": -18.033,
-        "max": 54.45
+        "max": 59.761
       },
       "string_embedded": null
     },
     "add_isolated": {
-      "n": 19,
-      "n_surface_comparable": 19,
+      "n": 25,
+      "n_surface_comparable": 25,
       "n_string_embedded": 0,
       "classification": {
-        "directly-expressible": 19
+        "directly-expressible": 25
       },
-      "expressible": 19,
+      "expressible": 25,
       "by_subgroup": {
-        "inline-construction": 19
+        "inline-construction": 25
       },
       "code_loc": {
-        "n": 19,
-        "mean": -7.5927,
+        "n": 25,
+        "mean": -6.9403,
         "median": -7.143,
-        "q1": -13.636,
-        "q3": -3.704,
-        "min": -21.333,
-        "max": 7.692
+        "q1": -13.961,
+        "q3": -1.852,
+        "min": -29.787,
+        "max": 28.302
       },
       "tokens": {
-        "n": 19,
-        "mean": 1.8094,
-        "median": 0.247,
-        "q1": -2.577,
-        "q3": 7.258,
+        "n": 25,
+        "mean": 1.8775,
+        "median": 1.176,
+        "q1": -2.206,
+        "q3": 7.1115,
         "min": -14.179,
         "max": 14.576
       },
       "chars": {
-        "n": 19,
-        "mean": -3.6865,
+        "n": 25,
+        "mean": -3.5853,
         "median": -3.699,
-        "q1": -5.802,
-        "q3": 0.135,
+        "q1": -6.1965,
+        "q3": 0.159,
         "min": -19.443,
-        "max": 5.134
+        "max": 7.73
       },
       "syntax_nodes": {
-        "n": 19,
-        "mean": 13.9976,
+        "n": 25,
+        "mean": 15.1923,
         "median": 12.766,
-        "q1": 4.233,
-        "q3": 23.81,
-        "min": -4.405,
-        "max": 32.18
+        "q1": 4.4975,
+        "q3": 25.5535,
+        "min": -8.571,
+        "max": 56.492
       },
       "string_embedded": null
     },
     "add_run_shared_subject": {
-      "n": 22,
-      "n_surface_comparable": 22,
+      "n": 30,
+      "n_surface_comparable": 30,
       "n_string_embedded": 0,
       "classification": {
-        "directly-expressible": 22
+        "directly-expressible": 30
       },
-      "expressible": 22,
+      "expressible": 30,
       "by_subgroup": {
-        "inline-construction": 21,
+        "inline-construction": 29,
         "terms-only": 1
       },
       "code_loc": {
-        "n": 22,
-        "mean": -15.7464,
+        "n": 30,
+        "mean": -18.8692,
         "median": -16.1115,
-        "q1": -20.6593,
-        "q3": -4.7367,
-        "min": -69.231,
+        "q1": -25.3042,
+        "q3": -2.9603,
+        "min": -133.333,
         "max": 29.333
       },
       "tokens": {
-        "n": 22,
-        "mean": 12.7945,
-        "median": 11.7,
-        "q1": 6.888,
-        "q3": 15.6375,
-        "min": -1.778,
+        "n": 30,
+        "mean": 9.3733,
+        "median": 9.806,
+        "q1": 2.5285,
+        "q3": 14.5777,
+        "min": -33.784,
         "max": 39.189
       },
       "chars": {
-        "n": 22,
-        "mean": -1.1142,
-        "median": 0.282,
+        "n": 30,
+        "mean": -3.9009,
+        "median": -3.4965,
         "q1": -8.7812,
-        "q3": 4.1505,
-        "min": -17.292,
+        "q3": 3.2185,
+        "min": -58.503,
         "max": 19.307
       },
       "syntax_nodes": {
-        "n": 22,
-        "mean": 29.1621,
-        "median": 30.2015,
-        "q1": 20.3528,
+        "n": 30,
+        "mean": 25.536,
+        "median": 27.989,
+        "q1": 12.5075,
         "q3": 38.9275,
-        "min": 4.545,
-        "max": 54.386
+        "min": -46.512,
+        "max": 58.881
       },
       "string_embedded": null
     },
     "bind_initbindings": {
-      "n": 16,
-      "n_surface_comparable": 4,
-      "n_string_embedded": 12,
+      "n": 20,
+      "n_surface_comparable": 6,
+      "n_string_embedded": 14,
       "classification": {
-        "directly-expressible": 16
+        "directly-expressible": 20
       },
-      "expressible": 16,
+      "expressible": 20,
       "by_subgroup": {
         "no-source-rdf": 4,
-        "string-embedded": 12
+        "string-embedded": 14,
+        "terms-only": 2
       },
       "code_loc": {
-        "n": 4,
-        "mean": 7.448,
+        "n": 6,
+        "mean": 6.9152,
         "median": 5.0,
-        "q1": -6.2498,
-        "q3": 23.5938,
+        "q1": -6.7707,
+        "q3": 20.493,
         "min": -8.333,
         "max": 28.125
       },
       "tokens": {
-        "n": 4,
-        "mean": -11.0373,
-        "median": -10.5125,
-        "q1": -19.4125,
-        "q3": -3.1867,
+        "n": 6,
+        "mean": -7.4015,
+        "median": -6.6105,
+        "q1": -14.2375,
+        "q3": 0.0535,
         "min": -22.0,
-        "max": -1.124
+        "max": 3.586
       },
       "chars": {
-        "n": 4,
-        "mean": 2.873,
+        "n": 6,
+        "mean": 1.9938,
         "median": 2.8145,
-        "q1": -0.3578,
-        "q3": 6.1623,
-        "min": -0.828,
+        "q1": -1.6947,
+        "q3": 5.2473,
+        "min": -4.295,
         "max": 6.691
       },
       "syntax_nodes": {
-        "n": 4,
-        "mean": 4.7978,
+        "n": 6,
+        "mean": 8.29,
         "median": 6.299,
-        "q1": -2.5152,
-        "q3": 10.6095,
+        "q1": 0.582,
+        "q3": 15.836,
         "min": -5.172,
-        "max": 11.765
+        "max": 28.049
       },
       "string_embedded": {
         "code_loc": {
-          "n": 12,
-          "mean": 10.4012,
+          "n": 14,
+          "mean": 10.373,
           "median": 12.271,
-          "q1": 4.0938,
-          "q3": 15.5917,
+          "q1": 3.4725,
+          "q3": 15.8595,
           "min": 0.0,
-          "max": 20.0
+          "max": 20.408
         },
         "tokens": {
-          "n": 12,
-          "mean": -24.2778,
-          "median": -7.5655,
-          "q1": -38.7583,
-          "q3": -3.067,
+          "n": 14,
+          "mean": -26.0606,
+          "median": -18.6045,
+          "q1": -40.5373,
+          "q3": -3.403,
           "min": -102.151,
           "max": 7.576
         },
         "chars": {
-          "n": 12,
-          "mean": 5.1445,
+          "n": 14,
+          "mean": 5.0862,
           "median": 3.68,
-          "q1": 2.4707,
-          "q3": 7.964,
+          "q1": 2.6302,
+          "q3": 7.7,
           "min": -11.103,
           "max": 20.606
         },
         "syntax_nodes": {
-          "n": 12,
-          "mean": 8.0469,
+          "n": 14,
+          "mean": 8.4009,
           "median": 11.681,
-          "q1": 0.8658,
-          "q3": 16.1242,
+          "q1": -0.5068,
+          "q3": 17.6212,
           "min": -14.545,
           "max": 26.087
         }
       }
     },
     "coercion_datatype": {
-      "n": 18,
-      "n_surface_comparable": 18,
+      "n": 26,
+      "n_surface_comparable": 26,
       "n_string_embedded": 0,
       "classification": {
-        "directly-expressible": 17,
+        "awkward": 1,
+        "directly-expressible": 24,
         "minor-restructuring": 1
       },
-      "expressible": 18,
+      "expressible": 25,
       "by_subgroup": {
-        "inline-construction": 14,
-        "terms-only": 4
+        "inline-construction": 20,
+        "terms-only": 6
       },
       "code_loc": {
-        "n": 18,
-        "mean": -3.2943,
-        "median": 0.0,
+        "n": 26,
+        "mean": -4.3702,
+        "median": -2.0,
         "q1": -11.9868,
-        "q3": 10.4663,
+        "q3": 5.9527,
         "min": -69.231,
         "max": 43.396
       },
       "tokens": {
-        "n": 18,
-        "mean": 10.6769,
-        "median": 10.281,
+        "n": 26,
+        "mean": 8.9639,
+        "median": 4.2435,
         "q1": -2.8558,
         "q3": 20.304,
         "min": -30.769,
         "max": 48.113
       },
       "chars": {
-        "n": 18,
-        "mean": 2.3488,
-        "median": 0.7105,
-        "q1": -5.344,
-        "q3": 8.5515,
+        "n": 26,
+        "mean": 1.3068,
+        "median": 0.2685,
+        "q1": -7.3338,
+        "q3": 7.04,
         "min": -15.093,
         "max": 31.497
       },
       "syntax_nodes": {
-        "n": 18,
-        "mean": 22.7116,
-        "median": 21.1075,
-        "q1": 1.588,
-        "q3": 40.1325,
+        "n": 26,
+        "mean": 19.1732,
+        "median": 14.1525,
+        "q1": 0.6352,
+        "q3": 38.788,
         "min": -5.263,
         "max": 59.477
       },
       "string_embedded": null
     },
     "ns_def_local": {
-      "n": 12,
-      "n_surface_comparable": 12,
-      "n_string_embedded": 0,
+      "n": 20,
+      "n_surface_comparable": 19,
+      "n_string_embedded": 1,
       "classification": {
-        "directly-expressible": 12
+        "directly-expressible": 20
       },
-      "expressible": 12,
+      "expressible": 20,
       "by_subgroup": {
-        "inline-construction": 4,
+        "inline-construction": 7,
         "no-source-rdf": 4,
-        "terms-only": 4
+        "string-embedded": 1,
+        "terms-only": 8
       },
       "code_loc": {
-        "n": 12,
-        "mean": -2.8747,
-        "median": -3.2805,
-        "q1": -6.9197,
+        "n": 19,
+        "mean": -3.6143,
+        "median": -2.273,
+        "q1": -7.143,
         "q3": 0.0,
         "min": -33.333,
         "max": 29.231
       },
       "tokens": {
-        "n": 12,
-        "mean": 13.0111,
-        "median": 6.1145,
-        "q1": -1.2463,
-        "q3": 31.513,
+        "n": 19,
+        "mean": 11.8477,
+        "median": 3.896,
+        "q1": 1.075,
+        "q3": 23.984,
         "min": -10.811,
         "max": 44.904
       },
       "chars": {
-        "n": 12,
-        "mean": -26.8269,
-        "median": -9.6005,
-        "q1": -41.298,
-        "q3": 4.3042,
+        "n": 19,
+        "mean": -17.7658,
+        "median": -0.142,
+        "q1": -28.427,
+        "q3": 1.431,
         "min": -132.271,
         "max": 10.932
       },
       "syntax_nodes": {
-        "n": 12,
-        "mean": 16.5375,
-        "median": 6.627,
-        "q1": -1.6335,
-        "q3": 43.753,
+        "n": 19,
+        "mean": 14.5564,
+        "median": 6.667,
+        "q1": 2.439,
+        "q3": 30.159,
         "min": -21.429,
         "max": 60.199
       },
-      "string_embedded": null
+      "string_embedded": {
+        "code_loc": {
+          "n": 1,
+          "mean": -3.636,
+          "median": -3.636,
+          "q1": -3.636,
+          "q3": -3.636,
+          "min": -3.636,
+          "max": -3.636
+        },
+        "tokens": {
+          "n": 1,
+          "mean": 1.55,
+          "median": 1.55,
+          "q1": 1.55,
+          "q3": 1.55,
+          "min": 1.55,
+          "max": 1.55
+        },
+        "chars": {
+          "n": 1,
+          "mean": -3.988,
+          "median": -3.988,
+          "q1": -3.988,
+          "q3": -3.988,
+          "min": -3.988,
+          "max": -3.988
+        },
+        "syntax_nodes": {
+          "n": 1,
+          "mean": 0.391,
+          "median": 0.391,
+          "q1": 0.391,
+          "q3": 0.391,
+          "min": 0.391,
+          "max": 0.391
+        }
+      }
     },
     "ns_import_project": {
-      "n": 16,
-      "n_surface_comparable": 16,
+      "n": 20,
+      "n_surface_comparable": 20,
       "n_string_embedded": 0,
       "classification": {
-        "directly-expressible": 9,
+        "directly-expressible": 13,
         "minor-restructuring": 7
       },
-      "expressible": 16,
+      "expressible": 20,
       "by_subgroup": {
-        "inline-construction": 5,
+        "inline-construction": 6,
         "no-source-rdf": 2,
-        "terms-only": 9
+        "terms-only": 12
       },
       "code_loc": {
-        "n": 16,
-        "mean": -0.8705,
+        "n": 20,
+        "mean": -0.718,
         "median": 0.0,
         "q1": -1.3155,
         "q3": 0.0,
-        "min": -10.0,
-        "max": 5.556
+        "min": -33.333,
+        "max": 23.81
       },
       "tokens": {
-        "n": 16,
-        "mean": 5.6758,
-        "median": 4.167,
+        "n": 20,
+        "mean": 5.0072,
+        "median": 3.7175,
         "q1": 0.527,
-        "q3": 11.7335,
+        "q3": 9.357,
         "min": -4.321,
         "max": 16.667
       },
       "chars": {
-        "n": 16,
-        "mean": -18.9552,
-        "median": -2.858,
+        "n": 20,
+        "mean": -15.8883,
+        "median": -1.5135,
         "q1": -4.9675,
         "q3": -0.02,
         "min": -150.619,
         "max": 3.663
       },
       "syntax_nodes": {
-        "n": 16,
-        "mean": -4.7504,
+        "n": 20,
+        "mean": -3.4339,
         "median": 0.0,
-        "q1": -3.2845,
+        "q1": -1.8882,
         "q3": 3.2455,
         "min": -60.0,
         "max": 5.994
@@ -4508,54 +5474,54 @@
       "string_embedded": null
     },
     "remove": {
-      "n": 23,
-      "n_surface_comparable": 22,
+      "n": 24,
+      "n_surface_comparable": 23,
       "n_string_embedded": 1,
       "classification": {
         "awkward": 1,
-        "directly-expressible": 18,
+        "directly-expressible": 19,
         "minor-restructuring": 4
       },
-      "expressible": 22,
+      "expressible": 23,
       "by_subgroup": {
-        "inline-construction": 13,
+        "inline-construction": 14,
         "no-source-rdf": 2,
         "string-embedded": 1,
         "terms-only": 7
       },
       "code_loc": {
-        "n": 22,
-        "mean": -16.5601,
-        "median": -3.646,
-        "q1": -21.25,
+        "n": 23,
+        "mean": -15.7476,
+        "median": -3.125,
+        "q1": -20.0,
         "q3": 0.0,
         "min": -160.0,
         "max": 15.217
       },
       "tokens": {
-        "n": 22,
-        "mean": 9.51,
-        "median": 4.4725,
-        "q1": 0.5723,
-        "q3": 21.1745,
+        "n": 23,
+        "mean": 9.168,
+        "median": 4.272,
+        "q1": 0.763,
+        "q3": 20.455,
         "min": -20.0,
         "max": 39.007
       },
       "chars": {
-        "n": 22,
-        "mean": 2.1009,
-        "median": 2.4175,
-        "q1": -1.1783,
-        "q3": 6.3053,
+        "n": 23,
+        "mean": 2.0331,
+        "median": 1.823,
+        "q1": -0.912,
+        "q3": 5.838,
         "min": -30.075,
         "max": 20.675
       },
       "syntax_nodes": {
-        "n": 22,
-        "mean": 18.493,
-        "median": 16.123,
-        "q1": 5.6325,
-        "q3": 27.7632,
+        "n": 23,
+        "mean": 17.9063,
+        "median": 15.909,
+        "q1": 5.0,
+        "q3": 27.353,
         "min": -4.878,
         "max": 66.762
       },
@@ -4599,380 +5565,100 @@
       }
     },
     "sparql_interpolated": {
-      "n": 12,
-      "n_surface_comparable": 12,
-      "n_string_embedded": 0,
+      "n": 15,
+      "n_surface_comparable": 14,
+      "n_string_embedded": 1,
       "classification": {
+        "awkward": 1,
         "directly-expressible": 10,
-        "minor-restructuring": 2
+        "minor-restructuring": 4
       },
-      "expressible": 12,
+      "expressible": 14,
       "by_subgroup": {
         "inline-construction": 7,
-        "no-source-rdf": 4,
+        "no-source-rdf": 6,
+        "string-embedded": 1,
         "terms-only": 1
       },
       "code_loc": {
-        "n": 12,
-        "mean": 0.4059,
+        "n": 14,
+        "mean": 4.2149,
         "median": 0.0,
-        "q1": -7.2088,
-        "q3": 6.3643,
+        "q1": -3.2363,
+        "q3": 12.3552,
         "min": -14.286,
-        "max": 23.333
+        "max": 30.0
       },
       "tokens": {
-        "n": 12,
-        "mean": -11.1593,
+        "n": 14,
+        "mean": -9.8881,
         "median": -2.8065,
-        "q1": -14.083,
-        "q3": 2.5645,
+        "q1": -15.1262,
+        "q3": 3.1787,
         "min": -78.125,
         "max": 13.462
       },
       "chars": {
-        "n": 12,
-        "mean": 1.9722,
+        "n": 14,
+        "mean": -0.8689,
         "median": 0.3785,
-        "q1": -2.528,
-        "q3": 5.6067,
-        "min": -16.781,
+        "q1": -5.8665,
+        "q3": 8.2278,
+        "min": -60.606,
         "max": 28.02
       },
       "syntax_nodes": {
-        "n": 12,
-        "mean": 17.016,
-        "median": 12.7015,
-        "q1": 1.926,
-        "q3": 28.9612,
+        "n": 14,
+        "mean": 19.0856,
+        "median": 14.855,
+        "q1": 2.33,
+        "q3": 31.8828,
         "min": -5.901,
         "max": 50.0
       },
-      "string_embedded": null
+      "string_embedded": {
+        "code_loc": {
+          "n": 1,
+          "mean": 28.0,
+          "median": 28.0,
+          "q1": 28.0,
+          "q3": 28.0,
+          "min": 28.0,
+          "max": 28.0
+        },
+        "tokens": {
+          "n": 1,
+          "mean": 9.434,
+          "median": 9.434,
+          "q1": 9.434,
+          "q3": 9.434,
+          "min": 9.434,
+          "max": 9.434
+        },
+        "chars": {
+          "n": 1,
+          "mean": 38.81,
+          "median": 38.81,
+          "q1": 38.81,
+          "q3": 38.81,
+          "min": 38.81,
+          "max": 38.81
+        },
+        "syntax_nodes": {
+          "n": 1,
+          "mean": 42.857,
+          "median": 42.857,
+          "q1": 42.857,
+          "q3": 42.857,
+          "min": 42.857,
+          "max": 42.857
+        }
+      }
     },
     "sparql_literal": {
-      "n": 16,
-      "n_surface_comparable": 3,
-      "n_string_embedded": 13,
-      "classification": {
-        "directly-expressible": 16
-      },
-      "expressible": 16,
-      "by_subgroup": {
-        "inline-construction": 1,
-        "no-source-rdf": 1,
-        "string-embedded": 13,
-        "terms-only": 1
-      },
-      "code_loc": {
-        "n": 3,
-        "mean": 7.0823,
-        "median": 3.39,
-        "q1": 2.857,
-        "q3": 15.0,
-        "min": 2.857,
-        "max": 15.0
-      },
-      "tokens": {
-        "n": 3,
-        "mean": -26.579,
-        "median": -32.131,
-        "q1": -44.828,
-        "q3": -2.778,
-        "min": -44.828,
-        "max": -2.778
-      },
-      "chars": {
-        "n": 3,
-        "mean": 2.8987,
-        "median": 3.554,
-        "q1": -2.565,
-        "q3": 7.707,
-        "min": -2.565,
-        "max": 7.707
-      },
-      "syntax_nodes": {
-        "n": 3,
-        "mean": 2.6317,
-        "median": -8.333,
-        "q1": -8.772,
-        "q3": 25.0,
-        "min": -8.772,
-        "max": 25.0
-      },
-      "string_embedded": {
-        "code_loc": {
-          "n": 13,
-          "mean": 2.9516,
-          "median": 11.111,
-          "q1": -7.0835,
-          "q3": 14.839,
-          "min": -28.571,
-          "max": 19.048
-        },
-        "tokens": {
-          "n": 13,
-          "mean": -100.6688,
-          "median": -81.319,
-          "q1": -133.679,
-          "q3": -24.6525,
-          "min": -313.514,
-          "max": 15.287
-        },
-        "chars": {
-          "n": 13,
-          "mean": -2.0415,
-          "median": -0.694,
-          "q1": -6.0725,
-          "q3": 1.702,
-          "min": -14.973,
-          "max": 10.983
-        },
-        "syntax_nodes": {
-          "n": 13,
-          "mean": -9.7912,
-          "median": -5.769,
-          "q1": -27.39,
-          "q3": 6.168,
-          "min": -45.0,
-          "max": 18.841
-        }
-      }
-    },
-    "trav_existence": {
-      "n": 21,
-      "n_surface_comparable": 21,
-      "n_string_embedded": 0,
-      "classification": {
-        "directly-expressible": 21
-      },
-      "expressible": 21,
-      "by_subgroup": {
-        "inline-construction": 2,
-        "no-source-rdf": 2,
-        "terms-only": 17
-      },
-      "code_loc": {
-        "n": 21,
-        "mean": -9.6152,
-        "median": -5.263,
-        "q1": -15.8335,
-        "q3": -3.095,
-        "min": -44.444,
-        "max": 8.333
-      },
-      "tokens": {
-        "n": 21,
-        "mean": -7.1176,
-        "median": -5.614,
-        "q1": -10.3965,
-        "q3": -1.982,
-        "min": -25.989,
-        "max": 19.242
-      },
-      "chars": {
-        "n": 21,
-        "mean": -6.1973,
-        "median": -4.072,
-        "q1": -10.772,
-        "q3": -1.569,
-        "min": -23.077,
-        "max": 1.419
-      },
-      "syntax_nodes": {
-        "n": 21,
-        "mean": -3.2635,
-        "median": -1.7,
-        "q1": -9.505,
-        "q3": 1.4705,
-        "min": -25.455,
-        "max": 19.588
-      },
-      "string_embedded": null
-    },
-    "trav_navigation": {
-      "n": 18,
-      "n_surface_comparable": 17,
-      "n_string_embedded": 1,
-      "classification": {
-        "directly-expressible": 16,
-        "minor-restructuring": 2
-      },
-      "expressible": 18,
-      "by_subgroup": {
-        "inline-construction": 1,
-        "no-source-rdf": 3,
-        "string-embedded": 1,
-        "terms-only": 13
-      },
-      "code_loc": {
-        "n": 17,
-        "mean": -7.6887,
-        "median": -4.651,
-        "q1": -7.5025,
-        "q3": 0.0,
-        "min": -57.143,
-        "max": 6.061
-      },
-      "tokens": {
-        "n": 17,
-        "mean": -0.8242,
-        "median": -2.141,
-        "q1": -4.1555,
-        "q3": 2.331,
-        "min": -10.063,
-        "max": 11.776
-      },
-      "chars": {
-        "n": 17,
-        "mean": -1.3259,
-        "median": -3.623,
-        "q1": -11.0555,
-        "q3": 2.9455,
-        "min": -20.088,
-        "max": 50.656
-      },
-      "syntax_nodes": {
-        "n": 17,
-        "mean": 3.8394,
-        "median": 1.471,
-        "q1": -2.0385,
-        "q3": 6.826,
-        "min": -10.0,
-        "max": 27.353
-      },
-      "string_embedded": {
-        "code_loc": {
-          "n": 1,
-          "mean": -1.429,
-          "median": -1.429,
-          "q1": -1.429,
-          "q3": -1.429,
-          "min": -1.429,
-          "max": -1.429
-        },
-        "tokens": {
-          "n": 1,
-          "mean": 0.177,
-          "median": 0.177,
-          "q1": 0.177,
-          "q3": 0.177,
-          "min": 0.177,
-          "max": 0.177
-        },
-        "chars": {
-          "n": 1,
-          "mean": 16.307,
-          "median": 16.307,
-          "q1": 16.307,
-          "q3": 16.307,
-          "min": 16.307,
-          "max": 16.307
-        },
-        "syntax_nodes": {
-          "n": 1,
-          "mean": 5.307,
-          "median": 5.307,
-          "q1": 5.307,
-          "q3": 5.307,
-          "min": 5.307,
-          "max": 5.307
-        }
-      }
-    },
-    "trav_one_step": {
-      "n": 14,
-      "n_surface_comparable": 13,
-      "n_string_embedded": 1,
-      "classification": {
-        "directly-expressible": 14
-      },
-      "expressible": 14,
-      "by_subgroup": {
-        "inline-construction": 2,
-        "no-source-rdf": 2,
-        "string-embedded": 1,
-        "terms-only": 9
-      },
-      "code_loc": {
-        "n": 13,
-        "mean": -18.5997,
-        "median": -10.0,
-        "q1": -17.4075,
-        "q3": -2.206,
-        "min": -108.333,
-        "max": 18.605
-      },
-      "tokens": {
-        "n": 13,
-        "mean": -8.1387,
-        "median": -6.667,
-        "q1": -14.1445,
-        "q3": -2.422,
-        "min": -30.319,
-        "max": 6.263
-      },
-      "chars": {
-        "n": 13,
-        "mean": -8.9278,
-        "median": -6.533,
-        "q1": -17.494,
-        "q3": -1.1705,
-        "min": -23.489,
-        "max": 7.255
-      },
-      "syntax_nodes": {
-        "n": 13,
-        "mean": -2.6201,
-        "median": -2.804,
-        "q1": -9.4595,
-        "q3": 2.73,
-        "min": -26.667,
-        "max": 21.053
-      },
-      "string_embedded": {
-        "code_loc": {
-          "n": 1,
-          "mean": -20.588,
-          "median": -20.588,
-          "q1": -20.588,
-          "q3": -20.588,
-          "min": -20.588,
-          "max": -20.588
-        },
-        "tokens": {
-          "n": 1,
-          "mean": -39.271,
-          "median": -39.271,
-          "q1": -39.271,
-          "q3": -39.271,
-          "min": -39.271,
-          "max": -39.271
-        },
-        "chars": {
-          "n": 1,
-          "mean": -34.588,
-          "median": -34.588,
-          "q1": -34.588,
-          "q3": -34.588,
-          "min": -34.588,
-          "max": -34.588
-        },
-        "syntax_nodes": {
-          "n": 1,
-          "mean": -39.86,
-          "median": -39.86,
-          "q1": -39.86,
-          "q3": -39.86,
-          "min": -39.86,
-          "max": -39.86
-        }
-      }
-    },
-    "trav_single_value": {
       "n": 22,
-      "n_surface_comparable": 20,
-      "n_string_embedded": 2,
+      "n_surface_comparable": 5,
+      "n_string_embedded": 17,
       "classification": {
         "directly-expressible": 21,
         "minor-restructuring": 1
@@ -4980,80 +5666,442 @@
       "expressible": 22,
       "by_subgroup": {
         "inline-construction": 1,
-        "no-source-rdf": 4,
-        "string-embedded": 2,
-        "terms-only": 15
+        "no-source-rdf": 2,
+        "string-embedded": 17,
+        "terms-only": 2
       },
       "code_loc": {
-        "n": 20,
-        "mean": -12.4821,
-        "median": -6.5125,
-        "q1": -13.7428,
-        "q3": -3.0362,
-        "min": -108.333,
-        "max": 11.111
+        "n": 5,
+        "mean": 13.9444,
+        "median": 15.0,
+        "q1": 3.1235,
+        "q3": 24.2375,
+        "min": 2.857,
+        "max": 30.526
       },
       "tokens": {
-        "n": 20,
-        "mean": -11.1011,
-        "median": -9.3755,
-        "q1": -18.9688,
-        "q3": -3.8442,
-        "min": -31.915,
-        "max": 5.361
+        "n": 5,
+        "mean": -17.6338,
+        "median": -12.018,
+        "q1": -38.4795,
+        "q3": 0.404,
+        "min": -44.828,
+        "max": 3.586
       },
       "chars": {
-        "n": 20,
-        "mean": -5.556,
-        "median": -4.8545,
-        "q1": -7.941,
-        "q3": -0.6558,
-        "min": -23.489,
-        "max": 2.413
+        "n": 5,
+        "mean": 4.3122,
+        "median": 4.766,
+        "q1": 0.4945,
+        "q3": 7.903,
+        "min": -2.565,
+        "max": 8.099
       },
       "syntax_nodes": {
-        "n": 20,
-        "mean": -4.7926,
-        "median": -3.9925,
-        "q1": -12.5325,
-        "q3": 3.2778,
-        "min": -20.0,
-        "max": 8.088
+        "n": 5,
+        "mean": 7.7732,
+        "median": 2.922,
+        "q1": -8.5525,
+        "q3": 26.5245,
+        "min": -8.772,
+        "max": 28.049
+      },
+      "string_embedded": {
+        "code_loc": {
+          "n": 17,
+          "mean": 4.5455,
+          "median": 11.111,
+          "q1": -4.0835,
+          "q3": 14.839,
+          "min": -28.571,
+          "max": 20.408
+        },
+        "tokens": {
+          "n": 17,
+          "mean": -122.1225,
+          "median": -73.333,
+          "q1": -133.679,
+          "q3": -26.302,
+          "min": -670.435,
+          "max": 15.287
+        },
+        "chars": {
+          "n": 17,
+          "mean": -0.7418,
+          "median": -0.543,
+          "q1": -3.7165,
+          "q3": 2.8445,
+          "min": -14.973,
+          "max": 10.983
+        },
+        "syntax_nodes": {
+          "n": 17,
+          "mean": -7.0775,
+          "median": -3.846,
+          "q1": -20.5705,
+          "q3": 6.5665,
+          "min": -45.0,
+          "max": 18.841
+        }
+      }
+    },
+    "trav_existence": {
+      "n": 28,
+      "n_surface_comparable": 27,
+      "n_string_embedded": 1,
+      "classification": {
+        "awkward": 1,
+        "directly-expressible": 27
+      },
+      "expressible": 27,
+      "by_subgroup": {
+        "inline-construction": 4,
+        "no-source-rdf": 2,
+        "string-embedded": 1,
+        "terms-only": 21
+      },
+      "code_loc": {
+        "n": 27,
+        "mean": -9.2069,
+        "median": -4.545,
+        "q1": -15.0,
+        "q3": 0.0,
+        "min": -75.0,
+        "max": 25.0
+      },
+      "tokens": {
+        "n": 27,
+        "mean": -6.6139,
+        "median": -5.614,
+        "q1": -10.599,
+        "q3": -1.971,
+        "min": -25.989,
+        "max": 19.242
+      },
+      "chars": {
+        "n": 27,
+        "mean": -7.1211,
+        "median": -4.064,
+        "q1": -11.223,
+        "q3": -1.543,
+        "min": -39.385,
+        "max": 1.419
+      },
+      "syntax_nodes": {
+        "n": 27,
+        "mean": -1.2033,
+        "median": -1.278,
+        "q1": -6.593,
+        "q3": 6.587,
+        "min": -25.455,
+        "max": 20.408
+      },
+      "string_embedded": {
+        "code_loc": {
+          "n": 1,
+          "mean": -15.556,
+          "median": -15.556,
+          "q1": -15.556,
+          "q3": -15.556,
+          "min": -15.556,
+          "max": -15.556
+        },
+        "tokens": {
+          "n": 1,
+          "mean": -3.366,
+          "median": -3.366,
+          "q1": -3.366,
+          "q3": -3.366,
+          "min": -3.366,
+          "max": -3.366
+        },
+        "chars": {
+          "n": 1,
+          "mean": -8.601,
+          "median": -8.601,
+          "q1": -8.601,
+          "q3": -8.601,
+          "min": -8.601,
+          "max": -8.601
+        },
+        "syntax_nodes": {
+          "n": 1,
+          "mean": -2.687,
+          "median": -2.687,
+          "q1": -2.687,
+          "q3": -2.687,
+          "min": -2.687,
+          "max": -2.687
+        }
+      }
+    },
+    "trav_navigation": {
+      "n": 29,
+      "n_surface_comparable": 27,
+      "n_string_embedded": 2,
+      "classification": {
+        "directly-expressible": 25,
+        "minor-restructuring": 4
+      },
+      "expressible": 29,
+      "by_subgroup": {
+        "inline-construction": 4,
+        "no-source-rdf": 4,
+        "string-embedded": 2,
+        "terms-only": 19
+      },
+      "code_loc": {
+        "n": 27,
+        "mean": -4.5416,
+        "median": -4.396,
+        "q1": -8.108,
+        "q3": 1.0,
+        "min": -57.143,
+        "max": 20.0
+      },
+      "tokens": {
+        "n": 27,
+        "mean": -0.4268,
+        "median": -2.139,
+        "q1": -4.58,
+        "q3": 1.181,
+        "min": -15.544,
+        "max": 26.341
+      },
+      "chars": {
+        "n": 27,
+        "mean": -3.9968,
+        "median": -5.73,
+        "q1": -11.306,
+        "q3": 2.413,
+        "min": -35.691,
+        "max": 50.656
+      },
+      "syntax_nodes": {
+        "n": 27,
+        "mean": 4.4248,
+        "median": 1.471,
+        "q1": -2.19,
+        "q3": 8.867,
+        "min": -10.656,
+        "max": 36.957
       },
       "string_embedded": {
         "code_loc": {
           "n": 2,
-          "mean": -13.8655,
-          "median": -13.8655,
-          "q1": -23.9492,
-          "q3": -3.7817,
-          "min": -20.588,
-          "max": -7.143
+          "mean": -0.7145,
+          "median": -0.7145,
+          "q1": -1.7863,
+          "q3": 0.3573,
+          "min": -1.429,
+          "max": 0.0
         },
         "tokens": {
           "n": 2,
-          "mean": -33.8145,
-          "median": -33.8145,
-          "q1": -41.9993,
-          "q3": -25.6297,
-          "min": -39.271,
-          "max": -28.358
+          "mean": -0.8375,
+          "median": -0.8375,
+          "q1": -2.3592,
+          "q3": 0.6843,
+          "min": -1.852,
+          "max": 0.177
         },
         "chars": {
           "n": 2,
-          "mean": -34.2025,
-          "median": -34.2025,
-          "q1": -34.7807,
-          "q3": -33.6243,
-          "min": -34.588,
-          "max": -33.817
+          "mean": 9.33,
+          "median": 9.33,
+          "q1": -1.1355,
+          "q3": 19.7955,
+          "min": 2.353,
+          "max": 16.307
         },
         "syntax_nodes": {
           "n": 2,
-          "mean": -24.581,
-          "median": -24.581,
-          "q1": -47.4995,
-          "q3": -1.6625,
+          "mean": 7.6205,
+          "median": 7.6205,
+          "q1": 4.1503,
+          "q3": 11.0907,
+          "min": 5.307,
+          "max": 9.934
+        }
+      }
+    },
+    "trav_one_step": {
+      "n": 24,
+      "n_surface_comparable": 22,
+      "n_string_embedded": 2,
+      "classification": {
+        "awkward": 1,
+        "directly-expressible": 22,
+        "minor-restructuring": 1
+      },
+      "expressible": 23,
+      "by_subgroup": {
+        "inline-construction": 2,
+        "no-source-rdf": 4,
+        "string-embedded": 2,
+        "terms-only": 16
+      },
+      "code_loc": {
+        "n": 22,
+        "mean": -12.2222,
+        "median": -6.4365,
+        "q1": -14.4182,
+        "q3": 0.0,
+        "min": -108.333,
+        "max": 20.0
+      },
+      "tokens": {
+        "n": 22,
+        "mean": -7.4967,
+        "median": -4.698,
+        "q1": -13.8092,
+        "q3": -1.3967,
+        "min": -30.319,
+        "max": 10.099
+      },
+      "chars": {
+        "n": 22,
+        "mean": -6.875,
+        "median": -4.3205,
+        "q1": -14.5017,
+        "q3": -0.2575,
+        "min": -29.451,
+        "max": 15.453
+      },
+      "syntax_nodes": {
+        "n": 22,
+        "mean": -2.0706,
+        "median": -2.7715,
+        "q1": -7.458,
+        "q3": 4.8407,
+        "min": -28.0,
+        "max": 21.053
+      },
+      "string_embedded": {
+        "code_loc": {
+          "n": 2,
+          "mean": -18.072,
+          "median": -18.072,
+          "q1": -21.846,
+          "q3": -14.298,
+          "min": -20.588,
+          "max": -15.556
+        },
+        "tokens": {
+          "n": 2,
+          "mean": -21.3185,
+          "median": -21.3185,
+          "q1": -48.2473,
+          "q3": 5.6102,
+          "min": -39.271,
+          "max": -3.366
+        },
+        "chars": {
+          "n": 2,
+          "mean": -21.5945,
+          "median": -21.5945,
+          "q1": -41.0847,
+          "q3": -2.1043,
+          "min": -34.588,
+          "max": -8.601
+        },
+        "syntax_nodes": {
+          "n": 2,
+          "mean": -21.2735,
+          "median": -21.2735,
+          "q1": -49.1532,
+          "q3": 6.6063,
+          "min": -39.86,
+          "max": -2.687
+        }
+      }
+    },
+    "trav_single_value": {
+      "n": 34,
+      "n_surface_comparable": 31,
+      "n_string_embedded": 3,
+      "classification": {
+        "awkward": 2,
+        "directly-expressible": 31,
+        "minor-restructuring": 1
+      },
+      "expressible": 32,
+      "by_subgroup": {
+        "inline-construction": 2,
+        "no-source-rdf": 4,
+        "string-embedded": 3,
+        "terms-only": 25
+      },
+      "code_loc": {
+        "n": 31,
+        "mean": -11.6822,
+        "median": -5.882,
+        "q1": -14.815,
+        "q3": -2.899,
+        "min": -108.333,
+        "max": 11.111
+      },
+      "tokens": {
+        "n": 31,
+        "mean": -10.7292,
+        "median": -10.169,
+        "q1": -12.162,
+        "q3": -4.184,
+        "min": -31.915,
+        "max": 5.361
+      },
+      "chars": {
+        "n": 31,
+        "mean": -7.6641,
+        "median": -4.958,
+        "q1": -11.775,
+        "q3": -0.793,
+        "min": -39.385,
+        "max": 2.413
+      },
+      "syntax_nodes": {
+        "n": 31,
+        "mean": -4.5108,
+        "median": -2.874,
+        "q1": -10.417,
+        "q3": 2.941,
+        "min": -28.0,
+        "max": 8.088
+      },
+      "string_embedded": {
+        "code_loc": {
+          "n": 3,
+          "mean": -8.4103,
+          "median": -7.143,
+          "q1": -20.588,
+          "q3": 2.5,
+          "min": -20.588,
+          "max": 2.5
+        },
+        "tokens": {
+          "n": 3,
+          "mean": -30.494,
+          "median": -28.358,
+          "q1": -39.271,
+          "q3": -23.853,
+          "min": -39.271,
+          "max": -23.853
+        },
+        "chars": {
+          "n": 3,
+          "mean": -24.1317,
+          "median": -33.817,
+          "q1": -34.588,
+          "q3": -3.99,
+          "min": -34.588,
+          "max": -3.99
+        },
+        "syntax_nodes": {
+          "n": 3,
+          "mean": -21.1493,
+          "median": -14.286,
+          "q1": -39.86,
+          "q3": -9.302,
           "min": -39.86,
           "max": -9.302
         }
@@ -5062,8 +6110,8 @@
   },
   "by_construction": {
     "+{ }": {
-      "pairs": 97,
-      "repositories": 60,
+      "pairs": 127,
+      "repositories": 79,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5080,21 +6128,22 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 97,
-        "mean": 7.0943,
-        "median": 4.673,
-        "q1": -1.61,
-        "q3": 14.494,
-        "min": -30.769,
+        "n": 127,
+        "mean": 5.4129,
+        "median": 3.819,
+        "q1": -1.778,
+        "q3": 12.155,
+        "min": -54.667,
         "max": 48.113
       }
     },
     "-{ }": {
-      "pairs": 25,
-      "repositories": 17,
+      "pairs": 26,
+      "repositories": 18,
       "strata": [
         "add_run_shared_subject",
         "coercion_datatype",
+        "ns_def_local",
         "remove",
         "sparql_interpolated",
         "sparql_literal",
@@ -5102,11 +6151,11 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 25,
-        "mean": 7.7447,
-        "median": 4.272,
-        "q1": 0.1395,
-        "q3": 19.945,
+        "n": 26,
+        "mean": 7.5101,
+        "median": 3.8525,
+        "q1": 0.2093,
+        "q3": 19.69,
         "min": -30.769,
         "max": 39.007
       }
@@ -5128,29 +6177,31 @@
       }
     },
     ".execute()": {
-      "pairs": 4,
-      "repositories": 4,
+      "pairs": 5,
+      "repositories": 5,
       "strata": [
         "bind_initbindings",
+        "sparql_interpolated",
         "sparql_literal"
       ],
       "tokens_reduction_pct": {
-        "n": 4,
-        "mean": -32.9663,
-        "median": -28.386,
-        "q1": -64.6588,
-        "q3": -5.854,
+        "n": 5,
+        "mean": -29.9024,
+        "median": -17.647,
+        "q1": -58.1465,
+        "q3": -7.786,
         "min": -71.171,
         "max": -3.922
       }
     },
     ".first()": {
-      "pairs": 39,
-      "repositories": 23,
+      "pairs": 56,
+      "repositories": 36,
       "strata": [
         "add_run_shared_subject",
         "coercion_datatype",
         "ns_def_local",
+        "ns_import_project",
         "remove",
         "trav_existence",
         "trav_navigation",
@@ -5158,30 +6209,47 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 39,
-        "mean": -8.9137,
-        "median": -7.353,
-        "q1": -15.385,
-        "q3": -2.141,
+        "n": 56,
+        "mean": -9.2195,
+        "median": -8.9395,
+        "q1": -14.5793,
+        "q3": -2.6397,
         "min": -39.271,
         "max": 14.889
       }
     },
     ".one()": {
-      "pairs": 1,
-      "repositories": 1,
+      "pairs": 2,
+      "repositories": 2,
       "strata": [
         "trav_existence",
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 1,
-        "mean": -4.348,
-        "median": -4.348,
-        "q1": -4.348,
-        "q3": -4.348,
-        "min": -4.348,
+        "n": 2,
+        "mean": -6.404,
+        "median": -6.404,
+        "q1": -9.488,
+        "q3": -3.32,
+        "min": -8.46,
         "max": -4.348
+      }
+    },
+    "@base": {
+      "pairs": 1,
+      "repositories": 1,
+      "strata": [
+        "trav_navigation",
+        "trav_one_step"
+      ],
+      "tokens_reduction_pct": {
+        "n": 1,
+        "mean": 10.099,
+        "median": 10.099,
+        "q1": 10.099,
+        "q3": 10.099,
+        "min": 10.099,
+        "max": 10.099
       }
     },
     "@bindings": {
@@ -5201,8 +6269,8 @@
       }
     },
     "@graph": {
-      "pairs": 157,
-      "repositories": 76,
+      "pairs": 205,
+      "repositories": 99,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5220,18 +6288,18 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 157,
-        "mean": 2.4163,
-        "median": 0.647,
-        "q1": -4.266,
-        "q3": 10.274,
+        "n": 205,
+        "mean": 1.3226,
+        "median": 0.438,
+        "q1": -4.4465,
+        "q3": 8.5305,
         "min": -81.319,
         "max": 48.113
       }
     },
     "@prefix": {
-      "pairs": 173,
-      "repositories": 82,
+      "pairs": 236,
+      "repositories": 113,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5249,19 +6317,20 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 173,
-        "mean": -7.4713,
-        "median": -1.536,
-        "q1": -9.397,
-        "q3": 8.2205,
-        "min": -313.514,
+        "n": 236,
+        "mean": -8.7557,
+        "median": -1.497,
+        "q1": -9.8905,
+        "q3": 7.2388,
+        "min": -670.435,
         "max": 48.113
       }
     },
     "IRI": {
-      "pairs": 30,
-      "repositories": 22,
+      "pairs": 41,
+      "repositories": 30,
       "strata": [
+        "add_in_loop",
         "add_isolated",
         "add_run_shared_subject",
         "bind_initbindings",
@@ -5273,22 +6342,24 @@
         "sparql_literal",
         "trav_existence",
         "trav_navigation",
+        "trav_one_step",
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 30,
-        "mean": 2.1115,
-        "median": 7.683,
-        "q1": -4.8967,
-        "q3": 20.7847,
+        "n": 41,
+        "mean": -0.5204,
+        "median": 2.273,
+        "q1": -5.8715,
+        "q3": 11.4745,
         "min": -73.333,
         "max": 44.904
       }
     },
     "call suffix (g)": {
-      "pairs": 55,
-      "repositories": 34,
+      "pairs": 78,
+      "repositories": 54,
       "strata": [
+        "add_in_loop",
         "add_isolated",
         "add_run_shared_subject",
         "bind_initbindings",
@@ -5303,60 +6374,64 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 55,
-        "mean": -31.473,
-        "median": -6.417,
-        "q1": -37.232,
-        "q3": 0.177,
-        "min": -313.514,
-        "max": 22.404
+        "n": 78,
+        "mean": -32.6869,
+        "median": -6.885,
+        "q1": -25.9917,
+        "q3": -1.133,
+        "min": -670.435,
+        "max": 26.341
       }
     },
     "f<…>": {
-      "pairs": 13,
-      "repositories": 12,
+      "pairs": 15,
+      "repositories": 14,
       "strata": [
         "add_in_loop",
         "add_isolated",
         "add_run_shared_subject",
+        "bind_initbindings",
         "coercion_datatype",
         "ns_def_local",
         "ns_import_project",
         "remove",
         "sparql_interpolated",
-        "trav_existence"
+        "trav_existence",
+        "trav_navigation",
+        "trav_one_step"
       ],
       "tokens_reduction_pct": {
-        "n": 13,
-        "mean": 17.3611,
-        "median": 17.803,
-        "q1": 4.5795,
-        "q3": 28.5215,
-        "min": -2.083,
+        "n": 15,
+        "mean": 12.9592,
+        "median": 9.434,
+        "q1": 1.553,
+        "q3": 28.472,
+        "min": -29.167,
         "max": 44.904
       }
     },
     "for @bindings in": {
-      "pairs": 10,
-      "repositories": 8,
+      "pairs": 11,
+      "repositories": 9,
       "strata": [
         "add_in_loop",
         "coercion_datatype",
-        "ns_def_local"
+        "ns_def_local",
+        "ns_import_project"
       ],
       "tokens_reduction_pct": {
-        "n": 10,
-        "mean": 1.9069,
-        "median": -1.186,
-        "q1": -11.7585,
-        "q3": 9.4398,
+        "n": 11,
+        "mean": 1.4424,
+        "median": -2.372,
+        "q1": -11.628,
+        "q3": 5.618,
         "min": -27.66,
         "max": 48.113
       }
     },
     "from … import p:": {
-      "pairs": 20,
-      "repositories": 16,
+      "pairs": 23,
+      "repositories": 19,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5365,29 +6440,29 @@
         "sparql_interpolated"
       ],
       "tokens_reduction_pct": {
-        "n": 20,
-        "mean": 6.9391,
-        "median": 4.823,
-        "q1": 0.527,
-        "q3": 13.2605,
+        "n": 23,
+        "mean": 6.5365,
+        "median": 4.167,
+        "q1": 1.058,
+        "q3": 12.5,
         "min": -4.321,
         "max": 23.687
       }
     },
     "f{ }": {
-      "pairs": 2,
-      "repositories": 2,
+      "pairs": 5,
+      "repositories": 4,
       "strata": [
         "coercion_datatype"
       ],
       "tokens_reduction_pct": {
-        "n": 2,
-        "mean": 2.565,
-        "median": 2.565,
-        "q1": 1.548,
-        "q3": 3.582,
-        "min": 1.887,
-        "max": 3.243
+        "n": 5,
+        "mean": -0.131,
+        "median": 1.887,
+        "q1": -5.4965,
+        "q3": 4.2255,
+        "min": -9.091,
+        "max": 5.208
       }
     },
     "global/nonlocal modifier": {
@@ -5424,8 +6499,8 @@
       }
     },
     "interpolation {expr}": {
-      "pairs": 136,
-      "repositories": 76,
+      "pairs": 178,
+      "repositories": 95,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5443,17 +6518,17 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 136,
-        "mean": -3.0142,
+        "n": 178,
+        "mean": -2.8935,
         "median": -1.5225,
-        "q1": -7.1815,
-        "q3": 8.0738,
+        "q1": -7.9038,
+        "q3": 7.276,
         "min": -120.879,
         "max": 47.297
       }
     },
     "language literal": {
-      "pairs": 12,
+      "pairs": 13,
       "repositories": 5,
       "strata": [
         "add_in_loop",
@@ -5462,18 +6537,18 @@
         "remove"
       ],
       "tokens_reduction_pct": {
-        "n": 12,
-        "mean": 17.9471,
-        "median": 14.979,
-        "q1": 4.3405,
-        "q3": 32.7802,
-        "min": -2.404,
+        "n": 13,
+        "mean": 13.9678,
+        "median": 12.155,
+        "q1": 2.991,
+        "q3": 29.3215,
+        "min": -33.784,
         "max": 47.297
       }
     },
     "m{ }": {
-      "pairs": 80,
-      "repositories": 37,
+      "pairs": 114,
+      "repositories": 56,
       "strata": [
         "add_run_shared_subject",
         "coercion_datatype",
@@ -5488,18 +6563,18 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 80,
-        "mean": -4.746,
+        "n": 114,
+        "mean": -4.8973,
         "median": -3.7365,
-        "q1": -10.1613,
-        "q3": 0.3067,
+        "q1": -10.5442,
+        "q3": -0.1095,
         "min": -39.271,
         "max": 39.007
       }
     },
     "plain literal": {
-      "pairs": 14,
-      "repositories": 13,
+      "pairs": 15,
+      "repositories": 14,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5511,18 +6586,18 @@
         "trav_one_step"
       ],
       "tokens_reduction_pct": {
-        "n": 14,
-        "mean": 12.8437,
-        "median": 11.0035,
-        "q1": 3.4517,
-        "q3": 22.8215,
+        "n": 15,
+        "mean": 12.1653,
+        "median": 10.667,
+        "q1": 2.667,
+        "q3": 20.905,
         "min": -22.0,
         "max": 44.904
       }
     },
     "prefixed name": {
-      "pairs": 170,
-      "repositories": 82,
+      "pairs": 222,
+      "repositories": 106,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5540,19 +6615,20 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 170,
-        "mean": -5.9232,
-        "median": -1.207,
+        "n": 222,
+        "mean": -4.3658,
+        "median": -0.3005,
         "q1": -6.4795,
-        "q3": 8.9902,
+        "q3": 8.2445,
         "min": -313.514,
         "max": 47.297
       }
     },
     "s{ }": {
-      "pairs": 41,
-      "repositories": 25,
+      "pairs": 53,
+      "repositories": 33,
       "strata": [
+        "add_in_loop",
         "bind_initbindings",
         "remove",
         "sparql_interpolated",
@@ -5560,40 +6636,18 @@
         "trav_one_step"
       ],
       "tokens_reduction_pct": {
-        "n": 41,
-        "mean": -45.4881,
-        "median": -14.286,
-        "q1": -72.252,
+        "n": 53,
+        "mean": -51.3887,
+        "median": -14.41,
+        "q1": -55.5025,
         "q3": -2.8385,
-        "min": -313.514,
+        "min": -670.435,
         "max": 15.287
       }
     },
     "typed literal": {
-      "pairs": 13,
-      "repositories": 11,
-      "strata": [
-        "add_in_loop",
-        "add_run_shared_subject",
-        "coercion_datatype",
-        "ns_def_local",
-        "remove",
-        "sparql_interpolated",
-        "trav_one_step"
-      ],
-      "tokens_reduction_pct": {
-        "n": 13,
-        "mean": 10.7352,
-        "median": 8.407,
-        "q1": 0.9845,
-        "q3": 20.3595,
-        "min": -2.933,
-        "max": 36.239
-      }
-    },
-    "variable": {
-      "pairs": 116,
-      "repositories": 57,
+      "pairs": 18,
+      "repositories": 16,
       "strata": [
         "add_in_loop",
         "add_isolated",
@@ -5601,6 +6655,33 @@
         "bind_initbindings",
         "coercion_datatype",
         "ns_def_local",
+        "ns_import_project",
+        "remove",
+        "sparql_interpolated",
+        "sparql_literal",
+        "trav_one_step"
+      ],
+      "tokens_reduction_pct": {
+        "n": 18,
+        "mean": 9.6119,
+        "median": 7.85,
+        "q1": 2.1742,
+        "q3": 16.985,
+        "min": -2.933,
+        "max": 36.239
+      }
+    },
+    "variable": {
+      "pairs": 123,
+      "repositories": 63,
+      "strata": [
+        "add_in_loop",
+        "add_isolated",
+        "add_run_shared_subject",
+        "bind_initbindings",
+        "coercion_datatype",
+        "ns_def_local",
+        "ns_import_project",
         "remove",
         "sparql_interpolated",
         "sparql_literal",
@@ -5610,18 +6691,18 @@
         "trav_single_value"
       ],
       "tokens_reduction_pct": {
-        "n": 116,
-        "mean": -4.8241,
-        "median": -2.207,
-        "q1": -9.6125,
-        "q3": 3.469,
+        "n": 123,
+        "mean": -4.622,
+        "median": -2.141,
+        "q1": -9.375,
+        "q3": 3.433,
         "min": -291.837,
         "max": 48.113
       }
     }
   },
   "by_oracle": {
-    "isomorphism": 133,
-    "values": 91
+    "isomorphism": 184,
+    "values": 119
   }
 }

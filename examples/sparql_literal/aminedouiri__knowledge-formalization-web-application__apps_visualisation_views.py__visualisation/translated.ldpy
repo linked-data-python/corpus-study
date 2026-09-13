@@ -1,22 +1,31 @@
 # Extracted from aminedouiri/knowledge-formalization-web-application@0a8007ff46 : apps/visualisation/views.py
 # region: visualisation (lines 9-120, stratum sparql_literal)
 # licence of the source repository: see meta.json
-from django.shortcuts import render
-import rdflib 
-from apps.connaissance.models import Connaissance
-from apps.commentaire.models import Commentaire
+# Context shim: `render`/`Connaissance`/`Commentaire` come from ./context.py
+# (see meta.json), a stand-in for Django and the sibling apps that are not
+# available outside the project. `visualisation` also gained six defaulted
+# path parameters, one per ontology file it parses: the function otherwise
+# takes no graph and reads six hardcoded paths, so this is the 163-region
+# case of restoring a binding the extracted region cannot otherwise carry
+# (design record corpus/403 s6). Called with no arguments it behaves exactly
+# as before.
+import rdflib
+from context import render, Connaissance, Commentaire
 
-def visualisation(request):
-    #Tache 
+@prefix : <http://dig.isi.edu/> .
+
+def visualisation(request,
+                   tache_path="apps/connaissance/static/viz-onto/viz_tache.ttl",
+                   activite_path="apps/connaissance/static/viz-onto/viz_activite.ttl",
+                   historique_path="apps/connaissance/static/viz-onto/viz_historique.ttl",
+                   phenomene_path="apps/connaissance/static/viz-onto/viz_phenomene.ttl",
+                   domaine_path="apps/connaissance/static/viz-onto/viz_domaine.ttl",
+                   strategie_path="apps/connaissance/static/viz-onto/viz_strategie.ttl"):
+    #Tache
 
     g_tache = rdflib.Graph()
-    g_tache.parse("apps/connaissance/static/viz-onto/viz_tache.ttl")
-    query_tache = """
-    SELECT ?tache
-    WHERE {
-        ?tache a :Tache .
-    }"""
-    qres_tache = g_tache.query(query_tache)
+    g_tache.parse(tache_path)
+    qres_tache = s{ SELECT ?tache WHERE { ?tache a :Tache . } }(g_tache)
     taches = []
 
     for row in qres_tache:
@@ -26,13 +35,8 @@ def visualisation(request):
 
     #Activite
     g_activite = rdflib.Graph()
-    g_activite.parse("apps/connaissance/static/viz-onto/viz_activite.ttl")
-    query_activite = """
-    SELECT ?activite
-    WHERE {
-        ?activite a :Activite .
-    }"""
-    qres_activite = g_activite.query(query_activite)
+    g_activite.parse(activite_path)
+    qres_activite = s{ SELECT ?activite WHERE { ?activite a :Activite . } }(g_activite)
     activites = []
 
     for row in qres_activite:
@@ -41,13 +45,8 @@ def visualisation(request):
 
     #Historique
     g_historique = rdflib.Graph()
-    g_historique.parse("apps/connaissance/static/viz-onto/viz_historique.ttl")
-    query_historique = """
-    SELECT ?generation
-    WHERE {
-        ?generation a :Generation .
-    }"""
-    qres_generation = g_historique.query(query_historique)
+    g_historique.parse(historique_path)
+    qres_generation = s{ SELECT ?generation WHERE { ?generation a :Generation . } }(g_historique)
     generations = []
 
     for row in qres_generation:
@@ -56,13 +55,8 @@ def visualisation(request):
 
     #Phenomenes
     g_phenomene = rdflib.Graph()
-    g_phenomene.parse("apps/connaissance/static/viz-onto/viz_phenomene.ttl")
-    query_phenomene = """
-    SELECT ?phenomene
-    WHERE {
-        ?phenomene a :Phenomene_Metier .
-    }"""
-    qres_phenomene = g_phenomene.query(query_phenomene)
+    g_phenomene.parse(phenomene_path)
+    qres_phenomene = s{ SELECT ?phenomene WHERE { ?phenomene a :Phenomene_Metier . } }(g_phenomene)
     phenomenes = []
 
     for row in qres_phenomene:
@@ -72,13 +66,8 @@ def visualisation(request):
 
     #Domaines
     g_domaine = rdflib.Graph()
-    g_domaine.parse("apps/connaissance/static/viz-onto/viz_domaine.ttl")
-    query_domaine = """
-    SELECT ?domaine
-    WHERE {
-        ?domaine a :Domaine .
-    }"""
-    qres_domaine = g_domaine.query(query_domaine)
+    g_domaine.parse(domaine_path)
+    qres_domaine = s{ SELECT ?domaine WHERE { ?domaine a :Domaine . } }(g_domaine)
     domaines = []
 
     for row in qres_domaine:
@@ -87,13 +76,8 @@ def visualisation(request):
 
     #Strategique
     g_strategie = rdflib.Graph()
-    g_strategie.parse("apps/connaissance/static/viz-onto/viz_strategie.ttl")
-    query_strategie = """
-    SELECT ?strategie
-    WHERE {
-        ?strategie a :Strategie .
-    }"""
-    qres_strategie = g_strategie.query(query_strategie)
+    g_strategie.parse(strategie_path)
+    qres_strategie = s{ SELECT ?strategie WHERE { ?strategie a :Strategie . } }(g_strategie)
     strategies = []
 
     for row in qres_strategie:

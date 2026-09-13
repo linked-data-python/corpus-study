@@ -2,24 +2,31 @@
 # region: test_is_before_rdflib (lines 165-183, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, BNode
+from _shim import tests_dir, is_before_rdflib
 g = Graph().parse(str(tests_dir / "data" / "before.ttl"))
 
 def test_is_before_rdflib():
-    BEFORE = Namespace("https://w3id.org/timefuncs/testdata/before/")
+    @prefix before: <https://w3id.org/timefuncs/testdata/before/> as BEFORE .
 
-    assert is_before_rdflib(g, BEFORE.a01, BEFORE.b01)
-    assert is_before_rdflib(g, BEFORE.a02, BEFORE.b02)
-    assert is_before_rdflib(g, BEFORE.a03, BEFORE.b03)
-    assert is_before_rdflib(g, BEFORE.a04, BEFORE.b04)
-    assert is_before_rdflib(g, BEFORE.a05, BEFORE.b05)
-    assert is_before_rdflib(g, BEFORE.a06, BEFORE.b06)
-    assert is_before_rdflib(g, BEFORE.a08, BEFORE.b08)
-    assert is_before_rdflib(g, BEFORE.a09, BEFORE.b09)
-    assert is_before_rdflib(g, BEFORE.a10, BEFORE.b10)
-    assert is_before_rdflib(g, BEFORE.a11, BEFORE.b11)
+    assert is_before_rdflib(g, before:a01, before:b01)
+    assert is_before_rdflib(g, before:a02, before:b02)
+    assert is_before_rdflib(g, before:a03, before:b03)
+    assert is_before_rdflib(g, before:a04, before:b04)
+    assert is_before_rdflib(g, before:a05, before:b05)
+    assert is_before_rdflib(g, before:a06, before:b06)
+    assert is_before_rdflib(g, before:a08, before:b08)
+    assert is_before_rdflib(g, before:a09, before:b09)
+    assert is_before_rdflib(g, before:a10, before:b10)
+    assert is_before_rdflib(g, before:a11, before:b11)
 
-    assert not is_before_rdflib(g, BEFORE.a01, BEFORE.b02)
-    assert not is_before_rdflib(g, BEFORE.foo, BEFORE.bar)
-    assert not is_before_rdflib(g, BEFORE.b01, BEFORE.a01)
-    assert not is_before_rdflib(g, BEFORE.b07, BEFORE.a07)
-    assert not is_before_rdflib(g, BEFORE.b10, BEFORE.a10)
+    assert not is_before_rdflib(g, before:a01, before:b02)
+    assert not is_before_rdflib(g, before:foo, before:bar)
+    assert not is_before_rdflib(g, before:b01, before:a01)
+    assert not is_before_rdflib(g, before:b07, before:a07)
+    assert not is_before_rdflib(g, before:b10, before:a10)
+
+    # Test harness only (see meta.json): the original test only asserts and
+    # returns None, which gives the driver nothing to compare. Returning
+    # True (every assertion above already passed to reach this line) makes
+    # the successful run observable without inventing any new check.
+    return True

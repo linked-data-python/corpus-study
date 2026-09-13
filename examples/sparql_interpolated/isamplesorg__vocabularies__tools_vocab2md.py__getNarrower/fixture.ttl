@@ -2,3 +2,13 @@
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Dog  a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabA .
+ex:Cat  a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabA .
+ex:Wolf a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabB .
+ex:Rock a skos:Concept .
+
+# neighbourhood that must NOT match a narrower(Animal) query
+ex:Fish   a skos:Concept ; skos:broader ex:Plant .
+ex:Cactus a skos:Concept ; skos:related ex:Animal .

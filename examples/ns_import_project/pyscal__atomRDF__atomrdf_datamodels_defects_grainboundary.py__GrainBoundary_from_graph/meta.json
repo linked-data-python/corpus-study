@@ -13,11 +13,24 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd, RDF->rdf, RDFS->rdfs, CMSO->cmso, LDO->ldo, PLDO->pldo, PODO->podo, CDCO->cdco, PROV->prov, ASMO->asmo"
+    "prefixes: XSD->xsd, RDF->rdf, RDFS->rdfs, CMSO->cmso, LDO->ldo, PLDO->pldo, PODO->podo, CDCO->cdco, PROV->prov, ASMO->asmo (only cdco/pldo/rdf are actually used by this region's own body). CDCO and PLDO are atomrdf's own project namespaces (atomrdf/namespace.py, plain Namespace(...) bindings) -- genuinely ns_import_project, rewritten `from atomrdf_context import pldo:, cdco:` (the shim exports __namespaces__, same mechanism as the yurtle-rdflib sibling in this stratum); RDF is rdflib's own namespace, kept as a plain `@prefix rdf:`, matching the split documented on the johnjung/LexMalta/edmondchuc siblings.",
+    "`graph.triples((material, CDCO.hasCrystallographicDefect, None))` then `triple[2]` (a single-variable triple pattern, object position free) is exactly `for plane_defect in m{ {material} cdco:hasCrystallographicDefect ?o }` -- a bare term is yielded because only one variable is projected, so `triple[2]` extraction disappears rather than being reproduced. `graph.value(plane_defect, RDF.type)` is `m{ {plane_defect} rdf:type ?t }.first()` (trav_single_value): both return None on zero solutions, matching the original's `typev is not None` guard exactly.",
+    "Restoring the binding (AGENT_BATCH's 163-regions case): after extraction `from_graph` is a bare @classmethod dangling outside any class. Unlike the johnjung/metadata_converters sibling in this same stratum, this one's own body is NOT buggy through the ordinary classmethod protocol -- `cls` genuinely means GrainBoundary here, matching `to_graph`'s own usage a few lines above in the real file -- so restoring the binding only needs attaching it to the shim's GrainBoundary class (`GrainBoundary.from_graph = classmethod(from_graph.__func__)`), not a `.__func__`-bypassing demo stub. `GrainBoundary._read_gb` (called by this region, not otherwise carried by the extraction) is copied verbatim into atomrdf_context.py, together with the minimal pydantic BaseModel/TemplateMixin subset needed to instantiate it.",
+    "demo(graph, sample) returns result.model_dump() rather than the GrainBoundary instance itself: pydantic's BaseModel.__eq__ compares self.__class__ == other.__class__, and the two exec'd modules (original.py, translated.ldpy) each define their own distinct GrainBoundary class via the shim import, so two structurally identical instances would never compare equal by identity of class. This is plumbing for the harness, not a translation choice.",
+    "Fixture deliberately does NOT exercise a sample with no cmso:hasMaterial at all: get_material then returns None, and rdflib's `graph.triples((None, CDCO.hasCrystallographicDefect, None))` treats that None as a WILDCARD SUBJECT, matching every crystallographic-defect triple in the whole graph -- while `m{ {material} cdco:hasCrystallographicDefect ?o }` interpolates {material} in TERM position, not as a pattern wildcard. Once the subject is genuinely unbound the two operations diverge; testing that would measure the divergence, not this stratum's own namespace-import construction, so it is left as a documented gap rather than folded into this pair's fixture."
   ],
   "draft_sha": "74324385193df057",
   "provenance": {
@@ -29,5 +42,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

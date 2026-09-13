@@ -14,10 +14,20 @@
     "serialize_parse": 6,
     "sparql": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "Six independent g.query(TEXT) literals, one per hardcoded ontology file, each become s{ } called with the explicit (graph) call suffix since none of the six graphs is the block's single designated @graph. The shared `:` default prefix (http://dig.isi.edu/, taken from the string-stripping the region does on results) is hoisted to one module-level @prefix, matching what each real viz_*.ttl file itself declares.",
+    "The function had no way to receive a graph (it hardcodes six file paths and takes only `request`): restored the binding by adding six defaulted path parameters, one per ontology file, per instructions section 6 (163-region case). Called with no arguments the function behaves exactly as before.",
+    "Non-RDF context (django.shortcuts.render, apps.connaissance/commentaire.models) is out of reach outside the Django project (no settings module, no database); replaced by context.py, a minimal shim used identically by both representations that returns the render() context dict and answers the two queryset calls the region makes.",
+    "classification is minor-restructuring rather than directly-expressible only because of the added path parameters restoring the missing binding, not because of anything the language itself could not express."
+  ],
+  "article_candidate": true,
   "draft_sha": "a9f846b20cb18007",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.874907+00:00",
@@ -28,5 +38,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:visualisation",
+    "diffs": [],
+    "error": null
+  }
 }

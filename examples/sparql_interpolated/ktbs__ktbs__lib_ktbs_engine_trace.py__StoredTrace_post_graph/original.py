@@ -1,7 +1,13 @@
 # Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/engine/trace.py
 # region: StoredTrace.post_graph (lines 318-358, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
+#
+# Context restored (see meta.json): `prepareQuery` is used at module level
+# but its import (`from rdflib.plugins.sparql.processor import
+# prepareQuery`, line 26 of the real file, above the extracted context
+# window) was not captured by the context lines. Restored here verbatim.
 from rdflib import BNode, Graph, Literal, URIRef, XSD
+from rdflib.plugins.sparql.processor import prepareQuery
 from rdfrest.exceptions import InvalidDataError
 from rdfrest.util import bounded_description, cache_result, random_token, replace_node_sparse, \
     Diagnosis

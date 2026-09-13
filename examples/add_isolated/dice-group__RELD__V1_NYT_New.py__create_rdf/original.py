@@ -4,8 +4,27 @@
 from rdflib.namespace import DC, DCTERMS, DOAP, FOAF, SKOS, OWL, RDF, RDFS, VOID, XMLNS, XSD
 from rdflib import Graph, URIRef, Literal, Namespace # here is some error
 from  validate import containsNumber , returnValue, check_type, remove_alphaNumeric, is_date, clean_sentences ,wikidata_id_toText
-subject_dict = {}
-object_dict = {}
+# Fixture context restoring the bindings the extracted region reads
+# (relation, dsName, sent_counter, ne_counter, info, subject_dict,
+# object_dict): the original function received/derived them from the
+# enclosing script, which the extraction does not carry.
+relation = "http://ex.org/relation1"
+dsName = "ds"
+sent_counter = 0
+ne_counter = 0
+info = [
+    ("subjA", "objA", [
+        ("A sentence about entities.", {
+            "listOfNamedEntities": [("Entity One", "Person"), ("Entity Two!", "Organization")],
+            "score": 5,
+        }),
+    ], 2, "distA"),
+    ("123", "456", [
+        ("Another sentence with numbers.", {"listOfNamedEntities": [], "score": 7}),
+    ], 1, "distB"),
+]
+subject_dict = {"Some Subject": "subjA", "NumKey": "123"}
+object_dict = {"Some Object": "objA", "ObjNum": "456"}
 g = Graph()
 prop = Namespace("https://reld.dice-research.org/schema/")
 res = Namespace("https://reld.dice-research.org/resource/")

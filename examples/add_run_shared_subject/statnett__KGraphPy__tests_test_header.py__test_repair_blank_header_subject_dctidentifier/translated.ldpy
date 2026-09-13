@@ -17,7 +17,8 @@ from kgraphpy.header import CIMMetadataHeader, create_header_attribute
 def test_repair_blank_header_subject_dctidentifier(header_type: Node, caplog: pytest.LogCaptureFixture) -> None:
     g = Graph()
     b = BNode()
-    g += g{
+    @graph g
+    +{
         {b} a {header_type} ;
            dcterms:identifier "1234"
     }

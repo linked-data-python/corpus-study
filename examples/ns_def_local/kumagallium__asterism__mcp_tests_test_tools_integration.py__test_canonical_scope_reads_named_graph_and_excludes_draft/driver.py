@@ -1,19 +1,21 @@
 """Validation driver for kumagallium__asterism__mcp_tests_test_tools_integration.py__test_canonical_scope_reads_named_graph_and_excludes_draft.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
+excluded (see meta.json): the region depends on the real
+`asterism_mcp.tools.sample_search` and `asterism.substrate` helpers, neither
+installed in this study's venv nor included in the extraction. Reconstructing
+them would mean reimplementing the canonical/draft graph selection that is
+the very thing the test exercises, not restoring a binding.
 
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+The 0-argument async entry is called directly (no fixture=-driven wiring,
+which does not fit this signature) so that `rdfeval check` surfaces the real
+blocker: both `original.py` and `translated.ldpy` already fail at
+`from asterism.substrate import (...)` (ModuleNotFoundError), before the
+canonical/draft graphs are ever built.
 """
 from rdfeval.harness import run_pair
 
 VERDICT = run_pair(
     __file__,
     entry='test_canonical_scope_reads_named_graph_and_excludes_draft',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    calls=[lambda: ((), {})],
 )

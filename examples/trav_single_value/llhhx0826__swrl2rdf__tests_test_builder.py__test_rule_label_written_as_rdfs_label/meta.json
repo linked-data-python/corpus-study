@@ -12,12 +12,21 @@
   "categories": {
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: SWRL->swrl, RDF->rdf, RDFS->rdfs"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()"
   ],
+  "translation_notes": [
+    "prefixes: SWRL->swrl, RDF->rdf, RDFS->rdfs",
+    "swrl2rdf is not installed in the venv: original.py and translated.ldpy both import from swrl2rdf_shim.py, a verbatim subset of swrl2rdf/{prefixmap,model,builder}.py from the pinned commit (context shim, see AGENT_BATCH.md); the region under study (the two reads) is untouched.",
+    "next(g.subjects(RDF.type, SWRL.Imp)) -> m{ ?imp rdf:type swrl:Imp }.first(); g.value(imp, RDFS.label) -> m{ {imp} rdfs:label ?label }.first(); both single-solution reads over the same graph, no join needed since the second pattern reads a different predicate on an already-bound subject.",
+    "driver shares one PrefixMap instance between both sides (calls=[((PrefixMap(),), {})], not a callable factory) because PrefixMap has no __eq__: two fresh-but-equal instances would be reported as differing by identity; rules_to_graph only reads it, so sharing is safe."
+  ],
+  "article_candidate": false,
   "draft_sha": "efab715feabf38fd",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.316247+00:00",
@@ -28,5 +37,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_rule_label_written_as_rdfs_label",
+    "diffs": [],
+    "error": null
+  }
 }

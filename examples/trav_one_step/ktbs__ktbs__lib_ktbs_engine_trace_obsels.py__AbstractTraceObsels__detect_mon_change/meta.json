@@ -10,10 +10,22 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "rdf_ops/categories were computed as 0/{} by the automatic extractor, but the region does read a graph: graph.value(...) with a wildcard subject or object, and graph.objects(s, None)/graph.subjects(None, s) (wildcard predicate). This is a miss in the automatic categorizer, confirmed by hand.",
+    "graph.value(None, KTBS.hasTrace, trace_uri) -> m{ ?s ktbs:hasTrace {trace_uri} }.first() ; graph.value(obs, KTBS.hasBegin) -> m{ {obs} ktbs:hasBegin ?o }.first() : the standard trav_single_value idiom, applied at each call site.",
+    "self_state_value = self.state.value is a bound-method alias kept as a perf optimisation in the original (avoids repeated attribute lookup). An m{ } island is not a first-class value that can be bound to a name like a rdflib method: translated it as a locally-defined function `def self_state_value(subj, pred): return m{ {subj} {pred} ?o }(self.state).first()` wrapping the island, called exactly as before (`self_state_value(obs, ktbs:hasEnd)`). This preserves call sites unchanged but is a small restructuring of the alias itself -> minor-restructuring.",
+    "graph.objects(new_obs, None) and graph.subjects(None, new_obs) have a WILDCARD PREDICATE: there is no island form that projects only the object (or subject) while leaving the predicate unconstrained and unprojected. Translated as `(o for _, o in m{ {new_obs} ?p ?o }(graph))` / `(s for s, _ in m{ ?s ?p {new_obs} }(graph))`, discarding ?p by unpacking -- a minor restructuring forced by the language, not a refactor of the algorithm (the itertools.chain of three iterables is kept as-is).",
+    "This is a gap worth reporting: rdflib's predicate-wildcard convenience methods (.objects(s, None), .subjects(None, o)) have no equally terse island counterpart; m{ } always requires naming (and then discarding) the wildcard position as a pattern variable."
+  ],
   "draft_sha": "e0af3e5460b82669",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.252682+00:00",
@@ -24,5 +36,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_detect_mon_change",
+    "diffs": [],
+    "error": null
+  }
 }

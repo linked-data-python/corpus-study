@@ -1,15 +1,18 @@
 """Validation driver for llhhx0826__swrl2rdf__tests_test_builder.py__test_rule_label_written_as_rdfs_label.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region's whole effect is an internal ``assert``: it returns None, and
+the only argument worth observing is ``prefix_map`` itself. A single
+``PrefixMap`` instance is shared between both calls (the tuple ``case`` is
+not a callable factory, so both sides unpack the SAME object) rather than
+built fresh per side, because ``PrefixMap`` has no ``__eq__``: two distinct
+but equal-by-content instances would be reported as differing by identity.
+Sharing is safe here since ``rules_to_graph`` only reads it.
 """
 from rdfeval.harness import run_pair
+from swrl2rdf_shim import PrefixMap
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry='test_rule_label_written_as_rdfs_label',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((PrefixMap(),), {})],
 )

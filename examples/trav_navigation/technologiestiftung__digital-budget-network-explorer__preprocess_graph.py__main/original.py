@@ -3,6 +3,16 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, RDF
 from rdflib.namespace import SKOS, OWL, DCTERMS, RDFS
+
+# Test harness only (see meta.json): binds the input graph, BASE, the
+# string helpers and the accumulators `main()` builds before reaching this
+# region, so the extracted statements run standalone. Added identically to
+# original.py and translated.ldpy.
+from shim import BASE, local_name, first_label, get_top_level, extract_phrases, build_fixture
+
+(g, keywords, concept_labels, bereiche, klassen, hauptgruppen,
+ hauptfunktionen, jahre, titel_beschreibung, posten) = build_fixture()
+
 DH = Namespace(BASE + "ontology#")
 SCHEMA = Namespace("https://schema.org/")
 KEYWORD_PREFIX = BASE + "keyword/"

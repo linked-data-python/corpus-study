@@ -1,8 +1,18 @@
 # Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/generate-hed-bundle.py
 # region: read_sweep (lines 175-201, stratum trav_navigation)
 # licence of the source repository: see meta.json
+# Context restored (meta.json): SSTIM and local() are module-level helpers
+# defined earlier in scripts/generate-hed-bundle.py (lines 70, 109-111).
 from rdflib import Graph, URIRef
+
+SSTIM = "https://w3id.org/sstim#"
 S = lambda name: URIRef(SSTIM + name)  # noqa: E731
+
+
+def local(term) -> str:
+    text = str(term)
+    return text.rsplit("#", 1)[-1] if "#" in text else text.rsplit("/", 1)[-1]
+
 
 def read_sweep(graph: Graph) -> dict | None:
     """The one declarative modulation in SSTIM that a single row cannot express.

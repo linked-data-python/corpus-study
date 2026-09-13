@@ -272,25 +272,27 @@ Deux déduplications, et elles expliquent tous les écarts du tableau :
 2. **entre strates**, une région déjà tirée est réutilisée et **créditée aux
    deux** : elle sera traduite une fois et comptée dans chacune.
 
-| strate | sites | dépôts | crédit | classée | plafond¹ | finales |
+| strate | sites | dépôts | crédit | classée | plafond¹ | finales² |
 |---|---:|---:|---:|---:|---:|---:|
-| `ns_import_project` | 1 271 | 65 | 100 | 100 | 260 | 9 |
-| `ns_def_local` | 1 061 | 156 | 100 | 100 | 624 | 4 |
-| `add_isolated` | 5 053 | 220 | 100 | 98 | 880 | 10 |
-| `add_in_loop` | 3 646 | 208 | 100 | 85 | 832 | 9 |
-| `add_run_shared_subject` | 1 246 | 154 | 100 | 78 | 616 | 9 |
-| `remove` | 636 | 81 | 100 | 94 | 324 | 21 |
-| `trav_one_step` | 5 235 | 185 | 100 | 92 | 740 | 9 |
-| `trav_navigation` | 1 039 | 99 | 100 | 90 | 396 | 9 |
-| `trav_single_value` | 2 252 | 111 | 100 | 76 | 444 | 8 |
-| `trav_existence` | 261 | 43 | **89** | 72 | 172 | 9 |
-| `sparql_literal` | 884 | 99 | 100 | 95 | 396 | 7 |
-| `sparql_interpolated` | 140 | 21 | **53** | 49 | 84 | 10 |
-| `bind_initbindings` | 333 | 56 | 100 | 81 | 224 | 9 |
-| `coercion_datatype` | 6 174 | 242 | 100 | 86 | 968 | 8 |
-| **TOTAL** | **29 231** | — | **1 342** | **1 196** | — | **131** |
+| `ns_import_project` | 1 271 | 65 | 100 | 100 | 260 | 21 |
+| `ns_def_local` | 1 061 | 156 | 100 | 100 | 624 | 22 |
+| `add_isolated` | 5 053 | 220 | 100 | 98 | 880 | 25 |
+| `add_in_loop` | 3 646 | 208 | 100 | 85 | 832 | 24 |
+| `add_run_shared_subject` | 1 246 | 154 | 100 | 78 | 616 | 24 |
+| `remove` | 636 | 81 | 100 | 94 | 324 | 23 |
+| `trav_one_step` | 5 235 | 185 | 100 | 92 | 740 | 23 |
+| `trav_navigation` | 1 039 | 99 | 100 | 90 | 396 | 25 |
+| `trav_single_value` | 2 252 | 111 | 100 | 76 | 444 | 24 |
+| `trav_existence` | 261 | 43 | **89** | 72 | 172 | 23 |
+| `sparql_literal` | 884 | 99 | 100 | 95 | 396 | 22 |
+| `sparql_interpolated` | 140 | 21 | **53** | 49 | 84 | 23 |
+| `bind_initbindings` | 333 | 56 | 100 | 81 | 224 | 25 |
+| `coercion_datatype` | 6 174 | 242 | 100 | 86 | 968 | 25 |
+| **TOTAL** | **29 231** | — | **1 342** | **1 196** | — | **329** |
 
-¹ plafond théorique = dépôts × 4. « Crédit » = régions créditées à la strate ;
+¹ plafond théorique = dépôts × 4. ² colonne « finales » au 2026-09-03,
+après la campagne complète : elle se lit sur l'échantillon de 350 du § 5.3,
+pas sur les 1 196. « Crédit » = régions créditées à la strate ;
 « classée » = régions **rangées** dans `examples/<strate>/`, une région
 multi-strates n'étant rangée qu'une fois. D'où 1 342 crédits pour
 **1 196 régions distinctes** — 124 appartiennent à deux strates ou plus (une à
@@ -360,18 +362,23 @@ Chiffres du 2026-09-03, sur l'échantillon final de 350.
 | régions tirées | § 5.2 | 1 196 |
 | **retenues pour l'article** | § 5.3 | **350** |
 | brouillon mécanique | écrit pour toutes dès le tirage (`materialise = true`) | 350 |
-| **tentées** par un agent | par lots, strates les plus déficitaires d'abord | **210** |
-| non exprimables | le langage ne l'atteint pas — c'est un **résultat**, pas une perte | −19 |
-| malaisées / exprimables | classées `awkward` (1) ou `expressible` (190) | **191** |
-| **traduites, statut `final`** | traduction + pilote + équivalence prouvée | **210** |
-| paires mesurées | métriques calculées | **190** |
+| **tentées** par un agent | campagne close le 2026-09-03, plus aucun brouillon éligible | **350** |
+| non évaluables en isolation | `excluded` : le pilote ne peut exécuter ni l'original ni la traduction | −21 |
+| **traduites, statut `final`** | traduction + pilote + équivalence prouvée | **329** |
+| dont non exprimables | le langage ne l'atteint pas — c'est un **résultat**, pas une perte | 26 |
+| dont malaisées | `awkward` : une forme existe, elle ne gagne rien | 6 |
+| dont exprimables | `directly-expressible` (271) + `minor-restructuring` (26) | **297** |
+| paires mesurées | métriques calculées — **à rejouer, 119 finales sont postérieures au dernier `compare`** | 190 |
 | **approuvées** | revue humaine — **verrou : `--force` ne rend que des chiffres provisoires** | **0** |
 
-Couverture d'expressivité sur ce qui a pu être évalué : **190 / 210**.
+Couverture d'expressivité sur ce qui a pu être évalué : **297 / 329** (90 %).
 
-Les 140 régions non tentées gardent leur brouillon mécanique intact et se
-reprennent sans re-tirage. Elles sont exactement ce qui reste à traduire pour
-que l'échantillon de l'article soit complet.
+Les 21 régions qui restent au statut `draft` sont exactement les 21
+`excluded` : sans pilote exécutable, il n'y a pas d'équivalence à prouver.
+Aucune strate n'atteint donc 25 finales sauf quatre (`add_isolated`,
+`bind_initbindings`, `coercion_datatype`, `trav_navigation`) ; les autres
+plafonnent entre 21 et 24, l'élagage du § 5.3 ayant supprimé le vivier qui
+aurait permis de remplacer une `excluded`.
 
 Sur les 190 paires, l'oracle se partage en **113 par isomorphisme de graphe**
 (la région construit) et **77 par égalité des valeurs produites** (elle lit) —

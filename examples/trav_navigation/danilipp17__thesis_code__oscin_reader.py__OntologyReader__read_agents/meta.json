@@ -12,11 +12,18 @@
   "categories": {
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd, AGENTO->agento, AGENTOSCIN->agentoscin"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd, AGENTO->agento, AGENTOSCIN->agentoscin",
+    "rp_uri is a genuine join key shared by both patterns (employsReasoningPattern then rdf:type on the same node), so this is one conjunctive m{ } rather than two independent reads; the outer/inner break collapses into a single 'stop at first matching pair' loop over the joined solutions, which is safe here because the source populator writes exactly one employsReasoningPattern triple per agent",
+    "self.g is not visible in the extracted region (163/1196 regions case): restored a minimal _Self wrapper and a shim_namespaces.py subset of oscin/namespaces.py in original.py; the region only reads (no graph is built), so driver.py compares the reasoning_pattern value via captured stdout rather than isomorphism"
   ],
   "draft_sha": "6caad5256c33b690",
   "provenance": {
@@ -28,5 +35,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

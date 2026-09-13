@@ -14,10 +14,21 @@
     "term_constructor": 5,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "IRI",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "the two test_graph.add() calls share the subject test_subject: translated as a single +{ } with a ';'-separated predicate-object pair (rdf:type + ex:name), per the add_run_shared_subject construction.",
+    "no @prefix used: both predicates/objects are ad hoc <http://example.org/...> IRIs used once, not namespace members worth naming.",
+    "region restored out of its 'if __name__ == \"__main__\":' guard (dropped, body unindented one level, identically on both sides): run_pair execs the module with __name__ set to '__original__'/'__translated__', never '__main__', so under the guard as extracted nothing would run and both sides would trivially compare two empty namespaces. Same restoration and rationale as sparql_interpolated's custom_eval.py__<module>_1 (precedent).",
+    "context shims added, identical on both sides: oxigraph_shim.py replaces the real Oxigraph adapter (opens an HTTP connection to a live server) with an in-memory rdflib-backed stand-in exposing the same insert/query/get_subject_graph/remove signatures and RDF semantics; naas_abi_core/services/triple_store/resolve.py replicates the two reachable branches of resolve_local_http_url (env-var override, else default_url -- the .abi/dev/instance.json branch never triggers here); dotenv.py is a no-op load_dotenv stand-in (python-dotenv not installed).",
+    "driver applies a stdout_filter blanking 'at 0x...' addresses: the region prints row.count on a SPARQL COUNT result, but ResultRow subclasses tuple so '.count' resolves to the inherited tuple.count BOUND METHOD (a pre-existing bug in the source, not touched by translation) and printing it embeds the method object's id(), which differs run to run though the program is identical on both sides."
+  ],
   "draft_sha": "5291f47c6b40ba5d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.112855+00:00",
@@ -28,5 +39,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

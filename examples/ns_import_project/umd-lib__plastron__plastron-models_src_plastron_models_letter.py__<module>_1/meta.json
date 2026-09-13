@@ -13,9 +13,15 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": [
+    "IRI"
+  ],
+  "translation_notes": [
+    "the single raw URIRef (`URIRef('http://id.loc.gov/datatypes/edtf')`, a datatype argument, not a triple term) is directly-expressible as `<IRI>` -- already the state of translated.ldpy, correct as drafted.",
+    "the region's namespace import (`from plastron.namespaces import bibo, dc, dcmitype, edm, geo, rel, skos, ore, owl, umd, schema, pcdm, dcterms`) is exactly the case the stratum is sampling for -- 18+ genuine term uses (owl.sameAs, edm.Agent, bibo.Letter, dcterms.title, ...), all real, none decorative. But it CANNOT become `from plastron.namespaces import bibo:, dc:, ...`: fetched plastron-utils/src/plastron/namespaces/__init__.py at umd-lib/plastron@4a7f08cc19 (real source, via GitHub) -- it is plain `NAME = Namespace('...')` module attributes, no `__namespaces__` dict anywhere. Unlike the edmondchuc__rdflib-orm region in this same stratum, this module is a real, heavily-used third-party dependency (plastron-utils, its own package) we cannot patch the way a same-repo test shim can add one line -- so the import stays ordinary Python for every one of these dozen namespaces, uncredited. This is the strongest instance yet of the finding the batch reminder anticipated: a project namespace module lacking `__namespaces__` blocks the construction regardless of how heavily its terms are actually used.",
+    "excluded from execution: `check` fails at original.py's own imports (`plastron.handles`, `plastron.models`, `plastron.models.authorities`, `plastron.models.fedora`, `plastron.models.pcdm`, `plastron.models.page`, `plastron.rdfmapping.decorators/descriptors/resources`, `plastron.validation.rules/vocabularies`) -- an entire application framework (ObjectProperty/DataProperty descriptors, @rdf_type class decorator, RDFResource base, ContentModeledResource, PCDMObject, HandleBearingResource, FedoraResource), not a namespace-only dependency. Reproducing enough of it to execute the class bodies would mean re-implementing the framework's descriptor/decorator machinery, which is business logic, not context glue."
+  ],
   "draft_sha": "821ddfc8438a0580",
   "provenance": {
     "generated_at": "2026-08-28T17:54:57.606121+00:00",

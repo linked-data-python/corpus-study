@@ -1,4 +1,39 @@
-# Input graph for anuzzolese__pyrml__pyrml_pyrml_core.py__Source_from_rdf — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for anuzzolese__pyrml__pyrml_pyrml_core.py__Source_from_rdf.
+# Covers: several rml:source objects of different shapes (plain literal,
+# csvw:url-bearing, sd:endpoint-bearing, d2rq:jdbcDSN-bearing), the
+# zero-solution case (a source with none of those properties and no
+# rdf:type d2rq:Database anywhere -- the else branch finds nothing and the
+# source is silently skipped), and neighbouring triples on an unrelated
+# parent that must not be picked up.
 @prefix ex: <http://example.org/> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+# parent1: every source hits csvw:url/sd:endpoint/d2rq:jdbcDSN/isinstance
+# Literal, so the else branch (and the g.value(...) default-argument bug
+# it triggers -- see original.py/translated.ldpy comments) is never
+# reached. This exercises the three m{ }.first() translations for real.
+ex:parent1 rml:source "plain-value-source" ;
+           rml:source ex:src-table ;
+           rml:source ex:src-sparql ;
+           rml:source ex:src-sql .
+
+ex:src-table csvw:url ex:some-csv-file .
+
+ex:src-sparql sd:endpoint <http://example.org/sparql-endpoint> .
+
+ex:src-sql d2rq:jdbcDSN "jdbc:mysql://localhost/db" .
+
+# parent3: a single source with none of those properties, and no
+# rdf:type d2rq:Database triple anywhere in this graph -- the zero-solution
+# case, which here (a real bug in the source: g.value's 4th positional
+# argument is `default`, not a flag) makes the function return early with
+# [None] rather than an empty list. Kept to prove the bug survives
+# translation identically, not fixed.
+ex:parent3 rml:source ex:src-unmatched .
+
+# Neighbourhood that must NOT match: another parent's sources.
+ex:parent2 rml:source ex:src-other .
+ex:src-other csvw:url ex:other-csv-file .

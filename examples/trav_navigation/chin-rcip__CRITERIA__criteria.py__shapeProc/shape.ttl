@@ -1,0 +1,28 @@
+# Shape graph for chin-rcip__CRITERIA__criteria.py__shapeProc — written during
+# translation. shapeProc parses this file itself (util.guess_format +
+# shape.parse), it is not the fixture.ttl the harness parses for us.
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix ex: <http://example.org/> .
+
+ex:PersonShape a sh:NodeShape ;
+    skos:example ex:examplePerson1 ;
+    sh:property ex:namePropShape, ex:agePropShape .
+
+ex:namePropShape
+    sh:path ex:name ;
+    sh:name "Name" ;
+    sh:description "The person's name" .
+
+ex:agePropShape
+    sh:path ex:age ;
+    sh:name "Age" ;
+    sh:description "The person's age" ;
+    sh:defaultValue ex:defaultAgeValue .
+
+# Neighbour that must NOT reach nodeLabels: a NodeShape with no skos:example.
+ex:OtherShape a sh:NodeShape .
+
+# Neighbour that must NOT reach nodeLabels: has skos:example but is not a
+# sh:NodeShape, so the `(s, rdf:type, sh:NodeShape) in shape` guard excludes it.
+ex:NotAShape skos:example ex:exampleNotAShape .

@@ -4,6 +4,7 @@
 from typing import Dict, List, Any, Optional
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS
+from species_context import _select_uris
 
 def _find_species_for_synthesis(graph: Graph, synth: URIRef) -> List[URIRef]:
     q = f"""

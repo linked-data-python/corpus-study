@@ -4,7 +4,16 @@
 from rdflib.namespace import RDF, RDFS, XSD, DCAT, DCTERMS
 from rdflib import Graph, Namespace, Literal,URIRef
 
-if kwargs.get('only_schema',False) == False:
+# Wrapped in a function (context restoration, meta.json: this is one of the
+# regions with no visible graph -- kwargs/df_datasets/graph/*_NODE/
+# *_flow_managers/audiences are all free variables of the original method
+# body). The body itself, from here to the end of the file, is byte-for-byte
+# what was extracted.
+def build_graph_region(self, kwargs, df_datasets, graph, CATALOG_NODE,
+                        PROFILE_NODE, FLOWS_NODE, AUDIENCES_NODE,
+                        source_flow_managers, audiences,
+                        destination_flow_managers):
+ if kwargs.get('only_schema',False) == False:
     for index, row in df_datasets.iterrows():
         graph.add((CATALOG_NODE, self.CATALOG.contains, self.CATALOG[row['id']]))
         graph.add((self.CATALOG[row['id']], RDF.type, DCAT.Dataset))
@@ -90,5 +99,5 @@ if kwargs.get('only_schema',False) == False:
                 graph.add((self.AUDIENCES[audienceId], self.FLOWS.usedIn, self.FLOWS[destination.id]))
     self.global_graph = graph
     return self.global_graph
-else:
+ else:
     return graph

@@ -14,12 +14,22 @@
     "term_constructor": 2,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: _EX->ex"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
   ],
+  "translation_notes": [
+    "prefixes: _EX->ex",
+    "ds.graph(rdflib.URIRef(iri)) is designated with `@graph EXPR` (its value at that line -- a fresh call each time the function runs), rather than assigned then reused, since the function has a single write",
+    "Literal(iri) is a plain literal built from a str with no explicit datatype, so it is identical to the default coercion of a bare interpolation {iri}: rewritten as such rather than kept as an explicit Literal(...) call",
+    "the rewrite drops the manual Namespace/Literal/.add() plumbing to a three-line pattern"
+  ],
+  "article_candidate": true,
   "draft_sha": "cf9eec475c2a3b8d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.490352+00:00",
@@ -30,5 +40,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_add_version",
+    "diffs": [],
+    "error": null
+  }
 }

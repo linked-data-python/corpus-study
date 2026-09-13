@@ -14,10 +14,17 @@
     "graph_read": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "variable"
+  ],
+  "translation_notes": [
+    "g.subjects() has BOTH predicate and object free -- not the one-known-position read the stratum's short form (`for o in m{ {s} p ?o }`) covers. No island form projects a single variable while leaving two other positions as wildcards: a blank node in a pattern is a non-distinguished variable that is matched but not projected, but that is documented only for genuine blank-node positions, not as a general throwaway-variable idiom. Had to write the full triple pattern `m{ ?s ?p ?o }` and destructure `for s, _p, _o in ...`, discarding two variables to get the one the original wanted. Confirms the known gap noted in AGENT_BATCH.md: a free-predicate one-step read has no short form.",
+    "The region reads a real file from disk (output_dir, filename), not a passed-in graph, so there is no fixture= graph argument; the fixture is a real Turtle file (fixture_ok.ttl) next to the pair, plus a nonexistent filename for the os.path.isfile zero-solution branch."
+  ],
   "draft_sha": "b372ed5ce51f8f09",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.226846+00:00",
@@ -28,5 +35,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_declared_local_names",
+    "diffs": [],
+    "error": null
+  }
 }

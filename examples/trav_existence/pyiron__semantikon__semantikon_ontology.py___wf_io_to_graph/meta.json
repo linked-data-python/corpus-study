@@ -15,10 +15,12 @@
     "triple_add": 11
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "prefixed name", "g{ }", "m{ }", ".first()", "interpolation {expr}"],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
+    "translated the .add() calls into grouped g{ } literals unioned with `g +=` (kept the g{ }/+= idiom already used natively by the original for _to_owl_restriction/_translate_triples results, so `g` is never reassigned under a stale @graph designation), and `g.value(data_node, SNS.has_value) is None` into `m{ {data_node} {SNS.has_value} ?v }(g).first() is None`.",
+    "excluded per AGENT_BATCH.md rule 1: `semantikon.flowrep_to_networkx` does not exist as an installable package here (ModuleNotFoundError), and the region additionally calls _get_bound_graph, _to_owl_restriction, _translate_triples and references SNS and G.t_ns/a_ns/a_ns_short/_get_data_node — none defined in the extracted context. Reconstructing them in a shim would mean inventing their logic (forbidden by AGENT_BATCH.md's shim policy: 'n'inventez pas de logique'), not just restoring bindings, so the pilot cannot be built without fabricating the semantics it is supposed to verify."
   ],
   "draft_sha": "49b57264eb2b9f75",
   "provenance": {

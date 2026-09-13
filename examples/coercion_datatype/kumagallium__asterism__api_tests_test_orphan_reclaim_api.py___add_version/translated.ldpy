@@ -6,4 +6,5 @@ import rdflib
 
 
 def _add_version(ds: rdflib.Dataset, iri: str) -> None:
-    ds.graph(rdflib.URIRef(iri)) += g{ ex:s ex:p {rdflib.Literal(iri)} }
+    @graph ds.graph(rdflib.URIRef(iri))
+    +{ ex:s ex:p {iri} }

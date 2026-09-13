@@ -13,10 +13,15 @@
     "namespace_term": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "REVISION of the draft's \"prefixes: RDF->rdf, RDFS->rdfs\": RDFS is imported but never used as a term in the extracted lines -- stays an ordinary import, uncredited. RDF IS used as a term (`p == RDF.type`, twice) so `@prefix rdf: <...> .` / `rdf:type` is legitimate there, but RDF/RDFS come from rdflib itself (`from rdflib import RDF, RDFS`), not from a project namespace module -- rdflib.namespace exports no `__namespaces__`, so this is the same `@prefix` fallback already documented for the edmondchuc__rdflib-orm region in this stratum, not a `from ... import p:` case.",
+    "the region's actual project-owned namespace import is `from semantikon.ontology import PMD, get_knowledge_graph`, and PMD IS used as a term in the context lines above the function (PMD_PROCESS = PMD[\"0000010\"]). Checked semantikon/ontology.py at pyiron/semantikon@cfd1d3ff (fetched from GitHub): `PMD: Namespace = Namespace(\"https://w3id.org/pmd/co/PMD_\")`, no `__namespaces__` dict anywhere in the module -- so even if the region ran, `from semantikon.ontology import pmd:` would not be available and PMD would need its own `@prefix` too, or a one-line addition to a shim standing in for ontology.py (not attempted: see below).",
+    "excluded from execution: `check` fails at original.py's own imports (`from semantikon import datastructure, flowrep_dict`, `semantikon.ontology`). semantikon/flowrep_dict.py and semantikon/ontology.py are ~28k and ~50k characters respectively (fetched to check) -- not shimmable in miniature without reimplementing get_knowledge_graph and _dict_to_workflow_recipe, which is exactly the business logic under test, not context glue. The region also calls `self._wf_dict()` and is itself a bound TestCase method (`self` as first parameter) with no class or fixture data given by the extracted lines -- a second, independent binding gap beyond the missing package."
   ],
   "draft_sha": "14f6b6a60a6a4187",
   "provenance": {

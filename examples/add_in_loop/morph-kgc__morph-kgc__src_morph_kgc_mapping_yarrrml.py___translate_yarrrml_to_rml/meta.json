@@ -13,10 +13,22 @@
     "term_constructor": 63,
     "triple_add": 32
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "prefixes: rdf: <...rdf-syntax-ns#>, rml: <http://w3id.org/rml/> (all RML_* constants of morph_kgc.constants share this one namespace, so every rdflib.term.URIRef(RML_X) becomes rml:x).",
+    "The region is a bare top-level for-loop statement, not a function: it reads free names yarrrml_mapping, mapping_graph, tm_id_to_norm_tm_ids and the RML_* constants and helper functions (_add_source, _add_template, _translate_yarrrml_function_to_rml) that live elsewhere in yarrrml.py/constants.py. Added shim.py with the constants and verbatim helper functions plus a make_fixture() covering every branch (reference/template/constant subjects, quoted and quotedNonAsserted triples maps, a function-valued subject and predicate, a join condition, an explicit termType, a referencing object map, and the implicit-blank-node subject when 'subjects' is absent).",
+    "mapping_graph is reassigned by the helper functions (_add_source, _add_template, _translate_yarrrml_function_to_rml) which mutate and return the SAME graph object; each such reassignment is followed by a fresh `@graph mapping_graph` per corpus/0xx's rule that @graph captures the value at its line, not the name.",
+    "The helper functions themselves keep .add() (they are shim context, out of scope for this region's translation, called identically from both original.py and translated.ldpy).",
+    "run_pair's entry/fixture modes assume a function or full-module comparison; this region is a script fragment referencing free globals, so driver.py seeds them directly and compares the resulting mapping_graph by isomorphism instead of using run_pair."
+  ],
   "draft_sha": "57cbe50a8cf94b73",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.468496+00:00",
@@ -27,5 +39,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "statement:seeded-globals+isomorphism",
+    "diffs": [],
+    "error": null
+  }
 }

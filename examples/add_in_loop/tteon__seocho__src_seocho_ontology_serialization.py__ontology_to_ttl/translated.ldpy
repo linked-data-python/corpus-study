@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from shim import _safe_local
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -28,7 +29,7 @@ def ontology_to_ttl(
             "Install it with: pip install seocho[ontology]"
         ) from exc
 
-    from .core import PropertyType
+    from shim import PropertyType
 
     ns_str = ontology.namespace or "https://seocho.dev/ontology/"
     if not (ns_str.endswith("/") or ns_str.endswith("#")):
@@ -40,11 +41,12 @@ def ontology_to_ttl(
     g.bind("rdfs", RDFS)
     g.bind("skos", SKOS)
     g.bind("priv", ns)
+    @graph g
 
     onto_iri = URIRef(ns + _safe_local(ontology.name))
-    g += g{ {onto_iri} a owl:Ontology }
+    +{ {onto_iri} a owl:Ontology }
     if ontology.description:
-        g += g{ {onto_iri} rdfs:label {Literal(ontology.description)} }
+        +{ {onto_iri} rdfs:label {Literal(ontology.description)} }
 
     xsd_for = {
         PropertyType.STRING: xsd:string,
@@ -62,39 +64,39 @@ def ontology_to_ttl(
 
     for label, node in ontology.nodes.items():
         cls_iri = URIRef(node.same_as) if node.same_as else URIRef(ns + _safe_local(label))
-        g += g{
+        +{
             {cls_iri} a owl:Class ;
                rdfs:label {Literal(label)}
         }
         if node.description:
-            g += g{ {cls_iri} skos:definition {Literal(node.description)} }
+            +{ {cls_iri} skos:definition {Literal(node.description)} }
         for alias in node.aliases or []:
-            g += g{ {cls_iri} skos:altLabel {Literal(alias)} }
+            +{ {cls_iri} skos:altLabel {Literal(alias)} }
         # Subclass hierarchy: broader -> rdfs:subClassOf (round-trips with from_ttl).
         for parent in (node.broader or []):
             if parent in ontology.nodes:
-                g += g{ {cls_iri} rdfs:subClassOf {_cls_iri(parent)} }
+                +{ {cls_iri} rdfs:subClassOf {_cls_iri(parent)} }
         for pname, p in node.properties.items():
             prop_iri = URIRef(ns + _safe_local(pname))
-            g += g{
+            +{
                 {prop_iri} a owl:DatatypeProperty ;
                    rdfs:domain {cls_iri} ;
                    rdfs:range {xsd_for.get(p.property_type, XSD.string)}
             }
             if p.description:
-                g += g{ {prop_iri} rdfs:label {Literal(p.description)} }
+                +{ {prop_iri} rdfs:label {Literal(p.description)} }
 
     for rtype, rel in ontology.relationships.items():
         prop_iri = URIRef(rel.same_as) if rel.same_as else URIRef(ns + _safe_local(rtype))
-        g += g{ {prop_iri} a owl:ObjectProperty }
+        +{ {prop_iri} a owl:ObjectProperty }
         if rel.description:
-            g += g{ {prop_iri} rdfs:label {Literal(rel.description)} }
+            +{ {prop_iri} rdfs:label {Literal(rel.description)} }
         if rel.source and rel.source != "Any":
-            g += g{ {prop_iri} rdfs:domain {URIRef(ns + _safe_local(rel.source))} }
+            +{ {prop_iri} rdfs:domain {URIRef(ns + _safe_local(rel.source))} }
         if rel.target and rel.target != "Any":
-            g += g{ {prop_iri} rdfs:range {URIRef(ns + _safe_local(rel.target))} }
+            +{ {prop_iri} rdfs:range {URIRef(ns + _safe_local(rel.target))} }
         for alias in rel.aliases or []:
-            g += g{ {prop_iri} skos:altLabel {Literal(alias)} }
+            +{ {prop_iri} skos:altLabel {Literal(alias)} }
 
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)

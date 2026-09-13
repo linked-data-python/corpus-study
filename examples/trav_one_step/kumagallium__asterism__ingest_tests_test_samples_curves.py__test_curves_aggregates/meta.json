@@ -13,11 +13,21 @@
     "namespace_term": 7,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, PROV->prov, RDF->rdf, XSD->xsd"
+    "prefixes: DCTERMS->dcterms, PROV->prov, RDF->rdf, XSD->xsd",
+    "SD = Namespace(DEFAULT_ONTOLOGY) binds an IRI unknown until runtime, so it stays a plain Python Namespace object: no @prefix can be declared for it. Each g.objects(c79, SD.xFoo) becomes m{ {c79} {SD.xFoo} ?o } -- the predicate interpolated with bare {expr} in term position rather than a prefixed name, which is the correct outcome when the namespace's IRI is not a compile-time literal, not a workaround.",
+    "context shim: examples/.../asterism/__init__.py extends this package's __path__ to the real asterism.starrydata checked out under corpus/repos/kumagallium__asterism@f0977d4d3a, so original.py's `from asterism.starrydata import ...` resolves to the genuine ingester (ingest_curves) unmodified rather than a reinvented stand-in.",
+    "original.py restores the test file's own `_load(path)` helper (verbatim) so the region is executable standalone.",
+    "driver.py reproduces the `curves_csv` pytest fixture body verbatim and shares one tmp_path/curves_csv pair between both sides so run_pair's argument comparison sees identical values."
   ],
   "draft_sha": "90f831b0355c085f",
   "provenance": {
@@ -29,5 +39,11 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_curves_aggregates",
+    "diffs": [],
+    "error": null
+  }
 }

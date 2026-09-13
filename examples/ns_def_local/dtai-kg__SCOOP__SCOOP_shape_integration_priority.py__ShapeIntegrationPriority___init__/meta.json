@@ -14,10 +14,16 @@
     "namespace_ctor": 2,
     "namespace_term": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "Both self.shaclNS and self.rdfSyntax store the Namespace OBJECT itself on self (reused later by other methods of the class, outside this region), not just its terms: each needs `as NAME` so the bound Python name can be assigned back to the attribute (`self.shaclNS = SHACL_NS`), unlike a namespace used only through attribute access.",
+    "driver.py: __init__ is extracted as a bare function, so `self` is a small stand-in object with value-based __eq__ (Graph attributes compared by isomorphism). self.random_number is excluded from that equality on purpose: it is 1000 fresh random.randint draws per call, not RDF content, and comparing exact values would fail on non-determinism unrelated to the translation."
+  ],
   "draft_sha": "f078e7444ce3c9e7",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.412368+00:00",
@@ -28,5 +34,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:__init__",
+    "diffs": [],
+    "error": null
+  }
 }

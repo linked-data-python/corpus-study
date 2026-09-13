@@ -16,12 +16,27 @@
     "serialize_parse": 1,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: CSVW->csvw, RDF->rdf, RDFS->rdfs, PROV->prov, XSD->xsd"
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    ".one()",
+    "+{ }",
+    "call suffix (g)"
   ],
+  "translation_notes": [
+    "prefixes: CSVW->csvw, RDF->rdf, RDFS->rdfs, PROV->prov, XSD->xsd",
+    "Restored the free locals (duplicate_for_table, is_rdf_data, rows, template_url/content, template_graph, data_graph, mapping_graph, joined_graph) as an explicit fixture in original.py/translated.ldpy, one of the 163 no-visible-graph regions (see AGENT_BATCH.md).",
+    "data_graph.value(row, CSVW.describes) -> m{ {row} csvw:describes ?data_node }(data_graph).first(): the stratum's target idiom, directly expressible.",
+    "next(joined_graph.objects(data_node, property), None) -> m{ {data_node} {property} ?subject }(joined_graph).first(): default is None, matching .first() exactly.",
+    "next(data_graph.objects(subject=column, predicate=CSVW.propertyUrl), column) kept as native rdflib: the default is the column itself, not None, and m{ }.first() only ever yields None on no match -- exactly the case flagged by the batch reminder. Signalled, not forced.",
+    "tablegroup = next(data_graph[: RDF.type : CSVW.TableGroup]) -> .one(): approximate. next() without a default takes the FIRST match and only raises on zero; .one() raises on zero OR more than one. The two coincide only because the fixture (and presumably the real data) has exactly one csvw:TableGroup.",
+    "mapping_graph.predicate_objects(subject=column) and mapping_graph.predicate_objects(note) translated as m{ {s} ?p ?o }(g) -- a full two-variable traversal, not this stratum's single-value idiom, but the most specific construction available; results converted with tuple(_r) because the harness's materialise() cannot reconstruct the ldpy Row subclass of tuple nested inside a dict (Row.__new__() missing 'fields') -- a harness/runtime limitation, not a translation choice.",
+    "mapping_graph.subjects(unique=True) kept native: no island expresses a deduplicated whole-graph subject scan; m{ ?s ?p ?o } would repeat a subject once per triple."
+  ],
+  "article_candidate": false,
   "draft_sha": "83425bb08b781aed",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.235126+00:00",
@@ -32,5 +47,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

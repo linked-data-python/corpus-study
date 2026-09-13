@@ -17,11 +17,21 @@
     "term_constructor": 12,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, SKOS->skos"
+    "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, SKOS->skos",
+    "the first g.add() quadruple shares subject c across rdf:type, skos:prefLabel, skos:definition, skos:inScheme: translated as a single +{ } with ';'-separated predicate-object pairs, per the add_run_shared_subject construction.",
+    "the two loops each add exactly one triple per iteration on the same subject c but with a per-iteration predicate/object pair chosen by an if/else on the value shape (IRI vs literal): kept as one +{ } per branch rather than merged, since predicate and object differ per call and there is nothing shared to factor with ';'.",
+    "g.bind(...) calls (including the dynamic '' and 'cs' prefixes) are namespace-manager bindings on runtime-computed values, not @prefix declarations resolvable at transpile time, so they are left as plain rdflib calls.",
+    "driver re-parses each side's serialised Turtle response body into a fresh Graph and compares those by isomorphism, instead of comparing the Flask Response objects/bytes directly, since raw serialisation order and Response identity are not a valid oracle.",
+    "context shim vocprez/_config.py added to bind DEFAULT_LANGUAGE, mirroring vocprez/_config/template.py at the pinned commit."
   ],
   "draft_sha": "cdf7a53e3bb69c72",
   "provenance": {
@@ -33,5 +43,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_render_skos_rdf (re-parsed graphs)",
+    "diffs": [],
+    "error": null
+  }
 }

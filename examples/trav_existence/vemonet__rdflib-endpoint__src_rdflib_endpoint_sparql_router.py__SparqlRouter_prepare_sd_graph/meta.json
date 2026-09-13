@@ -10,10 +10,20 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "`not any(g.triples((s, p, o)))` becomes `not bool(m{ {s} p o })`, and the guarded `.add(...)` becomes `+{ }` on the @graph-designated self.service_description.",
+    "self and sd_subj are unannotated method context (self.service_description, a local bound earlier in prepare_sd_graph); rdflib_endpoint is not installed here either. Restored via shim.py using the real, standard SD (SPARQL 1.1 Service Description) and formats (W3C formats) vocabularies rdflib_endpoint.utils actually binds.",
+    "added an identical `service_description = self.service_description` line to both original.py and translated.ldpy so the pilot's module-state comparison has a graph to compare (self is not a module-level Graph)."
+  ],
   "draft_sha": "0518dc1050016c3f",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.406116+00:00",
@@ -24,5 +34,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

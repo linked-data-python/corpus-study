@@ -17,10 +17,12 @@
     "triple_add": 12
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "@graph", "+{ }", "interpolation {expr}", "IRI"],
   "translation_notes": [
-    "prefixes: DC->dc, RDF->rdf, RDFS->rdfs"
+    "prefixes: DC->dc, RDF->rdf, RDFS->rdfs",
+    "each shared-subject g.add() run is translated to a single +{ } with ';'-separated predicate-object pairs: scenario/rdf:type+rdfs:label+dc:abstract, and study/obo:BFO_0000051+rdfs:label+dc:abstract. For the input/output dataset blocks, the link from 'scenario' to 'inp'/'out' is one +{ } and the label+value pair on 'inp'/'out' is a second +{ }, since those two additions are on different subjects and a ';'-join would wrongly ask for a single add_run_shared_subject pattern across two subjects.",
+    "translation itself transpiles cleanly and is directly-expressible for the RDF-construction part, but the pilot cannot execute: original.py imports factsheet.views.get_scenarios_view, which at import time requires Django settings (oeplatform.settings), a local OWL ontology on disk, and a live SPARQL store connection (factsheet/oekg/connection.py's module-level oekg store) -- ModuleNotFoundError: No module named 'factsheet' when run standalone. get_scenarios_view is a ~100-line view walking many oekg.triples() calls; faithfully shimming it without inventing logic is not possible without vendoring the real oeplatform Django app and a triplestore. classification: excluded per protocol point 1 (translation-status stays draft since rdfeval check is red)."
   ],
   "draft_sha": "87f51cfd6aa3392a",
   "provenance": {

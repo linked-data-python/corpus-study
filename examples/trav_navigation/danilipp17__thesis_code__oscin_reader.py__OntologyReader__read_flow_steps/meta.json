@@ -12,11 +12,22 @@
   "categories": {
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd, AGENTO->agento, AGENTOSCIN->agentoscin"
+    "prefixes narrowed to rdf/agento/agentoscin: OWL/RDFS/XSD from the draft are unused by the region's own body (noise, as noted for prior trav_navigation regions in this batch).",
+    "the region does NOT fuse into one multi-pattern m{ }: the six `self.g.objects(step_uri, PRED)` calls (nextStep, hasDecoratorArgument, hasAssociatedAgent, plus the three `in self.g` existence checks) each read a DIFFERENT predicate off the same step_uri to fill independent fields (next_names, decorator_args, associated_agent_key, is_start/is_conditional/is_end) -- joining them would be a Cartesian product across unrelated predicates, not the intersection the original code computes. Each site gets its own most-specific island instead: `m{ {step_uri} pred ?var }` replacing each `.objects()` call (trav_one_step, arity 1), and `bool(m{ {step_uri} rdf:type TYPE })` replacing each `(s, p, o) in g` (trav_existence). The outer `for step_uri in m{ {wp_uri} agento:hasWorkflowStep ?step_uri }` is the one genuine navigation step.",
+    "self._str_value / self._int_value / self._local_name / self._agent_uri_to_key are plain method/dict lookups external to the region (defined on OntologyReader, reconstructed minimally in shim.py) and are left untouched -- only the region's own direct rdflib calls are translated.",
+    "context shim (shim.py) also stands in for `from oscin.namespaces import (...)`, unavailable outside the source repository: original.py's import line was changed from `oscin.namespaces` to `shim` (permitted -- restoring the missing binding, see AGENT_BATCH.md); the constants/Namespace objects themselves are otherwise identical.",
+    "fixture.ttl gives wp:WP1 one step of each observable step_type (conditional-not-start, start, end, regular) so every branch and every optional field (routing_logic, edge_mapping, decorator_args, associated_agent_key, calls_crew) is exercised, including the zero-solution case (step:Regular has none of the optional predicates) and a neighbouring workflow (wp:WP2/step:Foreign) that must not be read."
   ],
   "draft_sha": "07cd336e2db3011d",
   "provenance": {
@@ -28,5 +39,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

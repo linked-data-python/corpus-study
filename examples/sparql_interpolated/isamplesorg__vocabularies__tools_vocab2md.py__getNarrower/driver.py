@@ -8,12 +8,25 @@ The fixture is part of the translation: it must hold several solutions of the
 pattern the region reads, the zero-solution case, and neighbouring triples
 that must NOT match.
 """
-from rdfeval.harness import run_pair
+from pathlib import Path
+
+from rdfeval.harness import run_pair, fixture_graph
+
+FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
+
+
+def call(v, r):
+    return lambda: ((fixture_graph(FIXTURE), v, r), {})
+
 
 VERDICT = run_pair(
     __file__,
     entry='getNarrower',
-    fixture="fixture.ttl",
+    calls=[
+        call(None, "http://example.org/Animal"),                   # several solutions: Dog, Cat
+        call("http://example.org/VocabA", "http://example.org/Animal"),  # scheme filter excludes Wolf
+        call(None, "http://example.org/Rock"),                     # zero solutions
+    ],
     # ordered=True only if the region imposes an order (sorted, ORDER BY):
     # no store promises one, so results are compared as multisets.
 )

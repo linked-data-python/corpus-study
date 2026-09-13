@@ -2,6 +2,7 @@
 # region: test_is_before_rdflib (lines 165-183, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, BNode
+from _shim import tests_dir, is_before_rdflib
 g = Graph().parse(str(tests_dir / "data" / "before.ttl"))
 
 def test_is_before_rdflib():
@@ -23,3 +24,9 @@ def test_is_before_rdflib():
     assert not is_before_rdflib(g, BEFORE.b01, BEFORE.a01)
     assert not is_before_rdflib(g, BEFORE.b07, BEFORE.a07)
     assert not is_before_rdflib(g, BEFORE.b10, BEFORE.a10)
+
+    # Test harness only (see meta.json): the original test only asserts and
+    # returns None, which gives the driver nothing to compare. Returning
+    # True (every assertion above already passed to reach this line) makes
+    # the successful run observable without inventing any new check.
+    return True

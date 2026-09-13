@@ -1,0 +1,16 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/> .
+
+# ex:prop1 has two node shapes -> multiple solutions
+ex:Shape1 sh:property ex:prop1 ;
+    rdfs:label "Shape One" .
+
+ex:Shape2 sh:property ex:prop1 ;
+    rdfs:label "Shape Two" .
+
+# neighbouring data that must NOT match ex:prop1's query
+ex:Shape3 sh:property ex:otherProp ;
+    rdfs:label "Shape Three" .
+
+# ex:prop2 has no node shape at all -> zero solutions

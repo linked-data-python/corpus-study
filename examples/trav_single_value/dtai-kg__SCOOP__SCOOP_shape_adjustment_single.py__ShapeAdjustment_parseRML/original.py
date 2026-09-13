@@ -3,10 +3,11 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, URIRef, Literal, Namespace, BNode
 from rdflib.namespace import RDF, RDFS, XSD, OWL
+from scoop_context import ShapeAdjustmentStub
 
-def parseRML(self, rml_graph: Graph):
+def parseRML(self: ShapeAdjustmentStub, rml_graph: Graph):
     """
-    A function to parse the RML graph and return a list of dictionary of the triples maps 
+    A function to parse the RML graph and return a list of dictionary of the triples maps
     (path of subject map, predicate map, object map, logical source, and classes and properties)
     """
     self.rml_graph = rml_graph

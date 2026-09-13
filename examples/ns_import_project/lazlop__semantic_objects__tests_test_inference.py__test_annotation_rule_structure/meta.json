@@ -13,9 +13,15 @@
     "term_constructor": 6
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": [
+    "IRI"
+  ],
+  "translation_notes": [
+    "translation itself is correct as drafted: the six bare shacl# URIRefs are directly-expressible as `<IRI>` term constructors (already the state of translated.ldpy), nothing else in the extracted lines touches RDF.",
+    "excluded from execution, not from translation: `check` fails at original.py's own import line (`from semantic_objects.inference import ...`, then transitively `.core`, `.discovery`, `brick_tq_shacl`) -- semantic_objects is not installed and not vendorable as a small shim. Fetched the real source (lazlop/semantic_objects@243c5efd8c, src/semantic_objects/inference.py + namespaces.py + examples/s223_framework_demo.py) to check: AnnotationRuleGenerator.generate_annotation_rules walks a metaclass-based Resource/Node class hierarchy (_ns, _get_iri(), abstract flags, SHACL shape introspection) to produce the very SHACL rules graph the test asserts against -- reproducing it faithfully would mean re-implementing a nontrivial slice of the framework's object model, which is business logic, not context glue (the shim is supposed to bind names, not compute the thing under test).",
+    "of the two imports the ns_import_project stratum samples for, semantic_objects.namespaces (HPFS used as a term, S223 imported but never used as a term, bind_prefixes a function not a namespace) and semantic_objects.inference (functions/classes, not namespaces) -- HPFS is the only one that would matter for `from ... import p:`, and whether that import can be credited could not be checked either: it depends on running the AnnotationRuleGenerator to see what HPFS instances end up in `rules`, which is exactly the part that cannot execute."
+  ],
   "draft_sha": "17e7a065b270e842",
   "provenance": {
     "generated_at": "2026-08-28T17:54:57.876817+00:00",

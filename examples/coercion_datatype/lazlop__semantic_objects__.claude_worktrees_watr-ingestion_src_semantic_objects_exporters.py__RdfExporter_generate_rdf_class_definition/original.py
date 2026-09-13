@@ -1,8 +1,19 @@
 # Extracted from lazlop/semantic_objects@243c5efd8c : .claude/worktrees/watr-ingestion/src/semantic_objects/exporters.py
 # region: RdfExporter.generate_rdf_class_definition (lines 350-385, stratum coercion_datatype)
 # licence of the source repository: see meta.json
-from .namespaces import PARAM, RDF, RDFS, SH, bind_prefixes
+from context_shim import PARAM, RDF, RDFS, SH, bind_prefixes  # context shim -- see meta.json
 from rdflib import Graph, Literal, BNode, URIRef
+
+# Restored bindings (see meta.json): the region is a mid-method excerpt of
+# RdfExporter.generate_rdf_class_definition(cls, include_hierarchy=False),
+# where `cls`, `g`, `class_iri`, `classes_to_process` and
+# `processed_relations` are already in scope from earlier lines.
+from context_shim import _SourceThing
+cls = _SourceThing
+g = Graph()
+class_iri = cls._get_iri()
+classes_to_process = [cls]
+processed_relations = set()
 
 for base_class in classes_to_process:
     if not hasattr(base_class, '_valid_relations'):

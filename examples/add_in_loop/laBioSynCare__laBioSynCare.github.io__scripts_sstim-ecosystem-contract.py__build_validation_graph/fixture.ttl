@@ -1,4 +1,12 @@
 # Input graph for laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__build_validation_graph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Covers: several relationshipTarget solutions (targetA matches the catalog
+# profile type, targetB does not and must be skipped), the zero-solution
+# case (targetD is in the catalog but nothing points at it), and
+# neighbouring triples that must NOT match (rel4 uses a different predicate).
 @prefix ex: <http://example.org/> .
+@prefix eco: <https://w3id.org/sstim/ecosystem#> .
+
+ex:rel1 eco:relationshipTarget ex:targetA .
+ex:rel2 eco:relationshipTarget ex:targetB .
+ex:rel3 eco:relationshipTarget ex:targetC .
+ex:rel4 eco:someOtherProperty ex:targetA .

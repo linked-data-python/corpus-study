@@ -1,4 +1,10 @@
 # Input graph for TheWorldAvatar__mcp-tool-layer__src_ontospecies_extension_operations_ontospecies_extension.py__add_elemental_analysis_data_to_species — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# It must cover: several solutions of the pattern the region reads (two
+# existing os:Species), the zero-solution case (a species IRI absent from
+# this graph, queried by driver.py), and neighbouring triples that must NOT
+# match (a same-shaped subject typed os:Element, not os:Species).
+@prefix os: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
+
+<https://example.org/species/S1> a os:Species .
+<https://example.org/species/S2> a os:Species .
+<https://example.org/species/NotASpecies> a os:Element .

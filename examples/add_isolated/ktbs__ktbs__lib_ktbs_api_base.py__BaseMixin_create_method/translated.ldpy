@@ -2,10 +2,7 @@
 # region: BaseMixin.create_method (lines 202-251, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, RDF, URIRef
-from rdfrest.exceptions import InvalidDataError
-from rdfrest.util import coerce_to_node, coerce_to_uri, parent_uri
-from ..namespace import KTBS
-from ..utils import extend_api, SKOS
+from context import InvalidDataError, coerce_to_node, coerce_to_uri, parent_uri, KTBS, extend_api, SKOS
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
@@ -47,7 +44,8 @@ def create_method(self, id=None, parent=None, parameters=None, label=None,
             trust = False # could be built-in, let impl/server check
     if graph is None:
         graph = Graph()
-    graph += g{
+    @graph graph
+    +{
         {self.uri} {KTBS.contains} {node} .
         {node} a {KTBS.Method} ;
            {KTBS.hasParentMethod} {parent}
@@ -55,9 +53,9 @@ def create_method(self, id=None, parent=None, parameters=None, label=None,
     for key, value in parameters.items():
         if "=" in key:
             raise ValueError("Parameter name can not contain '=': %s", key)
-        graph += g{ {node} {KTBS.hasParameter} {Literal("%s=%s" % (key, value))} }
+        +{ {node} {KTBS.hasParameter} {Literal("%s=%s" % (key, value))} }
     if label:
-        graph += g{ {node} skos:prefLabel {Literal(label)} }
+        +{ {node} skos:prefLabel {Literal(label)} }
     uris = self.post_graph(graph, None, trust, node, KTBS.Method)
     assert len(uris) == 1
     return self.factory(uris[0], [KTBS.Method])

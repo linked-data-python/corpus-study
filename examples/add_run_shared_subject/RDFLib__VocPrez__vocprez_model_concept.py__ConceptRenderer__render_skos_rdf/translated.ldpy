@@ -21,8 +21,10 @@ def _render_skos_rdf(self):
     c = URIRef(self.concept.uri)
     g.bind("", "/".join(str(c).split("/")[:-1]) + "/")
 
+    @graph g
+
     # Concept SKOS metadata
-    g += g{
+    +{
         {c} a skos:Concept ;
            skos:prefLabel {Literal(self.concept.prefLabel, lang=config.DEFAULT_LANGUAGE)} ;
            skos:definition {Literal(self.concept.definition, lang=config.DEFAULT_LANGUAGE)} ;
@@ -33,17 +35,17 @@ def _render_skos_rdf(self):
         for k, v in self.concept.related_instances.items():
             for prop in v:
                 if str(prop.value).startswith("http"):
-                    g += g{ {c} {URIRef(prop.uri)} {URIRef(prop.value)} }
+                    +{ {c} {URIRef(prop.uri)} {URIRef(prop.value)} }
                 else:
-                    g += g{ {c} {URIRef(prop.uri)} {Literal(prop.value)} }
+                    +{ {c} {URIRef(prop.uri)} {Literal(prop.value)} }
 
     if self.concept.other_properties is not None:
         for v in self.concept.other_properties:
             for prop in v:
                 if str(prop.value).startswith("http"):
-                    g += g{ {c} {URIRef(prop.uri)} {URIRef(prop.value)} }
+                    +{ {c} {URIRef(prop.uri)} {URIRef(prop.value)} }
                 else:
-                    g += g{ {c} {URIRef(prop.uri)} {Literal(prop.value)} }
+                    +{ {c} {URIRef(prop.uri)} {Literal(prop.value)} }
 
     # serialise in the appropriate RDF format
     if self.mediatype in ["application/ld+json", "application/json"]:

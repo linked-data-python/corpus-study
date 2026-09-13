@@ -17,8 +17,7 @@ def ingest_to_weaviate(self, filename):
 
 
     problemCount = 0
-    for subj in graph.subjects(predicate=rdf:type, 
-                                object=self.eliozoNS.Problem):
+    for subj in m{ ?subj rdf:type {self.eliozoNS.Problem} }(graph):
 
         problemID = "NA"
         olympiadType = "NA"
@@ -26,7 +25,7 @@ def ingest_to_weaviate(self, filename):
         problemYear = 0
 
         try:
-            val = graph.value(subj, self.eliozoNS.problemID)
+            val = m{ {subj} {self.eliozoNS.problemID} ?v }(graph).first()
             problemID = str(val)
         except Exception as e:
             print(f"Error converting problemID={val} for {problemCount}; skipping insert")
@@ -37,22 +36,22 @@ def ingest_to_weaviate(self, filename):
 
 
         try:
-            val = graph.value(subj, self.eliozoNS.olympiadType)
+            val = m{ {subj} {self.eliozoNS.olympiadType} ?v }(graph).first()
             olympiadType = str(val)
         except Exception as e:
             print(f"Error converting olympiadType={val} for {problemCount}; skipping insert")
             continue
 
 
-        try: 
-            val = graph.value(subj, self.eliozoNS.problemGrade)
+        try:
+            val = m{ {subj} {self.eliozoNS.problemGrade} ?v }(graph).first()
             problemGrade = int(val)
         except Exception as e:
             print(f"Error converting problemGrade={val} for {problemCount}; skipping insert")
             continue
 
-        try: 
-            val = graph.value(subj, self.eliozoNS.problemYear)
+        try:
+            val = m{ {subj} {self.eliozoNS.problemYear} ?v }(graph).first()
             problemYear = int(val)
         except Exception as e:
             print(f"Error converting problemYear={val} for {problemCount}; skipping insert")
@@ -63,20 +62,20 @@ def ingest_to_weaviate(self, filename):
         # Initialize the data object with non-language properties
         data_object = {
             "problemID": problemID,
-            "problemGrade": problemGrade, 
-            "olympiadType": olympiadType, 
+            "problemGrade": problemGrade,
+            "olympiadType": olympiadType,
             "problemYear": problemYear
         }
         # print(f'data_object = {data_object}')
 
 
         for lang in ['lv']:
-            for obj in graph.objects(subj, self.eliozoNS.problemText):
+            for obj in m{ {subj} {self.eliozoNS.problemText} ?obj }(graph):
                 if obj.language == lang:
                     data_object[f"problemText_{lang}"] = str(obj)
 
-            for solution_obj in graph.objects(subj, self.eliozoNS.problemSolution): 
-                for solution_text in graph.objects(solution_obj, self.eliozoNS.solutionText):
+            for solution_obj in m{ {subj} {self.eliozoNS.problemSolution} ?solution_obj }(graph):
+                for solution_text in m{ {solution_obj} {self.eliozoNS.solutionText} ?solution_text }(graph):
                     if solution_text.language == lang:
                         if f"solutionText_{lang}" in data_object:
                             data_object[f"solutionText_{lang}"] = data_object[f"solutionText_{lang}"] + '\n\n' + str(solution_text)

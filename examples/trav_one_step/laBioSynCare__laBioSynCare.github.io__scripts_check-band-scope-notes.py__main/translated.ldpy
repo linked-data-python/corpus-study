@@ -1,11 +1,12 @@
 # Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/check-band-scope-notes.py
 # region: main (lines 76-174, stratum trav_one_step)
 # licence of the source repository: see meta.json
+import re
 import sys
-from rdflib import Graph, Namespace, RDF, URIRef
-from rdflib.namespace import SKOS
+from rdflib import Graph, URIRef
+from shim import module_paths, instance_paths
 @prefix sstim: <https://w3id.org/sstim#> .
-@prefix sstimv: <https://w3id.org/sstim/vocab#> .
+@prefix sstimv: <https://w3id.org/sstim/vocab#> as SSTIM_V .
 @prefix sstimex: <https://w3id.org/sstim/exposure#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -35,18 +36,19 @@ def main() -> int:
     failures: list[str] = []
 
     graph = Graph()
+    @graph graph
     for path in module_paths():
         graph.parse(path, format="turtle")
 
     # ── 1. No band asserts an outcome ────────────────────────────────────────
-    bands = [b for b in graph.subjects(rdf:type, sstim:FrequencyBand) if isinstance(b, URIRef)]
+    bands = [b for b in m{ ?b rdf:type sstim:FrequencyBand } if isinstance(b, URIRef)]
     if not bands:
         failures.append("no sstim:FrequencyBand concepts found — the lint would pass vacuously")
 
     checked = 0
     for band in bands:
         for predicate in (skos:scopeNote, skos:definition, skos:prefLabel, skos:altLabel):
-            for value in graph.objects(band, predicate):
+            for value in m{ {band} {predicate} ?o }:
                 checked += 1
                 hit = OUTCOME_WORDS.search(str(value))
                 if hit:
@@ -63,8 +65,8 @@ def main() -> int:
 
     for name, expected in MOVED_ASSOCIATIONS.items():
         oscillation = SSTIM_V[name]
-        assessed = set(graph.subjects(sstim:evaluatesSubject, oscillation))
-        statuses = set(graph.objects(oscillation, sstimex:hasKnowledgeStatusAssertion))
+        assessed = set(m{ ?s sstim:evaluatesSubject {oscillation} })
+        statuses = set(m{ {oscillation} sstimex:hasKnowledgeStatusAssertion ?o })
         found = len(assessed) + len(statuses)
         if found < expected:
             failures.append(
@@ -79,19 +81,19 @@ def main() -> int:
     # that any band's interval runs the right way — both are the kind of error a
     # single mistyped digit makes and no reader notices.
     oscillations = 0
-    for oscillation in sorted(graph.subjects(rdf:type, sstim:NeuralOscillationType), key=str):
+    for oscillation in sorted(m{ ?o rdf:type sstim:NeuralOscillationType }, key=str):
         name = str(oscillation).split("#")[-1]
-        band = next(graph.objects(oscillation, sstim:hasTypicalFrequencyBand), None)
-        low = next(graph.objects(oscillation, sstim:extendedHzMin), None)
-        high = next(graph.objects(oscillation, sstim:extendedHzMax), None)
+        band = m{ {oscillation} sstim:hasTypicalFrequencyBand ?o }.first()
+        low = m{ {oscillation} sstim:extendedHzMin ?o }.first()
+        high = m{ {oscillation} sstim:extendedHzMax ?o }.first()
         if band is None or low is None or high is None:
             failures.append(f"{name}: missing a typical band or an extended range")
             continue
         oscillations += 1
         if float(low) >= float(high):
             failures.append(f"{name}: extendedHzMin {low} is not below extendedHzMax {high}")
-        band_low = next(graph.objects(band, sstim:hzMin), None)
-        band_high = next(graph.objects(band, sstim:hzMax), None)
+        band_low = m{ {band} sstim:hzMin ?o }.first()
+        band_high = m{ {band} sstim:hzMax ?o }.first()
         if band_low is None or band_high is None:
             failures.append(f"{name}: typical band {str(band).split('#')[-1]} states no Hz interval")
         elif float(low) > float(band_low) or float(high) < float(band_high):
@@ -103,8 +105,8 @@ def main() -> int:
 
     bands_with_interval = 0
     for band in bands:
-        low = next(graph.objects(band, sstim:hzMin), None)
-        high = next(graph.objects(band, sstim:hzMax), None)
+        low = m{ {band} sstim:hzMin ?o }.first()
+        high = m{ {band} sstim:hzMax ?o }.first()
         if low is None or high is None:
             failures.append(f"{str(band).split('#')[-1]}: states no hzMin/hzMax interval")
         else:

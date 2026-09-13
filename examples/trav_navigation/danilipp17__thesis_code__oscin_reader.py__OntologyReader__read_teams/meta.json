@@ -12,11 +12,18 @@
   "categories": {
     "namespace_term": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "@graph",
+    "m{ }"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd, AGENTO->agento, AGENTOSCIN->agentoscin"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd, AGENTO->agento, AGENTOSCIN->agentoscin",
+    "self.g.objects(team_uri, agentoscin:hasTerminationCondition) and the nested self.g.objects(term_uri, agentoscin:hasSubCondition) each become their own single-motif m{ }: the outer loop's body dispatches on the term's type (an elif chain over four disjoint classes), which is exactly the case prior batches flagged -- joining a type triple into the same m{ } as the traversal would require ALL branches' types at once, so each `(x, RDF.type, C) in self.g` stays a separate bool(m{ {x} a C }).",
+    "context shim (oscin_context.py) reconstructs OntologyReader._int_value/_str_value verbatim from the upstream source at the pinned commit; the fixture graph (built inline in original.py/translated.ldpy, identically) exercises all four termination-condition branches plus the nested Composite sub-conditions."
   ],
   "draft_sha": "57951052b958fec8",
   "provenance": {
@@ -28,5 +35,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -11,7 +11,9 @@ from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
+from shim import HERE
 g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_6_0.ttl")
 ONT = <http://example.org/semtech/page>
 
-g += g{ {ONT} rdfs:label "Semantic technology landscape interactive page ABox v4.0.0"@en }
+@graph g
++{ {ONT} rdfs:label "Semantic technology landscape interactive page ABox v4.0.0"@en }

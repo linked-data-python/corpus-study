@@ -10,7 +10,7 @@ from rdflib.namespace import OWL, RDF, RDFS
 
 def _label_for(g: RdfGraph, subject, uri_str: str) -> str:  # type: ignore[type-arg]
     """Return rdfs:label if present, otherwise the local name from the URI."""
-    val = g.value(subject, rdfs:label)
+    val = m{ {subject} rdfs:label ?o }(g).first()
     if val:
         return str(val)
     fragment = uri_str.rsplit("#", 1)[-1].rsplit("/", 1)[-1]

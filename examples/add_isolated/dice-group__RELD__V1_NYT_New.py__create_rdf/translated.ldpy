@@ -5,7 +5,7 @@ from rdflib.namespace import DC, DCTERMS, DOAP, FOAF, SKOS, OWL, RDF, RDFS, VOID
 from rdflib import Graph, URIRef, Literal, Namespace # here is some error
 from  validate import containsNumber , returnValue, check_type, remove_alphaNumeric, is_date, clean_sentences ,wikidata_id_toText
 @prefix prop: <https://reld.dice-research.org/schema/> .
-@prefix res: <https://reld.dice-research.org/resource/> .
+@prefix res: <https://reld.dice-research.org/resource/> as RES .
 @prefix dbo: <http://dbpedia.org/ontology/> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -19,57 +19,77 @@ from  validate import containsNumber , returnValue, check_type, remove_alphaNume
 @prefix xmlns: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-subject_dict = {}
-object_dict = {}
+# Fixture context restoring the bindings the extracted region reads
+# (relation, dsName, sent_counter, ne_counter, info, subject_dict,
+# object_dict): the original function received/derived them from the
+# enclosing script, which the extraction does not carry.
+relation = "http://ex.org/relation1"
+dsName = "ds"
+sent_counter = 0
+ne_counter = 0
+info = [
+    ("subjA", "objA", [
+        ("A sentence about entities.", {
+            "listOfNamedEntities": [("Entity One", "Person"), ("Entity Two!", "Organization")],
+            "score": 5,
+        }),
+    ], 2, "distA"),
+    ("123", "456", [
+        ("Another sentence with numbers.", {"listOfNamedEntities": [], "score": 7}),
+    ], 1, "distB"),
+]
+subject_dict = {"Some Subject": "subjA", "NumKey": "123"}
+object_dict = {"Some Object": "objA", "ObjNum": "456"}
 g = Graph()
+@graph g
 
 for index, val in enumerate(info): # Code for Sentence and relevant info
 
-    g += g{ {URIRef(relation)} {URIRef(prop+'distribution')} {Literal(val[4],datatype=XSD.string)} }
+    +{ {URIRef(relation)} prop:distribution {Literal(val[4],datatype=XSD.string)} }
 
     for ind, v in enumerate(val[2]):
-        sent_id = res+"S_"+dsName+"_"+ str(sent_counter) # will go to all code
+        sent_id = RES+"S_"+dsName+"_"+ str(sent_counter) # will go to all code
         sent_counter = sent_counter + 1
-        g += g{
-            {URIRef(relation)} {URIRef(prop+'hasSentence')} {URIRef(sent_id)} .
-            {URIRef(sent_id)} {URIRef(prop+'hasText')} {Literal(v[0],lang='en')}
+        +{
+            {URIRef(relation)} prop:hasSentence {URIRef(sent_id)} .
+            {URIRef(sent_id)} prop:hasText {Literal(v[0],lang='en')}
         }
         for key , value in v[1].items(): # code for named entities
             if key == "listOfNamedEntities":
                 for nam_e in value:
-                    ne_id = res+'ne_n' + str(ne_counter)
+                    ne_id = RES+'ne_n' + str(ne_counter)
                     #ne_id = res+ str(nam_e[0]).strip().replace(' ','_')+str(ne_counter)
                     ne_counter = ne_counter + 1
-                    g += g{
-                        {URIRef(sent_id)} {URIRef(prop+'hasNamedEntity')} {URIRef(ne_id)} .
-                        {URIRef(ne_id)} a {URIRef(dbo+remove_alphaNumeric(nam_e[1]))} ;
+                    +{
+                        {URIRef(sent_id)} prop:hasNamedEntity {URIRef(ne_id)} .
+                        {URIRef(ne_id)} a dbo:{remove_alphaNumeric(nam_e[1])} ;
                            rdfs:label {Literal(nam_e[0],lang='en')}
                     }
             else:
-                g += g{ {URIRef(sent_id)} {URIRef(prop+key)} {Literal(value,datatype=XSD.integer)} }
+                +{ {URIRef(sent_id)} prop:{key} {Literal(value,datatype=XSD.integer)} }
     ################ Subject Object Code ##################
-    g += g{ {URIRef(sent_id)} {URIRef(prop+'numOfRelation')} {Literal(val[3],datatype=XSD.integer)} }
+    +{ {URIRef(sent_id)} prop:numOfRelation {Literal(val[3],datatype=XSD.integer)} }
     subject_string = returnValue(subject_dict,val[0])
-    sub_id = res+'sub_'+dsName+str(val[0])
-    g += g{ {URIRef(sent_id)} {URIRef(prop+'hasSubject')} {URIRef(sub_id)} }
+    sub_id = RES+'sub_'+dsName+str(val[0])
+    +{ {URIRef(sent_id)} prop:hasSubject {URIRef(sub_id)} }
     if containsNumber(str(subject_string)):
-        g += g{ {URIRef(sub_id)} rdfs:label {Literal(subject_string,datatype=XSD.string)} }
+        +{ {URIRef(sub_id)} rdfs:label {Literal(subject_string,datatype=XSD.string)} }
 
 
     elif check_type(str(subject_string)):
-        g += g{ {URIRef(sub_id)} rdfs:label {Literal(subject_string,datatype=XSD.string)} }
+        +{ {URIRef(sub_id)} rdfs:label {Literal(subject_string,datatype=XSD.string)} }
 
     else:
-        g += g{ {URIRef(sub_id)} rdfs:label {Literal(remove_alphaNumeric(subject_string),datatype=XSD.string)} }
+        +{ {URIRef(sub_id)} rdfs:label {Literal(remove_alphaNumeric(subject_string),datatype=XSD.string)} }
 
 
-    object_string = returnValue(object_dict,val[1])#remove_alphaNumeric(val[1]) 
-    obj_id = res + 'obj_'+dsName+str(val[1])
-    g += g{ {URIRef(sent_id)} {URIRef(prop+'hasObject')} {URIRef(obj_id)} }
+    object_string = returnValue(object_dict,val[1])#remove_alphaNumeric(val[1])
+    obj_id = RES + 'obj_'+dsName+str(val[1])
+    +{ {URIRef(sent_id)} prop:hasObject {URIRef(obj_id)} }
     if containsNumber(str(object_string)):
-        g += g{ {URIRef(obj_id)} rdfs:label {Literal(object_string,datatype=XSD.string)} }
+        +{ {URIRef(obj_id)} rdfs:label {Literal(object_string,datatype=XSD.string)} }
 
     elif check_type(str(object_string)):
-        g += g{ {URIRef(obj_id)} rdfs:label {Literal(object_string,datatype=XSD.string)} }
+        +{ {URIRef(obj_id)} rdfs:label {Literal(object_string,datatype=XSD.string)} }
     else:
-        g += g{ {URIRef(obj_id)} rdfs:label {Literal(remove_alphaNumeric(object_string),datatype=XSD.string)} }
+        +{ {URIRef(obj_id)} rdfs:label {Literal(remove_alphaNumeric(object_string),datatype=XSD.string)} }

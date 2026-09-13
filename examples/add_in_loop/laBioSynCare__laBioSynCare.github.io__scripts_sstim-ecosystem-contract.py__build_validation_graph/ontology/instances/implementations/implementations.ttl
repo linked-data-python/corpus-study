@@ -1,0 +1,15 @@
+@prefix ex: <http://example.org/> .
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+ex:targetA a sstim:SensoryStimulationImplementation ;
+    rdfs:label "Target A" ;
+    dcterms:description "Implementation A" ;
+    sstim:implementsFramework ex:frameworkX .
+
+ex:targetB a ex:SomeOtherKind ;
+    rdfs:label "Target B not in profile" .
+
+ex:targetC a sstim:SensoryStimulationImplementation, ex:OtherType ;
+    rdfs:label "Target C" .

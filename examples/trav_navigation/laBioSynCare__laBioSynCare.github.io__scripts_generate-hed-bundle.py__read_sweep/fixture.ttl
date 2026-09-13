@@ -1,4 +1,29 @@
 # Input graph for laBioSynCare__laBioSynCare.github.io__scripts_generate-hed-bundle.py__read_sweep — written during translation.
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
+@prefix sstim: <https://w3id.org/sstim#> .
 @prefix ex: <http://example.org/> .
+
+# Qualifying: a genuine sweep (mp0 != mp1), all three predicates present.
+# Kept as the only qualifying track so the return value does not depend on
+# the (unordered) iteration order of subjects/objects.
+ex:trackSweep
+    sstim:martigliPeriodInitial 1.0 ;
+    sstim:martigliPeriodFinal 2.0 ;
+    sstim:martigliTransitionDuration 0.5 .
+
+# Neighbour that must NOT be returned: declared but flat (mp0 == mp1).
+ex:trackFlat
+    sstim:martigliPeriodInitial 3.0 ;
+    sstim:martigliPeriodFinal 3.0 ;
+    sstim:martigliTransitionDuration 0.5 .
+
+# Neighbour that must NOT be returned: incomplete (missing the duration),
+# i.e. the join has a zero-solution for this subject.
+ex:trackIncomplete
+    sstim:martigliPeriodInitial 4.0 ;
+    sstim:martigliPeriodFinal 5.0 .
+
+# Neighbour that must NOT match at all: unrelated predicate, same subject shape.
+ex:trackUnrelated
+    sstim:reactionTimeMs 42.0 .

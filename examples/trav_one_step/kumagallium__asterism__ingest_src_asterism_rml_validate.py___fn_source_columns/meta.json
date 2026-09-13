@@ -10,10 +10,18 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "f<...>",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Each graph.objects(subject, uri(pred)) with a fixed predicate string built by string concatenation becomes m{ {subject} f<{pred}> ?o }: the predicate is already a full IRI string, so f<...> (no percent-encoding) is the exact fit, not the bare {expr} coercion which would make it a Literal.",
+    "A shim.py supplies _RMLF/_FNML_OLD, missing from the extracted region's context (defined earlier in the source module)."
+  ],
   "draft_sha": "d18abecc89b92d7c",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.188579+00:00",
@@ -25,5 +33,11 @@
     "trav_one_step",
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_fn_source_columns",
+    "diffs": [],
+    "error": null
+  }
 }

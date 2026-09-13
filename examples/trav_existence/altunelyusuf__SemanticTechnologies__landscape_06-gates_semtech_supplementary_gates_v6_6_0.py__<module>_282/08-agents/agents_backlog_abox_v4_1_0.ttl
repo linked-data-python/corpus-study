@@ -1,0 +1,14 @@
+@prefix b2: <http://example.org/backlog#> .
+
+b2:F1 a b2:Feature ;
+    b2:hasState b2:Done ;
+    b2:hasEvidence b2:Ev1 .
+
+b2:F2 a b2:Feature ;
+    b2:hasState b2:Done .
+
+b2:F3 a b2:Feature ;
+    b2:hasState b2:InProgress ;
+    b2:hasEvidence b2:Ev3 .
+
+b2:F4 a b2:Feature .

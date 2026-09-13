@@ -13,11 +13,19 @@
     "graph_read": 3,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: OWL->owl, RDFS->rdfs (RDF and XSD are imported but never referenced in the region body).",
+    "the nested `for r in g.objects(c, RDFS.subClassOf): if prop in g.objects(r, OWL.onProperty): if filler in g.objects(r, pred): return True` is a single existential over a 3-triple join -- it returns True as soon as ONE r satisfies all three conditions together, which is exactly what a single joined m{ } plus bool() expresses: `bool(m{ {c} rdfs:subClassOf ?r . ?r owl:onProperty {prop} . ?r {pred} {filler} }(g))`. `pred` is itself a parameter (a URIRef) used in PREDICATE position via interpolation -- no special-casing needed, term interpolation is position-agnostic.",
+    "fixture.ttl covers: C1 with two restrictions on subClassOf (several solutions of the head pattern, collapsing correctly to one bool()), a PlainSuperclass neighbour that IS a subClassOf of C1 but carries no owl:onProperty at all (must not satisfy the join even though the first triple matches), and C2 whose one restriction has the right property but the wrong filler (false/zero-solution case). Verified directly against original.py: True/False/False for the three driver cases."
   ],
   "draft_sha": "f773b9ba42981807",
   "provenance": {
@@ -29,5 +37,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_contains_restriction",
+    "diffs": [],
+    "error": null
+  }
 }

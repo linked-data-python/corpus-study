@@ -1,4 +1,49 @@
-# Input graph for dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_parseRML — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for dtai-kg__SCOOP__SCOOP_shape_adjustment_single.py__ShapeAdjustment_parseRML
+#
+# Two rr:TriplesMap subjects (several solutions of the `subjects(RDF.type,
+# TRIPLES_MAP_CLASS)` pattern): tm1 has a logical source (getSource finds a
+# value) and two predicate-object maps (one ordinary property, one whose
+# predicate is rdf:type -- the branch that extends the subject map's
+# classes instead of appending to pom_list); tm2 has NO rml:logicalSource,
+# the zero-solution case for `g.value(tm2, LOGICAL_SOURCE)` / `.first()`,
+# and no predicate-object maps at all.
+#
+# ex:notATriplesMap is neighbouring data that must NOT match: it carries a
+# logicalSource-shaped triple but is not typed rr:TriplesMap, so it must
+# never enter the `subjects(RDF.type, TRIPLES_MAP_CLASS)` loop; ex:decoyPom
+# is a predicateObjectMap-shaped resource attached to nothing, so it must
+# never be reached by `objects(triples_map_identifier, POM)`.
 @prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+
+ex:tm1 a rr:TriplesMap ;
+    rml:logicalSource ex:src1 ;
+    rr:subjectMap ex:sm1 ;
+    rr:predicateObjectMap ex:pom1, ex:pom2 .
+
+ex:src1 rml:source "data1.csv" ;
+    rml:referenceFormulation ql:CSV .
+
+ex:sm1 rr:template "http://example.org/{id}" ;
+    rr:class ex:ClassA .
+
+ex:pom1 rr:predicate ex:prop1 ;
+    rr:object "val1" .
+
+ex:pom2 rr:predicate rdf:type ;
+    rr:object ex:ClassB .
+
+ex:tm2 a rr:TriplesMap ;
+    rr:subjectMap ex:sm2 .
+
+ex:sm2 rr:template "http://example.org/{name}" ;
+    rr:class ex:ClassC .
+
+ex:notATriplesMap a ex:SomeOtherClass ;
+    rml:logicalSource ex:decoySrc .
+
+ex:decoyPom rr:predicate ex:decoyProp ;
+    rr:object "decoy" .

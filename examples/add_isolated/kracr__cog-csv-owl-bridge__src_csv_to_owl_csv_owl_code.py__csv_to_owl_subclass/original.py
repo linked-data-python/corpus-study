@@ -5,8 +5,7 @@ import pandas as pd
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, RDFS, OWL, XSD
 from rdflib import Graph, Namespace
-from rdflib import Graph, Namespace
-from rdflib import URIRef, RDF, RDFS, Namespace
+from helpers import load_prefixes, _bind_prefixes_to_graph, resolve_uri, ensure_declaration, reconstruct_intersection
 
 def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="subclass.owl"):
     g = Graph()

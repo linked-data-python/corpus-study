@@ -10,10 +10,17 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "s{ }",
+    "IRI",
+    "call suffix (g)",
+    ".execute()"
+  ],
+  "translation_notes": [
+    "The original builds its query text by splicing already-bracketed IRI syntax (EX_A = \"<http://example/a>\") straight into an f-string, not by interpolating a data value in term position. s{ }'s {expr} holes are never textual substitution: interpolating {EX_A} would coerce the Python string \"<http://example/a>\" into a Literal via initBindings, not the URIRef the bracket syntax denotes -- silently wrong for a query built to test ground-pattern matching. Since the three IRIs are compile-time constants here, not data, the faithful translation writes them directly as terms in the island, losing the EX_A/EX_B/EX_NOPE indirection the original used purely to avoid retyping the fragment across five sibling tests in the same file. What is missing: a way to splice already-formed island syntax (an IRI, a whole triple pattern) from a Python-level constant into s{ }, short of writing it out again at each use site."
+  ],
   "draft_sha": "03ba676ef89a488d",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.995090+00:00",
@@ -24,5 +31,11 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_nonmatching_fact_yields_zero_rows",
+    "diffs": [],
+    "error": null
+  }
 }

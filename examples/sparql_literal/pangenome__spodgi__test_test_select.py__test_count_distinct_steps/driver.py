@@ -10,10 +10,14 @@ that must NOT match.
 """
 from rdfeval.harness import run_pair
 
+# The region opens a real pangenome graph through the native `spodgi.OdgiStore`
+# rdflib store plugin (a C++ extension backed by a binary `.odgi` file). That
+# plugin is not installed and its binary fixture cannot be reproduced here —
+# see translation_notes in meta.json (classification: excluded). `calls`
+# below is only what the entry point's signature needs to be invoked at all;
+# it never gets far enough to matter.
 VERDICT = run_pair(
     __file__,
     entry='test_count_distinct_steps',
-    fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    calls=[lambda: ((), {})],
 )

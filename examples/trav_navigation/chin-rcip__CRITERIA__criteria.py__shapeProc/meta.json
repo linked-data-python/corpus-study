@@ -15,11 +15,21 @@
     "namespace_term": 9,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDFS->rdfs, RDF->rdf, XSD->xsd, SKOS->skos, SH->sh"
+    "prefixes: RDFS->rdfs, RDF->rdf, XSD->xsd, SKOS->skos, SH->sh",
+    "This is the trap the previous trav_navigation batch flagged: propShape is a real subject shared by sh:path/sh:name/sh:description/sh:defaultValue, but each read is independently-optional and the original relies on a bare `for` loop leaving its variable untouched (last value, or the previous propShape's leftover) when the predicate is absent. Fusing the four into one conjunctive m{ } would silently drop any propShape missing one predicate (defaultValue is optional in the fixture) instead of reproducing that leftover-value quirk, so each stayed a separate trav_one_step m{ }",
+    "(s, RDF.type, SH.NodeShape) in shape became bool(m{ {s} rdf:type sh:NodeShape }(shape)) (trav_existence), not a graph-membership Python idiom",
+    "the outer shape.triples((None, SKOS.example, None)) unpacked (s, p, o) but never used p (always SKOS.example, a fixed predicate); translated as m{ ?s skos:example ?o } and dropped the unused binding rather than inventing a variable for a predicate that is not data-dependent",
+    "shapeProc mutates module-level nodeLabels/nodeLink and returns None, with dataGraph only read: entry=/fixture= would see nothing, so driver.py instead has both sides call shapeProc against fixture.ttl (dataGraph) and a second file shape.ttl (the shape graph shapeProc parses itself from a path) and print the resulting dicts for module-state stdout comparison",
+    "shape.namespace_manager is untouched by the ldpy @prefix declarations (those bind lexical prefixes for the island source, not the parsed shape graph's namespace manager), so .n3() output is identical on both sides"
   ],
   "draft_sha": "73ef70ce4f868b44",
   "provenance": {
@@ -31,5 +41,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

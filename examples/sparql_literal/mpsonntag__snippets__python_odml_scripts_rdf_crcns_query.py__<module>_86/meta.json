@@ -10,10 +10,19 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "Each prepareQuery(text, initNs=NAMESPACE_MAP) becomes s{ text }: NAMESPACE_MAP's odml:/rdf: bindings move to two module-level @prefix declarations, so the prologue is built once instead of passed to every call.",
+    "curr_graph.query(q) becomes q(curr_graph): the s{ } value is already the lazy prepared query prepareQuery used to build, so the call suffix replaces .query() directly.",
+    "The context reassigns q six times before the scored for-loop uses it; all six are translated (not just the last) since each is itself a sparql_literal occurrence, dead code or not -- translating only the used one would silently drop five instances of the construction under study.",
+    "Weak oracle: the extracted context builds curr_graph = Graph() but drops the original file's curr_graph.parse(FILE_PATH) call (out of the region's context lines), so the graph is empty on both sides and the loop body never runs. The check is still meaningful -- it proves s{ } parses at transpile time and that q(curr_graph) executes without error and yields the same (empty) result as curr_graph.query(q) -- but it does not exercise the FILTER/property-path/subquery machinery inside the query text against real data."
+  ],
   "draft_sha": "6d11bc5f87b22825",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.841318+00:00",
@@ -24,5 +33,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

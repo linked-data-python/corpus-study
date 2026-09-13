@@ -13,11 +13,26 @@
     "graph_read": 4,
     "namespace_term": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, OWL->owl"
+    "only `rdf:` was actually needed once written: the draft note's rdfs/xsd/owl prefixes are never used as prefixed names in this function's body (RDF.type is the sole namespace term read), so only @prefix rdf: was kept.",
+    "parseRML is a bare method (self.rml_graph, self.TRIPLES_MAP_CLASS, self.LOGICAL_SOURCE, self.SUBJECT_MAP, self.POM, plus the sibling methods getSource/getSubjectMap/getPredicate/getObjectMap) -- none in the extracted context (lines 50-85). Restored via scoop_context.ShapeAdjustmentStub, copying the RML vocabulary constants from __init__ and the four sibling methods (plus getFunctionValue/parseTemplate_csv/parseReference_csv that they call) VERBATIM from the pinned commit, so the fixture exercises the real logic rather than an invented approximation -- same shape as the sibling ShapeAdjustment_adjust_pom region already done in this repository.",
+    "self.rml_graph.subjects(RDF.type, self.TRIPLES_MAP_CLASS) -> m{ ?triples_map_identifier rdf:type {self.TRIPLES_MAP_CLASS} }, single variable projected so iterating yields the bare term, same cardinality as .subjects().",
+    "self.rml_graph.value(triples_map_identifier, self.LOGICAL_SOURCE) and .value(triples_map_identifier, self.SUBJECT_MAP) -> m{ {triples_map_identifier} {predicate} ?o }.first(): both g.value() calls here have no explicit default= argument, so rdflib's own default (None on zero solutions) coincides with .first()'s -- no degraded g.value kept, unlike the batch's earlier note about g.value(..., default=...).",
+    "self.rml_graph.objects(triples_map_identifier, self.POM) -> m{ {triples_map_identifier} {self.POM} ?o }, same one-variable-projected shape as the subjects() island above.",
+    "pom_property == RDF.type -> pom_property == rdf:type: a bare prefixed name in term-equality position, the same standalone-prefixed-name idiom already final in other strata's regions of this repository (e.g. trav_existence/ScaDS__KGpipe, remove/dtai-kg__SCOOP__..._RML.py).",
+    "@graph self.rml_graph is declared once, right after `self.rml_graph = rml_graph`, and never reassigned afterwards in this region, so per INSTRUCTIONS.md SS2bis one declaration is safe for all three m{ } sites.",
+    "driver.py hand-rolls the call (findNode's precedent in the `remove` stratum, same class/repository): parseRML takes (self, rml_graph) -- two positional arguments -- and mutates self.rml_parsed rather than returning anything, so run_pair's built-in entry=/fixture= (single positional arg) does not fit. A fresh ShapeAdjustmentStub is built per side, parseRML is called directly, and self.rml_parsed is compared by value.",
+    "fixture.ttl uses only URIRefs for triples-map/subject-map/pom identifiers (no blank nodes) so dict keys of self.rml_parsed compare equal across the two independently-parsed fixture graphs without BNode-identifier normalisation.",
+    "fixture covers: two rr:TriplesMap subjects (tm1 with a logical source and two predicate-object maps -- one ordinary, one whose predicate is rdf:type, exercising the classes-extension branch instead of pom_list; tm2 with no rml:logicalSource at all, the zero-solution case for the first .first()) and neighbouring data that must not match (ex:notATriplesMap, untyped as rr:TriplesMap; ex:decoyPom, unattached to any triples map)."
   ],
   "draft_sha": "8b55d7529f3d40e5",
   "provenance": {
@@ -29,5 +44,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:parseRML (hand-rolled: self.rml_parsed compared by value, self has no useful __eq__)",
+    "diffs": [],
+    "error": null
+  }
 }

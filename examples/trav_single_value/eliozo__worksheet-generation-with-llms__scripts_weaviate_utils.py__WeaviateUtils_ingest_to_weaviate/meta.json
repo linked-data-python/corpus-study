@@ -15,11 +15,22 @@
     "namespace_term": 1,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "prefixes: RDF->rdf",
+    "graph.subjects(predicate=rdf:type, object=self.eliozoNS.Problem) becomes m{ ?subj rdf:type {self.eliozoNS.Problem} }(graph) -- trav_one_step in reverse (subject unbound), directly expressible the same way.",
+    "the four graph.value(subj, self.eliozoNS.X) reads become m{ {subj} {self.eliozoNS.X} ?v }(graph).first(), one island per property -- not joined, since the original reads each independently (each wrapped in its own try/except with its own `continue`), and a join would change which properties get read once problemGrade or problemYear is missing.",
+    "the region's own return value is a fixed status tuple, so the oracle in driver.py compares the properties dict recorded through a fake Weaviate client's insert() call (context_shim.py's _Self.__eq__) rather than the return value or a graph -- otherwise this would be a hollow green.",
+    "context_shim.py's eliozoNS IRI (http://www.dudajevagatve.lv/eliozo#) is the real one from the pinned commit."
   ],
   "draft_sha": "15e8a687f74d6fe2",
   "provenance": {
@@ -31,5 +42,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:ingest_to_weaviate",
+    "diffs": [],
+    "error": null
+  }
 }

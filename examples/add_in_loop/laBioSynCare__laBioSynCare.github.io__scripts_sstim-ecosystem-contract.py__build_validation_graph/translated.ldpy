@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV, XSD
+from shim import ROOT, MANIFEST_MODULES, FULL_PROFILE, ONTOLOGY_DIR, parse_graph
 @prefix sstim: <https://w3id.org/sstim#> .
 @prefix eco: <https://w3id.org/sstim/ecosystem#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -35,8 +36,9 @@ def build_validation_graph(artifact: Graph) -> Graph:
     the artifact under test.
     """
     merged = parse_graph(list(CONTEXT_FILES))
-    for triple in artifact:
-        merged.add(triple)
+    @graph merged
+    for s, p, o in artifact:
+        +{ {s} {p} {o} }
 
     catalog = parse_graph([IMPLEMENTATION_CATALOG])
     profile_predicates = {
@@ -50,5 +52,5 @@ def build_validation_graph(artifact: Graph) -> Graph:
             continue
         for predicate in profile_predicates:
             for obj in catalog.objects(target, predicate):
-                merged += g{ {target} {predicate} {obj} }
+                +{ {target} {predicate} {obj} }
     return merged

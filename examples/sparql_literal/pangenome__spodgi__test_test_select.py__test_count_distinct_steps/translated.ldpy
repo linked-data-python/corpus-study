@@ -5,13 +5,14 @@ from rdflib.store import Store
 from rdflib import Graph
 from rdflib import plugin
 
+@prefix vg: <http://biohackathon.org/resource/vg#> .
+
 def test_count_distinct_steps():
     plugin.register('OdgiStore', Store, 'spodgi.OdgiStore', 'OdgiStore')
     s = plugin.get('OdgiStore', Store)(base="http://example.org/test/")
     spodgi = Graph(store=s)
     spodgi.open('./test/t.odgi', create=False)
-    for r in spodgi.query('''PREFIX vg:<http://biohackathon.org/resource/vg#>
-    SELECT (count(distinct ?s) as ?count) WHERE {?s a vg:Step}'''):
+    for r in s{ SELECT (count(distinct ?s) as ?count) WHERE {?s a vg:Step} }(spodgi):
         assert r[0].value == 10
 
     spodgi.close()

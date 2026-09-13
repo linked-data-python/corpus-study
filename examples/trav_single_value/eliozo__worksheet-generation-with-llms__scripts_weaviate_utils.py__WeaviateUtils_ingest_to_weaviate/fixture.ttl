@@ -1,4 +1,33 @@
-# Input graph for eliozo__worksheet-generation-with-llms__scripts_weaviate_utils.py__WeaviateUtils_ingest_to_weaviate — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# eliozo__worksheet-generation-with-llms__scripts_weaviate_utils.py__WeaviateUtils_ingest_to_weaviate
+# Covers: several eliozo:Problem subjects (some complete, one missing
+# problemGrade -- the zero-solution case for one of the four .value()
+# reads, which the original's int(None) turns into a caught exception and
+# a `continue`), a language-tagged problemText/solutionText pair, and
+# neighbouring triples (a subject of a different rdf:type, and a Problem
+# with no eliozoNS properties at all) that must not be picked up.
+@prefix eliozo: <http://www.dudajevagatve.lv/eliozo#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+eliozo:problem1 a eliozo:Problem ;
+    eliozo:problemID "P001" ;
+    eliozo:olympiadType "math" ;
+    eliozo:problemGrade "9" ;
+    eliozo:problemYear "2024" ;
+    eliozo:problemText "Solve for x"@lv ;
+    eliozo:problemText "Some other language"@en ;
+    eliozo:problemSolution eliozo:solution1 .
+
+eliozo:solution1 eliozo:solutionText "x = 1"@lv .
+
+eliozo:problem2 a eliozo:Problem ;
+    eliozo:problemID "P002" ;
+    eliozo:olympiadType "physics" ;
+    eliozo:problemYear "2023" ;
+    eliozo:problemText "Compute the force"@lv .
+# problem2 deliberately has no eliozo:problemGrade -- int(None) raises,
+# original.py "continue"s before reaching the language-tagged properties.
+
+# Neighbourhood that must NOT match.
+eliozo:notAProblem a eliozo:OtherType ;
+    eliozo:problemID "should-not-appear" .

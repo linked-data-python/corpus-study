@@ -7,7 +7,7 @@ from rdflib import Graph, Literal, RDF
 
 def filter_graph_by_subjects(graph: Graph, subjects: set):
     new_graph = Graph()
+    @graph new_graph
     for s, p, o in graph:
-        if str(s) in subjects:
-            new_graph += g{ {s} {p} {o} }
+        if str(s) in subjects: +{ {s} {p} {o} }
     return new_graph

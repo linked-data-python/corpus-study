@@ -1,7 +1,38 @@
 # Extracted from tetherless-world/materialsmine@0be55da099 : tests/ingest_tester.py
 # region: autoparse (lines 232-233, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+#
+# The extracted line reads `expected_data` and `root`, both bound elsewhere
+# in the enclosing test method (an XML ElementTree root the test parses from
+# a fixture file, and a dict it accumulates expectations into). Restoring the
+# binding here (AGENT_BATCH.md, kind:statement note) means building a small
+# ElementTree in their place.
+#
+# `root.iter(".//Viscoelastic//MeasurementMode")` is the ORIGINAL call,
+# unchanged: ElementTree's `.iter()` matches an exact tag, not an XPath, so
+# this only matches an element whose tag literally IS that string -- a bug
+# in the source repository we do not fix (AGENT_BATCH.md: "no
+# refactoring"). To exercise the coercion_datatype site at all (several
+# matches, a non-matching neighbour), the fixture tree is built with
+# `ET.Element(...)` rather than parsed from XML text, so an element's `.tag`
+# can hold that literal string -- real XML syntax forbids "/" in a tag name,
+# but the in-memory tree has no such restriction.
+import xml.etree.ElementTree as ET
+
 import rdflib
+
+_MATCH_TAG = ".//Viscoelastic//MeasurementMode"
+
+root = ET.Element("Root")
+for text in ("Tension", "Shear"):
+    match = ET.Element(_MATCH_TAG)
+    match.text = text
+    root.append(match)
+neighbour = ET.Element("MeasurementMode")  # real tag name: does not match
+neighbour.text = "Ignored"
+root.append(neighbour)
+
+expected_data = {}
 
 expected_data["viscoelastic_measurement_mode"] = [rdflib.Literal(elem.text)
                                 for elem in root.iter(".//Viscoelastic//MeasurementMode")]

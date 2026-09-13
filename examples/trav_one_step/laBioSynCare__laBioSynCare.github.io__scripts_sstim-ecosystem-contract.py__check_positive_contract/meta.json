@@ -12,11 +12,25 @@
   "categories": {
     "namespace_term": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "IRI",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: ECO->eco, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl, PROV->prov, XSD->xsd"
+    "prefixes: ECO->eco, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl, PROV->prov, XSD->xsd",
+    "set(fixture.subjects(ECO.hasEngagementActivity, event)) -> set(m{ ?a eco:hasEngagementActivity {event} }); fixture.objects(event, PROV.wasInformedBy) in the nested for-loop -> m{ {event} prov:wasInformedBy ?predecessor }. Both are exactly the trav_one_step idiom.",
+    "(event, RDF.type, ECO.ConsentDecisionActivity) in fixture and (actor, RDF.type, PROV.Agent) in merged are the trav_existence idiom on this same region (both strata are declared): bool(m{ {s} p o }), the second with a call suffix (merged) since the current graph is fixture.",
+    "values(fixture, ...) calls are left untouched: `values` is the module's own helper (not an rdflib method visible at this call site), and translating a call to an opaque helper would be inventing logic the region does not show, not a translation of an rdflib idiom -- per instruction #2's no-refactoring rule.",
+    "PERSON and CURATOR (constant URIRef(...) at module scope, not per-row) become bare <IRI> terms rather than @prefix declarations, since they are single absolute IRIs used once each, not a namespace with multiple local parts -- @prefix would not simplify anything here.",
+    "context: fixture.ttl is the project's own real positive fixture (static/ontology/instances/ecosystem/fixtures/synthetic-ecosystem.ttl, same commit, copied verbatim, 14 real EngagementActivity instances exercising both the ConsentDecisionActivity/PERSON branch and the default CURATOR branch, plus a wasInformedBy predecessor chain) rather than an invented one; `merged` stands in for build_validation_graph(fixture) by reparsing the same file, which is faithful for this region since every actor this loop names already carries its prov:Agent triple directly in the fixture."
   ],
   "draft_sha": "ade307937b7f6bc5",
   "provenance": {
@@ -29,5 +43,11 @@
     "trav_one_step",
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

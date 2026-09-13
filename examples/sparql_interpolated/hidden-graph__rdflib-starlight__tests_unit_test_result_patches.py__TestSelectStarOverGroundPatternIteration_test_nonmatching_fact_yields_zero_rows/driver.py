@@ -1,15 +1,16 @@
 """Validation driver for hidden-graph__rdflib-starlight__tests_unit_test_result_patches.py__TestSelectStarOverGroundPatternIteration_test_nonmatching_fact_yields_zero_rows.
 
 Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+
+The region is a bound test method whose body never uses `self`, so a plain
+`None` stands in for it; the region has nothing to return or mutate and
+prints nothing, but this call argument makes `run_pair` treat it as
+observed rather than "nothing observable to compare".
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
     entry='test_nonmatching_fact_yields_zero_rows',
-    calls=[]  # TODO: [(args, kwargs), ...] fixtures,
+    calls=[((None,), {})],
 )

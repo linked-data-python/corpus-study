@@ -1,13 +1,25 @@
 # Extracted from lazlop/semantic_objects@243c5efd8c : .claude/worktrees/watr-ingestion/src/semantic_objects/exporters.py
 # region: RdfExporter.generate_rdf_class_definition (lines 350-385, stratum coercion_datatype)
 # licence of the source repository: see meta.json
-from .namespaces import PARAM, RDF, RDFS, SH, bind_prefixes
+from context_shim import PARAM, RDF, RDFS, SH, bind_prefixes  # context shim -- see meta.json
 from rdflib import Graph, Literal, BNode, URIRef
 @prefix param: <urn:___param___#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
+# Restored bindings (see meta.json): the region is a mid-method excerpt of
+# RdfExporter.generate_rdf_class_definition(cls, include_hierarchy=False),
+# where `cls`, `g`, `class_iri`, `classes_to_process` and
+# `processed_relations` are already in scope from earlier lines.
+from context_shim import _SourceThing
+cls = _SourceThing
+g = Graph()
+class_iri = cls._get_iri()
+classes_to_process = [cls]
+processed_relations = set()
+
+@graph g
 
 for base_class in classes_to_process:
     if not hasattr(base_class, '_valid_relations'):
@@ -22,11 +34,9 @@ for base_class in classes_to_process:
         relation_iri = relation._get_iri()
 
         prop_node = BNode()
-        g += g{
-            {class_iri} sh:property {prop_node} .
-            {prop_node} a sh:PropertyShape ;
-               sh:path {relation_iri}
-        }
+        +{ {class_iri} sh:property {prop_node} }
+        +{ {prop_node} a sh:PropertyShape ;
+                       sh:path {relation_iri} }
 
         if target_class is None:
             target_class_name = "None"
@@ -39,11 +49,11 @@ for base_class in classes_to_process:
             target_class_name = str(target_class)
 
         field_comment = f"If the relation `{relation._name}` is present it must associate the `{cls.__name__}` with a `{target_class_name}`."
-        g += g{ {prop_node} rdfs:comment {Literal(field_comment)} }
+        +{ {prop_node} rdfs:comment {field_comment} }
 
         if hasattr(target_class, '_get_iri'):
             target_class_iri = target_class._get_iri()
-            g += g{ {prop_node} sh:class {target_class_iri} }
+            +{ {prop_node} sh:class {target_class_iri} }
 
             message = f"s223: If the relation `{relation._name}` is present it must associate the `{cls.__name__}` with a `{target_class_name}`."
-            g += g{ {prop_node} sh:message {Literal(message)} }
+            +{ {prop_node} sh:message {message} }

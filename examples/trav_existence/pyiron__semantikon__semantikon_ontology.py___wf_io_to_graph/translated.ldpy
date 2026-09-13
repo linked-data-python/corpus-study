@@ -46,7 +46,7 @@ def _wf_io_to_graph(
             {node} rdfs:label {Literal(G.a_ns_short + str(node_name))} ;
                {has_specified_io} {data_node}
         }
-        if "value" in data and g.value(data_node, SNS.has_value) is None:
+        if "value" in data and m{ {data_node} {SNS.has_value} ?v }(g).first() is None:
             g += g{ {data_node} {SNS.has_value} {Literal(data["value"])} }
         if "hash" in data:
             hash_bnode = BASE[G.a_ns + data_node_name + "_hash"]

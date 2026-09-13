@@ -15,11 +15,18 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "f{ }"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd (rdf/rdfs unused by the region itself)",
+    "val is not a string constant, so the bare `{expr}^^dt` term form (only valid in graph term position) does not apply; used f{Literal(val, datatype=xsd:dateTime)} per migrate-from-rdflib trap 1",
+    "graph.set/.remove kept as plain rdflib calls: self.edit() yields an opaque editable graph, not a @graph-declared one, and .set/.remove(pattern-with-None) are outside the add_isolated/remove strata this region targets",
+    "context shim namespace.py restores KTBS (relative import `..namespace` cannot resolve when the region is executed standalone)"
   ],
   "draft_sha": "7c55097a31b3cb9e",
   "provenance": {
@@ -31,5 +38,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:set_trace_begin_dt",
+    "diffs": [],
+    "error": null
+  }
 }

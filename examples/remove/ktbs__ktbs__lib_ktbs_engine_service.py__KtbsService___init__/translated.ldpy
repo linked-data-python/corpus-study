@@ -15,8 +15,6 @@ from .trace_stats import TraceStatistics
 from ..namespace import KTBS
 from .. import __version__ as ktbs_version
 from .. import __commitno__ as ktbs_commit
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
 LOG = logging.getLogger(__name__)
 
 def __init__(self, service_config=None):
@@ -53,10 +51,11 @@ def __init__(self, service_config=None):
 
     LOG.debug("updating built-in methods")
     with root.edit(_trust=True) as graph:
+        @graph graph
         # updating hasBuiltinMethod with registered implementations
-        graph.remove((self.root_uri, KTBS.hasBuiltinMethod, None))
+        -{ {self.root_uri} {KTBS.hasBuiltinMethod} ?o }
         for bim in iter_builtin_method_impl():
-            graph += g{ {self.root_uri} {KTBS.hasBuiltinMethod} {bim.uri} }
+            +{ {self.root_uri} {KTBS.hasBuiltinMethod} {bim.uri} }
         # updating version number
         graph.set((self.root_uri,
                    KTBS.hasVersion,

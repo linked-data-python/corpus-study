@@ -15,3 +15,22 @@ def _render_skos_rdf(self):
                 g.add((s, p, o))
 
     return Response(g.serialize(format=self.format), mimetype=self.format)
+
+
+# Test harness only (see meta.json): `_render_skos_rdf` needs a `self` with
+# `.uri`/`.format` (ConceptRenderer instance state, not a parameter) and
+# returns a Flask Response, which the harness cannot compare directly. This
+# wrapper supplies a minimal `self` and reparses the Response body back into
+# a Graph, so the verdict is RDF isomorphism on what was actually rendered.
+# Added identically to original.py and translated.ldpy.
+class _FakeConceptRenderer:
+    def __init__(self, uri, fmt):
+        self.uri = uri
+        self.format = fmt
+
+
+def render(uri, fmt="turtle"):
+    resp = _render_skos_rdf(_FakeConceptRenderer(uri, fmt))
+    out = Graph()
+    out.parse(data=resp.get_data(as_text=True), format=fmt)
+    return out

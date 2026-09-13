@@ -17,10 +17,23 @@
     "term_constructor": 40,
     "triple_add": 19
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "prefixes cim:/emt: declared 'as CIM'/'as EMT' to keep the Namespace objects the code still needs for serializer.class_order (CIM.SvPowerFlow etc.) after the @prefix lines replace CIM_NS/EMT_NS-based rdflib.Namespace(...) construction and g.bind() calls",
+    "one run-shared-subject +{ ; } per predicate-object-list group (ConnectivityNode, SvVoltage, each SvPowerFlow endpoint) instead of the mechanical draft's per-group g{ } + g += ; two independent subjects sv1/sv2 in the branch loop are two triple groups in ONE +{ } separated by '.', not merged with ';' (different subjects, so ';' would be wrong -- see INSTRUCTIONS.md pitfall on multi-pattern -{ } join, same reasoning applies here to keep each subject's own triple set clear)",
+    "rdflib.Literal(x, datatype=CIM.xxx) on a computed value (vmag, deg, p1/q1/p2/q2) becomes {x}^^cim:xxx: CIM.xxx is a fixed namespace member known at each call site, so unlike the altimeter region's conditional datatype this one has a single term-position literal form",
+    "g is created once with rdflib.Graph() and never reassigned (only mutated via +{ } across three loops), so a single @graph g at its point of creation covers the whole function body",
+    "shim otsrdflib.py: reimplementation of OrderedTurtleSerializer from PyPI otsrdflib v0.5.0 (a TurtleSerializer subclass whose only real logic is orderSubjects(), driven by the class_order attribute the region sets) -- named otsrdflib.py so 'from otsrdflib import OrderedTurtleSerializer' resolves to it unchanged in both original.py and translated.ldpy, no import edit needed",
+    "oracle gap: create_cim_ic returns nothing and mutates no argument -- its only observable effect is the Turtle file it serializes to disk. That is exactly the case rdfeval.harness.run_pair's entry/calls mode documents as unobservable ('nothing observable to compare... a region whose whole effect is a file write lands exactly here'). driver.py works around it by calling both sides directly and comparing the graph parsed back from each side's output file, rather than using run_pair's calls= mechanism -- this is a harness/oracle limitation, not a language limitation, and is worth flagging for other function regions in this stratum whose whole effect is a file write"
+  ],
   "draft_sha": "60c67f30eb828e81",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.918922+00:00",
@@ -31,5 +44,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "output-file:create_cim_ic",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from shim import _safe_local
 
 def ontology_to_ttl(
     ontology: "Ontology",
@@ -22,7 +23,7 @@ def ontology_to_ttl(
             "Install it with: pip install seocho[ontology]"
         ) from exc
 
-    from .core import PropertyType
+    from shim import PropertyType
 
     ns_str = ontology.namespace or "https://seocho.dev/ontology/"
     if not (ns_str.endswith("/") or ns_str.endswith("#")):

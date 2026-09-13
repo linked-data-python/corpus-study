@@ -4,10 +4,8 @@
 from typing import Optional, List, Tuple
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
-@prefix os: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
+from context_shim import OS, locked_graph, _is_abs_iri, _mint_hash_iri, _ensure_type_with_label, _class, _list_species_summaries
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 def add_elemental_analysis_data_to_species(
@@ -27,7 +25,7 @@ def add_elemental_analysis_data_to_species(
         species_ref = URIRef(species_iri)
 
         # Check if species exists
-        exists = any(g.triples((species_ref, rdf:type, _class(OS, "Species"))))
+        exists = bool(m{ {species_ref} rdf:type {_class(OS, "Species")} }(g))
         if not exists:
             catalog = _list_species_summaries(g, 20)
             return (
@@ -46,23 +44,23 @@ def add_elemental_analysis_data_to_species(
             wp_c = _mint_hash_iri("WeightPercentage")
             _ensure_type_with_label(g, wp_c, _class(OS, "WeightPercentage"), "Calculated")
             g.set((wp_c, _class(OS, "hasWeightPercentageCalculatedValue"), Literal(calculated_value_text)))
-            g += g{ {ea} {_class(OS, "hasWeightPercentageCalculated")} {wp_c} }
+            +{ {ea} {_class(OS, "hasWeightPercentageCalculated")} {wp_c} }(g)
 
         # Experimental WeightPercentage node
         if experimental_value_text:
             wp_e = _mint_hash_iri("WeightPercentage")
             _ensure_type_with_label(g, wp_e, _class(OS, "WeightPercentage"), "Experimental")
             g.set((wp_e, _class(OS, "hasWeightPercentageExperimentalValue"), Literal(experimental_value_text)))
-            g += g{ {ea} {_class(OS, "hasWeightPercentageExperimental")} {wp_e} }
+            +{ {ea} {_class(OS, "hasWeightPercentageExperimental")} {wp_e} }(g)
 
         # Empirical molecular formula node (optional)
         if empirical_molecular_formula:
             mf = _mint_hash_iri("MolecularFormula")
             _ensure_type_with_label(g, mf, _class(OS, "MolecularFormula"), empirical_molecular_formula)
             g.set((mf, _class(OS, "hasMolecularFormulaValue"), Literal(empirical_molecular_formula)))
-            g += g{ {species_ref} {_class(OS, "hasMolecularFormula")} {mf} }
+            +{ {species_ref} {_class(OS, "hasMolecularFormula")} {mf} }(g)
 
         # Attach EA to species
-        g += g{ {species_ref} {_class(OS, "hasElementalAnalysisData")} {ea} }
+        +{ {species_ref} {_class(OS, "hasElementalAnalysisData")} {ea} }(g)
 
         return str(ea)

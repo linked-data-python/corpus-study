@@ -16,11 +16,21 @@
     "term_constructor": 15,
     "triple_add": 9
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: BFO->bfo, ABI->abi, CCO->cco, OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: BFO->bfo, ABI->abi, CCO->cco, OWL->owl, RDF->rdf, RDFS->rdfs, XSD->xsd (each with 'as NAME' to keep the Namespace object for g.bind())",
+    "Literal(item)/Literal(prop_value) have no explicit datatype: bare interpolation {item} in +{ } goes through the same default coercion as rdflib's own Literal() inference, so no explicit Literal(...) constructor is needed inside the island",
+    "g += item.rdf(...) mutates in place (Graph.__iadd__ returns self), so a single @graph g at the top of the function stays valid throughout despite the later g += calls",
+    "driver.py builds duck-typed Entity/Leaf fixtures (with value-based __eq__) since RDFEntity.rdf is written against attribute access only; three calls cover the full property mix, an entity with none of the optional attributes, and the cycle-detection early return"
   ],
   "draft_sha": "d993c0e8f65a6347",
   "provenance": {
@@ -32,5 +42,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:rdf",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -14,10 +14,19 @@
     "namespace_term": 2,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "AAS = Namespace(...) becomes '@prefix aas: <...> as AAS .': 'as AAS' is unused here (nothing else in the region needs the Namespace object) but kept for provenance/readability; a plain '@prefix aas: <...> .' would do just as well.",
+    "CD_TYPE = rdflib.URIRef(AAS['ConceptDescription']) -> 'aas:ConceptDescription': the surrounding rdflib.URIRef(...) call was redundant (a prefixed name is already a URIRef) and dropped.",
+    "ID = rdflib.URIRef(AAS['Identifiable/id']): the local part contains a literal '/', which is not typeable as a bare prefixed-name suffix. Used 'aas:{\"Identifiable/id\"}' (computed local part from a Python string) rather than the lexical form, since it concatenates without re-encoding the slash -- exactly what the original AAS[...] indexing does.",
+    "This module has no Graph and its only module-level value is a class, which rdfeval.harness._values excludes (classes have no meaningful __eq__): wrote a custom driver.py that compares the three class attributes (AAS, CD_TYPE, ID) directly instead of the generic entry=None module-state comparison."
+  ],
   "draft_sha": "626094156c68c7fb",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.222609+00:00",
@@ -28,5 +37,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "custom:class-attributes",
+    "diffs": [],
+    "error": null
+  }
 }

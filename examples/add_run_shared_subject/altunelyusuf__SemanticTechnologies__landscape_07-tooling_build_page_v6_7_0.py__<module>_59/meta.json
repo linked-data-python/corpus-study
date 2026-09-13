@@ -14,11 +14,21 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "IRI",
+    "prefixed name",
+    "language literal"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov",
+    "the extracted line is a single g.add on ONT; it exercises +{ } but not the multi-predicate ';' grouping the stratum otherwise targets, since only one statement was in scope.",
+    "URIRef(\"http://example.org/semtech/page\") is a constant IRI, so it becomes <http://example.org/semtech/page> directly rather than f<...>.",
+    "context shim (shim.py) supplies HERE (a path helper only, no RDF logic) pointing at a minimal stand-in for the sibling ABox file 04-page/semtech_page_abox_v6_6_0.ttl (the real landscape ABox from the origin repo was not fetched; the stand-in only needs to parse identically for both representations, which it does since both call the same Graph().parse(...))."
   ],
   "draft_sha": "cee0f38190c0d20e",
   "provenance": {
@@ -30,5 +40,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

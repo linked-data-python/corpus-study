@@ -33,7 +33,7 @@ def _decode_tt_hash(graph, node):
     identically to (and is the same technique as) `StarlightGraph.
     _build_registry_from_store()`'s own reconstruction.
     """
-    from starlight.model.encoding import TT_NS
+    from shim_encoding import TT_NS  # see meta.json: context shim
 
     if not (isinstance(node, URIRef) and str(node).startswith(TT_NS)):
         return None

@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
+from shim import HERE
 g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_6_0.ttl")
 ONT = URIRef("http://example.org/semtech/page")
 

@@ -13,11 +13,21 @@
     "term_constructor": 3,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: PARAM->param, RDF->rdf, RDFS->rdfs, SH->sh"
+    "prefixes: PARAM->param, RDF->rdf, RDFS->rdfs, SH->sh",
+    "statement region: classes_to_process, cls, g, class_iri and processed_relations are restored in original.py/translated.ldpy from context_shim.py (a minimal stand-in for semantic_objects.core's Resource/relation shape -- _name, _get_iri(), __name__ -- not the real dataclass-field machinery)",
+    "each run of g.add() on class_iri is one +{ } (a single triple), and the two g.add() sharing prop_node as subject are folded into one +{ p1 ; p2 }, per add_run_shared_subject",
+    "Literal(field_comment) and Literal(message) are plain literals built from an f-string (already str): rewritten as bare interpolation {field_comment}/{message}, matching the default coercion exactly",
+    "BNode() kept as a plain Python call (not _:{expr}): identity here is arbitrary/fresh per relation, not derived from data, so the data-keyed blank-node construction does not apply"
   ],
   "draft_sha": "8c90ef335606e118",
   "provenance": {
@@ -29,5 +39,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

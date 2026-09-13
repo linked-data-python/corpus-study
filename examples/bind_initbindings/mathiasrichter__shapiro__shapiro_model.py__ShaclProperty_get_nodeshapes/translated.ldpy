@@ -1,9 +1,15 @@
 # Extracted from mathiasrichter/shapiro@3954ef2148 : shapiro_model.py
 # region: ShaclProperty.get_nodeshapes (lines 824-835, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from rdflib import Graph, URIRef, BNode
-from typing import Tuple, List
+from rdflib import URIRef, BNode
+from typing import List
 from urllib.parse import urlparse
+
+# Context shim: NodeShape lived elsewhere in shapiro_model.py; restoring the
+# binding so the region executes standalone (see shim.py).
+from shim import NodeShape
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
 
 def get_nodeshapes(self) -> List[NodeShape]:
     prop = None
@@ -11,7 +17,7 @@ def get_nodeshapes(self) -> List[NodeShape]:
         prop = BNode(self.iri)
     else:
         prop = URIRef(self.iri)
-    result = self.graph.query(self.SHAPE_QUERY, initBindings={"property": prop})
+    result = s{ SELECT DISTINCT ?shape WHERE { ?shape sh:property {prop} } }(self.graph)
     shapes = []
     for r in result:
         shapes.append(NodeShape(str(r.shape), self.graph))

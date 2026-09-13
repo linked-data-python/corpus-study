@@ -2,10 +2,7 @@
 # region: BaseMixin.create_method (lines 202-251, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, RDF, URIRef
-from rdfrest.exceptions import InvalidDataError
-from rdfrest.util import coerce_to_node, coerce_to_uri, parent_uri
-from ..namespace import KTBS
-from ..utils import extend_api, SKOS
+from context import InvalidDataError, coerce_to_node, coerce_to_uri, parent_uri, KTBS, extend_api, SKOS
 
 def create_method(self, id=None, parent=None, parameters=None, label=None,
                   graph=None):

@@ -12,10 +12,20 @@
   "categories": {
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "initBindings variable 'property' is not projected (only ?shape is), so it becomes a term interpolation {prop} in s{ }, per the bind_initbindings row of INSTRUCTIONS.md#2.",
+    "self.graph is not the module's current graph, so s{ } uses the explicit call suffix (self.graph) rather than reading an ambient @graph.",
+    "NodeShape and the label lookup it needs (itself an initBindings query one level up, in SemanticModelElement.__init__) are outside the extracted region; restored via a context shim (shim.py) faithful to shapiro_model.py's DESCRIPTION_QUERY/prune_iri, since the region's sort key (s.label) depends on them.",
+    "oracle: reading region (self.graph.query -> a value), not isomorphism; meta's initial oracle field was stale from the draft and the driver instead uses fixture.ttl via calls= (entry takes self, not a graph, so fixture= could not be used directly)."
+  ],
   "draft_sha": "5a66e5d921deba2c",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.320909+00:00",
@@ -26,5 +36,12 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_nodeshapes",
+    "diffs": [],
+    "error": null
+  }
 }

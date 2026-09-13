@@ -2,17 +2,13 @@
 # region: GrainBoundary.from_graph (lines 94-102, stratum ns_import_project)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, XSD, RDF, RDFS, BNode, URIRef
-from atomrdf.namespace import (
+from atomrdf_context import (
     CMSO,
-    LDO,
     PLDO,
-    PODO,
     CDCO,
-    PROV,
-    Literal,
-    ASMO,
+    get_material,
+    GrainBoundary,
 )
-from atomrdf.utils import get_material
 
 @classmethod
 def from_graph(cls, graph, sample):
@@ -23,3 +19,24 @@ def from_graph(cls, graph, sample):
         if typev is not None and typev == PLDO.GrainBoundary:
             return cls._read_gb(graph, sample, plane_defect)
     return None
+
+# Restoring the binding (AGENT_BATCH's 163-regions case): after extraction
+# `from_graph` is a bare @classmethod dangling outside any class -- its own
+# body already works correctly through the ordinary classmethod protocol
+# (unlike the johnjung/metadata_converters sibling in this stratum, `cls`
+# here is genuinely GrainBoundary, matching to_graph's own usage a few lines
+# above in the real file), it is only not yet attached to one. Attached to
+# the shim's GrainBoundary (subset of grainboundary.py, see
+# atomrdf_context.py) via the classmethod's own wrapped function, without
+# altering the region's own decorator or body.
+GrainBoundary.from_graph = classmethod(from_graph.__func__)
+
+
+# Demo harness (identical on both sides, see meta.json): calls the real
+# GrainBoundary.from_graph through the ordinary classmethod protocol and
+# returns a plain dict, so the two sides' pydantic model instances (two
+# distinct classes, one per exec'd module) compare by value rather than by
+# identity.
+def demo(graph, sample):
+    result = GrainBoundary.from_graph(graph, sample)
+    return result.model_dump() if result is not None else None

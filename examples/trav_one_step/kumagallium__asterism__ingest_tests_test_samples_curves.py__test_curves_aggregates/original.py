@@ -16,6 +16,15 @@ from asterism.starrydata import (
 )
 SD = Namespace(DEFAULT_ONTOLOGY)
 
+
+def _load(path: Path) -> Graph:
+    # Restores the binding to the test file's own helper (verbatim, same
+    # commit) so the region is executable outside test_samples_curves.py.
+    g = Graph()
+    g.parse(str(path), format="turtle")
+    return g
+
+
 def test_curves_aggregates(curves_csv: Path, tmp_path: Path) -> None:
     """設計プラン §4 方針 C: x/y 集約値 (Min/Max/PointCount) を出す"""
     out = tmp_path / "curves.ttl"

@@ -2,6 +2,12 @@
 # region: collect (lines 221-268, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from typing import Any, Dict, List, Optional, Tuple
+import rdflib
+from _shim import (
+    _turtle_files, _parse_all, _authored_graph, _count_predicate_objects,
+    _multi_domain, _alignment_unbound, _malformed_iris, _cq_rows,
+    _pitfall_counts,
+)
 
 def collect(output_dir: str) -> Dict[str, Any]:
     paths = _turtle_files(output_dir)
@@ -17,8 +23,8 @@ def collect(output_dir: str) -> Dict[str, Any]:
     # Phase 5 capabilities. Counted as instances, not declarations: a
     # vocabulary nothing uses is the failure mode this roadmap exists to
     # remove, so the metric tracks reified records rather than classes.
-    prov_ns = rdflib.Namespace("http://www.w3.org/ns/prov#")
-    ns = rdflib.Namespace("https://ontology.example.com/enterprise/")
+    @prefix prov: <http://www.w3.org/ns/prov#> .
+    @prefix ent: <https://ontology.example.com/enterprise/> as ns .
     prov_chains = _count_predicate_objects(authored, rdflib.RDF.type, ns.DerivationActivity)
     temporal_extents = _count_predicate_objects(authored, rdflib.RDF.type, ns.TemporalExtent)
     quantity_values = _count_predicate_objects(authored, rdflib.RDF.type, ns.QuantityValue)

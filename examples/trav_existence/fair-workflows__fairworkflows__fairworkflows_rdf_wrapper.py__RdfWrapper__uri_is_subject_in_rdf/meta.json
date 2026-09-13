@@ -13,10 +13,18 @@
     "graph_read": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "`rdflib.URIRef(uri) not in rdf.subjects()` -> `not bool(m{ {rdflib.URIRef(uri)} ?p ?o }(rdf))`: subject bound, predicate/object wildcards -- the direct trav_existence idiom for 'is this term ever a subject', more direct than materialising all subjects to test membership.",
+    "not exercised: the force=False + uri-absent branch, which RAISES ValueError. rdfeval.harness.run_pair wraps both sides' call in one try/except with no per-call exception handling, so it aborts the whole verdict on any exception rather than comparing two raises -- a harness limitation (confirms the known constat about a driver's blind spot on raising branches, not a language limitation). That branch differs from the covered ones only by a plain `if force: warn else: raise`, untouched by the translation, so it carries no extra translation risk.",
+    "fixture.ttl covers a subject with two triples (several solutions), a URI that appears only as an OBJECT (neighbourhood: must not count as a subject), and a URI absent altogether (zero-solution, exercised via a driver case rather than the fixture alone)."
+  ],
   "draft_sha": "e9f9cfd950be984f",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.635761+00:00",
@@ -27,5 +35,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:_uri_is_subject_in_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

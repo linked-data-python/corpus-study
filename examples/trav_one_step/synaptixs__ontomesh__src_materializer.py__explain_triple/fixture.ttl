@@ -1,4 +1,49 @@
-# Input graph for synaptixs__ontomesh__src_materializer.py__explain_triple — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for synaptixs__ontomesh__src_materializer.py__explain_triple.
+# Covers: two derivations for the same reified statement (several
+# solutions), a fully-formed premise and an incomplete one (missing
+# object, must be skipped), a second reified statement for a DIFFERENT
+# triple (neighbour that must not match), and a plain rdf:Statement with
+# no prov:wasDerivedFrom at all (zero solutions for that path).
 @prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix toolkit: <https://ontology.example.com/toolkit/materializer/> .
+
+# The target triple ex:s1 ex:p1 ex:o1, explained by two derivations.
+ex:stmt1 a rdf:Statement ;
+    rdf:subject ex:s1 ;
+    rdf:predicate ex:p1 ;
+    rdf:object ex:o1 ;
+    prov:wasDerivedFrom ex:deriv1, ex:deriv2 .
+
+ex:deriv1 toolkit:rule "ruleA" ;
+    toolkit:engine "engineA" ;
+    toolkit:bindings "{\"x\": 1}" ;
+    toolkit:premise ex:prem1, ex:prem2 .
+
+ex:prem1 rdf:subject ex:s0 ; rdf:predicate ex:p0 ; rdf:object ex:o0 .
+# ex:prem2 is missing rdf:object on purpose: it must be excluded from
+# the "premises" list built by explain_triple.
+ex:prem2 rdf:subject ex:s0b ; rdf:predicate ex:p0b .
+
+ex:deriv2 toolkit:rule "ruleB" ;
+    toolkit:engine "engineB" ;
+    toolkit:bindings "{}" .
+
+# Neighbouring statement for a DIFFERENT triple: must not match a query
+# for (ex:s1, ex:p1, ex:o1).
+ex:stmt2 a rdf:Statement ;
+    rdf:subject ex:s2 ;
+    rdf:predicate ex:p2 ;
+    rdf:object ex:o2 ;
+    prov:wasDerivedFrom ex:deriv3 .
+
+ex:deriv3 toolkit:rule "ruleC" ;
+    toolkit:engine "engineC" .
+
+# A reified statement with no lineage at all: matches the (s, p, o)
+# pattern but yields zero derivations.
+ex:stmt3 a rdf:Statement ;
+    rdf:subject ex:s3 ;
+    rdf:predicate ex:p3 ;
+    rdf:object ex:o3 .

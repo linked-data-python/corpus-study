@@ -1,9 +1,11 @@
 # Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/check-band-scope-notes.py
 # region: main (lines 76-174, stratum trav_one_step)
 # licence of the source repository: see meta.json
+import re
 import sys
 from rdflib import Graph, Namespace, RDF, URIRef
 from rdflib.namespace import SKOS
+from shim import module_paths, instance_paths
 SSTIM = Namespace("https://w3id.org/sstim#")
 SSTIM_V = Namespace("https://w3id.org/sstim/vocab#")
 SSTIM_EX = Namespace("https://w3id.org/sstim/exposure#")

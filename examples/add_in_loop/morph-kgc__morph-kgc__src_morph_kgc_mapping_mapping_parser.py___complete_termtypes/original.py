@@ -2,6 +2,13 @@
 # region: _complete_termtypes (lines 231-291, stratum add_in_loop)
 # licence of the source repository: see meta.json
 import rdflib
+from rml_constants import (
+    RML_QUOTED_TRIPLES_MAP, RML_TERM_TYPE, RML_RDF_STAR_TRIPLE,
+    RML_CONSTANT, RML_BLANK_NODE, RML_LITERAL, RML_OBJECT_MAP,
+    RML_REFERENCE, RML_EXECUTION, RML_LANGUAGE_MAP, RML_DATATYPE_MAP,
+    RML_PARENT_TRIPLES_MAP, RML_SUBJECT_MAP, RML_IRI,
+    RML_PREDICATE_MAP, RML_GRAPH_MAP,
+)
 
 def _complete_termtypes(mapping_graph):
     """

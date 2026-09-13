@@ -18,11 +18,20 @@
     "term_constructor": 13,
     "triple_add": 9
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SDO->sdo, SKOS->skos, OWL->owl, RDF->rdf, PROF->prof, XSD->xsd, FOAF->foaf"
+    "prefixes: SDO->sdo, SKOS->skos, OWL->owl, RDF->rdf, PROF->prof, XSD->xsd, FOAF->foaf",
+    "Literal(x, datatype=xsd:date) kept as a Literal(...) constructor call (not rewritten to a typed-literal island \"...\"^^xsd:date): the value comes from METADATA.get(...), not a literal string, so a bare interpolation could not be trusted to carry the same datatype (2bis pitfall); only the XSD.date attribute access was rewritten to the xsd:date prefixed-name term.",
+    "the first two .add() calls on the same subject (rdf:type, sdo:name) were fused into one +{ s a T ; p o } block: the region is double-tagged add_isolated/add_run_shared_subject, and this is the add_run_shared_subject idiom applied to its shared-subject pair.",
+    "every remaining if-guarded .add() becomes a one-line `if cond: +{ ... }` (0.4.0 compound-statement support), one +{ } per original .add()."
   ],
   "draft_sha": "dad7d52302552a98",
   "provenance": {
@@ -35,5 +44,11 @@
     "add_isolated",
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_make_schemaorg_metadata",
+    "diffs": [],
+    "error": null
+  }
 }

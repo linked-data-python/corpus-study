@@ -82,26 +82,20 @@ def _make_schemaorg_metadata(self):
     g.bind("sdo", SDO)
     g.bind("xsd", XSD)
 
-    g += g{
+    @graph g
+    +{
         {uri} a sdo:DefinedTermSet ;
            sdo:name {name}
     }
     # g.add((uri, sdo:publishers, sdo:DigitalDocument))
     # g.add((uri, sdo:creators, sdo:DigitalDocument))
-    if self.METADATA.get("date_created") is not None:
-        g += g{ {uri} sdo:dateCreated {date_created} }
-    if self.METADATA.get("date_modified") is not None:
-        g += g{ {uri} sdo:dateModified {date_modified} }
-    if self.METADATA.get("description") is not None:
-        g += g{ {uri} sdo:description {description} }
-    if license is not None:
-        g += g{ {uri} sdo:license {license} }
-    if self.METADATA.get("rights") is not None:
-        g += g{ {uri} sdo:rights {rights} }
+    if self.METADATA.get("date_created") is not None: +{ {uri} sdo:dateCreated {date_created} }
+    if self.METADATA.get("date_modified") is not None: +{ {uri} sdo:dateModified {date_modified} }
+    if self.METADATA.get("description") is not None: +{ {uri} sdo:description {description} }
+    if license is not None: +{ {uri} sdo:license {license} }
+    if self.METADATA.get("rights") is not None: +{ {uri} sdo:rights {rights} }
     # g.add((uri, sdo:copyrightHolder, copyrightHolder))
-    if self.METADATA.get("copyright_year") is not None:
-        g += g{ {uri} sdo:copyrightYear {copyright_year} }
-    if self.METADATA.get("repository") is not None:
-        g += g{ {uri} sdo:codeRepository {repository} }
+    if self.METADATA.get("copyright_year") is not None: +{ {uri} sdo:copyrightYear {copyright_year} }
+    if self.METADATA.get("repository") is not None: +{ {uri} sdo:codeRepository {repository} }
 
     return g.serialize(format="json-ld")

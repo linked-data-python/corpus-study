@@ -1,87 +1,96 @@
 # Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-core/naas_abi_core/services/triple_store/adaptors/secondary/Oxigraph.py
 # region: Oxigraph.query (lines 429-510, stratum coercion_datatype)
 # licence of the source repository: see meta.json
+#
+# The region as extracted is a bare `if/elif/else` block with a `return` in
+# each branch: it is not runnable outside the enclosing method. Restoring the
+# binding here (rdfeval.harness.run_pair needs a callable) means wrapping it
+# in a function taking `response` and `content_type` as parameters -- exactly
+# the two names the original method reads that the extracted lines do not
+# define themselves. No other change.
 from rdflib import BNode, Graph, URIRef
 
-if "sparql-results" in content_type:
-    # SELECT or ASK query - parse JSON results
-    import json
 
-    result_data = json.loads(response.text)
+def query(response, content_type):
+    if "sparql-results" in content_type:
+        # SELECT or ASK query - parse JSON results
+        import json
 
-    # Create a result wrapper that's compatible with RDFLib's ResultRow
-    from rdflib.query import ResultRow
-    from rdflib.term import BNode, Literal, URIRef, Variable
+        result_data = json.loads(response.text)
 
-    # Extract variables
-    vars = result_data.get("head", {}).get("vars", [])
-    bindings = result_data.get("results", {}).get("bindings", [])
+        # Create a result wrapper that's compatible with RDFLib's ResultRow
+        from rdflib.query import ResultRow
+        from rdflib.term import BNode, Literal, URIRef, Variable
 
-    # Convert variable names to Variable objects
-    var_objects = [Variable(var) for var in vars]
+        # Extract variables
+        vars = result_data.get("head", {}).get("vars", [])
+        bindings = result_data.get("results", {}).get("bindings", [])
 
-    # Convert bindings to result rows
-    results = []
+        # Convert variable names to Variable objects
+        var_objects = [Variable(var) for var in vars]
 
-    for binding in bindings:
-        row_values = {}
+        # Convert bindings to result rows
+        results = []
 
-        for var in vars:
-            var_obj = Variable(var)
+        for binding in bindings:
+            row_values = {}
 
-            if var in binding:
-                binding_info = binding[var]
-                value_str = binding_info["value"]
-                binding_type = binding_info.get("type", "literal")
+            for var in vars:
+                var_obj = Variable(var)
 
-                # Convert to appropriate RDFLib term
-                value: URIRef | BNode | Literal | None
-                if binding_type == "uri":
-                    value = URIRef(value_str)
-                elif binding_type == "bnode":
-                    value = BNode(value_str)
-                else:  # literal
-                    datatype = binding_info.get("datatype")
-                    lang = binding_info.get("xml:lang")
+                if var in binding:
+                    binding_info = binding[var]
+                    value_str = binding_info["value"]
+                    binding_type = binding_info.get("type", "literal")
 
-                    if datatype:
-                        # Handle numeric datatypes
-                        if datatype in [
-                            "http://www.w3.org/2001/XMLSchema#integer",
-                            "http://www.w3.org/2001/XMLSchema#long",
-                        ]:
-                            try:
-                                value = Literal(
-                                    int(value_str), datatype=URIRef(datatype)
-                                )
-                            except ValueError:
+                    # Convert to appropriate RDFLib term
+                    value: URIRef | BNode | Literal | None
+                    if binding_type == "uri":
+                        value = URIRef(value_str)
+                    elif binding_type == "bnode":
+                        value = BNode(value_str)
+                    else:  # literal
+                        datatype = binding_info.get("datatype")
+                        lang = binding_info.get("xml:lang")
+
+                        if datatype:
+                            # Handle numeric datatypes
+                            if datatype in [
+                                "http://www.w3.org/2001/XMLSchema#integer",
+                                "http://www.w3.org/2001/XMLSchema#long",
+                            ]:
+                                try:
+                                    value = Literal(
+                                        int(value_str), datatype=URIRef(datatype)
+                                    )
+                                except ValueError:
+                                    value = Literal(
+                                        value_str, datatype=URIRef(datatype)
+                                    )
+                            else:
                                 value = Literal(
                                     value_str, datatype=URIRef(datatype)
                                 )
+                        elif lang:
+                            value = Literal(value_str, lang=lang)
                         else:
-                            value = Literal(
-                                value_str, datatype=URIRef(datatype)
-                            )
-                    elif lang:
-                        value = Literal(value_str, lang=lang)
-                    else:
-                        value = Literal(value_str)
+                            value = Literal(value_str)
 
-                row_values[var_obj] = value
-            else:
-                row_values[var_obj] = None  # type: ignore
+                    row_values[var_obj] = value
+                else:
+                    row_values[var_obj] = None  # type: ignore
 
-        # Create a ResultRow compatible object
-        row = ResultRow(row_values, var_objects)
-        results.append(row)
+            # Create a ResultRow compatible object
+            row = ResultRow(row_values, var_objects)
+            results.append(row)
 
-    # Return an iterable result
-    return iter(results)  # type: ignore
-elif "n-triples" in content_type or "turtle" in content_type:
-    # CONSTRUCT or DESCRIBE query
-    graph = Graph()
-    format_type = "nt" if "n-triples" in content_type else "turtle"
-    graph.parse(data=response.text, format=format_type)
-    return graph  # type: ignore
-else:
-    raise ValueError(f"Unexpected content type: {content_type}")
+        # Return an iterable result
+        return iter(results)  # type: ignore
+    elif "n-triples" in content_type or "turtle" in content_type:
+        # CONSTRUCT or DESCRIBE query
+        graph = Graph()
+        format_type = "nt" if "n-triples" in content_type else "turtle"
+        graph.parse(data=response.text, format=format_type)
+        return graph  # type: ignore
+    else:
+        raise ValueError(f"Unexpected content type: {content_type}")

@@ -3,6 +3,8 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV, XSD
+from shim import ROOT, MANIFEST_MODULES, FULL_PROFILE, ONTOLOGY_DIR, parse_graph
+
 CONTEXT_FILES = tuple(
     ROOT / MANIFEST_MODULES[module_id]["source"]["path"]
     for module_id in FULL_PROFILE["modules"]

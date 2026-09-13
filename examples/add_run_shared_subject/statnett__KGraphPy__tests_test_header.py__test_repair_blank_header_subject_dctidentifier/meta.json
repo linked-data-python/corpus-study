@@ -15,11 +15,23 @@
     "term_constructor": 3,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "plain literal",
+    "IRI"
+  ],
   "translation_notes": [
-    "prefixes: DCAT->dcat, DCTERMS->dcterms, RDF->rdf"
+    "prefixes: DCAT->dcat, DCTERMS->dcterms, RDF->rdf",
+    "the two kg.add(...) share the blank node subject b, so they merge into one +{ b a {header_type} ; dcterms:identifier \"1234\" }; g is reassigned nowhere so a single @graph g before it covers both.",
+    "DCAT.Dataset as a decorator argument (@pytest.mark.parametrize list, module scope, outside any function body) translates to dcat:Dataset with no special-casing: the island rule is purely lexical adjacency, not statement context.",
+    "URIRef(\"urn:uuid:1234\") is a constant IRI compared with ==, so it becomes <urn:uuid:1234> directly.",
+    "context shim: vendored a subset of the kgraphpy package (kgraphpy/header.py, kgraphpy/namespaces.py, kgraphpy/exceptions.py, kgraphpy/__init__.py) verbatim from statnett/KGraphPy@38859be62f, since the package is not on PyPI and this test exercises real logic in CIMMetadataHeader.from_graph/_repair_blank_header_subject (the blank-node-to-urn:uuid repair and the logger.error call the test's own assertions check) that no context shim could fake without inventing it.",
+    "the region's caplog parameter (a pytest fixture, not a real argument) has no equivalent when run_pair calls the entry point directly outside pytest; driver.py supplies a _FakeCaplog whose .messages mirrors caplog.messages closely enough for the region's own len(records)==1 / 'blank node' in records[0] assertions -- which remain the real oracle here, unmodified -- to run as written."
   ],
   "draft_sha": "2ddcecc4e91198e0",
   "provenance": {
@@ -31,5 +43,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_repair_blank_header_subject_dctidentifier",
+    "diffs": [],
+    "error": null
+  }
 }

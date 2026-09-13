@@ -10,10 +10,18 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "PREFIX owl:/rdfs: lines dropped from the query string, moved to @prefix declarations in the enclosing if-block, per the block-scoped prologue.",
+    "self.graph is not the module's designated @graph (it's an attribute of an external object), so the query uses the explicit call suffix s{ ... }(self.graph) rather than a @graph declaration.",
+    "row.prop / row.range attribute access on the s{ } iteration result works unchanged: it stays an rdflib ResultRow."
+  ],
   "draft_sha": "648d4b3f8b2bd1bb",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.969460+00:00",
@@ -24,5 +32,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:get_xsd_type_map",
+    "diffs": [],
+    "error": null
+  }
 }

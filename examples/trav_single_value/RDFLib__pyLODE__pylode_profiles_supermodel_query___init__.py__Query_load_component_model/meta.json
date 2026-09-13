@@ -14,11 +14,15 @@
     "namespace_term": 5
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@prefix"],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann",
+    "The stratum's target line is `order = db.value(iri, SH.order)`, but db is a rdflib Dataset, not a Graph: per ldpy/docs/how-to/migrate-from-rdflib.md ('What not to rewrite'), a Dataset/ConjunctiveGraph's named-graph API has no m{ }/@graph counterpart -- @graph designates ONE graph. The correct translation keeps the native .value() call and only substitutes the term (SH.order -> sh:order), which is what translated.ldpy already does; this is not a degraded translation, it is the language's documented boundary.",
+    "Left translation_status=draft/classification=excluded (not final) because making the region executable would require reconstructing most of pylode.profiles.supermodel.query.__init__.Query beyond the extracted lines: self.get_component_model_classes calls self.get_component_model_class, which itself calls get_svg_images, get_is_defined_by, get_examples, get_notes, RDFS.subClassOf superclass-property merging, and builds Class/Property/RDFProperty/CodedProperty model objects -- none of it exercising a new construction beyond the one already noted, all of it far outside this region's scope. Not forced; excluded per AGENT_BATCH.md rule 1 (translation is right, the driver cannot reasonably be made to run it).",
+    "fixture.ttl left as a stub (see driver.py) since no driver run was attempted: building it would be wasted effort without the dependency chain above."
   ],
+  "article_candidate": false,
   "draft_sha": "5f888a674db8b2a5",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.338012+00:00",

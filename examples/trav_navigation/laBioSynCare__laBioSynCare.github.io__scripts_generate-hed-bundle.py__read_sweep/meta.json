@@ -12,10 +12,19 @@
   "categories": {
     "graph_read": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "track is a genuine join key shared by all three predicates (martigliPeriodInitial/Final/TransitionDuration all hang off the same subject), so this is one conjunctive m{ } rather than three independent next(graph.objects(...)) reads; each predicate is single-valued per track in this data, so the join's implicit missing-value handling matches the original's explicit `next(..., None)` guard",
+    "SSTIM and local() are module-level helpers from generate-hed-bundle.py (lines 70, 109-111) not visible in the extracted region: restored directly in original.py/translated.ldpy since they are one-liners, no separate shim file needed",
+    "fixture.ttl keeps exactly one qualifying (sweeping) track so the returned dict does not depend on iteration order across subjects, which no store promises"
+  ],
   "draft_sha": "d52c6850a38c5ad9",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.732519+00:00",
@@ -26,5 +35,12 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:read_sweep",
+    "diffs": [],
+    "error": null
+  }
 }

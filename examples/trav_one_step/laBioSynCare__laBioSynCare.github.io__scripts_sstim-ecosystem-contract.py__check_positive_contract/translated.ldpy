@@ -1,6 +1,14 @@
 # Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/sstim-ecosystem-contract.py
 # region: check_positive_contract (lines 1096-1125, stratum trav_one_step)
 # licence of the source repository: see meta.json
+#
+# `fixture`, `merged`, `activities` and `errors` are restored here (see
+# meta.json) so the loop is executable outside `check_positive_contract`:
+# `fixture.ttl` is the project's own real fixture graph
+# (static/ontology/instances/ecosystem/fixtures/synthetic-ecosystem.ttl,
+# same commit, copied verbatim), and `values`/`require` are the module's own
+# tiny helpers (also verbatim, lines 412-418).
+from pathlib import Path
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV, XSD
 @prefix eco: <https://w3id.org/sstim/ecosystem#> .
@@ -14,13 +22,38 @@ from rdflib.namespace import DCTERMS, OWL, PROV, XSD
 PERSON = <https://w3id.org/sstim/specialist/synthetic-alex-rivera>
 CURATOR = <https://example.org/agent/synthetic-curator>
 
+
+def values(graph: Graph, subject: URIRef, predicate: URIRef) -> set:
+    return set(graph.objects(subject, predicate))
+
+
+def require(condition: bool, message: str, errors: list[str]) -> None:
+    if not condition:
+        errors.append(message)
+
+
+_FIXTURE_PATH = Path(__file__).parent / "fixture.ttl"
+fixture = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+# The real `merged` is fixture + the ontology/context modules
+# (build_validation_graph); this region only ever tests
+# `(actor, RDF.type, PROV.Agent) in merged`, and every actor it can name
+# (CURATOR, PERSON) already carries that triple directly in the fixture, so
+# a second parse of the same file is a faithful-enough stand-in for this
+# region's purposes.
+merged = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+
+@graph fixture
+
+activities = set(fixture.subjects(RDF.type, eco:EngagementActivity))
+errors: list[str] = []
+
 for event in activities:
-    inbound = set(fixture.subjects(eco:hasEngagementActivity, event))
+    inbound = set(m{ ?a eco:hasEngagementActivity {event} })
     governed = values(fixture, event, eco:engagementFor)
     require(len(inbound) == 1 and inbound == governed,
             f"{event}: activity must belong to exactly one matching relationship", errors)
     expected_actor = {CURATOR}
-    if (event, rdf:type, eco:ConsentDecisionActivity) in fixture:
+    if bool(m{ {event} rdf:type eco:ConsentDecisionActivity }):
         relationship = next(iter(governed), None)
         if relationship is not None and values(
             fixture, relationship, eco:relationshipAgent
@@ -29,7 +62,7 @@ for event in activities:
     require(values(fixture, event, prov:wasAssociatedWith) == expected_actor,
             f"{event}: expected actor {expected_actor}", errors)
     actor = next(iter(expected_actor))
-    require((actor, rdf:type, prov:Agent) in merged,
+    require(bool(m{ {actor} rdf:type prov:Agent }(merged)),
             f"{event}: actor {actor} is not explicitly a prov:Agent", errors)
 
     event_times = values(fixture, event, prov:endedAtTime)
@@ -37,7 +70,7 @@ for event in activities:
             f"{event}: event time must be one xsd:dateTime", errors)
     if len(event_times) == 1:
         current = next(iter(event_times)).toPython()
-        for predecessor in fixture.objects(event, prov:wasInformedBy):
+        for predecessor in m{ {event} prov:wasInformedBy ?predecessor }:
             prior_times = values(fixture, predecessor, prov:endedAtTime)
             require(len(prior_times) == 1,
                     f"{event}: predecessor {predecessor} has no unique timestamp", errors)

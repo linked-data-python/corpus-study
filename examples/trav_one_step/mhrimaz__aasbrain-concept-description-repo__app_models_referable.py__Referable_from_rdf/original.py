@@ -2,10 +2,7 @@
 # region: Referable.from_rdf (lines 88-158, stratum trav_one_step)
 # licence of the source repository: see meta.json
 import rdflib
-from app.models.aas_namespace import AASNameSpace
-from app.models.has_extensions import HasExtensions
-from app.models.lang_string_name_type import LangStringNameType
-from app.models.lang_string_text_type import LangStringTextType
+from shim import AASNameSpace, HasExtensions, LangStringNameType, LangStringTextType, Referable
 
 @staticmethod
 def from_rdf(graph: rdflib.Graph, subject: rdflib.IdentifiedNode):

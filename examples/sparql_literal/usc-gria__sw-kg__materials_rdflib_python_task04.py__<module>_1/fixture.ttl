@@ -1,0 +1,31 @@
+# Input graph for usc-gria__sw-kg__materials_rdflib_python_task04.py__<module>_1
+# — written during translation, standing in for the missing "../rdf/example3.rdf"
+# referenced by the original notebook (not shipped with the extracted region).
+# Covers: several solutions for each of the module's five queries, the
+# join used by q5 (foaf:knows + vcard:FN), and a neighbour (ex:carol) that
+# must not match any pattern (no vcard:FN, no vcard:Family, no foaf:email).
+@prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org/> .
+
+ex:john
+    vcard:FN "John Smith"^^xsd:string ;
+    vcard:Family "Smith"^^xsd:string ;
+    vcard:Given "John"^^xsd:string ;
+    foaf:email "john@example.org" ;
+    foaf:knows ex:jane .
+
+ex:jane
+    vcard:FN "Jane Smith"^^xsd:string ;
+    vcard:Family "Smith"^^xsd:string ;
+    vcard:Given "Jane"^^xsd:string ;
+    foaf:email "jane@example.org" .
+
+ex:bob
+    vcard:FN "Bob Jones"^^xsd:string ;
+    vcard:Family "Jones"^^xsd:string ;
+    vcard:Given "Bob"^^xsd:string .
+
+ex:carol
+    vcard:Note "no FN or Family here"^^xsd:string .

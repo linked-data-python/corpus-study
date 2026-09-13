@@ -14,10 +14,15 @@
     "serialize_parse": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "s{ }"
+  ],
+  "translation_notes": [
+    "Direct mapping of g.query(TEXT) to s{ }: the UNION/FILTER query needs no rewrite beyond the island syntax. Wrote sample1.turtle as the fixture graph (not present in the extracted region) with two reified-statement encodings (explicit rdf:Statement/rdf:predicate, and a node whose own rdf:type is the predicate), plus a plain triple and an incomplete rdf:Statement as non-matching neighbours."
+  ],
   "draft_sha": "8db1f6e925a4d7ef",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.740001+00:00",
@@ -28,5 +33,11 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

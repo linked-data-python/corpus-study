@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib.namespace import OWL, XMLNS, XSD, RDF, RDFS
 from rdflib import URIRef, BNode, Literal
-prefixes = {}
+from shim import prefixes, Initial_KG, get_attributes, get_iris
 
 def triplify(df):
     kg = Initial_KG()

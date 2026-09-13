@@ -12,9 +12,6 @@ from cognite.neat._v0.core._utils.rdf_ import (
     remove_instance_ids_in_batch,
     remove_namespace_from_uri,
 )
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-
 def _edge_triples(
     self,
     graph: Graph,
@@ -23,12 +20,25 @@ def _edge_triples(
     instance_count: int,
     lookup_entity_with_external_id: Callable[[str, str], URIRef],
 ) -> Iterable[Triple]:
-    query = self._instances.format(namespace=self._namespace, source_type=source_type, target_type=target_type)
+    # self._namespace is a runtime instance attribute (a Namespace built
+    # from CLASSIC_CDF_NAMESPACE), not a value known when this file is
+    # transpiled, so @prefix classic: <{self._namespace}> is rejected by
+    # the transpiler ("prefixe non declare"): @prefix only binds a literal
+    # IRI. Every classic: term is therefore interpolated instead of
+    # written under a prefix -- see translation_notes.
     total_instance_count = instance_count if self._limit_per_type is None else self._limit_per_type
 
     converted_relationships: list[URIRef] = []
     for no, result in enumerate(
-        iterate_progress_bar(graph.query(query), total=total_instance_count, description="Relationships to edges")
+        iterate_progress_bar(
+            s{
+                SELECT ?instance WHERE {
+                    ?instance a {self._namespace.Relationship} .
+                    ?instance {self._namespace.sourceType} {self._namespace[source_type]} .
+                    ?instance {self._namespace.targetType} {self._namespace[target_type]} .
+                }
+            }(graph),
+            total=total_instance_count, description="Relationships to edges")
     ):
         if self._limit_per_type is not None and no >= self._limit_per_type:
             break

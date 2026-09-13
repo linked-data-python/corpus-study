@@ -13,11 +13,16 @@
     "graph_ctor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "prefixes: RDF->rdf",
+    "the .add() inside the loop is an isolated triple write per iteration: @graph new_graph designates the receiver once, +{ } replaces each .add() one-for-one."
   ],
   "draft_sha": "0464a8f85a16dcc5",
   "provenance": {
@@ -29,5 +34,11 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:filter_graph_by_subjects",
+    "diffs": [],
+    "error": null
+  }
 }

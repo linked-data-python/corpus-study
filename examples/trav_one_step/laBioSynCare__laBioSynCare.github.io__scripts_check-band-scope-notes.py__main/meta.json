@@ -15,11 +15,19 @@
     "namespace_term": 18,
     "serialize_parse": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: SSTIM->sstim, SSTIM_V->sstimv, SSTIM_EX->sstimex, RDF->rdf, SKOS->skos"
+    "prefixes: SSTIM->sstim, SSTIM_V->sstimv (with `as SSTIM_V` since the body still indexes it with SSTIM_V[name] -- a Namespace subscript, which has no island form), SSTIM_EX->sstimex, RDF->rdf, SKOS->skos.",
+    "Every graph.objects/subjects one-step read becomes m{ }; every next(graph.objects(...), None) becomes m{ }.first(); the sorted(graph.subjects(...)) traversal keeps its Python sorted() around a m{ } iterable.",
+    "module_paths()/instance_paths() (manifest + directory walk, not RDF) are outside the region's context; shim.py supplies them, pointed at fixture_module.ttl/fixture_instance.ttl for both sides. main() takes no argument, so the driver calls it with no fixture= graph -- the two ttl files ARE the fixture."
   ],
   "draft_sha": "a4fc21d46e91319b",
   "provenance": {
@@ -32,5 +40,11 @@
     "trav_one_step",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:main",
+    "diffs": [],
+    "error": null
+  }
 }

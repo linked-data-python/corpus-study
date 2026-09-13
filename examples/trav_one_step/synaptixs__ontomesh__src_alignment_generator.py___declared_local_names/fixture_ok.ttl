@@ -1,0 +1,17 @@
+@prefix ex: <http://example.org/> .
+@prefix ex2: <http://example.org/other#> .
+
+# Two subjects with distinct local names, reached through both a slash- and
+# a hash-delimited IRI.
+ex:SensorA a ex:Sensor ;
+    ex:hasLabel "Sensor A" .
+
+ex2:SensorB a ex:Sensor ;
+    ex:hasLabel "Sensor B" .
+
+# A blank-node subject must NOT contribute a local name: isinstance(s, URIRef)
+# excludes it.
+[] ex:hasLabel "anonymous, must not appear" .
+
+# A literal never appears as a subject, so no extra guard is needed there --
+# nothing to add for that case.

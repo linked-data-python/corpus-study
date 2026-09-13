@@ -7,6 +7,8 @@ import pandas as pd
 from otsrdflib import OrderedTurtleSerializer
 CIM_NS = 'http://www.ucaiug.org/grid18v15#'
 EMT_NS = 'http://opensource.ieee.org/emtiop01v01#'
+@prefix cim: <http://www.ucaiug.org/grid18v15#> as CIM .
+@prefix emt: <http://opensource.ieee.org/emtiop01v01#> as EMT .
 
 def create_cim_ic (case):
   bus_ic = None
@@ -29,10 +31,7 @@ def create_cim_ic (case):
     #print (br_ic)
 
   g = rdflib.Graph() # (store='Oxigraph')
-  CIM = rdflib.Namespace (CIM_NS)
-  g.bind('cim', CIM)
-  EMT = rdflib.Namespace (EMT_NS)
-  g.bind('emt', EMT)
+  @graph g
 
   for i in range(len(bus_ic)):
     bus = bus_ic.iloc[i,0]
@@ -44,18 +43,18 @@ def create_cim_ic (case):
     # temporary TopologicalNode for compliance with base CIM
     tnid = cnid+'_TN'
     tn = rdflib.URIRef (tnid)
-    g += g{ {tn} {rdflib.RDF.type} {rdflib.URIRef (CIM_NS + 'TopologicalNode')} }
+    +{ {tn} a cim:TopologicalNode }
     cn = rdflib.URIRef (cnid)
-    g += g{
-        {cn} {rdflib.RDF.type} {rdflib.URIRef (CIM_NS + 'ConnectivityNode')} ;
-           {rdflib.URIRef (CIM_NS + 'ConnectivityNode.TopologicalNode')} {rdflib.URIRef(tnid)}
+    +{
+        {cn} a cim:ConnectivityNode ;
+           cim:ConnectivityNode.TopologicalNode {rdflib.URIRef(tnid)}
     }
     sv = rdflib.URIRef (cnid+'_SvV')
-    g += g{
-        {sv} {rdflib.RDF.type} {rdflib.URIRef (CIM_NS + 'SvVoltage')} ;
-           {rdflib.URIRef (CIM_NS + 'SvVoltage.TopologicalNode')} {rdflib.URIRef(tnid)} ;
-           {rdflib.URIRef (CIM_NS + 'SvVoltage.v')} {rdflib.Literal (vmag, datatype=CIM.Voltage)} ;
-           {rdflib.URIRef (CIM_NS + 'SvVoltage.angle')} {rdflib.Literal (deg, datatype=CIM.AngleDegrees)}
+    +{
+        {sv} a cim:SvVoltage ;
+           cim:SvVoltage.TopologicalNode {rdflib.URIRef(tnid)} ;
+           cim:SvVoltage.v {vmag}^^cim:Voltage ;
+           cim:SvVoltage.angle {deg}^^cim:AngleDegrees
     }
 
   for i in range(len(br_ic)):
@@ -73,15 +72,15 @@ def create_cim_ic (case):
     else:
       sv1 = rdflib.URIRef (eqid+'_SvLinePF_1')
       sv2 = rdflib.URIRef (eqid+'_SvLinePF_2')
-    g += g{
-        {sv1} {rdflib.RDF.type} {rdflib.URIRef (CIM_NS + 'SvPowerFlow')} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.Terminal')} {rdflib.URIRef(t1id)} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.p')} {rdflib.Literal (p1, datatype=CIM.ActivePower)} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.q')} {rdflib.Literal (q1, datatype=CIM.ReactivePower)} .
-        {sv2} {rdflib.RDF.type} {rdflib.URIRef (CIM_NS + 'SvPowerFlow')} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.Terminal')} {rdflib.URIRef(t2id)} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.p')} {rdflib.Literal (p2, datatype=CIM.ActivePower)} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.q')} {rdflib.Literal (q2, datatype=CIM.ReactivePower)}
+    +{
+        {sv1} a cim:SvPowerFlow ;
+           cim:SvPowerFlow.Terminal {rdflib.URIRef(t1id)} ;
+           cim:SvPowerFlow.p {p1}^^cim:ActivePower ;
+           cim:SvPowerFlow.q {q1}^^cim:ReactivePower .
+        {sv2} a cim:SvPowerFlow ;
+           cim:SvPowerFlow.Terminal {rdflib.URIRef(t2id)} ;
+           cim:SvPowerFlow.p {p2}^^cim:ActivePower ;
+           cim:SvPowerFlow.q {q2}^^cim:ReactivePower
     }
 
   # positive generation sign changes to follow load convention, into the From bus
@@ -91,11 +90,11 @@ def create_cim_ic (case):
     t1id = gen_ic.iloc[i,4]
     eqid = t1id.split('_')[0]
     sv = rdflib.URIRef (eqid+'_SvGenPF')
-    g += g{
-        {sv} {rdflib.RDF.type} {rdflib.URIRef (CIM_NS + 'SvPowerFlow')} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.Terminal')} {rdflib.URIRef(t1id)} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.p')} {rdflib.Literal (p1, datatype=CIM.ActivePower)} ;
-           {rdflib.URIRef (CIM_NS + 'SvPowerFlow.q')} {rdflib.Literal (q1, datatype=CIM.ReactivePower)}
+    +{
+        {sv} a cim:SvPowerFlow ;
+           cim:SvPowerFlow.Terminal {rdflib.URIRef(t1id)} ;
+           cim:SvPowerFlow.p {p1}^^cim:ActivePower ;
+           cim:SvPowerFlow.q {q1}^^cim:ReactivePower
     }
 
   serializer = OrderedTurtleSerializer(g)

@@ -12,11 +12,21 @@
   "categories": {
     "namespace_term": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "prefixes: RDF->rdf",
+    "the three g.value(node, RDF.X) reads become m{ {node} rdf:X ?v }(graph).first(), one island each -- no join, since the original consumes each predicate independently and a join would change cardinality if any predicate repeated.",
+    "context shim shim_encoding.py stands in for starlight.model.encoding (TT_NS), fetched from the real commit b7973da2b5 so the guard is faithful to the source.",
+    "oracle in meta.json says isomorphism (stratum default) but the region returns a value tuple, not a graph -- driver.py uses entry+calls (values oracle) instead, per corpus/405."
   ],
   "draft_sha": "764913785606026f",
   "provenance": {
@@ -28,5 +38,11 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_decode_tt_hash",
+    "diffs": [],
+    "error": null
+  }
 }

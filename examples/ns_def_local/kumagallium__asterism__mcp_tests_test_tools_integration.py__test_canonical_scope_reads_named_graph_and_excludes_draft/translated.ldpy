@@ -27,15 +27,11 @@ async def test_canonical_scope_reads_named_graph_and_excludes_draft() -> None:
     ds = rdflib.Dataset()  # default_union=False: GRAPH-less reads only default
     canon = ds.graph(rdflib.URIRef(canonical_graph_iri("ds1")))
     draft = ds.graph(rdflib.URIRef(draft_graph_iri("ds2")))
-    sd = rdflib.Namespace(SD)
-    canon += g{
-        <https://ex/s/c1> {rdflib.RDF.type} {sd.Sample} ;
-           {sd.compositionString} "CanonComp"
-    }
-    draft += g{
-        <https://ex/s/d1> {rdflib.RDF.type} {sd.Sample} ;
-           {sd.compositionString} "DraftComp"
-    }
+    @prefix sd: f<{SD}> .
+    @graph canon
+    +{ <https://ex/s/c1> a sd:Sample ; sd:compositionString "CanonComp" }
+    @graph draft
+    +{ <https://ex/s/d1> a sd:Sample ; sd:compositionString "DraftComp" }
     _flag_promoted(ds, canonical_graph_iri("ds1"))  # ds1 promoted; ds2 is an unflagged draft
 
     class _C:

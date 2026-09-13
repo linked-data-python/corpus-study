@@ -1,0 +1,22 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <https://ontology.example.com/enterprise/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+ex:hasPart a owl:ObjectProperty ;
+    rdfs:domain ex:Assembly ;
+    rdfs:domain ex:Kit ;
+    rdfs:range owl:Thing .
+
+ex:hasOwner a owl:ObjectProperty ;
+    rdfs:range owl:Thing .
+
+_:r1 a owl:Restriction .
+_:r2 a owl:Restriction .
+
+ex:activity1 a ex:DerivationActivity .
+ex:activity2 a ex:DerivationActivity .
+ex:extent1 a ex:TemporalExtent .
+ex:qty1 a ex:QuantityValue .
+ex:part1 a ex:Participation .

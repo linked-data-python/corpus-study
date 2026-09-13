@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 import json
 from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
+from ontouml_shim import get_output_artifact
 PROV = Namespace("http://www.w3.org/ns/prov#")
 
 def get_recorded_configuration(metadata_graph: Graph) -> dict[str, object]:

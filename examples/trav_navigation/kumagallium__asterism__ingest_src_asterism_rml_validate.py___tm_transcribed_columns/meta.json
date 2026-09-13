@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "@graph",
+    "m{ }",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "graph.objects(tm, uri(_R2RML + \"predicateObjectMap\")) then graph.objects(pom, uri(_R2RML + \"objectMap\")) is a genuine two-step chain (every pom must have come from tm, every om from pom -- not independently optional siblings), so it becomes one joined `for pom, om in m{ {tm} r2rml:predicateObjectMap ?pom . ?pom r2rml:objectMap ?om }`, matching the nested-loop cross product exactly.",
+    "the remaining graph.objects(om, uri(X)) calls use predicates that are only known at run time (drawn from tuples like _TERM_TYPE_PREDS, _REFERENCE_PREDS, _FUNCTION_EXECUTION_PREDS mixing rml/fnml-old/r2rml variants), so they stay individual m{ {om} {uri(pred)} ?v } with the predicate interpolated -- m{ } takes a written pattern, not a dynamic list of alternative predicates, so the Python-level `for pred in PREDS:` loop around it could not be folded in.",
+    "context shim (rml_context.py) reconstructs _local_name and the recursive _fn_source_columns helper (and the _RMLF/_FNML_OLD/_INPUT_PREDS/_INPUT_VALUE_MAP_PREDS constants they need) verbatim from the upstream source at the pinned commit; _REFERENCE_PREDS/_FUNCTION_EXECUTION_PREDS/_R2RML/_TERM_TYPE_PREDS are the region's own module-level constants and stay in original.py/translated.ldpy.",
+    "classified minor-restructuring rather than directly-expressible only because of the predicate-interpolation workaround needed for the dynamic term-type/reference/function predicates -- the traversal shape itself (the join) is a direct fit."
+  ],
   "draft_sha": "440e65ea25f9b03e",
   "provenance": {
     "generated_at": "2026-08-28T17:55:01.615287+00:00",
@@ -24,5 +35,11 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_tm_transcribed_columns",
+    "diffs": [],
+    "error": null
+  }
 }

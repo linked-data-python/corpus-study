@@ -13,10 +13,11 @@
     "graph_write": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "s{ }", ".execute()", "call suffix (g)", "prefixed name", "typed literal"],
   "translation_notes": [
-    "prefixes: XSD->xsd, METADATA->metadata"
+    "prefixes: XSD->xsd, METADATA->metadata, KTBS_NS_URI(default)->:",
+    "excluded (see driver.py): `from rdfrest.exceptions import InvalidDataError` already fails with ModuleNotFoundError -- rdfrest is ktbs's own REST-resource framework, not a leaf dependency a context shim can stand in for. post_graph is a method on the rdfrest resource class StoredTrace (self.get_base(), self.obsel_collection.edit(), super(StoredTrace, self).post_graph, self.trace_statistics): executing it faithfully means standing up ktbs's resource store, which the batch protocol rules out for a shim ('n'inventez pas de logique'). The translation itself is believed correct but unverifiable: `graph.query(_SELECT_CANDIDATE_OBSELS, initBindings=binding)` becomes `_SELECT_CANDIDATE_OBSELS(graph)(bindings={...}).execute()` because `trace` is projected in the SELECT list ($trace), matching the bind_initbindings rule 'sinon s{ }(bindings=...)'. The `PREFIX : <%s#>` line, built by %-formatting KTBS_NS_URI into the query prologue, becomes `@prefix : <http://liris.cnrs.fr/silex/2009/ktbs#> .` with the value inlined literally, the same trade-off noted in the sibling region hidden-graph/rdflib-starlight/.../test_nonmatching_fact_yields_zero_rows: @prefix's IRI is lexical, so a Python constant used only to parametrise a namespace cannot be interpolated the way a term-position value would be -- harmless here since KTBS_NS_URI is itself a compile-time constant."
   ],
   "draft_sha": "b1ddfb61fda3ac95",
   "provenance": {

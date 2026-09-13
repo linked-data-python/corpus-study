@@ -12,11 +12,16 @@
   "categories": {
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "IRI"
+  ],
   "translation_notes": [
-    "prefixes: SH->sh"
+    "prefixes: SH->sh -- but SH (imported by the region's own context line, `from etk.knowledge_graph.shacl import SH, SHACL, SHACLOntoConverter`) is never used as a term anywhere in test_cnode's own body: the region's only RDF operations are the two `rdflib.URIRef('http://example.org/...')` calls, so there is nothing to bind a prefix to. SH/SHACL stay plain (unused) imports, same reasoning as johnjung/metadata_converters' BASE in this stratum: a mixed import list is legal, only names actually used as namespaces become prefixes.",
+    "`rdflib.URIRef('http://example.org/Person')` -> `<http://example.org/Person>`, dropping the constructor call entirely rather than keeping `rdflib.<...>` (the mechanical draft's mistake): an absolute-IRI island is a term, not a call, so `rdflib.` in front of it is not legal syntax -- the transpiler rejects it. No @base is in scope, and no prefix is declared or needed for an absolute IRI.",
+    "Restoring the binding (AGENT_BATCH's 163-regions case): test_cnode's `self` needs only the three unittest assert methods it calls (assertIsInstance x3, assertEqual, assertNotEqual) -- verified against the pinned commit that TestSHACLOntoConverter carries no setUp/fixture this test relies on -- so a plain `unittest.TestCase()` instance is a faithful `self`, not an invented stand-in. Appended demo() (identical on both sides) calls test_cnode(case) and returns a sentinel string: the region's whole effect is raising on a failing assertion, so 'did not raise' needs an explicit observable or run_pair reports 'nothing observable to compare'.",
+    "etk.knowledge_graph.node/etk.knowledge_graph.shacl are not installed (etk is not a pip package here): etk_context.py copies Node/URI/BNode/Literal/SHACLOntoConverter.__init__/.cnode/.class_nodes verbatim from the pinned commit. LiteralType is stubbed to its URI-subclass identity only (the real class is a ~130-line regex-based xsd/rdf datatype validator, not reached by test_cnode at all), and SHACL/Graph are stubbed to what SHACLOntoConverter.__init__ touches (a no-op .bind()) -- none of these three are exercised by the region under test."
   ],
   "draft_sha": "278d95f1b9e43781",
   "provenance": {
@@ -28,5 +33,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:demo",
+    "diffs": [],
+    "error": null
+  }
 }

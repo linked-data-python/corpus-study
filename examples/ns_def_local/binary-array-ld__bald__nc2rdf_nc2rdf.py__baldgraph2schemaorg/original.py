@@ -1,10 +1,11 @@
 # Extracted from binary-array-ld/bald@ca59666abe : nc2rdf/nc2rdf.py
 # region: baldgraph2schemaorg (lines 29-95, stratum ns_def_local)
 # licence of the source repository: see meta.json
-import bald
 import rdflib
 import json
 from rdflib import Namespace, BNode, URIRef, Literal
+import _shim as bald
+from _shim import isUrl, getBasename
 
 def baldgraph2schemaorg(graph, path=None, baseuri=None):
     """

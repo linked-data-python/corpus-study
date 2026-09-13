@@ -27,6 +27,6 @@ from rdflib.namespace import DefinedNamespace, Namespace
 
 
 class AASNameSpace:
-    AAS = Namespace("https://admin-shell.io/aas/3/0/")
-    CD_TYPE = rdflib.URIRef(AAS["ConceptDescription"])
-    ID = rdflib.URIRef(AAS["Identifiable/id"])
+    @prefix aas: <https://admin-shell.io/aas/3/0/> as AAS .
+    CD_TYPE = aas:ConceptDescription
+    ID = aas:{"Identifiable/id"}

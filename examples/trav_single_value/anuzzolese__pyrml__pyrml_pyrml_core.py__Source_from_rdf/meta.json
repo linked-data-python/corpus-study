@@ -14,11 +14,19 @@
     "namespace_term": 1,
     "term_constructor": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "the three simple existence checks (g.value(source, csvw:url)/sd:endpoint/d2rq:jdbcDSN, called with 2 positional args so `default` stays None) translate cleanly to m{ {source} {prop} ?v }(g).first().",
+    "the final g.value(None, RDF.type, rml_vocab.D2RQ_NS.Database, True) could NOT be translated: its 4th positional argument is g.value's `default` parameter, not a unique/any flag -- a real bug in pyrml (an unmatched pattern silently returns True instead of None, and 'if db:' then fires unconditionally, causing an early return of [SQLSource.from_rdf(g, True)] on the very first source that reaches the else branch). m{ }.first() has no `default=` to reproduce this with, so this one call is left as native g.value(...) in translated.ldpy, verbatim, to keep both sides equally (and identically) buggy. Classified awkward rather than directly-expressible for this reason -- flagged, not forced.",
+    "context_shim.py stands in for pyrml/rml_vocab.py (real namespace IRIs, fetched from the pinned commit) plus minimal Source/SQLSource stand-ins for the region's two external calls; Source.__build is assigned outside the class body so its name is not mangled, matching how the extracted top-level function (originally a class body statement) resolves `Source.__build` unmangled once it lives outside the class.",
+    "fixture.ttl uses two parents: parent1 exercises the three m{ }.first() islands for real (literal/table/sparql/sql sources), parent3 isolates the default-argument bug so both sides return [None] on it; parent2 is neighbourhood that must not match."
   ],
   "draft_sha": "a452720003d4f3ca",
   "provenance": {
@@ -31,5 +39,11 @@
     "trav_single_value",
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:from_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

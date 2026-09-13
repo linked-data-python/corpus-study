@@ -15,11 +15,18 @@
     "namespace_term": 7,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "prefixes: RDF->rdf, RDFS->rdfs, plus the two ns_def_local locals ontosyn and ontospecies (both Namespace(\"...\") built inside the function body), all as @prefix declarations.",
+    "Both local namespaces are only ever used through attribute access (ontosyn.hasChemicalOutput, ontospecies.Species, ontospecies.hasProductName) to build terms, never passed around as objects, so no `as NAME` binding is needed.",
+    "_select_uris is called by the original but not defined in the extracted lines (163/1196 case): added species_context.py, a minimal shim reconstructing it as a plain SELECT-?uri runner, imported identically by original.py and translated.ldpy.",
+    "The embedded PREFIX ontosyn:/ontospecies: lines inside the f-string SPARQL query text (sparql_literal, not this stratum) are left untouched."
   ],
   "draft_sha": "2672d2bd20b8974c",
   "provenance": {
@@ -31,5 +38,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_find_species_for_synthesis",
+    "diffs": [],
+    "error": null
+  }
 }

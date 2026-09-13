@@ -1,4 +1,29 @@
-# Input graph for mhrimaz__aasbrain-concept-description-repo__app_models_referable.py__Referable_from_rdf — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@base <https://admin-shell.io/aas/3/0/> .
+
+# The referable under test: a category, an idShort, two display names,
+# and one description.
+ex:subject <Referable/category> "TemperatureSensor" ;
+    <Referable/idShort> "sensor01" ;
+    <Referable/displayName> ex:displayEn, ex:displayDe ;
+    <Referable/description> ex:desc1 .
+
+ex:displayEn <AbstractLangString/language> "en" ;
+    <AbstractLangString/text> "Temperature Sensor" .
+
+ex:displayDe <AbstractLangString/language> "de" ;
+    <AbstractLangString/text> "Temperatursensor" .
+
+ex:desc1 <AbstractLangString/language> "en" ;
+    <AbstractLangString/text> "Measures ambient temperature." .
+
+# ex:noCategory has no category, no idShort, no displayName, no description
+# at all -- the zero-solution case for every next(..., None) in the region.
+ex:noCategory a ex:SomeOtherType .
+
+# Neighbour that must NOT match: a different subject carrying the same
+# predicates, and a display-name blank structure missing its text.
+ex:otherSubject <Referable/category> "Unrelated" .
+
+ex:noCategory <Referable/displayName> ex:displayNoText .
+ex:displayNoText <AbstractLangString/language> "fr" .

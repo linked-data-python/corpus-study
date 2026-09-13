@@ -3,6 +3,8 @@
 # licence of the source repository: see meta.json
 from typing import Any
 
+from context_shim import _blank_node_labels
+
 def _canonicalize_shacl(turtle_text: str) -> str:
     """Byte-stable form of ShaclGenerator output.
 

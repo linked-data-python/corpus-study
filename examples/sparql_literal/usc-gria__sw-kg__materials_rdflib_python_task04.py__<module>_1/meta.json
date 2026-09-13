@@ -17,12 +17,25 @@
     "sparql": 10,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [
-    "prefixes: VCARD->vcard, XSD->xsd, FOAF->foaf"
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "typed literal",
+    "prefixed name",
+    "variable",
+    "call suffix (g)"
   ],
+  "translation_notes": [
+    "prefixes: VCARD->vcard, XSD->xsd, FOAF->foaf",
+    "The notebook parses \"../rdf/example3.rdf\", a file not shipped with the extracted region; original.py and translated.ldpy both load fixture.ttl instead (module-level exec, executability edit only, per AGENT_BATCH.md).",
+    "fixture.ttl is a real graph (john/jane/bob/carol) exercising all 5 queries, including the foaf:knows join of q5 and a non-matching neighbour (ex:carol): this is not a hollow-graph pass, module-level stdout differs whenever a query result differs.",
+    "q3 and q5 bind ?Family / ?JaneSmithFullName via initBindings, but neither variable is projected: per the bind_initbindings rule the bound value is written directly as a typed literal term in the pattern (\"Smith\"^^xsd:string, \"Jane Smith\"^^xsd:string) instead of passed as a binding.",
+    "prepareQuery(...) + g.query(query, initNs=...) becomes s{ } bound once and called on the graph (q1(g), ...); no s{ } was needed where m{ } would have sufficed, since every query here is a genuine SELECT the module treats as a query object, matching the sparql_literal stratum.",
+    "VCARD.Given is printed as a plain Python value outside any island in q5's last line, so @prefix vcard: <...> as VCARD binds the Namespace object for that use; the other prefixes (xsd, foaf) are only ever used inside islands and need no 'as' binding."
+  ],
+  "article_candidate": true,
   "draft_sha": "a10396cb350e32ef",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.912763+00:00",
@@ -34,5 +47,11 @@
     "sparql_literal",
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

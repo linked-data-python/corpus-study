@@ -4,8 +4,11 @@
 from typing import Dict, List, Any, Optional
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS
+from species_context import _select_uris
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix ontospecies: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
 
 
 def _find_species_for_synthesis(graph: Graph, synth: URIRef) -> List[URIRef]:
@@ -31,8 +34,6 @@ def _find_species_for_synthesis(graph: Graph, synth: URIRef) -> List[URIRef]:
             resolved.append(uri)
 
     # Fallback 1: resolve species by synthesis label / ChemicalOutput label matching.
-    ontosyn = Namespace("https://www.theworldavatar.com/kg/OntoSyn/")
-    ontospecies = Namespace("http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#")
 
     def _normalize_product_name(value: str) -> str:
         text = str(value or "").strip().lower()
@@ -45,7 +46,7 @@ def _find_species_for_synthesis(graph: Graph, synth: URIRef) -> List[URIRef]:
         norm = _normalize_product_name(str(label))
         if norm:
             target_names.add(norm)
-    for out in graph.objects(synth, ontosyn.hasChemicalOutput):
+    for out in graph.objects(synth, ontosyn:hasChemicalOutput):
         for label in graph.objects(out, rdfs:label):
             norm = _normalize_product_name(str(label))
             if norm:
@@ -54,13 +55,13 @@ def _find_species_for_synthesis(graph: Graph, synth: URIRef) -> List[URIRef]:
     if not target_names:
         return resolved
 
-    for species in graph.subjects(rdf:type, ontospecies.Species):
+    for species in graph.subjects(rdf:type, ontospecies:Species):
         species_names: set[str] = set()
         for label in graph.objects(species, rdfs:label):
             norm = _normalize_product_name(str(label))
             if norm:
                 species_names.add(norm)
-        for product_name in graph.objects(species, ontospecies.hasProductName):
+        for product_name in graph.objects(species, ontospecies:hasProductName):
             norm = _normalize_product_name(str(product_name))
             if norm:
                 species_names.add(norm)

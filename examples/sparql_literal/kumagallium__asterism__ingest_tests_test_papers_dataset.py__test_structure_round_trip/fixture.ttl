@@ -1,4 +1,63 @@
-# Input graph for kumagallium__asterism__ingest_tests_test_papers_dataset.py__test_structure_round_trip — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for
+# kumagallium__asterism__ingest_tests_test_papers_dataset.py__test_structure_round_trip.
+#
+# A small, hand-authored stand-in for the real datasets/papers/seed/paper.ttl
+# (521 KB, produced by a JATS parser) that _seed_ttl() reads in the source
+# repository -- restoring it verbatim would dwarf the region it feeds. This
+# graph keeps exactly the shape the region's two queries read:
+#   * the paper -> section -> paragraph -> sentence po:contains chain (the
+#     region's "down" query), with TWO complete chains so LIMIT 1 has more
+#     than one candidate to discard;
+#   * each chain's up-links (para -> its sec via po:contains, sentence's
+#     prov:wasQuotedFrom / nif:referenceContext) so the "up" query, given
+#     whichever sentence "down" picked, resolves back to the same paper/sec;
+# Neighbourhood that must NOT match:
+#   * sec3/para3/sent3: para3 is linked but never typed doco:Paragraph, so
+#     the "down" pattern (?para a doco:Paragraph) must skip it;
+#   * a second paper's own complete chain: {rdflib.URIRef(PAPER)} in the
+#     "down" query is interpolated as the exact subject, not a wildcard, so
+#     this decoy chain must never surface in the result.
+@prefix po: <http://www.essepuntato.it/2008/12/pattern#> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix nif: <http://persistence.uni-leipzig.de/nlp2rdf/ontologies/nif-core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+<https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533>
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/sec/1> ,
+                <https://kumagallium.github.io/asterism/papers/resource/sec/2> ,
+                <https://kumagallium.github.io/asterism/papers/resource/sec/3> .
+
+<https://kumagallium.github.io/asterism/papers/resource/sec/1> a doco:Section ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/para/1> .
+<https://kumagallium.github.io/asterism/papers/resource/para/1> a doco:Paragraph ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/sent/1> .
+<https://kumagallium.github.io/asterism/papers/resource/sent/1> a doco:Sentence ;
+    prov:wasQuotedFrom <https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533> ;
+    nif:referenceContext <https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533/fulltext> .
+
+<https://kumagallium.github.io/asterism/papers/resource/sec/2> a doco:Section ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/para/2> .
+<https://kumagallium.github.io/asterism/papers/resource/para/2> a doco:Paragraph ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/sent/2> .
+<https://kumagallium.github.io/asterism/papers/resource/sent/2> a doco:Sentence ;
+    prov:wasQuotedFrom <https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533> ;
+    nif:referenceContext <https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533/fulltext> .
+
+# Neighbourhood: linked but untyped -- must not satisfy "?para a doco:Paragraph".
+<https://kumagallium.github.io/asterism/papers/resource/sec/3> a doco:Section ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/para/3> .
+<https://kumagallium.github.io/asterism/papers/resource/para/3>
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/sent/3> .
+<https://kumagallium.github.io/asterism/papers/resource/sent/3> a doco:Sentence .
+
+# Neighbourhood: a different paper's own complete chain -- must not match a
+# query whose subject is interpolated as the exact PAPER IRI.
+<https://kumagallium.github.io/asterism/papers/resource/paper/OTHER>
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/sec/X> .
+<https://kumagallium.github.io/asterism/papers/resource/sec/X> a doco:Section ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/para/X> .
+<https://kumagallium.github.io/asterism/papers/resource/para/X> a doco:Paragraph ;
+    po:contains <https://kumagallium.github.io/asterism/papers/resource/sent/X> .
+<https://kumagallium.github.io/asterism/papers/resource/sent/X> a doco:Sentence ;
+    prov:wasQuotedFrom <https://kumagallium.github.io/asterism/papers/resource/paper/OTHER> ;
+    nif:referenceContext <https://kumagallium.github.io/asterism/papers/resource/paper/OTHER/fulltext> .

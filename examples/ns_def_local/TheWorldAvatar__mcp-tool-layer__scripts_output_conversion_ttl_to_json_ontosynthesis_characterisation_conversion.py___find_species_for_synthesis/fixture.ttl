@@ -2,3 +2,32 @@
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix synth: <http://example.org/synth/> .
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix ontospecies: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# --- direct-hit case: two chemical outputs typed Species (multiple solutions) ---
+synth:direct ontosyn:hasChemicalOutput ex:species1 , ex:species2 , ex:notASpecies .
+ex:species1 a ontospecies:Species .
+ex:species2 a ontospecies:Species .
+# ex:notASpecies is a chemical output but NOT typed Species: neighbour that
+# must not appear among the direct hits.
+
+# --- fallback case: no direct (synth, chemicalOutput, Species) triple ---
+synth:fallback rdfs:label "Widget Synthesis" .
+synth:fallback ontosyn:hasChemicalOutput ex:widgetOutput .
+ex:widgetOutput rdfs:label "Gadget Synthesis" .
+
+ex:speciesA a ontospecies:Species ;
+    rdfs:label "widget" .
+ex:speciesB a ontospecies:Species ;
+    ontospecies:hasProductName "gadget" .
+ex:speciesC a ontospecies:Species ;
+    rdfs:label "unrelated" .
+# ex:speciesC is a neighbouring Species whose normalised name matches
+# neither target name: must not be resolved.
+
+# --- zero-solution case: no label, no chemical output ---
+synth:none a ontosyn:Synthesis .

@@ -2,6 +2,12 @@
 # region: collect (lines 221-268, stratum ns_def_local)
 # licence of the source repository: see meta.json
 from typing import Any, Dict, List, Optional, Tuple
+import rdflib
+from _shim import (
+    _turtle_files, _parse_all, _authored_graph, _count_predicate_objects,
+    _multi_domain, _alignment_unbound, _malformed_iris, _cq_rows,
+    _pitfall_counts,
+)
 
 def collect(output_dir: str) -> Dict[str, Any]:
     paths = _turtle_files(output_dir)

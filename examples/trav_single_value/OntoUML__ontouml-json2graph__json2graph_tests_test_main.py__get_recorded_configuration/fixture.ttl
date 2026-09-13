@@ -1,4 +1,25 @@
-# Input graph for OntoUML__ontouml-json2graph__json2graph_tests_test_main.py__get_recorded_configuration — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for
+# OntoUML__ontouml-json2graph__json2graph_tests_test_main.py__get_recorded_configuration
+#
+# ex:transformation prov:used three entities (several solutions of the
+# `objects(transformation, PROV.used)` pattern the region reads): ex:config1
+# carries prov:value (the one entity the existence filter keeps -- the
+# region asserts exactly one survives), ex:config2 and ex:decoyUsed do NOT
+# (the zero-solution case for `(entity, PROV.value, None) in metadata_graph`
+# / `bool(m{ })`).  ex:otherSubject is neighbouring data (a
+# prov:generatedAtTime triple) that must not match the
+# `subjects(PROV.wasGeneratedBy, None)` pattern get_output_artifact reads.
 @prefix ex: <http://example.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+ex:artifact prov:wasGeneratedBy ex:transformation .
+
+ex:transformation prov:used ex:config1, ex:config2, ex:decoyUsed .
+
+ex:config1 prov:value "{\"scale\": 2}" .
+
+ex:config2 prov:label "not the configuration" .
+
+ex:decoyUsed prov:label "used but no recorded value" .
+
+ex:otherSubject prov:generatedAtTime "2024-01-01T00:00:00" .

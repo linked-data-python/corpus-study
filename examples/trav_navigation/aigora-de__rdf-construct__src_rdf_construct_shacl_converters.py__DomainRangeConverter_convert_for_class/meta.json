@@ -13,11 +13,20 @@
     "graph_read": 4,
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "@graph",
+    "m{ }",
+    ".first()"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd",
+    "outer subjects(RDFS.domain, cls) is a single-motif m{ ?prop rdfs:domain {cls} }; the isinstance(prop, URIRef) filter is kept verbatim since a plain m{ } can bind a blank node too.",
+    "range/label/comment are three g.value() lookups on the same prop, each independently guarded (config.include_labels, config.include_descriptions) and each tolerant of absence -- per prior trav_navigation findings, folding them into one multi-pattern m{ } would turn the missing-value case into a dropped row instead of a None, so each stays its own m{ }.first().",
+    "context shim (shacl_context.py) reconstructs PropertyConstraint, ShaclConfig and DomainRangeConverter._is_datatype/XSD_DATATYPES from the upstream source at the pinned commit."
   ],
   "draft_sha": "c5e1da88653ed03d",
   "provenance": {
@@ -29,5 +38,12 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true,
+  "validation": {
+    "status": "equivalent",
+    "method": "fixture:fixture.ttl entry:convert_for_class",
+    "diffs": [],
+    "error": null
+  }
 }

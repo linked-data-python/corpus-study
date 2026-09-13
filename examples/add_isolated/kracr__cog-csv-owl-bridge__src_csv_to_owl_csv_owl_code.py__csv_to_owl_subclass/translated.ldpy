@@ -5,8 +5,7 @@ import pandas as pd
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, RDFS, OWL, XSD
 from rdflib import Graph, Namespace
-from rdflib import Graph, Namespace
-from rdflib import URIRef, RDF, RDFS, Namespace
+from helpers import load_prefixes, _bind_prefixes_to_graph, resolve_uri, ensure_declaration, reconstruct_intersection
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -15,6 +14,7 @@ from rdflib import URIRef, RDF, RDFS, Namespace
 
 def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="subclass.owl"):
     g = Graph()
+    @graph g
     prefixes, xml_base = load_prefixes(prefix_file)
     _bind_prefixes_to_graph(g, prefixes)
     try:
@@ -40,14 +40,14 @@ def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="s
 
     def build_restriction(prop_uri, quantifier, filler_uri):
         b = BNode()
-        g += g{
+        +{
             {b} a owl:Restriction ;
                owl:onProperty {prop_uri}
         }
         if quantifier == "some":
-            g += g{ {b} owl:someValuesFrom {filler_uri} }
+            +{ {b} owl:someValuesFrom {filler_uri} }
         else:
-            g += g{ {b} owl:allValuesFrom {filler_uri} }
+            +{ {b} owl:allValuesFrom {filler_uri} }
         return b
 
     for row_idx, row in df.iterrows():
@@ -75,7 +75,7 @@ def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="s
                 ensure_declaration(g, prop_uri, owl:ObjectProperty)
                 ensure_declaration(g, filler_uri, owl:Class)
                 ensure_declaration(g, superclass_uri, owl:Class)
-                g += g{ {restriction_bnode} rdfs:subClassOf {superclass_uri} }
+                +{ {restriction_bnode} rdfs:subClassOf {superclass_uri} }
                 continue
             else:
                 print(f"[WARN] Could not resolve textual restriction in Subclass column (row {row_idx}): '{subclass_str}'")
@@ -88,27 +88,27 @@ def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="s
             for cls in class_uris:
                 ensure_declaration(g, cls, owl:Class)
             anon_cls = BNode()
-            g += g{ {anon_cls} owl:intersectionOf {reconstruct_intersection(g, class_uris)} }
+            +{ {anon_cls} owl:intersectionOf {reconstruct_intersection(g, class_uris)} }
             if superclass_uri:
-                g += g{ {anon_cls} rdfs:subClassOf {superclass_uri} }
+                +{ {anon_cls} rdfs:subClassOf {superclass_uri} }
             continue
 
         # A ⊑ (∃R.C) or (∀R.C)
         if subclass_str and on_property_uri and quantifier and superclass_uri:
             subclass_uri = resolve_uri(subclass_str, prefixes)
             restriction = BNode()
-            g += g{
+            +{
                 {restriction} a owl:Restriction ;
                    owl:onProperty {on_property_uri}
             }
             if quantifier == "some":
-                g += g{ {restriction} owl:someValuesFrom {superclass_uri} }
+                +{ {restriction} owl:someValuesFrom {superclass_uri} }
             else:
-                g += g{ {restriction} owl:allValuesFrom {superclass_uri} }
+                +{ {restriction} owl:allValuesFrom {superclass_uri} }
             ensure_declaration(g, subclass_uri, owl:Class)
             ensure_declaration(g, on_property_uri, owl:ObjectProperty)
             ensure_declaration(g, superclass_uri, owl:Class)
-            g += g{ {subclass_uri} rdfs:subClassOf {restriction} }
+            +{ {subclass_uri} rdfs:subClassOf {restriction} }
             continue
 
         # GCI row: empty Subclass but restriction columns filled -> restriction ⊑ Superclass
@@ -116,7 +116,7 @@ def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="s
             restriction_bnode = build_restriction(on_property_uri, quantifier, superclass_uri)
             ensure_declaration(g, on_property_uri, owl:ObjectProperty)
             ensure_declaration(g, superclass_uri, owl:Class)
-            g += g{ {restriction_bnode} rdfs:subClassOf {superclass_uri} }
+            +{ {restriction_bnode} rdfs:subClassOf {superclass_uri} }
             continue
 
         # Simple A ⊑ B
@@ -124,7 +124,7 @@ def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="s
             subclass_uri = resolve_uri(subclass_str, prefixes)
             ensure_declaration(g, subclass_uri, owl:Class)
             ensure_declaration(g, superclass_uri, owl:Class)
-            g += g{ {subclass_uri} rdfs:subClassOf {superclass_uri} }
+            +{ {subclass_uri} rdfs:subClassOf {superclass_uri} }
             continue
 
         if any([subclass_str, on_property_str, superclass_str, quantifier]):

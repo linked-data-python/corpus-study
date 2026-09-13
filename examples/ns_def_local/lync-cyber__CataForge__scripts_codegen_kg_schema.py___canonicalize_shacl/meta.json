@@ -19,10 +19,24 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "sh = rdflib.Namespace(...) becomes '@prefix sh: <...> as SH .': the 'as SH' binding is needed because the function also uses sh.ignoredProperties/sh[\"in\"] as ordinary Python values (loop targets, .subject_objects(pred) arguments), not just in term position.",
+    "graph.remove((None, sh.order, None)) -> '-{ ?s sh:order ?o }' (unbound variable = wildcard, matches the 'remove' stratum).",
+    "graph.remove((subject, pred, head)) -> '-{ {subject} {pred} {head} }': all three positions are fully bound Python values here (not a wildcard pattern), so this stays a precise single-triple removal, unlike the neighbouring wildcard remove above.",
+    "graph.add((subject, pred, new_head)) -> '+{ {subject} {pred} {new_head} }' under a single '@graph graph' designated once at the top of the function (graph is never reassigned, so one designation covers the whole body).",
+    "_blank_node_labels is a sibling top-level function in the source file, not visible in the extracted region/context: restored via context_shim.py (verbatim from the source repo) per AGENT_BATCH.md's context-shim convention.",
+    "The entry point takes turtle_text: str and parses its own graph, so the driver reads fixture.ttl as text and passes it directly via calls=[...] rather than through run_pair's fixture= (which would hand it a pre-parsed Graph object)."
+  ],
   "draft_sha": "55b5d7b9db518e74",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.395312+00:00",
@@ -34,5 +48,11 @@
     "ns_def_local",
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_canonicalize_shacl",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,4 +1,23 @@
-# Input graph for lync-cyber__CataForge__scripts_codegen_kg_schema.py___canonicalize_shacl — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for lync-cyber__CataForge__scripts_codegen_kg_schema.py___canonicalize_shacl
+# — written during translation. Covers several solutions of the pattern the
+# region reads (sh:order, sh:ignoredProperties, sh:in), the zero-solution
+# case (ex:Shape3 has none of them), and neighbouring triples (sh:property,
+# sh:path, sh:targetClass, rdf:type) that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:Shape1
+    a sh:NodeShape ;
+    sh:order 1 ;
+    sh:ignoredProperties ( ex:c ex:a ex:b ) ;
+    sh:property ex:PropShape1 .
+
+ex:PropShape2
+    a sh:PropertyShape ;
+    sh:order 2 ;
+    sh:in ( ex:z ex:x ex:y ) ;
+    sh:path ex:someProp .
+
+ex:Shape3
+    a sh:NodeShape ;
+    sh:targetClass ex:Foo .

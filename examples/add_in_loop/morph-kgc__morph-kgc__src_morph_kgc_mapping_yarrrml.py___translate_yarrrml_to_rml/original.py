@@ -2,6 +2,16 @@
 # region: _translate_yarrrml_to_rml (lines 584-700, stratum add_in_loop)
 # licence of the source repository: see meta.json
 import rdflib
+from shim import (
+    RDF_TYPE,
+    RML_LOGICAL_SOURCE, RML_SUBJECT_MAP, RML_QUOTED_TRIPLES_MAP,
+    RML_NON_ASSERTED_TRIPLES_MAP_CLASS, RML_JOIN_CONDITION, RML_CHILD,
+    RML_PARENT, RML_TERM_TYPE, RML_IRI, RML_BLANK_NODE, RML_GRAPH_MAP,
+    RML_PREDICATE_OBJECT_MAP, RML_PREDICATE_MAP, RML_OBJECT_MAP,
+    RML_PARENT_TRIPLES_MAP, RML_LANGUAGE_SHORTCUT, RML_DATATYPE_SHORTCUT,
+    RML_LITERAL, RML_CONSTANT,
+    _add_source, _add_template, _translate_yarrrml_function_to_rml,
+)
 
 for mapping_id, mapping_value in yarrrml_mapping['mappings'].items():
     triples_map_iri = rdflib.term.URIRef(mapping_id)

@@ -2,6 +2,7 @@
 # region: DomainRangeConverter.convert_for_class (lines 245-283, stratum trav_navigation)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
+from shacl_context import ConverterSelf, PropertyConstraint, ShaclConfig
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -17,14 +18,15 @@ def convert_for_class(
     constraints: list[PropertyConstraint] = []
 
     # Find all properties with this class as domain
-    for prop in source_graph.subjects(rdfs:domain, cls):
+    @graph source_graph
+    for prop in m{ ?prop rdfs:domain {cls} }:
         if not isinstance(prop, URIRef):
             continue
 
         constraint = PropertyConstraint(path=prop)
 
         # Get range if defined
-        range_value = source_graph.value(prop, rdfs:range)
+        range_value = m{ {prop} rdfs:range ?range }.first()
         if range_value:
             if self._is_datatype(range_value, source_graph):
                 constraint.datatype = range_value
@@ -33,13 +35,13 @@ def convert_for_class(
 
         # Add label as name if configured
         if config.include_labels:
-            label = source_graph.value(prop, rdfs:label)
+            label = m{ {prop} rdfs:label ?label }.first()
             if label:
                 constraint.name = str(label)
 
         # Add comment as description if configured
         if config.include_descriptions:
-            comment = source_graph.value(prop, rdfs:comment)
+            comment = m{ {prop} rdfs:comment ?comment }.first()
             if comment:
                 constraint.description = str(comment)
 

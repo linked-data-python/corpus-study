@@ -2,3 +2,23 @@
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ex:C1 has two restrictions among its subClassOf triples: several solutions
+# of the join the region walks.
+ex:C1 rdfs:subClassOf ex:R1, ex:R2, ex:PlainSuperclass .
+ex:R1 owl:onProperty ex:p1 ;
+      owl:someValuesFrom ex:F1 .
+ex:R2 owl:onProperty ex:p2 ;
+      owl:someValuesFrom ex:F2 .
+
+# Neighbourhood: ex:PlainSuperclass is a subClassOf of C1 but is not itself
+# a restriction (no owl:onProperty) -- must not be picked up by the join.
+ex:PlainSuperclass a owl:Class .
+
+# ex:C2 has one restriction, whose filler is F9 (not F1): used for the
+# "wrong filler" false case, distinct from true zero-solution.
+ex:C2 rdfs:subClassOf ex:R3 .
+ex:R3 owl:onProperty ex:p1 ;
+      owl:someValuesFrom ex:F9 .

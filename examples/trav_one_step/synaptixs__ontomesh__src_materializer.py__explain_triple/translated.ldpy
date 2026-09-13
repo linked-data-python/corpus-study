@@ -6,6 +6,7 @@ import os
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from rdflib import BNode, Graph, Literal, Namespace, URIRef, Variable
 from rdflib.namespace import OWL, PROV, RDF, RDFS, XSD
+from helpers import _parse_term
 @prefix toolkit: <https://ontology.example.com/toolkit/materializer/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
@@ -32,23 +33,23 @@ def explain_triple(lineage_path: str, subject: str, predicate: str,
     o = _parse_term(obj)
 
     out: List[Dict[str, Any]] = []
-    for stmt in g.subjects(rdf:type, rdf:Statement):
-        if (stmt, rdf:subject, s) not in g: continue
-        if (stmt, rdf:predicate, p) not in g: continue
-        if (stmt, rdf:object, o) not in g: continue
-        for _, _, deriv in g.triples((stmt, prov:wasDerivedFrom, None)):
-            rule = next(g.objects(deriv, toolkit:rule), None)
-            engine = next(g.objects(deriv, toolkit:engine), None)
-            bindings = next(g.objects(deriv, toolkit:bindings), None)
+    for stmt in m{ ?stmt rdf:type rdf:Statement }(g):
+        if not bool(m{ {stmt} rdf:subject {s} }(g)): continue
+        if not bool(m{ {stmt} rdf:predicate {p} }(g)): continue
+        if not bool(m{ {stmt} rdf:object {o} }(g)): continue
+        for deriv in m{ {stmt} prov:wasDerivedFrom ?deriv }(g):
+            rule = m{ {deriv} toolkit:rule ?o }(g).first()
+            engine = m{ {deriv} toolkit:engine ?o }(g).first()
+            bindings = m{ {deriv} toolkit:bindings ?o }(g).first()
             try:
                 bindings_obj = json.loads(str(bindings)) if bindings else {}
             except Exception:
                 bindings_obj = {}
             premises = []
-            for _, _, prem in g.triples((deriv, toolkit:premise, None)):
-                ps = next(g.objects(prem, rdf:subject), None)
-                pp = next(g.objects(prem, rdf:predicate), None)
-                po = next(g.objects(prem, rdf:object), None)
+            for prem in m{ {deriv} toolkit:premise ?prem }(g):
+                ps = m{ {prem} rdf:subject ?o }(g).first()
+                pp = m{ {prem} rdf:predicate ?o }(g).first()
+                po = m{ {prem} rdf:object ?o }(g).first()
                 if ps and pp and po:
                     premises.append([str(ps), str(pp), str(po)])
             out.append({

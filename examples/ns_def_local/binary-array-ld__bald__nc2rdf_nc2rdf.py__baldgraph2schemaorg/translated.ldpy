@@ -1,10 +1,11 @@
 # Extracted from binary-array-ld/bald@ca59666abe : nc2rdf/nc2rdf.py
 # region: baldgraph2schemaorg (lines 29-95, stratum ns_def_local)
 # licence of the source repository: see meta.json
-import bald
 import rdflib
 import json
 from rdflib import Namespace, BNode, URIRef, Literal
+import _shim as bald
+from _shim import isUrl, getBasename
 
 def baldgraph2schemaorg(graph, path=None, baseuri=None):
     """
@@ -43,12 +44,13 @@ def baldgraph2schemaorg(graph, path=None, baseuri=None):
     else:
        container = BNode()
 
-    so = Namespace("http://schema.org/")
-    schema_g += g{ {container} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> {so.Dataset} }
+    @prefix so: <http://schema.org/> .
+    @graph schema_g
+    +{ {container} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> so:Dataset }
 
     if path is not None and isUrl(path):
        predUri = <http://schema.org/url>
-       schema_g += g{ {container} {predUri} {URIRef(path)} }
+       +{ {container} {predUri} {URIRef(path)} }
 
     for row in qres:
        currField = getBasename(str(row[0])).strip()
@@ -61,12 +63,12 @@ def baldgraph2schemaorg(graph, path=None, baseuri=None):
                 if len(kw) == 0:
                    continue
                 lit = Literal(kw)
-                schema_g += g{ {container} {predUri} {lit} }
+                +{ {container} {predUri} {lit} }
              continue
 
           #print('schemaorg:' + mapping_idx[currField], "\t", row[1])
           lit = Literal(row[1])
-          schema_g += g{ {container} {predUri} {lit} }
+          +{ {container} {predUri} {lit} }
     #
     # Add some distrbution details
     #

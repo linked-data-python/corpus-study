@@ -1,16 +1,28 @@
 # Extracted from aminedouiri/knowledge-formalization-web-application@0a8007ff46 : apps/visualisation/views.py
 # region: visualisation (lines 9-120, stratum sparql_literal)
 # licence of the source repository: see meta.json
-from django.shortcuts import render
-import rdflib 
-from apps.connaissance.models import Connaissance
-from apps.commentaire.models import Commentaire
+# Context shim: `render`/`Connaissance`/`Commentaire` come from ./context.py
+# (see meta.json), a stand-in for Django and the sibling apps that are not
+# available outside the project. `visualisation` also gained six defaulted
+# path parameters, one per ontology file it parses: the function otherwise
+# takes no graph and reads six hardcoded paths, so this is the 163-region
+# case of restoring a binding the extracted region cannot otherwise carry
+# (design record corpus/403 s6). Called with no arguments it behaves exactly
+# as before.
+import rdflib
+from context import render, Connaissance, Commentaire
 
-def visualisation(request):
-    #Tache 
+def visualisation(request,
+                   tache_path="apps/connaissance/static/viz-onto/viz_tache.ttl",
+                   activite_path="apps/connaissance/static/viz-onto/viz_activite.ttl",
+                   historique_path="apps/connaissance/static/viz-onto/viz_historique.ttl",
+                   phenomene_path="apps/connaissance/static/viz-onto/viz_phenomene.ttl",
+                   domaine_path="apps/connaissance/static/viz-onto/viz_domaine.ttl",
+                   strategie_path="apps/connaissance/static/viz-onto/viz_strategie.ttl"):
+    #Tache
 
     g_tache = rdflib.Graph()
-    g_tache.parse("apps/connaissance/static/viz-onto/viz_tache.ttl")
+    g_tache.parse(tache_path)
     query_tache = """
     SELECT ?tache
     WHERE {
@@ -26,7 +38,7 @@ def visualisation(request):
 
     #Activite
     g_activite = rdflib.Graph()
-    g_activite.parse("apps/connaissance/static/viz-onto/viz_activite.ttl")
+    g_activite.parse(activite_path)
     query_activite = """
     SELECT ?activite
     WHERE {
@@ -41,7 +53,7 @@ def visualisation(request):
 
     #Historique
     g_historique = rdflib.Graph()
-    g_historique.parse("apps/connaissance/static/viz-onto/viz_historique.ttl")
+    g_historique.parse(historique_path)
     query_historique = """
     SELECT ?generation
     WHERE {
@@ -56,7 +68,7 @@ def visualisation(request):
 
     #Phenomenes
     g_phenomene = rdflib.Graph()
-    g_phenomene.parse("apps/connaissance/static/viz-onto/viz_phenomene.ttl")
+    g_phenomene.parse(phenomene_path)
     query_phenomene = """
     SELECT ?phenomene
     WHERE {
@@ -72,7 +84,7 @@ def visualisation(request):
 
     #Domaines
     g_domaine = rdflib.Graph()
-    g_domaine.parse("apps/connaissance/static/viz-onto/viz_domaine.ttl")
+    g_domaine.parse(domaine_path)
     query_domaine = """
     SELECT ?domaine
     WHERE {
@@ -87,7 +99,7 @@ def visualisation(request):
 
     #Strategique
     g_strategie = rdflib.Graph()
-    g_strategie.parse("apps/connaissance/static/viz-onto/viz_strategie.ttl")
+    g_strategie.parse(strategie_path)
     query_strategie = """
     SELECT ?strategie
     WHERE {

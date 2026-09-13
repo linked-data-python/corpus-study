@@ -1,4 +1,13 @@
-# Input graph for boricles__ontosphere__backend_app_api_import_rdf.py___label_for — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for boricles__ontosphere__backend_app_api_import_rdf.py___label_for.
+# Covers: a subject with two rdfs:label values (several solutions of the
+# pattern g.value reads — any one is an acceptable "the" value), a subject
+# with no label at all (the zero-solution case, falling back to the URI
+# fragment), and a neighbouring subject/predicate that must not match.
 @prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:withLabel rdfs:label "First Label", "Second Label" .
+
+ex:withoutLabel rdfs:comment "not a label" .
+
+ex:neighbour rdfs:label "Someone else's label" .

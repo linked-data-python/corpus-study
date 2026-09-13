@@ -1,11 +1,10 @@
 # Extracted from anuzzolese/pyrml@d18fe2edfc : pyrml/pyrml_core.py
 # region: Source.from_rdf (lines 1770-1795, stratum trav_single_value)
 # licence of the source repository: see meta.json
-from pyrml import rml_vocab
 from rdflib import URIRef, Graph, IdentifiedNode
 from rdflib.namespace import RDF, Namespace, XSD
-from rdflib.term import Node, BNode, Literal, Identifier, URIRef, _is_valid_langtag, _castPythonToLiteral, _castLexicalToPython 
-import pyrml.rml_vocab as rml_vocab
+from rdflib.term import Node, BNode, Literal, Identifier, URIRef, _is_valid_langtag, _castPythonToLiteral, _castLexicalToPython
+from context_shim import rml_vocab, Source, SQLSource  # see meta.json: context shim
 
 @staticmethod
 def from_rdf(g: Graph, parent: IdentifiedNode) -> 'Source':

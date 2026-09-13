@@ -15,10 +15,13 @@
     "triple_add": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": ["@graph", "-{ }", "+{ }", "for @bindings in", "interpolation {expr}"],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "translated -{ } for graph.remove((self.root_uri, KTBS.hasBuiltinMethod, None)) with a wildcard ?o, and +{ } inside the for loop over iter_builtin_method_impl(); @graph graph designates the context-manager graph from `with root.edit(_trust=True) as graph:`.",
+    "terms are interpolated directly as {KTBS.hasBuiltinMethod} / {self.root_uri} rather than via a declared prefix, since KTBS is an imported Namespace object used by attribute access, not a prefixed name in the source.",
+    "graph.set(...) for KTBS.hasVersion is left untouched: no island covers rdflib's set() (remove+add) idiom in the reference table.",
+    "excluded: the region depends on rdfrest.cores.local.Service (self.root_uri, self.get, root.edit(_trust=True) context manager) and ktbs's own class registry (get_builtin_method_impl/iter_builtin_method_impl). rdfrest is not installed/importable and is a framework, not a namespace/constant module, so it cannot be reduced to a minimal context shim without inventing substantial execution logic. Driver cannot execute either representation past `from rdfrest.cores.local import Service` (ModuleNotFoundError). Transpilation of translated.ldpy succeeds up to that same import, confirming the island syntax itself is valid."
   ],
   "draft_sha": "8c45d7480bdf19b4",
   "provenance": {

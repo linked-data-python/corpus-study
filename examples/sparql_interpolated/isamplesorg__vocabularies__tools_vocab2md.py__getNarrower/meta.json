@@ -12,10 +12,21 @@
   "categories": {
     "sparql": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "same shape as isamplesorg/vocabularies' VocabularyStore.narrower/broader (sibling regions in this stratum): the query text never concatenates a TERM (`v`/`r` already travel via `initBindings`); what is assembled by `+` is the PROLOGUE (`PFX + \"\"\"SELECT ...\"\"\"`). `?parent` (here spelled `r`) is not projected (only `?s` is in SELECT), so it becomes a direct term interpolation instead of a bindings-call; the module-level `PFX` string (rdf:/rdfs:/owl:/skos:) collapses to a single `@prefix skos:` since only skos: is used by these queries.",
+    "TRANSPILER DEFECT, confirmed and worth reporting as-is (ldpy/012-style constat, not a limitation of the language design): `s{ ... {r} ... }` -- a bare single-character interpolation whose expression text is exactly `r` -- crashes the transpiler with `IndexError: string index out of range` in `_string_end` (core.py), because the sub-scan that validates the interpolation as a Python expression mistakes the identifier `r` for the start of a raw-string literal (`r'...'`/`r\"...\"`) and then finds no closing quote. Reproduced in isolation with a 6-line minimal file (`s{ SELECT ?s WHERE { ?s skos:broader {r} . } }`). Any expression starting with `r`/`R`/`b`/`B`/`f`/`F`/`u`/`U` (Python's string-prefix letters) immediately inside `{` is a suspect of the same class; only the bare single-letter case was verified here.",
+    "workaround used (not a refactoring of the ORIGINAL program, only of how the SPARQL interpolation is spelled): `{(r)}` instead of `{r}` -- parenthesising defeats the prefix-letter misparse while remaining the exact same Python expression. Both branches of the region use it, since both interpolate the bare parameter `r`.",
+    "classified minor-restructuring rather than directly-expressible for the same reason as the sibling regions: recognising the unprojected variable and retiring the `PFX +` string concatenation in favour of `@prefix` is a structural choice, on top of which the parenthesising workaround above was needed purely to route around the transpiler defect."
+  ],
   "draft_sha": "e3686950b1980fd7",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.058557+00:00",
@@ -26,5 +37,11 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:getNarrower",
+    "diffs": [],
+    "error": null
+  }
 }

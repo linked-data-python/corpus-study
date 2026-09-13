@@ -2,7 +2,7 @@
 # region: SimpleLink.to_rdf (lines 60-77, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, URIRef, XSD
-from altimeter.core.graph.node_cache import NodeCache
+from node_cache import NodeCache  # shim: altimeter.core.graph.node_cache, see meta.json
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -19,9 +19,10 @@ def to_rdf(
          graph: RDF graph
          node_cache: NodeCache to use to find cached nodes.
     """
+    @graph graph
     datatype = None
     if isinstance(self.obj, int):
         if self.obj > 2147483647:
             datatype = xsd:nonNegativeInteger
     literal = Literal(self.obj, datatype=datatype)
-    graph += g{ {subj} {getattr(namespace, self.pred)} {literal} }
+    +{ {subj} {getattr(namespace, self.pred)} {literal} }

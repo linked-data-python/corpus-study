@@ -2,7 +2,7 @@
 # region: LinkedInExportConnectionsPipeline.generate_graph_date (lines 132-149, stratum ns_import_project)
 # licence of the source repository: see meta.json
 from datetime import UTC, datetime
-from naas_abi_core.utils.Graph import ABI, BFO, CCO
+from naas_abi_context import BFO, CCO, abi:
 from rdflib import OWL, RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -17,16 +17,17 @@ def generate_graph_date(
     if isinstance(date, datetime):
         date_str = date.strftime(date_format)
         date_epoch = int(date.timestamp() * 1000)
-        date_uri = ABI[str(date_epoch)]  # Create URI using timestamp
+        date_uri = abi:{str(date_epoch)}  # Create URI using timestamp
         date_literal = Literal(date_str, datatype=xsd:dateTime)
     elif isinstance(date, str):
         date_str = date
-        date_uri = ABI[date_str]
+        date_uri = abi:{date_str}
         date_literal = Literal(date_str)
     graph = Graph()
-    graph += g{
+    @graph graph
+    +{
         {date_uri} a owl:NamedIndividual ;
-           a {ABI.ISO8601UTCDateTime} ;
+           a abi:ISO8601UTCDateTime ;
            rdfs:label {date_literal}
     }
     return date_uri, graph

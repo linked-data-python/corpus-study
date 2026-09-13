@@ -1,0 +1,16 @@
+# Input graph parsed by rs = Graph().parse(f"{HERE}/01-research/...") in
+# original.py / translated.ldpy (see meta.json). Path restored so the line
+# executes outside the parent script's pipeline: the real
+# rdodi_procedure_audit_v6_4_0.py generates this file's real counterpart
+# earlier in the pipeline (landscape/01-research/); this is a small stand-in
+# covering the pattern the region reads (res:ResearchCorpus skos:note),
+# plus neighbouring data that must NOT match (another subject with a
+# skos:note, and another predicate on the same subject).
+@prefix res: <http://example.org/semtech/research#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+res:ResearchCorpus skos:note "1200 documents surveyed across six sources." ;
+    dcterms:title "SemTech Research Corpus" .
+
+res:OtherCollection skos:note "Not the research corpus." .

@@ -14,11 +14,21 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "prefixes: RDF->rdf, XSD->xsd (RDF unused: kept from the mechanical draft, matches an unused import already present in original.py)",
+    "Literal(self.obj, datatype=datatype) is kept as a plain Python constructor call and interpolated whole ({literal}) in +{ }: datatype is conditionally None or xsd:nonNegativeInteger depending on a runtime comparison, so there is no single term-position literal form ('...'^^dt requires a fixed datatype) that covers both branches; +{ } happily takes an already-built rdflib term through interpolation",
+    "graph is a parameter mutated by the caller (no reassignment in the body), so a single @graph graph at the top of the function is valid for the whole body",
+    "shim node_cache.py: full contents of altimeter/core/graph/node_cache.py from tableau/altimeter@efe383f3e17 (NodeCache subclasses dict; unused in the body, only needed to satisfy the type annotation and import)",
+    "driver.py covers: small int (datatype None), int over 2147483647 (datatype forced), non-int string (datatype None), negative int (datatype None)"
   ],
   "draft_sha": "6047041af695f536",
   "provenance": {
@@ -30,5 +40,11 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:to_rdf",
+    "diffs": [],
+    "error": null
+  }
 }

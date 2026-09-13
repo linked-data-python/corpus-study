@@ -3,6 +3,8 @@
 # licence of the source repository: see meta.json
 from typing import Any
 
+from context_shim import _blank_node_labels
+
 def _canonicalize_shacl(turtle_text: str) -> str:
     """Byte-stable form of ShaclGenerator output.
 
@@ -21,18 +23,19 @@ def _canonicalize_shacl(turtle_text: str) -> str:
     import rdflib
     from rdflib.collection import Collection
 
-    sh = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+    @prefix sh: <http://www.w3.org/ns/shacl#> as SH .
     graph = rdflib.Graph()
     graph.parse(data=turtle_text, format="turtle")
-    graph.remove((None, sh.order, None))
-    for pred in (sh.ignoredProperties, sh["in"]):
+    @graph graph
+    -{ ?s sh:order ?o }
+    for pred in (SH.ignoredProperties, SH["in"]):
         for subject, head in list(graph.subject_objects(pred)):
             items = list(Collection(graph, head))
             Collection(graph, head).clear()  # type: ignore[no-untyped-call]
-            graph.remove((subject, pred, head))
+            -{ {subject} {pred} {head} }
             new_head = rdflib.BNode()
             Collection(graph, new_head, sorted(items, key=str))
-            graph += g{ {subject} {pred} {new_head} }
+            +{ {subject} {pred} {new_head} }
 
     labels = _blank_node_labels(graph)
     if labels is None:

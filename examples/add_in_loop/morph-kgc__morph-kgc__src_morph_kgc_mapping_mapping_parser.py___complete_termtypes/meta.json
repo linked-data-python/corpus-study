@@ -13,10 +13,23 @@
     "term_constructor": 12,
     "triple_add": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "s{ }",
+    "+{ }",
+    "interpolation {expr}",
+    "IRI"
+  ],
+  "translation_notes": [
+    "Each SELECT ... OPTIONAL ... FILTER(!bound(...)) query becomes s{ }: m{ } has no OPTIONAL/FILTER, so this is the only fit.",
+    "RML_* names are plain Python strings holding IRIs (not URIRef), so bare {RML_X} interpolation in term position coerces to a Literal and silently matches nothing; each use is wrapped {rdflib.term.URIRef(RML_X)} to keep the predicate an IRI, exactly the coercion trap in INSTRUCTIONS.md 2 bis.",
+    "@graph mapping_graph must NOT be followed by a trailing '.' inside a function body: with the dot, the transpiler mis-balances the braces of every s{ } that follows and raises a plain SyntaxError -- confirmed by a minimal repro; worth reporting upstream as a lexer/oracle gap.",
+    "Context shim rml_constants.py reconstructs the RML_* IRI constants from morph_kgc/constants.py at the pinned commit (not in the extracted context lines).",
+    "The .add() calls stay one per loop body (six independent loops): no join is introduced, so cardinality matches the original exactly."
+  ],
+  "article_candidate": true,
   "draft_sha": "8f54233ae2545fd4",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.659012+00:00",
@@ -27,5 +40,11 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_complete_termtypes",
+    "diffs": [],
+    "error": null
+  }
 }

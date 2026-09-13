@@ -2,7 +2,7 @@
 # region: StoredTraceMixin.set_trace_begin_dt (lines 384-392, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, RDF, RDFS, URIRef, XSD
-from ..namespace import KTBS
+from namespace import KTBS  # context shim -- see meta.json
 
 def set_trace_begin_dt(self, val):
     """

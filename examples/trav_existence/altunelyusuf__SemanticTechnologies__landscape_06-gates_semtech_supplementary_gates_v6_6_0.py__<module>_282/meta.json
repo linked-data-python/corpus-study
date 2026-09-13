@@ -10,11 +10,19 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: B2->b2"
+    "prefixes: B2->b2",
+    "`(f, B2.hasState, B2.Done) in gbk` becomes `bool(m{ {f} b2:hasState b2:Done }(gbk))`; `gbk.value(f, B2.hasEvidence)` becomes `m{ {f} b2:hasEvidence ?ev }(gbk).first()`, both against the explicit (gbk) receiver since no @graph is designated for this module-level script.",
+    "HERE and feats are not defined in the extracted region (module-level script, context lost); restored via shim.py alongside a copy of the referenced ttl fixture, with feats/state data chosen to cover Done+evidence, Done without evidence, not-Done, and no-state neighbours."
   ],
   "draft_sha": "e1aaa1731018100b",
   "provenance": {
@@ -26,5 +34,11 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "module-state",
+    "diffs": [],
+    "error": null
+  }
 }

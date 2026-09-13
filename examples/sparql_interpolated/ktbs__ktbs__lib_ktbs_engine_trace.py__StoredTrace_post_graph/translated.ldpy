@@ -1,29 +1,39 @@
 # Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/engine/trace.py
 # region: StoredTrace.post_graph (lines 318-358, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
+#
+# Context restored (see meta.json): `prepareQuery`'s import, as in original.py
+# -- unused here since the query becomes an `s{ }` island instead, parsed at
+# transpile time; kept only so both files declare the same names.
 from rdflib import BNode, Graph, Literal, URIRef, XSD
+from rdflib.plugins.sparql.processor import prepareQuery
 from rdfrest.exceptions import InvalidDataError
 from rdfrest.util import bounded_description, cache_result, random_token, replace_node_sparse, \
     Diagnosis
 from .resource import KtbsPostableMixin, METADATA
 from ..namespace import KTBS, KTBS_NS_URI
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://liris.cnrs.fr/silex/2009/ktbs#> .
 @prefix metadata: <tag:silex.liris.cnrs.fr.2012.08.06.ktbs.metadata:> .
 
-_SELECT_CANDIDATE_OBSELS = prepareQuery("""
-    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-    PREFIX : <%s#>
+# Translation note (see meta.json): the default prefix `:` here is bound to
+# `KTBS_NS_URI` inlined literally, the same trade-off as `%s` in the original
+# f-string prologue: `@prefix` takes a lexical IRI, so a Python-level
+# constant used only to fill in a namespace cannot be interpolated the way a
+# term-position value would be. `KTBS_NS_URI` is a compile-time constant
+# (see ../namespace.py), so this changes nothing observable.
+_SELECT_CANDIDATE_OBSELS = s{
     SELECT ?obs
            (IF(bound(?b), ?b, "INF"^^xsd:float) as ?begin)
            (IF(bound(?e), ?e, ?begin) as ?end)
-           $trace # selected solely to please Virtuoso
+           ?trace # selected solely to please Virtuoso
     WHERE {
         ?obs :hasTrace ?trace
         OPTIONAL { ?obs :hasBegin ?b }
         OPTIONAL { ?obs :hasEnd   ?e }
     }
     ORDER BY ?begin ?end
-""" % KTBS_NS_URI)
+}
 YES = Literal('yes')
 
 def post_graph(self, graph, parameters=None,
@@ -34,10 +44,8 @@ def post_graph(self, graph, parameters=None,
     """
     base = self.get_base()
     post_single_obsel = super(StoredTrace, self).post_graph
-    binding = { "trace": self.uri }
     ret = []
-    candidates = [ i[0] for i in graph.query(_SELECT_CANDIDATE_OBSELS,
-                                             initBindings=binding) ]
+    candidates = [ i[0] for i in _SELECT_CANDIDATE_OBSELS(graph)(bindings={"trace": self.uri}).execute() ]
     bnode_candidates = { i for i in candidates
                            if isinstance(i, BNode) }
     with self.obsel_collection.edit({"add_obsels_only":1}, _trust=True):

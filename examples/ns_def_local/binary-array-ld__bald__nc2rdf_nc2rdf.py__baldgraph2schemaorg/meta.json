@@ -16,10 +16,22 @@
     "term_constructor": 8,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI"
+  ],
+  "translation_notes": [
+    "Context shim (_shim.py) stands in for `import bald` (isUrl, getBasename, and a schemaOrg.distribution(container, graph, baseuri) that returns its graph unchanged): the real bald.schemaOrg in this checkout (lib/bald/__init__.py:1463) does not expose a 3-argument distribution() -- a pre-existing mismatch in the source repository, unrelated to the translation. bald2schemaorg_mappings.json is copied verbatim from nc2rdf/ since original.py opens it by relative path.",
+    "The one local `so = Namespace(\"http://schema.org/\")` (namespace_ctor) becomes `@prefix so: <http://schema.org/> .`; its single use `so.Dataset` (namespace_term) becomes `so:Dataset`. Not bound `as so` since the object itself is never used, only the prefix.",
+    "The four schema_g.add((...)) calls (triple_add) become `+{ }` under a single `@graph schema_g` for the function: add_isolated is the more specific construction here even though the region is drawn from the ns_def_local stratum, per the instruction to always credit the most specific construction. Each add stayed a separate +{ } (no `;` merging) since they are independent statements, some conditional, some inside a loop -- merging would be the DELETE-WHERE-style join pitfall's write-side analogue and would change which triples get added when a branch is skipped.",
+    "The static `URIRef(\"http://schema.org/url\")` became the IRI literal `<http://schema.org/url>`; the two runtime-built `URIRef(\"http://schema.org/\" + mapping_idx[currField])` were left as URIRef(...) rather than rewritten to f<...{expr}...>, matching the instruction to translate only the ns_def_local idiom itself (no unrequested refactor of unrelated term construction).",
+    "driver.py builds an input graph inline (bald:Container with a plain field, a comma-separated 'keywords' field including a blank entry, and one unmapped predicate that must not appear in the output) since the oracle is isomorphism on the function's *return* value, not a read of a pre-existing fixture file."
+  ],
   "draft_sha": "df4c3b6533f5b41a",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.564389+00:00",
@@ -30,5 +42,11 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:baldgraph2schemaorg",
+    "diffs": [],
+    "error": null
+  }
 }

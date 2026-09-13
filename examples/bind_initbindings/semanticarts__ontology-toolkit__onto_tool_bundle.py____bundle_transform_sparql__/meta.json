@@ -14,11 +14,13 @@
     "serialize_parse": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
   "translation_notes": [
-    "prefixes: OWL->owl, RDFS->rdfs, SKOS->skos, XSD->xsd"
+    "The bind_initbindings site is `g.update(parsed_query, initNs={'xsd': XSD, 'owl': OWL, 'rdfs': RDFS, 'skos': SKOS})` at line 188-190. `parsed_query` comes from `__parse_update_query__(query_text)`, and `query_text` is read at run time from `tool['query']` (itself possibly the CONTENTS OF AN EXTERNAL FILE, when `isfile(query)`). `s{ }` requires the SPARQL text to be a literal in the .ldpy source, validated when the file is transpiled (see querying.md, 'validated at transpile time'). There is no island for an update whose text is only known at run time, so the site is left as plain rdflib (`g.update(..., initNs=...)`), unchanged from original.py.",
+    "This is a limit of s{ }'s design (transpile-time query text), not an edge case of this repository: any dynamic/externally-loaded query hits the same wall. Confirms the class of finding already logged in pilotage/design/ldpy/012 (constructs that cannot see run-time-only content) rather than a new one, so not re-reported there.",
+    "Draft's guessed prefix mapping (OWL->owl, RDFS->rdfs, SKOS->skos, XSD->xsd) was never usable: it assumed initNs could become @prefix declarations feeding an s{ }, but there is no s{ } here to feed."
   ],
   "draft_sha": "13704983b6cf24a2",
   "provenance": {

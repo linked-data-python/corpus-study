@@ -1,0 +1,55 @@
+@prefix dh: <https://ratsvermerk.example.org/ontology#> .
+@prefix kw: <https://ratsvermerk.example.org/keyword/> .
+@prefix p: <https://ratsvermerk.example.org/posten/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# P1: a "full" record -- every optional field present, exercises every
+# non-None branch once, plus a keyword whose label matches a phrase in the
+# description and one that does not.
+p:P1 a dh:Haushaltsposten ;
+    dcterms:subject kw:schule, kw:energie, <https://elsewhere.example.org/not-a-keyword> ;
+    dh:einzelplan dh:ep01 ;
+    dh:bereich dh:ber01 ;
+    dh:digiKlasse dh:1 ;
+    dh:gruppe dh:soziales.gruppeA ;
+    dh:funktion dh:bildung.funktionA ;
+    dh:jahr "2024-05-01" ;
+    dcterms:isPartOf p:titelA ;
+    schema:description "Investition in Schulen. Neue Gebaeude." ;
+    dh:soll "100.5" ;
+    dh:ist "80.2" ;
+    dh:istDigitalWeit "10" ;
+    dh:sollDigitalEng "5" ;
+    dh:istDigitalEng "3" .
+
+dh:ber01 skos:prefLabel "Bereich Eins" .
+
+# P2: digiKlasse "0" -- excluded via the mid-loop `continue`, before jahr,
+# titel, desc or the final append are ever reached. bereich IS read first
+# (proves that part of the loop still ran).
+p:P2 a dh:Haushaltsposten ;
+    dh:bereich dh:ber01 ;
+    dh:digiKlasse dh:0 ;
+    dh:soll "999" .
+
+# P3: passes every branch but SOLL <= 0 -- excluded by the trailing filter,
+# not the mid-loop continue.
+p:P3 a dh:Haushaltsposten ;
+    dh:digiKlasse dh:2 ;
+    dh:soll "0" .
+
+# P4: the zero-solution case for every optional predicate -- none of
+# einzelplan/bereich/digiKlasse/gruppe/funktion/jahr/isPartOf/description/
+# subject is present, yet it still has a positive soll so it must appear in
+# `posten` with every optional field None/empty.
+p:P4 a dh:Haushaltsposten ;
+    dh:soll "42" .
+
+# Neighbourhood: not typed dh:Haushaltsposten -- must never be visited by
+# the outer `for s in ... rdf:type dh:Haushaltsposten` loop, even though it
+# carries the same predicates.
+p:P5 dh:soll "50" ;
+    dh:digiKlasse dh:1 .

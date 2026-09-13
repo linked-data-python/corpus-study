@@ -13,11 +13,20 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
+    "g.value(subject, RDFS.label) -> m{ {subject} rdfs:label ?o }(g).first(): the trav_single_value idiom, a one-line, one-construction gain.",
+    "fixture.ttl: a subject with two rdfs:label values (both sides pick the same one, since both parse the identical file into the same default in-memory store), a subject with no label at all (zero-solution -> falls back to the URI fragment), and a neighbouring subject with its own label that must not match.",
+    "_label_for(g, subject, uri_str) takes three arguments, not just a graph, so driver.py builds the calls by hand instead of the generic fixture= wiring."
   ],
   "draft_sha": "dabad8b1ec89e5e3",
   "provenance": {
@@ -30,5 +39,11 @@
     "trav_one_step",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:_label_for",
+    "diffs": [],
+    "error": null
+  }
 }

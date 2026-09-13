@@ -1,4 +1,39 @@
-# Input graph for pyscal__atomRDF__atomrdf_datamodels_defects_grainboundary.py__GrainBoundary_from_graph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for pyscal__atomRDF__atomrdf_datamodels_defects_grainboundary.py__GrainBoundary_from_graph
+# Covers: several solutions of the defect pattern (sample1), the
+# zero-solution case when the type doesn't match (sample2), and
+# neighbouring triples (a TwistGrainBoundary sibling type) that must NOT
+# match.
+#
+# A third case -- a sample with NO cmso:hasMaterial at all -- is
+# deliberately NOT covered here: get_material(graph, sample) then returns
+# None, and `graph.triples((None, CDCO.hasCrystallographicDefect, None))`
+# treats that None as a WILDCARD subject (rdflib triple-pattern semantics),
+# matching every defect in the whole graph regardless of sample -- while
+# `m{ {material} cdco:hasCrystallographicDefect ?o }` interpolates {material}
+# as a TERM, not a pattern wildcard. The two are not the same operation once
+# the subject is unbound; exercising it would test that gap, not this
+# region's own namespace-import construction. See translation_notes.
 @prefix ex: <http://example.org/> .
+@prefix cmso: <http://purls.helmholtz-metadaten.de/cmso/> .
+@prefix pldo: <http://purls.helmholtz-metadaten.de/cdos/pldo/> .
+@prefix cdco: <http://purls.helmholtz-metadaten.de/cdos/cdco/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# sample1: material1 has two defects, one a TwistGrainBoundary (neighbour,
+# must not match) and one a GrainBoundary with full property data.
+ex:sample1 cmso:hasMaterial ex:material1 .
+ex:material1 cdco:hasCrystallographicDefect ex:pd1_twist, ex:pd1_gb .
+ex:pd1_twist a pldo:TwistGrainBoundary ;
+    pldo:hasSigmaValue "99"^^xsd:integer .
+ex:pd1_gb a pldo:GrainBoundary ;
+    pldo:hasSigmaValue "5"^^xsd:integer ;
+    pldo:hasGBplane "1.0 0.0 0.0"^^xsd:string ;
+    pldo:hasRotationAxis "0.0 0.0 1.0"^^xsd:string ;
+    pldo:hasMisorientationAngle "36.87"^^xsd:float .
+
+# sample2: material2 exists but none of its defects is a GrainBoundary ->
+# zero-solution case reached through a non-empty for-loop.
+ex:sample2 cmso:hasMaterial ex:material2 .
+ex:material2 cdco:hasCrystallographicDefect ex:pd2_twist .
+ex:pd2_twist a pldo:TwistGrainBoundary .

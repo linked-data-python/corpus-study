@@ -2,19 +2,17 @@
 # region: <module> (lines 1-29, stratum sparql_literal)
 # licence of the source repository: see meta.json
 import json
-import rdflib
 
-g = rdflib.Graph()
+@graph as g
 g.parse("sample1.turtle", format="ttl")
 
-statements = g.query(
-        """SELECT DISTINCT ?sub ?pred ?obj
+statements = s{ SELECT DISTINCT ?sub ?pred ?obj
         WHERE {
             { ?s rdf:type rdf:Statement . ?s rdf:predicate ?pred } UNION
             { ?s rdf:type ?pred FILTER (?pred != rdf:Statement) }
             ?s rdf:subject ?sub .
             ?s rdf:object ?obj .
-       }""")
+       } }
 
 
 d = dict()

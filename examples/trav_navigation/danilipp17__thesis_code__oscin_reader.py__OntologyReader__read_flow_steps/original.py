@@ -5,7 +5,7 @@ import json
 from typing import Optional
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, XSD
-from oscin.namespaces import (
+from shim import (  # context shim (see meta.json)
     AGENTO,
     AGENTOSCIN,
     CALLS_CREW,
@@ -14,6 +14,15 @@ from oscin.namespaces import (
     HAS_DESCRIPTION,
     HAS_TITLE,
 )
+
+# Test harness only (see meta.json): binds self/wp_uri from the fixture and
+# the two accumulators the region writes into, so the extracted statements
+# run standalone. Added identically to original.py and translated.ldpy.
+from shim import build_fixture
+
+self, wp_uri = build_fixture()
+step_uri_to_name: dict[str, str] = {}
+step_info: dict[str, dict] = {}
 
 for step_uri in self.g.objects(wp_uri, AGENTO.hasWorkflowStep):
     name = self._str_value(step_uri, HAS_TITLE) or self._local_name(step_uri)

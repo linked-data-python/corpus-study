@@ -4,7 +4,7 @@
 from typing import Optional, List, Tuple
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
-OS  = Namespace("http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#")
+from context_shim import OS, locked_graph, _is_abs_iri, _mint_hash_iri, _ensure_type_with_label, _class, _list_species_summaries
 
 def add_elemental_analysis_data_to_species(
     species_iri: str,

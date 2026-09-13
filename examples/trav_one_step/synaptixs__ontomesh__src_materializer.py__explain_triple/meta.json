@@ -16,11 +16,24 @@
     "serialize_parse": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: TOOLKIT_NS->toolkit, OWL->owl, PROV->prov, RDF->rdf, RDFS->rdfs, XSD->xsd"
+    "prefixes: TOOLKIT_NS->toolkit, OWL->owl, PROV->prov, RDF->rdf, RDFS->rdfs, XSD->xsd",
+    "g.subjects(RDF.type, RDF.Statement) -> m{ ?stmt rdf:type rdf:Statement }(g), one-step traversal projecting the subject.",
+    "the three '(x, p, o) not in g' existence guards -> bool(m{ {x} p {o} }(g)) each, per the trav_existence idiom, kept as three separate islands rather than folded into one multi-pattern m{ } (folding into a join would change which check short-circuits first and would require re-deriving the AND from a single solution set -- not the same program).",
+    "g.triples((stmt, PROV.wasDerivedFrom, None)) and g.triples((deriv, TOOLKIT_NS.premise, None)) -> m{ {x} p ?y }(g), the trav_one_step idiom the stratum targets.",
+    "every next(g.objects(...), None) -> m{ {x} p ?o }(g).first(): .first() already returns None on an empty solution set, matching next(..., None) exactly.",
+    "needed a context shim (helpers.py) for _parse_term, defined a few lines below the extracted region in the source file but not part of it.",
+    "fixture.ttl covers two derivations for one reified statement (one premise complete, one missing rdf:object and so excluded), a neighbouring reified statement for a different triple, and a reified statement with no prov:wasDerivedFrom at all (inner zero-solution case); driver.py adds a third call whose (s, p, o) matches no statement at all (outer zero-solution case). explain_triple's first argument is a file path rather than a graph, so the calls are written by hand instead of using the generic fixture= wiring."
   ],
   "draft_sha": "a23fd5129cfe2751",
   "provenance": {
@@ -33,5 +46,11 @@
     "trav_one_step",
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:explain_triple",
+    "diffs": [],
+    "error": null
+  }
 }

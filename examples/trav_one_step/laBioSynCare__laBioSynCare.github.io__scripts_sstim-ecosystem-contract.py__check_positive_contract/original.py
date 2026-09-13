@@ -1,11 +1,42 @@
 # Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/sstim-ecosystem-contract.py
 # region: check_positive_contract (lines 1096-1125, stratum trav_one_step)
 # licence of the source repository: see meta.json
+#
+# `fixture`, `merged`, `activities` and `errors` are restored here (see
+# meta.json) so the loop is executable outside `check_positive_contract`:
+# `fixture.ttl` is the project's own real fixture graph
+# (static/ontology/instances/ecosystem/fixtures/synthetic-ecosystem.ttl,
+# same commit, copied verbatim), and `values`/`require` are the module's own
+# tiny helpers (also verbatim, lines 412-418).
+from pathlib import Path
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV, XSD
 ECO = Namespace("https://w3id.org/sstim/ecosystem#")
 PERSON = URIRef("https://w3id.org/sstim/specialist/synthetic-alex-rivera")
 CURATOR = URIRef("https://example.org/agent/synthetic-curator")
+
+
+def values(graph: Graph, subject: URIRef, predicate: URIRef) -> set:
+    return set(graph.objects(subject, predicate))
+
+
+def require(condition: bool, message: str, errors: list[str]) -> None:
+    if not condition:
+        errors.append(message)
+
+
+_FIXTURE_PATH = Path(__file__).parent / "fixture.ttl"
+fixture = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+# The real `merged` is fixture + the ontology/context modules
+# (build_validation_graph); this region only ever tests
+# `(actor, RDF.type, PROV.Agent) in merged`, and every actor it can name
+# (CURATOR, PERSON) already carries that triple directly in the fixture, so
+# a second parse of the same file is a faithful-enough stand-in for this
+# region's purposes.
+merged = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+
+activities = set(fixture.subjects(RDF.type, ECO.EngagementActivity))
+errors: list[str] = []
 
 for event in activities:
     inbound = set(fixture.subjects(ECO.hasEngagementActivity, event))

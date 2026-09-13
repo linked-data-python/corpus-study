@@ -1,4 +1,19 @@
-# Input graph for statnett__KGraphPy__kgraphpy_header.py__CIMMetadataHeader_from_manifest — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+@prefix md: <http://iec.ch/TC57/61970-552/ModelDescription/1#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# The graph this test asks for: several header triples (several solutions
+# of the pattern `manifest_graph.triples((graph_uri, None, None))`).
+<urn:uuid:graph-1> a md:FullModel ;
+    dcterms:title "Graph one" ;
+    md:Model.version "1" .
+
+# Neighbouring triples that must NOT match: a header for a DIFFERENT graph
+# identifier, sharing predicates with the one above.
+<urn:uuid:graph-2> a md:FullModel ;
+    dcterms:title "Graph two" ;
+    md:Model.version "7" .
+
+# A triple whose object is the graph-1 identifier, so a pattern that
+# (wrongly) matched in object position too would over-select.
+<urn:uuid:some-other> dcterms:isPartOf <urn:uuid:graph-1> .

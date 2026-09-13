@@ -1,0 +1,34 @@
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix sstimv: <https://w3id.org/sstim/vocab#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Two frequency bands: one clean, one that carries an outcome claim (KR-08).
+sstim:alphaBand a sstim:FrequencyBand ;
+    skos:prefLabel "Alpha"@en ;
+    skos:scopeNote "8 to 12 Hz, a Hz interval only" ;
+    sstim:hzMin "8"^^xsd:decimal ;
+    sstim:hzMax "12"^^xsd:decimal .
+
+sstim:betaBand a sstim:FrequencyBand ;
+    skos:scopeNote "helps relax and reduce stress" ;
+    sstim:hzMin "12"^^xsd:decimal ;
+    sstim:hzMax "30"^^xsd:decimal .
+
+# Neighbour that must NOT be counted as a band: right vocabulary, wrong type.
+sstim:unrelatedConcept a skos:Concept ;
+    skos:scopeNote "sleep and relaxation, but not a band" .
+
+# Oscillations: two with a complete typical-band/extended-range story, one
+# with neither (the zero-solution case for next(graph.objects(...), None)).
+sstimv:alphaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:alphaBand ;
+    sstim:extendedHzMin "7"^^xsd:decimal ;
+    sstim:extendedHzMax "13"^^xsd:decimal .
+
+sstimv:betaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:betaBand ;
+    sstim:extendedHzMin "11"^^xsd:decimal ;
+    sstim:extendedHzMax "31"^^xsd:decimal .
+
+sstimv:gammaOscillation a sstim:NeuralOscillationType .

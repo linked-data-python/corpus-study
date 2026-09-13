@@ -15,9 +15,12 @@
     "sparql": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "s{ }", "call suffix (g)"],
+  "translation_notes": [
+    "Translation is direct: the literal g.query(TEXT) with an inline PREFIX becomes s{ } with the vg: prefix hoisted to a module-level @prefix, called with the explicit (spodgi) call suffix since spodgi is not the block's designated @graph.",
+    "The driver cannot execute either side: the region opens a real pangenome graph through the native spodgi.OdgiStore rdflib store plugin, a C++ extension over a binary .odgi file. Neither the spodgi package nor a genome dataset can be reproduced as a context shim without inventing the store's actual logic, so this is excluded per instructions section 6 item 1 (external/native dependency), confirmed by driver failure: ModuleNotFoundError: No module named 'spodgi'."
+  ],
   "draft_sha": "fa3c0bfbae196126",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.941908+00:00",

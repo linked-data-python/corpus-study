@@ -24,10 +24,12 @@ def test_view_handles_internal_and_databus_datasets(self, mock_oekg, MockOekgQue
     OEO = Namespace("https://openenergyplatform.org/ontology/oeo/")
     OBO = Namespace("http://purl.obolibrary.org/obo/")
 
+    @graph g
+
     scenario_uid = "60a682d8-6a41-25d3-c817-e258a90a5d5e"
     scenario = URIRef(f"https://openenergyplatform.org/scenario/{scenario_uid}")
 
-    g += g{
+    +{
         {scenario} a {OEO.OEO_00000365} ;
            rdfs:label "Scenario A" ;
            dc:abstract "Scenario abstract"
@@ -35,7 +37,7 @@ def test_view_handles_internal_and_databus_datasets(self, mock_oekg, MockOekgQue
 
     # Provide a study so study_label/study_abstract exist
     study = <https://openenergyplatform.org/study/study1>
-    g += g{
+    +{
         {study} {OBO.BFO_0000051} {scenario} ;
            rdfs:label "Study A" ;
            dc:abstract "Study abstract"
@@ -43,16 +45,20 @@ def test_view_handles_internal_and_databus_datasets(self, mock_oekg, MockOekgQue
 
     # Input dataset: internal URL
     inp = <https://openenergyplatform.org/dataset/inp1>
-    g += g{
-        {scenario} {OEO.OEO_00020437} {inp} .
+    +{
+        {scenario} {OEO.OEO_00020437} {inp} ;
+    }
+    +{
         {inp} rdfs:label "Input DS" ;
            {OEO.OEO_00390094} "database/tables/eu_leg_data_2021_rep_table_3"
     }
 
     # Output dataset: databus URL
     out = <https://openenergyplatform.org/dataset/out1>
-    g += g{
-        {scenario} {OEO.OEO_00020436} {out} .
+    +{
+        {scenario} {OEO.OEO_00020436} {out} ;
+    }
+    +{
         {out} rdfs:label "Output DS" ;
            {OEO.OEO_00390094} "https://databus.openenergyplatform.org/zl_energie/ZLE/IKT_Input/FinalData_v2"
     }

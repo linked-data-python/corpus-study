@@ -5,7 +5,7 @@ import json
 from typing import Optional
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, XSD
-from oscin.namespaces import (
+from shim import (  # context shim (see meta.json)
     AGENTO,
     AGENTOSCIN,
     CALLS_CREW,
@@ -14,22 +14,28 @@ from oscin.namespaces import (
     HAS_DESCRIPTION,
     HAS_TITLE,
 )
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix agento: <http://www.w3id.org/agentic-ai/onto#> .
 @prefix agentoscin: <http://www.semanticweb.org/danilippmann/ontologies/2026/3/agentoscin/> .
 
+# Test harness only (see meta.json): binds self/wp_uri from the fixture and
+# the two accumulators the region writes into, so the extracted statements
+# run standalone. Added identically to original.py and translated.ldpy.
+from shim import build_fixture
 
-for step_uri in self.g.objects(wp_uri, agento:hasWorkflowStep):
+self, wp_uri = build_fixture()
+@graph self.g
+step_uri_to_name: dict[str, str] = {}
+step_info: dict[str, dict] = {}
+
+for step_uri in m{ {wp_uri} agento:hasWorkflowStep ?step_uri }:
     name = self._str_value(step_uri, HAS_TITLE) or self._local_name(step_uri)
     order = self._int_value(step_uri, agento:stepOrder) or 0
 
     # Determine step type from RDF type
-    is_start = (step_uri, rdf:type, agento:StartStep) in self.g
-    is_conditional = (step_uri, rdf:type, agentoscin:ConditionalStep) in self.g
-    is_end = (step_uri, rdf:type, agento:EndStep) in self.g
+    is_start = bool(m{ {step_uri} rdf:type agento:StartStep })
+    is_conditional = bool(m{ {step_uri} rdf:type agentoscin:ConditionalStep })
+    is_end = bool(m{ {step_uri} rdf:type agento:EndStep })
 
     # A step can be both start and conditional (LangGraph pattern:
     # entry node with conditional edges). EndStep is mutually
@@ -63,20 +69,20 @@ for step_uri in self.g.objects(wp_uri, agento:hasWorkflowStep):
 
     # Collect nextStep targets
     next_names = []
-    for next_uri in self.g.objects(step_uri, agento:nextStep):
+    for next_uri in m{ {step_uri} agento:nextStep ?next_uri }:
         next_names.append(str(next_uri))
 
     # Original literal decorator arguments (e.g. CrewAI
     # @start("wait_next_run")) preserved by the populator. These
     # are restored ahead of the inferred dependency list.
     decorator_args: list[str] = []
-    for lit in self.g.objects(step_uri, agentoscin:hasDecoratorArgument):
+    for lit in m{ {step_uri} agentoscin:hasDecoratorArgument ?lit }:
         if isinstance(lit, Literal):
             decorator_args.append(str(lit))
 
     # Associated agent (e.g. LangGraph node → LLMAgent)
     associated_agent_key: Optional[str] = None
-    for agent_uri in self.g.objects(step_uri, agentoscin:hasAssociatedAgent):
+    for agent_uri in m{ {step_uri} agentoscin:hasAssociatedAgent ?agent_uri }:
         key = self._agent_uri_to_key.get(str(agent_uri))
         if key:
             associated_agent_key = key

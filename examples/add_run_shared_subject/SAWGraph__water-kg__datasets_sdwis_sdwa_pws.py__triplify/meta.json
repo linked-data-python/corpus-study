@@ -14,11 +14,22 @@
     "term_constructor": 9,
     "triple_add": 14
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "typed literal",
+    "prefixed name",
+    "from … import p:"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, XMLNS->xmlns, XSD->xsd, RDF->rdf, RDFS->rdfs"
+    "prefixes: OWL->owl, XMLNS->xmlns, XSD->xsd, RDF->rdf, RDFS->rdfs",
+    "kg is created once per call and never reassigned, so a single @graph kg before the loop is enough; every kg.add(...) becomes +{ }.",
+    "each if-guarded triple stays its own +{ } (one add per condition); the two runs of consecutive unconditional adds (Name/label, then populationServed/serviceConnections/hasActivity) merge into one +{ s p1 o1 ; p2 o2 } each, and the CDS pair merges into one +{ s1 a T . s2 p s1 } block, all matching the source's shared-subject grouping without changing which triples are conditional.",
+    "context shim (shim.py) restores Initial_KG/get_attributes/get_iris/prefixes verbatim from the origin file (self.graph-style external binding, case foreseen by AGENT_BATCH.md §6); no logic invented.",
+    "driver fixture: two rows exercising CWS (name, deactivation, GW_SW_CODE, CDS_ID, source, owner, last-report all present) and TNCWS (all optional fields absent, Transient branch)."
   ],
   "draft_sha": "b2784dd4f001b8ca",
   "provenance": {
@@ -30,5 +41,11 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:triplify",
+    "diffs": [],
+    "error": null
+  }
 }

@@ -1,6 +1,11 @@
 # Extracted from kumagallium/asterism@f0977d4d3a : ingest/src/asterism/rml_validate.py
 # region: _tm_transcribed_columns (lines 1002-1037, stratum trav_navigation)
 # licence of the source repository: see meta.json
+from rml_context import _fn_source_columns, _local_name
+@prefix r2rml: <http://www.w3.org/ns/r2rml#> .
+
+_RMLF = "http://w3id.org/rml/"
+_FNML_OLD = "http://semweb.mmlab.be/ns/fnml#"
 _REFERENCE_PREDS = (
     "http://w3id.org/rml/reference",
     "http://semweb.mmlab.be/ns/rml#reference",
@@ -27,21 +32,21 @@ def _tm_transcribed_columns(graph, tm) -> set[str]:
 
     uri = rdflib.URIRef
     out: set[str] = set()
-    for pom in graph.objects(tm, uri(_R2RML + "predicateObjectMap")):
-        for om in graph.objects(pom, uri(_R2RML + "objectMap")):
-            is_iri = any(
-                _local_name(str(t)) == "IRI"
-                for tp in _TERM_TYPE_PREDS
-                for t in graph.objects(om, uri(tp))
-            )
-            if is_iri:
-                continue
-            for rp in _REFERENCE_PREDS:
-                for r in graph.objects(om, uri(rp)):
-                    out.add(str(r))
-            for fe_pred in _FUNCTION_EXECUTION_PREDS:
-                for fe in graph.objects(om, uri(fe_pred)):
-                    cols = _fn_source_columns(graph, fe)
-                    if len(cols) == 1:
-                        out |= cols
+    @graph graph
+    for pom, om in m{ {tm} r2rml:predicateObjectMap ?pom . ?pom r2rml:objectMap ?om }:
+        is_iri = any(
+            _local_name(str(t)) == "IRI"
+            for tp in _TERM_TYPE_PREDS
+            for t in m{ {om} {uri(tp)} ?t }
+        )
+        if is_iri:
+            continue
+        for rp in _REFERENCE_PREDS:
+            for r in m{ {om} {uri(rp)} ?r }:
+                out.add(str(r))
+        for fe_pred in _FUNCTION_EXECUTION_PREDS:
+            for fe in m{ {om} {uri(fe_pred)} ?fe }:
+                cols = _fn_source_columns(graph, fe)
+                if len(cols) == 1:
+                    out |= cols
     return out

@@ -2,6 +2,7 @@
 # region: DomainRangeConverter.convert_for_class (lines 245-283, stratum trav_navigation)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
+from shacl_context import ConverterSelf, PropertyConstraint, ShaclConfig
 
 def convert_for_class(
     self,

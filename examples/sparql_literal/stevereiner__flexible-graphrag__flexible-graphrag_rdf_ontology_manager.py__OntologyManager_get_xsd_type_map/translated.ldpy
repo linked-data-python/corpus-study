@@ -33,15 +33,12 @@ def get_xsd_type_map(self) -> Dict[str, str]:
     # This is authoritative and covers relation-property annotations (e.g. assignment_percentage)
     # that are not inside any entity/relation .properties dict.
     if self.graph is not None:
-        datatype_range_query = """
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        SELECT DISTINCT ?prop ?range WHERE {
+        @prefix owl: <http://www.w3.org/2002/07/owl#> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        for row in s{ SELECT DISTINCT ?prop ?range WHERE {
             ?prop a owl:DatatypeProperty .
             OPTIONAL { ?prop rdfs:range ?range . }
-        }
-        """
-        for row in self.graph.query(datatype_range_query):
+        } }(self.graph):
             name = self._uri_to_name(row.prop)
             if name:
                 range_uri = str(row.range) if row.range else "http://www.w3.org/2001/XMLSchema#string"

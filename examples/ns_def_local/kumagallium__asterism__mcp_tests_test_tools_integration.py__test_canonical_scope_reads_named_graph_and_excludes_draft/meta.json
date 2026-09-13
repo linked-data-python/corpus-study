@@ -18,9 +18,13 @@
     "triple_add": 4
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": ["@prefix", "@graph", "+{ }", "prefixed name", "typed literal"],
+  "translation_notes": [
+    "The ns_def_local site (sd = rdflib.Namespace(SD) where SD is a runtime value, not a literal) translates as @prefix sd: f<{SD}> . -- the computed-prefix form, since @prefix refuses a bare expression as IRI. The two shared-subject adds on canon/draft (add_run_shared_subject, also in this region's strata) become one @graph + one +{ s p1 o1 ; p2 o2 } per named graph, reassigning @graph mid-function the way a local variable would be reassigned. This part transpiles cleanly on its own.",
+    "excluded: the region calls asterism_mcp.tools.sample_search and several asterism.substrate helpers (canonical_graph_iri, draft_graph_iri, DEFAULT_ONTOLOGY, _flag_promoted) that are not installed in this study's venv (ModuleNotFoundError: no module named 'asterism') and not included in the extraction. sample_search is precisely the canonical/draft graph selection logic this test exercises -- reconstructing it in a context shim would mean inventing the very behaviour under test, not restoring a binding, so none is provided.",
+    "driver.py calls the 0-argument async entry directly (fixture= does not fit this signature: the region builds its own Dataset internally rather than reading one supplied to it) so that `rdfeval check` surfaces the real blocker: both sides already fail at the `from asterism.substrate import (...)` line, before the canonical/draft graphs are ever built."
+  ],
   "draft_sha": "fc301ac1aa85b07e",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.611342+00:00",

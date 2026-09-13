@@ -1,6 +1,10 @@
 # Extracted from kumagallium/asterism@f0977d4d3a : ingest/src/asterism/rml_validate.py
 # region: _tm_transcribed_columns (lines 1002-1037, stratum trav_navigation)
 # licence of the source repository: see meta.json
+from rml_context import _fn_source_columns, _local_name
+
+_RMLF = "http://w3id.org/rml/"
+_FNML_OLD = "http://semweb.mmlab.be/ns/fnml#"
 _REFERENCE_PREDS = (
     "http://w3id.org/rml/reference",
     "http://semweb.mmlab.be/ns/rml#reference",

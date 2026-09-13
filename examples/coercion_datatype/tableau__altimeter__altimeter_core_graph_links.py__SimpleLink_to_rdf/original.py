@@ -2,7 +2,7 @@
 # region: SimpleLink.to_rdf (lines 60-77, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Graph, Literal, Namespace, RDF, URIRef, XSD
-from altimeter.core.graph.node_cache import NodeCache
+from node_cache import NodeCache  # shim: altimeter.core.graph.node_cache, see meta.json
 
 def to_rdf(
     self, subj: BNode, namespace: Namespace, graph: Graph, node_cache: NodeCache

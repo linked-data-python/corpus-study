@@ -2,3 +2,34 @@
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
 @prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Solution 1: a datatype property with domain ex:Person, range xsd:string,
+# a label and a comment — every optional field present.
+ex:name rdfs:domain ex:Person ;
+    rdfs:range xsd:string ;
+    rdfs:label "name" ;
+    rdfs:comment "The person's name" .
+
+# Solution 2: an object property with domain ex:Person, range a class
+# (not a datatype), no label, no comment — the independently-optional
+# fields must each be absent on their own, not lost together.
+ex:knows rdfs:domain ex:Person ;
+    rdfs:range ex:Person .
+
+# Solution 3: domain ex:Person, only a label configured, range absent
+# entirely (zero-solution case for the range lookup on this property).
+ex:nickname rdfs:domain ex:Person ;
+    rdfs:label "nickname" .
+
+# Neighbouring data that must NOT match: a property whose domain is a
+# different class.
+ex:title rdfs:domain ex:Book ;
+    rdfs:range xsd:string ;
+    rdfs:label "title" .
+
+# A blank-node subject with the right domain: filtered out by the
+# isinstance(prop, URIRef) guard, not by the pattern itself.
+_:bn rdfs:domain ex:Person ;
+    rdfs:range xsd:string .

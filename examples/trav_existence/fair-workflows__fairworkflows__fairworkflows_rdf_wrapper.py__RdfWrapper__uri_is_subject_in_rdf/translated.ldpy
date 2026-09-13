@@ -13,7 +13,7 @@ def _uri_is_subject_in_rdf(uri: str, rdf: rdflib.Graph, force: bool):
         uri: Uri of the object
         force: Toggle raising an error (force=False) or just a warning (force=True)
     """
-    if rdflib.URIRef(uri) not in rdf.subjects():
+    if not bool(m{ {rdflib.URIRef(uri)} ?p ?o }(rdf)):
         message = (f"Provided URI '{uri}' does not "
                    f"match any subject in provided rdf graph.")
         if force:

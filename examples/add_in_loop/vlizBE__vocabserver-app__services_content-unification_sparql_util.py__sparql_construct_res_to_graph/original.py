@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib.graph import Graph
 from rdflib.term import URIRef, Literal
+from json_to_term_shim import json_to_term
 
 def sparql_construct_res_to_graph(res):
     """ Turn results of a sparql construct query into an rdflib graph """
