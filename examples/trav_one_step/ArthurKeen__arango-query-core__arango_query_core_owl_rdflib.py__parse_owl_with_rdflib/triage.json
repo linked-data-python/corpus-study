@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (équivalente sur 400 ontologies aléatoires) mais pilote très faible : une dizaine de mutants (gardes if domain/range/type_field/type_value, styles par défaut, repli mappingStyle, prédicat rdfs:range de la boucle datatype) restent verts.",
+  "questions": [
+    {
+      "question": "La fixture ne couvre pas les branches négatives et les valeurs par défaut de la région (types autres que xsd:string, class avec collectionName mais sans typeField/typeValue/style, arête avec phys: mais sans domain/range ni style) : acceptez-vous de passer en needs-work pour les ajouter ?",
+      "where": "fixture.ttl:32-65 ; translated.ldpy:48, :87-92, :99-110 ; original.py:48, :87-92, :99-110",
+      "if_yes": "needs-work : enrichir la fixture (au minimum un xsd:integer/boolean, une classe phys: sans typeField/typeValue/style, une arête phys: sans style/domain/range, une classe avec phys:mappingStyle seul) ; la traduction elle-même est correcte.",
+      "if_no": "approuver : la traduction est mécanique (g.subjects->m{ }, g.value->.first(), `or` conservé) et sans écart sur 400 graphes aléatoires."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants dans une copie, tous restés OK : `if type_field:`->`if True:` ; `if type_value:`->`if True:` ; défaut \"COLLECTION\"->\"X\" ; défaut \"DEDICATED_COLLECTION\"->\"X\" ; `{cls} phys:mappingStyle`->`phys:style` ; `{prop} phys:mappingStyle`->`phys:style` (arêtes) ; `if domain:`->`if True:` et `if range_:`->`if True:` (arêtes physiques) ; `{prop} rdfs:range`->`rdfs:domain` dans la boucle datatype (invisible : l'unique range est xsd:string, qui est aussi le défaut de _xsd_to_simple). Mutants tués (FAIL) : `if domain_name in entity_props:`->True ; défaut \"Any\"->\"Y\". La note affirme une vérification anti-vert-creux sur un seul mutant (collectionName). Fuzz de 400 ontologies Turtle aléatoires (valeurs multiples, littéraux \"\", \"0\", 0, @en ; sans BNodes dont l'id est aléatoire) : repr(MappingBundle) identique original/traduction dans 400/400. Shim MappingBundle/MappingSource/_local_name/_xsd_to_simple conforme à mapping.py:129-143 et owl_rdflib.py:130-153. Les 20 g.value->m{ }.first() allongent le texte sans gain (pas de jointure possible), `?v` réutilisé partout.",
+  "triaged_by": "sonnet-5.5"
+}

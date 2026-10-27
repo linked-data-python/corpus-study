@@ -1,0 +1,30 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "L'enregistrement CUSTOM_EVALS de translated.ldpy n'est pas prouvé (il fuit depuis original.py, exécuté d'abord dans le même processus) ; le pilote ne distingue pas non plus `?s a foaf:Agent` de `?s a foaf:Person` ; et la région n'a aucune interpolation de terme dans s{ } (PREFIX templating).",
+  "questions": [
+    {
+      "question": "Le pilote doit-il isoler l'état global rdflib.plugins.sparql.CUSTOM_EVALS (le vider avant d'exécuter translated.ldpy), faute de quoi le docstring « un enregistrement cassé serait silencieusement faux » est inexact ?",
+      "where": "translated.ldpy:74 et driver.py:36-43 (harnais : original.py puis translated.ldpy dans le même processus)",
+      "if_yes": "needs-work : vider CUSTOM_EVALS entre les deux exécutions (ou un appel de pilote qui le fait), et idéalement choisir une requête dont Person ne donne pas les mêmes lignes qu'Agent.",
+      "if_no": "approuver en notant que la ligne 74 n'est pas vérifiée."
+    },
+    {
+      "question": "`+{ foaf:Person {rdflib.RDFS.subClassOf} foaf:Agent }` interpole une constante de l'API rdflib là où `rdfs:subClassOf` avec `@prefix rdfs:` est la construction la plus spécifique ; faut-il le corriger (et retirer alors « interpolation {expr} » de constructions, seul usage de cette construction dans la région) ?",
+      "where": "translated.ldpy:81 et original.py:79",
+      "if_yes": "needs-work : ajouter `@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .` et écrire `foaf:Person rdfs:subClassOf foaf:Agent`.",
+      "if_no": "approuver (fidélité à l'API rdflib de l'original) mais ne pas compter « interpolation {expr} » comme gain."
+    },
+    {
+      "question": "Cette paire peut-elle illustrer l'article ?",
+      "where": "translated.ldpy:45 et 84 contre original.py:82",
+      "if_yes": "seulement pour « le PREFIX templating `% FOAF` disparaît avec @prefix » (deux lignes) ; elle ne montre PAS l'interpolation d'un terme en initBindings, qui est le propos de la strate.",
+      "if_no": "ne pas l'utiliser pour la strate sparql_interpolated."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants sur translated.ldpy (copie) : ligne 74 (`CUSTOM_EVALS[...] = customEval`) remplacée par `pass` -> toujours OK ; exécutée seule, cette traduction mutilée imprime 0 ligne (contre 26) : le vert vient de la fuite de l'état global depuis original.py. `?s a foaf:Agent` -> `?s a foaf:Person` -> toujours OK (même 26 sujets : zéro-longueur de subClassOf*), alors que `foaf:Organization` -> FAIL, `+{ }` supprimé -> FAIL, `(g)` -> `(Graph())` -> FAIL. Les modifications de original.py (garde __main__ retirée, g.load -> g.parse) sont identiques des deux côtés et confirmées contre custom_eval.py du dépôt (lignes 50-63) ; foaf.n3 n'est pas dans le dépôt (find vide). `% FOAF` et `@prefix foaf:` donnent le même prologue. L'import FOAF reste inutilisé dans translated.ldpy (sans effet).",
+  "triaged_by": "sonnet-5.5"
+}

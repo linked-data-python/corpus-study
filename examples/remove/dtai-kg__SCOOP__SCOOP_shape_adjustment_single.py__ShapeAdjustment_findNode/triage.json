@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : les quatre -{ {o} sh:targetX ?x } sont bien quatre îlots (jointure interdite) et le pilote est solide ; bonne paire pour la strate remove.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ?",
+      "where": "translated.ldpy:8-14 et original.py:5-11",
+      "if_yes": "retenir comme exemple de la strate remove : None devient le joker ?x, et le texte peut dire pourquoi ce sont quatre -{ } et non un seul.",
+      "if_no": "approuver sans l'utiliser (le gain en jetons est modeste : 4 lignes contre 4 lignes)."
+    }
+  ],
+  "evidence": "rdfeval check OK. Neuf mutants de translated.ldpy tous FAIL : prédicat échangé dans chacun des 4 remove, remove devenu `pass`, joker `?p` trop large, `{node}` remplacé par `?s` (le voisinage <Untouched> est donc bien surveillé), récursion supprimée, `.first()`. Expérience hors pilote sur une copie : des enfants sh:node BNode (récursion à travers des BNode) -> les deux versions élaguent les mêmes triples, graphes isomorphes (le FAIL du pilote ainsi étendu n'est que str(BNode) comparé dans adjusted_shape, artefact du harnais). Cycle sh:node (o == node) -> RecursionError des deux côtés (le harnais ne compare pas les levées, sans conséquence ici). findNode n'est appelé dans le dépôt qu'avec URIRef(shape_identifier) puis des objets du graphe : node ne vaut jamais None (le cas Literal(\"None\") est donc inatteignable). Remarque : la note dit « l'attribut initial_graph n'est jamais réaffecté », faux dans le dépôt (shape_adjustment_single.py:88 et :605) mais sans effet, @graph est capturé à chaque appel de findNode. shaclNS est constant (ligne 17), donc @prefix sh: est exact.",
+  "triaged_by": "sonnet-5.5"
+}

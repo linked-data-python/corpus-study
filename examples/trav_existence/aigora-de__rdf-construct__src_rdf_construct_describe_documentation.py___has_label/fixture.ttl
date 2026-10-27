@@ -5,10 +5,16 @@
 # and neighbouring triples that must NOT match (rdfs:comment on ex:noLabel;
 # rdfs:label on a DIFFERENT subject, ex:neighbour, to prove the read is
 # scoped to the given subject, not the whole graph).
+# Falsy labels (repair 2026-10-27): rdflib's `any(graph.objects(s, p))` tests
+# the TRUTH of the objects, so a label that is the empty string or the number
+# 0 counts as ABSENT in the original (documentation.py:48 and :54 count the
+# classes/properties that have a label).  The graph can hold such labels:
+# the source is any ontology the user hands to `rdf-construct describe`.
 @prefix ex:      <http://example.org/> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
 
 ex:hasLabel    rdfs:label "Has a label" .
 ex:hasAltLabel skos:altLabel "Alt label" .
@@ -18,3 +24,20 @@ ex:noLabel ex:other "not a label predicate" ;
     rdfs:comment "not a label predicate either" .
 
 ex:neighbour rdfs:label "Belongs to a different subject" .
+
+# The two LABEL_PREDICATES members no subject above goes through.
+ex:hasPrefLabel skos:prefLabel "Pref label" .
+ex:hasDcTitle   dc:title "A dc title" .
+
+# Falsy labels: absent for `any(...)` over the objects.
+ex:emptyLabel   rdfs:label "" .
+ex:zeroLabel    skos:prefLabel 0 .
+ex:falseLabel   skos:altLabel false .
+ex:emptyLang    dcterms:title ""@en .
+ex:emptyThenOk  rdfs:label "" , "A real one" .
+ex:zeroOnOtherPredicate rdfs:label 0 ; skos:altLabel "Alt after a zero" .
+
+# Truthy objects that are not plain strings: an IRI, a blank node, a number.
+ex:iriLabel   rdfs:label ex:someIri .
+ex:bnodeLabel rdfs:label [ ex:p "x" ] .
+ex:numLabel   skos:prefLabel 7 .

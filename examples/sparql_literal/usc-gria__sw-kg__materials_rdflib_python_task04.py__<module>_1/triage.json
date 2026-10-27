@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (equivalente sur le fixture, sur le vrai example3.rdf du dépôt et sur des littéraux simples/@en), mais le fixture ne discrimine pas le littéral \"Jane Smith\"^^xsd:string de q5, c'est-à-dire la réécriture initBindings -> terme dans le motif qui est la raison d'être de la région.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un fixture où un deuxième sujet connaît (foaf:knows) une personne qui n'est PAS « Jane Smith » mais porte un vcard:Given (par exemple ex:carol foaf:knows ex:bob, avec ex:carol vcard:Given), avant d'approuver la paire ?",
+      "where": "translated.ldpy:94 (?JaneSmith vcard:FN \"Jane Smith\"^^xsd:string) et original.py:109 (initBindings '?JaneSmithFullName'); fixture.ttl (seul ex:john a un foaf:knows)",
+      "if_yes": "needs-work : ajouter au fixture ce voisinage ; le vert actuel ne prouve pas la substitution du lien initBindings pour q5.",
+      "if_no": "approuver : le texte du littéral est identique à l'original (relu) et q3 (même réécriture) est, lui, discriminé par le fixture."
+    }
+  ],
+  "evidence": "check OK. Mutants sur une copie : (a) q5 `?JaneSmith vcard:FN ?jn.` (contrainte « Jane Smith » supprimée) -> OK (vert) ; (b) q5 `foaf:knows ?Jx` -> OK (vert) ; (c) q3 `vcard:Family ?f` -> FAIL ; (d) q3 `\"Smith\"` sans xsd:string -> FAIL ; (e) q5 `vcard:Given` -> `vcard:Note` -> FAIL. Cause : un seul sujet (ex:john) a foaf:knows, et il ne connaît que Jane. Équivalence confirmée par ailleurs : original et traduction rejoués sur le vrai corpus/repos/usc-gria__sw-kg/materials/rdflib/rdf/example3.rdf (parse xml) -> stdout identique, check OK ; et sur un fixture mêlant littéraux simples, @en et ^^xsd:string (« Smith », « Jane Smith ») -> OK. L'original.py ne diffère du dépôt que par le chargement (github_storage + parse remplacé par fixture.ttl). La note sur `../rdf/example3.rdf` est exacte (github_storage = \"../rdf/\"). Réserve mineure : la traduction supprime les noms FOAF, XSD, Literal, Namespace, prepareQuery, github_storage du module (non comparés en module-state), sans effet ici. Article : pas en l'état (5 requêtes longues, gain = disparition de prepareQuery/initNs, oracle à renforcer d'abord).",
+  "triaged_by": "sonnet-5.5"
+}

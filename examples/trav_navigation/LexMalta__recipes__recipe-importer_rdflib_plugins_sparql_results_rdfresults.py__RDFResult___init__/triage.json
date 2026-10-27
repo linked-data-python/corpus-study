@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction équivalente sur tout ce que j'ai essayé (BNode, ASK faux, valeurs multiples), mais le pilote ne distingue pas `askAnswer is not None` de `if askAnswer:` : aucun ASK à réponse fausse, la véracité d'un littéral n'est pas exercée.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel ASK dont rs:boolean vaut false, puisque le mutant `if askAnswer:` (littéral faux traité comme absent, branche SELECT au lieu d'ASK) reste vert ?",
+      "where": "translated.ldpy:32 et original.py:30 ; driver.py (ASK_TTL ne contient que `rs:boolean true`)",
+      "if_yes": "needs-work : ajouter un appel ASK false au pilote (la traduction passe avec lui, vérifié) ; puis approuver",
+      "if_no": "approuver en l'état ; le garde `is not None` est correct mais non prouvé par le pilote"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutant `if askAnswer:` dans une copie -> OK (VERT). Mutant `Variable(... .first() or 'x')` -> OK (VERT : aucune liaison sans rs:variable). Copie avec quatre appels ajoutés (graphe de résultat entièrement en BNode comme les fichiers DAWG réels, ASK false, `rs:boolean \"0\"^^xsd:boolean` avec rs:solution, valeurs multiples pour rs:value / rs:variable) et ordered=True : la traduction passe (OK) ; le mutant `if askAnswer:` y échoue (FAIL). original.py = dépôt, à la déindentation près (diff). ldpy émet un LdpyWarning ('rs' à la fois préfixe et nom Python, ligne 18) que meta.json mentionne ; je n'ai trouvé aucune ambiguïté réelle dans ce fichier. Pas candidate article : aucune jointure fondue (les boucles imbriquées restent, avec raison : sol = {} par solution), la paire illustre trav_single_value plutôt que la navigation.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -25,6 +25,6 @@ def _has_label(graph: Graph, subject: URIRef) -> bool:
     """
     @graph graph
     for pred in LABEL_PREDICATES:
-        if bool(m{ {subject} {pred} ?o }):
+        if any(m{ {subject} {pred} ?o }):
             return True
     return False

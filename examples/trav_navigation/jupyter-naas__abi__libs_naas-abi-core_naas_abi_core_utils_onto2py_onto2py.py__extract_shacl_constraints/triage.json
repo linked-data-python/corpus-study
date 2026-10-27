@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "article-example"
+  ],
+  "summary": "Fusion des trois boucles en un m{ } à trois motifs correcte (produit = imbrication, ordre des appels identique, vérifié par fuzz), mais le pilote ne voit ni l'ordre ni la multiplicité des appels : un mutant `reversed(list(m{...}))` reste vert.",
+  "questions": [
+    {
+      "question": "Le pilote déclare ordered=True mais sa fixture n'a aucune écriture conflictuelle, donc l'ordre n'est pas observé : acceptez-vous de passer en needs-work pour ajouter à fixture.ttl des property shapes de même sh:path avec des sh:maxCount différents (dernier écrit gagne) ?",
+      "where": "driver.py:20-27 et :79 (ordered=True) ; fixture.ttl:98-112 ; translated.ldpy:20-22",
+      "if_yes": "needs-work : enrichir la fixture (testé dans une copie : la traduction actuelle y reste équivalente, et le mutant inversé échoue) ; la traduction elle-même est correcte.",
+      "if_no": "approuver : l'ordre est préservé de fait (300 graphes aléatoires, séquences d'appels identiques)."
+    },
+    {
+      "question": "Cette paire peut-elle illustrer l'article (trois boucles imbriquées g.subjects/g.objects/g.objects -> un seul m{ } de trois motifs, cardinalité et ordre préservés, filtre Python conservé) ?",
+      "where": "original.py:16-24 et translated.ldpy:20-26",
+      "if_yes": "candidate pour la strate trav_navigation, une fois la fixture enrichie",
+      "if_no": "ne pas la retenir comme exemple"
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutant dans une copie : `for ... in reversed(list(m{...}))` reste OK sur la fixture livrée (ordre non observé malgré ordered=True) ; avec 4 property shapes conflictuelles ajoutées (S1: N1 maxCount 1, N2 5, N3 9 ; S2: N4 2 sur ex:name), la traduction réelle reste OK et le mutant inversé FAIL. Fuzz de 300 graphes aléatoires (formes IRI/BNode, 0-3 targetClass, 0-4 property, absence de rdf:type NodeShape, insertion mélangée), process_property_shape remplacé par un enregistreur : la séquence exacte d'appels (prop_shape, classe) est identique original/traduction dans 300/300 cas. Dépôt : SHACL = rdflib.Namespace(\"http://www.w3.org/ns/shacl#\") (onto2py.py:1286), conforme au driver ; le shim process_property_shape est identique à onto2py.py:1717-1748 sauf l'annotation `g: rdflib.Graph` supprimée (cosmétique, la note dit « unmodified »). Le shim ignore class_info (comme l'original) : l'argument classes[...] n'est donc jamais observé.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (requêtes identiques, {URIRef(class_uri)} nécessaire), mais le pilote ne distingue pas rdf:rest* de rdf:rest, rdf:rest? ou rdf:rest+ : l'IRI cherchée est toujours en 2e position de la liste owl:unionOf.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il être renforcé (liste owl:unionOf où la classe est en 1re et en 3e position, en plus de la 2e) avant d'accepter la paire ?",
+      "where": "driver.py:GRAPH_TTL (ex:unionProp rdfs:domain [ owl:unionOf ( ex:OtherClass ex:A ) ]) et translated.ldpy:14 (rdf:rest*/rdf:first) / original.py:8",
+      "if_yes": "needs-work : ajouter au fixture une liste avec ex:A en tête et une avec ex:A en 3e position, puis relancer ; la paire redevient approuvable (et candidate à l'article : suppression des {{ }} doublés).",
+      "if_no": "approuver en l'état, mais le chiffre « équivalent » ne couvre pas la sémantique de rest*, seul trait non trivial de la requête."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants de translated.ldpy sur une copie : rdf:rest* -> rdf:rest, -> rdf:rest?, -> rdf:rest+ : TOUS RESTENT VERTS (A est à l'index 1 de la liste, atteint avec exactement un rest). Tués : étoile externe (owl:unionOf/...)* retirée, rdf:type retiré en q1 ou q2, onProperty retiré, q1 ou q2 vidée, rdf:rest* sans rdf:first. Survivant DISTINCT retiré : mutant équivalent (list(set(...)) déduplique), sans conséquence. ordered=False est correct (list(set())). Types réels : class_uri est un str (appels dans sbol_factory.py:133,238 et uml_factory.py:185,273,347, valeurs de CLASS_URI) ; f<{class_uri}> et <{class_uri}> sont refusés par le transpileur dans s{ }, donc {URIRef(class_uri)} est la forme la plus spécifique ; aucun @base. Préfixes rdf/rdfs/owl : bien les pré-liés du graphe réel (query.py:22-27 lie en plus sbol, xsd, om, prov, non utilisés ici). Non commité, pas de bogue de traduction trouvé.",
+  "triaged_by": "sonnet-5.5"
+}

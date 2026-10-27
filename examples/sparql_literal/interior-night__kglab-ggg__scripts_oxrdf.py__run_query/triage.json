@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "Le dépôt appelle run_query avec un kglab.KnowledgeGraph dont query(sparql, *, bindings=None) n'accepte pas initBindings : la traduction lève TypeError là où l'original marche ; de plus la 2e branche du UNION n'est exercée par aucune donnée du fixture.",
+  "questions": [
+    {
+      "question": "Faut-il considérer le second appel du dépôt (scripts/oxrdf.py:56-57, g = kglab.KnowledgeGraph(...)) comme atteint, donc la traduction s{ ... }(g) comme non équivalente à g.query(str) pour cet argument ?",
+      "where": "translated.ldpy:17 (s{ ... }(g)) et original.py:25 (g.query(QUDT_QUERY9)) ; dépôt : scripts/oxrdf.py:55-57 et kglab/query/mixin.py:45-48",
+      "if_yes": "needs-work (ou drapeau « écart du langage » consigné) : s{ }(g) appelle g.query(prep, initBindings={}) ; ne marche que sur un rdflib.Graph ; ajouter un appel au pilote avec un objet de signature kglab.",
+      "if_no": "approuver en notant que la paire n'est valide que pour les rdflib.Graph (le pilote ne passe que des Probe qui acceptent **kwargs)."
+    },
+    {
+      "question": "Le fixture doit-il être renforcé pour que la 2e branche du UNION (chemins owl:unionOf/rdf:rest*/rdf:first) soit seule à produire un item ?",
+      "where": "driver.py:RICH_TTL (ex:Item2) et translated.ldpy:17 (2e branche du UNION)",
+      "if_yes": "needs-work : Item2 doit avoir des restrictions sans owl:onClass direct ni forme matchant la 1re branche.",
+      "if_no": "approuver, l'équivalence reposant alors sur l'identité textuelle de la requête (prouvée)."
+    }
+  ],
+  "evidence": "rdfeval check OK. (1) Texte de la requête de translated.ldpy == texte de original.py hors PREFIX (comparaison octet à octet, 1337 caractères) : le risque de recopie est nul. (2) Copie du pilote avec un 3e appel passant un stand-in KG ayant exactement la signature de kglab.KnowledgeGraph.query (sparql, *, bindings=None, qui appelle self._g.query(sparql, initBindings=...)) : l'original passe, translated.ldpy lève TypeError: KG.query() got an unexpected keyword argument 'initBindings' (runtime.py:1139). kglab n'est pas installé ici, d'où le stand-in. Le 1er appel du dépôt (rdflib.Graph(store='OxMemory')) marche : essayé avec le store oxrdflib 'Oxigraph', même sortie. (3) Mutants : 2e branche du UNION remplacée par un motif impossible -> VERT ; rest* -> rest dans les deux chemins -> VERT ; FILTER(?item != ?item_class), FILTER(?interfaceClass != CoatingLayer), FILTER(?interfaceClass != ?base_layer), rdf:type owl:Restriction des restrictions 1/2/interface retirés, onProperty basedOn->interactsWith, hasEquivalentCoatingLayer->basedOn, someValuesFrom->onClass : tous VERTS (Item2 est aussi trouvé par la 1re branche, via des BNodes). Tués : DISTINCT retiré, FILTER owl:Nothing et FILTER CoatingLayer retirés, 1re branche rendue impossible, ?item_class retiré. OPTIONAL retiré : mutant équivalent (?label non projeté). Écart de timing init/exec déjà documenté, bien filtré. Nom QUDT_QUERY9 disparu mais non importé ailleurs dans le dépôt. Candidate à l'article : non (requête recopiée telle quelle, aucun gain de longueur, oracle faible, écart de comportement sur le 2e appel du dépôt).",
+  "triaged_by": "sonnet-5.5"
+}

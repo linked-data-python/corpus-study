@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (les quatre -{ } sont exactement les quatre remove, et Literal(x, datatype=...) est le même appel rdflib des deux côtés), mais le shim ne contient aucun voisinage que les -{ } ne doivent PAS effacer : trois mutants trop larges restent verts.",
+  "questions": [
+    {
+      "question": "Le shim doit-il contenir une ligne où ISO, COUNTRY et SOURCE sont manquants (donc \"unknown\"@en et cvdr:unknown, que l'original ne retire PAS) ainsi qu'un Alternative source se terminant par ';' (URIRef('') des deux côtés) ?",
+      "where": "context_shim.py:26-92 (aucune ligne n'a ISO/COUNTRY/SOURCE None) et translated.ldpy:88-91 / original.py:88-91",
+      "if_yes": "needs-work : ajouter cette quatrième ligne au shim ; je l'ai fait dans une copie, la paire reste verte et le mutant `-{ ?s ?p \"unknown\"@en }` devient rouge, donc approuver ensuite.",
+      "if_no": "approuver : la traduction est correcte par construction (mêmes quatre motifs, même appel Literal), le risque est celui d'un oracle muet, pas d'une erreur."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants sur translated.ldpy (copie) : commenter chacun des quatre -{ } -> FAIL (les quatre îlots portent la charge). Mais ajouter un cinquième -{ ?s ?p \"unknown\"@en }, ou -{ ?s ?p \"unknown\" }, ou -{ ?s hasISO3 cvdr:unknown } -> toujours OK : aucun littéral \"unknown\" de langue, simple ou IRI cvdr:unknown n'existe dans le shim. Copie avec une 4e ligne (ISO/COUNTRY/SOURCE/REGION None, Alternative source 'http://x;', LINK avec espace) : paire OK et le mutant @en devient FAIL. Autres points vérifiés : transpilation = Literal((x), datatype=URIRef(xsd:...)) / Literal(x, lang='en') / firi(x)=URIRef(x) sans @base, donc coercition identique pour tout type de cellule (Timestamp, float) ; IRI des @prefix identiques. Réserve mineure sans portée sur les données : pname() fait str(x) là où cvdr[x] avec x non-str renvoie l'IRI du namespace seul ; ISO/COUNTRY sont des chaînes après fillna. Pour l'article : les lignes 88-91 (4 remove -> 4 -{ }, qui ne se factorisent pas en un seul) illustrent bien la strate une fois le shim complété ; la région entière (72 lignes, 161 ops) est trop longue pour être montrée telle quelle.",
+  "triaged_by": "sonnet-5.5"
+}

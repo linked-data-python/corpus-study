@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle, mais le fixture n'a aucun doublon de ligne, aucun service sans device et aucun prédicat voisin sur le datapoint : DISTINCT ajouté, motif ?device retiré et ?dp ?p ?topic restent verts, alors que la requête n'a pas de DISTINCT.",
+  "questions": [
+    {
+      "question": "Le fixture doit-il être renforcé (deux devices pour une même fonctionnalité donnant deux lignes identiques ; un service exposant une fonctionnalité sans device ; un datapoint avec un autre prédicat que base:mqttTopic) ?",
+      "where": "fixture.ttl:9-30 et translated.ldpy:14-18 (requête sans DISTINCT, motifs ?device et base:mqttTopic)",
+      "if_yes": "needs-work : ajouter ces trois voisinages et un appel sur graphe vide ; paire ensuite approuvable.",
+      "if_no": "approuver, mais ni la cardinalité (multi-ensemble) ni la jointure sur ?device ne sont prouvées."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants sur une copie : SELECT -> SELECT DISTINCT : VERT ; motif ?device onem2m:hasFunctionality ?eventfunc retiré : VERT ; ?dp base:mqttTopic ?topic -> ?dp ?p ?topic : VERT. Tués : ordre de projection permuté, motif rdf:type retiré ou changé, exposesFunctionality retiré, hasOutputDataPoint cassé, LIMIT 1, serialize xml, return None, print des lignes retiré (la sortie standard est comparée). Appelant réel (aggregatPreload.py:195-208) : g = Graph() rempli par parse json-ld, un rdflib.Graph ordinaire ; les cinq voisines du dépôt utilisent DISTINCT, celle-ci non, donc des doublons sont plausibles sur données réelles. initNs/prepareQuery partagés par six fonctions : le gain de longueur (5 @prefix contre un dict) est moins net que dans la région isolée. Candidate à l'article : peut-être après renforcement, mais le gain est faible (le préfixe passe de 2 à 5 lignes, .execute() requis).",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "article-example"
+  ],
+  "summary": "Traduction correcte (la jointure produit exactement le produit de l'original, même ordre), mais le fixture n'a aucune classe à plusieurs parents : la cardinalité de la jointure, tout le gain de la paire, n'est pas prouvée par le pilote.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un appel (ou une classe du fixture) avec une classe ayant au moins deux parents non définis avant d'approuver, puisque le pilote actuel ne distingue pas la jointure d'un « premier parent seulement » ?",
+      "where": "translated.ldpy:24 et original.py:19-24 ; fixture.ttl (aucune classe n'a deux rdfs:subClassOf)",
+      "if_yes": "needs-work : ajouter au fixture une classe à 2-3 parents non définis (j'ai vérifié que la traduction passe alors, y compris en ordered=True) ; la paire redevient approuvable et candidate",
+      "if_no": "approuver en l'état, en sachant que la preuve de non-changement de cardinalité repose sur ma seule expérience, pas sur le pilote"
+    },
+    {
+      "question": "Cette paire peut-elle illustrer l'article (deux boucles imbriquées de sélecteurs fondues en un seul m{ } à deux variables, sans négation ni lecture optionnelle, cardinalité identique) une fois le fixture complété ?",
+      "where": "translated.ldpy:24 et original.py:19-24",
+      "if_yes": "retenir comme exemple trav_navigation propre (gain : deux boucles et une garde de plus -> un seul motif)",
+      "if_no": "ne pas la retenir ; rien d'autre à corriger"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutant dans une copie : ne garder que la première solution par class_uri (`_seen`) -> rdfeval check reste OK (VERT), donc le fixture ne distingue pas une jointure d'un « premier parent seulement ». Copie avec fixture enrichi (ex:Multi : parents U1,U2,U3,ClassG,owl:Thing + deux rdfs:label ; ex:Multi2 : U3,U1) et ordered=True : la traduction passe (OK, ordre de la liste identique), le même mutant échoue (FAIL). Shim (LintResult, _get_label, _get_local_name) comparé au dépôt : identique ; LintIssueType est un Enum au lieu de StrEnum, `.value` identique. Zéro solution (graphe vide) et voisinage (BNode classe, BNode/littéral parent, owl:Thing, parent défini) bien couverts.",
+  "triaged_by": "sonnet-5.5"
+}

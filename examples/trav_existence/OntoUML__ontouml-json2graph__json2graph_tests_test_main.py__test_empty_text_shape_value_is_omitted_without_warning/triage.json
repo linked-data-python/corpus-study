@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Les trois lectures sont fidèles et les jokers `[]` sont bien libres, mais `demo()` rend `('assertion-failed', '')` quelle que soit l'assertion qui échoue : échanger les prédicats ontouml:text et ontouml:value des assertions 2 et 3 reste vert ; le décodeur et write_text_shape_project sont remplacés par un copieur de fixture.",
+  "questions": [
+    {
+      "question": "Faut-il faire distinguer au pilote QUELLE assertion échoue (message dans les `assert` des deux fichiers, ou index renvoyé par demo) avant d'approuver la paire ?",
+      "where": "translated.ldpy:28-29 et original.py:23-24 (assertions 2 et 3) ; demo() : translated.ldpy:44 / original.py:39 `return (\"assertion-failed\", str(e))` (str(e) vaut '' pour ces deux assertions) ; driver.py:45-46",
+      "if_yes": "needs-work : ajouter un message (ou l'index) aux assertions des deux côtés ; sinon les fixtures leftover_text/leftover_value ne prouvent pas que chaque prédicat est le bon.",
+      "if_no": "approuver : le défaut ne touche que l'échange de deux prédicats voisins, relu identique à l'original."
+    }
+  ],
+  "evidence": "check OK. Mutants sur une copie : (a) prédicats text et value échangés aux lignes 28-29 -> OK (vert) ; (b) `[]` -> `?z` partout -> OK (équivalent, attendu : variable non liée) ; (c) assertion 1 avec sujet libre `?x a ontouml:Text` -> FAIL (grâce à view-2_shape typé Text dans fixture_missing_type) ; (d) assertion 2 avec sujet libre -> FAIL ; (e) assertion 2 -> `assert True` -> FAIL ; (f) view-1_shape -> view-2_shape -> FAIL ; (g) ontouml:value `\"x\"` au lieu de `[]` -> FAIL. Cas vrai ET faux exercés pour les trois `bool(m{ })` (clean / missing_type / leftover_text / leftover_value), voisinage view-2_shape présent. `f<{BASE_URI}view-1_shape>` = URIRef(BASE_URI + ...) : BASE_URI est une str (dépôt, ligne 58), pas d'@base, équivalent. Réserve sur le shim (context_shim.py) : decode_ontouml_json2graph du dépôt est remplacé par un copieur de fixture choisi par fichier-marqueur et write_text_shape_project (qui construit le vrai JSON, lignes 218-262 du dépôt) par un fichier `{}` ; la région est donc seulement prouvée sur ses trois lignes de lecture, pas sur ce que le décodeur produit (je n'ai pas tenté d'importer le paquet du dépôt). Article : oui, après correction du pilote — c'est la meilleure de ce lot : trois lignes, `in g` -> `bool(m{ })` fermé, `not any(g.triples((s,p,None)))` -> `not bool(m{ s p [] })` avec le joker lexical.",
+  "triaged_by": "sonnet-5.5"
+}

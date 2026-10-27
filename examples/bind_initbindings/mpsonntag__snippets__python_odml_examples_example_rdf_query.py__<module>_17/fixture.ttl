@@ -21,3 +21,21 @@ ex:doc2 rdf:type odml:Document .
 ex:doc2 odml:hasSection ex:sec4 .
 ex:sec4 rdf:type odml:Section ;
     odml:hasType "stimulus/white_noise" .
+
+# must NOT match (kills a query that drops `?d rdf:type odml:Document`):
+# the parent of a perfectly good "setup/daq" section is not a Document
+ex:notadoc rdf:type ex:Folder ;
+    odml:hasSection ex:sec5 .
+ex:sec5 rdf:type odml:Section ;
+    odml:hasType "setup/daq" .
+
+# must NOT match (kills a query that drops `?s rdf:type odml:Section`):
+# right document, right hasType, but the child is not typed as a Section
+ex:doc3 rdf:type odml:Document ;
+    odml:hasSection ex:sec6 .
+ex:sec6 odml:hasType "setup/daq" .
+
+# must NOT match (kills a literal compared loosely): same text, other case
+ex:doc3 odml:hasSection ex:sec7 .
+ex:sec7 rdf:type odml:Section ;
+    odml:hasType "Setup/DAQ" .

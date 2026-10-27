@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Le pilote pointe les six chemins sur le même fixture : rattacher une requête à un autre des six graphes (le suffixe (g) que la paire crédite) ou changer un parse reste vert ; de plus, minor-restructuring ne vient que des paramètres ajoutés à original.py, pas de la traduction.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il utiliser six fichiers distincts (ou six graphes dont chacun ne contient que sa classe) pour que le couplage requête/graphe soit exercé ?",
+      "where": "driver.py:22-29 (six *_path -> fixture.ttl) et translated.ldpy:23,34,45,56,67,78 (s{ ... }(g_xxx))",
+      "if_yes": "needs-work : six fixtures distincts ; tant que ce n'est pas fait, la construction « call suffix (g) » est créditée sans preuve.",
+      "if_no": "approuver, en acceptant que l'oracle ne teste que les motifs (chacun des six est bien discriminé), pas leur graphe."
+    },
+    {
+      "question": "La classification peut-elle passer à directly-expressible, puisque les six paramètres de chemin sont dans original.py ET dans translated.ldpy et que la traduction ne diffère de l'original que par la notation ?",
+      "where": "meta.json:16 (classification), meta.json translation_notes[3], translated.ldpy:11-16 et original.py:11-16",
+      "if_yes": "corriger la classification (sinon la paire débite à tort le langage dans le décompte minor-restructuring).",
+      "if_no": "garder minor-restructuring, mais alors dire que c'est une restructuration du dépôt, pas de la traduction."
+    }
+  ],
+  "evidence": "rdfeval check OK. Sur une copie : requête activite exécutée sur g_tache -> VERT ; requête strategie sur g_tache -> VERT ; g_strategie.parse(tache_path) -> VERT ; g_domaine.parse(domaine_path) remplacé par pass -> VERT (les six graphes ont le même contenu). Tués : classe changée (Tache->Activite), Domaine->Strategie (le cas zéro solution est bien exercé), ?tache a ?c, sortie 'domaines' permutée, parse tache retiré. Préfixe ':' = http://dig.isi.edu/ vérifié dans les six viz_*.ttl du dépôt (ligne 1) : hoist en @prefix correct. s{ } et non m{ } est conforme à la table de la strate. print(strategies) est bien dans la sortie comparée. Candidate à l'article : non (six fois la même requête triviale, gain nul tant que l'oracle est faible).",
+  "triaged_by": "sonnet-5.5"
+}

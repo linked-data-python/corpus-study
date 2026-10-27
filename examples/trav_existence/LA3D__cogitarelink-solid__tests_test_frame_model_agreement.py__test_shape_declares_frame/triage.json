@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le seul cas faux (broken.shacl.ttl) est un graphe sans aucun sub:frameRole : une fuite du sujet ou un mauvais prédicat dans `bool(m{ })` de la ligne 1 de l'assertion passe au vert ; les faux des trois autres assertions ne sont pas exercés.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel faux dans un graphe qui contient sub:frameRole pour un AUTRE sujet (par exemple page.shacl.ttl avec une shape sans frameRole, ou wiki:ThingShape sur page.shacl.ttl) avant d'approuver la paire ?",
+      "where": "translated.ldpy:37 (`assert bool(m{ {shape} sub:frameRole ?fr })`) et original.py:36 ; driver.py (4e appel : broken.shacl.ttl)",
+      "if_yes": "needs-work : ajouter l'appel ; sinon la moitié « faux » de l'idiome de la strate n'est pas prouvée contre une fuite du sujet.",
+      "if_no": "approuver malgré tout : l'équivalence se lit à l'œil sur une ligne, mais le chiffre « vérifié par exécution » est alors faux pour cette ligne."
+    }
+  ],
+  "evidence": "check OK. Mutants sur une copie de translated.ldpy : (a) `m{ ?x sub:frameRole ?fr }` (sujet libre) à la ligne 37 -> OK (vert) ; (b) `sub:labelProperty` au lieu de `sub:frameRole` à la ligne 37 -> OK (vert) ; (c) assertion `labelProperty` remplacée par `assert True` -> OK ; (d) assertion `governsSubject` remplacée par `assert True` -> OK ; (e) `.first() == labelprop` -> `.first() != None` -> OK ; (f) ligne 37 remplacée par `assert True` -> FAIL (message d'assertion différent), (g) `?x` dans la ligne frameRole.first() -> FAIL. Cause : dans broken.shacl.ttl aucun triplet sub:frameRole n'existe, donc ni la fuite ni le mauvais prédicat n'y changent la réponse ; et le pilote n'a aucun appel où les assertions 2-4 échouent (elles ne sont vues qu'au vrai). Jokers : `?fr` est bien non lié et libre. `.first()` vs `g.value` : monovalué dans tous les fichiers, donc cardinalité non éprouvée (sans conséquence ici). original.py = dépôt (lignes 36-42) au caractère près ; ROOT repointé. La note « PageDraftShape attraperait une fuite » est vraie pour les 3 lectures `.first()` (mutant g FAIL) mais pas pour l'assertion d'existence. Article : non (traduction plus longue que l'original : `g.value(shape, SUB.x)` -> `m{ {shape} sub:x ?v }.first()` x3, plus un test pytest sans intérêt pour le lecteur).",
+  "triaged_by": "sonnet-5.5"
+}

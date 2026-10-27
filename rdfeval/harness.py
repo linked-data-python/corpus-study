@@ -273,6 +273,29 @@ def _compare_value(a, b, label: str, diffs: list[str],
         diffs.append(f"{label}: values differ ({a!r} vs {b!r})")
 
 
+class Raised:
+    """What a call raised, compared by exception type and message."""
+
+    def __init__(self, exc: BaseException):
+        self.type = type(exc).__name__
+        self.message = str(exc)
+
+    def __eq__(self, other):
+        return (isinstance(other, Raised)
+                and (self.type, self.message) == (other.type, other.message))
+
+    def __repr__(self):
+        return f"raised {self.type}({self.message!r})"
+
+
+def _outcome(fn, args, kwargs):
+    """The call's return value, or a :class:`Raised` for an Exception."""
+    try:
+        return fn(*args, **kwargs)
+    except Exception as e:                        # noqa: BLE001 - compared
+        return Raised(e)
+
+
 def run_pair(driver_file: str, entry: str | None = None,
              calls: list | None = None, fixture: str | None = None,
              ordered: bool | None = None, stdout_filter=None) -> dict:
@@ -348,14 +371,22 @@ def run_pair(driver_file: str, entry: str | None = None,
                 # compare: capture what each side writes while it runs.
                 buf_o, buf_t = io.StringIO(), io.StringIO()
                 with contextlib.redirect_stdout(buf_o):
-                    ro = fo(*args_o, **kw_o)
+                    ro = _outcome(fo, args_o, kw_o)
                 with contextlib.redirect_stdout(buf_t):
-                    rt = ft(*args_t, **kw_t)
+                    rt = _outcome(ft, args_t, kw_t)
             except Exception:
                 verdict["error"] = traceback.format_exc(limit=8)
                 _emit(verdict)
                 return verdict
-            _compare_value(ro, rt, f"call[{i}].result", diffs, ordered)
+            if isinstance(ro, Raised) or isinstance(rt, Raised):
+                # A raise is an outcome like a value: same exception type and
+                # message on both sides, or a difference.  What the call
+                # mutated before raising is still compared below.
+                if ro != rt:
+                    diffs.append(f"call[{i}]: outcome differs ({ro!r} vs {rt!r})")
+                observed = True
+            else:
+                _compare_value(ro, rt, f"call[{i}].result", diffs, ordered)
             for j, (ao, at) in enumerate(zip(args_o, args_t)):
                 _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs, ordered)
             for k in kw_o:

@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (listes de prédicats identiques à l'original en multi-ensemble, y compris avec membres de liste BNode et littéraux), mais le fixture n'exerce que 3 des 34 prédicats des listes : une faute de frappe dans 27 d'entre eux resterait verte.",
+  "questions": [
+    {
+      "question": "Acceptez-vous de tenir pour établie l'égalité des deux listes de prédicats (comparée mécaniquement : mêmes 4 + 30 noms SH, mêmes sh:or/sh:and/sh:xone) plutôt que d'exiger un fixture portant chacun des 34 prédicats ?",
+      "where": "translated.ldpy:22-32 (object_parameters, subject_parameters) et original.py:18-28 ; fixture.ttl (n'emploie que sh:property, sh:minCount, sh:or)",
+      "if_yes": "approuver (le comptage de la paire reste valable).",
+      "if_no": "needs-work : étendre le fixture à chaque prédicat des deux listes."
+    }
+  ],
+  "evidence": "check OK. Mutants sur une copie : `sh:qualifiedValueShape` -> `sh:qualifiedValueShap` dans subject_parameters, `sh:hasValue` -> `sh:hasValu`, suppression de `sh:minLength, sh:maxLength`, object_parameters réduit à `[sh:property]` -> tous OK (verts). Contrôle mécanique : les noms SH.x / SH['x'] de original.py et sh:x de translated.ldpy (hors commentaires) forment le même multi-ensemble. Cas ajoutés au fixture dans une copie, résultat identique des deux côtés : membres de liste BNode (`sh:and ( [sh:path ex:p1] [sh:minCount 2] [a ex:W] )` : le BNode interpolé `{shapename}` est bien lié, pas traité comme variable de motif), membres littéraux (`sh:or (\"lit\" ex:B 5)`), liste dont un maillon n'a pas de rdf:first (Collection ne rend pas None, donc l'écart connu {None} -> Literal(\"None\") n'est pas atteint). original.py = dépôt (lignes 83-119) sans différence. Seule la dernière condition (`SH.path not in graph.predicates(x)` -> `not m{ {x} sh:path [] }`) est un idiome trav_existence ; le reste est trav_one_step : la région illustre mal la strate. Article : non (37 lignes, quatre boucles, Collection reste du rdflib, l'idiome d'existence est noyé).",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "La jointure à trois motifs change la cardinalité : une restriction à deux owl:onProperty donne deux contraintes là où `g.value` en prenait une ; et le fixture laisse passer la suppression des gardes BNode, URIRef et de la véracité de 0.",
+  "questions": [
+    {
+      "question": "Une owl:Restriction portant deux owl:onProperty (graphe mal formé ou fusionné) doit-elle produire une seule contrainte, comme l'original (`source_graph.value` ne prend que la première valeur) ?",
+      "where": "translated.ldpy:26-29 et original.py:26-27",
+      "if_yes": "needs-work : la jointure ne peut pas absorber `onProperty` ; remettre `m{ {superclass} owl:onProperty ?on_prop }.first()` hors du motif (les deux premiers motifs restent fondus), ajouter ce cas au fixture, et rediscuter la classification (minor-restructuring)",
+      "if_no": "approuver en notant dans meta.json que la fusion suppose un seul owl:onProperty par restriction (écart de langage à consigner)"
+    },
+    {
+      "question": "Faut-il compléter le fixture (restriction ayant pour sujet une IRI, onProperty anonyme via owl:inverseOf, cardinalité 0, plusieurs valeurs pour une même propriété) puisque trois mutants restent verts ?",
+      "where": "fixture.ttl (r1-r14) ; translated.ldpy:31, 34, 42",
+      "if_yes": "needs-work : ajouter ces cas au fixture (je les ai ajoutés dans une copie : la traduction passe, les trois mutants échouent)",
+      "if_no": "approuver en acceptant que les gardes isinstance et `if exact:` ne soient pas prouvées"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copie avec ex:W2 (restriction à `owl:onProperty ex:pa, ex:pb`) : original -> contraintes pa, pf, pg ; traduction -> pa, pb, pf, pg : FAIL (call[2]). Même fixture avec un seul onProperty et ordered=True : OK, donc les autres cas (restriction IRI, onProperty BNode inverseOf, cardinalité 0, valeurs multiples de someValuesFrom/onClass) sont équivalents ; l'ordre de la liste est identique. Mutants sur le fixture d'origine, tous VERTS : suppression de `isinstance(superclass, BNode)`, suppression de `isinstance(on_prop, URIRef)`, `if exact:` -> `if exact is not None:` ; avec le fixture enrichi ils échouent tous trois. Les notes disent que la cardinalité est conservée sans traiter le cas du onProperty multiple. Appels réels (generator.py:174, 241) : cls et superclass sont des URIRef issues du graphe, aucun problème de type d'entrée. Pas candidate article tant que la cardinalité diverge.",
+  "triaged_by": "sonnet-5.5"
+}

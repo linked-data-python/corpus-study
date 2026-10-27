@@ -15,7 +15,7 @@ def _add_modified_to_bs_graph(
     self: Concept, betydningsbeskrivelse: Betydningsbeskrivelse, bsnode: BNode
 ) -> None:
     if getattr(betydningsbeskrivelse, "modified", None):
-        +{ {bsnode} dct:modified {betydningsbeskrivelse.modified} }(self._g)
+        +{ {bsnode} dct:modified f"{betydningsbeskrivelse.modified}"^^xsd:date }(self._g)
 
 
 # Demo harness (identical on both sides, see meta.json): `self: Concept` is a

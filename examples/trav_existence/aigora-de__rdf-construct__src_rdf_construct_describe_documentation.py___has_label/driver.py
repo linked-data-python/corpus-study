@@ -19,15 +19,36 @@ from rdfeval.harness import run_pair, fixture_graph
 FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
 EX = "http://example.org/"
 
-# One call per subject in fixture.ttl: three that resolve through a
-# different LABEL_PREDICATES member each, one with only non-label
-# predicates, one absent from the graph entirely (both False cases).
+# One call per subject in fixture.ttl: the five LABEL_PREDICATES members, one
+# subject each (True); one with only non-label predicates and one absent from
+# the graph entirely (both False, zero solution); the FALSY labels ("", 0,
+# false, ""@en), which `any(graph.objects(s, p))` counts as absent -- these
+# calls separate `any(m{ })` (truth of the object, as rdflib) from `bool(m{ })`
+# (existence of a solution), which the first version of this translation
+# wrote; and truthy non-string objects (IRI, blank node, number).
 _SUBJECTS = [
     URIRef(EX + "hasLabel"),
     URIRef(EX + "hasAltLabel"),
     URIRef(EX + "hasTitle"),
     URIRef(EX + "noLabel"),
     URIRef(EX + "isolated"),
+    # the two LABEL_PREDICATES members the subjects above do not use
+    URIRef(EX + "hasPrefLabel"),
+    URIRef(EX + "hasDcTitle"),
+    # falsy labels: `any(graph.objects(s, p))` counts them as absent
+    URIRef(EX + "emptyLabel"),
+    URIRef(EX + "zeroLabel"),
+    URIRef(EX + "falseLabel"),
+    URIRef(EX + "emptyLang"),
+    # a falsy label next to a truthy one (same predicate, then another one)
+    URIRef(EX + "emptyThenOk"),
+    URIRef(EX + "zeroOnOtherPredicate"),
+    # truthy non-string objects
+    URIRef(EX + "iriLabel"),
+    URIRef(EX + "bnodeLabel"),
+    URIRef(EX + "numLabel"),
+    # the neighbour carries a label of its own, none on this subject's behalf
+    URIRef(EX + "neighbour"),
 ]
 
 VERDICT = run_pair(

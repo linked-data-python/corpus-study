@@ -14,6 +14,8 @@
 # pair, and no rdf:first at all -- the neighbourhood that must not match).
 @prefix ex: <http://example.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix shext: <http://example.com/shacl-extension#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 # case1: sequence path as an RDF list -- TRUE branch, and a plain URIRef
 # leaf at each position via the recursive isinstance(pp, URIRef) case.
@@ -43,3 +45,44 @@ ex:case6 ex:path [ sh:union ( ex:u1 ex:u2 ) ] .
 # case7: a sequence whose second element is itself an inverse path --
 # recursion inside the while loop, with a non-leaf (blank node) list member.
 ex:case7 ex:path ( ex:p3 [ sh:inversePath ex:p4 ] ) .
+
+# ---- repair 2026-10-27 -------------------------------------------------
+# The cases below were added by the repair pass.  Cases 8 to 11 reach the
+# PRED_TO_PATH_CLASS entries and nested shapes the first seven did not; the
+# `err*` cases are the ones on which the region RAISES (driver.py compares
+# the exceptions of the two versions, which the harness does not).
+
+# case8..case10: the remaining single-predicate path classes.
+ex:case8  ex:path [ sh:oneOrMorePath ex:q ] .
+ex:case9  ex:path [ sh:zeroOrOnePath ex:r ] .
+ex:case10 ex:path [ shext:bNodeDepth 3 ] .
+
+# case11: recursion through three levels (inverse of a sequence of an
+# alternative), and an empty alternative list (Collection over rdf:nil).
+ex:case11 ex:path [ sh:inversePath ( ex:a [ sh:alternativePath ( ex:b ex:c ) ] ) ] .
+ex:case12 ex:path [ sh:alternativePath () ] .
+ex:case13 ex:path [ sh:union () ] .
+
+# err1: a blank node with no predicate-object at all.
+ex:err1 ex:path [] .
+# err2: two predicate-objects on the path node.
+ex:err2 ex:path [ sh:inversePath ex:a ; sh:zeroOrMorePath ex:b ] .
+# err3: one predicate-object, but not a SHACL path construct.
+ex:err3 ex:path [ ex:notAPathConstruct ex:a ] .
+# err4: pp is a literal, neither URIRef nor BNode.
+ex:err4 ex:path "not a node" .
+# err5: a list whose second element is a falsy literal (the loop reads
+# `first = value(current, rdf:first)`, finds "", and raises "Malformed ...").
+ex:err5 ex:path ( ex:a "" ) .
+# err6: a list head whose rdf:rest is missing ("missing rdf:rest").
+ex:err6 ex:path [ rdf:first ex:a ] .
+# err7, err8: the guard `value(pp, rdf:first)` is FALSY (the head element is
+# the empty string / the number 0): the node is NOT taken for a list, falls
+# through to predicate_objects (rdf:first + rdf:rest = two) and raises
+# "multiple predicate-objects".  `bool(m{ })` (existence) would enter the
+# list branch instead and raise "Malformed RDF list structure".
+ex:err7 ex:path ( "" ex:x ) .
+ex:err8 ex:path ( 0 ex:x ) .
+# err9: a path class applied to an erroneous operand: the error comes from
+# the recursive call.
+ex:err9 ex:path [ sh:oneOrMorePath [] ] .

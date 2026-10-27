@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : lectures à un pas traduites fidèlement, oracle solide ; mais aucune jointure n'est fondue (parcours par liste de travail), donc la paire n'illustre pas le gain de la strate.",
+  "questions": [],
+  "evidence": "rdfeval check : OK. Mutants dans des copies, tous détectés par le pilote : suppression de la garde sh:targetClass, `len(paths) == 1` -> `>= 1`, suppression de `!= rdf:type`. Copie avec fixture enrichi (nœuds et propriétés anonymes BNode, trois sh:targetClass sur une même forme, sous-forme atteinte deux fois, cycle via sh:not/sh:xone, forme ciblée anonyme, forme non ciblée anonyme) et ordered=True : OK, 10 triplets produits des deux côtés ; l'interpolation {shape}/{prop} d'un BNode et le `[]` de `sh:targetClass []` se comportent comme g.objects. Fusionner `?nodeshape a sh:NodeShape ; sh:targetClass ?t` aurait dupliqué les formes à plusieurs targetClass : la traduction a raison de garder l'existence séparée. Shim (connective_clauses, LIST_CONNECTIVES, VALUE_PATH_ATTRIBUTE_TYPES) et original.py identiques au dépôt (lignes 1464, 1692-1740, 1757-1781) ; appel réel `for nodeshape, prop, path in attribute_shapes(g)`. Pas candidate article : aucun gain de notation (`list(m{...})` n'est pas plus court que `list(g.objects(...))`).",
+  "triaged_by": "sonnet-5.5"
+}

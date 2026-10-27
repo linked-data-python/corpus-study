@@ -16,6 +16,18 @@ translated.ldpy -- see meta.json for why the two agree exactly for a
 
 CALL_2 -- modified=None: the falsy branch of `if getattr(...)`, contributing
 no triple at all (the zero-triples edge).
+
+CALL_3 -- modified="2020-03-04", an ISO `str`: this is what the repository
+ACTUALLY passes (tests/test_concept.py:105,116,129,... do json.load and assign
+`definition.modified = _concept[...]["modified"]`; the `-> date` annotation on
+betydningsbeskrivelse.py is only a hint). `Literal("2020-03-04",
+datatype=XSD.date)` is an xsd:date literal, whereas a bare `{str}` in term
+position would be a plain (datatype-less) literal: this call separates the two
+and kills the "bare interpolation" mutant of translated.ldpy.
+
+CALL_4 -- modified="": falsy str, the `if getattr(...)` guard skips it (no
+triple); a rewrite of the guard to `is not None` would write a typed
+"" literal and be caught here.
 """
 from datetime import date
 
@@ -27,5 +39,7 @@ VERDICT = run_pair(
     calls=[
         ((date(2023, 6, 15),), {}),
         ((None,), {}),
+        (("2020-03-04",), {}),
+        (("",), {}),
     ],
 )

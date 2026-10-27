@@ -32,7 +32,7 @@ def _parse_property_path(self, pp: Node) -> PropertyPath:
         return Path(value=pp)
     elif isinstance(pp, BNode):
         # Check for sequence first (RDF list structure)
-        if bool(m{ {pp} rdf:first ?x }):
+        if m{ {pp} rdf:first ?x }.first():
             path_elements = []
             current = pp
             while current != rdf:nil:

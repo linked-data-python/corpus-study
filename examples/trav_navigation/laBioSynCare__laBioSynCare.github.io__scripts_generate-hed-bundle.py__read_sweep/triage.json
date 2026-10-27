@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "La fusion en un m{ } à trois motifs change la cardinalité : l'original ne lit que la première valeur de chaque prédicat (next(..., None)), la jointure en produit toutes les combinaisons ; divergence reproduite (original None, traduction renvoie un sweep).",
+  "questions": [
+    {
+      "question": "Les prédicats sstim:martigliPeriodInitial / Final / TransitionDuration sont owl:FunctionalProperty et sh:maxCount 1 dans l'ontologie du dépôt : jugez-vous que la divergence sur un track multi-valué est hors de portée du dépôt et acceptez-vous la fusion telle quelle ?",
+      "where": "translated.ldpy:34-38 et original.py:29-34 ; dépôt : static/ontology/sstim-patch-studio.ttl:256, static/ontology/sstim-shapes.ttl:522-523",
+      "if_yes": "approuver avec réserve : classification à revoir en minor-restructuring (la fusion est un changement de sémantique que la fixture ne montre pas) et retirer l'affirmation « missing-value guard » trompeuse ; ne pas retenir pour l'article.",
+      "if_no": "needs-work : retraduire fidèlement (m{ ?track sstim:martigliPeriodInitial ?mp0 } en boucle externe, puis `.first()` pour mp1 et md), ce que INSTRUCTIONS.md §2 impose quand le code d'origine traite « première valeur ou aucune » comme sémantique."
+    },
+    {
+      "question": "La fixture ne contient ni prédicat multi-valué ni plusieurs tracks qualifiants (la note le revendique comme choix) : acceptez-vous d'y ajouter ces deux cas ?",
+      "where": "fixture.ttl:8-30 ; meta.json (translation_notes, 3e note)",
+      "if_yes": "needs-work : avec l'ajout, le check de la traduction actuelle échoue (voir evidence) ; corriger la traduction avant d'approuver.",
+      "if_no": "laisser la fixture ; le défaut reste invisible au pilote."
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie, fixture remplacée par `ex:t1 martigliPeriodInitial 3.0, 4.0 ; martigliPeriodFinal 3.0 ; martigliTransitionDuration 0.5` : FAIL, `values differ (None vs {'track': 't1', 'mp0': 4.0, 'mp1': 3.0, 'md': 0.5})` (l'original prend la première valeur 3.0 == mp1 et passe au suivant ; la jointure atteint la ligne (4.0, 3.0)). Fixture à trois tracks qualifiants, puis 12 tracks aux triples mélangés : OK (aucun écart d'ordre trouvé sur le track renvoyé ; l'original renvoie le premier du parcours de subjects(), la jointure le premier de la jointure, identiques ici). Dépôt : read_sweep n'est appelé que sur des graphes lus de bundles Turtle (generate-hed-bundle.py:439, :667) ; l'ontologie déclare les prédicats fonctionnels, donc le cas multi-valué n'est probablement pas atteint par le dépôt, mais le shim S/local est fidèle (l.70-71, 109-111) et la note « single-valued per track in this data » n'est pas vérifiée par le pilote.",
+  "triaged_by": "sonnet-5.5"
+}

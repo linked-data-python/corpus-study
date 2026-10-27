@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Les deux requêtes s{ } (le but de la strate) ne sont observées par aucun appel : la première ne peut jamais renvoyer de ligne (SELECT ?x, ?x jamais lié), la seconde est dans une branche import_from absente du dépôt ; add_relationships est un no-op alors que les appels réels lui passent des clés ; et `from … import p:` est crédité sans être employé.",
+  "questions": [
+    {
+      "question": "Faut-il considérer que le pilote ne prouve PAS l'interpolation de terme de cette paire (requête 1 toujours vide, requête 2 jamais exécutée, dernière ligne add_relationships muette) et donc exclure la paire des chiffres de la strate sparql_interpolated tant que le shim ne restitue pas add_relationships tel quel (6 lignes, generate_brick.py:85-91) et qu'un appel avec import_from n'est pas ajouté ?",
+      "where": "translated.ldpy:41-48, 63, 89 ; original.py:42-53, 63, 87 ; context_shim.py:31-40",
+      "if_yes": "needs-work : restituer add_relationships verbatim dans le shim, ajouter un appel avec import_from (fichier .ttl local) et, pour la requête 1, dire dans la note qu'elle est morte (SELECT ?x non lié) plutôt que « branche réflexive ».",
+      "if_no": "approuver, en acceptant que cette paire ne démontre rien sur s{ } + interpolation."
+    },
+    {
+      "question": "`from … import p:` est déclaré dans constructions alors que translated.ldpy n'en contient aucun (13 @prefix écrits à la main, copie des IRI de bricksrc/namespaces.py). Faut-il retirer ce crédit ?",
+      "where": "meta.json constructions, translated.ldpy:8-20 (aucun import de préfixes), original.py:6-22",
+      "if_yes": "corriger constructions (retirer « from … import p: ») avant de compter.",
+      "if_no": "approuver tel quel."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants sur translated.ldpy (copie), tous restés verts : `add_relationships(ps, prop_defn, ...)` -> `pass`, ou -> `(prop_name, prop_defn, ...)` ; `?p sh:path {prop_name}` -> `?zz` ; suppression du FILTER NOT EXISTS ; `{ {prop_name} ?p ?o }` -> `{ ?z ?p ?o }`. Cause 1 : sur rdflib 7.2.1, `SELECT ?x { ?p sh:property ?p . ?p sh:path <hasWindow> }` renvoie [] même sur un graphe contenant la forme réflexive (ex:selfShape sh:property ex:selfShape ; sh:path ex:hasWindow), car ?x n'est jamais lié ; `SELECT ?p` avec le même motif renvoie la ligne. La branche est donc morte quoi qu'il arrive, et la note du traducteur (« reflexive ») n'est que la moitié de la cause. Preuve de bonne foi de la traduction : dans une copie où j'ai changé `?x` en `?p` des DEUX côtés et ajouté la forme réflexive au fixture, la paire reste OK (l'interpolation {prop_name} équivaut à .n3()) et un mutant `?p sh:path <hasTag>` y devient FAIL. Cause 2 : `import_from` n'apparaît nulle part dans le dépôt hors la définition de generate_brick.py (code mort). Cause 3 : le vrai add_relationships (generate_brick.py:85-91) écrit les clés restantes ; les vrais appels (bricksrc/entity_properties.py:500-660) passent SKOS.definition, SH.minCount, SH['class'], « optional » avec autres clés ; le shim rend `return`, ce qui masque l'effet de la dernière ligne de la région. Si la branche reuse se déclenchait, prop_exists[0][0] vaudrait None : rdflib lèverait, la traduction écrirait Literal('None') ; inatteignable puisque la branche ne renvoie jamais de ligne. Les types sont bons : prop_name est un URIRef (clés BRICK.x) donc {prop_name} = .n3() ; les `graph += g{ }` ne diffèrent de graph.add que pour brickschema.Graph.add (qui accepte des listes comme objets), non employé ici (objets toujours des Node). IRI des @prefix identiques à bricksrc/namespaces.py. Pas pour l'article : ses deux îlots s{ } sont du code mort, la paire ne montre rien de la strate.",
+  "triaged_by": "sonnet-5.5"
+}

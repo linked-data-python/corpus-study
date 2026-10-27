@@ -453,3 +453,45 @@ def test_a_call_that_observes_nothing_is_not_a_green(tmp_path):
     assert not verdict["equivalent"]
     assert verdict["observed"] is False
     assert any("nothing observable" in d for d in verdict["diffs"])
+
+
+RAISING = """\
+from rdflib import Graph, URIRef
+
+def add(g, s):
+    if not s:
+        raise ValueError("empty subject")
+    g.add((URIRef(s), URIRef("http://e/p"), URIRef("http://e/o")))
+"""
+
+
+def _raising_pair(tmp_path, translated):
+    ex = tmp_path / "ex"
+    ex.mkdir()
+    (ex / "original.py").write_text(RAISING)
+    (ex / "translated.ldpy").write_text(translated)
+    (ex / "driver.py").write_text(
+        "from rdflib import Graph\nfrom rdfeval.harness import run_pair\n"
+        "run_pair(__file__, entry='add', calls=[lambda: ((Graph(), 'http://e/s'), {}),"
+        " lambda: ((Graph(), ''), {})])\n")
+    proc = subprocess.run([sys.executable, str(ex / "driver.py")],
+                          capture_output=True, text=True, cwd=ex, timeout=60)
+    import json
+    return json.loads(proc.stderr.split("RDFEVAL-VERDICT ", 1)[1].splitlines()[0])
+
+
+def test_two_identical_raises_are_an_agreement(tmp_path):
+    verdict = _raising_pair(tmp_path, RAISING)
+    assert verdict["equivalent"] is True, verdict
+
+
+def test_a_raise_on_one_side_only_is_a_difference(tmp_path):
+    lenient = RAISING.replace('raise ValueError("empty subject")', "return")
+    verdict = _raising_pair(tmp_path, lenient)
+    assert verdict["equivalent"] is False and not verdict["error"]
+    assert any("outcome differs" in d for d in verdict["diffs"])
+
+
+def test_a_different_message_is_a_difference(tmp_path):
+    verdict = _raising_pair(tmp_path, RAISING.replace("empty subject", "no subject"))
+    assert verdict["equivalent"] is False
