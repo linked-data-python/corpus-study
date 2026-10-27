@@ -155,3 +155,33 @@ def test_triage_ranks_high_first_and_distrusts_bad_files(tmp_path):
         {"priority": "urgent", "flags": ["made-up"], "questions": []}))
     t = triage.read_triage(ex)
     assert t["priority"] == "high" and t["unknown_flags"] == ["made-up"]
+
+
+def test_a_hand_written_driver_is_redirected_by_the_helpers(tmp_path):
+    ex = _region(tmp_path)
+    (ex / "driver.py").write_text(
+        "from pathlib import Path\n"
+        "from rdfeval.harness import _exec_python, _exec_ldpy, _emit,"
+        " graphs_isomorphic\n"
+        "HERE = Path(__file__).resolve().parent\n"
+        "ns_o, _ = _exec_python(HERE / 'original.py')\n"
+        "ns_t, _ = _exec_ldpy(HERE / 'translated.ldpy')\n"
+        "_emit({'equivalent': graphs_isomorphic(ns_o['g'], ns_t['g'])})\n")
+    results = {r["artefact"]: r for r in check_region(ex)}
+    assert all(r["ok"] for r in results.values()), \
+        {k: r["error"] for k, r in results.items()}
+    (ex / "optimized.py").write_text(
+        OPTIMIZED_PY.replace("capitalize", "upper"))
+    assert not {r["artefact"]: r for r in check_region(ex)}["optimized.py"]["ok"]
+
+
+def test_a_driver_reading_files_itself_cannot_claim_the_sides(tmp_path):
+    ex = _region(tmp_path)
+    # reads translated.ldpy by hand: the redirection never applies
+    (ex / "driver.py").write_text(
+        "from rdfeval.harness import _emit\n"
+        "open('translated.ldpy').read()\n"
+        "_emit({'equivalent': True})\n")
+    results = {r["artefact"]: r for r in check_region(ex)}
+    assert results["translated.ldpy"]["ok"]       # what it was written for
+    assert not results["optimized.ldpy"]["ok"]

@@ -52,29 +52,14 @@ import traceback
 from pathlib import Path
 
 
-def _exec_python(path: Path, name: str = "__original__") -> tuple[dict, str]:
-    ns: dict = {"__name__": name, "__file__": str(path)}
-    out = io.StringIO()
-    code = compile(path.read_text(), str(path), "exec")
-    with contextlib.redirect_stdout(out):
-        exec(code, ns)
-    return ns, out.getvalue()
-
-
-def _exec_ldpy(path: Path, name: str = "__translated__") -> tuple[dict, str]:
-    from ldpy.transpiler import transpile
-    r = transpile(path.read_text(), filename=str(path))
-    ns: dict = {"__name__": name, "__file__": str(path)}
-    out = io.StringIO()
-    code = compile(r.code, str(path), "exec")
-    with contextlib.redirect_stdout(out):
-        exec(code, ns)
-    return ns, out.getvalue()
-
-
 DEFAULT_SIDES = ("original.py", "translated.ldpy")
 SIDES_ENV = "RDFEVAL_SIDES"
 ARTEFACTS = ("original.py", "translated.ldpy", "optimized.py", "optimized.ldpy")
+
+# The artefacts this process actually executed, by file name.  A driver that
+# reads its files some other way cannot then claim to have compared the
+# sides it was asked for (see ``_emit``).
+_EXECUTED: list[str] = []
 
 
 def sides_from_env() -> tuple[str, str]:
@@ -88,10 +73,54 @@ def sides_from_env() -> tuple[str, str]:
     return names
 
 
+def _run_python(path: Path, name: str) -> tuple[dict, str]:
+    ns: dict = {"__name__": name, "__file__": str(path)}
+    out = io.StringIO()
+    code = compile(path.read_text(), str(path), "exec")
+    with contextlib.redirect_stdout(out):
+        exec(code, ns)
+    return ns, out.getvalue()
+
+
+def _run_ldpy(path: Path, name: str) -> tuple[dict, str]:
+    from ldpy.transpiler import transpile
+    r = transpile(path.read_text(), filename=str(path))
+    ns: dict = {"__name__": name, "__file__": str(path)}
+    out = io.StringIO()
+    code = compile(r.code, str(path), "exec")
+    with contextlib.redirect_stdout(out):
+        exec(code, ns)
+    return ns, out.getvalue()
+
+
 def _exec_artefact(path: Path, name: str) -> tuple[dict, str]:
     """Run a ``.py`` as Python and a ``.ldpy`` through the transpiler."""
-    run = _exec_ldpy if path.suffix == ".ldpy" else _exec_python
+    path = Path(path)
+    _EXECUTED.append(path.name)
+    run = _run_ldpy if path.suffix == ".ldpy" else _run_python
     return run(path, name)
+
+
+def _redirected(path: Path) -> Path:
+    """The artefact ``RDFEVAL_SIDES`` puts in place of a default one.
+
+    Some drivers do not call :func:`run_pair`: they execute the two files
+    themselves, by name, through the two helpers below.  Redirecting here
+    lets the same driver prove an optimized artefact without being edited —
+    ``original.py`` becomes the left side, ``translated.ldpy`` the right.
+    """
+    path = Path(path)
+    left, right = sides_from_env()
+    swap = {"original.py": left, "translated.ldpy": right}
+    return path.with_name(swap.get(path.name, path.name))
+
+
+def _exec_python(path: Path, name: str = "__original__") -> tuple[dict, str]:
+    return _exec_artefact(_redirected(path), name)
+
+
+def _exec_ldpy(path: Path, name: str = "__translated__") -> tuple[dict, str]:
+    return _exec_artefact(_redirected(path), name)
 
 
 def fixture_graph(path) -> object:
@@ -374,4 +403,11 @@ def run_pair(driver_file: str, entry: str | None = None,
 
 
 def _emit(verdict: dict) -> None:
+    if "sides" not in verdict:
+        # a hand-written driver: credit only the sides it actually executed
+        # (the default pair is what every driver was written to prove)
+        left, right = sides_from_env()
+        proved = (left, right) == DEFAULT_SIDES or (
+            left in _EXECUTED and right in _EXECUTED)
+        verdict["sides"] = [left, right] if proved else None
     print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
