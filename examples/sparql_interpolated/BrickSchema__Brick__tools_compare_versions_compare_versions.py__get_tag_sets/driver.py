@@ -15,6 +15,20 @@ AGENT_BATCH.md's note on the ~163 regions with no visible graph parameter.
 
   - brick:Sensor       -> several solutions (a two-hop subclass chain)
   - brick:Luminance_Sensor -> the zero-solution case (present in no triple)
+
+The same roots are also passed as plain `str`, which is what the origin
+repository really does: in BrickSchema/Brick@c12949f, `get_root()` returns
+`str` ("https://brickschema.org/schema/Brick#Class", ...) and `OLD_ROOT` /
+`NEW_ROOT` are those strings (compare_versions.py:26-33, 76-77).  The
+original wraps the value as `<{0}>` (an IRI whichever the Python type); an
+interpolation that coerced a `str` to a Literal would match nothing, so
+these calls are what keeps a `{root}` shortcut honest:
+
+  - str(brick:Sensor)            -> several solutions, root given as str
+  - str(brick:Temperature_Sensor) -> a one-hop-plus-one-hop root, as str
+  - str(brick:Luminance_Sensor)  -> zero solutions, root given as str
+  - str(brick:Point)             -> a root whose subclasses are the
+                                    neighbourhood triples of the fixture
 """
 from pathlib import Path
 
@@ -39,5 +53,9 @@ VERDICT = run_pair(
     calls=[
         _call(BRICK.Sensor),
         _call(BRICK.Luminance_Sensor),
+        _call(str(BRICK.Sensor)),
+        _call(str(BRICK.Temperature_Sensor)),
+        _call(str(BRICK.Luminance_Sensor)),
+        _call(str(BRICK.Point)),
     ],
 )

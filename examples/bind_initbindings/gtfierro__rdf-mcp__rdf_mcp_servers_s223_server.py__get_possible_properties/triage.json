@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote dépend d'un téléchargement réseau en direct (open223.info) et ses deux appels n'exercent aucune des deux branches du UNION séparément ; la paire est `final` alors que driver.py se déclare lui-même « EXCLUDED ».",
+  "questions": [
+    {
+      "question": "Cette paire, dont l'oracle repose sur Graph().parse(\"https://open223.info/223p.ttl\") au niveau module (non hermétique, contenu susceptible de changer) et dont driver.py:3 dit « EXCLUDED », doit-elle rester `final` et compter dans les chiffres ?",
+      "where": "original.py:13, translated.ldpy:18, driver.py:3-22, meta.json translation_notes (« NETWORK CAVEAT »)",
+      "if_yes": "approuver, en acceptant qu'un rejeu hors réseau échoue ; le dépôt d'origine a d'ailleurs un test moqué (tests/test_s223.py:126) dont on pourrait tirer un fixture local.",
+      "if_no": "needs-work : remplacer l'ontologie par un fixture .ttl local (quelques classes + NodeShapes) et ajouter les appels qui exercent chaque branche du UNION ; sinon passer la paire en `excluded` comme les « 7 régions non évaluables en isolation » de corpus/403."
+    }
+  ],
+  "evidence": "rdfeval check : OK (réseau joignable, ~1 s). Mutants dans un mktemp -d, SPARQL de la traduction : retirer FILTER(!isBlank(?path)) -> FAIL ; `rdfs:subClassOf*` -> `+` -> FAIL ; mais `FILTER(false)` ajouté dans la branche `{ ?shape sh:targetClass ?fromp }` -> OK (vert) et `FILTER(false)` ajouté dans la branche `{ ?fromp a sh:NodeShape . BIND(...) }` -> OK (vert) : chaque branche du UNION est invisible prise seule avec \"Zone\". Le transpileur produit `?__i0 rdfs:subClassOf* ?fromp` + initBinding via S223[term], même mécanisme que l'original, donc l'équivalence logique tient. Confirmé : `s223:{term}` est refusé dans s{ } (« Expected SelectQuery, found 's223' »), l'astuce `@prefix … as S223` + `{S223[term]}` est donc justifiée. Shim FastMCP : passe-plat inoffensif. Le dépôt appelle bien la fonction avec une str (term: str), `S223[term]` est le même objet qu'au départ.",
+  "triaged_by": "sonnet-5.5"
+}

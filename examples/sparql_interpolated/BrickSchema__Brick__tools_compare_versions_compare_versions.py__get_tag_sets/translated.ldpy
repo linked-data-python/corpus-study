@@ -15,7 +15,7 @@ def get_tag_sets(root, graph=g):
     tag_sets = {}
     for row in s{
         SELECT ?class WHERE {
-            ?class rdfs:subClassOf+ {root} .
+            ?class rdfs:subClassOf+ {f<{root}>} .
         }
     }(graph):
         klass = row[0].split("#")[-1]

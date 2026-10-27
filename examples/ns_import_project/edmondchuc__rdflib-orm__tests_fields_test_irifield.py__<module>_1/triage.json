@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "weak-oracle"
+  ],
+  "summary": "Le crédit « from orm_context import base: » repose sur un `__namespaces__ = {\"base\": BASE_URI}` écrit à la main dans orm_context.py que le dépôt d'origine n'a pas ; de plus le pilote ne voit presque aucune des IRI que la traduction réécrit (rdf:type, owl:Thing, l'IRI du préfixe owl: restent verts sous mutation).",
+  "questions": [
+    {
+      "question": "Le dépôt edmondchuc/rdflib-orm n'a aucun `__namespaces__` (grep vide sur tout le clone ; tests/__init__.py ne contient que `BASE_URI = Namespace('http://example.com/')`) : le shim l'invente (orm_context.py:30). Faut-il retirer le crédit « from … import p: » de cette paire (et sa mention dans `constructions`) ?",
+      "where": "orm_context.py:14-19,30 ; translated.ldpy:7 ; meta.json:20-25 ; corpus/repos/edmondchuc__rdflib-orm/tests/__init__.py",
+      "if_yes": "needs-work : soit traduire BASE_URI.test par `@prefix base: <http://example.com/> .` (et retirer `from … import p:` des constructions), soit garder l'import de préfixe mais le déclarer comme hypothèse (« le projet ajoute une ligne à tests/__init__.py ») et ne pas le compter comme usage réel du dépôt.",
+      "if_no": "approuver ce point, à condition que l'article dise que le `__namespaces__` est une modification que le projet doit faire lui-même."
+    },
+    {
+      "question": "Le pilote est-il trop faible pour valider les trois @prefix/IRI réécrits (rdf:type, owl:Thing, IRI de owl:, rdf:value dans les tests 1, 2, 4 et 6) ?",
+      "where": "driver.py:42-68,91-104 ; translated.ldpy:9-10,17,26,38,53,83-84",
+      "if_yes": "needs-work : ajouter au pilote une comparaison des triples de `g` (ou de Database.databases['default'].g) après chaque test, y compris owl:Thing/rdf:type.",
+      "if_no": "approuver ; les IRI W3C sont inchangées et se lisent à l'œil."
+    }
+  ],
+  "evidence": "check initial : OK. Clone : `grep -rn __namespaces__ corpus/repos/edmondchuc__rdflib-orm` = rien ; tests/__init__.py = BASE_URI seul ; le shim ajoute `__namespaces__` (orm_context.py:30) et le commente comme « one line added ». Le reste du shim (IRIField.convert, Model.save) est fidèle au clone (comparé). Mutants sur une copie de translated.ldpy, `rdfeval check` reste OK pour : owl:Thing->owl:Class (l.38) ; rdf:type->rdf:label dans class_type (l.53) ; rdf:type,owl:Thing->rdf:label,owl:Class + rdf:value->rdf:label (l.17-18, test 1) ; rdf:value->rdf:label (l.27, test 2) ; base:test->base:wrong dans test_irifield_convert_to_rdf_none (l.59) ; rdf:value->rdf:label (l.84, test 6) ; IRI du préfixe owl: -> .../owlX# (l.10). Seuls échouent les mutants sur rdf:value/base:test des tests 3 et 5 (assertions upstream). Raison : les tests 1 et 2 lèvent AttributeError des deux côtés (Database.databases reset à {'default': None}) avant d'atteindre quoi que ce soit, et le graphe final comparé est celui du test 6 après rollback (vide de rdf:type/owl:Thing). Les `<123>` du test passent (== URIRef('123')).",
+  "triaged_by": "sonnet-5.5"
+}

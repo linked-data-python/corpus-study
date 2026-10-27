@@ -57,7 +57,16 @@ Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
 5. **Les exceptions** : le harnais ne compare pas deux levées ; une
    réécriture qui déplace un calcul pouvant lever passe inaperçue.
 6. **Les notes du traducteur** affirmaient des faits faux sur le dépôt
-   (« real call sites »).
+   (« real call sites », « verbatim », « the mirror has no source ») : un
+   shim dit verbatim qui ne l'est pas, un `__namespaces__` écrit à la main
+   que le dépôt n'a pas (`from … import p:` crédité indûment).
+7. **Une refactorisation cachée dans la traduction fidèle** : table de
+   dispatch, conditions repliées en dictionnaires, affectations hissées —
+   faisables en Python pur, donc un gain que la mesure attribue à tort à la
+   notation. C'est `classification-doubt` (la paire n'est pas
+   `directly-expressible`), et dites-le dans la question.
+8. **Des enveloppes inutiles** : `{URIRef(x)}` ou `{Literal(x)}` là où
+   `f<…>` ou `{x}` passent (`wrong-construction`, vérifiez l'équivalence).
 
 Vérifiez au lieu de supposer. Vous pouvez **expérimenter dans une copie** :
 `work=$(mktemp -d)` puis `cp -r "<dir>" "$work/"` — toujours un dossier

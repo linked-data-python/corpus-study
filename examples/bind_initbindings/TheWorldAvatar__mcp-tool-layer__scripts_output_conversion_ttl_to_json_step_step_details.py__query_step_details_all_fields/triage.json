@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Le second îlot (étiquette de l'étape, translated.ldpy:50) est invisible du pilote (mutant `labels = []` vert) et c'est un BGP pur qui passe en m{ }, pas en s{ }.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il distinguer la requête q_label (rdfs:label de l'étape) de la première requête ? Aujourd'hui la remplacer par `labels = []` ou changer son prédicat en rdfs:comment laisse le verdict vert, parce que ex:step1 a un seul rdfs:label déjà ramassé par q_props sous la clé « label ».",
+      "where": "translated.ldpy:50 et original.py:54-58 ; driver.py:36-39 ; fixture.ttl:15-16",
+      "if_yes": "needs-work : ajouter au fixture une étape à deux rdfs:label (ou dont l'étiquette n'est pas ramassée par q_props) et un appel au pilote ; sans cela le second îlot n'est pas prouvé.",
+      "if_no": "accepter que q_label soit non prouvée (elle est quasi redondante avec q_props dans ce dépôt) et la compter comme telle dans les chiffres."
+    },
+    {
+      "question": "q_label (`SELECT ?label WHERE { {URIRef(step_uri)} rdfs:label ?label }`) est un BGP pur à un motif : doit-elle s'écrire `[str(l) for l in m{ f<{step_uri}> rdfs:label ?l }(graph)]` plutôt qu'en s{ } (règle « pas de s{ } là où m{ } passe ») ?",
+      "where": "translated.ldpy:50 ; meta.json constructions (s{ } crédité pour les deux requêtes)",
+      "if_yes": "wrong-construction : réécrire avec m{ } ; le second s{ } ne doit pas être crédité (les constructions restent s{ } pour la première requête, qui a OPTIONAL+FILTER+DISTINCT).",
+      "if_no": "approuver (la traduction en s{ } garde la forme SELECT de l'original)."
+    }
+  ],
+  "evidence": "rdfeval check de la paire : OK. Copies mutées dans un mktemp -d : (a) q_label réécrite en `m{ {URIRef(step_uri)} rdfs:label ?l }(graph)` -> OK (donc m{ } passe, et `f<{step_uri}>` aussi) ; (c) prédicat de q_label changé en rdfs:comment -> OK (vert à tort) ; (g) `labels = []` -> OK (vert à tort) ; (f) sujet de q_label remplacé par une variable libre -> FAIL (seul le motif trop large est vu) ; (b) OPTIONAL rendu obligatoire -> FAIL ; (d) FILTER(?p != rdf:type) retiré -> FAIL ; (e) DISTINCT retiré -> OK (sans effet sémantique, un graphe est un ensemble). Appelant réel du dépôt (step_details.py:140) passe `str(row.s)` : `{URIRef(step_uri)}` est donc nécessaire, et `f<{step_uri}>` est refusé par le transpileur dans s{ } (LdpySyntaxError) mais accepté dans m{ }. Transpilation vérifiée : l'interpolation devient `?__i0` + initBindings, c'est donc le même mécanisme que l'original pour la première requête.",
+  "triaged_by": "sonnet-5.5"
+}

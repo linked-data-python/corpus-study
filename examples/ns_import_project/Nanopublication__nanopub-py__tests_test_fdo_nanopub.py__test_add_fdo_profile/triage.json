@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "wrong-construction"
+  ],
+  "summary": "nanopub_ns_shim.py invente `__namespaces__` (absent de nanopub/namespaces.py et de tout le dépôt) : le `from nanopub_ns_shim import hdl:, fdof:, npx:` est un crédit indu, et fdof: n'est même pas utilisé.",
+  "questions": [
+    {
+      "question": "nanopub/namespaces.py (commit 05022dc) ne définit pas `__namespaces__` (zéro occurrence dans le clone) et le shim est une copie réécrite à la main sous un autre nom de module : confirmez-vous que `from … import p:` ne doit pas être crédité pour cette paire ?",
+      "where": "nanopub_ns_shim.py:17 (`__namespaces__ = {...}`), translated.ldpy:33 (`from nanopub_ns_shim import hdl:, fdof:, npx:`) et original.py:19 (`from nanopub.namespaces import HDL, FDOF, NPX`)",
+      "if_yes": "retirer `from … import p:` de `constructions` ; le reste (@prefix rdfs/dcterms typés à la main, `bool(m{ })` sur motifs fermés) est du trav_existence, pas du ns_import_project ; classification à revoir ; pas pour l'article",
+      "if_no": "approuver en précisant que le shim est la voie sanctionnée (ldpy/012 pt 15bis) et que ce crédit suppose une écriture manuelle du shim"
+    },
+    {
+      "question": "La région n'utilise aucune des IRI via un module-projet ldpy et la moitié de l'import (RDFS, DCTERMS) retombe en `@prefix` avec IRI recopiée : faut-il laisser la paire en `directly-expressible` ?",
+      "where": "translated.ldpy:23-27 (@prefix rdfs/dcterms recopiés), translated.ldpy:33",
+      "if_yes": "laisser la classification",
+      "if_no": "passer en minor-restructuring (deux résolutions d'import différentes + 4 assertions réécrites en `bool(m{ })`)"
+    }
+  ],
+  "evidence": "rdfeval check : OK. grep '__namespaces__' sur corpus/repos/Nanopublication__nanopub-py : aucune occurrence (nanopub/namespaces.py définit HDL, FDOF, NPX sans export de ce type). Valeurs des IRI du shim conformes à namespaces.py. Types réels : fdo_uri est une URIRef (fdo_nanopub.py:54-56), to_hdl_uri rend toujours une URIRef ou lève, donc les interpolations {fdo.fdo_uri}, {uri} ne tombent pas dans le piège str->Literal. `\"FdoProfile\"` == rdflib.Literal(\"FdoProfile\") (datatype nul des deux côtés). Le pilote appelle la fonction directement avec URIRef : le décorateur parametrize (`hdl:{FAKE_HANDLE}`) est évalué au chargement mais sa valeur n'est pas comparée à `HDL[FAKE_HANDLE]` ; équivalence vérifiée à la main (même URIRef). Les assertions sont l'oracle ; pas d'appel avec graphe où elles échoueraient côté original seul.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Équivalente : `Literal(a.startswith(b))` -> `f{a.startswith(b)}` sur un bool Python ; rien à signaler.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Les valeurs réelles sont des bool (str.startswith sur Literal, sous-classe de str) ; True et False sont couverts par les appels 1 et 2, et False n'est pas traité comme absent. Les SPARQLError viennent du même shim des deux côtés, avant la ligne traduite. Le shim reprend verbatim operators.py lignes 309-315 et 1017-1026 du dépôt (vérifié). Non couvert, sans conséquence : arguments xsd:string typés (même chemin de code). Article : non (substitution de notation sans gain, `f{x}` n'est ni plus court ni plus clair que `Literal(x)`, un seul îlot, pas de graphe).",
+  "triaged_by": "sonnet-5.5"
+}

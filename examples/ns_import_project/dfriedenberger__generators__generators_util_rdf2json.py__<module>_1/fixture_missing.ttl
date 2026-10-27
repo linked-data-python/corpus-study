@@ -1,0 +1,19 @@
+# A second input graph for rdf2json's driver: it holds NO rdf:Seq and NO
+# ans:Dictionary.  In fixture.ttl, `(None, rdf:type, rdf:Seq) in graph` is a
+# wildcard match (None is a wildcard in rdflib), so a pair with no ans:value
+# cannot be told from a list there; here the same pair must fall through to
+# the final ValueError.
+@prefix ans: <http://example.org/dfriedenberger/generators/assets#> .
+@prefix ex:  <http://example.org/data/> .
+
+# a pair with a key and NO ans:value: value_node is None
+ex:no-value ans:hasKeyValuePair ex:kv-no-value .
+ex:kv-no-value ans:key "lonely" .
+
+# a pair with a value and NO ans:key: the key is str(None) == "None"
+ex:no-key ans:hasKeyValuePair ex:kv-no-key .
+ex:kv-no-key ans:value "orphan value" .
+
+# a subject whose pair has neither
+ex:no-either ans:hasKeyValuePair ex:kv-no-either .
+ex:kv-no-either ex:unrelatedProp "x" .

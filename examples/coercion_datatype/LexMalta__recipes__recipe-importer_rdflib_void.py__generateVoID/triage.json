@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Équivalente : 7 `Literal(int)` deviennent `{int}` / `1` et neuf `.add` se regroupent en deux `+{ }` ; types réels (int) conformes au dépôt.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ?",
+      "where": "translated.ldpy:29-38 et original.py:29-45",
+      "if_yes": "oui : Literal(int) sans datatype explicite devenu interpolation nue, avec classCount[c]=0 couvert, plus regroupement par sujet.",
+      "if_no": "à écarter si l'article veut un cas où la coercition change quelque chose ; ici elle est neutre par construction (même inférence rdflib)."
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state). Région = lignes 84-99 de LexMalta/recipes recipe-importer/rdflib/void.py (vérifié) ; dans le dépôt classCount est un defaultdict(int) et les autres valeurs sont des len() : tous des int, donc le fixture a les bons types (dont 0). Copies : distinctForPartitions=False des deux côtés : OK ; mutant `if True:` à la place de `if distinctForPartitions:` dans la traduction : reste vert (la branche False n'est pas exercée), mais la ligne `if` est conservée telle quelle dans la traduction, donc sans conséquence ici. Le fixture (lignes 9-23) est ajouté à la région des deux côtés : des données, pas de la logique.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction",
+    "classification-doubt"
+  ],
+  "summary": "Le côté RDF est solidement prouvé (quads du Dataset, voisin ds-other intact), mais le fichier meta.json écrit par la région n'est pas observé (le modifier laisse le verdict vert), le `.add` est traduit en gardant trois constructeurs rdflib dans l'îlot, et l'INSERT DATA interpolé reste une f-string alors que la région est classée directly-expressible. Article : non (une moitié de la région non traduite, un harnais contourné par un `_FakeDataset`, le gain est un `.add` unique).",
+  "questions": [
+    {
+      "question": "Le contenu de meta.json écrit dans registry_root (l.20-34) fait-il partie de ce que la paire doit prouver ?",
+      "where": "translated.ldpy:20-34 et original.py:20-34 ; driver.py:42, 84, 87-92 (le dossier est partagé et jamais relu)",
+      "if_yes": "needs-work : faire lire meta.json par le pilote après chaque version (ou un registry_root distinct par version) et comparer.",
+      "if_no": "approuver : seul le RDF compte, et il est bien couvert ; dire dans la note que le fichier n'est pas comparé."
+    },
+    {
+      "question": "L'îlot doit-il s'écrire `+{ f<{entity}> f<{PRED}> {raw} }` plutôt que `{rdflib.URIRef(entity)} {rdflib.URIRef(PRED)} {rdflib.Literal(raw)}` ?",
+      "where": "translated.ldpy:15 ; original.py:15",
+      "if_yes": "needs-work : réécrire l'îlot (vérifié équivalent sur raw = '', 0, 1.5, doublon).",
+      "if_no": "approuver, en justifiant dans la note pourquoi les constructeurs rdflib sont gardés."
+    },
+    {
+      "question": "L'INSERT DATA interpolé, laissé en f-string (l.16-19), doit-il faire descendre la classification de directly-expressible à awkward (la strate sparql_interpolated de la région n'est pas traduite) ?",
+      "where": "translated.ldpy:16-19 et original.py:16-19 ; meta.json (classification, strata)",
+      "if_yes": "needs-work : changer la classification et documenter la limite (s{ INSERT DATA { GRAPH {iri} {…} } } avec interpolation ne s'exécute pas correctement, voir evidence).",
+      "if_no": "approuver ; limiter alors la classification aux seules lignes add_in_loop et le dire."
+    }
+  ],
+  "evidence": "check : OK. Mutants sur une copie, pilote d'origine : ROUGE pour un graphe nommé erroné (key+'x'), 'promotedX' dans l'INSERT DATA, Literal(raw, lang='en'). VERT pour `\"promoted\": True` -> False et `\"name\": dataset_id` -> `\"zz\"` dans meta.json (effet non observé, confirmé). Avec rows = [..., ('urn:a3',''), ('urn:a4',0), ('urn:a6',1.5), doublon] : OK, `+{ }` ne perd ni '' ni 0 (défaut n°2 écarté). Variante `+{ f<{entity}> f<{PRED}> {raw} }` : OK sur ces lignes. Essai `s{ INSERT DATA { GRAPH {rdflib.URIRef(ctrl)} { {rdflib.URIRef(key)} {rdflib.URIRef(pred)} \"promoted\" } } }(ds).execute()` : aucune erreur mais le Dataset reçoit le quad (Variable('__i1'), Variable('__i2'), Literal('promoted'), URIRef('__i0')) : les liaisons initiales ne s'appliquent pas à INSERT DATA, échec silencieux (constat de langage, pas un défaut de la paire). Dépôt : appels réels = `_seed_promoted(ds, root, 'ds-a', [('urn:a1','Bi₂Te₃')])`, rows de str ; le shim asterism.py (CONTROL_GRAPH_IRI, STATUS_PREDICATE, regex) correspond à ingest/src/asterism/substrate.py. Le diff original.py / dépôt ne montre que l'en-tête ajouté.",
+  "triaged_by": "sonnet-5.5"
+}

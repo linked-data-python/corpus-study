@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction juste (équivalente sur 8 appels de ma façon), mais le pilote n'a qu'un appel qui prend les deux branches vraies : ni la garde `in graph` fausse ni `def_property` déjà présent ne sont exercées, deux mutants restent verts.",
+  "questions": [
+    {
+      "question": "Le pilote (un seul appel, graphe avec le littéral 'T1055' et sans d3fend:definition) suffit-il pour compter cette paire, alors que remplacer la garde `bool(m{ ?s ?p {attack_id} })` par `True`, ou `def_property is None` par `True`, laisse `rdfeval check` vert ?",
+      "where": "driver.py:36-40 et translated.ldpy:17 et 21 (original.py:14 et 18)",
+      "if_yes": "approuver telle quelle (la traduction est équivalente sur tous les cas que j'ai ajoutés)",
+      "if_no": "needs-work : ajouter au pilote (a) un graphe sans le littéral attack_id (retour 0, rien écrit), (b) un graphe où attack_uri a déjà d3fend:definition (retour 0), éventuellement (c) un voisin Literal('T1055', datatype=xsd:string) qui ne doit pas matcher"
+    }
+  ],
+  "evidence": "check OK. Copie dans mktemp -d : (1) `if bool(m{...}):` -> `if True:` : check OK (vert) ; (2) `if def_property is None:` -> `if True:` : check OK (vert). Puis pilote étendu à 8 appels (description multi-ligne, description vide, description commençant par http://, espaces autour, graphe sans le littéral, d3fend:definition préexistante, voisin Literal('T1055', datatype=xsd:string), guillemets/accolades) : check OK sur la vraie traduction ; le mutant `if True:` de la garde devient alors FAIL (call[4], call[6]) — donc le défaut est dans le pilote, pas dans la traduction. Dépôt (clone cce593d) : attack_id vient de get_attack_id (external_id STIX, str) et description de tech['data'], donc des str ; `{x}` donne bien Literal(x) simple, égal à l'original, y compris pour '' et pour une chaîne qui ressemble à une IRI. Shim d3fend_context.py : get_attack_id est bien verbatim (update_attack.py:98-107) ; `_xmlns` est une valeur inventée (src/util/build.py n'en définit aucune à ce commit, update_attack.py:7 y fait un import qui lèverait ImportError : la région est cassée en amont) — c'est une liaison de repli, identique des deux côtés, sans logique ; je ne lève pas shim-invents-logic mais le shim ne représente pas ce que le dépôt exécute. Pas d'exemple d'article : aucun datatype= dans la région, le seul gain est `Literal(x)` -> `{x}`/`bool(m{ })` et la garde est mal observée.",
+  "triaged_by": "sonnet-5.5"
+}

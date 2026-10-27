@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : un `g.add((s, p, o))` devenu `+{ {s} {p} {o} }`, vérifié équivalent sur littéral vide, '0', lang via la clé 'lang', type 'bnode', URI vide, doublon et zéro binding. Article : non, car le gain est nul (une ligne `@graph g` de plus pour le même `.add` ; tout le reste de la boucle est du Python).",
+  "questions": [],
+  "evidence": "check : OK. Copie avec pilote étendu (littéral '' , '0'^^xsd:integer, lang='fr' sous la clé 'lang', type 'bnode', xsd:string, boolean, entier mal formé, sujet et objet URI vides, doublon, et un second appel sans binding) : OK. Mutants sur le pilote d'origine : ROUGE pour {o}->{s} et pour la boucle tronquée ; VERT pour un o=None quand la valeur est vide (le pilote n'a aucune valeur vide) mais ROUGE avec le pilote étendu, et la traduction ne contient aucune garde de vérité. Dépôt : l'extrait original.py correspond ligne à ligne à sparql_util.py:48-56 ; json_to_term du shim identique à celui du dépôt (sparql_util.py:31-45). Aucun avertissement du transpileur.",
+  "triaged_by": "sonnet-5.5"
+}

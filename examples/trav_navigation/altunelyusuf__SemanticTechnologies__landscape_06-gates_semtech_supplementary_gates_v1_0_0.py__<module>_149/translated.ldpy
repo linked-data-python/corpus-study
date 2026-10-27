@@ -11,6 +11,6 @@ SEM = Namespace("http://example.org/semtech#")
 g_ab  = Graph(); g_ab.parse(f"{H}/02-ontology/semtech_abox_v1_0_0.ttl")
 
 @graph g_ab
-ex_no_prov = [str(s) for s in {s for s, t in m{ ?s a owl:NamedIndividual ; a ?t }
-                                 if str(t).startswith(str(SEM)+"T")}
-              if not bool(m{ {s} sem:hasSourceProvenance ?p })]
+ex_no_prov = [str(s) for s in dict.fromkeys(s for s, t in m{ ?s a owl:NamedIndividual ; a ?t }
+                                            if str(t).startswith(str(SEM)+"T"))
+              if not m{ {s} sem:hasSourceProvenance ?p }.first()]

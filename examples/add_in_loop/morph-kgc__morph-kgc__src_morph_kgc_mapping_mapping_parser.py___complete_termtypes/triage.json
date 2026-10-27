@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "La traduction est identique en comportement sur tout ce que j'ai essayé (y compris des chaînes où l'ajout pendant l'itération paresseuse change le résultat), mais le pilote ne contient aucun voisin qui a déjà un termType pour les branches 2, 3 et 4, ni de carte avec execution/language/datatype seuls, ni de predicateMap/graphMap : 7 mutants du SPARQL restent verts ; et `constructions` déclare « IRI » sans aucun îlot `<…>`. Article : pas en l'état ; après renforcement du pilote, oui, c'est la meilleure candidate du lot (six f-strings SPARQL à continuations `\\` deviennent des `s{ }` vérifiés à la transpilation, sans collage de texte).",
+  "questions": [
+    {
+      "question": "Acceptez-vous un pilote qui laisse vertes la suppression de `!bound(?termtype)` dans les branches 2, 3 et 4, de `bound(?execution)`/`bound(?language)`/`bound(?datatype)`, et du retrait de predicateMap ou graphMap de la liste finale ?",
+      "where": "translated.ldpy:27-31, 33-37, 42-50, 61-66 ; driver.py:17-56 (un seul voisin à termType, tm1b, pour la branche 1)",
+      "if_yes": "approuver (les requêtes sont recopiées du dépôt) en acceptant que ces branches ne soient pas prouvées.",
+      "if_no": "needs-work : ajouter au graphe du pilote un voisin avec termType par branche 2/3/4, trois object maps avec seulement execution/language/datatype, une predicateMap et une graphMap sans termType (vérifié : cela rend rouges les 7 mutants)."
+    },
+    {
+      "question": "Faut-il retirer « IRI » de `constructions` (aucun `<…>` dans translated.ldpy) et écrire `f<{RML_…}>` dans les six `+{ }` plutôt que `{rdflib.term.URIRef(RML_…)}` ?",
+      "where": "meta.json:constructions ; translated.ldpy:25, 32, 39, 51, 58, 66",
+      "if_yes": "needs-work : corriger meta.json et réécrire les six `+{ }` (vérifié équivalent) ; dans les `s{ }`, `f<{…}>` est refusé par le parseur SPARQL, `{rdflib.term.URIRef(…)}` y reste donc la bonne forme.",
+      "if_no": "approuver ; retirer tout de même « IRI » de constructions pour ne pas créditer un îlot absent."
+    }
+  ],
+  "evidence": "check : OK. Mutants sur une copie, pilote d'origine : ROUGE pour `!bound(?termtype)` retiré dans la branche 1 et dans la boucle finale, `isBlank`->`isIRI`, et `bound(?execution) || bound(?language) || bound(?datatype)` sans reference. VERT pour : `!bound(?termtype)` retiré dans la branche 2 (blank), dans la 3 (literal), dans la 4 (object map) ; `bound(?reference)` seul (execution, language, datatype retirés) ; liste finale sans RML_PREDICATE_MAP/RML_GRAPH_MAP (non testé : liste réduite à subject/object) ; `URIRef(termtype)` -> `termtype` (équivalent, termtype est déjà une URIRef). Pilote renforcé (copie mk2) : tm2b/tm3b/om4b avec termType déjà présent, om avec seulement execution, language, datatype, predicateMap, graphMap : check OK sur la traduction, ROUGE pour les 7 mutants testés. Mutation pendant l'itération : l'original dépend de l'ordre d'insertion (chaîne B->A->S1, B reçoit ou non un termType selon l'ordre) ; sur 3 ordres, la traduction reproduit exactement l'original (itération paresseuse préservée) : pas de doute d'équivalence. Transpilation : les termes interpolés deviennent des liaisons initiales ?__iN, y compris dans OPTIONAL, sans effet visible. Constat de langage : `for @bindings in s{ … }` échoue (TypeError : ResultRow n'est pas un mapping), donc le tuple `for term_map, _ in s{ }` est le seul tour possible ici. Shim rml_constants.py conforme à src/morph_kgc/constants.py (RML_NAMESPACE = 'http://w3id.org/rml/'). Aucun avertissement du transpileur.",
+  "triaged_by": "sonnet-5.5"
+}

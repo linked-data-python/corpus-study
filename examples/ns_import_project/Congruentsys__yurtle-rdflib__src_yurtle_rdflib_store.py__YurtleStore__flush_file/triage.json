@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "wrong-construction"
+  ],
+  "summary": "yurtle_context.py invente `__namespaces__` (absent du dépôt, qui n'a que STANDARD_NAMESPACES avec la clé \"prov\", pas \"provenance\") et fusionne core.py et namespaces.py : le `from … import p:` est un crédit indu, trois des quatre préfixes importés ne sont même pas déréférencés dans la région.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine ne définit nulle part `__namespaces__` (grep sur tout le clone : zéro occurrence) : confirmez-vous que `from yurtle_context import being:, pm:, yurtle:` / `provenance:` ne doit pas être crédité comme `from … import p:` (au mieux `@prefix provenance: <https://yurtle.dev/provenance/> .`) ?",
+      "where": "yurtle_context.py:37 (`__namespaces__ = {...}`), translated.ldpy:12-20, original.py:12-20 ; dépôt : src/yurtle_rdflib/namespaces.py:35-42 (STANDARD_NAMESPACES, clé \"prov\")",
+      "if_yes": "retirer `from … import p:` de `constructions`, classification à revoir (le seul gain restant est `m{ }` + `+{ }(subject_graph)` + un nom préfixé) ; la paire ne peut pas illustrer l'article au titre de ns_import_project",
+      "if_no": "approuver, en notant dans l'article que le shim `__namespaces__` est une écriture manuelle de l'utilisateur"
+    },
+    {
+      "question": "`being:`, `pm:`, `yurtle:` sont importés mais jamais déréférencés dans le corps de `_flush_file` (seul `provenance:` l'est ; being:/pm: ne servent qu'au harnais `demo()`) : le crédit de la construction doit-il se limiter à l'unique préfixe utilisé par la région ?",
+      "where": "translated.ldpy:12-20 (imports) et translated.ldpy:38 (seul usage : `provenance:definedIn`)",
+      "if_yes": "compter 1 préfixe importé utile et non 4 pour cette région",
+      "if_no": "compter les 4 préfixes (imports d'un bloc = une unité)"
+    }
+  ],
+  "evidence": "rdfeval check : OK. grep -rn '__namespaces__' sur corpus/repos/Congruentsys__yurtle-rdflib : aucune occurrence (commit 8bbb378 vérifié). namespaces.py du dépôt expose STANDARD_NAMESPACES = {yurtle, pm, being, voyage, knowledge, prov}, pas `__namespaces__` ; la clé du shim est \"provenance\" (invention). YurtleWriter.write/_serialize_turtle/write_file et YurtleDocument/FileState du shim sont bien conformes à core.py/store.py (comparés). La traduction m{ {state.subject_uri} ?p ?o }(internal_graph) est équivalente en pratique : subject_uri n'est jamais qu'une URIRef dans le dépôt (store.py:173, 527 sous garde isinstance URIRef ligne 508). Pilote : un seul appel, un seul sujet ; la branche de sortie anticipée (pas d'état) n'est pas exercée mais est identique des deux côtés. Pas de mutant lancé (le traducteur en consigne un).",
+  "triaged_by": "sonnet-5.5"
+}

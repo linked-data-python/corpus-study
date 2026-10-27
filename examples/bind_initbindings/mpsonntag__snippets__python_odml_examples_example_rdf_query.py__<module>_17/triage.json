@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "classification-doubt"
+  ],
+  "summary": "`q` change de type (Query rdflib -> PreparedQuery ldpy) et l'instruction suivante du module d'origine, `graph.query(q)`, plante avec la traduction ; le pilote masque cela en consommant chaque côté différemment.",
+  "questions": [
+    {
+      "question": "Le module d'origine consomme `q` aussitôt après la région par `for row in graph.query(q):` (example_rdf_query.py:25) : la paire est-elle équivalente alors que la valeur `q` produite n'est plus utilisable par `graph.query(q)` ?",
+      "where": "translated.ldpy:11 ; driver.py:30 (`q(g) if hasattr(q, \"graph\") else g.query(q)`) ; corpus/repos/mpsonntag__snippets/python/odml/examples/example_rdf_query.py:25",
+      "if_yes": "approuver, en acceptant qu'un site d'appel doive être réécrit en `q(graph)` ; la paire n'est alors plus « même programme » et doit être reclassée minor-restructuring.",
+      "if_no": "needs-work ou exclure : s{ } ne peut pas remplacer prepareQuery(...) pour une requête réutilisée par graph.query ; dire que la région n'a pas de traduction sans changement d'interface."
+    },
+    {
+      "question": "La paire est-elle bien `directly-expressible` et du bon stratum, alors qu'elle n'utilise aucun initBindings (seulement initNs -> @prefix) et que la valeur produite ne s'emploie plus comme avant ?",
+      "where": "meta.json classification et stratum ; translated.ldpy:7-9",
+      "if_yes": "approuver la classification telle quelle.",
+      "if_no": "reclasser en minor-restructuring ; ne pas compter la paire dans la moitié « interpolation de terme » du stratum bind_initbindings."
+    }
+  ],
+  "evidence": "rdfeval check : OK (pilote custom:query-fixture, pas run_pair). Expérience dans un mktemp -d : translated.ldpy + `graph = Graph().parse('fixture.ttl'); for row in graph.query(q): …` (l'instruction qui suit la région dans le dépôt, example_rdf_query.py:25-26) -> `AttributeError: 'PreparedQuery' object has no attribute 'algebra'` (type(q) = ldpy.runtime.PreparedQuery). Le fixture, lui, est bon (deux solutions, un voisin qui ne doit pas matcher, un document sans solution). Le BGP ne peut pas passer en m{ } (pas de graphe au point de définition, q est réutilisée comme valeur), donc s{ } est juste. Note mineure : le commentaire du shim dit que ODML_NS est « as defined in odml.tools.rdf_converter » avec la valeur https://g-node.org/projects/odml-rdf#, mais la copie G-Node__python-odml du corpus définit Format._ns = https://g-node.org/odml-rdf# (rdf_converter.py:32, format.py:22) ; sans effet sur l'équivalence (même constante des deux côtés), le fichier d'origine utilise la valeur « projects » dans ses commentaires et qonsole.js.",
+  "triaged_by": "sonnet-5.5"
+}

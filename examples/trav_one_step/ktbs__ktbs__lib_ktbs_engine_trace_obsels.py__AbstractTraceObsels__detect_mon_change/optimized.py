@@ -20,6 +20,8 @@ def _detect_mon_change(self, graph, prepared):
     old_last_obsel = prepared.last_obsel
     old_last_begin = prepared.last_begin
     old_last_end = prepared.last_end
+    pse_mon_b_limit = old_last_begin - self.trace.pseudomon_range
+    pse_mon_e_limit = old_last_end - self.trace.pseudomon_range
 
     str_mon = True
     pse_mon = True
@@ -38,13 +40,13 @@ def _detect_mon_change(self, graph, prepared):
         begin = None
         if end < old_last_end:
             str_mon = False
-            if end < old_last_end - self.trace.pseudomon_range:
+            if end < pse_mon_e_limit:
                 pse_mon = False
         elif end == old_last_end:
             begin = int(self.state.value(obs, KTBS.hasBegin))
             if begin < old_last_begin:
                 str_mon = False
-                if begin < old_last_begin - self.trace.pseudomon_range:
+                if begin < pse_mon_b_limit:
                     pse_mon = False
             elif begin == old_last_begin:
                 if obs <= old_last_obsel:

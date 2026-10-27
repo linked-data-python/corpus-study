@@ -17,5 +17,6 @@
     }
   ],
   "evidence": "rdfeval check de la region : 3 OK. Sur le vrai TTL : 145 NamedIndividual, 120 avec un type T-prefixe, 120 avec provenance => resultat vide, aucun cas positif exerce. Copie dans le scratchpad avec H pointant vers un TTL synthetique (z1: 2 types T sans provenance, a2: T sans provenance, m3: provenance \"\", n4: provenance 0, p5: provenance \"ok\", q6: type non T, r7: T mais pas NamedIndividual) : original.py/optimized.py/optimized.ldpy donnent z1,a2,m3,n4 ; translated.ldpy donne seulement a2,z1 => FAIL 'value ex_no_prov: values differ'. Aussi : la traduction passe par un set (ordre perdu, le pilote compare en multi-ensemble donc ne le voit pas). optimized.py/optimized.ldpy sont symetriques (nested m{} + .first()), pas de drapeau d'optimisation. Copie supprimee.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "driver: 4 synthetic aboxes added (falsy provenance \"\"/0/false, two values, interleaved types, zero solution, empty, reversed order); translated.ldpy fixed (.first() instead of bool(m{ }), dict.fromkeys instead of a set); check 3 OK; the old translation fails the new driver."
 }

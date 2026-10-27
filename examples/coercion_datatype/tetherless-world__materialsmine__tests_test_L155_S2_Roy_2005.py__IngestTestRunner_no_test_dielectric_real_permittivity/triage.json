@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Équivalente, mais `f{x}` y est un simple renommage de `rdflib.Literal(x)` (identique pour int, bool, Decimal, date, nan…) et l'observation du shim ignore la langue : un littéral @en à la place d'une description reste vert ; pas d'exemple d'article.",
+  "questions": [
+    {
+      "question": "Le shim n'imprime que (str, datatype) : un mutant qui donne `rdflib.Literal(\"Frequency (Hz)\", lang=\"en\")` à la place du littéral simple reste vert. Acceptez-vous ce défaut d'observation parce que ces trois lignes sont identiques des deux côtés et ne sont pas des sites traduits ?",
+      "where": "context_shim.py:15-18 et translated.ldpy:61-63 (original.py:61-63)",
+      "if_yes": "approuver ; pas de risque sur le chiffre des deux sites traduits (flottants, sans langue)",
+      "if_no": "needs-work : imprimer aussi `.language` dans le shim et comparer `repr()` des termes"
+    }
+  ],
+  "evidence": "check OK. Copie (mktemp -d) : listes de données identiques entre original.py et translated.ldpy (diff vide) ; `f{str(p)}` : FAIL ; `frequency[:-1]` : FAIL ; mais Literal('Frequency (Hz)', lang='en') au lieu du littéral simple : check OK (vert), donc la langue n'est pas observée. Mesure directe dans le langage : f{v} == rdflib.Literal(v) pour 1, True, 0.5, Decimal('1.50'), date, 's', nan, inf, 1e-7, b'ab', None. Dépôt (0be55da) : la région est dans tests/test_L155_S2_Roy_2005.py:17-75 avec le même texte, les valeurs sont des float, et l'aval (ingest_tester.py:588-594) compare ces Literal par assertCountEqual à des résultats d'un triple store que le shim remplace par un affichage ; la région ne touche aucun graphe. Meta : région morte dans son dépôt (préfixe no_test_). Avis article : non — le seul changement est `Literal(f)` -> `f{f}` sur 2 sites (3 constructions simples gardées en rdflib.Literal), c'est un renommage sans gain de lisibilité ni de sémantique, et aucun `datatype=` n'est en jeu.",
+  "triaged_by": "sonnet-5.5"
+}

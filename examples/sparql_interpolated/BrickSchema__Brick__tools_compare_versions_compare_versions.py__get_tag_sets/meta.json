@@ -16,13 +16,16 @@
     "@prefix",
     "s{ }",
     "interpolation {expr}",
-    "prefixed name"
+    "prefixed name",
+    "f<…>",
+    "call suffix (g)"
   ],
   "translation_notes": [
     "The query is assembled with `str.format(root)` inserting `root` inside `<{0}>`: a term-position interpolation, translated to `s{ SELECT ?class WHERE { ?class rdfs:subClassOf+ {root} . } }(graph)`. The `<...>` disappears because s{ } coerces the interpolated Python value to a term itself (root is a URIRef at the real call sites); no string pasting anywhere.",
     "The property path `rdfs:subClassOf+` (a transitive closure, SPARQL 1.1) transpiles and runs unchanged inside s{ } — property paths are not a separate construction in the vocabulary, they are part of the SPARQL text s{ } parses.",
     "163-regions case: the original closes over a module-level `g` (always an empty Graph()) with no parameter carrying it, so the region as extracted has no way to receive a fixture graph. Restored the binding identically on both sides as `def get_tag_sets(root, graph=g)` using `graph` inside instead of the closed-over `g`, per AGENT_BATCH.md's guidance for this exact situation. Added `from rdflib import Graph` to original.py for the same reason (missing entirely from the extracted region).",
-    "anti-hollow-green: weakening `rdfs:subClassOf+` to `rdfs:subClassOf` (no transitive closure) in translated.ldpy made the check FAIL as expected (fewer classes found, both the returned dict and the printed count differed); reverted, check is green again."
+    "anti-hollow-green: weakening `rdfs:subClassOf+` to `rdfs:subClassOf` (no transitive closure) in translated.ldpy made the check FAIL as expected (fewer classes found, both the returned dict and the printed count differed); reverted, check is green again.",
+    "Repair 2026-10-27: the first note above is wrong on one point. `{root}` was not equivalent: original.py wraps the value as `<{0}>`, an IRI whatever its Python type, while s{ } coerces a `str` to a plain Literal, which matches nothing. At c12949f get_tag_sets has no call site, and the roots the script defines are `str` (get_root() returns str, OLD_ROOT/NEW_ROOT are those strings, compare_versions.py:26-33 and 76-77), not URIRef. With str(brick:Sensor), str(brick:Temperature_Sensor) and str(brick:Point) as roots the old translation returned {} (0 classes) where original.py returned 4, 3 and 6. The hole is now written `{f<{root}>}`, the formatted-IRI island of the same shape as `<{0}>`; the driver passes the roots as str as well as URIRef, and the former `{root}` fails it again (mutant checked). `call suffix (g)` and `f<…>` are now declared in `constructions`."
   ],
   "draft_sha": "9db8e16e59d9dc41",
   "provenance": {
@@ -48,13 +51,27 @@
     "optimized.py cannot drop the `rdfs:` prefix: rdflib's default namespace manager binds it, so the query text needs no PREFIX line; optimized.ldpy pays one `@prefix rdfs:` declaration instead (the prologue is built from @prefix in scope).",
     "optimized.py uses an f-string `<{root}>`, which is string pasting and does not escape; the ldpy `{root}` is a term-position interpolation (initial binding) that coerces the value itself and drops the angle brackets. Same results on the fixture; the ldpy side is the safer of the two, which is a property of the notation, not a compression.",
     "No exception to the symmetry rule. m{ } was tried in place of s{ }: it does not parse `rdfs:subClassOf+` (property path), so s{ } stays the most specific island here.",
-    "Not compressible further: the `print(root, len(tag_sets))` and the return are the observable behaviour, and the module-level `g` / `graph=g` harness is kept as is."
+    "Not compressible further: the `print(root, len(tag_sets))` and the return are the observable behaviour, and the module-level `g` / `graph=g` harness is kept as is.",
+    "Repair 2026-10-27: the third note above is superseded. optimized.ldpy had the same `{root}` defect as translated.ldpy (0 classes instead of 4 on a str root) and now writes `{f<{root}>}`; optimized.py's f-string `<{root}>` was already right on a str. The claim that the ldpy side is 'the safer of the two' holds only as far as the value is an initial binding and not pasted text; `f<…>` does not percent-encode either. Notation ratio after the fix: see the check line, above 1 (the ldpy island is longer than the f-string)."
   ],
   "optimized_constructions": [
     "@prefix",
     "s{ }",
     "interpolation {expr}",
     "prefixed name",
+    "f<…>",
     "call suffix (g)"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "four calls added with the roots as plain str (str(brick:Sensor), str(brick:Temperature_Sensor), str(brick:Luminance_Sensor) for zero solutions, str(brick:Point) whose subclasses include the 'neighbourhood' triples), because the origin repo's roots (get_root(), OLD_ROOT, NEW_ROOT) are str; docstring says what each call exercises",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "{root} in place of {f<{root}>} (translated.ldpy and optimized.ldpy: 4/3/6 classes vs 0)",
+      "rdfs:subClassOf instead of rdfs:subClassOf+ (translated.ldpy, optimized.ldpy)",
+      "pattern direction swapped, root subClassOf+ ?class (translated.ldpy)",
+      "<{root}x> in optimized.py"
+    ],
+    "remaining": "article_candidate: the pair stays publishable only with what it now shows (no {{ }} escaping, no .format, query parsed at transpile time, interpolation as binding), not 'the braces just coerce the value': a str root needs the explicit `f<…>`. optimized.ldpy is longer than the f-string of optimized.py (notation ratio > 1)."
+  }
 }

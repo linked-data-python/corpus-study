@@ -13,7 +13,7 @@ g = Graph()
 # get the identical change.
 def get_tag_sets(root, graph=g):
     classes = (row[0].split("#")[-1] for row in s{
-        SELECT ?class WHERE { ?class rdfs:subClassOf+ {root} }
+        SELECT ?class WHERE { ?class rdfs:subClassOf+ {f<{root}>} }
     }(graph))
     # Tags inside the class name.
     tag_sets = {klass: set(klass.split("_")) for klass in classes}

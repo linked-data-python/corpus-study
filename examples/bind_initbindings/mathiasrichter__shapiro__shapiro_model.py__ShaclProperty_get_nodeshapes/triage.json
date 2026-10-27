@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Le pilote n'exerce ni la branche BNode ni le tri (deux mutants verts), et la requête SPARQL est hissée depuis l'attribut de classe SHAPE_QUERY (hors région) : la région d'origine n'en contient aucune.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel dont `iri` est un identifiant de nœud blanc (sans schéma) et un cas où l'ordre du tri sur s.label diffère de l'ordre naturel ? Aujourd'hui `prop = URIRef(self.iri)` partout et la suppression de `shapes.sort(...)` laissent le verdict vert.",
+      "where": "translated.ldpy:15-19 et :24 ; original.py:13-17 et :22 ; driver.py:48-52 ; fixture.ttl",
+      "if_yes": "needs-work : ajouter l'appel BNode (par exemple `graph.add((Shape4, sh:property, BNode(\"bn1\")))` puis `_case(\"bn1\")`, que j'ai vérifié passant sur les deux côtés) et deux formes dont le tri change l'ordre.",
+      "if_no": "approuver en l'état (la branche BNode est recopiée telle quelle), mais la paire reste peu prouvée pour la branche la plus fréquente dans un SHACL réel (les sh:property sont presque toujours des nœuds blancs)."
+    },
+    {
+      "question": "L'original n'a aucune requête SPARQL dans la région (il lit `self.SHAPE_QUERY`, défini hors région à shapiro_model.py:581-590) : la traduction qui réécrit ce texte en `s{ SELECT DISTINCT ?shape WHERE { ?shape sh:property {prop} } }` est-elle une paire `directly-expressible` créditant légitimement s{ } ?",
+      "where": "translated.ldpy:20 et original.py:18 ; shim.py:13-22 ; meta.json classification et constructions",
+      "if_yes": "approuver (le texte hissé est bien identique à ShaclProperty.SHAPE_QUERY du dépôt).",
+      "if_no": "reclasser en minor-restructuring (hissage d'une constante de classe dans la région, la traduction ignore `self.SHAPE_QUERY`) et ne pas créditer s{ } à ce site, ou conserver `self.graph.query(self.SHAPE_QUERY, initBindings=…)`."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants dans un mktemp -d : (e) `prop = URIRef(self.iri)` dans translated.ldpy -> OK (vert à tort) ; (b) `shapes.sort(...)` remplacé par `pass` -> OK (vert à tort, les formes sortent déjà dans l'ordre) ; en ajoutant au pilote un appel BNode (`graph.add((Shape4, sh:property, BNode('bn1')))`, `_case('bn1')`), la traduction réelle passe (OK) et le mutant URIRef-seul échoue (FAIL : `[NodeShape('…Shape4','Shape4')]` contre `[]`) : le {prop} avec un BNode est donc correct, c'est le pilote qui est trop pauvre. Dernier test : en donnant au _FakeProperty un SHAPE_QUERY différent (sh:targetClass), la traduction FAIL (retourne [] au lieu de 2 formes) : elle ignore bien self.SHAPE_QUERY. Le texte de SHAPE_QUERY du shim correspond à celui de ShaclProperty (shapiro_model.py:581-590) et pas à celui de RdfClass (:488). Aucune sous-classe de ShaclProperty dans le dépôt, donc pas de divergence réelle.",
+  "triaged_by": "sonnet-5.5"
+}

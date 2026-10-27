@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Équivalente (vérifiée), mais le site `Literal(..., lang=key)` reste en Python tel quel dans l'îlot : aucun gain de notation sur la coercition, la strate coercion_datatype ne s'applique pas vraiment (pas de datatype).",
+  "questions": [
+    {
+      "question": "Le seul îlot est `+{ }` ; la construction à tester (le littéral) reste du Python pur `{Literal(self.subject[key], lang=key)}`. Faut-il reclasser cette paire (et la sortir du compte de la strate coercion_datatype et de l'article) ?",
+      "where": "translated.ldpy:12 et original.py:11-17",
+      "if_yes": "garder la paire approuvée mais la classer `awkward` ou hors-strate ; ne pas l'utiliser pour l'article.",
+      "if_no": "approuver, classification `directly-expressible` inchangée."
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie avec trois appels de plus au pilote ({'en': ''} valeur vide, {} dict vide, {'en':'a','EN':'b'} deux tags de casse différente) : tout OK, donc pas de défaut de véracité ni de triple perdu. Types réels : subject est un dict {code langue: str} lu de JSON (tests/files/completeconcept.json:51), identifier une str ; conforme au pilote. Article-candidate : non, la ligne traduite garde `Literal(..., lang=key)` ; la clé de langue est calculée donc la notation `\"…\"@lang` ne s'applique pas (constat déjà dans meta.json).",
+  "triaged_by": "sonnet-5.5"
+}

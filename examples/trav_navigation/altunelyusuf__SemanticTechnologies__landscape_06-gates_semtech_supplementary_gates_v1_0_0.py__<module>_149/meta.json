@@ -18,6 +18,7 @@
     "@prefix",
     "@graph",
     "m{ }",
+    ".first()",
     "prefixed name",
     "variable",
     "interpolation {expr}"
@@ -28,7 +29,8 @@
     "the original's first `if` clause, `list(g_ab.objects(s, RDF.type))` (non-empty check), is logically always true given how `s` was selected: `s` only reaches that point because `(s, RDF.type, OWL.NamedIndividual)` already holds (that is literally `g_ab.subjects(RDF.type, OWL.NamedIndividual)`'s definition), so `g_ab.objects(s, RDF.type)` is provably non-empty (it contains at least OWL.NamedIndividual) for every candidate -- verified this is genuinely dead code in the original, not assumed. Joining the two `.objects(s, RDF.type)` calls (this dead check, and the real 'any T-prefixed type' check) into the SAME `m{ ?s a owl:NamedIndividual ; a ?t }` naturally subsumes the redundant condition (every row already implies it) without adding code for it -- not a cleanup we chose to make for tidiness, but the direct, unavoidable consequence of collapsing two identical repeated traversal calls into the one join the trav_navigation stratum asks for. Classified minor-restructuring (not directly-expressible) because consuming m{ }'s rows required turning the single chained-`if` comprehension into a comprehension over an intermediate set of rows.s values, which is the language's row-vs-term arity model (querying.md: 'Arity decides the shape'), not an edit made for style.",
     "kept `SEM = Namespace(\"http://example.org/semtech#\")` as a plain rdflib Namespace object (NOT folded into @prefix-only) because `str(SEM)+\"T\"` is a genuine Namespace-as-a-runtime-string use, the one case migrate-from-rdflib.md's 'What not to rewrite' section says has no @prefix form ('@prefix is a lexical declaration, not a value... keep the Namespace constant'). @prefix sem: is declared separately, only for the `sem:hasSourceProvenance` prefixed name inside m{ } -- both coexist for the same IRI, for two different needs, which is itself a small finding: not every coercion/prefix site in a region converges on one notation.",
     "context shim (context.py): restores `H` (the source script's own module-scope constant, an author-machine absolute path \"/home/claude/semtech-landscape\" that cannot resolve here) plus the `Graph`/`Namespace` rdflib imports the source file itself makes at its own module top but the lines-149-151 extraction does not carry. H is pointed at this corpus study's OWN checkout of the same repository at the studied commit (corpus/repos/altunelyusuf__SemanticTechnologies/landscape), so the pilot parses the real landscape/02-ontology/semtech_abox_v1_0_0.ttl -- not a synthetic fixture.",
-    "IMPORTANT caveat on the green check: at commit bad0fa7c46, semtech_abox_v1_0_0.ttl happens to have hasSourceProvenance recorded for every T-prefixed owl:NamedIndividual, so `ex_no_prov == []` on BOTH sides (checked directly: `len(ex_no_prov) == 0` on the real file) -- rdfeval check's OK by itself risks being a hollow green (corpus/405). The join+negation was therefore ALSO independently verified against a small synthetic graph (not committed to this region's files, a throwaway check) covering: two solutions (individuals with 1 and 2 T-prefixed types, no provenance), the zero-solution case (an empty graph), and three non-matching neighbours (a T-typed NamedIndividual that DOES have provenance; a NamedIndividual with only a non-T type; a T-typed resource that is not an owl:NamedIndividual at all) -- original-style comprehension and the m{ }-based translation produced identical sorted results in every case, run directly against rdflib/ldpy.runtime outside the harness."
+    "IMPORTANT caveat on the green check: at commit bad0fa7c46, semtech_abox_v1_0_0.ttl happens to have hasSourceProvenance recorded for every T-prefixed owl:NamedIndividual, so `ex_no_prov == []` on BOTH sides (checked directly: `len(ex_no_prov) == 0` on the real file) -- rdfeval check's OK by itself risks being a hollow green (corpus/405). The join+negation was therefore ALSO independently verified against a small synthetic graph (not committed to this region's files, a throwaway check) covering: two solutions (individuals with 1 and 2 T-prefixed types, no provenance), the zero-solution case (an empty graph), and three non-matching neighbours (a T-typed NamedIndividual that DOES have provenance; a NamedIndividual with only a non-T type; a T-typed resource that is not an owl:NamedIndividual at all) -- original-style comprehension and the m{ }-based translation produced identical sorted results in every case, run directly against rdflib/ldpy.runtime outside the harness.",
+    "Repair 2026-10-27: the earlier translation was wrong in two ways that the old driver could not see (ex_no_prov was [] on the real ontology). (1) `not bool(m{ {s} sem:hasSourceProvenance ?p })` treats an empty or zero literal as a provenance, whereas `not g_ab.value(...)` treats \"\", 0 and false as absent: on a synthetic graph m5 (\"\"), n6 (0), f7 (false) and v11 (\"\" then \"ok\") were listed by original.py and not by the translation. It is now `not m{ {s} sem:hasSourceProvenance ?p }.first()`, which keeps the truthiness (the same as optimized.ldpy). (2) The set comprehension over the join lost the list order of the original (the order of the result depended on the hash seed): the join `m{ ?s a owl:NamedIndividual ; a ?t }` yields one row per (s, t), so duplicates are removed with `dict.fromkeys(...)`, which keeps the first-occurrence order of the graph; with mutants `set(` in place of `dict.fromkeys(` and a plain list the driver now fails. The note above claiming 'identical sorted results in every case' compared sorted lists, which hides (2), and had no falsy literal, which hides (1)."
   ],
   "draft_sha": "5c126788e6e33a28",
   "provenance": {
@@ -55,7 +57,8 @@
     "Exception to symmetry (islands only): `@prefix sem: <...> as SEM .` declares the prefix and binds the Namespace object in one line, so `SEM = Namespace(...)` and the Namespace import disappear from optimized.ldpy; Python has no equivalent. RDF and OWL imports also vanish (replaced by `a` and `owl:`).",
     "Not done: the joined `m{ ?s a owl:NamedIndividual ; a ?t }` of translated.ldpy. It yields one row per (s, t) pair, so it needs a set comprehension to deduplicate, which loses the graph order of the original list and is only correct while ex_no_prov is empty. The nested single-pattern islands keep order, uniqueness and the same structure as optimized.py. A multi-pattern join therefore does not apply here, and the trav_navigation stratum gains nothing from it.",
     "The green check is hollow on the real ontology (ex_no_prov is [] on every side). Verified separately, in a scratch directory outside the region, on a synthetic graph with two T-types on one individual, a T-individual with provenance, a non-T individual, a T-typed non-NamedIndividual and a T-individual with an empty-literal provenance: original.py, optimized.py and optimized.ldpy give the same list, in the same order.",
-    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded.",
+    "Repair 2026-10-27: the fourth note above ('the joined m{ } ... needs a set comprehension, loses the graph order') described a defect of the previous translated.ldpy, not a limit of the join: with dict.fromkeys the join keeps the order and translated.ldpy now holds it. optimized.ldpy keeps the nested single-pattern islands; the optimized artefacts are unchanged and pass the strengthened driver."
   ],
   "optimized_constructions": [
     "@prefix",
@@ -65,5 +68,23 @@
     "prefixed name",
     "variable",
     "interpolation {expr}"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "module-state run on 5 inputs merged into one verdict: the real abox (as before, result []) and four synthetic aboxes written to a scratch dir and reached by setting context.H (the shim's own attribute): 'mixed' (two T-types on one individual, one T-type, interleaved x3/y4/x3, provenance \"\", 0, false, \"0\", \"ok\", an IRI, two values in both orders, non-T type, T-typed non-NamedIndividual, NamedIndividual alone, other namespace, lower-case t), the same in reverse order, 'none-named' (zero solution) and 'empty' (no triple); the order of the list is compared",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "not bool(m{ … }) instead of not m{ … }.first() (translated.ldpy and optimized.ldpy)",
+      "set(…) in place of dict.fromkeys(…) (order)",
+      "no dedupe of the join (list)",
+      "startswith(…+\"t\") (translated.ldpy and optimized.ldpy)",
+      "startswith test removed",
+      "all(…) in place of any(…) (optimized.ldpy)",
+      "a owl:Class in place of a owl:NamedIndividual",
+      "sem:hasSourceProvenance replaced (translated.ldpy and optimized.ldpy)",
+      "negation removed (optimized.ldpy)",
+      "m{ {s} a ?t } replaced by a fixed type (optimized.ldpy)"
+    ],
+    "remaining": "article_candidate: not publishable as a trav_navigation example in its current form. The faithful join needs dict.fromkeys to undo the (s, t) multiplicity and a Python-side .first() for the negation, and optimized.ldpy does not use the join at all. Maxime to decide whether the pair is kept as a counter-example (the join changes cardinality) rather than as a gain."
+  }
 }

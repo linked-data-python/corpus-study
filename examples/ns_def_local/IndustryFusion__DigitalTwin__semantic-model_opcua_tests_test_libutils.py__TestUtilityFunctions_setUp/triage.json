@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check initial : 3x OK. Copie dans un mktemp -d, mutations : (1) translated.ldpy et optimized.ldpy 'self.basens = BASENS' -> 'self.basens = \"http://example.org/base/\"' (str) : 3x OK ; (2) URIRef : OK ; temoin IRI changee en <http://example.org/baseX/> : FAIL (le pilote compare bien la valeur, pas le type). type(BASENS) dans optimized.ldpy = rdflib.namespace.Namespace. Tokens : mesure care 0.6923 / notation 1.0 / total 0.6923 ; sans lignes d'import dans les trois fichiers care 1.0 / notation 1.2857 / total 1.2857 ; avec l'import original conserve dans les deux optimises 1.0 / 1.1538 / 1.1538. Le seul 'gain' est donc la ligne from rdflib import Graph, Namespace, URIRef, Literal, BNode (original.py:4, contexte extrait, pas les lignes 161-163 de la region) ; @prefix ... as BASENS plus affectation est plus long que Namespace(\"...\"). Aucun usage lexical du prefixe basens: dans la region (seul 'as BASENS' sert) : la construction @prefix est creditee pour un simple constructeur. Point 1 (str/URIRef) : voir la mutation (1)-(2), meme famille.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforce : self.basens est compare par type et par usage reel (ns['x'], .term, str, bind+serialisation) ; les mutants str nue et URIRef, qui passaient, echouent maintenant."
 }

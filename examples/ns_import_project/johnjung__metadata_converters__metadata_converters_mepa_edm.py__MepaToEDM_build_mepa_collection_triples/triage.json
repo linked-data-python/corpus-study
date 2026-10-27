@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic"
+  ],
+  "summary": "classes_context.py invente `__namespaces__` (11 préfixes) que classes.py du dépôt n'a pas, ce qui crédite indûment « from classes_context import bf:, edm:, … » ; la région n'en utilise que edm: et erc:, et ne tourne pas telle quelle dans le dépôt (BASE inexistant, MEPA_WBR non défini, classmethod cassée). Oracle solide, pas de cas article.",
+  "questions": [
+    {
+      "question": "classes.py (commit 36a81d6a97) définit les Namespace en simples variables, sans `__namespaces__` : le shim classes_context.py:42-46 l'ajoute. Faut-il retirer le crédit « from … import p: » ?",
+      "where": "classes_context.py:42-46 ; translated.ldpy:7 ; meta.json:19 ; corpus/repos/johnjung__metadata_converters/metadata_converters/classes.py:10-21",
+      "if_yes": "needs-work : traduire edm:/erc: en `@prefix` (comme rdf:/dc:/xsd:), ne garder dans `constructions` que @prefix/prefixed name/+{ }/call suffix, et ne plus compter la paire dans l'usage du `from … import p:`.",
+      "if_no": "approuver ce point, à condition que la note dise que le `__namespaces__` est ajouté par le projet importateur, pas trouvé dans le dépôt."
+    }
+  ],
+  "evidence": "check initial : OK. `grep -rn __namespaces__` sur le clone = rien. Le corps de DigitalCollectionToEDM.__init__/agg_graph/rem_graph du shim est fidèle à classes.py:186-213 (comparé). BASE n'existe pas dans classes.py (ImportError upstream, placeholder du shim, sans effet sur la région). Mutants sur une copie, tous détectés par l'isomorphisme (graphe complet comparé) : erc:when->erc:what, dc: .../1.1/->1.2/, erc:where->erc:whom, xsd:dateTime->xsd:date, IRI rdf: altérée. Le `+{ {self.MEPA_CHO} {p} {o} }(self.graph)` est équivalent : p et o sont toujours des termes (URIRef/Literal). Boucle sur un tuple constant, un seul appel suffit. Article : non (la traduction est plus longue de 3 lignes @prefix, le `+{ }` remplace un `.add` 1 pour 1, le gain venant du `__namespaces__` inventé).",
+  "triaged_by": "sonnet-5.5"
+}

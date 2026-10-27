@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "Le dépôt peut réellement passer subject=None (reified_o = rdf_graph.value(...) dans __build_explicit_type_map/__build_subclass_tree/__build_predicate_scope) : l'original efface tous les adb:collection puis lève AssertionError, la traduction n'efface rien et écrit un sujet Literal('None') sans erreur ; et le pilote ne détecte pas un test d'existence élargi à tout prédicat.",
+  "questions": [
+    {
+      "question": "Faut-il traiter comme un écart réel de la paire le cas subject=None (rdf:object ou rdf:subject absent d'une réification), que le dépôt atteint aux l.3641-3665, 3735-3736 et 3820-3821 de main.py, où l'original efface tous les `adb:collection` du graphe puis lève, alors que la traduction écrit `Literal('None') adb:collection \"Class\"` sans lever ?",
+      "where": "translated.ldpy:36,38,41 et original.py:35,37,40 ; corpus/repos/ArangoDB-Community__ArangoRDF/arango_rdf/main.py:3641,3654-3665,3735,3820",
+      "if_yes": "needs-work : ajouter un appel au pilote avec subject=None et noter l'écart dans la paire (c'est l'écart connu `{expr}` valant None, ici atteignable sur entrée RDF mal formée) ; ne pas faire de cette paire la preuve que `-{ }` est sans écart.",
+      "if_no": "approuver ce point : entrée malformée, l'original plante de toute façon (AssertionError), l'écart ne touche aucune exécution réussie."
+    },
+    {
+      "question": "Le pilote est-il trop faible, puisqu'un test d'existence élargi à tout prédicat (`bool(m{ {subject} ?p ?o })`) reste vert ?",
+      "where": "driver.py:30-48 ; translated.ldpy:38",
+      "if_yes": "needs-work : ajouter un appel sans overwrite où le sujet a un voisin (S, OTHER_P, …) mais pas de adb_col (attendu : l'ajout a lieu).",
+      "if_no": "approuver ; seule la forme de l'original compte et elle se lit."
+    }
+  ],
+  "evidence": "check initial : OK. Sonde (copie) : BNode comme sujet, overwrite et non-overwrite, graphes voisins : équivalent des deux côtés (le BNode n'est pas pris pour une variable). Sujet str : original AssertionError, traduction écrit Literal('plain-str') comme sujet. Sujet None, graphe {S->P, T->Q} : original `AssertionError: Subject None must be an rdflib term` et graphe VIDE ensuite (remove((None,p,None)) a tout effacé) ; traduction : aucune exception, graphe {S|P, T|Q, 'None'|Class}. Sites d'appel du dépôt : main.py:3641/3646/3654-3665 (reified_o), 3735-3736, 3820-3821 : valeurs de `self.__rdf_graph.value(s, RDF.object)`, None possible. adb_col est toujours str (rdf_id_to_adb_label, str(doc[..])) : `{adb_col}` == Literal(adb_col). Mutants : `bool(m{ {subject} ?p ?o })` -> VERT (non détecté) ; `-{ ?s … }` et `-{ {subject} ?p ?o }` -> détectés ; `@graph self.__adb_col_statements` OK. Article : OUI sous condition. C'est le plus net avant/après du lot (3 lignes de graphe + @graph), mais seulement après ajout du cas None et mention de l'écart ; sinon l'article affirmerait une équivalence qui ne tient pas sur le dépôt réel.",
+  "triaged_by": "sonnet-5.5"
+}

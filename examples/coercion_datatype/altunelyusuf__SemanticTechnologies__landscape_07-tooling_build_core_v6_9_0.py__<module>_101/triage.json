@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : traduction exacte (Literal(x, lang='en') et URIRef(url) rendus à l'identique) ; ce n'est pas un cas datatype= mais langue, à écarter de l'article au titre de la coercition.",
+  "questions": [],
+  "evidence": "rdfeval check OK (module-state). Transpilation (-t) : {e[\"cite\"]}@en donne Literal((e[\"cite\"]), lang='en'), f<{e[\"url\"]}> donne firi(e[\"url\"]) = URIRef(url) sans @base ; srns:{f\"Pub_...\"} donne pname(base, local), concaténation sans encodage comme Namespace.__getitem__. Dépôt : enrichment_o_v6_1_0.py du shim identique au dépôt (diff) ; load() identique ; le BASEDIR redirigé et le .ttl de remplacement n'agissent pas (la région n'ajoute qu'à g1) ; aucun __namespaces__ inventé par le shim. Données EXT8 : 2 entrées, toutes str (cite, url, level, ev), url absolues sans caractère à encoder. Mutants sur copie : @en retiré, '-' non remplacé, ^^xsd:string ajouté -> ROUGE ; seul le retrait de [:180] reste vert car la plus longue citation fait 109 caractères, mais l'expression est recopiée telle quelle dans le trou, sans risque de sémantique ldpy. Copies supprimées. Article : exemple correct d'une suite de sujet partagé (7 add -> 2 îlots) avec littéraux de langue, pas de coercition de datatype ; dépend de deux fichiers de shim.",
+  "triaged_by": "sonnet-5.5"
+}

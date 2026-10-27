@@ -1,0 +1,18 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "wrong-construction"
+  ],
+  "summary": "Le shim pyrdfa_context.py invente `__namespaces__` (absent du dépôt) pour que le `from .. import ns_rdfa` devienne `from … import p:` : crédit indu ; la paire n'est de toute façon pas directly-expressible dans sa forme honnête (@prefix, @graph, +{ }).",
+  "questions": [
+    {
+      "question": "Le `__init__.py` du paquet (server/src/rdflib2/plugins/parsers/pyRdfa/__init__.py:197) ne définit que `ns_rdfa = Namespace(...)`, aucun `__namespaces__` n'existe dans le clone : confirmez-vous que `from pyrdfa_context import nsrdfa:` ne doit pas être crédité comme `from … import p:` ?",
+      "where": "pyrdfa_context.py:18 (`__namespaces__ = {\"nsrdfa\": ns_rdfa}`), translated.ldpy:24-25 et original.py:24 (`from pyrdfa_context import ns_rdfa`, remplaçant `from .. import ns_rdfa`)",
+      "if_yes": "retirer `from … import p:` de `constructions` ; les gains restants (@prefix nsrdf, nsrdfa:Pattern, @graph + une seule insertion +{ }) relèvent de ns_def_local/add_isolated ; pas pour l'article",
+      "if_no": "approuver, en notant que le crédit suppose un `__namespaces__` écrit à la main pour un paquet qui n'en exporte pas"
+    }
+  ],
+  "evidence": "rdfeval check : OK. grep '__namespaces__' sur corpus/repos/MDD4REST__mdd4rest-annotator : aucune occurrence. Le shim ne fait que rebrancher `ns_rdfa` (valeur identique à server/src/rdflib2/plugins/parsers/pyRdfa/__init__.py:197) plus la ligne inventée ; original.py ne diffère de la source que par la source de l'import (relatif -> shim), le corps de handle_prototypes est intact. Expérience dans une copie (mktemp -d, supprimée) : j'ai ajouté au fixture un prototype avec littéral @fr, entier typé, xsd:string, BNode objet et second rdf:type : check reste OK, donc `+{ {x} {p} {y} }` préserve bien les termes. Les trois lectures (graph.triples x2, `in graph`) sont laissées en rdflib, choix assumé du traducteur (hors strate). L'entrée 'ns_rdf' est conservée en import Python ET doublée en `@prefix nsrdf:` (IRI RDF recopiée à la main) : inoffensif.",
+  "triaged_by": "sonnet-5.5"
+}

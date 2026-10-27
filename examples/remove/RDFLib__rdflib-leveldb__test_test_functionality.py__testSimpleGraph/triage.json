@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (relue ligne à ligne), mais le seul `-{ }` de la région est entièrement lié, donc sans joker, et le pilote ne le distingue pas d'un `-{ {tarek} {likes} ?o }` ; la dernière requête est paresseuse et jamais exécutée, mutation verte. Conséquence pratique faible : cette dernière ligne est morte aussi dans l'original.",
+  "questions": [
+    {
+      "question": "Le pilote est-il suffisant alors qu'un `-{ }` élargi à `{tarek} {likes} ?o` (l.46) et une dernière requête altérée (l.47, `<urn:pizza>`->`<urn:cheese>`) restent verts ?",
+      "where": "translated.ldpy:46-47 ; original.py:47-48 ; driver.py:65-69",
+      "if_yes": "approuver ; l'original n'asserte rien après le remove et l'oracle est celui que le dépôt fournit.",
+      "if_no": "needs-work : ajouter une assertion dans le pilote sur le contenu de g après le remove (tarek likes cheese ajouté avant, qui doit survivre) et exécuter le dernier `s{ }` (.execute() / list) des deux côtés."
+    }
+  ],
+  "evidence": "check initial : OK. Mutants sur une copie : l.46 `-{ {tarek} {likes} ?o }` -> VERT ; l.47 pizza->cheese -> VERT (le s{} est paresseux, jamais itéré, alors que g.query de l'original s'exécute) ; l.46 supprimée, l.45 sans (g2), l.24 sans (g2), l.20 {cheese}->{pizza} -> détectés ; l.46 sujet joker (vu par les notes) détecté. La région ne contient AUCUN joker dans son remove (`g.remove((tarek, likes, pizza))`) : elle n'illustre pas l'idiome de la strate `remove` (s, p, None). Clone : original.py est identique au dépôt (test_functionality.py:68-102). Article : NON. Le remove est 1 pour 1 sans joker, les lectures sont 1 pour 1, la région fait 34 lignes contre 35 ; le seul gain est de fusionner trois .add en un îlot, ce qui ne se lit pas en trois lignes.",
+  "triaged_by": "sonnet-5.5"
+}

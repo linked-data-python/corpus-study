@@ -17,5 +17,6 @@
     }
   ],
   "evidence": "rdfeval check de la region : 3 OK. Copies dans le scratchpad (supprimees). Mutant A (dans translated.ldpy et optimized.ldpy, `(s for s, _ in m{ ?s ?p {new_obs} }...)` remplace par `[]`) : 3 OK avec le pilote d'origine. Mutant B (hasBegin remplace par hasEnd dans la lecture de la branche `end == old_last_end`) : 3 OK. Avec 3 cas ajoutes au driver (relation entrante `(other, relatesTo, new_obs)`, hasEnd == last_end avec begin plus petit, litteral objet commencant par le trace_uri) : base 3 OK, mutant A FAIL (call[4]) sur translated.ldpy et optimized.ldpy, mutant B FAIL (call[5]) sur les memes ; optimized.py reste OK dans les deux (non mute). Le cas du litteral-objet passe (m{ } sur sujet Literal rend bien None comme value()). Copie avec pseudomon_range=None : l'original leve TypeError, le harnais ne compare pas les exceptions de l'original, donc la paresse d'optimized.py n'est pas prouvee ni refutee par check. Symetrie optimized.py/optimized.ldpy : ligne a ligne identiques hors RDF, seule exception `@graph graph` documentee ; pas de drapeau d'optimisation. Note : ratio notation 1.16 (>1), la region est un cas ou la notation coute.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforce (29 appels, comparaison des exceptions) : les deux mutants cites (subjects -> [], hasBegin -> hasEnd dans end == old_last_end) et 13 autres tombent ; optimized.py/.ldpy ont ete corriges (TypeError eager sur pseudomon_range=None) ; reste 2 mutants equivalents."
 }

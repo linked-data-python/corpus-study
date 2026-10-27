@@ -17,7 +17,9 @@
     "m{ }",
     ".first()",
     "call suffix (g)",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
   ],
   "translation_notes": [
     "rdf_ops/categories were computed as 0/{} by the automatic extractor, but the region does read a graph: graph.value(...) with a wildcard subject or object, and graph.objects(s, None)/graph.subjects(None, s) (wildcard predicate). This is a miss in the automatic categorizer, confirmed by hand.",
@@ -45,10 +47,11 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "optimized.py: the intermediate names trace_uri, pseudomon_range, pse_mon_b_limit, pse_mon_e_limit and the bound-method alias self_state_value are removed and their uses inlined (self.trace_uri, self.state.value, old_last_* - self.trace.pseudomon_range). Docstring, comments, the early return, the `end is None` guard, the three old_last_* snapshots (needed: prepared is mutated inside the loop) and the itertools.chain of three iterables are kept.",
+    "optimized.py: the intermediate names trace_uri, pseudomon_range and the bound-method alias self_state_value are removed and their uses inlined (self.trace_uri, self.state.value); pse_mon_b_limit and pse_mon_e_limit are KEPT, computed before the loop from self.trace.pseudomon_range (repair 2026-10-27, see below). Docstring, comments, the early return, the `end is None` guard, the three old_last_* snapshots (needed: prepared is mutated inside the loop) and the itertools.chain of three iterables are kept.",
     "optimized.ldpy is optimized.py with each graph.value / self.state.value replaced by m{ ... }.first(), and graph.objects(new_obs, None) / graph.subjects(None, new_obs) by `(o for _, o in m{ {new_obs} ?p ?o })` and `(s for s, _ in m{ ?s ?p {new_obs} })`; the self.state alias removal also removes the local helper function that translated.ldpy needed.",
     "Exception to symmetry (islands only): `@graph graph` at the top of the function makes `graph` the current graph, so the four reads on `graph` drop their `(graph)` suffix and only the reads on self.state keep one. Python has no current-graph mechanism.",
-    "Not compressible: the predicate-wildcard selectors have no terse island form (the unused ?p must be named and discarded), so the notation costs more than it saves here (notation ratio above 1). The chain of three sources is a union, which m{ } cannot express. Merging begin/end reads into one multi-pattern m{ } would change what happens when a value is missing or repeated, so it was not done."
+    "Not compressible: the predicate-wildcard selectors have no terse island form (the unused ?p must be named and discarded), so the notation costs more than it saves here (notation ratio above 1). The chain of three sources is a union, which m{ } cannot express. Merging begin/end reads into one multi-pattern m{ } would change what happens when a value is missing or repeated, so it was not done.",
+    "2026-10-27 (repair): the first optimized.py inlined `old_last_begin - self.trace.pseudomon_range` into the two branches that use it, so it no longer raised TypeError when pseudomon_range is not a number (original.py:25-26 subtracts before the loop, whatever the obsels). The repaired driver compares raised exceptions and caught it (optimized.py and optimized.ldpy FAIL on call[20]); both now compute pse_mon_b_limit and pse_mon_e_limit before the loop, reading self.trace.pseudomon_range twice instead of once (in the repo it is an int property, so the case is unreachable there, but the eager evaluation is the original's behaviour)."
   ],
   "optimized_constructions": [
     "@prefix",
@@ -58,5 +61,29 @@
     "prefixed name",
     "variable",
     "interpolation {expr}"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "26 calls added to the 3 existing ones (29 in all). end == old_last_end (begin read from self.state: <, ==, > last_begin, obs <= old_last_obsel both ways and by equality, begin below/above the pseudo-monotonic limit); end < old_last_end above/below the limit; end > old_last_end (begin from graph); pseudomon_range 0; INCOMING relation (graph.subjects(None, new_obs)) and outgoing relation, with the related obsel's end/begin in the graph and ONLY in self.state, regressing or reaching end == last_end, both at once, and a self-relation; neighbourhood to skip (obsel of another trace, no hasEnd, literal object starting with the trace URI, non-obsel resource, hasTrace triple of another trace in graph); exceptions: _harness._exec_artefact is wrapped in the driver so the entry point RETURNS ('raised', type, message), and the driver gives pseudomon_range=None, a missing hasBegin, and a new obsel without hasEnd.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "A: subjects(None,new_obs) island -> [] (translated.ldpy, optimized.ldpy, optimized.py equivalent)",
+      "A2: objects(new_obs,None) island -> [] (survived the first repaired driver; killed by the outgoing-relation calls)",
+      "B: hasBegin -> hasEnd in the end == old_last_end read",
+      "C: final begin read from hasEnd",
+      "E: begin < last_begin -> <=",
+      "F: obs <= old_last_obsel -> < (killed by new_obs == old last obsel)",
+      "G/H: pseudo-monotonic limits ignored",
+      "I: startswith skip removed",
+      "J: end None skip removed",
+      "L: hasTrace lookup not keyed on trace_uri",
+      "M: first-obsel hasEnd -> hasBegin",
+      "N: end read from graph instead of self.state",
+      "O: update of prepared without str_mon",
+      "P: end limit computed from last_begin",
+      "Q: neighbours restricted to ktbs:relatesTo",
+      "pseudomon_range=None eager TypeError: optimized.py and optimized.ldpy FAILED, repaired"
+    ],
+    "remaining": "Two mutants stay green and are equivalent: `elif end <= old_last_end` for `==` (the `<` case is caught by the preceding `if`), and `obs == new_obs` for `obs is new_obs` (a second pass on an equal obsel writes the same values; only identity differs). Not exercised: a graph without any hasTrace triple (new_obs None; original and translated both raise in the cases tried, not added as invalid input). Question 2 of the triage is resolved the strict way: the driver now compares exceptions and optimized.* were fixed, although in the repo pseudomon_range is always an int (Trace.get_pseudomon_range returns int(... or 0)), so Maxime may judge the eager evaluation irrelevant and drop the driver call _case_range_none; the cost is that optimized.* keep two limit variables and the ratio care went from 0.9842 to 1.0032."
+  }
 }

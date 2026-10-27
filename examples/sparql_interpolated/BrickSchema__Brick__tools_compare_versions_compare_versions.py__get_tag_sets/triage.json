@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check de la région : 3 OK. Expérience dans une copie : ajout de `_call(str(BRICK.Sensor))` au driver -> [translated.ldpy] FAIL (call[2] : 4 classes vs {} ; stdout « … Brick#Sensor 4 » vs « … Brick#Sensor 0 »), [optimized.ldpy] FAIL (idem), [optimized.py] OK (f\"<{root}>\" garde la str). Vérifié sur le dépôt (curl du fichier au commit c12949f) : get_root() (l.26-33) rend des str, jamais des URIRef. Aussi : meta.json:15-20 omet « call suffix (g) » alors que translated.ldpy:20 emploie `}(graph)` (sous-déclaration, pas de crédit indu). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "driver: str roots added (the repo's real type); translated.ldpy and optimized.ldpy fixed ({root} -> {f<{root}>}); check 3 OK; the old translation fails the new driver, and the str-root calls kill the {root} mutant."
 }

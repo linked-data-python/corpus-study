@@ -36,3 +36,112 @@ ex:obj2 ex:unrelatedProp "should not appear" .
 # kv-pair node -- neither must leak into ex:obj1's or ex:obj2's result.
 ex:kv-orphan ans:key "orphan" ; ans:value "should not appear either" .
 ex:obj3 ex:notHasKeyValuePair ex:kv-name .
+
+# ---------------------------------------------------------------------------
+# Added by the repair pass (AGENT_REPAIR.md).  The cases below were absent and
+# let three mutants through: int(literal) -> float(literal) (42 == 42.0), both
+# `raise ValueError` replaced by `return None`, and the `len(...) > 0` guard of
+# "has_<key>" removed.  Each error case has its OWN anchor so that exactly one
+# exception can be raised from it (the order graph.objects() yields several
+# pairs in is the store's, not the region's).
+# ---------------------------------------------------------------------------
+
+# ex:obj-types -- one pair per datatype shape, chosen so that the Python TYPE
+# of the result tells the branches apart (int 1 == float 1.0 == bool True).
+ex:obj-types ans:hasKeyValuePair ex:kv-int, ex:kv-int-neg, ex:kv-int-zero,
+    ex:kv-float-zero, ex:kv-float,
+    ex:kv-float-whole, ex:kv-float-nan, ex:kv-float-inf, ex:kv-bool-true,
+    ex:kv-bool-false, ex:kv-bool-zero, ex:kv-bool-one, ex:kv-text-digits,
+    ex:kv-text-empty, ex:kv-text-lang, ex:kv-text-bare .
+ex:kv-int         ans:key "int"         ; ans:value "1"^^xsd:integer .
+ex:kv-int-neg     ans:key "int-neg"     ; ans:value "-7"^^xsd:integer .
+# falsy values: Literal("0"^^xsd:integer) and Literal("0.0"^^xsd:float) are
+# falsy in rdflib, like "" -- a truth test written for "absent" would drop them
+ex:kv-int-zero    ans:key "int-zero"    ; ans:value "0"^^xsd:integer .
+ex:kv-float-zero  ans:key "float-zero"  ; ans:value "0.0"^^xsd:float .
+ex:kv-float       ans:key "float"       ; ans:value "2.5"^^xsd:float .
+ex:kv-float-whole ans:key "float-whole" ; ans:value "2"^^xsd:float .
+ex:kv-float-nan   ans:key "float-nan"   ; ans:value "NaN"^^xsd:float .
+ex:kv-float-inf   ans:key "float-inf"   ; ans:value "INF"^^xsd:float .
+ex:kv-bool-true   ans:key "bool-true"   ; ans:value "true"^^xsd:boolean .
+ex:kv-bool-false  ans:key "bool-false"  ; ans:value "false"^^xsd:boolean .
+ex:kv-bool-zero   ans:key "bool-zero"   ; ans:value "0"^^xsd:boolean .
+ex:kv-bool-one    ans:key "bool-one"    ; ans:value "1"^^xsd:boolean .
+# no datatype: always a str, even when it looks like a number or is empty
+ex:kv-text-digits ans:key "text-digits" ; ans:value "42" .
+ex:kv-text-empty  ans:key "text-empty"  ; ans:value "" .
+ex:kv-text-lang   ans:key "text-lang"   ; ans:value "bonjour"@fr .
+ex:kv-text-bare   ans:key "text-bare"   ; ans:value "plain" .
+
+# ex:obj-lists -- the "has_<key>" flag and process_seq's index walk.
+ex:obj-lists ans:hasKeyValuePair ex:kv-empty-list, ex:kv-ints, ex:kv-falsy, ex:kv-twelve,
+    ex:kv-gap, ex:kv-nested, ex:kv-both, ex:kv-empty-dict, ex:kv-dict-full .
+# an rdf:Seq with no member: [] and NO "has_empty-list" (the zero-length guard)
+ex:kv-empty-list ans:key "empty-list" ; ans:value ex:seq-empty .
+ex:seq-empty a rdf:Seq .
+# a list of typed literals: the elements keep their Python types
+ex:kv-ints ans:key "ints" ; ans:value ex:seq-ints .
+ex:seq-ints a rdf:Seq ; rdf:_1 "1"^^xsd:integer ; rdf:_2 "2.0"^^xsd:float ;
+    rdf:_3 "true"^^xsd:boolean ; rdf:_4 "four" .
+# falsy members ("" , 0, false, 0.0) do NOT end the walk: only a MISSING member
+# does (`item is None`), and a truth test (`not item`) would stop at the first
+ex:kv-falsy ans:key "falsy" ; ans:value ex:seq-falsy .
+ex:seq-falsy a rdf:Seq ; rdf:_1 "" ; rdf:_2 "0"^^xsd:integer ;
+    rdf:_3 "false"^^xsd:boolean ; rdf:_4 "0.0"^^xsd:float ; rdf:_5 "end" .
+# twelve members: read by number (rdf:_10 after rdf:_9), not by sorted label
+ex:kv-twelve ans:key "twelve" ; ans:value ex:seq-twelve .
+ex:seq-twelve a rdf:Seq ;
+    rdf:_1 "e1" ; rdf:_2 "e2" ; rdf:_3 "e3" ; rdf:_4 "e4" ; rdf:_5 "e5" ;
+    rdf:_6 "e6" ; rdf:_7 "e7" ; rdf:_8 "e8" ; rdf:_9 "e9" ; rdf:_10 "e10" ;
+    rdf:_11 "e11" ; rdf:_12 "e12" .
+# a gap: the walk stops at the first missing index, so rdf:_3 is never read
+ex:kv-gap ans:key "gap" ; ans:value ex:seq-gap .
+ex:seq-gap a rdf:Seq ; rdf:_1 "first" ; rdf:_3 "unreachable" .
+# a list holding a list and a dictionary (recursion through both branches)
+ex:kv-nested ans:key "nested" ; ans:value ex:seq-nested .
+ex:seq-nested a rdf:Seq ; rdf:_1 ex:seq-ints ; rdf:_2 ex:dict-inner ;
+    rdf:_3 ex:seq-empty ; rdf:_4 "tail" .
+ex:dict-inner a ans:Dictionary ; ans:hasKeyValuePair ex:kv-inner-n, ex:kv-inner-l .
+ex:kv-inner-n ans:key "n" ; ans:value "5"^^xsd:integer .
+ex:kv-inner-l ans:key "l" ; ans:value ex:seq-gap .
+# a node typed both rdf:Seq and ans:Dictionary: the Seq test comes first
+ex:kv-both ans:key "both" ; ans:value ex:seq-and-dict .
+ex:seq-and-dict a rdf:Seq, ans:Dictionary ; rdf:_1 "as-list" ;
+    ans:hasKeyValuePair ex:kv-inner-n .
+# an empty dictionary is {} (and gets no "has_" flag either)
+ex:kv-empty-dict ans:key "empty-dict" ; ans:value ex:dict-empty .
+ex:dict-empty a ans:Dictionary .
+ex:kv-dict-full ans:key "dict-full" ; ans:value ex:dict-inner .
+
+# Error cases, one anchor each.  Every one makes the region RAISE ValueError.
+# xsd:string / xsd:date / xsd:double / xsd:decimal: a datatype with no branch.
+ex:err-string  ans:hasKeyValuePair ex:kv-err-string .
+ex:kv-err-string  ans:key "k" ; ans:value "x"^^xsd:string .
+ex:err-date    ans:hasKeyValuePair ex:kv-err-date .
+ex:kv-err-date    ans:key "k" ; ans:value "2020-01-01"^^xsd:date .
+ex:err-double  ans:hasKeyValuePair ex:kv-err-double .
+ex:kv-err-double  ans:key "k" ; ans:value "1.5"^^xsd:double .
+ex:err-decimal ans:hasKeyValuePair ex:kv-err-decimal .
+ex:kv-err-decimal ans:key "k" ; ans:value "1.5"^^xsd:decimal .
+# a value that is neither Seq, Dictionary nor Literal: a bare IRI, a bare bnode
+ex:err-iri     ans:hasKeyValuePair ex:kv-err-iri .
+ex:kv-err-iri     ans:key "k" ; ans:value ex:untyped-node .
+ex:err-bnode   ans:hasKeyValuePair ex:kv-err-bnode .
+ex:kv-err-bnode   ans:key "k" ; ans:value [ ex:unrelatedProp "x" ] .
+# an ill-typed integer / float: int() / float() themselves raise ValueError
+ex:err-int-lex   ans:hasKeyValuePair ex:kv-err-int-lex .
+ex:kv-err-int-lex   ans:key "k" ; ans:value "abc"^^xsd:integer .
+ex:err-int-dec   ans:hasKeyValuePair ex:kv-err-int-dec .
+ex:kv-err-int-dec   ans:key "k" ; ans:value "1.5"^^xsd:integer .
+ex:err-float-lex ans:hasKeyValuePair ex:kv-err-float-lex .
+ex:kv-err-float-lex ans:key "k" ; ans:value "abc"^^xsd:float .
+# the error is raised from depth: inside a dictionary, inside a list
+ex:err-deep-dict ans:hasKeyValuePair ex:kv-err-deep-dict .
+ex:kv-err-deep-dict ans:key "k" ; ans:value ex:dict-bad .
+ex:dict-bad a ans:Dictionary ; ans:hasKeyValuePair ex:kv-err-date .
+ex:err-deep-list ans:hasKeyValuePair ex:kv-err-deep-list .
+ex:kv-err-deep-list ans:key "k" ; ans:value ex:seq-bad .
+ex:seq-bad a rdf:Seq ; rdf:_1 "fine" ; rdf:_2 "2020-01-01"^^xsd:date .
+ex:err-deep-iri ans:hasKeyValuePair ex:kv-err-deep-iri .
+ex:kv-err-deep-iri ans:key "k" ; ans:value ex:seq-bad-iri .
+ex:seq-bad-iri a rdf:Seq ; rdf:_1 ex:untyped-node .

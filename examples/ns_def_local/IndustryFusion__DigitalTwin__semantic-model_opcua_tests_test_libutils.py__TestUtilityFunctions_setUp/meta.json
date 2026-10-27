@@ -44,5 +44,19 @@
   ],
   "optimized_constructions": [
     "@prefix"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "The stand-in `self` now compares a probe of self.basens that reproduces the uses found in the clone (test_libutils.py): type of the object, str(), item access ns['hasDatatype'] / ns['numericID'] (value and type), ns.term('x'), graph.bind('base', ns) + a triple minted through the namespace and its N-Triples serialisation, plus the set of attributes left on self. Exceptions of a use are part of the probe.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "self.basens = bare str with the same text (survived the old == comparison)",
+      "self.basens = URIRef with the same text",
+      "IRI changed",
+      "trailing slash dropped",
+      "attribute renamed",
+      "extra attribute"
+    ],
+    "remaining": "The second triage question (whether the care gain 0.69 comes from the import line of the extracted header) is a judgement about measurement, not handled here."
+  }
 }

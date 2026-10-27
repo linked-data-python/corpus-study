@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler ; mais ce n'est pas un cas coercion_datatype (Literal(str) sans datatype), donc à écarter de l'article au titre de la coercition.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Dépôt (corpus/repos/OpenEnergyPlatform__oeplatform) : fonction identique ; les trois appelants (test_oekg_query.py:46,54,80) passent des str ; namespaces.py du shim identique pour OEO et OBO (Namespace simples). Pilote : 2 appels (str non vide, chaîne vide) ; mutants (objet échangé, @en ajouté) -> FAIL. Aucun datatype= nulle part : la seule coercition est node(str) -> Literal(str), réécriture {table_iri_literal} triviale. Seul gain : 4 add -> 3 îlots (dont une suite de sujet partagé). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

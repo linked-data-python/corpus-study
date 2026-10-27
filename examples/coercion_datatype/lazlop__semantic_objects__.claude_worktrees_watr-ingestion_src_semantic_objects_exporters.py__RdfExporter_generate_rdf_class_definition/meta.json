@@ -60,5 +60,25 @@
     "+{ }",
     "prefixed name",
     "interpolation {expr}"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "No argument (module-state oracle): the data is context_shim._SourceThing._valid_relations, to which three relations were added: hasSelf with target typing.Self (as the repo writes self-referential relations: PhysicalSpace.contains -> typing.Self), and two repeated predicates (hasTarget again with another target, hasSelf again with None) for processed_relations; driver.py docstring says what each relation exercises and what is unreachable.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "Self branch name -> 'Broken'",
+      "Self branch no rebind of target_class (None)",
+      "processed_relations guard disabled",
+      "processed_relations.add removed",
+      "'Self' test disabled",
+      "hasattr(_get_iri) forced True / False",
+      "plain __name__ branch",
+      "None branch",
+      "sh:class->sh:node",
+      "message prefix",
+      "comment dropped",
+      "sh:path from class_iri"
+    ],
+    "remaining": "Two mutants stay green and are not reachable from the excerpt: the `else: target_class_name = str(target_class)` branch (the preceding `target_class.__name__` raises AttributeError first, so it is dead code in the original too) and the hasattr(base_class, '_valid_relations') guard (the restored binding is classes_to_process = [cls] and cls has the attribute; the real method walks cls.__mro__ when include_hierarchy is set, but changing the binding would edit original.py). The stratum coercion_datatype is not truly exercised: both Literal() receive f-strings (str)."
+  }
 }

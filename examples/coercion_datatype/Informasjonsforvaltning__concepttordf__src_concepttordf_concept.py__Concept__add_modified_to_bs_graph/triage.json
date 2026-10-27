@@ -1,0 +1,18 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "`{betydningsbeskrivelse.modified}` produit un littéral sans datatype quand `modified` est une str, alors que `Literal(str, datatype=XSD.date)` donne un xsd:date ; le dépôt (tests) passe des str venues du JSON, le pilote n'exerce que des `date`.",
+  "questions": [
+    {
+      "question": "Les appels réels du dépôt passent une str ISO (\"2020-03-04\", lue dans un JSON) à `modified` : la traduction `{betydningsbeskrivelse.modified}` perd alors le datatype xsd:date. Cette paire est-elle à renvoyer en needs-work ?",
+      "where": "translated.ldpy:18 et original.py:18 (appels réels : corpus/repos/Informasjonsforvaltning__concepttordf/tests/test_concept.py:105,116,129,136,... ; résultat attendu tests/files/completeconcept.ttl:34 `\"2020-03-04\"^^xsd:date`)",
+      "if_yes": "needs-work : traduire par `f\"{betydningsbeskrivelse.modified}\"^^xsd:date` (vérifié équivalent pour str et pour date) et ajouter au pilote un appel avec une str ISO ; la note qui affirme que l'interpolation nue reproduit l'original est fausse pour le dépôt.",
+      "if_no": "approuver en l'état, en acceptant que l'équivalence ne vaille que pour des objets datetime.date (hors usage réel du dépôt)."
+    }
+  ],
+  "evidence": "rdfeval check : OK sur l'original. Copie avec un appel supplémentaire `('2020-03-04',)` au pilote : FAIL `call[2].result: graphs not isomorphic (1 vs 1 triples)`. Cause : Literal('2020-03-04', datatype=XSD.date) a le datatype xsd:date, alors que `{str}` en position de terme donne Literal('2020-03-04') sans datatype. Les tests du dépôt font json.load puis `definition.modified = _concept[...]['modified']` (str) ; l'annotation `-> date` de betydningsbeskrivelse.py:99 n'est qu'un indice de type, non appliqué. Correctif essayé dans la copie : `f\"{betydningsbeskrivelse.modified}\"^^xsd:date` (le f devant les guillemets est nécessaire : sans lui la chaîne n'est pas interpolée) : OK pour date et pour str (seul écart observé : un datetime, str(datetime) a une espace au lieu du T, hors usage). Article : pas en l'état (traduction fausse pour l'usage réel) ; une fois corrigée, bon exemple du piège `Literal(n, datatype=…)` != interpolation nue.",
+  "triaged_by": "sonnet-5.5"
+}

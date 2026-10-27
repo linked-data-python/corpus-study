@@ -60,5 +60,18 @@
     "call suffix (g)",
     "prefixed name",
     "variable"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "module-state run on 13 inputs merged into one verdict, each in a scratch dir holding a copy of the artefacts and its own 01-research file: the shipped stand-in, the REAL semtech_research_v6_4_0.ttl of the origin repo (one language-tagged note), no note (zero solution), empty graph, notes \"\", 0, false, \"0\", a typed integer, an IRI, and three multi-valued cases (falsy first, truthy first, \"b\",\"a\",\"c\") to see that .first() and g.value pick the same value",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "` or \"\"` removed (translated.ldpy and optimized.ldpy)",
+      "skos:note replaced by dcterms:title (translated.ldpy)",
+      "res:OtherCollection in place of res:ResearchCorpus (optimized.ldpy)",
+      "list(m{ … })[-1] in place of .first() (translated.ldpy)",
+      "str(m{ … }.count()) in place of the value (translated.ldpy)"
+    ],
+    "remaining": ""
+  }
 }
