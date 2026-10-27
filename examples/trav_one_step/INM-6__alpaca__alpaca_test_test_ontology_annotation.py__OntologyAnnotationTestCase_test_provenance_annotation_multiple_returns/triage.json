@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote ne voit que « aucune assertion n'échoue » ('ok' contre 'ok') : supprimer la boucle `for attribute in m{…}` (l'îlot trav_one_step de la strate), élargir un motif, remplacer une assertion par True : tout reste vert.",
+  "questions": [
+    {
+      "question": "Un oracle qui renvoie seulement 'ok' si les assertions du test passent (aucune valeur lue n'est exposée) vous suffit-il pour créditer les 14 lectures de cette région, y compris la boucle `for attribute in m{ {output_node} {ALPACA.hasAttribute} ?a }` ?",
+      "where": "driver.py:98-102 ; original.py:112-117 ; translated.ldpy:71-88",
+      "if_yes": "approuver en sachant que seuls les littéraux (\"param_1\", 45) et la valeur pairValue sont réellement contrôlés",
+      "if_no": "needs-work : faire que demo() renvoie aussi les observations (les 7 count(), execution_uri/parameter_node/output_node/input_node, la liste (name, value) de la boucle, les 10 booléens) pour que le pilote compare des valeurs"
+    }
+  ],
+  "evidence": "check : OK. Région identique au dépôt (diff du texte, dédenté, identique) ; shim alpaca_context.py identique au fichier d'origine pour InputObject, OutputObject, process_multiple (setUp, qui vide _OntologyInformation.namespaces/ONTOLOGY_INFORMATION, n'est pas rejoué ; inversion des côtés RDFEVAL_SIDES=translated.ldpy,original.py : vert aussi). Mutants VERTS sur translated.ldpy : boucle des attributs→[] (a3), →`[:1]` (a3c), →`.first() and []`, `?s ?p {Parameter}` dans un count (a1), `{execution_uri}`→`?x` (a2), `.count(), 0`→`0, 0`, assertTrue(bool(…))→assertTrue(True) (a8), assertEqual(value, expected[name])→pass (a9), motif rdf:type Attribute→`{attribute} ?p ?o` (a11). Mutants tués : 45→46, \"param_1\"→\"param_2\", pairValue→pairName. La boucle itère bien 2 fois (channel, name), mais aucune de ses sorties n'est observée. Écart non atteignable par un test qui passe : `list(g.subjects(…))[0]` (IndexError si vide) devient `.first()` → None → `{None}` = Literal('None'), donc AssertionError au lieu d'IndexError pour execution_uri (seul des quatre sans assertion count préalable) ; le dépôt ne l'atteint pas (le test passe). Article : non — test d'assertions dont les 37 opérations sont presque toutes des existences/comptes, et dont l'oracle est vide.",
+  "triaged_by": "sonnet-5.5"
+}

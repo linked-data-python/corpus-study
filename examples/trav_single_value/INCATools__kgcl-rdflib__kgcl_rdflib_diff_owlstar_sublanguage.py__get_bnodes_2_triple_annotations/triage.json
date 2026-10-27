@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Le demo() du pilote jette le sujet de chaque triplet (`_`), donc le seul remaniement de la traduction (for s,p,o -> for p,o + s remplacé par i) n'est pas observé ; la paire n'est pas non plus purement directly-expressible.",
+  "questions": [
+    {
+      "question": "Faut-il exiger que demo() conserve le premier élément des triplets (par ex. ('bnode',) ou le nom) pour que le remplacement de `s` par `i` soit réellement prouvé ?",
+      "where": "driver.py/original.py:68 (`for (_, p, o) in triples`) et translated.ldpy:46,52 (`(i, p, o)`)",
+      "if_yes": "needs-work : modifier demo (identique des deux côtés) ; la paire reste très probablement équivalente (s est le sujet fixe du motif), mais le vert actuel ne le prouve pas",
+      "if_no": "approuver : le sujet est fixé par le motif, l'oracle suffit"
+    },
+    {
+      "question": "Le remaniement `for s, p, o in g.triples((i,None,None))` -> `for p, o in m{ {i} ?p ?o }` (tuple de 3 à 2, corps réécrit avec i) plus `next(...)` -> `.first()` (différent sur zéro solution, justifié inatteignable) mérite-t-il minor-restructuring au lieu de directly-expressible ?",
+      "where": "translated.ldpy:46-52 et original.py:34-44 ; meta.json classification",
+      "if_yes": "reclasser en minor-restructuring",
+      "if_no": "garder directly-expressible"
+    }
+  ],
+  "evidence": "rdfeval check: OK. Mutants sur la copie: remplacer `(i, p, o)` par `(None, p, o)` et `(i, owl:annotatedSource, source)` par `(None, ...)` restent OK (sujet ignoré par demo). Les gardes Python `not isinstance(source|property|target|p, BNode)` retirées restent OK aussi (aucun cas du fixture n'a d'objet BNode pour annotatedSource/Property/Target; code identique des deux côtés, donc sans incidence sur la traduction). Tous les mutants sur les îlots sont tués (source=None, prédicat échangé dans les 3 lectures .first(), set() ou prédicat échangé dans les lectures complètes, boucle m{ {i} ?p ?o } vidée, exclude altéré, isinstance(i,BNode) retiré). Fixture étendu (annotatedSource/Target multi-valués, objet BNode, 3 bnodes) : toujours OK, l'ordre de .first() coïncide avec celui de next(g.objects) sur ce magasin. Le cas zéro-solution de .first() par bnode est inatteignable (intersection), confirmé par lecture. Seul changement de texte hors îlots: le commentaire « generators » -> « matches », et `OWL` retiré de l'import, sans effet.",
+  "triaged_by": "sonnet-5.5"
+}

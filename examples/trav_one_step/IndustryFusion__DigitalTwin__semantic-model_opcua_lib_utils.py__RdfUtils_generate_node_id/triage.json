@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "`{rootentity}`/`{node}` valant None : le dépôt les atteint (owl2instances.py:831-840 passe None quand aucune instance du type racine) où graph.objects(None, p) est un joker, mais la traduction cherche Literal('None') ; et 3 des 6 îlots résistent à un prédicat joker.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine appelle-t-il generate_node_id avec rootentity=None et node=None (rootentities=[next(g.subjects(RDF.type, …), None)] puis scan_entity(None, …)), cas où `graph.objects(None, p)` est un joker mais `m{ {None} p ?v }` ne matche rien ?",
+      "where": "corpus/repos/IndustryFusion__DigitalTwin/semantic-model/opcua/owl2instances.py:831-840 et 455 ; original.py:8-13 ; translated.ldpy:9-26",
+      "if_yes": "needs-work ou limite à documenter : garder graph.objects pour ces six sites (ou garde explicite), la classification n'est plus directly-expressible",
+      "if_no": "approuver pour ce point en notant l'écart de langage ({None} → Literal('None'))"
+    },
+    {
+      "question": "Faut-il ajouter au fixture un ex:ns1 portant un second prédicat et ex:root1 un second prédicat (voisinage de même sujet, autre prédicat) ainsi qu'un prédicat à deux valeurs (cardinalité et ordre du premier) avant d'approuver ?",
+      "where": "fixture.ttl:10-59, driver.py:48-65 ; translated.ldpy:15, 18, 21, 24",
+      "if_yes": "needs-work : compléter le fixture (3 îlots sur 6 survivent à un prédicat joker)",
+      "if_no": "approuver en acceptant que les prédicats de rootns/rootnsuri/nsuri (hasNamespace de rootentity, hasUri ×2) ne soient pas prouvés"
+    }
+  ],
+  "evidence": "check : OK. Région et shim (nodeId_to_iri, idtype2String, is_iri) identiques au dépôt (diff). Exécuté des deux côtés avec fixture.ttl : generate_node_id(self, g, None, None, 'x') → original URIRef('ns://examplexnodei12345') (jokers) contre traduction URIRef('unknownxnodexunknown') ; (root=None, node1) → …nodei12345 contre …nodei12345 sans préfixe ; (root1, node=None) → …testID:nodei12345 contre unknownnodexunknown. Le dépôt atteint le cas : owl2instances.py:831-834 met rootentities=[None] si aucune instance du type racine, puis :838-840 get_type(g, None) (qui avale ses exceptions) et scan_entity(None, …) qui appelle generate_node_id(g, rootentity, None, id) (l.455) — ce qui se passe en aval n'a pas été évalué. Mutants (jokers corrigés pour une seule variable projetée) : sujet joker `?x` ou prédicat `?p` sur node_id, idtype, ns, rootnsuri, nsuri, rootns(sujet) : tous tués ; VERTS : prédicat joker sur rootentity/hasNamespace (j6), sur rootns/hasUri (j8), sur ns/hasUri (j12) parce que ces sujets ne portent qu'un prédicat dans le fixture. Valeurs par défaut 'unknown' remplacées par 'other' pour idtype/ns/rootns : verts mais équivalents (même résultat en aval) ; pour rootnsuri : tué. Aucun prédicat à plusieurs valeurs dans le fixture ; je l'ai testé hors pilote (3 hasNodeId) : même résultat, m{} suit graph.triples dans l'ordre (runtime.py Match.solutions). Article : non — le gain est négatif (6 lignes → 18, `.first()` n'accepte pas de défaut donc `next(it, 'unknown')` devient 3 lignes) et l'équivalence échoue sur None.",
+  "triaged_by": "sonnet-5.5"
+}

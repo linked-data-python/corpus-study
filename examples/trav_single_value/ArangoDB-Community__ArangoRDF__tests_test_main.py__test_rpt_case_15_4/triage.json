@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction correcte (identique à g.value sur le vrai 15_4.trig, ConjunctiveGraph et Dataset), mais aucun appel du pilote n'a plusieurs solutions et la note « le voisinage n'est pas décoratif » ne tient que par un accident de projection.",
+  "questions": [
+    {
+      "question": "Le fixture doit-il avoir deux sujets pour un même (prédicat, objet) et le sujet ex:weight placé AVANT le sujet attendu, pour que « première valeur » et sélectivité du prédicat soient réellement exercés ?",
+      "where": "fixture.ttl:34-39 et driver.py:55-60 ; translated.ldpy:15",
+      "if_yes": "needs-work léger : ajouter ces lignes au fixture (traduction inchangée).",
+      "if_no": "approuver : le dépôt ne rencontre que des (prédicat, objet) uniques dans 15_4.trig."
+    }
+  ],
+  "evidence": "rdfeval check OK. Sur le vrai corpus/repos/.../cases/15_4.trig, lu en ConjunctiveGraph et en Dataset, les 4 appels du test (0.5, 0.75, 1, foo/bar) donnent le même résultat que g.value(predicate=, object=) (Dataset non-union : None des deux côtés pour 0.5, 0.75, bar). Avec deux sujets partageant (certainty, 0.5) dans une copie : g.value et m{}.first() rendent le même premier sujet dans Graph, ConjunctiveGraph, Dataset. Mutants : None / ?s {c} ?o / sujet-prédicat inversés / .one() (échec au cas 0.42) : FAIL. ?s ?p {v} : FAIL mais seulement par erreur de comparaison Row (2 variables projetées), pas par le voisinage ex:weight ; la même requête réduite à [0] reste OK (ex:weight vient après le bon sujet dans le fichier). (list(m{...}) or [None])[-1] au lieu de .first() : OK tant que chaque clé est unique (FAIL dès qu'on ajoute un doublon). Peut illustrer le cas miroir (sujet inconnu, prédicat + objet donnés) mais sans gain de concision : 1 ligne rdflib devient @graph + 1 ligne. meta.oracle dit isomorphism pour une région qui lit (valeurs en réalité).",
+  "triaged_by": "sonnet-5.5"
+}

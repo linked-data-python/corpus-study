@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (pilote custom:query-fixture, pas run_pair). Expérience dans un mktemp -d : translated.ldpy + `graph = Graph().parse('fixture.ttl'); for row in graph.query(q): …` (l'instruction qui suit la région dans le dépôt, example_rdf_query.py:25-26) -> `AttributeError: 'PreparedQuery' object has no attribute 'algebra'` (type(q) = ldpy.runtime.PreparedQuery). Le fixture, lui, est bon (deux solutions, un voisin qui ne doit pas matcher, un document sans solution). Le BGP ne peut pas passer en m{ } (pas de graphe au point de définition, q est réutilisée comme valeur), donc s{ } est juste. Note mineure : le commentaire du shim dit que ODML_NS est « as defined in odml.tools.rdf_converter » avec la valeur https://g-node.org/projects/odml-rdf#, mais la copie G-Node__python-odml du corpus définit Format._ns = https://g-node.org/odml-rdf# (rdf_converter.py:32, format.py:22) ; sans effet sur l'équivalence (même constante des deux côtés), le fichier d'origine utilise la valeur « projects » dans ses commentaires et qonsole.js.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Driver now runs the repository's consumer (graph.query(q) / q(g), reading row.d and row.s) and asserts that graph.query(q) fails on s{ }; classification changed to minor-restructuring; fixture strengthened with three non-matching neighbours."
 }

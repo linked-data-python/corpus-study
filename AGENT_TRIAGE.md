@@ -89,6 +89,10 @@ l'expérience a montré. Supprimez vos copies à la fin.
   `shim-invents-logic` ou `optimization-asymmetry` que vous avez vérifié ou
   que vous pouvez montrer par une ligne précise ; ou un `check` en échec.
   Ce sont les paires qui peuvent fausser un chiffre.
+  Pour `weak-oracle`, `high` exige qu'un mutant qui **supprime un îlot ou
+  élargit un terme lié** reste vert. Si seuls des mutants de cardinalité
+  survivent (`.first()` → `.one()`, `[:1]`) et que vous avez établi
+  l'équivalence par des cas à la main, c'est `medium`.
 - **`medium`** : `wrong-construction`, `classification-doubt`,
   `optimization-doctrine`, ou un drapeau `high` resté plausible sans
   preuve.

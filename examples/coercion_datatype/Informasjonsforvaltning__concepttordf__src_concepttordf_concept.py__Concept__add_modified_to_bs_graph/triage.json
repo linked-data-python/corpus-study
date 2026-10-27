@@ -14,5 +14,6 @@
     }
   ],
   "evidence": "rdfeval check : OK sur l'original. Copie avec un appel supplémentaire `('2020-03-04',)` au pilote : FAIL `call[2].result: graphs not isomorphic (1 vs 1 triples)`. Cause : Literal('2020-03-04', datatype=XSD.date) a le datatype xsd:date, alors que `{str}` en position de terme donne Literal('2020-03-04') sans datatype. Les tests du dépôt font json.load puis `definition.modified = _concept[...]['modified']` (str) ; l'annotation `-> date` de betydningsbeskrivelse.py:99 n'est qu'un indice de type, non appliqué. Correctif essayé dans la copie : `f\"{betydningsbeskrivelse.modified}\"^^xsd:date` (le f devant les guillemets est nécessaire : sans lui la chaîne n'est pas interpolée) : OK pour date et pour str (seul écart observé : un datetime, str(datetime) a une espace au lieu du T, hors usage). Article : pas en l'état (traduction fausse pour l'usage réel) ; une fois corrigée, bon exemple du piège `Literal(n, datatype=…)` != interpolation nue.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilot extended with the real input type (ISO str, plus ''): the str call failed on the old translation; translated.ldpy now uses f\"{...}\"^^xsd:date and check is OK for date, str, None and ''."
 }

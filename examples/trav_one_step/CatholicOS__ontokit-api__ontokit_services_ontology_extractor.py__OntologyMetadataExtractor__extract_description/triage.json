@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (région identique au dépôt, quirk conservé), mais le pilote n'exerce jamais la boucle globale au-delà du premier owl:Ontology : élargir ou tronquer l'îlot `m{ ?s rdf:type owl:Ontology }` reste vert.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il être renforcé pour que la boucle globale `m{ ?s rdf:type owl:Ontology }` voie un deuxième sujet (premier owl:Ontology dans l'ordre du store SANS description, et un sujet non-owl:Ontology portant dc:description AVANT lui), avant d'approuver ?",
+      "where": "fixture.ttl:11-43 et driver.py:59-80 ; translated.ldpy:36-41 et original.py:29-34",
+      "if_yes": "needs-work : réordonner fixture.ttl (ex:OntoEmpty puis ex:NotAnOntology avant ex:OntoDC) ou ajouter un fixture ; la traduction elle-même n'a pas à changer",
+      "if_no": "approuver en acceptant que l'îlot `?s rdf:type owl:Ontology` (et la priorité des propriétés dans la boucle globale) ne soit pas prouvé"
+    }
+  ],
+  "evidence": "check : OK. Région comparée au dépôt (ontology_extractor.py:386-415) : identique à l'indentation près. Sur le fixture tout appel hors OntoComment/OntoDCTERMS retourne 'DC wins.' parce que ex:OntoDC est le premier owl:Ontology du store, il a dc:description : la boucle globale s'arrête toujours à son premier sujet. Mutants sur translated.ldpy, VERTS : global `[s for s,c in m{ ?s rdf:type ?c }]` (sans filtre owl:Ontology, donc ex:NotAnOntology jamais atteint malgré le commentaire du fixture), sous-îlot global `{ont_subject}`→`?x` joker, `list(m{…})[:1]` sur les ontologies (un seul sujet examiné), idem sur les objets, `desc_properties[:2]` dans la boucle globale. Mutants tués : boucle 1→[], joker sur sujet de la boucle 1, boucle globale→[]/→`[]`, ordre des propriétés. Pas d'objet à valeur vide dans le fixture (la garde `if value:` n'est pas exercée), ni de prédicat à deux valeurs. Ordre : m{} = graph.triples imbriqué (runtime.py:Match.solutions), même ordre que graph.objects/subjects. Article : propre mais gain modeste (deux m{} dans 2 boucles imbriquées) ; non tant que l'oracle est faible.",
+  "triaged_by": "sonnet-5.5"
+}

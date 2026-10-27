@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check initial : OK. Sonde (copie) : BNode comme sujet, overwrite et non-overwrite, graphes voisins : équivalent des deux côtés (le BNode n'est pas pris pour une variable). Sujet str : original AssertionError, traduction écrit Literal('plain-str') comme sujet. Sujet None, graphe {S->P, T->Q} : original `AssertionError: Subject None must be an rdflib term` et graphe VIDE ensuite (remove((None,p,None)) a tout effacé) ; traduction : aucune exception, graphe {S|P, T|Q, 'None'|Class}. Sites d'appel du dépôt : main.py:3641/3646/3654-3665 (reified_o), 3735-3736, 3820-3821 : valeurs de `self.__rdf_graph.value(s, RDF.object)`, None possible. adb_col est toujours str (rdf_id_to_adb_label, str(doc[..])) : `{adb_col}` == Literal(adb_col). Mutants : `bool(m{ {subject} ?p ?o })` -> VERT (non détecté) ; `-{ ?s … }` et `-{ {subject} ?p ?o }` -> détectés ; `@graph self.__adb_col_statements` OK. Article : OUI sous condition. C'est le plus net avant/après du lot (3 lignes de graphe + @graph), mais seulement après ajout du cas None et mention de l'écart ; sinon l'article affirmerait une équivalence qui ne tient pas sur le dépôt réel.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (8 appels, 8 mutants tués, dont les existences élargies que le pilote laissait vertes) ; traduction juste ; subject=None (original : efface tout puis AssertionError) laissé en remaining."
 }

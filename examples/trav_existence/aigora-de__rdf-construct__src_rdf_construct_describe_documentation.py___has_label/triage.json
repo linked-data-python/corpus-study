@@ -14,5 +14,6 @@
     }
   ],
   "evidence": "rdfeval check OK sur la paire telle quelle. Dans une copie : fixture + `ex:emptyLabel rdfs:label \"\"` et `ex:zeroLabel skos:prefLabel 0`, deux appels ajoutés au pilote -> FAIL `call[5].result: values differ (False vs True); call[6].result: values differ (False vs True)` (original False, traduction True). Avec `any(m{ {subject} {pred} ?o })` à la place de `bool(m{ ... })` la copie repasse OK sur ce fixture élargi. Le call site (documentation.py:48/54) compte les classes/propriétés avec label : l'écart fausse ce comptage. Les entrées sont des URIRef (pas de piège de type). Rien d'autre : `{subject}` et `{pred}` sont des termes, constructions justes.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Garde corrigée en `any(m{ ... })` (véracité des objets comme rdflib) ; pilote : 12 appels ajoutés (labels \"\", 0, false, \"\"@en, prefLabel, dc:title, voisinage) ; 7 mutants tués."
 }

@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler ; pilote solide, et .first() / bool(m{ }) côte à côte sur le même graphe, dans la même fonction.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ? (`has_instance = ti_g.value(...) is not None` -> `bool(m{ {reg} solid:instance ?o })` à côté de `ctr_node = ... .first()`)",
+      "where": "translated.ldpy:37-38 et original.py:35-36",
+      "if_yes": "candidate : extraire ces deux lignes",
+      "if_no": "approuver sans article"
+    }
+  ],
+  "evidence": "rdfeval check: OK. 9 mutants sur la copie, tous FAIL : forClass -> None / mauvais prédicat / sujet élargi (?r), instanceContainer sujet élargi, has_instance = True / sujet élargi / mauvais prédicat, motif de boucle élargi (?t) ou vidé. Fixtures étendus (copie) : registrations à sujet BNode (l'interpolation {reg} d'un BNode matche), forClass et instanceContainer littéraux vides \"\", multi-valués (littéraux langués + IRI, 3 conteneurs, 2 solid:instance), solid:instance \"\" seul : tous OK (les gardes sont `is None`, pas de véracité). Une erreur de répr de BNode dans un message (forClass BNode) fait diverger les deux parses mais c'est un artefact du harnais, pas de la traduction. Shim finding/rewrite identiques au dépôt; original.py identique aux lignes 337-409 hors indentation de la fonction enveloppe.",
+  "triaged_by": "sonnet-5.5"
+}

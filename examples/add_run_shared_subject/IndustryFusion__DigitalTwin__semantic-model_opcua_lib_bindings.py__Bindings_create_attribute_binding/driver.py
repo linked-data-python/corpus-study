@@ -16,10 +16,28 @@ itself to a deterministic, state-free stand-in sidesteps the ordering
 problem entirely: both calls mint the identical bindingiri regardless of
 when they run, and every other choice inside create_attribute_binding
 (which one) is untouched.
+
+The two calls above ("logic_transform absent" and "scale(2.0)") only
+prove `is not None` against None and a non-empty str. The repair pass adds
+the values the real caller can produce (extractIffBindings.py:269 passes
+`attribute[3]`, the `?logicExpression` of an OPTIONAL SPARQL pattern, so
+None or an rdflib Literal -- which may well be an empty or zero-valued
+Literal, hence falsy):
+
+  3. logic_transform = Literal("") (falsy, present): `bindsLogic ""` must be
+     written. A mutant `if logic_transform:` drops it.
+  4. logic_transform = Literal(0) (falsy, typed xsd:integer), with a BNode as
+     the parent entity (the entities graph may name entities by blank node):
+     same guard, and Literal(Literal(0)) keeps its datatype.
+  5. logic_transform = Literal("fr", lang="fr") and a typed xsd:decimal
+     Literal for version: the language tag / datatype of what is passed is
+     what lands in the graph (the region wraps it in Literal(...)).
+  6. logic_transform = "" (a plain empty str, the type the docstring
+     hints at).
 """
 import random as _random
 
-from rdflib import URIRef
+from rdflib import BNode, Literal, URIRef, XSD
 
 from rdfeval.harness import run_pair
 
@@ -49,6 +67,24 @@ VERDICT = run_pair(
         (
             (URIRef("http://example.org/parent2"), URIRef("http://example.org/attr2")),
             {"logic_transform": "scale(2.0)", "version": "0.2", "firmware": "fw-x"},
+        ),
+        # falsy but present logic expressions (see the docstring, 3 to 6)
+        (
+            (URIRef("http://example.org/parent3"), URIRef("http://example.org/attr3")),
+            {"logic_transform": Literal("")},
+        ),
+        (
+            (BNode("ent4"), URIRef("http://example.org/attr4")),
+            {"logic_transform": Literal(0)},
+        ),
+        (
+            (URIRef("http://example.org/parent5"), URIRef("http://example.org/attr5")),
+            {"logic_transform": Literal("bonjour", lang="fr"),
+             "version": Literal("1.5", datatype=XSD.decimal)},
+        ),
+        (
+            (URIRef("http://example.org/parent6"), URIRef("http://example.org/attr6")),
+            {"logic_transform": ""},
         ),
     ],
 )

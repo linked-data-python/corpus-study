@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote ne détecte ni la suppression des îlots curateur-de-relation et acteur-d-activité, ni leur prédicat échangé, ni leur sujet élargi : fixture sans cas fautif pour ces deux boucles (le rejet n'y est observable que par une erreur).",
+  "questions": [
+    {
+      "question": "Le fixture doit-il contenir une relation dont le curateur n'est pas un agent vérifié et une activité dont l'acteur n'est pas un agent vérifié, comme il le fait déjà pour agent3 ?",
+      "where": "fixture.ttl:28-33 (rel1 -> agent1 valide, act1 -> agent2 valide) et translated.ldpy:33-37, 39-43",
+      "if_yes": "needs-work : ajouter deux lignes au fixture (testé : eco:rel2 ... prov:wasAttributedTo eco:notAnAgent ; prov:used eco:agent1 . eco:act2 ... prov:wasAssociatedWith eco:notAnAgent ; prov:wasAttributedTo eco:agent1) ; les 5 mutants ci-dessous échouent alors. La traduction elle-même n'est pas en cause.",
+      "if_no": "approuver en acceptant que 2 des 5 îlots crédités soient non prouvés par le pilote."
+    }
+  ],
+  "evidence": "rdfeval check OK. Région identique aux lignes 827-885 du dépôt (diff vide) ; shim require() identique à la ligne 416. Mutants dans une copie : agents/relationships/activities remplacés par set() et agents/relationships par ?s a [] : FAIL ; boucle curateur d'agent : [] / sujet libre / prov:used : FAIL. SURVIVANTS (check OK) : boucle curateur de relation -> [] ; idem prov:used ; boucle acteur d'activité -> [] ; sujet libre [] ; prédicat prov:wasAttributedTo ; activities = set(m{ ?s a [] }). La note du traducteur (« swap wasAttributedTo -> used a fait échouer ») n'est vraie que pour la boucle des agents. Avec les 2 lignes de fixture ci-dessus : les 5 premiers survivants deviennent FAIL ; activities élargi survit encore (il faudrait un sujet d'un autre type portant prov:wasAssociatedWith). Les 2 lectures laissées en rdflib (subjects(), all_nodes()) sont justifiées. 4 des 6 @prefix déclarés (rdfs, dcterms, owl, xsd) sont inutilisés. Ne peut pas illustrer l'article en l'état.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,15 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : deux g.value(s, p) -> m{ {s} p ?o }.first(), pilote solide (10 mutants tués, 1 équivalent), shim fidèle au dépôt.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ? (réserve : harnais unittest, trois lectures sur cinq restent le helper value() en rdflib pur, et les deux îlots sont plus longs que g.value ; seul intérêt : le nom pointé fhir:Account.servicePeriod devenu nom préfixé.)",
+      "where": "translated.ldpy:41 et :44, original.py:35 et :38",
+      "if_yes": "candidate à l'article, intérêt = nom pointé FHIR sans DottedNamespace",
+      "if_no": "approuver sans article"
+    }
+  ],
+  "evidence": "rdfeval check: OK. Mutants sur la copie, tous FAIL sauf l'équivalent: premier/second îlot -> None, prédicat échangé (end->start), sujet élargi en ?x (les deux îlots), {s}/{period} -> ?p ?o. .one() à la place de .first() reste OK, normal (fixture mono-valuée; g.value a any=True par défaut, donc pas d'UniquenessError, et .first() = premier comme lui). Pilote rejoué avec le vrai tests/data/account-example.ttl du clone: OK; avec un fixture sans Account.servicePeriod: OK (les deux côtés tombent sur le même assertIsNotNone). Shim: value() et DottedNamespace identiques au dépôt (annotations de type retirées seulement); original.py identique aux lignes 17-32 du dépôt aux deux renommages documentés (load->parse, nom du fixture). Pas d'enveloppe inutile, pas de {expr} douteux: s est une URIRef, period un BNode, et {period} BNode interpolé matche bien (testé par le pilote).",
+  "triaged_by": "sonnet-5.5"
+}

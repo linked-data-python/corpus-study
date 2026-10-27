@@ -24,7 +24,8 @@
     "self.graph est un ATTRIBUT, pas une variable simple : +{ }(self.graph) (suffixe d'appel, current-graph.md) plutot que `@graph self.graph` suivi d'un +{ } nu -- choisi parce qu'il n'y a qu'UN SEUL site d'ecriture dans toute la fonction (une declaration de contexte pour un usage unique aurait ete plus lourde que le suffixe) et parce que c'est exactement l'exemple documente pour un attribut/propriete self.graph. Verifie a la main que les deux formes transpilent et s'executent correctement meme quand `graph` est une @property en lecture seule sans setter -- ce que `self.graph += g{ }` ne pourrait pas faire (piege documente de current-graph.md), jamais tente ici.",
     "@prefix xsd: du brouillon RETIRE : aucun terme de vocabulaire prefixe n'apparait dans la region (les 3 predicats sont tous des lectures self.nodes[...]) -- declaration inutile, meme lecon que les deux autres regions de ce lot.",
     "shim de contexte (context_shim.py) : SparqlEngine reduite aux 3 constantes de classe PRED_FACT_H/PRED_FACT_R/PRED_FACT_T que la region lit comme NOM GLOBAL (`SparqlEngine.PRED_FACT_H`, pas `self.SparqlEngine...`) -- original.py corrige a l'identique (import ajoute) pour rester executable, translated.ldpy pareil.",
-    "contrairement a la region soeur ObjectMinCardinality_to_rdf de ce lot (ou `g` est un parametre externe et `self` peut etre partage tel quel entre les deux cotes), ici self.graph vit A L'INTERIEUR de self : chaque cas construit un `self` FRAIS par cote, et _Engine.__eq__ (driver.py) compare par isomorphisme de self.graph plutot que par identite."
+    "contrairement a la region soeur ObjectMinCardinality_to_rdf de ce lot (ou `g` est un parametre externe et `self` peut etre partage tel quel entre les deux cotes), ici self.graph vit A L'INTERIEUR de self : chaque cas construit un `self` FRAIS par cote, et _Engine.__eq__ (driver.py) compare par isomorphisme de self.graph plutot que par identite.",
+    "Repair 2026-10-27: pilot strengthened with the repository's real argument types (t a BNode from _get_value_node on a graph already holding (h,r,t); r built like URIRef(legal(p))) and the shim's PRED_FACT_* are now plain str as in the repository (they were URIRef); translation unchanged. Known and accepted divergence, unreachable from the repository: a non-term h or t (None, str, int) makes rdflib's graph.add raise AssertionError where `{t}` coerces it (Literal('None')...); at both call sites (sparql_engine.py:75, 94) the preceding `graph.add((h, r, t))` raises first, so the divergence cannot be observed."
   ],
   "draft_sha": "c050a0e18ed7a126",
   "provenance": {
@@ -43,5 +44,17 @@
     "method": "entry:_new_fact_node",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "calls 3 (t a BNode, graph pre-seeded with (h,r,t): the attribute-fact case of sparql_engine.py:75) and 4 (r = URIRef(legal(...)), pre-seeded graph); shim constants PRED_FACT_* made plain str with nodes mapping them to URIRef, as in SparqlEngine.__init__; docstring lists the real call shapes.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "predicate H replaced by R in the first pair",
+      "{r} replaced by {h}",
+      "{t} replaced by {h}",
+      "subject {node} replaced by {h}"
+    ],
+    "remaining": "Non-term inputs (t=None/str/int, h=None) raise AssertionError in the original and become literals in the translation: language gap (coercion of non-terms), unreachable from the repository, so left out of the pilot. Kept only as a recorded gap of the language, no translation change."
   }
 }

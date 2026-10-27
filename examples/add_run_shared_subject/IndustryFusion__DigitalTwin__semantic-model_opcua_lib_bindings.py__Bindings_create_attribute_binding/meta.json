@@ -47,5 +47,17 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "4 calls added, with the values the real caller can produce (extractIffBindings.py:269 passes attribute[3], the OPTIONAL ?logicExpression: None or an rdflib Literal): logic_transform = Literal(\"\") and Literal(0) (falsy but present), a BNode as parent entity, a language-tagged logic_transform with an xsd:decimal Literal version, and a plain \"\" str. Docstring explains each.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "translated.ldpy:38 `if logic_transform is not None:` -> `if logic_transform:` (killed by the Literal(\"\") call)",
+      "translated.ldpy:38 guard -> `if True:` (already killed by the no-logic call)",
+      "Literal(logic_transform) -> Literal(str(logic_transform)) (killed by the typed/lang calls)",
+      "Literal(version) altered (already killed)"
+    ],
+    "remaining": "None. The out-of-contract inputs the triage raised (parent_node_id/attribute_iri valued None or a str: `{x}` writes Literal('None') / a literal where rdflib's add() raises) are not reachable from the repo: the two real callers pass URIRef/BNode (extractIffBindings.py:269 entity_id from entities_graph.subjects and attribute[1] = BIND(IRI(...)); lib/bindings.py:45 forwards its own parameters), so they are the known `{expr}`-is-None language gap and stay out of the pilot. article_candidate remains Maxime's call (triage: the island gains nothing in readability, every predicate stays an interpolation)."
   }
 }

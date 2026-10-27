@@ -13,7 +13,7 @@
     "sparql": 1
   },
   "translation_status": "final",
-  "classification": "directly-expressible",
+  "classification": "minor-restructuring",
   "constructions": [
     "@prefix",
     "f<…>",
@@ -22,7 +22,8 @@
   "translation_notes": [
     "initNs={'odml': ..., 'rdf': RDF, 'rdfs': RDFS} becomes three @prefix declarations, none of them interpolated in the query body: the site is pure prefix binding, no initBindings term. This is the 'prologue herite des @prefix' half of the bind_initbindings row, not the term-interpolation half.",
     "ODML_NS is a plain string built at run time in the source repo (imported from odml.tools.rdf_converter), so the odml: prefix uses a formatted IRI (f<{ODML_NS}>) rather than a literal <...> -- declarations.md documents this exact case (a computed prefix IRI).",
-    "The region only prepares the query (prepareQuery / s{ }); it is never iterated where it is written. The driver therefore runs q against a fixture graph via the call suffix (q(g) for the ldpy PreparedQuery, graph.query(q) for rdflib) to compare something observable -- constructing a query has no other externally visible effect."
+    "The region only prepares the query (prepareQuery / s{ }); it is never iterated where it is written. The driver therefore runs q against a fixture graph via the call suffix (q(g) for the ldpy PreparedQuery, graph.query(q) for rdflib) to compare something observable -- constructing a query has no other externally visible effect.",
+    "RECLASSIFIED (repair 2026-10-27) directly-expressible -> minor-restructuring. The repository uses `q` on the very next line as `for row in graph.query(q): print(row.d, row.s)`. The value of s{ } is an ldpy PreparedQuery, not an rdflib Query: `graph.query(q)` raises `AttributeError: 'PreparedQuery' object has no attribute 'algebra'` (the old driver hid this by calling g.query(q) on one side and q(g) on the other). The language cannot reproduce the repository's interface: every consumer must be rewritten to `for row in q(graph)` (same ResultRow, row.d/row.s unchanged). Keeping `prepareQuery(...)` would be plain rdflib, not a construction. The driver now exercises the repository's real consumer on both sides (rdflib: graph.query(q); ldpy: q(g)), compares (row.d, row.s) and the projected variables, and asserts the interface gap as a probe (verdict key interface_gap). Also: the site uses initNs only (-> @prefix), no initBindings, so it does not exercise the term-interpolation half of the bind_initbindings stratum. Fixture extended with three neighbours that must not match (non-Document parent, child not typed Section, case-different hasType)."
   ],
   "draft_sha": "f7f3a2118f1d7db1",
   "provenance": {
@@ -41,5 +42,18 @@
     "method": "custom:query-fixture",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "consumer of the repository (`for row in graph.query(q)` reading row.d, row.s) instead of materialising whole results; projected variables compared; probe asserting that graph.query(q_translated) raises AttributeError 'algebra'; fixture gains 3 non-matching neighbours (non-Document parent, child not typed Section, 'Setup/DAQ' case variant) and exactly 2 solutions are required.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "drop `?d rdf:type odml:Document`",
+      "drop `?s rdf:type odml:Section`",
+      "hasType literal changed",
+      "hasSection replaced by hasType",
+      "SELECT ?s instead of SELECT * (variables differ)"
+    ],
+    "remaining": "Maxime to judge: (1) classification minor-restructuring (interface change at every call site of q) vs awkward; (2) article_candidate is still true in meta.json but the pair no longer reads as 'same program, other notation' -- recommend false. (3) shim.py ODML_NS 'https://g-node.org/projects/odml-rdf#' differs from the G-Node__python-odml clone (Format._ns = 'https://g-node.org/odml-rdf#'); no effect on equivalence, not touched (shim is not a real-input-type fix)."
   }
 }

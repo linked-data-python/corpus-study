@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "`rdfeval check` : OK. Mutant dans une copie, ligne 38 `if logic_transform is not None:` -> `if logic_transform:` : check reste OK (le pilote n'a que logic_transform absent et \"scale(2.0)\"). Autre mutant (bindsFirmware -> bindsEntity, ligne 35) : FAIL, donc le reste est bien discriminé. Comparaison directe des deux versions : logic_transform=\"\", Literal(3), URIRef, version=None, firmware=3, attribute_iri=Literal : identiques. Divergences : parent_node_id=None -> original AssertionError('Object None must be an rdflib term'), traduction écrit `bindsEntity \"None\"` (6 triplets) ; parent_node_id=\"http://e/p\" (str) -> original AssertionError, traduction écrit un littéral ; attribute_iri=None -> original AssertionError, traduction écrit `\"None\" boundBy binding` (sujet littéral). Shim : Bindings.__init__ et NGSILD identiques au dépôt (lib/bindings.py:26-31 ; lib/utils.py:85). Les randoms sont neutralisés par un patch de random.choices dans driver.py, hors région : acceptable. Note : l'îlot de 5 lignes ne gagne rien en lisibilité, tous les prédicats restent `{self.basens['…']}` ; article-example non retenu.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (4 appels : logic_transform Literal(\"\"), Literal(0), \"\", Literal avec langue/datatype, BNode en parent) : le mutant `if logic_transform:` échoue désormais ; traduction inchangée et juste ; None/str en entrée inatteignables par les appelants réels (URIRef/BNode)."
 }

@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Expérience dans une copie (original.py et translated.ldpy appelés directement sur un _Engine frais) : t=None -> original AssertionError « Object None must be an rdflib term » après 2 triplets déjà écrits, traduction 3 triplets dont (node, pred_t, Literal('None')) ; t='plain' -> AssertionError vs Literal('plain') ; t=3 -> AssertionError vs Literal(3, xsd:integer) ; h=None -> AssertionError (0 triplet) vs Literal('None') ; clé manquante dans self.nodes -> KeyError après 1 triplet écrit (original) contre 0 (traduction). Sans écart : h/t BNode, h/t Literal, h=r=t, t Literal typé. Mutants du pilote (R<->T échangés, {t}->{h}, {t}->{None}) -> FAIL, et un 3e appel BNode ajouté au pilote -> OK : l'oracle est sensible, il manque seulement les non-termes. Dépôt : les nodes sont des URIRef(legal(p)), self.graph = rdflib.Graph() (sparql_engine.py:56-62). Le shim remplace PRED_FACT_* ('pred:fact_h' str dans le dépôt) par des URIRef http://example.org/... : sans effet sur la comparaison, les deux côtés voient la même valeur. Note du traducteur « une seule région-site » exacte.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilot given the real call shapes (BNode tail, pre-seeded graph, URIRef(legal(p)) predicate, str constants in the shim); the non-term divergence is recorded in repair.remaining as unreachable from the repository."
 }

@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "weak-oracle"
+  ],
+  "summary": "Équivalence solide (vérifiée aussi sur le vrai abox du dépôt : 129 instances, bad=[] des deux côtés) ; deux réserves mineures : enveloppe inutile sem:{f\"Kind{k}\"} (sem:Kind{k} passe) et cas « plusieurs instanceKindNote » absent du fixture.",
+  "questions": [
+    {
+      "question": "sem:{f\"Kind{k}\"} est-il une enveloppe inutile alors que sem:Kind{k} donne le même ensemble (vérifié) ?",
+      "where": "translated.ldpy:36 et original.py:SEM[f\"Kind{k}\"]",
+      "if_yes": "wrong-construction : remplacer par sem:Kind{k} (check reste OK) ; la forme à partie locale mixte n'est pas dans terms.md, à vérifier qu'elle est voulue.",
+      "if_no": "approuver : la forme documentée sem:{expr} est préférée à la forme mixte non documentée."
+    },
+    {
+      "question": "Le fixture doit-il avoir une instance avec deux sem:instanceKindNote, puisque list(m{ {i} sem:instanceKindNote ?n })[:1] passe aujourd'hui ?",
+      "where": "fixture.ttl (inst1..inst4) et translated.ldpy:41",
+      "if_yes": "needs-work léger : ajouter l'instance au fixture (traduction inchangée, équivalence déjà vérifiée par mon cas à la main).",
+      "if_no": "approuver."
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state). Shim semtech_context.py : 14 clés égales à KIND_DEFNS du dépôt (liste vs dict, itération identique). Région = lignes du dépôt ; ab dans le dépôt est le TTL semtech_abox_v4_1_0.ttl, qui existe : en le substituant au fixture dans une copie, check OK, 129 instances, bad=[]. Mutants tués : suppression de chacun des 3 îlots, sujet libre, prédicat joker/échangé, ?s a... élargi (inst4 fuit), sem:{k}, 'if True', len(ks)<1. SURVIVANTS : notes = list(m{...})[:1] et list(set(...)) (OK) ; len(notes) != 1 -> < 1 (OK, branche Python jamais exercée). Cas à la main (mêmes résultats des deux côtés) : sujet BNode, objet BNode du joker [], deux notes, plusieurs hasSourceProvenance (set), graphe vide, note typée/langue, type Literal. Le joker [] en position objet remplace bien None. sem:Kind{k} testé : check OK. Peut illustrer l'article APRÈS correction de l'enveloppe : 3 lectures d'un pas propres, joker [] contre None, vérifié sur données réelles ; pas de gain de concision.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "Le shim retire __eq__/__hash__ de DottedURIRef (dépôt : dottednamespace.py) : original.py ne parcourt jamais la boucle et renvoie [] aux 3 appels, donc le vert est creux ; de plus g.value(any=False) (lève si >1) devient .first() (ne lève pas).",
+  "questions": [
+    {
+      "question": "Le shim fhirgraphutils_context.py, qui se dit « unmodified » pour DottedNamespace/DottedURIRef, doit-il être corrigé pour reprendre les __eq__ et __hash__ que définit le dépôt d'origine (et qu'il a omis) ?",
+      "where": "fhirgraphutils_context.py:18-35 et corpus/repos/BD2KOnFHIR__fhirtordf/fhirtordf/rdfsupport/dottednamespace.py:17-44",
+      "if_yes": "needs-work : restaurer __eq__/__hash__ (et __getattribute__ 'index') dans le shim, corriger la note « unmodified », rejouer check. Avec ce correctif (testé dans une copie) la paire reste verte, original.py rend 2 CodeableConcept et 9 mutants sur 9 sont tués.",
+      "if_no": "Le shim est jugé fidèle : alors le pilote ne prouve rien (cf. question suivante) et la paire est à refaire autrement."
+    },
+    {
+      "question": "Acceptez-vous comme preuve d'équivalence un pilote dont les 3 appels renvoient [] des deux côtés (original.py n'entre jamais dans `for codeable_concept in …`, ni dans value(), ni dans le g.value(RDF.type)) ?",
+      "where": "driver.py:44-51, original.py:36-40, translated.ldpy:40-44",
+      "if_yes": "approuver en l'état (déconseillé : un mutant « boucle remplacée par [] », « sujet joker », « prédicat joker » passe vert, 8 mutants sur 8 vérifiés)",
+      "if_no": "needs-work : rejouer après correction du shim ; le fixture existant suffit alors (2 solutions, voisins patient2/otherStatus, zéro solution)"
+    },
+    {
+      "question": "Acceptez-vous que `g.value(subject, predicate, any=False)` (UniquenessError si plusieurs valeurs) et `g.value(cc, RDF.type, any=False)` deviennent `m{ … }.first()` (premier sans lever), alors que le dépôt n'écarte pas ce cas pour le type d'un Coding ?",
+      "where": "original.py:34 et 40 ; translated.ldpy:38 et 44",
+      "if_yes": "approuver en documentant l'écart comme limite connue du langage (.one() n'est pas un substitut : il lève aussi à zéro, là où g.value rend None)",
+      "if_no": "classification-doubt : la paire n'est pas directly-expressible ; garder g.value(any=False) pour ces deux sites, ou la déclarer awkward/needs-work"
+    }
+  ],
+  "evidence": "check : OK (mais voir ci-dessous). Exécuté original.codeable_concept_code sur fixture.ttl avec le shim livré : [] ; g.triples((None, FHIR.CodeableConcept.coding, None)) = [] car DottedURIRef != URIRef (le shim n'a ni __eq__ ni __hash__). Mutants sur translated.ldpy avec le shim LIVRÉ : boucle→[], {coded_entry}→?s, prédicat→?p, sujet de {subject}→?s, rdf:type→?p/?s, tous VERTS (m1-m8). Copie avec le shim corrigé (__eq__/__hash__ du dépôt) : original rend [(http://snomed.info/sct, 36629006, http://snomed.info/id/36629006), (…MaritalStatus, M, None)], la paire est verte, et les 9 mutants (boucle→[], joker sur sujet/prédicat de chaque îlot, premier .first()→None, second .first()→None) sont tous tués. Même copie avec un sujet portant deux ex:maritalStatus : original lève UniquenessError, la traduction rend [] sans lever (le pilote ne compare pas deux levées, et n'a pas d'appel de ce type). Région et shim par ailleurs identiques au dépôt (diff du texte de la région : identique). Article : meta.json porte article_candidate=true — à retirer tant que le shim n’est pas corrigé ; même corrigée, la paire mêle trav_one_step et deux g.value(any=False) non équivalents, donc pas un bon exemple.",
+  "triaged_by": "sonnet-5.5"
+}

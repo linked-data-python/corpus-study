@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (shim vérifié nœud par nœud contre le dépôt, mutants de suppression/élargissement tous tués), mais le pilote ne couvre ni zéro solution ni plusieurs valeurs sur les 6 lectures à valeur unique : tous les .first() peuvent devenir .one() sans que rien ne bouge.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au fixture une image à qui il manque des propriétés (ex. sans sdo:caption) et une image avec deux sdo:name, sachant que le fixture actuel ne les a pas et que le commentaire du fixture prétend couvrir le zéro solution « pour les deux motifs » ?",
+      "where": "fixture.ttl:1-9 (commentaire) et translated.ldpy:53-59 (6 lectures .first())",
+      "if_yes": "needs-work léger : ajouter ces deux sous-graphes au fixture (aucune retouche de la traduction) ; l'équivalence est par ailleurs établie par mes cas à la main.",
+      "if_no": "approuver : traduction correcte, la faiblesse n'affecte aucun chiffre."
+    }
+  ],
+  "evidence": "rdfeval check OK. Shim pylode_context.py comparé par AST à model.py + query/common.py du dépôt : 21 définitions identiques, seul Metadata absent (conforme à la note). Mutants dans une copie (mktemp) : image_ids=[] ; ?x au lieu de {iri} ; prédicat joker ; chacune des 6 lectures remplacée par None / sujet libre / prédicat échangé : tous FAIL. SURVIVANTS : les 6 .first() remplacés par .one() (OK : aucune image du fixture ne manque de propriété, aucune n'a deux valeurs) ; suppression du tri final (OK : ordre d'insertion = ordre trié) ; description=None (OK : le fixture n'a aucune description, get_descriptions rend toujours None). Cas à la main (original vs traduit, mêmes résultats) : images BNode, objet Literal de sdo:image, propriétés absentes, tri Literal vs None (exception des deux côtés), plusieurs sdo:name / sh:order, doublon d'url (set), '' et 0, Dataset (graphes nommés, default_union), ConjunctiveGraph. Seul écart : iri=None (original : joker, 1 résultat ; traduit : Literal('None'), 0) = écart connu du langage, NON atteignable : get_images n'a aucun appelant dans le dépôt (grep) et iri est annoté URIRef. Note du traducteur sur l'ordre positionnel d'ImageObject (order=caption) : exacte. Ne peut pas illustrer l'article : 6 appels courts g.value deviennent 6 îlots plus longs, 300 lignes de contexte, fonction morte dans le dépôt.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le fixture ne contient aucune propriété multi-valuée : échanger le sens de l'îlot (?x owl:inverseOf {prop}) reste vert ; aucun écart trouvé sur un fixture étendu.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au fixture une propriété à plusieurs owl:inverseOf (dont une est elle-même) et la mettre dans main_properties du pilote, pour que l'oracle distingue le sens de la lecture et le choix de la première valeur ?",
+      "where": "fixture.ttl:19-28 et driver.py:17-22 ; translated.ldpy:14",
+      "if_yes": "needs-work léger : ajouter ex:multiA owl:inverseOf ex:multiA, ex:z1 (testé: OK) ; la traduction elle-même n'est pas en cause",
+      "if_no": "approuver : un owl:inverseOf multi-valué est hors usage réel, et g.value (any=True) y est déjà dépendant de l'ordre du magasin"
+    }
+  ],
+  "evidence": "rdfeval check: OK. Mutants sur la copie: inv=None, sujet élargi (?x), prédicat remplacé par ?p, == inversé en != : tous FAIL ; .one() FAIL (zéro solution sur ex:noInverse, donc le cas zéro est bien exercé). Mutant `m{ ?x owl:inverseOf {prop} }.first()` : reste OK avec le fixture livré (paires inverses symétriques, ex:hasPart/ex:partOf). Avec un fixture étendu (copie : multiA/multiB/multiC multi-valués dont des auto-inverses, un objet littéral, un auto-inverse supplémentaire) la traduction reste OK, et ce mutant devient FAIL. g.value (any=True par défaut) ne lève donc pas ; sur ce magasin l'ordre de .first() coïncide avec celui de g.value. Shim _short/_label identique au dépôt; région identique aux lignes 1434-1451. Article : non (une ligne, mais @graph + @prefix ajoutent deux lignes et .first() n'est pas plus court que g.value ; meta.json article_candidate=true est excessif).",
+  "triaged_by": "sonnet-5.5"
+}

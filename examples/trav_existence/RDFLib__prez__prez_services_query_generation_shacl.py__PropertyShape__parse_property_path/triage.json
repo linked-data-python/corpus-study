@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Copie avec `ex:case8 ex:path ( \"\" ex:x )` : original -> ValueError « has multiple predicate-objects », traduction -> ValueError « Malformed RDF list structure at … » (exécutés à la main, le harnais plante au lieu de comparer deux levées, cf. défaut 5). Avec la garde `m{ {pp} rdf:first ?x }.first()` la copie redonne « multiple predicate-objects » comme l'original. Mutant : suppression de sh:oneOrMorePath et sh:zeroOrOnePath dans le dict de translated.ldpy -> check reste OK (branches non exercées). L'existence vrai/faux est bien couverte (cas1/7 vrai, cas3/4 faux). Autres écarts du diff : @graph self.graph sur un attribut, Collection() laissé en rdflib brut, shim en dataclasses (pydantic absent) = restauration de liaisons, pas de logique inventée. Non article : région longue, 8 îlots, rien en 3 lignes, shim de substitution des classes.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Garde corrigée en `.first()` (véracité de value(), listes de tête \"\" ou 0 : err7/err8) ; pilote : 6 cas valides, 9 cas qui lèvent comparés (type+message), 16 mutants tués."
 }
