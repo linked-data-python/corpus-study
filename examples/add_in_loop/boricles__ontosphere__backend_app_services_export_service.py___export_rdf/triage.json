@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Équivalence solidement établie (pilote riche, 19 mutants sur 21 tués, les 2 survivants sont du Python inchangé) ; mais `directly-expressible` est faux : les écritures sont hissées hors du if/elif (affectations de b['type'] puis un seul +{ }) et les gardes sont remplacées par l'omission de clé.",
+  "questions": [
+    {
+      "question": "Le passage de `g.add` dans chaque branche à `b['type'] = …` par branche puis un seul `+{ ?uri a ?type ; rdfs:label ?label ; rdfs:comment ?description }` (idem pour la branche else des arêtes) est-il une restructuration à compter comme `minor-restructuring` plutôt que `directly-expressible` ?",
+      "where": "translated.ldpy:42-59 et 94-100 contre original.py:38-50 et 81-88 ; meta.json:22",
+      "if_yes": "Reclasser en minor-restructuring (les écritures hissées sont faisables en Python pur avec une variable `type_` et une seule g.add ; seule l'omission de clé = garde est propre au langage).",
+      "if_no": "Approuver tel quel."
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo, 3 appels dont graphe vide). Mutants dans une copie, tous tués : garde label/description/edge.label retirée ou toujours vraie, défauts 'relatedTo'/edge_type, branche xsd, .upper(), hasKey, disjointWith, domain/range échangés, types de nœuds, onto_uri, @bindings as b sorti de la boucle (liaisons périmées, 30 vs 31 triples, pour nœuds et arêtes). Deux survivants : startswith('xsd') sans ':' (équivalent sur les données) et suppression de `and not endswith('/')` (ligne 22, Python inchangé, jamais exercé car l'appel au namespace en '/' a un graphe vide) -- ne touche pas la traduction. Élargissement du pilote : labels 'http://x.org/a', '_:b1', '42', description '2024-01-01', cible 'xsd:weird', 'xsd:' -> toujours OK (la coercition str->Literal tient, XSD[...] ne lève pas pour un nom inconnu). Shim : dataclasses et _resolve_uri conformes aux notes. Pas d'état global.",
+  "triaged_by": "sonnet-5.5"
+}

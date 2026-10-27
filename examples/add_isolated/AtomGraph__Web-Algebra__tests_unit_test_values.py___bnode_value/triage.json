@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction correcte et oracle suffisant, mais `{URIRef(EX_A)} {URIRef(EX_P)}` sont des enveloppes inutiles : `f<{EX_A}> f<{EX_P}>` donne le même résultat ; la requête f-string reste en Python (seconde strate sparql_interpolated non traduite).",
+  "questions": [
+    {
+      "question": "Faut-il écrire `+{ f<{EX_A}> f<{EX_P}> {BNode(\"b1\")} }` au lieu de `{URIRef(EX_A)} {URIRef(EX_P)}` (aucun @base en portée, EX_A et EX_P sont des str) ?",
+      "where": "translated.ldpy:11 et original.py:11",
+      "if_yes": "wrong-construction : remplacer ; équivalence vérifiée (le pilote reste vert avec f<>). La note du traducteur qui dit garder URIRef « comme l'original » n'est pas une raison. Le `{BNode(\"b1\")}` est à garder : `_:b1` n'est pas BNode(\"b1\").",
+      "if_no": "approuver tel quel."
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie mktemp -d, mutants : +{ } supprimé, prédicat élargi (EX_P+'x'), objet Literal('b1'), @graph Graph() : tous FAIL (values differ). `f<{EX_A}> f<{EX_P}>` à la place des URIRef : OK. `_:b1` à la place de BNode(\"b1\") : OK aussi, donc le pilote ne distingue pas les étiquettes de BNode (sans conséquence ici, le dépôt s'en sert seulement pour tester une levée, test_values.py:98-101). Fonction sans argument : un appel suffit, pas de branche. Région a deux strates (add_isolated, sparql_interpolated) : la requête `g.query(f\"SELECT ...\")` n'est pas traduite en s{ } ; à ne pas compter. Copie supprimée.",
+  "triaged_by": "sonnet-5.5"
+}

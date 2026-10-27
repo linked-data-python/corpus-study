@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Équivalence solide, mais la région n'emploie aucune boucle : la boucle d'origine (8 couples fixes sur un même sujet) est supprimée au profit d'un seul +{ } à `;`, donc la strate add_in_loop ne mesure ici rien sur `for @bindings`.",
+  "questions": [
+    {
+      "question": "Cette région, traduite sans `for @bindings` (boucle supprimée, un seul +{ w20 … ; … }), doit-elle rester comptée dans la strate add_in_loop (et classée minor-restructuring) plutôt que traitée comme un cas add_run_shared_subject hors strate ?",
+      "where": "translated.ldpy:25-32 et original.py:16-23",
+      "if_yes": "Approuver ; noter dans l'article que cette région d'add_in_loop ne sollicite pas la construction de boucle, le gain vient de `;` et des littéraux @en.",
+      "if_no": "Retirer la région des chiffres de add_in_loop (ou la reclasser), sans changer la traduction."
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Shim vérifié contre le dépôt : S(*byid['T1C3']['refs']) + ' | ' + S('NR-PYODIDE') calculé sur le vrai REG (fusion des 8 registres) est égal à celui du shim ; T.BASE et SP identiques ; corps de la région (lignes 90-97 du dépôt) identique à original.py. Mutants dans une copie : skos:note sans @en, scopeNote->note, NamedIndividual->Class, dcterms:source tronquée -> tous échouent (9 vs 9 triples). L'ABox placeholder (1 triple) n'est jamais lu par la région. Pas d'état global partagé.",
+  "triaged_by": "sonnet-5.5"
+}

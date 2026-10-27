@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Le pilote laisse passer trois mutants (garde `parent in ontology.nodes`, défaut `XSD.string` de xsd_for.get, garde `ontology.description`), et 7 enveloppes `{Literal(x)}` sont inutiles (`{x}` donne le même graphe).",
+  "questions": [
+    {
+      "question": "Faut-il exiger de l'ontologie du pilote un parent `broader` absent de `ontology.nodes`, un property_type hors de xsd_for (le dépôt réel a DATE, POINT, LIST ; le shim ne les a pas) ou FLOAT/BOOLEAN, et une ontologie sans description, avant d'approuver ?",
+      "where": "driver.py:_make_ontology ; translated.ldpy:46-49 (description), 78 (`if parent in ontology.nodes`), 83 (xsd_for.get(p.property_type, XSD.string)) ; shim.py:PropertyType",
+      "if_yes": "needs-work : ajouter ces cas à l'ontologie (et DATE/POINT/LIST au shim, qui omet des membres du vrai PropertyType) ; les trois mutants vivants doivent passer au rouge.",
+      "if_no": "accepter un oracle qui ne prouve que les branches nominales ; la région reste comptée avec cette réserve."
+    },
+    {
+      "question": "Les 7 `{Literal(x)}` dans les îlots (lignes 49, 69, 72, 74, 87, 93, 99) doivent-ils être remplacés par `{x}` (coercition du langage) ?",
+      "where": "translated.ldpy:49,69,72,74,87,93,99 et original.py:36,55,59,61,70,76,85 (les Literal(...) d'origine)",
+      "if_yes": "wrong-construction : l'enveloppe n'apporte rien (équivalence vérifiée : mutants `{label}`, `{alias}`, `{node.description}` verts ; test direct sur str, int, bool, float, '' : mêmes littéraux). Les `{URIRef(ns + _safe_local(..))}` lignes 95 et 97 ne sont pas dans ce cas (une str nue deviendrait un Literal).",
+      "if_no": "garder l'enveloppe par fidélité au code d'origine et ne pas la compter comme un défaut."
+    }
+  ],
+  "evidence": "rdfeval check OK ; le texte Turtle sérialisé est identique octet pour octet entre original et traduction (les @prefix du module ne fuient pas dans g.bind). Mutants sur une copie (mktemp -d) de translated.ldpy : garde Any de source/target, gardes description (node, propriété, relation), same_as des nœuds et des relations, mapping DATETIME, alias de relation, domain/range échangés : FAIL. Restent VERTS : (1) `if parent in ontology.nodes` -> `if True` ; (2) `xsd_for.get(p.property_type, XSD.integer)` en défaut ; (3) `if ontology.description` -> `if True` ; aussi FLOAT->xsd:double et BOOLEAN->xsd:string (types absents de l'ontologie du pilote). Ni `for @bindings` ni variable `?x` n'est utilisé : la strate add_in_loop est créditée avec de simples boucles Python + `+{ }` (justifiable, boucles non row-shaped, mais la note ne le dit pas). Shim : _safe_local conforme au dépôt (src/seocho/ontology/serialization.py:212-226) ; PropertyType du shim = 5 membres sur 8. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : 8 triples, shim vérifié contre le dépôt, tous les mutants testés échouent.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (module-state). NEW_RELATIONS du shim identique à celle du dépôt (diff vide) ; les 15 couples id/label de `nodes` identiques à taxonomy_v1_0_0.TAX (59 entrées comparées) ; cls_iri identique. Mutants dans une copie : prédicat constant (sem:informs), dernière relation retirée ([:-1]), objet ?s au lieu de ?d, +{ } remplacé par pass -> les quatre font échouer le pilote (9 vs 9, 9 vs 8, 9 vs 9, 9 vs 1 triples). Pas d'état global partagé (load() recrée un module à chaque appel, g2 reparsé). Gain négatif (3 lignes + reformage en dicts contre 2 lignes) : pas un exemple d'article ; classification minor-restructuring correcte.",
+  "triaged_by": "sonnet-5.5"
+}

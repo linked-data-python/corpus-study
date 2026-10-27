@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Divergence reproduite : un objet imbriqué à une seule propriété (ni @id, ni @value, ni @list) fait lever AssertionError à l'original (g.add exige un Node) alors que la traduction écrit en silence Literal(\"{'p': [...]}\") ; le pilote ne l'exerce pas.",
+  "questions": [
+    {
+      "question": "Un nœud imbriqué d'une seule propriété dans le JSON-LD développé (par ex. {\"@type\": [...]} seul, ou une adresse à un seul champ), qui atteint `_insert_resource` via `jsonld_to_graph(jsonld.expand(...))` dans le dépôt d'origine, compte-t-il comme atteint réellement, de sorte que l'écart (AssertionError contre Literal(str(dict)) silencieux) doit bloquer l'approbation ?",
+      "where": "translated.ldpy:44 (+{ {subject} {rdflib.URIRef(key)} {obj} } après `if len(obj) == 1`) et original.py:44 (g.add((subject, rdflib.URIRef(key), obj))) ; appelant firm/ld/jsonld_utils.py:110",
+      "if_yes": "needs-work : garder l'écriture qui lève comme l'original (par ex. g.add conservé ou garde explicite sur le type de obj) et ajouter au pilote ce cas (objet imbriqué {'http://e/q': [{'@value': 'v'}]}) ; le chiffre add_in_loop de cette région ne compte pas tant que ce n'est pas fait.",
+      "if_no": "approuver malgré l'écart en le consignant comme écart connu de coercition (dict -> Literal au lieu d'une levée)."
+    },
+    {
+      "question": "Faut-il ajouter au pilote un appel avec une @list non vide (branche `raise Exception(\"@list not supported\")`) maintenant que le harnais compare deux levées ? Le commentaire de driver.py qui l'exclut est périmé.",
+      "where": "driver.py:20-26 (docstring) ; original.py:34 et translated.ldpy:34",
+      "if_yes": "needs-work léger : ajouter un cas {'@id':..,'p':[{'@list':[{'@id':..}]}]} ; vérifié qu'il passe aujourd'hui (levée identique), mais le mutant « raise supprimé » reste vert sans lui.",
+      "if_no": "laisser, en acceptant que cette branche soit non prouvée."
+    },
+    {
+      "question": "La boucle `for @bindings in ({\"t\": rdflib.URIRef(type_)} for type_ in value): +{ {subject} a ?t }` est-elle une restructuration (générateur de dicts ajouté pour entrer dans l'idiome) qui interdit `directly-expressible`, alors que `for type_ in value: +{ {subject} a {rdflib.URIRef(type_)} }` suffit ?",
+      "where": "translated.ldpy:17-18 et original.py:17-18",
+      "if_yes": "reclasser en minor-restructuring (le gain de @bindings est factice ici).",
+      "if_no": "classification inchangée."
+    }
+  ],
+  "evidence": "rdfeval check de la paire : OK. Copie dans mktemp -d, 4 appels ajoutés au pilote (@list non vide ; {'http://e/q':[{'@value':'v'}]} imbriqué ; objet avec @id et @value ; mélange). Résultat : le cas imbriqué à une propriété FAIL : « outcome differs (raised AssertionError('Object {...} must be an rdflib term') vs URIRef('http://e/a')); graphs not isomorphic (0 vs 1 triples); stdout differs » ; la traduction écrit (a, p, Literal(\"{'http://e/q': [{'@value': 'v'}]}\")). Le dépôt d'origine atteint ce cas : jsonld_to_graph (firm/ld/jsonld_utils.py:105-111) appelle _insert_resource sur la sortie de jsonld.expand, où tout nœud imbriqué à une propriété a len(obj)==1 sans @id/@value/@list. @list non vide : les deux lèvent la même exception (vert). Mutants sur la traduction avec le pilote d'origine : type-loop supprimée, prédicat échangé, branches else/continue, garde >0 : tous FAIL ; `raise Exception(\"@list not supported\")` remplacé par pass : reste vert (branche non exercée). Le cas valeur None n'est pas atteint : Literal(obj['@value']) est déjà un Literal avant l'interpolation. Copie supprimée.",
+  "triaged_by": "sonnet-5.5"
+}

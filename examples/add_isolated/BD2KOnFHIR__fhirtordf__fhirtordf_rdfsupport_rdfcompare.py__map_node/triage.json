@@ -1,0 +1,18 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "weak-oracle"
+  ],
+  "summary": "Le shim `FHIR = Namespace(...)` n'est pas équivalent à DottedNamespace : `FHIR.index` y est la méthode str.index, pas l'IRI fhir:index, donc `gin.value(o, FHIR.index)` vaut toujours None et l'index `_N` des IRI squolémisées n'est jamais exercé ; la note « resolve identically » est fausse.",
+  "questions": [
+    {
+      "question": "Faut-il corriger le shim pour que `FHIR.index` soit URIRef('http://hl7.org/fhir/index') (comme DottedNamespace.__getattribute__ du dépôt, fhirtordf/rdfsupport/dottednamespace.py:12-16), puis relancer le pilote ?",
+      "where": "context_shim.py:17 (`FHIR = Namespace(\"http://hl7.org/fhir/\")`) et commentaire context_shim.py:10-15 ; usage original.py:17 / translated.ldpy:19",
+      "if_yes": "needs-work (shim) : la paire reste équivalente avec un shim corrigé (vérifié), mais le pilote actuel ne prouve pas le chemin avec index ; la note de traduction doit être rectifiée. Aucun changement de la traduction.",
+      "if_no": "accepter un shim qui change le comportement du dépôt ; alors la région ne prouve que les noms sans index."
+    }
+  ],
+  "evidence": "rdfeval check OK. repr(FHIR.index) du shim = <built-in method index of Namespace object>. Le mutant `gin.value(o, FHIR.index)` -> `None` reste VERT avec le shim d'origine (preuve que le chemin n'est pas exercé), et devient FAIL (graphs not isomorphic, 12 vs 12) avec un shim corrigé (sous-classe renvoyant URIRef pour 'index'). Avec le shim corrigé et le fixture étendu (littéral @fr, xsd:date, BNode sans fhir:index) la paire reste OK. Autres mutants sur la traduction : garde isinstance inversée, récursion supprimée ou avec mauvais gin/gout/sujet, auto-boucle, {str(o)}, @graph gin : tous FAIL. subj_pred_idx_to_uri : corps identique au dépôt (docstring abrégée) ; la note dit « verbatim ». `@graph gout` hors boucle correct (gout jamais réaffecté, récursion passe gout). Valeur None non atteinte ({p}, {o}, {sk_s}, {sk_o} jamais None). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

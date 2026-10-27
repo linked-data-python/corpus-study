@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "weak-oracle"
+  ],
+  "summary": "`@bindings {…}` + `?var` sont gratuits (tout passe en `{expr}` / `^^xsd:…`), les `{Literal(const, datatype=…)}` de la provenance sont des enveloppes inutiles, et le pilote (2 lignes de CSV) ne fait pas échouer un mutant qui retire la garde `row[heading] != \"\"` autour du bloc zip.",
+  "questions": [
+    {
+      "question": "Les `@bindings {…}` (lignes 98 et 113) et les `?country/?city/…/?p ?o` sont-ils un crédit indu de `@bindings` et `variable`, alors que `{ndice[adm]}`, `{zipcodeInfo[0]['city']}^^xsd:string`, `{metapredicate} {metaobject}` et `\"…\"^^xsd:dateTime` suffisent (variante testée, verte) ?",
+      "where": "translated.ldpy:98, 99-104, 113-115, 120-121 contre original.py:91-96, 105-106, 111-112 ; meta.json:19-27",
+      "if_yes": "Needs-work : réécrire sans @bindings ni ?var, retirer ces deux constructions de la liste et les enveloppes {Literal(const)} ; la paire devient directly-expressible.",
+      "if_no": "Approuver ; le crédit @bindings/variable reste mais n'illustre aucun gain."
+    },
+    {
+      "question": "Faut-il ajouter au CSV une ligne avec STORE_ZIP_CODE vide (et/ou aucune ligne) pour que le pilote exerce la garde `if row[heading] != \"\"` du bloc zip ?",
+      "where": "driver.py (CSV : les 2 lignes ont un code postal) et translated.ldpy:93-104 / original.py:86-96",
+      "if_yes": "Needs-work : ajouter la ligne ; vérifier que zipcodes.matching('') ne lève pas avant de la garder.",
+      "if_no": "Approuver : la garde est du Python inchangé identique des deux côtés."
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Corps de handleFile identique au dépôt (diff, lignes 35-117). repl() identique ; le CSV est reconstitué (absent du dépôt, dit dans les notes). Mutants dans une copie, tués : type, hasCity/hasCounty échangés, geo:geometry, datatypes (geom, adm, float, date, integer, string, UPC), postalCode, quantity, Entity, dateTime, hadPrimarySource, garde de ligne, îlot zip 1 ou 2 supprimé. SURVIVANTS : `if row[heading] != \"\":` (ligne 93) remplacé par `if True:` -> vert ; (la zone des îlots ne dépend du reste que si le code postal est vide, jamais le cas). Variante testée dans une copie : traduction sans @bindings ni ?var (interpolations directes, `^^xsd:string`, `^^xsd:dateTime`, `{metapredicate} {metaobject}` en position de prédicat/objet, + @prefix xsd) -> rdfeval check OK. Pas de `for @bindings in` : choix défendu dans les notes, la strate ne mesure donc rien sur la boucle ; `zipcodes` n'est pas dans le venv `ldpy` ? (installé, exécuté). Pas d'état global partagé : g est recréé dans chaque module.",
+  "triaged_by": "sonnet-5.5"
+}
