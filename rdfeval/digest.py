@@ -96,13 +96,13 @@ def _code(text: str, kind: str, numbered: bool = True) -> str:
 def _files(ex_dir: Path) -> dict:
     """The pair's files, by role.
 
-    Only five names are fixed.  Every other module is a **context shim** —
+    Only seven names are fixed.  Every other module is a **context shim** —
     the translator chooses its name, may need more than one, and may put it
     in a package directory when the region's own imports are relative.
     Fixtures are the same: one ``fixture.ttl`` is the common case, but a
     region with four branches may carry one Turtle file per branch."""
     known = {"original.py", "driver.py", "translated.ldpy", "meta.json",
-             "review.json"}
+             "review.json", "optimized.py", "optimized.ldpy"}
     kept = lambda q: q.name not in known and "__pycache__" not in q.parts
     shims = sorted(q for q in ex_dir.rglob("*.py") if kept(q))
     fixtures = sorted(q for q in ex_dir.rglob("*")

@@ -165,7 +165,7 @@ def shared_graph_objects(study) -> list:
         if meta.get("translation_status") != "final":
             continue
         for shim in sorted(Path(ex_dir).glob("*.py")):
-            if shim.name in ("original.py", "driver.py"):
+            if shim.name in ("original.py", "driver.py", "optimized.py"):
                 continue
             try:
                 tree = ast.parse(shim.read_text())

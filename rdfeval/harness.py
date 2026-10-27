@@ -27,6 +27,16 @@ shape the comparison:
     are compared as **multisets** unless ``ordered=True`` says the region
     itself imposes an order (it sorts, or the query has an ``ORDER BY``).
 
+**Which two artefacts.**  By default the pair is ``original.py`` against
+``translated.ldpy``.  A region may also carry the two *optimized* artefacts
+of design record ``corpus/403`` — ``optimized.py`` (the most compact
+equivalent Python) and ``optimized.ldpy`` (the most compact LD Python).  The
+same driver proves them: ``RDFEVAL_SIDES=original.py,optimized.py`` in the
+environment swaps the right-hand side, so each driver is written once and
+:mod:`rdfeval.check` runs it once per artefact.  Each optimized artefact is
+proved against the ORIGINAL, never against the other optimized one: a chain
+of proofs would let one error excuse another.
+
 The verdict is a JSON-serialisable dict; drivers print it so the validate
 stage can collect it from a subprocess.
 """
@@ -36,13 +46,14 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import sys
 import traceback
 from pathlib import Path
 
 
-def _exec_python(path: Path) -> tuple[dict, str]:
-    ns: dict = {"__name__": "__original__", "__file__": str(path)}
+def _exec_python(path: Path, name: str = "__original__") -> tuple[dict, str]:
+    ns: dict = {"__name__": name, "__file__": str(path)}
     out = io.StringIO()
     code = compile(path.read_text(), str(path), "exec")
     with contextlib.redirect_stdout(out):
@@ -50,15 +61,37 @@ def _exec_python(path: Path) -> tuple[dict, str]:
     return ns, out.getvalue()
 
 
-def _exec_ldpy(path: Path) -> tuple[dict, str]:
+def _exec_ldpy(path: Path, name: str = "__translated__") -> tuple[dict, str]:
     from ldpy.transpiler import transpile
     r = transpile(path.read_text(), filename=str(path))
-    ns: dict = {"__name__": "__translated__", "__file__": str(path)}
+    ns: dict = {"__name__": name, "__file__": str(path)}
     out = io.StringIO()
     code = compile(r.code, str(path), "exec")
     with contextlib.redirect_stdout(out):
         exec(code, ns)
     return ns, out.getvalue()
+
+
+DEFAULT_SIDES = ("original.py", "translated.ldpy")
+SIDES_ENV = "RDFEVAL_SIDES"
+ARTEFACTS = ("original.py", "translated.ldpy", "optimized.py", "optimized.ldpy")
+
+
+def sides_from_env() -> tuple[str, str]:
+    """The two artefacts to compare, from ``RDFEVAL_SIDES`` (``a,b``)."""
+    raw = os.environ.get(SIDES_ENV)
+    if not raw:
+        return DEFAULT_SIDES
+    names = tuple(n.strip() for n in raw.split(","))
+    if len(names) != 2 or not all(n in ARTEFACTS for n in names):
+        raise ValueError(f"{SIDES_ENV}={raw!r}: expected two of {ARTEFACTS}")
+    return names
+
+
+def _exec_artefact(path: Path, name: str) -> tuple[dict, str]:
+    """Run a ``.py`` as Python and a ``.ldpy`` through the transpiler."""
+    run = _exec_ldpy if path.suffix == ".ldpy" else _exec_python
+    return run(path, name)
 
 
 def fixture_graph(path) -> object:
@@ -238,6 +271,13 @@ def run_pair(driver_file: str, entry: str | None = None,
         ordered = fixture is None
     verdict: dict = {"example": ex_dir.name, "equivalent": False,
                      "method": None, "diffs": [], "error": None}
+    try:
+        left, right = sides_from_env()
+    except ValueError as e:
+        verdict["error"] = str(e)
+        _emit(verdict)
+        return verdict
+    verdict["sides"] = [left, right]
     if fixture is not None:
         if not entry:
             verdict["error"] = "fixture= needs entry= (the region to call)"
@@ -247,8 +287,8 @@ def run_pair(driver_file: str, entry: str | None = None,
         if calls is None:
             calls = [lambda: ((fixture_graph(path),), {})]
     try:
-        ns_o, out_o = _exec_python(ex_dir / "original.py")
-        ns_t, out_t = _exec_ldpy(ex_dir / "translated.ldpy")
+        ns_o, out_o = _exec_artefact(ex_dir / left, "__original__")
+        ns_t, out_t = _exec_artefact(ex_dir / right, "__translated__")
     except Exception:
         verdict["error"] = traceback.format_exc(limit=8)
         _emit(verdict)

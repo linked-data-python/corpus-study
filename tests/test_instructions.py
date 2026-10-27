@@ -35,7 +35,8 @@ def test_no_agent_facing_document_promises_a_deleted_path():
     dead = ("examples403", "INSTRUCTIONS_403", "_403.csv", "_403.json",
             "--study 403", "rdfeval sample", "rdfeval regions",
             "rdfeval translate")
-    for name in ("INSTRUCTIONS.md", "AGENT_BATCH.md", "README.md"):
+    for name in ("INSTRUCTIONS.md", "AGENT_BATCH.md", "AGENT_OPTIMIZE.md",
+                 "README.md"):
         text = (ROOT / name).read_text(encoding="utf-8")
         for token in dead:
             assert token not in text, "%s still mentions %r" % (name, token)

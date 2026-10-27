@@ -1,5 +1,10 @@
 """Pairwise quantitative comparison of original.py vs translated.ldpy.
 
+A region whose two optimized artefacts are final and proved (design record
+corpus/403) also gets ``optimized_python`` / ``optimized_ldpy`` metrics and
+three ratios: ``care`` (original → optimized.py), ``notation``
+(optimized.py → optimized.ldpy) and ``total`` (original → optimized.ldpy).
+
 For each example whose translation is final (and not excluded), compute:
 
 Surface size (both sides)
@@ -194,20 +199,12 @@ def subgroup_of(py: dict, ld: dict) -> str:
     return "no-source-rdf"
 
 
-def measure_pair(py_source: str, ldpy_source: str,
-                 preamble: str | None = None) -> dict:
-    """``preamble``: bindings-only source of the example's context shim
-    modules, so terms imported from a shim are recognised (analysis only —
-    the shim's surface counts on neither side)."""
+def python_side(py_source: str, preamble: str | None = None) -> dict:
+    """Surface and RDF metrics of one Python artefact."""
     fa = analyze_source(py_source, preamble=preamble)
-    lm = measure_ldpy_source(ldpy_source)
-    # rdflib constructs remaining in the ldpy version (outside islands)
-    residual = analyze_source(lm.masked_source, preamble=preamble)
     corr = python_correspondence(py_source, preamble=preamble)
-
-    py_code_loc = fa.code_loc
-    py = {
-        "loc": fa.total_loc, "code_loc": py_code_loc,
+    return {
+        "loc": fa.total_loc, "code_loc": fa.code_loc,
         "chars": len(py_source), "tokens": fa.tokens,
         "syntax_nodes": fa.ast_nodes,
         "constructors": fa.constructors,
@@ -220,7 +217,14 @@ def measure_pair(py_source: str, ldpy_source: str,
         **{f"string_rdf_{k}": v for k, v in string_embedded_rdf(py_source).items()},
         **{f"corr_{k}": v for k, v in corr.items()},
     }
-    ld = {
+
+
+def ldpy_side(ldpy_source: str, preamble: str | None = None) -> dict:
+    """Surface and RDF metrics of one LD Python artefact."""
+    lm = measure_ldpy_source(ldpy_source)
+    # rdflib constructs remaining in the ldpy version (outside islands)
+    residual = analyze_source(lm.masked_source, preamble=preamble)
+    return {
         "loc": lm.loc, "code_loc": lm.code_loc,
         "chars": lm.chars, "tokens": lm.tokens,
         "syntax_nodes": lm.syntax_nodes,
@@ -248,25 +252,67 @@ def measure_pair(py_source: str, ldpy_source: str,
             if lm.patterns_expressed else None,
     }
 
-    def ratio(a, b):
-        return round(b / a, 4) if a else None
 
+SIZE_METRICS = ("loc", "code_loc", "chars", "tokens", "syntax_nodes")
+
+
+def size_ratios(before: dict, after: dict) -> dict:
+    """after / before for each surface-size metric (None when before is 0)."""
+    return {k: round(after[k] / before[k], 4) if before[k] else None
+            for k in SIZE_METRICS}
+
+
+def measure_pair(py_source: str, ldpy_source: str,
+                 preamble: str | None = None) -> dict:
+    """``preamble``: bindings-only source of the example's context shim
+    modules, so terms imported from a shim are recognised (analysis only —
+    the shim's surface counts on neither side)."""
+    py = python_side(py_source, preamble)
+    ld = ldpy_side(ldpy_source, preamble)
     return {
         "python": py, "ldpy": ld,
         "subgroup": subgroup_of(py, ld),
-        "ratios": {
-            "loc": ratio(py["loc"], ld["loc"]),
-            "code_loc": ratio(py["code_loc"], ld["code_loc"]),
-            "chars": ratio(py["chars"], ld["chars"]),
-            "tokens": ratio(py["tokens"], ld["tokens"]),
-            "syntax_nodes": ratio(py["syntax_nodes"], ld["syntax_nodes"]),
-        },
+        "ratios": size_ratios(py, ld),
     }
+
+
+def measure_optimized(py: dict, opt_py_source: str, opt_ldpy_source: str,
+                      preamble: str | None = None) -> dict:
+    """The two optimized artefacts of design record corpus/403.
+
+    Three ratios, each read on its own: ``care`` (original.py →
+    optimized.py) is what a careful rewrite buys without the notation;
+    ``notation`` (optimized.py → optimized.ldpy) is what the notation buys
+    on top of it; ``total`` (original.py → optimized.ldpy) is both.  ``py``
+    is the original's side, already measured by :func:`measure_pair`.
+    """
+    opy = python_side(opt_py_source, preamble)
+    old = ldpy_side(opt_ldpy_source, preamble)
+    return {
+        "optimized_python": opy, "optimized_ldpy": old,
+        "ratios_care": size_ratios(py, opy),
+        "ratios_notation": size_ratios(opy, old),
+        "ratios_total": size_ratios(py, old),
+    }
+
+
+# Every module of a region that is not one of these is a context shim.
+NOT_SHIMS = ("original.py", "driver.py", "optimized.py")
+
+
+def _optimized_ready(meta: dict) -> bool:
+    """Both optimized artefacts final and proved against the original."""
+    if meta.get("optimization_status") != "final":
+        return False
+    v = meta.get("validation_optimized") or {}
+    return all((v.get(n) or {}).get("status") == "equivalent"
+               for n in ("optimized.py", "optimized.ldpy"))
 
 
 def run(config: dict, study: Study = STUDY) -> None:
     rows = []
     skipped = []
+    optimized = 0
     for ex_dir, meta in iter_examples(study):
         if meta.get("translation_status") != "final":
             continue
@@ -282,10 +328,17 @@ def run(config: dict, study: Study = STUDY) -> None:
         py_source = (ex_dir / "original.py").read_text()
         ldpy_source = (ex_dir / "translated.ldpy").read_text()
         shims = [p for p in sorted(ex_dir.glob("*.py"))
-                 if p.name not in ("original.py", "driver.py")]
+                 if p.name not in NOT_SHIMS]
         preamble = "\n".join(p.read_text() for p in shims) or None
         try:
             pair = measure_pair(py_source, ldpy_source, preamble=preamble)
+            if _optimized_ready(meta):
+                pair.update(measure_optimized(
+                    pair["python"],
+                    (ex_dir / "optimized.py").read_text(),
+                    (ex_dir / "optimized.ldpy").read_text(),
+                    preamble=preamble))
+                optimized += 1
         except LdpyMetricsError as e:
             print(f"  ! {meta['region_id']}: {e}")
             skipped.append((meta["region_id"], f"metrics-error: {e}"))
@@ -326,12 +379,17 @@ def run(config: dict, study: Study = STUDY) -> None:
                     "classification": r["classification"],
                     "subgroup": r.get("subgroup"),
                     "validation_status": r["validation_status"]}
-            for side in ("python", "ldpy"):
-                for k, v in r[side].items():
+            for side in ("python", "ldpy", "optimized_python",
+                         "optimized_ldpy"):
+                for k, v in r.get(side, {}).items():
                     if isinstance(v, (int, float, type(None))):
                         flat[f"{side}_{k}"] = v
-            for k, v in r["ratios"].items():
-                flat[f"ratio_{k}"] = v
+            for key, prefix in (("ratios", "ratio"),
+                                ("ratios_care", "ratio_care"),
+                                ("ratios_notation", "ratio_notation"),
+                                ("ratios_total", "ratio_total")):
+                for k, v in r.get(key, {}).items():
+                    flat[f"{prefix}_{k}"] = v
             flat_rows.append(flat)
         fieldnames = sorted({k for fr in flat_rows for k in fr},
                             key=lambda k: (k != "region_id", k))
@@ -339,7 +397,8 @@ def run(config: dict, study: Study = STUDY) -> None:
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             w.writerows(flat_rows)
-    print(f"compare: {len(rows)} pairs measured, {len(skipped)} skipped")
+    print(f"compare: {len(rows)} pairs measured, {len(skipped)} skipped, "
+          f"{optimized} with optimized artefacts")
 
 
 def _review_status(ex_dir) -> str:
