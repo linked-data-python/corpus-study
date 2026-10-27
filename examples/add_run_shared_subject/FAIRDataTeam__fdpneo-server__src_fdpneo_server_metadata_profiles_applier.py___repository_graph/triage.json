@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "optimization-doctrine"
+  ],
+  "summary": "Tout le gain « care » vient des imports du contexte retirés (care 0.916 -> 1.028, total 0.765 -> 0.877 une fois restaurés) et `constructions` crédite IRI et variable que translated.ldpy n'emploie pas.",
+  "questions": [
+    {
+      "question": "meta.json crédite les îlots « IRI » et « variable » alors que translated.ldpy n'a ni `<…>` ni `?nom` (seulement `a`, dct:, et des interpolations {…}), et omet « interpolation {expr} » : faut-il corriger `constructions` ?",
+      "where": "meta.json:21-28 et translated.ldpy:36-41",
+      "if_yes": "needs-work : constructions = [\"@graph\", \"+{ }\", \"from … import p:\", \"prefixed name\", \"interpolation {expr}\"] ; sinon crédit indu dans le tableau des îlots.",
+      "if_no": "approuver (« nom préfixé » est déjà rabattu sur « prefixed name » par normalise)."
+    },
+    {
+      "question": "optimized.py:4-6 retire BNode (original.py:4) et DCAT, LDP, ODRL, VOID (original.py:6), imports du contexte extrait que la région n'utilise pas ; faut-il recalculer les ratios en les gardant des deux côtés (care 0.916 -> 1.028, notation 0.835 -> 0.853, total 0.765 -> 0.877) ?",
+      "where": "optimized.py:4-6, optimized.ldpy:4-5 et original.py:4-6",
+      "if_yes": "needs-work : restaurer les imports (ou les exclure du compte de jetons) ; sans eux la relecture soignée n'apporte rien (care > 1).",
+      "if_no": "approuver ; le retrait d'imports inutilisés compte comme relecture soignée."
+    }
+  ],
+  "evidence": "rdfeval check : 3 OK. Ratios (tokens) avec imports morts restaurés des deux côtés (dead = BNode, DCAT, LDP, ODRL, VOID) : care 0.9162 -> 1.0279, notation 0.8354 -> 0.8533, total 0.7654 -> 0.8771 ; en restaurant tout le bloc d'imports de translated.ldpy : care 0.9721, total 0.8324. Point interpolation str/URIRef (optimized.ldpy:32, 35, 38 : f<{iri}>, f<{type_iri}>, {title}) : copie du pilote avec 5 appels ajoutés (title \"\", title qui ressemble à une IRI, title \"42\", type_iri relatif, rights_iri \"\") -> 3 artefacts OK ; avec title=URIRef(...) -> optimized.ldpy FAIL (call[7], 19 vs 19 triplets non isomorphes), translated.ldpy et optimized.py OK car ils gardent Literal(title). Dans le dépôt (applier.py, commit 3e72e11) title=profile.name (name: str dans manifest.py), iri=expander.base_url (str), type_iri=schema_iri() -> str, et le test unitaire passe des str : l'écart n'est donc pas atteignable depuis le dépôt, d'où pas de drapeau equivalence-doubt. Shim : direct_container_config et _service_advertisement identiques au dépôt (docstrings abrégées, logique intacte), `__namespaces__` ajouté à la main pour `from context_shim import dct:` (mécanisme, pas de comportement). Les deux boucles `graph.add(triple)` restent en Python à juste titre.",
+  "triaged_by": "sonnet-5.5"
+}

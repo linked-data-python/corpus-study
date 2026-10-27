@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Paire équivalente (extensions de fixture testées) mais la traduction fusionne et réordonne des .add autour d'un `if`, ce que INSTRUCTIONS §2 interdit, et la notation n'apporte aucun gain mesurable (0.993 jetons, 1.006 caractères).",
+  "questions": [
+    {
+      "question": "translated.ldpy:68-71 déplace `rdfs:domain owl:Thing` avant le `rdfs:range` conditionnel (original.py:62-66) pour fusionner type et domain avec `;` : est-ce une restructuration (minor-restructuring) plutôt que directly-expressible, vu l'interdit « ne réordonnez pas, ne fusionnez pas » ?",
+      "where": "translated.ldpy:67-71 et original.py:62-66",
+      "if_yes": "reclasser en minor-restructuring (ou garder trois +{ } dans l'ordre d'origine).",
+      "if_no": "approuver : l'ordre d'ajout est sans effet sur un ensemble de triplets."
+    }
+  ],
+  "evidence": "rdfeval check : 3 OK. Copie avec fixture étendue (littéraux @en et ^^xsd:integer, sujets BNode, littéraux de 150 et 151 caractères, deux privs équivalents à la même propriété dbo et à la même ressource dbr pour exercer le « dernier gagne » du dict) : 3 OK. Contrôles : mutation rdfs:domain -> rdfs:seeAlso dans optimized.ldpy puis dans optimized.py -> FAIL ontology_expanded à chaque fois, donc le driver atteint bien les artefacts optimisés. Les branches `\" \" in s/p/o` de la phase 1 sont inatteignables : le parseur nt rejette une IRI avec espace (ParserError), ce n'est pas un défaut du pilote. Imports : seul XSD (et le doublon `from rdflib import Graph, URIRef`) sont retirés, care 0.911 -> 0.918 si restaurés, négligeable. Point interpolation str/URIRef : `align.add(..., p)` / `{node}` remplacent URIRef(p_str)/URIRef(node_str) mais p et node sont déjà des URIRef du graphe parsé, aucune exposition. Note : la première puce de optimization_notes dit encore « STATUS DRAFT » alors que le statut est final (dernière puce) ; texte périmé à nettoyer.",
+  "triaged_by": "sonnet-5.5"
+}

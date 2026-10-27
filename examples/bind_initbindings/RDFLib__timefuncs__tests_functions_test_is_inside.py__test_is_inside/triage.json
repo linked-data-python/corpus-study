@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "optimization-doctrine"
+  ],
+  "summary": "Tout le gain « care » (192 -> 146 jetons, 0.760) vient de la réécriture de l'assertion du test (str() retirés, comparaison de termes) et non de la notation ; les commentaires de débogage de l'original sont aussi supprimés alors que q et initNs existent encore.",
+  "questions": [
+    {
+      "question": "optimized.py:29-37 remplace la comparaison de chaînes du test (original.py:29-33 et 38-44, `str(...)`) par une comparaison de termes URIRef, ce qui change ce que l'assertion vérifie : est-ce acceptable comme « relecture soignée » (et la suppression des commentaires de débogage original.py:35-37 aussi) ?",
+      "where": "optimized.py:29-35 et original.py:29-44 ; commentaires original.py:35-37",
+      "if_yes": "approuver ; le care 0.760 est assumé comme gain d'algorithme sur un test.",
+      "if_no": "needs-work : garder `str(...)` dans optimized.py (care ≈ 1.0, total ≈ 0.97) et restaurer les commentaires de débogage."
+    }
+  ],
+  "evidence": "rdfeval check : 3 OK. Mesure : original.py 192 jetons, optimized.py 146 ; original.py sans les 3 lignes de commentaires de débogage = 192 jetons (les commentaires ne comptent pas en jetons mais font passer care caractères de 0.887 à 0.935 si restaurés) ; donc 100 % du gain care en jetons vient des str() supprimés / comprehension remplacée par sorted(g.query(...)). Aucun import du contexte retiré : mêmes ratios avec et sans imports restaurés (care 0.7604, notation 0.9726, total 0.7396). Notation : 0.973 jetons, 0.966 caractères : gain faible, c'est un cas initNs seul (aucune interpolation, la strate bind_initbindings n'exerce pas initBindings). Oracle vivant : copie avec FILTER tfun:isInside(?a, ?b) remplacé par FILTER (true) dans optimized.ldpy seul -> FAIL (AssertionError), les deux autres OK. Shim is_inside et data/is_inside.ttl identiques au dépôt (RDFLib/timefuncs dd3bde8, diff vide ; seul register_custom_function de __init__.py reproduit à la main, pour isInside seulement). L'assertion plus stricte ne peut différer qu'avec un résultat BNode/Literal dont str() égale l'IRI attendue, impossible avec ce fixture. Pas d'interpolation dans cette région, donc pas d'exposition str/URIRef.",
+  "triaged_by": "sonnet-5.5"
+}

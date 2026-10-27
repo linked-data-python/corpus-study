@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "optimization-doctrine",
+    "classification-doubt"
+  ],
+  "summary": "Le gain « care » de optimized.py vient des imports morts du contexte retirés (care 0.961 -> 1.019 une fois restaurés) ; la traduction réécrit en outre les deux boucles en générateurs de dicts alors que le plain `for` suffit.",
+  "questions": [
+    {
+      "question": "optimized.py retire de original.py les imports Namespace, NamespaceManager et XSD (original.py:5), qui ne sont pas dans les lignes 48-75 de la région mais dans le contexte extrait : faut-il recalculer care/total en les gardant des deux côtés (care 0.961 -> 1.019, notation 0.849 -> 0.857, total 0.816 -> 0.874) ?",
+      "where": "optimized.py:4-5 et original.py:4-5 ; optimized.ldpy:4-5",
+      "if_yes": "needs-work : restaurer les imports morts dans les deux artefacts optimisés (ou les exclure du compte de jetons) ; sinon le chiffre « care » est faux.",
+      "if_no": "approuver ; le retrait d'imports inutilisés compte comme relecture soignée."
+    },
+    {
+      "question": "translated.ldpy:22-25 et 33-40 transforment les corps de boucle en générateurs de dicts (BNode() dans le dict, if/else de original.py:25-29 devenu ternaire) : est-ce une restructuration (minor-restructuring) plutôt que directly-expressible ?",
+      "where": "translated.ldpy:22-41 et original.py:15-33",
+      "if_yes": "reclasser en minor-restructuring ; le crédit `for @bindings in` est artificiel (optimized.ldpy:21 montre que `for param in plugin.params:` suffit, d'après optimization_notes).",
+      "if_no": "approuver : c'est l'idiome prescrit pour add_in_loop (INSTRUCTIONS.md §2)."
+    }
+  ],
+  "evidence": "rdfeval check : 3 OK. Ratios recalculés avec rdfeval.compare.measure_optimized en ajoutant à optimized.py ET optimized.ldpy les imports morts (dead = importés dans original.py, jamais référencés : Namespace, NamespaceManager, XSD) : tokens care 0.9612 -> 1.0194, notation 0.8485 -> 0.8571, total 0.8155 -> 0.8738. Notation en caractères 1.0587 et en code_loc 1.1852 (le @prefix ajoute 5 lignes) : le gain en jetons ne se lit pas en lignes ; article_candidate=true dans meta.json me paraît discutable. Point interpolation str/URIRef : copie du pilote avec label=URIRef(...) -> optimized.ldpy FAIL (call[4], 8 vs 8 triplets non isomorphes) alors que translated.ldpy (qui garde Literal(label)) et optimized.py passent ; MAIS dans le dépôt (carxp2lv2presets.py main(), commit a64f1f8) label est toujours une str (args.label ou splitext(...).replace), donc `{label}` nu (optimized.ldpy:19) n'est pas exposé. param.value vient de ast.literal_eval (loadcarxp.py) : testé dans une copie avec int 1, 0, True, None, \"\", \"abc\" -> les 3 artefacts OK ; le pilote n'exerce que des floats mais la coercition est équivalente sur ces types. Shim NS/get_graph conforme au dépôt (diff lu), Param/Property/PluginInstance réduits aux champs lus.",
+  "triaged_by": "sonnet-5.5"
+}
