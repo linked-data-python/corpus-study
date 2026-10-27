@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien a signaler : g1.remove((corpus, SKOS.note, None)) -> -{ {corpus} skos:note ?o }, oracle discriminant sur tous les mutants essayes ; gain de notation seulement (+1 ligne @graph, -1 import).",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (strate remove : le None de rdflib devient une variable non liee, en une ligne) ?",
+      "where": "translated.ldpy:9 (`-{ {corpus} skos:note ?o }`) et original.py:8 (`g1.remove((corpus, SKOS.note, None))`)",
+      "if_yes": "Retenir comme exemple de la strate remove ; dire dans l'article que le gain est de lisibilite (joker nomme, nom prefixe) et non de longueur : @graph g1 ajoute une ligne, l'import SKOS en retire une.",
+      "if_no": "Approuver quand meme ; chercher l'exemple de la strate ailleurs."
+    }
+  ],
+  "evidence": "check = OK (module-state, g1 14 triplets en sortie). Mutants sur une copie : remplacer l'ilot par pass -> ECHEC ; sujet en joker (-{ ?c skos:note ?o }) -> ECHEC (14 vs 12) ; objet lie a un litteral -> ECHEC ; predicat en joker -> ECHEC ; autre predicat -> ECHEC. Les skos:note des publications voisines sont donc bien proteges. Depot : l'instruction est bien seule a la ligne 101 de build_core_v4_4_0.py, corpus/SRNS definis aux lignes 90-92 (la note de meta.json et le commentaire de research_context.py disent « ligne 96 » : c'est 90 ; sans consequence). Le shim ne fait que restaurer import/BASEDIR/SRNS, le Namespace est verbatim. Pas de cas « corpus sans aucun skos:note » dans le fixture, mais l'ilot est une suppression unique sans branche : sans consequence.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -193,6 +193,28 @@ def _demo_bodies(files: dict) -> tuple[str | None, str | None]:
 
 # --------------------------------------------------------------------- flags
 
+def _invented_namespaces(meta: dict, files: dict) -> list:
+    """Shims defining ``__namespaces__`` that the origin repository lacks.
+
+    `from … import p:` (record ldpy/013) needs the imported module to
+    export ``__namespaces__``.  A shim may restore the repository's
+    bindings, never add one: if the clone has none, the construction is
+    credited for code nobody wrote.  Empty when the clone is absent."""
+    shims = [s for s in files["shims"] if "__namespaces__" in _read(s)]
+    if not shims:
+        return []
+    repo = ROOT / "corpus" / "repos" / meta.get("repository", "").replace("/", "__")
+    if not repo.is_dir():
+        return []
+    for py in repo.rglob("*.py"):
+        try:
+            if "__namespaces__" in py.read_text(errors="ignore"):
+                return []
+        except OSError:
+            continue
+    return [s.name for s in shims]
+
+
 def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
     flags = []
     add = lambda lvl, label, detail: flags.append((lvl, label, detail))
@@ -253,6 +275,14 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
             add(WARN, "demo() harness on both sides",
                 "scaffolding added identically to both files; it is excluded "
                 "from neither surface measure, so confirm it is minimal")
+
+    invented = _invented_namespaces(meta, files)
+    if invented:
+        add(DANGER, "shim invents __namespaces__: %s" % ", ".join(invented),
+            "the origin repository exports no __namespaces__, so `from … "
+            "import p:` works here only because the shim was written to "
+            "allow it — the construction is credited for code that does "
+            "not exist")
 
     for shim in files["shims"]:
         n = len(_read(shim).splitlines())

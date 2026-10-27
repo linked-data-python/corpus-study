@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien a signaler : les -{ } sont des ilots independants a un motif (pas de jointure), f<{k}> est necessaire (k est une str) et l'oracle (graphe + stdout) est discriminant.",
+  "questions": [],
+  "evidence": "check = OK. Mutants sur une copie : supprimer chacun des 4 -{ } -> ECHEC ; ilot unique joint `-{ f<{k}> ?p ?o . ?s ?p2 f<{k}> }` -> ECHEC (35 vs 42) ; label supprime par predicat/sujet joker -> ECHEC ; sans ^^xsd:string -> ECHEC (35 vs 35, non isomorphe) ; sujet/objet inverses dans le COUNT -> ECHEC ; cnt == 1 -> ECHEC ; casse de status -> ECHEC. Execution des deux versions avec les 3 TSV REELS du depot (1016 URI, CRLF, statuts private/Private/vides/texte libre) contre un graphe synthetique contenant chaque URI en sujet, en objet et en predicat : equivalent, stdout compris. Toutes les URI du depot ont [A-Za-z0-9_.:/#-] seulement, donc URIRef(k) == f<{k}> sans @base. Les imports URIRef/Literal/XSD retires sont reellement inutilises apres traduction (ecart de surface assume dans les notes, a ne pas compter comme gain de notation).",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction juste, mais le pilote n'exerce jamais le -{ ?s ?p {target_node} } : le supprimer laisse le verdict vert (les aretes entrantes sont deja retirees une a une).",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel qui exerce le joker d'objet (use case B avec convert_literal_to_uri=True ET delete_target_node=True, et un noeud cible situe dans le namespace de sortie) avant d'approuver la paire ?",
+      "where": "translated.ldpy:46 (`-{ ?s ?p {target_node} }`) et original.py:49 (`graph.remove((None, None, target_node))`) ; driver.py:104-118 (aucun appel ne combine convert et delete)",
+      "if_yes": "needs-work : ajouter l'appel et la cible a fixture.ttl (voir evidence, ca discrimine) ; la traduction ne change pas. L'ilot -{ ?s ?p {target_node} } n'est pas prouve par l'etat actuel du pilote.",
+      "if_no": "Approuver tel quel : accepter que le joker d'objet soit non prouve (il n'agit que quand l'ajout d'une valeur convertie recree une arete vers le noeud cible)."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur copie du dossier : supprimer -{ ?s ?p {target_node} } -> VERT (!) ; supprimer -{ {target_node} ?p ?o } -> ECHEC ; supprimer le retrait de l'ancienne arete -> ECHEC ; predicat permute -> ECHEC ; sans/avec toujours convert -> ECHEC ; `if True` pour delete -> ECHEC. Raison du vert : en cas A/B chaque arete entrante d'un noeud cible est une ligne de la requete, donc deja retiree par -{ {source_node} {old_predicate} {target_node} } ; le joker d'objet n'agit que si l'arete ajoutee pointe vers le noeud cible (namespace[valeur] == target_node) avec un predicat different. Dans une copie : fixture + noeud http://example.org/neat_/tgtcode (codeValue \"tgtcode\") + appel call(target_property=EX.codeValue, target_property_holding_new_property=..., convert_literal_to_uri=True, delete_target_node=True) : traduction OK, et le mutant sans le joker d'objet ECHOUE (15 vs 16 triplets). Autres pistes testees, sans defaut : noeuds blancs en source et cible (graphe a 28 triplets -> 16, equivalent), litteraux @fr, entier, chaine vide, auto-boucle ; -{ } pleinement lies ne recoivent jamais None. La note « negatif control : -{ ?s ?p ?o } » ne prouvait que le sur-effacement, pas le sous-effacement.",
+  "triaged_by": "sonnet-5.5"
+}
