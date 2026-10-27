@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "La garde `if self.graph.value(pp, RDF.first):` devient `bool(m{ })` : un rdf:first valant `\"\"`/`0` bascule dans la branche liste (ValueError « Malformed ») au lieu de la branche prédicats (ValueError « multiple/unsupported ») ; et le pilote n'exerce aucune levée ni oneOrMore/zeroOrOne/bNodeDepth.",
+  "questions": [
+    {
+      "question": "Faut-il que la traduction de la garde de la ligne 29 conserve la véracité de `value(...)` (donc `if m{ {pp} rdf:first ?x }.first():`) plutôt que `bool(m{ })` ?",
+      "where": "translated.ldpy:35 et original.py:29",
+      "if_yes": "needs-work : réécrire la garde en `.first()` truthy et ajouter `ex:case8 ex:path ( \"\" ex:x )` au fixture (écart limité au message du ValueError, mais la traduction « existence » n'est pas strictement la même condition).",
+      "if_no": "approuver en notant l'écart (déclenché seulement par un rdf:first littéral faux, invalide dans un sh:path, et levant ValueError des deux côtés) ; la paire reste crédible comme existence réelle."
+    },
+    {
+      "question": "Un pilote qui ne couvre ni les 5 chemins ValueError ni les entrées de PRED_TO_PATH_CLASS sh:oneOrMorePath/sh:zeroOrOnePath/SHEXT.bNodeDepth est-il acceptable pour cette région ?",
+      "where": "driver.py:42-55 ; translated.ldpy:22-23 ; fixture.ttl (cas 1 à 7)",
+      "if_yes": "approuver (l'existence vrai/faux est bien exercée par cas1/cas7 vs cas3/cas4).",
+      "if_no": "needs-work : ajouter des cas oneOrMore, zeroOrOne, bNodeDepth, bnode sans prédicat, bnode à deux prédicats, et faire comparer les levées."
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie avec `ex:case8 ex:path ( \"\" ex:x )` : original -> ValueError « has multiple predicate-objects », traduction -> ValueError « Malformed RDF list structure at … » (exécutés à la main, le harnais plante au lieu de comparer deux levées, cf. défaut 5). Avec la garde `m{ {pp} rdf:first ?x }.first()` la copie redonne « multiple predicate-objects » comme l'original. Mutant : suppression de sh:oneOrMorePath et sh:zeroOrOnePath dans le dict de translated.ldpy -> check reste OK (branches non exercées). L'existence vrai/faux est bien couverte (cas1/7 vrai, cas3/4 faux). Autres écarts du diff : @graph self.graph sur un attribut, Collection() laissé en rdflib brut, shim en dataclasses (pydantic absent) = restauration de liaisons, pas de logique inventée. Non article : région longue, 8 îlots, rien en 3 lignes, shim de substitution des classes.",
+  "triaged_by": "sonnet-5.5"
+}

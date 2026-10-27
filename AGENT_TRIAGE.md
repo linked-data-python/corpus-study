@@ -68,6 +68,12 @@ Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
 8. **Des enveloppes inutiles** : `{URIRef(x)}` ou `{Literal(x)}` là où
    `f<…>` ou `{x}` passent (`wrong-construction`, vérifiez l'équivalence).
 
+Deux défauts sont désormais **contrôlés mécaniquement** par le digest, ne
+les recherchez pas à la main : l'écart entre les `constructions` déclarées
+et les îlots du code, et un `__namespaces__` qu'un shim écrit alors que le
+dépôt d'origine n'en exporte aucun (les 21 crédits de `from … import p:`
+du corpus sont dans ce cas).
+
 Vérifiez au lieu de supposer. Vous pouvez **expérimenter dans une copie** :
 `work=$(mktemp -d)` puis `cp -r "<dir>" "$work/"` — toujours un dossier
 créé par `mktemp -d`, jamais un nom fixe : d'autres trieurs travaillent en

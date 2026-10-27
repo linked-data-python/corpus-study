@@ -7,7 +7,7 @@
   "questions": [
     {
       "question": "Faut-il ajouter au pilote un appel qui exerce le joker d'objet (use case B avec convert_literal_to_uri=True ET delete_target_node=True, et un noeud cible situe dans le namespace de sortie) avant d'approuver la paire ?",
-      "where": "translated.ldpy:46 (`-{ ?s ?p {target_node} }`) et original.py:49 (`graph.remove((None, None, target_node))`) ; driver.py:104-118 (aucun appel ne combine convert et delete)",
+      "where": "translated.ldpy:50 (`-{ ?s ?p {target_node} }`) et original.py:55 (`graph.remove((None, None, target_node))`) ; driver.py:93-101 (aucun appel ne combine convert et delete)",
       "if_yes": "needs-work : ajouter l'appel et la cible a fixture.ttl (voir evidence, ca discrimine) ; la traduction ne change pas. L'ilot -{ ?s ?p {target_node} } n'est pas prouve par l'etat actuel du pilote.",
       "if_no": "Approuver tel quel : accepter que le joker d'objet soit non prouve (il n'agit que quand l'ajout d'une valeur convertie recree une arete vers le noeud cible)."
     }

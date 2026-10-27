@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Le fixture laisse passer cinq mutants des deux requêtes (type ObjectProperty retiré des deux, subPropertyOf et owl:onProperty retirés de la 2e, rdf:rest* réduit à rdf:rest) et ne distingue ni DISTINCT ni list(set) ; `{URIRef(class_uri)}` s'écrit `{f<{class_uri}>}`.",
+  "questions": [
+    {
+      "question": "Les voisins du fixture (hasNote, associatesWith) violent chacun deux contraintes à la fois et aucune restriction ne vise une autre propriété : accepte-t-on qu'on puisse retirer `rdf:type owl:ObjectProperty`, `rdfs:subPropertyOf` (2e requête) ou `owl:onProperty` sans que le pilote le voie ?",
+      "where": "translated.ldpy:16, 31, 32, 34 et original.py:9, 24, 27 ; fixture.ttl:26-40",
+      "if_yes": "approuver, en assumant que la paire prouve le chemin de propriété et l'union des deux requêtes seulement",
+      "if_no": "needs-work : ajouter au fixture (a) une propriété ObjectProperty sans subPropertyOf (b) un DatatypeProperty sous directlyComprises (c) une restriction de ClassA visant une propriété étrangère (d) une liste unionOf à trois membres avec ClassA en 3e (e) une propriété qui sort des deux requêtes (test de list(set))"
+    },
+    {
+      "question": "`{URIRef(class_uri)}` (class_uri est un str à tous les appels : query.py:128 renvoie str(row[0])) peut s'écrire `{f<{class_uri}>}` : préfère-t-on cette forme ?",
+      "where": "translated.ldpy:18 et 33 ; import ligne 5",
+      "if_yes": "wrong-construction confirmé : remplacer et supprimer `from rdflib import URIRef`",
+      "if_no": "approuver la construction actuelle"
+    }
+  ],
+  "evidence": "Copie sous mktemp -d, mutants de translated.ldpy. VERTS : q1 sans `rdf:type owl:ObjectProperty` ; q2 sans `rdf:type` ; q2 sans `rdfs:subPropertyOf` ; q2 sans `?restriction owl:onProperty ?property_uri` ; `rdf:rest*` -> `rdf:rest` ; sans DISTINCT ; `list(set(x))` -> `x`. ROUGES : q1 sans `subPropertyOf` ; q1 sans le chemin (owl:unionOf/...)* ; q2 remplacée par []. `{class_uri}` nu -> call[0] rend [] (le fixture attrape bien le piège str/URIRef) ; `{f<{class_uri}>}` -> check OK. Autre point : l'original dépend des liaisons de préfixes du graphe (sbol: et rdf:/rdfs: liés par Query.graph.namespace_manager.bind, query.py:23-28 ; owl: par défaut rdflib) alors que la traduction les déclare lexicalement par @prefix : équivalent pour le dépôt, mais le pilote (fixture Turtle qui lie ses préfixes) ne l'exerce pas. Le driver restaure `self` par une classe _Self au __eq__ toujours vrai : ne touche que la comparaison des arguments, pas le résultat. Article : pas en l'état ; possible après renforcement du fixture (l'échec silencieux str->Literal est un bon exemple).",
+  "triaged_by": "sonnet-5.5"
+}

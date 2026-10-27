@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote ne prouve presque rien : la requête ASK peut être affaiblie (objet remplacé par ?x) ou remplacée par `ask = True` sans que rdfeval check échoue ; les constantes EX_A/B/C du module sont retypées (str -> URIRef) alors que le dépôt les partage avec _graph_with_one_fact.",
+  "questions": [
+    {
+      "question": "La région n'a qu'un graphe (un seul fait), un seul appel et une valeur de retour None : un pilote qui n'exerce que `assert ask is True` suffit-il à tenir cette paire pour prouvée ?",
+      "where": "translated.ldpy:13 et original.py:12-13 ; driver.py:13-15",
+      "if_yes": "approuver, en notant que la paire ne mesure que « ne lève pas » et ne peut illustrer l'article",
+      "if_no": "needs-work : le pilote devrait comparer la valeur de ASK sur plusieurs graphes (fait présent, fait absent) -- ce qui impose d'extraire le prédicat hors du test ; sinon déclasser la paire (non prouvable par exécution)"
+    }
+  ],
+  "evidence": "Copie sous mktemp -d. Mutant A : `ASK { {EX_A} {EX_B} ?x . }` -> rdfeval check OK (vert). Mutant C : `ask = True` -> OK (vert). Mutant B : objet remplacé par une IRI absente -> FAIL (AssertionError côté traduit), donc le pilote attrape seulement un ASK faux, pas un ASK trop large. Contrôle du type : EX_A etc. valent \"<http://example/a>\" (str) dans le dépôt (tests/unit/test_result_patches.py:11-13) ; le retypage en URIRef dans translated.ldpy:6-8 est nécessaire (str nue -> Literal -> ASK faux -> le pilote échouerait) mais ces constantes sont aussi utilisées par _graph_with_one_fact dans le dépôt : dans le dépôt réel la traduction casserait le parse N-Triples, d'où la copie privée _EX_* du shim. Le shim se dit « verbatim » mais renomme EX_* en _EX_* et omet `import starlight` (sans effet ici : askAnswer n'est pas touché par le patch). classification minor-restructuring : cohérente. Ne peut pas illustrer l'article : région de test, rien ne se lit à la sortie, constantes modifiées hors région.",
+  "triaged_by": "sonnet-5.5"
+}

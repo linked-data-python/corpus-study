@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "article-example"
+  ],
+  "summary": "Traduction fidèle et oracle solide (les 19 Namespace sont réellement exportés par global et utilisés plus bas dans le dépôt; les 19 g.bind disparaissent via @graph g), mais `constructions` crédite « prefixed name » alors qu'aucun nom préfixé n'est employé, et meta.json garde une ancienne note NOT-EXPRESSIBLE/draft contradictoire.",
+  "questions": [
+    {
+      "question": "Faut-il retirer « prefixed name » de `constructions` (aucun `ns:local` n'apparaît dans translated.ldpy; `extent2011node` reste `URIRef(\"{}{}\".format(BRDFTIME, '2011'))` parce que `brdftime:2011` est une erreur de syntaxe, un nom local ne pouvant pas commencer par un chiffre) ?",
+      "where": "meta.json constructions et translated.ldpy:30",
+      "if_yes": "Corriger `constructions` (crédit indu retiré) ; la traduction reste approuvable.",
+      "if_no": "Remplacer ligne 30 par `brdftime:{'2011'}` (ou f<{BRDFTIME}2011>) pour employer réellement la construction, puis revérifier."
+    },
+    {
+      "question": "Cette paire peut-elle illustrer l'article comme cas de la fiche ldpy/027 (19 Namespace exportés en objets par `global @prefix … as X`, 19 lignes g.bind supprimées par @graph g), une fois la note meta.json nettoyée ?",
+      "where": "translated.ldpy:10-28 et 43, original.py:11-29 et 42-60",
+      "if_yes": "Retenir comme exemple du gain de 0.6.3 : le pilote demo() le prouve (3 mutants rejetés).",
+      "if_no": "Approuver pour les chiffres sans la citer (19 lignes @prefix remplacent 19 lignes Namespace : le seul gain net est les 19 bind)."
+    }
+  ],
+  "evidence": "rdfeval check : OK (demo compare liaisons du graphe, globals et triplets). Dépôt : les 19 noms (BONT, BRDFFAT, BRDFLO, BRDFFO, OM2, PROV…) sont lus dans emissions() lignes 140-181 de extract_emissions.py, donc l'export global est réel, pas décoratif; shim = graph_common.py quasi verbatim (seule modification documentée : DC en Namespace simple, car DC de rdflib 7.2.1 est un DefinedNamespace qui lève sur DC.modified). Runtime : designate() fait graph.bind(prefix, str(ns)) dans l'ordre de déclaration, mêmes arguments que g.bind d'origine. Mutants sur copie, tous FAIL : @graph g remplacé par pass; schema en https://schema.org/; échange des lignes cc et ns1 (l'ordre relatif des deux préfixes de même IRI compte et est préservé). Test `extent2011node = brdftime:2011` : SyntaxError ; `t:{\"2011\"}` fonctionne. meta.json translation_notes mélange la note finale et l'ancienne note « NOT-EXPRESSIBLE… translation_status stays draft… » devenue fausse. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

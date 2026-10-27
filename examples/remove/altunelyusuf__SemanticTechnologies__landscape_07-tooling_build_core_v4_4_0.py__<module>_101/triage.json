@@ -7,7 +7,7 @@
   "questions": [
     {
       "question": "Cette paire peut-elle illustrer l'article (strate remove : le None de rdflib devient une variable non liee, en une ligne) ?",
-      "where": "translated.ldpy:9 (`-{ {corpus} skos:note ?o }`) et original.py:8 (`g1.remove((corpus, SKOS.note, None))`)",
+      "where": "translated.ldpy:10 (`-{ {corpus} skos:note ?o }`) et original.py:9 (`g1.remove((corpus, SKOS.note, None))`)",
       "if_yes": "Retenir comme exemple de la strate remove ; dire dans l'article que le gain est de lisibilite (joker nomme, nom prefixe) et non de longueur : @graph g1 ajoute une ligne, l'import SKOS en retire une.",
       "if_no": "Approuver quand meme ; chercher l'exemple de la strate ailleurs."
     }

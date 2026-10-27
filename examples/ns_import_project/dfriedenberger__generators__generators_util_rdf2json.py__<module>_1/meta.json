@@ -61,5 +61,18 @@
     "@prefix",
     "prefixed name",
     "interpolation {expr}"
-  ]
+  ],
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "driver.py compare maintenant (1) les valeurs PAR TYPE (typed() : (nom du type, repr), donc int 1, float 1.0 et bool True sont trois valeurs) et (2) les ISSUES, pas seulement les valeurs (outcome() : ('returns', résultat typé) ou ('raises', classe, message), donc une ValueError retirée ou changée est une différence). Il exerce les fonctions internes en direct (process_value sur chaque noeud valeur des deux graphes, process_seq sur chaque rdf:Seq et sur un non-liste, literal_to_value sur 16 littéraux construits en Python) en plus de process_key_value_pairs sur 4 ancres qui rendent et 12 ancres ex:err-* qui lèvent. fixture.ttl reçoit : ex:obj-types (xsd:integer incl. 0 et négatif, xsd:float incl. 0.0, 2 entier, NaN, INF, xsd:boolean true/false/0/1, quatre chaines sans datatype dont '' et '42', une langue), ex:obj-lists (rdf:Seq vide, liste typée, membres faux '' / 0 / false / 0.0 qui ne doivent pas arrêter la marche, douze membres lus par numéro, un trou, liste contenant liste et dictionnaire, noeud à la fois rdf:Seq et ans:Dictionary, dictionnaire vide) et les ancres d'erreur (xsd:string, xsd:date, xsd:double, xsd:decimal, IRI nue, noeud anonyme nu, xsd:integer/xsd:float mal formés, et les mêmes erreurs levées depuis un dictionnaire et une liste imbriqués). fixture_missing.ttl (nouveau, sans rdf:Seq : dans fixture.ttl `(None, rdf:type, rdf:Seq) in graph` est un joker) porte les paires sans ans:value, sans ans:key, sans rien.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "int(literal) -> float(literal) : vert x3 avant, FAIL x3 après (cité par le trieur)",
+      "raise ValueError('Unknown datatype') -> return None : vert x3 avant, FAIL x3 après (cité par le trieur)",
+      "raise ValueError('Unrecognized RDF node type') -> return None : vert x3 avant, FAIL x3 après (cité par le trieur)",
+      "suppression de la garde de liste vide (and len(...) > 0 / and json_obj[key]) : vert x3 avant, FAIL x3 après (cité par le trieur)",
+      "float->int, bool->int, message de la ValueError modifié, 'has_' -> 'hasx_', has_ aussi pour les dict, str(literal) -> literal par défaut, clé sans str(), branche Literal remplacée par True, rdf:Seq -> rdf:Bag, ans:Dictionary -> autre classe, marche des membres qui commence à 0, marche arrêtée par `not item` au lieu de `item is None`, élément de liste = tuple de process_value, branche dict sans récursion, lecture de ans:value supprimée : FAIL sur chacun des artefacts touchés. Au total 60 exécutions de mutants (une par artefact et par mutation) : 57 FAIL, 3 verts (le mutant équivalent de `remaining`)."
+    ],
+    "remaining": "Un mutant reste vert, équivalent sur toute entrée bien formée : bool(literal) -> str(literal) == 'true' (rdflib normalise la forme lexicale d'un xsd:boolean valide en 'true'/'false'). Les entrées de ce mutant que le fixture ne peut produire sont mal formées. Le gain de notation sans lignes d'import (drapeau optimization-doctrine : 0.985 contre 0.945) et le caractère article_candidate restent à juger par Maxime."
+  }
 }

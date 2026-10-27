@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Le pilote laisse passer le retrait de DISTINCT et le remplacement d'un prédicat hasTrace par une variable ; et l'objet produit par s{ } n'est pas un PreparedQuery rdflib : le site d'appel du dépôt (obsel.py:323) cassera, donc ce n'est pas « directly-expressible ».",
+  "questions": [
+    {
+      "question": "Le dépôt appelle `graph.query(_RELATED_OBSELS, initBindings=...)` (obsel.py:323) ; la traduction ne tient que si ce site d'appel est lui aussi réécrit en `_RELATED_OBSELS(graph, {\"obs\": node})` : faut-il tout de même classer la paire directly-expressible ?",
+      "where": "translated.ldpy:6 ; driver.py:62-65 (appel par le suffixe ldpy, pas par graph.query) ; corpus/repos/ktbs__ktbs/lib/ktbs/engine/obsel.py:323",
+      "if_yes": "approuver la classification, en acceptant qu'un changement hors région soit non compté",
+      "if_no": "classification-doubt confirmé : minor-restructuring (site d'appel à réécrire), à reclasser"
+    },
+    {
+      "question": "Le fixture ne contient aucun doublon (deux prédicats entre la même paire, ou même voisin atteint par les deux branches de l'UNION) : un oracle sans cas où DISTINCT agit est-il acceptable ?",
+      "where": "translated.ldpy:7 et original.py:8 ; driver.py:40-55 (_fixture)",
+      "if_yes": "approuver",
+      "if_no": "needs-work : ajouter dans le fixture une relation o1-o2 dans les deux sens ou avec deux prédicats, pour que le retrait de DISTINCT échoue"
+    }
+  ],
+  "evidence": "Copie sous mktemp -d, mutants de translated.ldpy. VERTS (survivent) : retrait de DISTINCT ; `$obs {KTBS.hasTrace} ?trace` -> `$obs ?zz ?trace`. ROUGES : retrait de `$obs` du SELECT, retrait de chaque ligne hasTrace, UNION cassé. Test d'API : `g.query(translated_query, initBindings={'obs': o1})` lève AttributeError: 'PreparedQuery' object has no attribute 'algebra' ; seul `q(g, {'obs': o1})` marche. La note « prepareQuery(...) disappears, the island already IS the prepared-query object » est donc fausse pour l'API rdflib du dépôt. Types : KTBS.hasTrace est un URIRef dans le dépôt (ClosedNamespace) comme dans le shim ; interpolation correcte. Peut illustrer l'article : non en l'état (appel du dépôt incompatible, gain réduit à `%s` -> `{expr}` et à la suppression de l'import prepareQuery).",
+  "triaged_by": "sonnet-5.5"
+}

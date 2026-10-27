@@ -1,0 +1,18 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "`any(graph.objects(s, p))` teste la véracité des objets : un label `\"\"` ou `0` compte pour absent dans l'original, présent dans `bool(m{ })` ; le pilote n'a aucun littéral faux.",
+  "questions": [
+    {
+      "question": "Dans le dépôt d'origine, `_has_label` doit-elle rendre False pour un sujet dont le seul label est un littéral vide (rdfs:label \"\") — c'est-à-dire la traduction doit-elle conserver le test de véracité d'`any(...)` ?",
+      "where": "translated.ldpy:28 et original.py:24 ; appelée en documentation.py:48 et :54 (comptage classes_with_label / properties_with_label)",
+      "if_yes": "needs-work : la traduction fidèle est `if any(m{ {subject} {pred} ?o }):` (le `any` garde la véracité de rdflib) ; ajouter au fixture `ex:x rdfs:label \"\"` et un littéral 0 et les appels correspondants au pilote. La paire ne peut pas être créditée trav_existence/bool(m{ }) telle quelle.",
+      "if_no": "approuver en notant que l'équivalence n'est vraie que modulo les littéraux faux ; ajouter tout de même l'appel au pilote pour documenter l'écart connu."
+    }
+  ],
+  "evidence": "rdfeval check OK sur la paire telle quelle. Dans une copie : fixture + `ex:emptyLabel rdfs:label \"\"` et `ex:zeroLabel skos:prefLabel 0`, deux appels ajoutés au pilote -> FAIL `call[5].result: values differ (False vs True); call[6].result: values differ (False vs True)` (original False, traduction True). Avec `any(m{ {subject} {pred} ?o })` à la place de `bool(m{ ... })` la copie repasse OK sur ce fixture élargi. Le call site (documentation.py:48/54) compte les classes/propriétés avec label : l'écart fausse ce comptage. Les entrées sont des URIRef (pas de piège de type). Rien d'autre : `{subject}` et `{pred}` sont des termes, constructions justes.",
+  "triaged_by": "sonnet-5.5"
+}

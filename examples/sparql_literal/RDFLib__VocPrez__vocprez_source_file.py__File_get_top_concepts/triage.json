@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "La branche de repli (second SELECT avec GRAPH ?g, six interpolations) n'est jamais exécutée par le pilote : un mutant dans cette requête reste vert ; et `{URIRef(vocab.uri)}` s'écrit `{f<{vocab.uri}>}` sans l'import de URIRef.",
+  "questions": [
+    {
+      "question": "Le second SELECT (len(tcs)==0) lève toujours sur un rdflib.Graph simple et n'est donc jamais comparé : accepte-t-on qu'un tiers de la région (lignes 43-77) et ses six interpolations soient crédités sans exécution ?",
+      "where": "translated.ldpy:43-77 et original.py:46-85 ; driver.py:1-40 (branche exclue)",
+      "if_yes": "approuver, en retirant ce crédit au moins de l'article (code mort à l'exécution)",
+      "if_no": "needs-work : ajouter un appel avec un ConjunctiveGraph/Dataset en fixture pour exercer la branche, ou retirer ses interpolations des comptes"
+    },
+    {
+      "question": "`{URIRef(vocab.uri)}` (vocab.uri est un str, vérifié à file.py:98-100) peut s'écrire `{f<{vocab.uri}>}` : préfère-t-on cette forme ?",
+      "where": "translated.ldpy:21, 25, 48, 52, 61, 65 ; import ligne 12",
+      "if_yes": "wrong-construction confirmé : remplacer et supprimer `from rdflib import URIRef`",
+      "if_no": "approuver la construction actuelle"
+    }
+  ],
+  "evidence": "Copie sous mktemp -d. Mutant `skos:inScheme` -> `skos:inFoo` dans le second SELECT : rdfeval check OK (vert). Appel ajouté (schéma inexistant, ou ex:scheme2) : original et traduction lèvent la même Exception (« requiring a dataset »), donc comparable à la main mais pas par le harnais ; self.gr est un Graph() simple partout dans le dépôt (file.py:55, load_pickle_graph), la branche est donc morte en production. Premier SELECT : retrait de ORDER BY, de la désjonction `lang(?pl) = \"\"`, d'une branche UNION -> FAIL (bon) ; retrait de DISTINCT -> vert mais équivalent (le cache pl_cache déduplique). Type : vocab.uri est str(cs[0]) (file.py:98-100) -> URIRef nécessaire (bare `{vocab.uri}` donnerait un Literal) ; `<{vocab.uri}>` dans s{ } ne transpile pas ; `{f<{vocab.uri}>}` : check OK sur les deux appels. self.language : str (`language or DEFAULT_LANGUAGE`), jamais None, donc `{self.language}` équivalent à `\"{language}\"`. Article : non (la moitié de la région est du code qui lève).",
+  "triaged_by": "sonnet-5.5"
+}

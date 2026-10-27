@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : `model.value(s, p, None) is not None` -> `bool(m{ {subject} {predicate} ?o })` est exactement l'existence, vrai et faux exercés, appelants du dépôt passent des URIRef.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ?",
+      "where": "translated.ldpy:13-14 et original.py:13",
+      "if_yes": "la retenir comme exemple trav_existence : deux lignes, aucune restructuration, équivalence propre (jokers : aucun).",
+      "if_no": "la laisser en approuvé simple."
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie avec `ex:s4 ex:p1 \"\"`, `ex:s5 ex:p1 0` et `ex:s6 ex:p1 ex:s6` (trois appels ajoutés) : OK, True des deux côtés, car `is not None` ne dépend pas de la véracité (contraste avec la région has_label). Appels du dépôt (lv2_check_specification.py:164, :183) : `subject` vient de `typed_subjects` sans BNode (URIRef), `rdfs.label`/`rdfs.comment` sont des URIRef : aucune coercition de str. Le shim se limite à l'annotation `model: Graph` ; meta.json garde oracle=isomorphism / rdf_ops=0, simple provenance du tirage.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : les 4 Namespace locaux ne sortent pas du bloc (seuls les URIRef produits en sortent), 12 add fusionnés en 4 +{ }; seule réserve, @graph g ajoute au graphe deux liaisons de préfixe (p, dpv_owl) que l'original n'a pas, invisibles à l'isomorphisme.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (en acceptant que `@prefix p: f<{PREFIX}> .` soit la forme employée parce que PREFIX est importé, et que le graphe rendu porte en plus les liaisons p: et dpv_owl: que l'original ne pose pas) ?",
+      "where": "translated.ldpy:20-52 et original.py:19-51",
+      "if_yes": "Retenir comme exemple ns_def_local propre : aucun Namespace ne s'échappe, 4 Namespace + 12 add deviennent 4 @prefix + 4 +{ }.",
+      "if_no": "Approuver quand même la paire pour les chiffres ; ne pas la citer (le f<{PREFIX}> et les liaisons de préfixe ajoutées brouillent le gain)."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dépôt d'origine : PREFIX = \"https://www.w3id.org/statbarnsdc#\" (acro/ontology_handler.py:18), le shim met \"https://example.org/acro-ontology#\" (valeur différente de la source malgré « Identical bindings », identique des deux côtés donc sans effet sur la paire). Aucun Namespace ne sort de la fonction, et aucun nom de terme ne collisionne avec une méthode de str. Mutation (prefLabel \"Frequencies\" -> \"Frequenciez\" dans une copie) : FAIL, l'oracle voit les littéraux. Transpilé et comparé : g.namespaces() de la traduction a 31 liaisons contre 29 (p et dpv_owl en plus) ; la sérialisation Turtle diffère donc (p:FrequencyTable au lieu de URIRefs complets). Le dépôt ne sérialise ni ne lit les espaces de noms de ce graphe (test_ontology_handling.py et ontology_handler.py : aucun serialize/namespace/qname), donc sans conséquence sur le comportement testé. Pas de {expr} pouvant valoir None (chaînes littérales et URIRef). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

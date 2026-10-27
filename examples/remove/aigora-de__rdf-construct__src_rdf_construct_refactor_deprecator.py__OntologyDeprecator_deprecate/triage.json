@@ -7,7 +7,7 @@
   "questions": [
     {
       "question": "Le commentaire « DEPRECATED: but this one belongs to somebody else. » de ex:Untouched est-il cense detecter un -{ } dont le sujet fuit en joker (le piege annonce dans l'en-tete de fixture.ttl) ?",
-      "where": "fixture.ttl:34-39 (ex:Untouched) ; translated.ldpy:97 et original.py:81 (suppression du commentaire DEPRECATED lie)",
+      "where": "fixture.ttl:31-36 (ex:Untouched) ; translated.ldpy:104 et original.py:101 (suppression du commentaire DEPRECATED lie)",
       "if_yes": "La fixture est insuffisante : le litteral d'ex:Untouched differe de celui d'ex:OldClass (« DEPRECATED (v0.9): superseded a long time ago. »), donc un motif dont le sujet est elargi ne l'atteint jamais. Mettre needs-work : donner a ex:Untouched exactement le meme litteral que l'un des commentaires DEPRECATED d'ex:OldClass, relancer check, verifier que le mutant `-{ ?s rdfs:comment {existing_deprecated_comment} }` echoue. La traduction elle-meme est juste ; ensuite approuver, et la paire devient candidate a l'article (voir evidence).",
       "if_no": "Le piege n'est pas voulu : approuver tel quel, le drapeau weak-oracle ne porte que sur un cas hors du coeur de la strate (suppression entierement liee)."
     }

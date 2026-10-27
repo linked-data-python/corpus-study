@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "classification-doubt"
+  ],
+  "summary": "Le @prefix est hissé au niveau module, hors de la région (la ligne `self.LMSS = Namespace(...)` d'origine est dans __init__), pour un gain nul (1 ligne devient 2, le préfixe lmss n'est jamais utilisé lexicalement), et `constructions` crédite @graph, m{ }, prefixed name, variable qui n'existent pas dans la traduction.",
+  "questions": [
+    {
+      "question": "Le `@prefix lmss: <http://lmss.sali.org/> as LMSS .` doit-il être dans le corps de __init__ (là où l'original construit le Namespace) plutôt qu'au niveau module avant la fonction, et `constructions` doit-il se réduire à « @prefix » ?",
+      "where": "translated.ldpy:28 et 45 contre original.py:29 ; meta.json constructions",
+      "if_yes": "needs-work : déplacer la ligne 28 dans la fonction (vérifié OK) et corriger `constructions`; l'en-tête 9-18 (« No @prefix appears below… left exactly as rdflib wrote it ») est périmé aussi.",
+      "if_no": "Justifier le hissage dans la note (il change où le Namespace est construit : à l'import au lieu de chaque instanciation)."
+    },
+    {
+      "question": "Cette paire, où @prefix ne remplace rien d'utile (un Namespace affecté à un attribut, jamais employé en nom préfixé dans le bloc), doit-elle être reclassée `awkward` (ou `minor-restructuring`) plutôt que `directly-expressible` ?",
+      "where": "meta.json classification ; translated.ldpy:28,45",
+      "if_yes": "Reclasser et ne pas compter cette paire comme un gain de @prefix; ne pas la citer dans l'article.",
+      "if_no": "Garder `directly-expressible` mais expliquer le gain (il n'y en a aucun de lisible)."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dépôt (app/lmss_classification.py:15-32) : self.LMSS = Namespace(\"http://lmss.sali.org/\") est bien dans __init__; _get_entity_embedding lit self.LMSS.hasEmbedding (l'attribut doit rester un Namespace; ldpy.runtime.Namespace est rdflib.Namespace, donc .hasEmbedding mint la bonne IRI). Transpilé : `__namespaces__['lmss'] = LMSS = Namespace(...)` en tête de module. Copie avec le @prefix ... as LMSS déplacé dans __init__ juste avant `self.LMSS = LMSS` : rdfeval check OK, donc le hissage n'était pas nécessaire. Le shim reprend _load_ontology_index/_load_top_classes comme le dépôt (lignes 34-44); SentenceTransformer est un stub nom-seul dont le résultat n'est jamais relu dans la région. Pas d'équivalence douteuse (pas de {expr}). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
