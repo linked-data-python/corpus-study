@@ -85,6 +85,9 @@ def _render(entries: list[tuple], study: Study) -> str:
         link = "%s.html#%s" % (html.escape(stratum), html.escape(meta["region_id"]))
         flags = " ".join(triage.get("flags", []))
         questions = "".join(_question_html(q) for q in triage.get("questions", []))
+        if triage.get("repaired"):
+            questions += ("<p><b>repaired:</b> %s</p>"
+                          % html.escape(str(triage["repaired"])))
         rows.append(
             "<tr class='%s'><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a>"
             "<br><span class=dim>%s</span></td><td>%s<ul>%s</ul></td><td>%s</td></tr>"
@@ -118,13 +121,15 @@ def run(config: dict, study: Study = STUDY) -> None:
     with open(study.path(TRIAGE_CSV), "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["region_id", study.group, "priority", "flags",
-                    "questions", "summary"])
+                    "questions", "repaired", "summary"])
         for ex_dir, meta, t in entries:
             t = t or {}
             w.writerow([meta["region_id"], meta.get(study.group),
                         t.get("priority", "untriaged"),
                         " ".join(t.get("flags", [])),
-                        len(t.get("questions", [])), t.get("summary", "")])
+                        len(t.get("questions", [])),
+                        "yes" if t.get("repaired") else "",
+                        t.get("summary", "")])
     counts = Counter((t or {}).get("priority", "untriaged") for _, _, t in entries)
     unknown = sum(bool((t or {}).get("unknown_flags")) for _, _, t in entries)
     print(f"triage: {dict(counts)} -> {out}"
