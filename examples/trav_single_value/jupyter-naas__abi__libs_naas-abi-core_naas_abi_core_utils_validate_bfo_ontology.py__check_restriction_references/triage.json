@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidele (original.py identique au depot, shim naas_context.py conforme), mais le fixture laisse survivre deux mutants du pilote : bool(m{ {iri} a ?x }) remplace par False, et la boucle des remplisseurs privee de owl:someValuesFrom.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un fixture plus riche (un remplisseur someValuesFrom non declare, un IRI non declare mais type par rdf:type utilise comme remplisseur ou comme onProperty, un deuxieme remplisseur sur le meme noeud) avant d'approuver la paire ?",
+      "where": "translated.ldpy:52 et :73 ; original.py:48 et :69 ; fixture.ttl:38-74",
+      "if_yes": "needs-work : ajouter ces cas au fixture.ttl (les mutants meurent alors, mesure ci-dessous) ; la paire reste equivalente, aucun defaut de traduction trouve.",
+      "if_no": "approuver en l'etat, en sachant que les branches `(iri, RDF.type, None) in g` et `someValuesFrom` ne sont pas prouvees par le pilote."
+    }
+  ],
+  "evidence": "rdfeval check initial : OK. Mutants sur une copie de translated.ldpy, fixture inchange : (a) `bool(m{ {iri} a ?x })` -> `False` : OK (survit) ; (b) idem -> `bool(m{ {iri} ?p ?x })` : OK (survit) ; (c) `(owl:allValuesFrom, owl:someValuesFrom)` -> `(owl:allValuesFrom,)` : OK (survit) ; (d) m{ ?s a owl:DatatypeProperty } -> [] : OK (mutant equivalent : un datatype property declare porte toujours un rdf:type, donc masque par (iri, RDF.type, None) -- meme redondance dans l'original). Meurent : someValuesFrom remplace par allValuesFrom en double, onProperty remplace par allValuesFrom, sens de rdfs:subClassOf inverse. Avec un fixture enrichi (ajout de restrictions BNode, d'un remplisseur someValuesFrom type mais non declare, de deux remplisseurs sur un noeud, de plusieurs proprietaires du meme noeud, d'un onProperty litteral) : paire toujours equivalente, et (a) et (c) echouent ; (b) survit encore (aucun IRI avec triplets non-type seulement). Original.py compare ligne a ligne au depot (jupyter-naas__abi, validate_bfo_ontology.py:653-716) : identique ; les cinq helpers du shim sont conformes au depot. Les noeuds Restriction du fixture sont des IRI nommes (ex:r1...), pas des BNodes ; avec des BNodes (fixture enrichi) c'est equivalent. Note : article_candidate:true dans meta.json non retenu : 5 lectures qui ne raccourcissent rien (g.value(a,b) -> m{ {a} b ?v }.first() est plus long) et oracle faible.",
+  "triaged_by": "sonnet-5.5"
+}

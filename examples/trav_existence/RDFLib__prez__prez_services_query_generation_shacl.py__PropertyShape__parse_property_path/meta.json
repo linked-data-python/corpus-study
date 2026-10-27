@@ -33,7 +33,8 @@
     "`self.graph` est designe une fois (`@graph self.graph`, un attribut, pas un simple nom -- confirme : accepte tel quel) et couvre les quatre `m{ }` de la fonction ; aucun n'a besoin de nommer le graphe.",
     "`Collection(self.graph, bn_obj)` (les deux occurrences, sh:union et sh:alternativePath) reste du rdflib brut : ce n'est pas un motif de triplet mais un algorithme (materialiser une rdf:List entiere), meme statut que .cbd() -- hors de portee de m{ } par construction, pas un manque du langage.",
     "les classes reelles (PropertyPath et ses sous-classes) sont des pydantic BaseModel ; pydantic n'est pas installe dans cet environnement, donc le shim les reproduit en dataclasses de meme forme -- l'egalite structurelle par defaut des dataclasses est exactement l'oracle qu'il fallait, sans harnais de comparaison ad hoc.",
-    "harnais demo() (identique des deux cotes, meme convention que l'exemple `remove`) : recherche le noeud de chemin ancre a `ex:{anchor} ex:path`, appelle la region contre un PropertyShapeStub frais, et renvoie (resultat, appels a _add_path_to_shape) -- le stub relie sa propre recursion (`self._parse_property_path`) a l'implementation sous test via les globals de l'appelant, pour que la recursion du sh:sequence/inversePath reste a l'interieur de la version comparee."
+    "harnais demo() (identique des deux cotes, meme convention que l'exemple `remove`) : recherche le noeud de chemin ancre a `ex:{anchor} ex:path`, appelle la region contre un PropertyShapeStub frais, et renvoie (resultat, appels a _add_path_to_shape) -- le stub relie sa propre recursion (`self._parse_property_path`) a l'implementation sous test via les globals de l'appelant, pour que la recursion du sh:sequence/inversePath reste a l'interieur de la version comparee.",
+    "REPAIR 2026-10-27: the guard `if self.graph.value(pp, RDF.first):` tests the TRUTH of the head element, not the existence of an rdf:first: `bool(m{ {pp} rdf:first ?x })` sent a list headed by \"\" or 0 into the list branch (ValueError \"Malformed RDF list structure\") where the original falls through to predicate_objects (ValueError \"multiple predicate-objects\"). Proved by the strengthened driver (err7/err8, FAIL with `bool`). Translation is now `if m{ {pp} rdf:first ?x }.first():`, the same truthiness as `value(...)`."
   ],
   "draft_sha": "545236900a10da4d",
   "provenance": {
@@ -52,5 +53,29 @@
     "method": "fixture:fixture.ttl entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "fixture + 6 valid cases (sh:oneOrMorePath, sh:zeroOrOnePath, shext:bNodeDepth, 3-level nesting, empty sh:alternativePath, empty sh:union) and 9 error cases (no predicate-object, several, unsupported construct, literal node, malformed list: falsy element / missing rdf:rest, falsy list head \"\" and 0, error from the recursion); driver.py compares the 9 exceptions (type + message, bnode ids normalised) of both artefacts, which run_pair cannot do on messages that embed blank-node ids; docstring explains each.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "bool(m{ }) guard (err7, err8)",
+      "guard on any subject",
+      "guard on any predicate",
+      "sh:oneOrMorePath removed from PRED_TO_PATH_CLASS",
+      "sh:zeroOrOnePath removed",
+      "shext:bNodeDepth removed",
+      "rdf:rest read as rdf:first",
+      "`if first:` check removed",
+      "missing-rdf:rest check removed",
+      "len(pred_objects) >= 1",
+      "empty-predicate check removed",
+      "predicate_objects over any subject",
+      "sh:union/sh:alternativePath branch swaps",
+      "union=True -> False",
+      "BNodeDepth value str()-ed",
+      "loop end changed from rdf:nil"
+    ],
+    "remaining": "The raise \"Unhandled path class\" is dead code in the source (every key of PRED_TO_PATH_CLASS is handled before or in the list of four) and is not exercised. Collection() stays rdflib (algorithm, not a pattern). Classification and article status for Maxime."
   }
 }

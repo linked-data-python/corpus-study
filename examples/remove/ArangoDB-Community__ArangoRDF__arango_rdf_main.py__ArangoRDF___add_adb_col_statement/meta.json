@@ -49,5 +49,21 @@
     "method": "entry:__add_adb_col_statement",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "8 calls added (12 in all): S with a neighbour on another predicate and another subject holding a collection statement but S none (add expected), overwrite on an empty graph, overwrite with the same value, BNode subject (no overwrite / already there / overwrite, next to another BNode), empty collection name, Literal subject; docstring explains each and the one case left out (None).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "existence test widened to any predicate (m{ {subject} ?p ?o })",
+      "existence test widened to any subject",
+      "-{ ?s p ?o } (removal on any subject)",
+      "-{ {subject} ?p ?o } (removal on any predicate)",
+      "removal dropped",
+      "existence test dropped / forced True",
+      "object of the added triple as URIRef",
+      "removal restricted to the added value"
+    ],
+    "remaining": "subject=None: the repository reaches it (rdf_graph.value(s, RDF.object) of a reification missing rdf:object, main.py:3641, 3735, 3820, always overwrite=True) but there the ORIGINAL wipes every adb:collection statement and raises AssertionError (\"Subject None must be an rdflib term\", from Graph.add), so no run that completes differs; the translation writes Literal('None') as subject, silently, and removes nothing. Verified by execution on both artefacts. It is the known `{expr}`-is-None gap of the language (not expressible without a guard that the original does not have); not in the driver. Article: the example stays publishable (3 islands + @graph against remove/in/add), but only with this footnote; the equivalence holds for every subject that is an rdflib term, and for None the original aborts."
   }
 }

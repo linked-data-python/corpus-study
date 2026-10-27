@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "L'ilot de boucle `m{ {URIRef(next_page)} hydra:nextPage ?v }(g).first()` (ligne 32, le seul a suffixe d'appel (g) credite) n'a JAMAIS de solution dans le pilote : on peut le supprimer ou lui retirer (g) sans que le pilote s'en apercoive ; et `{URIRef(next_page)}` s'ecrit `f<{next_page}>`.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un fixture a trois pages (la page 2 portant `<> hydra:nextPage <fixture_ckan_page3.ttl>`) pour que la lecture de la ligne 32 ait une solution et que le suffixe (g) soit prouve ?",
+      "where": "translated.ldpy:32 et original.py:31 ; fixture_ckan_page2.ttl (aucun hydra:nextPage) ; meta.json:34 (affirme que les 3 .first() ont chacun une solution : faux pour le troisieme)",
+      "if_yes": "needs-work : ajouter la page 3 et corriger la note de meta.json ; la paire est equivalente sur ce fixture enrichi.",
+      "if_no": "approuver en acceptant que la credit de `call suffix (g)` ne repose sur aucune preuve d'execution."
+    },
+    {
+      "question": "L'enveloppe `{URIRef(next_page)}` est-elle acceptable alors que `f<{next_page}>` donne le meme resultat (mesure, y compris quand hydra:nextPage est un litteral) ?",
+      "where": "translated.ldpy:32 et original.py:31",
+      "if_yes": "approuver tel quel (l'enveloppe est necessaire pour un litteral ; seule `{next_page}` nue est fausse).",
+      "if_no": "wrong-construction : ecrire `f<{next_page}>` ; recompter l'ilot."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur une copie, fixtures inchanges : `}(g).first()` -> `}.first()` : OK (survit) ; la lecture de la ligne 32 -> `None` : OK ; sujet {URIRef(next_page)} -> ?q avec (g) : OK ; predicat nextPage -> PagedCollection : OK. Meurent : cur=None, cur sur dcat:Dataset, ?q a la place de {cur}, next_page=None, boucle finale vide ou elargie (?d a ?t, ?d ?p ?o). Avec un fixture a trois pages (page2 : `<> hydra:nextPage <page3>`, page3 : un dcat:Dataset) la paire est equivalente (62 triplets de chaque cote) et les 4 mutants survivants echouent. Variantes de nextPage : avec un litteral absolu `\"file:///.../page2.ttl\"` pour nextPage, `{URIRef(next_page)}` et `f<{next_page}>` donnent le meme graphe que l'original ; `{next_page}` nu perd la page 3 (divergence) -- donc l'enveloppe est necessaire mais f<...> suffit (le pilote ne le voit pas car ses nextPage sont des IRI ; je n'ai pas verifie dans le depot si les vrais points d'acces CKAN emettent un IRI ou un litteral). Cas cur=None (graphe sans hydra:PagedCollection mais avec un hydra:nextPage) : equivalent, car graph.value(subject=None, predicate=P) rend None (sujet et objet absents) et {cur}=Literal('None') ne matche rien : l'ecart connu du langage n'est pas atteint. Shim quality.py no-op : remplace par une version qui ecrit les triplets DQV de add_measure() du depot dans graph pendant l'iteration de la boucle finale : toujours equivalent (le no-op ne cache rien ici). original.py identique au depot (portal_fetch_processors.py:296-320). Pas d'article-example malgre meta.json (article_candidate:true) : la credit du suffixe (g) n'est pas prouve et les 3 lectures sont plus longues que g.value.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "classification-doubt"
+  ],
+  "summary": "Oracle solide et paire equivalente, mais `for @bindings in` est applique a un generateur de dicts fabrique (qui deplace le calcul ontouml_ref(mapping[restriction]) hors du corps) alors qu'une boucle ordinaire + `+{ }` marche ; `{URIRef(...)}` s'ecrit aussi f<...>.",
+  "questions": [
+    {
+      "question": "Le credit de `for @bindings in` est-il indu, la boucle d'origine iterant une liste de chaines, sans lignes de donnees ?",
+      "where": "translated.ldpy:34-38 et original.py:32-39",
+      "if_yes": "wrong-construction : reecrire en `for restriction in class_dict[\"restrictedTo\"]: +{ {sujet} ontouml:restrictedTo {ontouml_ref(restriction_nature_mapping[restriction])} }`, retirer `for @bindings in` de constructions (mesure : cette forme passe le pilote).",
+      "if_no": "approuver, en notant que la construction est employee de facon artificielle."
+    },
+    {
+      "question": "La classification `directly-expressible` est-elle trop optimiste, le generateur de dicts etant une restructuration (minor-restructuring) ?",
+      "where": "translated.ldpy:35-37 et original.py:33-39",
+      "if_yes": "reclasser en minor-restructuring.",
+      "if_no": "laisser directly-expressible."
+    }
+  ],
+  "evidence": "rdfeval check : OK. 12 mutants de translated.ldpy : predicat change, objet constant, [:1], sujet constant, ilot supprime, mapping fixe, garde `if` retire, sens inverse, triplet en trop, {URIRef(..)} remplace par {str} nu -> tous detectes (oracle d'isomorphisme solide : 3 appels dont multi, unique, cle absente). Survivants equivalents : `{URIRef(base + id)}` -> `f<{base + id}>` ; boucle ordinaire sans `for @bindings` avec `{ontouml_ref(...)}` en position d'objet. Experiences hors pilote (graphes et exceptions) : ids absents, restrictedTo vide/doublons/chaine/None, cle inconnue au milieu de la liste (KeyError apres avoir ajoute le premier triplet : meme graphe partiel des deux cotes) : tout identique. Le shim ontouml_ref code en dur 'https://w3id.org/ontouml#' ; le depot construit METADATA['conformsTo'] + '#' + entity, METADATA['conformsTo'] valant la constante 'https://w3id.org/ontouml' (metadata.py:70) : conforme, et le @prefix ontouml: code la meme constante. Pas d'article-example : la traduction n'est pas plus courte que l'original.",
+  "triaged_by": "sonnet-5.5"
+}

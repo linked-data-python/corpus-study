@@ -26,7 +26,8 @@
   "translation_notes": [
     "Textbook trav_existence: `if any(graph.objects(subject, pred)): return True` throws the iterator away for its truth alone, never reuses a value -- translated with the stratum's own construction, `bool(m{ {subject} {pred} ?o })`, per INSTRUCTIONS_403 SS2 (`any(g.objects(...))` -> `bool(m{ })`); the loop over LABEL_PREDICATES and the early return are untouched (no refactoring). `{subject}`/`{pred}` are bare interpolations (both already rdflib terms, no coercion to reconsider) in the exact subject/predicate positions of INSTRUCTIONS_403's own trav_one_step example `m{ {s} p ?o }`.",
     "LABEL_PREDICATES: RDFS.label -> rdfs:label (prefixed name); the four skos:/dc:/dcterms: URIRef(...) constants have no @prefix imported by the original file, so they stay bare IRIs (<http://www.w3.org/2004/02/skos/core#prefLabel> etc.) rather than inventing prefixes the source never declared. RDF is imported but unused in the original file too (only RDFS.label is referenced) -- kept as-is, not cleaned up.",
-    "fixture.ttl / driver.py: `_has_label(graph, subject)` takes two arguments, so the default fixture= calling convention (entry called with just the parsed graph) doesn't fit; calls= is given explicitly, one call per subject, each re-parsing fixture.ttl fresh. Five subjects: three each resolving through a different LABEL_PREDICATES member (rdfs:label, skos:altLabel, dcterms:title), one with only non-label predicates (ex:other, rdfs:comment -- the zero-solution case with real neighbouring data), one absent from the graph entirely (zero solution, no data at all); plus a label on an unrelated subject (ex:neighbour) to prove the read is scoped to the given subject, not the whole graph."
+    "fixture.ttl / driver.py: `_has_label(graph, subject)` takes two arguments, so the default fixture= calling convention (entry called with just the parsed graph) doesn't fit; calls= is given explicitly, one call per subject, each re-parsing fixture.ttl fresh. Five subjects: three each resolving through a different LABEL_PREDICATES member (rdfs:label, skos:altLabel, dcterms:title), one with only non-label predicates (ex:other, rdfs:comment -- the zero-solution case with real neighbouring data), one absent from the graph entirely (zero solution, no data at all); plus a label on an unrelated subject (ex:neighbour) to prove the read is scoped to the given subject, not the whole graph.",
+    "REPAIR 2026-10-27: `bool(m{ {subject} {pred} ?o })` was NOT the same test as `any(graph.objects(subject, pred))`: `any` tests the TRUTH of the objects, so a label that is \"\", 0, false or \"\"@en counts as absent in the original (and in the repository: documentation.py:48 and :54 count the classes/properties that have a label from ontologies the user supplies), present for `bool(m{ })`. Proved by the strengthened driver (FAIL call[7..10] with `bool`, OK with the fix). Translation is now `if any(m{ {subject} {pred} ?o }):`, which keeps rdflib's truthiness exactly; the `any` stays Python, only the iterator is replaced."
   ],
   "article_candidate": true,
   "draft_sha": "ff471dbdbd9bc089",
@@ -45,5 +46,20 @@
     "method": "fixture:fixture.ttl entry:_has_label",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-27",
+    "driver": "fixture gets the two LABEL_PREDICATES members no subject used (skos:prefLabel, dc:title), the falsy labels (\"\", 0, false, \"\"@en), a falsy label next to a truthy one (same predicate, or another predicate), truthy non-string objects (IRI, blank node, number); driver adds 12 calls (17 in all) incl. the neighbour that carries a label of its own; docstring says what each exercises.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "bool(m{ }) instead of any(m{ }) (falsy labels)",
+      "m{ ?s {pred} ?o } (any subject)",
+      "m{ {subject} ?p ?o } (any predicate)",
+      "prefLabel dropped from LABEL_PREDICATES",
+      "dc:title dropped from LABEL_PREDICATES",
+      "condition forced False",
+      "m{ }.first() truthy (kills call[11], emptyThenOk)"
+    ],
+    "remaining": "Classification: the pair is now `any(m{ ... })` against `any(graph.objects(...))`; for Maxime to judge whether trav_existence is still credited as `bool(m{ })` (no: the construction is m{ } consumed by Python's any) and whether the pair keeps directly-expressible (the call is longer than the original, the gain is nil or negative in tokens)."
   }
 }
