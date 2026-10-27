@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "La traduction est correcte, mais le pilote ne prouve pas la garde `logic_transform is not None` (un mutant `if logic_transform:` reste vert, faute d'appel avec logic_transform=\"\") ; et None/str en entrée donnent un littéral \"None\" au lieu de lever. Peu d'intérêt pour l'article : les îlots sont faits d'interpolations.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel avec logic_transform=\"\" (et un Literal(0)) pour que la garde `is not None` soit réellement prouvée ?",
+      "where": "translated.ldpy:38 et original.py:35 ; driver.py:37-53",
+      "if_yes": "needs-work : ajouter l'appel (chez l'original `\"\" is not None` écrit bindsLogic \"\" ; la traduction aussi, mais rien ne le prouve)",
+      "if_no": "approuver en acceptant que la garde ne soit prouvée que sur None et sur une chaîne non vide"
+    },
+    {
+      "question": "Acceptez-vous qu'une entrée hors contrat (parent_node_id ou attribute_iri valant None ou une `str`) produise dans la traduction un littéral (`\"None\"`, ou l'IRI en chaîne) au lieu de l'AssertionError de rdflib ?",
+      "where": "translated.ldpy:33 et 39 ; original.py:31 et 37",
+      "if_yes": "approuver ; les appelants réels passent des URIRef (extractIffBindings.py:269 : entity_id issu de g.subjects, attribute[1] = BIND(IRI(?namestr)) ; owl2instances.py:647 : URIRef(node_id))",
+      "if_no": "needs-work : ajouter au pilote un appel avec parent_node_id=None, signaler l'écart de langage `{None}`"
+    }
+  ],
+  "evidence": "`rdfeval check` : OK. Mutant dans une copie, ligne 38 `if logic_transform is not None:` -> `if logic_transform:` : check reste OK (le pilote n'a que logic_transform absent et \"scale(2.0)\"). Autre mutant (bindsFirmware -> bindsEntity, ligne 35) : FAIL, donc le reste est bien discriminé. Comparaison directe des deux versions : logic_transform=\"\", Literal(3), URIRef, version=None, firmware=3, attribute_iri=Literal : identiques. Divergences : parent_node_id=None -> original AssertionError('Object None must be an rdflib term'), traduction écrit `bindsEntity \"None\"` (6 triplets) ; parent_node_id=\"http://e/p\" (str) -> original AssertionError, traduction écrit un littéral ; attribute_iri=None -> original AssertionError, traduction écrit `\"None\" boundBy binding` (sujet littéral). Shim : Bindings.__init__ et NGSILD identiques au dépôt (lib/bindings.py:26-31 ; lib/utils.py:85). Les randoms sont neutralisés par un patch de random.choices dans driver.py, hors région : acceptable. Note : l'îlot de 5 lignes ne gagne rien en lisibilité, tous les prédicats restent `{self.basens['…']}` ; article-example non retenu.",
+  "triaged_by": "sonnet-5.5"
+}

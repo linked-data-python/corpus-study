@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "classification-doubt"
+  ],
+  "summary": "Équivalence correcte et oracle suffisant, mais `constructions` crédite `@prefix` alors que translated.ldpy n'en déclare aucun, et le « gain » vient d'une table de dispatch en Python pur (refactorisation), pas du langage : contre-exemple pour l'article, pas exemple.",
+  "questions": [
+    {
+      "question": "`@prefix` est listé dans constructions (meta.json) alors que translated.ldpy n'a aucune déclaration `@prefix` (les prédicats passent par `SKOS.xxx` dans un dict Python) : faut-il retirer ce crédit ?",
+      "where": "meta.json:19-25 et translated.ldpy:6-18 (grep -c '@prefix' = 0)",
+      "if_yes": "needs-work : corriger constructions (retirer \"@prefix\") avant tout décompte.",
+      "if_no": "garder, mais expliquer quel îlot `@prefix` est crédité."
+    },
+    {
+      "question": "Remplacer la chaîne if/elif de 8 branches (original.py:15-30) par la table `_NOTE_PREDICATES` + `.get(..., SKOS.note)` (translated.ldpy:10-30) dépasse-t-il « même programme, notation différente » (INSTRUCTIONS §2 : pas de refactorisation) ?",
+      "where": "translated.ldpy:10-18,29 et original.py:15-30",
+      "if_yes": "reclasser en minor-restructuring, ne pas retenir pour l'article : la même table donnerait en Python pur `g.add((concept, _NOTE_PREDICATES.get(t, SKOS.note), Literal(...)))`, plus court que la version ldpy.",
+      "if_no": "garder directly-expressible."
+    }
+  ],
+  "evidence": "check OK. Mutants dans des copies, rejetés : 'example' -> SKOS.note ; défaut du .get -> SKOS.example. Le pilote couvre les 7 types, le type inconnu et zéro note ; `if obj.has_notes.all(): -> if True:` reste vert mais est un mutant équivalent (boucle vide). original.py = lignes 153-170 du dépôt à l'identique (diff vide) ; le seul ajout est l'enveloppe `graph_construct_qs_notes`, identique des deux côtés, sans logique. Le Literal(name, lang=...) reste en Python : `\"{name}\"@{lang}` n'existe pas (transpilé comme `@` matmul : TypeError), donc pas de construction manquée ; le tag de strate coercion_datatype ne repose sur aucun îlot. Table module-level présente d'un seul côté : sans effet ici (pas un état comparé qui change le graphe).",
+  "triaged_by": "sonnet-5.5"
+}

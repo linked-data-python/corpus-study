@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "shim-invents-logic",
+    "wrong-construction"
+  ],
+  "summary": "Le pilote n'observe jamais le graphe écrit : supprimer TOUTES les écritures de translated.ldpy (lignes 47-58) reste vert ; le shim réimplémente coerce_to_uri/coerce_to_node alors que rdfrest est dans le dépôt cloné ; les termes KTBS sont interpolés au lieu d'un @prefix.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il observer le graphe passé à post_graph (par ex. comparer FakeBase.posted, ou passer graph=Graph() et le comparer) avant qu'on accepte cette paire ?",
+      "where": "driver.py:25-28 et 37-40 (posted enregistré mais absent de __eq__) ; driver.py:66 (graph jamais passé, seul le noeud est retourné)",
+      "if_yes": "needs-work : étendre le pilote (comparer posted, ajouter un appel graph=Graph(), un parent non-Method qui lève, un paramètre contenant '=') puis relancer check",
+      "if_no": "approuver malgré tout, mais la paire ne prouve rien sur les 5 écritures et ne doit pas compter dans les chiffres d'équivalence"
+    },
+    {
+      "question": "Le shim doit-il être remplacé par le vrai rdfrest.util du dépôt (corpus/repos/ktbs__ktbs/lib/rdfrest/util/__init__.py:113-139) ?",
+      "where": "context.py:20-35 (coerce_to_uri/coerce_to_node/parent_uri reconstruits) contre lib/rdfrest/util/__init__.py:113-139 ; meta.json translation_notes[0] (« GitHub mirror has no source »)",
+      "if_yes": "needs-work : copier coerce_to_uri/coerce_to_node/parent_uri du dépôt dans context.py (le vrai coerce_to_uri fait assert obj is not None, lit .uri, et URIRef(ret, base)) et corriger la note, fausse, sur l'absence du source",
+      "if_no": "accepter la reconstruction, en la déclarant comme telle dans l'article"
+    },
+    {
+      "question": "Les sept `{KTBS.xxx}` en position de terme (et `{KTBS.Method}`) devraient-ils être `ktbs:xxx` avec `@prefix ktbs: <http://liris.cnrs.fr/silex/2009/ktbs#>`, comme skos: l'est déjà, et la construction « IRI » est-elle un crédit indu (aucun <...> hors des @prefix) ?",
+      "where": "translated.ldpy:48-58 (KTBS.contains, KTBS.Method, KTBS.hasParentMethod, KTBS.hasParameter) et meta.json constructions",
+      "if_yes": "needs-work : déclarer le préfixe ktbs, réécrire les îlots, retirer « IRI » de constructions ; classification inchangée",
+      "if_no": "approuver, mais noter la traduction comme incohérente (skos: préfixé, KTBS interpolé)"
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants dans une copie, tous restés OK : (M1) KTBS.hasParameter -> KTBS.hasParentMethod ; (M2) skos:prefLabel -> skos:altLabel ; (M3) `a KTBS.Method` -> `a KTBS.Service` ; (M4) `trust = False` -> `trust = True` ; (M5) bloc `if label:` supprimé ; (M6) `@graph graph` + tout le +{ } + la boucle supprimés (plus AUCUNE écriture de graphe). Cause : post_graph renvoie [node], factory renvoie uri ; le résultat comparé est le noeud, et FakeBase.__eq__ ne compare que uri et state. Cas absents du pilote : graph= fourni, parent non-Method (InvalidDataError), clé avec '=' (ValueError), label vide. Équivalence textuelle des îlots relue à la main (ordre des écritures, @graph pris après `graph = Graph()`, Literal interpolé reste Literal) : je n'y vois pas de divergence, mais rien ne le prouve. Transpilation vérifiée : rdf:type en position Python devient bien URIRef(rdf#type). Non retenue pour l'article.",
+  "triaged_by": "sonnet-5.5"
+}

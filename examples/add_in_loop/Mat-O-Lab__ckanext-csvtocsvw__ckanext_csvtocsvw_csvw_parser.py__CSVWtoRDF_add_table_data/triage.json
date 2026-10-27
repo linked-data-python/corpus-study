@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Vert creux sur deux points confirmés par mutant : le datatype calculé `{cell}^^{format}` (seul usage « typed literal » crédité) et `csvw:skipRows` ne sont pas distingués par le pilote ; de plus l'IRI csvw:url reste en `URIRef(\"...\".format())` au lieu de `f<...>`. L'équivalence réelle tient quand on étend le pilote. Ne convient pas à l'article (97 lignes, gain dispersé, bug préservé).",
+  "questions": [
+    {
+      "question": "Faut-il exiger que le pilote exerce `{cell}^^{format}` avec un format autre que xsd:string (xsd:boolean, xsd:date, xsd:dateTime) et un `csvw:skipRows` non nul avant d'approuver ?",
+      "where": "translated.ldpy:84 et :43-47 ; driver.py:39,62-64 (skipRows=0, format toujours xsd:string sur la branche annotation)",
+      "if_yes": "needs-work : ajouter au pilote une colonne xsd:boolean/xsd:date/xsd:dateTime et skipRows=2 (mes copies montrent que la traduction passe avec ces ajouts) ; ensuite approuver.",
+      "if_no": "approuver en l'état, en sachant que le crédit « typed literal » repose sur un oracle qui accepte `{cell}^^xsd:string`."
+    },
+    {
+      "question": "`{URIRef(\"{}/row={}\".format(self.csv_url, row_num))}` (une IRI composée de morceaux calculés) doit-il être `f<{self.csv_url}/row={row_num}>` ?",
+      "where": "translated.ldpy:48 et original.py:41-47",
+      "if_yes": "needs-work : passer en f<...> (vérifié équivalent dans une copie, aucun @base en portée).",
+      "if_no": "garder, l'écart est cosmétique."
+    }
+  ],
+  "evidence": "check OK. Mutants dans des copies, tous VERTS avec le pilote d'origine : (a) `oa:value {cell}^^{format}` -> `{cell}^^xsd:string` ; (b) `+ data[\"dialect\"][csvw:skipRows]` supprimé de row_num (rejeté dès que skipRows=2 dans la fixture). Rejetés : `if unit:` -> `if False:`. Pilote étendu (colonnes xsd:boolean, xsd:date, xsd:dateTime, xsd:int, cellules \"1\", \"True\", \"007\", \"\", dateTime avec fuseau) : la traduction reste équivalente (littéraux normalisés identiquement, ex. '007'->'7'), donc pas de défaut de traduction, seulement un oracle pauvre. Les cellules réelles sont toujours des str (csvw_parser.py:parse_csv_from_url_to_list applique str() à chaque cellule), et les formats DataStoreTypes (boolean/date/dateTime) tombent précisément dans cette branche en usage réel. `f<{self.csv_url}/row={row_num}>` : OK dans une copie. Les deux bugs préservés (`.format(table)` ligne 32, `else: URIRef(cell)` mort) sont bien dans le dépôt et identiques des deux côtés ; la branche about_url falsy n'est pas exercée (KeyError des deux côtés). Classification directly-expressible et absence de `for @bindings` : acceptable (boucles imbriquées avec logique, pas des lignes de données).",
+  "triaged_by": "sonnet-5.5"
+}

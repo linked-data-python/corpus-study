@@ -100,3 +100,53 @@ def normalise(labels) -> tuple[list[str], list[str]]:
         if canon not in seen:
             seen.append(canon)
     return seen, unknown
+
+
+# The constructions the transpiler's island spans identify without doubt.
+# The others (`variable`, `interpolation {expr}`, the literals, `.first()`,
+# `call suffix (g)`…) live inside an island's text and are not checked here.
+_SPAN_KINDS = {
+    "island:prefix": "@prefix", "island:base": "@base",
+    "island:import": "from … import p:", "island:graph-decl": "@graph",
+    "island:bindings-decl": "@bindings", "island:for-bindings": "for @bindings in",
+    "island:graph": "g{ }", "island:addto": "+{ }",
+    "island:removefrom": "-{ }", "island:match": "m{ }", "island:sparql": "s{ }",
+    "island:fnode": "f{ }", "island:firi": "f<…>", "island:iri": "IRI",
+}
+CHECKED = frozenset(_SPAN_KINDS.values())
+
+
+# An IRI or an f-IRI written INSIDE another island has no span of its own,
+# so those two are also looked for in the text, outside the declarations.
+_IRI_TEXT = re.compile(r"(?<![\w.])<[A-Za-z][\w+.-]*:[^>\s]*>")
+_FIRI_TEXT = re.compile(r"(?<![\w.])f<")
+_DECLARED_IRI = re.compile(r"(@prefix\s+[\w-]*:|@base)\s*<[^>]*>")
+
+
+def detected(ldpy_source: str) -> set[str]:
+    """The span-identifiable constructions a translation actually uses."""
+    from .ldpy_metrics import measure_ldpy_source
+    kinds = measure_ldpy_source(ldpy_source).island_kinds
+    used = {_SPAN_KINDS[k] for k in kinds if k in _SPAN_KINDS}
+    # drop comments and the plain IRI a declaration binds, nothing else
+    body = "\n".join(line for line in ldpy_source.splitlines()
+                     if not line.lstrip().startswith("#"))
+    body = _DECLARED_IRI.sub("", body)
+    if _IRI_TEXT.search(body.replace("f<", "f\x00")):
+        used.add("IRI")
+    if _FIRI_TEXT.search(body):
+        used.add("f<…>")
+    return used
+
+
+def mismatch(declared, ldpy_source: str) -> tuple[list[str], list[str]]:
+    """(declared but not used, used but not declared), checkable names only.
+
+    A declared construction the code does not use is credited to the
+    notation for nothing; a used one left undeclared is a construction the
+    study fails to count.  Both bias the per-construction tables.
+    """
+    named, _ = normalise(declared)
+    used = detected(ldpy_source)
+    claimed = {c for c in named if c in CHECKED}
+    return sorted(claimed - used), sorted(used - claimed)

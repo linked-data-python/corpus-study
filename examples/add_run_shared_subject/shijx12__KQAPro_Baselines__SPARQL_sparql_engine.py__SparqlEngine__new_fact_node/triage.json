@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "L'interpolation coerce ce que rdflib refusait : avec t=None, t='plain' ou t=3 l'original lève AssertionError, la traduction écrit Literal('None')/Literal('plain')/Literal(3) sans erreur (idem h=None) ; inatteignable dans le dépôt (le .add de la ligne 84/94 lève avant) mais c'est un écart de comportement réel ; paire par ailleurs propre.",
+  "questions": [
+    {
+      "question": "Accepte-t-on qu'une entrée qui n'est pas un terme RDF (None, str) passe de AssertionError à un littéral silencieux, étant donné que les sites d'appel du dépôt (sparql_engine.py:75 et 94) ne passent que URIRef/BNode ?",
+      "where": "translated.ldpy:9-11 ({h}, {t}) et original.py:9-11 ; dépôt corpus/repos/shijx12__KQAPro_Baselines/SPARQL/sparql_engine.py:75-84, 94-95",
+      "if_yes": "approuver, en notant dans la paire que le seul écart est la coercition des non-termes",
+      "if_no": "needs-work : ajouter un appel au pilote avec t=None (le harnais s'arrête alors en erreur des deux côtés ou pas : à régler) ou garder .add(...)"
+    }
+  ],
+  "evidence": "rdfeval check OK. Expérience dans une copie (original.py et translated.ldpy appelés directement sur un _Engine frais) : t=None -> original AssertionError « Object None must be an rdflib term » après 2 triplets déjà écrits, traduction 3 triplets dont (node, pred_t, Literal('None')) ; t='plain' -> AssertionError vs Literal('plain') ; t=3 -> AssertionError vs Literal(3, xsd:integer) ; h=None -> AssertionError (0 triplet) vs Literal('None') ; clé manquante dans self.nodes -> KeyError après 1 triplet écrit (original) contre 0 (traduction). Sans écart : h/t BNode, h/t Literal, h=r=t, t Literal typé. Mutants du pilote (R<->T échangés, {t}->{h}, {t}->{None}) -> FAIL, et un 3e appel BNode ajouté au pilote -> OK : l'oracle est sensible, il manque seulement les non-termes. Dépôt : les nodes sont des URIRef(legal(p)), self.graph = rdflib.Graph() (sparql_engine.py:56-62). Le shim remplace PRED_FACT_* ('pred:fact_h' str dans le dépôt) par des URIRef http://example.org/... : sans effet sur la comparaison, les deux côtés voient la même valeur. Note du traducteur « une seule région-site » exacte.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "Traduction équivalente sur tout ce que j'ai ajouté au pilote, mais le pilote laisse vivants 4 mutants (deux `-{ … nodeKind ?o }`, `-{ … datatype ?o }`, la garde `value is not None`) : aucun fixture ne contient de shacl:nodeKind/datatype à effacer ni de minLength falsy ; et seule 1 fusion `;` réelle (les notes en annoncent 2). Pas candidate pour l'article.",
+  "questions": [
+    {
+      "question": "Faut-il compléter le pilote (fixture avec shacl:nodeKind, shacl:datatype et shacl:path préexistants sur la forme, et sur un voisin, un cas où seul `datatype` est posé et un où seul `termType` est posé, un minLength valant Literal(0)) avant d'approuver ?",
+      "where": "driver.py:53-72 (case1, seul cas qui exerce les `-{ }` et m{ }.first()) ; translated.ldpy:31, 32, 35, 39",
+      "if_yes": "needs-work : ajouter ces appels ; j'ai vérifié que la traduction y reste équivalente, donc l'approbation suivra",
+      "if_no": "approuver, mais ne pas compter les `-{ }` des lignes 31/32/35 comme prouvés dans le chiffre « gain/équivalence »"
+    },
+    {
+      "question": "Acceptez-vous qu'une entrée hors contrat (pom[\"property\"], pom[\"datatype\"] ou pom[\"termType\"] valant None quand on les attend, ex. getPredicate renvoyant None) soit écrite comme littéral `\"None\"` par la traduction, alors que l'original lève AssertionError ?",
+      "where": "translated.ldpy:29, 33, 36, 76, 81 ; original.py:28, 32, 35, 74, 78",
+      "if_yes": "approuver ; RML bien formé fournit toujours une propriété (parseRML ne l'ajoute qu'après getPredicate)",
+      "if_no": "needs-work : un appel du pilote avec property=None ; signaler l'écart de langage"
+    }
+  ],
+  "evidence": "`rdfeval check` : OK. Mutants dans une copie, tous avec le pilote d'origine : suppression ligne 31 (-nodeKind sous la garde datatype), ligne 32 (-datatype), ligne 35 (-nodeKind sous la garde termType) : OK (rien à effacer dans les fixtures) ; ligne 39 `if value is not None:` -> `if value:` : OK ; ligne 30 `is not None` retiré : OK (équivalent, une URIRef est toujours vraie). Détruits par le pilote : suppression lignes 28, 40, 44, échange minLength/maxLength ligne 42, garde termType du bloc de repli (ligne 84), boucle findNS vide. Avec 3 appels ajoutés au pilote de la copie (forme et voisin porteurs de path/nodeKind/datatype/minLength=0/maxLength, minLength à deux valeurs, findNS vide) : check reste OK (donc pas de divergence cachée, y compris `.first()` contre `g.value` à deux valeurs) ; les mutants lignes 32 et 39 sont alors tués, mais 31 et 35 survivent encore (ils se couvrent mutuellement tant que les deux gardes se déclenchent ensemble : il faut des appels où une seule se déclenche). Shim : validatePath, updateShape, getConstraints, updateCombinationShape identiques au dépôt (shape_adjustment_single.py:409-412, 508-533, à la mise en forme près) ; random_number déterministe acceptable. Types réels (dépôt, parseRML l.77-84 et getObjectMap) : property/datatype des termes rdflib, termType = shaclNS[…] (URIRef), findNS des URIRef. Les notes affirment « two real ;-fusions » : la traduction n'en contient qu'une (lignes 74-77) ; la ligne 29 est un `+{ }` simple. `{None}` -> Literal('None') constaté sur la même mécanique que les régions voisines.",
+  "triaged_by": "sonnet-5.5"
+}

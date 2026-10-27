@@ -1,0 +1,23 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalente (check OK) mais sous-fusionnée : `NS[var]` laissé en Python (target_uri, rel_uri) coupe la série en 3 îlots + 1 boucle, alors que `lct:{edge.target_lct}` et `mrh:{edge.relation.value}` permettent un seul `+{ ; }` ; vérifié sur une copie.",
+  "questions": [
+    {
+      "question": "La construction attendue pour cette strate (un seul `+{ s p1 o1 ; p2 o2 }`, avec `ex:{expr}` pour la partie locale calculée, §1 et §2 bis) doit-elle remplacer les trois îlots séparés par `target_uri = LCT_NS[…]` et `rel_uri = MRH[…]` ?",
+      "where": "translated.ldpy:17-34 et 39 ; original.py:15-35",
+      "if_yes": "needs-work : réécrire en un seul `+{ {relevance_node} a mrh:Relevance ; mrh:target lct:{edge.target_lct} ; … mrh:relation mrh:{edge.relation.value} ; … }` (+ `@prefix lct:`), et `lct:{condition}` dans la boucle ; la paire devient candidate pour l'article",
+      "if_no": "approuver en l'état (le précédent « NS[var] reste en Python » fait loi) ; le décompte d'îlots reste 4"
+    },
+    {
+      "question": "Cette paire peut-elle illustrer l'article en l'état ?",
+      "where": "translated.ldpy:11-44",
+      "if_yes": "la retenir (non conseillé : les quatre îlots sont séparés par des affectations Python, le gain ne se lit pas en trois lignes)",
+      "if_no": "ne pas la retenir telle quelle ; la variante fusionnée serait l'exemple"
+    }
+  ],
+  "evidence": "`rdfeval check` : OK. Dans une copie, traduction réécrite en un seul îlot (lct:{edge.target_lct}, mrh:{edge.relation.value}, Literal(…, datatype=XSD.decimal/integer) gardés en Python, boucle `lct:{condition}`) : check OK sur les deux appels du pilote. Les littéraux typés restent à juste titre en Python (Literal(float, datatype=XSD.decimal) normalise la forme lexicale). Dépôt d'origine : MRHEdge.target_lct est une str (hash de 16 caractères), relation une MRHRelation à valeur str, probability un float (parfois calculé, mrh_rdf_implementation.py:411-419), donc la concaténation `lct:{…}` est équivalente à LCT_NS[…] sur les appelants réels. Les notes du traducteur décrivent les `NS[var]` comme laissés en Python « par précédent », mais INSTRUCTIONS.md §1 documente `ex:{expr}` pour calculer la partie locale. Mineur : `@prefix mrh:` et `MRH = Namespace(…)` répètent la même IRI (`@prefix mrh: <…> as MRH` n'en ferait qu'une).",
+  "triaged_by": "sonnet-5.5"
+}

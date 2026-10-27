@@ -265,6 +265,21 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
     if cls and cls != "directly-expressible":
         add(WARN, "classified %s" % cls,
             "a judgement, not a measurement: it is what the aggregates count")
+    if files["translated"].exists() and meta.get("constructions"):
+        from .constructions import mismatch
+        try:
+            over, under = mismatch(meta["constructions"],
+                                   _read(files["translated"]))
+        except Exception:                     # noqa: BLE001 - not a check
+            over, under = [], []
+        if over:
+            add(WARN, "credited, not used: %s" % ", ".join(over),
+                "meta.json declares a construction the translation does not "
+                "use — it is counted for the notation for nothing")
+        if under:
+            add(INFO, "used, not credited: %s" % ", ".join(under),
+                "the translation uses a construction meta.json does not "
+                "declare — the per-construction tables miss it")
     if (meta.get("translation_status") == "final"
             and not meta.get("constructions")
             and cls not in ("not-expressible", "excluded")):

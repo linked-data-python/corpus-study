@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt",
+    "wrong-construction"
+  ],
+  "summary": "Les `@graph g` ré-déclarés après chaque `g = g + ...` sont corrects (mutants rejetés), mais le pilote ne distingue pas `if x.contributor` de `if x.creator` (aucune collection avec un seul des deux) ; la paire ajoute 3 déclarations fragiles à l'original (« awkward » plutôt que directly-expressible) : illustre un piège, pas un gain, donc pas pour l'article comme exemple de gain.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un appel du pilote où une collection n'a que `creator` (contributor vide ou None) et une autre que `contributor` ?",
+      "where": "translated.ldpy:33-38 et driver.py:58-71 (COLL_1 a les deux, COLL_2 aucun)",
+      "if_yes": "needs-work : ajouter ces deux collections au pilote (le mutant `if x.contributor:` -> `if x.creator:` passe aujourd'hui).",
+      "if_no": "approuver : les gardes sont du Python copié tel quel, risque nul pour le chiffre."
+    },
+    {
+      "question": "Une traduction qui impose de ré-écrire `@graph g` à trois endroits (dont deux dans des boucles) après chaque `g = g + ...`, sous peine de perte silencieuse, relève-t-elle de « directly-expressible » ?",
+      "where": "translated.ldpy:20,32 et original.py:13,17,22",
+      "if_yes": "garder directly-expressible, mais ne l'employer dans l'article que comme exemple de piège.",
+      "if_no": "reclasser en awkward (ou minor-restructuring) ; l'exclure des exemples de gain."
+    },
+    {
+      "question": "`{Literal(i.strip())}`, `{URIRef(y.legacy_id)}` et `{URIRef(y.create_uri())}` doivent-ils être écrits `{i.strip()}` et `f<{...}>` ?",
+      "where": "translated.ldpy:35,38,42,44",
+      "if_yes": "needs-work cosmétique (vérifié équivalent dans une copie ; la note de meta.json dit déjà « plain {i} » alors que le code écrit Literal(...)).",
+      "if_no": "garder."
+    }
+  ],
+  "evidence": "check OK. Mutants dans des copies, rejetés : `@graph g` du haut de boucle sorti avant la boucle (10 vs 9 triples) ; `@graph g` de la boucle collection sorti avant la boucle (10 vs 5) ; branche legacy_id remplacée par create_uri (exception). VERT à tort : `if x.contributor:` -> `if x.creator:` (translated.ldpy:36). Variante avec `{i.strip()}`, `f<{y.legacy_id}>`, `f<{y.create_uri()}>` : OK. original.py = lignes 27-53 du dépôt à l'identique (diff vide) ; get_subject()/as_graph() du dépôt rendent des URIRef/Graph (vocabs/models.py:544, 345), donc `{collection}` et `{main_concept_scheme}` gardent leur type d'IRI. Shim minimal, sans logique. Aucune des écritures n'est en `for @bindings` : justifié dans les notes, mais la stratum add_in_loop n'est donc créditée que par `+{ }` dans des boucles ordinaires.",
+  "triaged_by": "sonnet-5.5"
+}

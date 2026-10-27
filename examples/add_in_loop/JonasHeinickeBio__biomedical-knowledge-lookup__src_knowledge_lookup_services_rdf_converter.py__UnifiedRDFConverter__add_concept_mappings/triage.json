@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Équivalence solidement prouvée (oracle fort, mutants tous rejetés), mais la traduction transforme les deux `if` en clés de dict conditionnelles dans un générateur : ce n'est pas « directly-expressible », et la paire ne convient pas à l'article en l'état.",
+  "questions": [
+    {
+      "question": "Replier `if mapping.confidence:` / `if mapping.source:` (original.py:26,34) en `**({...} if cond else {})` dans un générateur de dicts (translated.ldpy:15-29), en comptant sur « variable non liée = triple omis », est-ce plus qu'un changement de notation (donc à reclasser « minor-restructuring ») ?",
+      "where": "translated.ldpy:24-26 et original.py:26,34",
+      "if_yes": "reclasser en minor-restructuring ; ne pas retenir pour l'article (la forme avec `if cond: +{ ... }` d'une ligne, permise depuis 0.4.0, serait la traduction attendue et plus lisible).",
+      "if_no": "garder directly-expressible ; approuver."
+    }
+  ],
+  "evidence": "check OK. Pilote étendu dans une copie (4e appel : confiance vraie/source \"\", confiance 0.0/source vraie, tout None, identifiants avec '/') : toujours OK, donc le cas mixte (une seule des deux propriétés optionnelles) est bien équivalent. 6 mutants dans la copie, tous rejetés par le pilote d'origine : datatype xsd:float retiré, from_concept remplacé par to_concept dans mapping_uri, mapping_type rendu conditionnel (CALL_3 le tient), `or []` retiré, ?source lié à la confiance, `a vocab:Mappin`. Garde `is not None` à la place de la véracité : rejetée (CALL_3, confidence=0.0 / source=\"\"). Types réels vérifiés dans le dépôt (corpus/repos/JonasHeinickeBio__...): confidence Optional[float], source/mapping_type Optional[str], to_concept/from_concept obligatoires ; l'appel réel (rdf_converter.py:681) passe un URIRef. Shim: copies fidèles de `_get_concept_uri_from_identifier` (identique au dépôt), aucune logique inventée. Seul écart théorique : sur exception au milieu d'une ligne, le triple hasMapping de la ligne n'est plus écrit (le générateur lève avant) alors que l'original l'avait déjà ajouté ; aucune opération du modèle pydantic ne peut lever ici.",
+  "triaged_by": "sonnet-5.5"
+}

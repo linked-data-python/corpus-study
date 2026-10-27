@@ -403,3 +403,15 @@ def test_status_keeps_the_unevaluable_regions_in_the_denominator(tmp_path, monke
     assert data["outcome"] == {"expressible": 2, "not-expressible": 1,
                                "attempted, not evaluable": 1,
                                "not attempted": 1}
+
+
+def test_construction_credit_is_checked_against_the_code():
+    from rdfeval.constructions import mismatch
+    src = ("@prefix ex: <http://example.org/> .\n@graph g\n"
+           "+{ ex:a ex:p <http://example.org/b> }\n")
+    over, under = mismatch(["@prefix", "@graph", "+{ }", "m{ }"], src)
+    assert over == ["m{ }"]              # declared, never written
+    assert under == ["IRI"]              # written inside +{ }, not declared
+    # the IRI a @prefix binds is not an IRI term of the translation
+    assert mismatch(["@prefix", "IRI"], "@prefix ex: <http://e.org/> .\n")[0] == ["IRI"]
+    assert "f<…>" not in mismatch(["f<…>"], "@prefix ns: f<{base}> .\n")[0]
