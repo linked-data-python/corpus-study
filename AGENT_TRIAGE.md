@@ -38,8 +38,31 @@ une fois : tout doit être `OK` ; sinon c'est `high` d'office.
 | `optimization-doctrine` | un artefact optimisé enfreint la doctrine : gestion d'erreur retirée, noms raccourcis, golf, interface changée |
 | `article-example` | drapeau **positif** : le gain se lit en trois lignes et la paire est propre — candidate pour l'article |
 
+### Les défauts déjà trouvés — cherchez-les d'abord
+
+Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
+
+1. **Le type réel de l'entrée.** Une interpolation `{expr}` coerce une `str`
+   en littéral là où l'original en faisait une IRI (`<{0}>`.format) :
+   regardez ce que le **dépôt d'origine** passe vraiment (le clone est sous
+   `corpus/repos/<owner>__<repo>/`), pas ce que disent les notes.
+2. **La véracité d'un littéral.** `not g.value(…)` traite `""` et `0` comme
+   absents ; `not bool(m{ … })` et `.first() is None` non. Toute garde de
+   vérité réécrite est suspecte.
+3. **Le cas zéro solution et les branches secondaires** absents du pilote :
+   un mutant (îlot remplacé par `[]`, prédicat échangé dans une branche)
+   qui reste vert prouve que l'oracle est faible.
+4. **Un nom qui disparaît d'un côté** n'est pas comparé en mode
+   « module-state » (seuls les noms communs le sont).
+5. **Les exceptions** : le harnais ne compare pas deux levées ; une
+   réécriture qui déplace un calcul pouvant lever passe inaperçue.
+6. **Les notes du traducteur** affirmaient des faits faux sur le dépôt
+   (« real call sites »).
+
 Vérifiez au lieu de supposer. Vous pouvez **expérimenter dans une copie** :
-`cp -r "<dir>" "$TMPDIR/…"`, corrompre une ligne de la traduction ou ajouter
+`work=$(mktemp -d)` puis `cp -r "<dir>" "$work/"` — toujours un dossier
+créé par `mktemp -d`, jamais un nom fixe : d'autres trieurs travaillent en
+même temps dans le même répertoire temporaire. Corrompez une ligne de la traduction ou ajouter
 un appel au pilote dans la copie, et lancer `rdfeval check` sur la copie
 (commande avec le chemin de la copie). Un doute confirmé par une expérience
 vaut plus que dix doutes plausibles ; dites dans la question ce que

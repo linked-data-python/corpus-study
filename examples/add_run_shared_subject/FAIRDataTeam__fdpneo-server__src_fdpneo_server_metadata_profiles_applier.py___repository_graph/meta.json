@@ -52,5 +52,21 @@
     "method": "entry:_repository_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `for triple in helper(...): graph.add(triple)` loops are fused into one loop over the unpacked concatenation of both helper results; imports reduced to what is used (BNode and the four unused namespaces dropped, DCT only).",
+    "optimized.ldpy, from optimized.py: subject = URIRef(iri) becomes f<{iri}>, the type and title adds become one +{ ; } (shared subject, unconditional -- island only, Python keeps two graph.add), URIRef(type_iri)/URIRef(rights_iri) become f<{...}>, Literal(title) becomes a bare {title} (title is a str, same plain literal). The conditional dct:rights triple stays a separate +{ } inside its `if`.",
+    "The fused loop keeps graph.add(triple): the triples come already assembled from out-of-region helpers, so +{ {s} {p} {o} } would gain nothing (same finding as translated.ldpy).",
+    "Symmetry: apart from the RDF lines and the imports they need, the two files are identical.",
+    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

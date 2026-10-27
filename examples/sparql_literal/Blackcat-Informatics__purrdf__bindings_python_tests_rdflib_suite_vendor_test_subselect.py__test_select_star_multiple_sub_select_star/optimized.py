@@ -1,0 +1,40 @@
+# Extracted from Blackcat-Informatics/purrdf@3aa4ba514e : bindings/python/tests/rdflib_suite/vendor/test_subselect.py
+# region: test_select_star_multiple_sub_select_star (lines 36-70, stratum sparql_literal)
+# licence of the source repository: see meta.json
+#
+# Context restored (see meta.json): the extraction tool's captured context
+# for `_graph_with_label` kept only the empty `Graph()` constructor call
+# (line 3 of the real file); the `.add(...)` call that actually populates it
+# (lines 4-6, immediately below, read by every test function in the real
+# file including this one) was cut by line-range extraction. Restored here
+# verbatim -- not new logic, and without it the query below has nothing to
+# match on either side.
+from rdflib import RDFS, Graph, Literal, URIRef
+_graph_with_label = Graph()
+_graph_with_label.add(
+    (URIRef("http://example.com/something"), RDFS.label, Literal("Some label"))
+)
+
+def test_select_star_multiple_sub_select_star():
+    """
+    Ensure that we can define select * in multiple sub-selects and still select * (all)
+      of the variables out in the parent.
+    """
+    results = list(_graph_with_label.query("""
+        SELECT * WHERE {
+            { SELECT * WHERE { [] rdfs:label ?label. } }
+            { SELECT * WHERE { [] rdfs:label ?label2. } }
+        }
+    """))
+
+    assert len(results) == 1
+    assert results[0].asdict() == {
+        "label": Literal("Some label"),
+        "label2": Literal("Some label"),
+    }
+    # Appended (see meta.json): the original test only asserts and returns
+    # nothing, so the driver would have nothing beyond "did not raise" to
+    # compare (rdfeval.harness: a call that returns None, mutates nothing
+    # and prints nothing is "nothing observable to compare"). Identical on
+    # both sides; changes nothing about the RDF behaviour under test.
+    return results

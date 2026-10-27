@@ -1,0 +1,55 @@
+# Extracted from SpotlightKid/jack-audio-tools@a64f1f86ba : carla/carxp2lv2presets.py
+# region: create_lv2_preset (lines 48-75, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, BNode, URIRef
+from rdflib.namespace import Namespace, NamespaceManager, RDF, RDFS, XSD
+from context_shim import NS, get_graph
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix pstate: <http://lv2plug.in/ns/ext/state#> .
+
+
+def create_lv2_preset(label, plugin):
+    graph = get_graph()
+    @graph graph
+    preset = URIRef('')
+    +{ {preset} a pset:Preset ;
+                lv2:appliesTo f<{plugin.uri}> ;
+                rdfs:label {label} }
+
+    for param in plugin.params:
+        port = BNode()
+        +{ {port} lv2:symbol {param.symbol} ;
+                  pset:value {param.value} .
+           {preset} lv2:port {port} }
+
+    if plugin.properties:
+        state = BNode()
+
+        for prop in plugin.properties.values():
+            # XXX: handle other Atom types?
+            value = URIRef(prop.value) if prop.type == str(atom:Path) else Literal(prop.value)
+            +{ {state} f<{prop.key}> {value} }
+
+        +{ {preset} pstate:state {state} }
+
+    return graph.serialize(format='turtle')
+
+
+# Demo harness (identical on both sides, see meta.json): create_lv2_preset
+# returns a serialised Turtle STRING, and rdflib's serialisers are not
+# byte-stable across two independently built (even if isomorphic) graphs --
+# comparing the returned strings with plain equality would be comparing
+# serialisation order, not RDF content, which is exactly what run_pair's
+# docstring says graph comparison must not do ("never raw serialisation").
+# This round-trips the string back into a fresh Graph, so the driver compares
+# the two GRAPHS by isomorphism instead (same pattern as the boricles/
+# ontosphere export_service region already in this corpus).
+def demo(label, plugin):
+    from rdflib import Graph
+    serialised = create_lv2_preset(label, plugin)
+    g = Graph()
+    g.parse(data=serialised, format='turtle')
+    return g

@@ -1,0 +1,21 @@
+{
+  "priority": "high",
+  "flags": ["weak-oracle", "equivalence-doubt"],
+  "summary": "Le pilote est creux (ex_no_prov == [] sur le vrai fichier : 120 individus T-prefixes, tous avec provenance) et translated.ldpy diverge de l'original quand hasSourceProvenance est un litteral falsy (\"\" ou 0), ce que l'experience confirme ; l'ordre n'est de plus pas conserve (set comprehension).",
+  "questions": [
+    {
+      "question": "Le pilote vert (ex_no_prov vide des deux cotes) suffit-il a approuver la paire ? (Experience : sur un graphe synthetique contenant un litteral \"\" et un litteral 0 comme provenance, translated.ldpy FAIL, original.py = optimized.py = optimized.ldpy.)",
+      "where": "driver.py:29 et translated.ldpy:16 et original.py:11",
+      "if_yes": "approuver malgre le vide du pilote",
+      "if_no": "needs-work : remplacer `not bool(m{ {s} sem:hasSourceProvenance ?p })` par `not m{ ... }.first()` (comme optimized.ldpy:12) ou ajouter au pilote un fixture avec provenance absente / vide ; retirer article_candidate tant que translated.ldpy est faux"
+    },
+    {
+      "question": "Le `not bool(m{ {s} sem:hasSourceProvenance ?p })` de translated.ldpy est-il acceptable comme equivalent de `not g_ab.value(s, SEM.hasSourceProvenance)` alors que value() rend un Literal dont la veracite est celle de sa valeur (Literal(\"\") et Literal(0) sont faux) ?",
+      "where": "translated.ldpy:16 et original.py:11",
+      "if_yes": "approuver (equivalence au sens triple-existant)",
+      "if_no": "needs-work sur translated.ldpy (non equivalent : m3 et n4 de mon graphe de test sont rendus par l'original et pas par la traduction)"
+    }
+  ],
+  "evidence": "rdfeval check de la region : 3 OK. Sur le vrai TTL : 145 NamedIndividual, 120 avec un type T-prefixe, 120 avec provenance => resultat vide, aucun cas positif exerce. Copie dans le scratchpad avec H pointant vers un TTL synthetique (z1: 2 types T sans provenance, a2: T sans provenance, m3: provenance \"\", n4: provenance 0, p5: provenance \"ok\", q6: type non T, r7: T mais pas NamedIndividual) : original.py/optimized.py/optimized.ldpy donnent z1,a2,m3,n4 ; translated.ldpy donne seulement a2,z1 => FAIL 'value ex_no_prov: values differ'. Aussi : la traduction passe par un set (ordre perdu, le pilote compare en multi-ensemble donc ne le voit pas). optimized.py/optimized.ldpy sont symetriques (nested m{} + .first()), pas de drapeau d'optimisation. Copie supprimee.",
+  "triaged_by": "sonnet-5.5"
+}

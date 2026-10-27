@@ -1,0 +1,15 @@
+{
+  "priority": "medium",
+  "flags": ["weak-oracle"],
+  "summary": "Equivalence verifiee par experiences (zero solution, valeurs multiples, litteral vide), mais le fixture livre n'a qu'un seul motif qui matche : le cas zero solution (`or \"\"`) n'est pas exerce par le pilote.",
+  "questions": [
+    {
+      "question": "Le fixture 01-research/semtech_research_v6_4_0.ttl, qui ne contient aucun cas zero solution pour res:ResearchCorpus skos:note, est-il acceptable en l'etat sachant que j'ai verifie ce cas moi-meme (equivalent) ?",
+      "where": "01-research/semtech_research_v6_4_0.ttl:11-14 et original.py:16 / translated.ldpy:19",
+      "if_yes": "approuver (le doute est leve par mon experience, a noter)",
+      "if_no": "needs-work : ajouter un second graphe ou un appel sans la triple res:ResearchCorpus skos:note, pour que `or \"\"` soit exerce"
+    }
+  ],
+  "evidence": "rdfeval check de la region : 3 OK. Copies dans le scratchpad (supprimees). (1) Mutant : retirer ` or \"\"` de translated.ldpy et optimized.ldpy -> 3 OK avec le fixture livre (le cas zero solution n'est donc pas exerce). (2) Meme mutant avec un fixture sans la triple skos:note de ResearchCorpus -> FAIL ('' vs 'None'), et la paire intacte avec ce fixture -> 3 OK : le .first() rend bien None comme value(). (3) Fixture avec 4 valeurs skos:note sur ResearchCorpus (dont \"\" et deux chaines tardives/precoces) -> 3 OK, repete 3 fois. Pas de shim ni de modification de logique : le seul ajout est le .ttl stand-in, fixture honnete. optimized.py/optimized.ldpy symetriques (seul `(rs)` vs RES/Namespace, documente) ; classification directly-expressible correcte ; ratio notation 1.08 (>1) donc pas d'article-example.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -52,5 +52,22 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the original's if/else on prop.type becomes one conditional expression kept next to the original XXX comment; the unused rdflib imports (Graph, Namespace, NamespaceManager, XSD) are dropped. Little else compresses: the 6 graph.add calls have no common subject across the control flow, so Python keeps one call per triple.",
+    "optimized.ldpy, from optimized.py: the 3 base triples become one +{ } with ';' (the only structural change available only to the island, as Python has no shared-subject add); each graph.add in the two loops becomes +{ } with interpolation, and URIRef(x) becomes f<{x}>, Literal(x) becomes a bare {x}, NS.atom.Path becomes atom:Path.",
+    "Deliberate departure from translated.ldpy: the params loop is a plain `for param in plugin.params:` with +{ } directly (identical to optimized.py's loop header), not a `for @bindings in` over a generator of dicts -- the generator form is longer and the loop is the same in Python. The `for @bindings` construction therefore does not appear in the optimized artefact.",
+    "Kept the ternary value = URIRef(...) if ... else Literal(...) in both files: a Literal/URIRef choice on the object cannot be an island term, so it stays Python on both sides.",
+    "Symmetry: outside the RDF lines (graph.add vs +{ }) the two files are identical line for line; the only island-only restructuring is the ';' merge of the three preset triples.",
+    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

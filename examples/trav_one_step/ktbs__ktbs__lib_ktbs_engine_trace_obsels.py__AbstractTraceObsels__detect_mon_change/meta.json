@@ -42,5 +42,21 @@
     "method": "entry:_detect_mon_change",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the intermediate names trace_uri, pseudomon_range, pse_mon_b_limit, pse_mon_e_limit and the bound-method alias self_state_value are removed and their uses inlined (self.trace_uri, self.state.value, old_last_* - self.trace.pseudomon_range). Docstring, comments, the early return, the `end is None` guard, the three old_last_* snapshots (needed: prepared is mutated inside the loop) and the itertools.chain of three iterables are kept.",
+    "optimized.ldpy is optimized.py with each graph.value / self.state.value replaced by m{ ... }.first(), and graph.objects(new_obs, None) / graph.subjects(None, new_obs) by `(o for _, o in m{ {new_obs} ?p ?o })` and `(s for s, _ in m{ ?s ?p {new_obs} })`; the self.state alias removal also removes the local helper function that translated.ldpy needed.",
+    "Exception to symmetry (islands only): `@graph graph` at the top of the function makes `graph` the current graph, so the four reads on `graph` drop their `(graph)` suffix and only the reads on self.state keep one. Python has no current-graph mechanism.",
+    "Not compressible: the predicate-wildcard selectors have no terse island form (the unused ?p must be named and discarded), so the notation costs more than it saves here (notation ratio above 1). The chain of three sources is a union, which m{ } cannot express. Merging begin/end reads into one multi-pattern m{ } would change what happens when a value is missing or repeated, so it was not done."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

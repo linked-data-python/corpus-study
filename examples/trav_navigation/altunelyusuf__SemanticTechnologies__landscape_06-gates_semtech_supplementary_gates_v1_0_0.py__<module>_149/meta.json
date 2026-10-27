@@ -47,5 +47,23 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the dead clause `list(g_ab.objects(s, RDF.type)) and` is dropped (s was selected by (s, rdf:type, owl:NamedIndividual), so that list is never empty); `g_ab = Graph(); g_ab.parse(...)` becomes `Graph().parse(...)`; `str(SEM)+\"T\"` becomes `SEM + \"T\"` (Namespace is a str); the unused imports RDFS, SKOS, DCTERMS, PROV are removed. The `not g_ab.value(...)` guard and the module-level names SEM, g_ab, ex_no_prov are kept.",
+    "optimized.ldpy is optimized.py with the three rdflib selectors replaced by `m{ ?s a owl:NamedIndividual }`, `m{ {s} a ?t }` and `m{ {s} sem:hasSourceProvenance ?p }.first()`; the rest is line for line identical. The `.first()` keeps the original `not value(...)` truthiness (a present but empty literal still counts as absent), which the translated version's `bool(m{ })` did not.",
+    "Exception to symmetry (islands only): `@prefix sem: <...> as SEM .` declares the prefix and binds the Namespace object in one line, so `SEM = Namespace(...)` and the Namespace import disappear from optimized.ldpy; Python has no equivalent. RDF and OWL imports also vanish (replaced by `a` and `owl:`).",
+    "Not done: the joined `m{ ?s a owl:NamedIndividual ; a ?t }` of translated.ldpy. It yields one row per (s, t) pair, so it needs a set comprehension to deduplicate, which loses the graph order of the original list and is only correct while ex_no_prov is empty. The nested single-pattern islands keep order, uniqueness and the same structure as optimized.py. A multi-pattern join therefore does not apply here, and the trav_navigation stratum gains nothing from it.",
+    "The green check is hollow on the real ontology (ex_no_prov is [] on every side). Verified separately, in a scratch directory outside the region, on a synthetic graph with two T-types on one individual, a T-individual with provenance, a non-T individual, a T-typed non-NamedIndividual and a T-individual with an empty-literal provenance: original.py, optimized.py and optimized.ldpy give the same list, in the same order.",
+    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

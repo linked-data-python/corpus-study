@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "Quand root est une str (le cas du dépôt), original.py rend 4 classes et translated.ldpy/optimized.ldpy en rendent 0 : {root} coerce une str en Literal, alors que <{0}> en fait une IRI ; le pilote ne passe que des URIRef.",
+  "questions": [
+    {
+      "question": "Les racines qu'on passerait à get_tag_sets dans le dépôt sont-elles des str (get_root() rend des str comme \"https://brickschema.org/schema/Brick#Class\"), de sorte que la traduction `{root}` doit être `{URIRef(root)}` (ou la paire déclarée non équivalente) ?",
+      "where": "translated.ldpy:18 et original.py:16 ; meta.json:22 (« root is a URIRef at the real call sites ») ; Brick@c12949f compare_versions.py:26-33 (get_root rend des str), :76-77 (OLD_ROOT/NEW_ROOT), get_tag_sets n'est appelée nulle part à ce commit",
+      "if_yes": "equivalence-doubt confirmé : la traduction change le comportement sur l'entrée réelle ; needs-work (écrire {URIRef(root)} ou classer minor-restructuring, retirer article_candidate, corriger la note meta.json:22).",
+      "if_no": "Seuls des URIRef sont admissibles : approuver, mais corriger la note qui invoque des « real call sites » inexistants."
+    },
+    {
+      "question": "Faut-il ajouter au pilote un appel avec root en str (str(BRICK.Sensor)) pour que l'oracle exerce l'entrée réelle ?",
+      "where": "driver.py:39-42",
+      "if_yes": "ajouter l'appel ; avec lui, translated.ldpy et optimized.ldpy échouent (voir evidence) tant que la traduction n'est pas corrigée.",
+      "if_no": "le pilote reste muet sur le type de root ; le vert ne prouve que le cas URIRef."
+    }
+  ],
+  "evidence": "check de la région : 3 OK. Expérience dans une copie : ajout de `_call(str(BRICK.Sensor))` au driver -> [translated.ldpy] FAIL (call[2] : 4 classes vs {} ; stdout « … Brick#Sensor 4 » vs « … Brick#Sensor 0 »), [optimized.ldpy] FAIL (idem), [optimized.py] OK (f\"<{root}>\" garde la str). Vérifié sur le dépôt (curl du fichier au commit c12949f) : get_root() (l.26-33) rend des str, jamais des URIRef. Aussi : meta.json:15-20 omet « call suffix (g) » alors que translated.ldpy:20 emploie `}(graph)` (sous-déclaration, pas de crédit indu). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

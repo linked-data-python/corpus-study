@@ -34,6 +34,15 @@ artefacts optimisés séparent les deux effets :
   qu'un relecteur exigeant accepterait dans le dépôt.
 - **Commentaires et docstrings** : gardez ceux de l'original, retirez ceux
   qui décrivent du code supprimé, n'en ajoutez pas.
+- **L'en-tête extrait ne s'optimise pas** (décision du 2026-10-27).
+  L'en-tête, c'est tout ce qui précède la première ligne de la région, que
+  le commentaire `# region: … (lines a-b, …)` délimite : la provenance et
+  les imports du **fichier entier** d'où la région a été tirée, plus les
+  imports des shims. Il n'appartient pas à la région : retirer un import
+  inutilisé y gonflerait le gain de la relecture sans rien dire de la
+  région. `optimized.py` reprend l'en-tête de `original.py` **octet pour
+  octet**, `optimized.ldpy` celui de `translated.ldpy`. Seules les lignes de
+  la région s'optimisent.
 - **Interface inchangée** : même signature de la fonction d'entrée, même
   valeur rendue, mêmes noms au niveau du module que le pilote compare, même
   sortie imprimée. Le pilote (`driver.py`) est le même pour les trois

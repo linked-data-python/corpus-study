@@ -41,5 +41,20 @@
     "method": "entry:get_tag_sets",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the accumulation loop and the `tag_sets` dict filled item by item become one generator of class local names feeding a dict comprehension `{klass: set(klass.split(\"_\")) for klass in classes}`; the intermediate `tag_set` variable, the `qstr_allclasses` template and its `.format` call are gone. The query is one line (an f-string in optimized.py, an inline s{ } in optimized.ldpy). The `# Tags inside the class name.` comment is kept, moved above the comprehension.",
+    "optimized.py cannot drop the `rdfs:` prefix: rdflib's default namespace manager binds it, so the query text needs no PREFIX line; optimized.ldpy pays one `@prefix rdfs:` declaration instead (the prologue is built from @prefix in scope).",
+    "optimized.py uses an f-string `<{root}>`, which is string pasting and does not escape; the ldpy `{root}` is a term-position interpolation (initial binding) that coerces the value itself and drops the angle brackets. Same results on the fixture; the ldpy side is the safer of the two, which is a property of the notation, not a compression.",
+    "No exception to the symmetry rule. m{ } was tried in place of s{ }: it does not parse `rdfs:subClassOf+` (property path), so s{ } stays the most specific island here.",
+    "Not compressible further: the `print(root, len(tag_sets))` and the return are the observable behaviour, and the module-level `g` / `graph=g` harness is kept as is."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "call suffix (g)"
+  ]
 }

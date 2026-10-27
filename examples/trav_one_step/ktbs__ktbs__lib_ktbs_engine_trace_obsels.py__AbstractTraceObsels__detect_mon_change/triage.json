@@ -1,0 +1,21 @@
+{
+  "priority": "high",
+  "flags": ["weak-oracle", "equivalence-doubt"],
+  "summary": "Le pilote n'exerce jamais la branche graph.subjects(None, new_obs) ni la branche `end == old_last_end` (lecture de hasBegin dans self.state) : deux mutants de la traduction et de optimized.ldpy passent `check` ; de plus optimized.py differe de l'original par l'evaluation paresseuse de pseudomon_range.",
+  "questions": [
+    {
+      "question": "Faut-il exiger des appels supplementaires au pilote (un obsel lie par relatesTo EN POSITION OBJET, et un obsel dont hasEnd == last_end) avant d'approuver, sachant que les ilots `m{ ?s ?p {new_obs} }(graph)` et `m{ {obs} ktbs:hasBegin ?o }(self.state)` ne sont aujourd'hui prouves par rien ?",
+      "where": "driver.py:61-122 (aucun triplet (x, p, new_obs) dans les 3 cas ; end == old_last_end jamais vrai) ; translated.ldpy:37 et :50 ; original.py:36 et :49",
+      "if_yes": "needs-work : ajouter au pilote un cas `(other, RELATES_TO, new_obs)` et un cas `hasEnd == last_end` (begin < / == / > last_begin)",
+      "if_no": "approuver malgre un pilote qui ne couvre que 3 appels sur une fonction a ~8 branches"
+    },
+    {
+      "question": "optimized.py est-il equivalent a original.py quand `self.trace.pseudomon_range` n'est pas un nombre (None) ? L'original calcule `old_last_begin - pseudomon_range` eagerement (original.py:25-26) et leve TypeError meme si la boucle ne compare jamais ; optimized.py (lignes 41 et 47) ne soustrait que dans les branches `end < old_last_end` / `begin < old_last_begin`.",
+      "where": "original.py:24-26 et optimized.py:41,47 (idem optimized.ldpy:42,48)",
+      "if_yes": "accepter : difference sur entree invalide seulement, a noter dans optimization_notes",
+      "if_no": "needs-work : garder au moins le calcul des deux limites avant la boucle dans optimized.py/optimized.ldpy"
+    }
+  ],
+  "evidence": "rdfeval check de la region : 3 OK. Copies dans le scratchpad (supprimees). Mutant A (dans translated.ldpy et optimized.ldpy, `(s for s, _ in m{ ?s ?p {new_obs} }...)` remplace par `[]`) : 3 OK avec le pilote d'origine. Mutant B (hasBegin remplace par hasEnd dans la lecture de la branche `end == old_last_end`) : 3 OK. Avec 3 cas ajoutes au driver (relation entrante `(other, relatesTo, new_obs)`, hasEnd == last_end avec begin plus petit, litteral objet commencant par le trace_uri) : base 3 OK, mutant A FAIL (call[4]) sur translated.ldpy et optimized.ldpy, mutant B FAIL (call[5]) sur les memes ; optimized.py reste OK dans les deux (non mute). Le cas du litteral-objet passe (m{ } sur sujet Literal rend bien None comme value()). Copie avec pseudomon_range=None : l'original leve TypeError, le harnais ne compare pas les exceptions de l'original, donc la paresse d'optimized.py n'est pas prouvee ni refutee par check. Symetrie optimized.py/optimized.ldpy : ligne a ligne identiques hors RDF, seule exception `@graph graph` documentee ; pas de drapeau d'optimisation. Note : ratio notation 1.16 (>1), la region est un cas ou la notation coute.",
+  "triaged_by": "sonnet-5.5"
+}

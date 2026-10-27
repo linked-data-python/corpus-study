@@ -1,0 +1,61 @@
+# Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/engine/trace_obsels.py
+# region: AbstractTraceObsels._detect_mon_change (lines 483-541, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from itertools import chain
+@prefix ktbs: <http://liris.cnrs.fr/silex/2009/ktbs#> .
+
+def _detect_mon_change(self, graph, prepared):
+    """Detect monotonicity changed induced by 'graph', and update `prepared` accordingly.
+
+    Note that this is called after graph has been added to self.state,
+    so all arcs from graph are also in state.
+    """
+    @graph graph
+    new_obs = m{ ?s ktbs:hasTrace {self.trace_uri} }.first()
+    if prepared.last_obsel is None:
+        prepared.last_obsel = new_obs
+        prepared.last_begin = int(m{ {new_obs} ktbs:hasBegin ?o }.first())
+        prepared.last_end = int(m{ {new_obs} ktbs:hasEnd ?o }.first())
+        return
+
+    old_last_obsel = prepared.last_obsel
+    old_last_begin = prepared.last_begin
+    old_last_end = prepared.last_end
+
+    str_mon = True
+    pse_mon = True
+    # we used a SPARQL query before, but this seems to be more efficient...
+    # check all new obsels, but also their *related* obsels
+    # (as the relation changes *both* obsels)
+    for obs in chain( [new_obs],
+                      (o for _, o in m{ {new_obs} ?p ?o }),
+                      (s for s, _ in m{ ?s ?p {new_obs} })):
+        if not obs.startswith(self.trace_uri):
+            continue # not an obsel of this trace, skip it
+        end = m{ {obs} ktbs:hasEnd ?o }(self.state).first()
+        if end is None:
+            continue # not an obsel, skip it
+        end = int(end)
+        begin = None
+        if end < old_last_end:
+            str_mon = False
+            if end < old_last_end - self.trace.pseudomon_range:
+                pse_mon = False
+        elif end == old_last_end:
+            begin = int(m{ {obs} ktbs:hasBegin ?o }(self.state).first())
+            if begin < old_last_begin:
+                str_mon = False
+                if begin < old_last_begin - self.trace.pseudomon_range:
+                    pse_mon = False
+            elif begin == old_last_begin:
+                if obs <= old_last_obsel:
+                    str_mon = False
+        if obs is new_obs and str_mon:
+            prepared.last_obsel = new_obs
+            if begin is None:
+                begin = int(m{ {new_obs} ktbs:hasBegin ?o }.first())
+            prepared.last_begin = begin
+            prepared.last_end = end
+
+    prepared.str_mon = prepared.str_mon and str_mon
+    prepared.pse_mon = prepared.pse_mon and pse_mon

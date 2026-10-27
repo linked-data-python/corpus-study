@@ -46,5 +46,20 @@
     "method": "custom:fixture-values",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The custom driver (fixture-values, compares process_key_value_pairs on ex:obj1 and ex:obj2, ordered) proves both optimized artefacts; the first runs failed with 'driver compared None' while the harness did not yet redirect _exec_python/_exec_ldpy to the requested sides, and the same equivalence was checked then with a scratch copy of the driver (a deliberate break, 'has_' -> 'hasx_', is detected). The fixture does not distinguish int from float values (1 == 1.0) nor a list of strings from a list of literals, so a green here is weaker on those two points.",
+    "optimized.py: unused URIRef dropped (and the redundant outer URIRef(...) around RDF[...] with it); process_seq counts with `for index in count(1)` (itertools) instead of index = 1 / index += 1, and appends process_value(...)[1] directly instead of unpacking `_, element`; `len(json_obj[key]) > 0` became the truthiness of the list; elif/else after return became plain if / raise; RDF[\"_{}\".format(index)] became RDF[f\"_{index}\"]. The error paths (ValueError twice) and the None test on item are kept; value_node is kept as a variable (inlining it gives a 120-character line).",
+    "optimized.ldpy: identical outside the RDF lines: ANS/RDF/XSD terms become ans:/rdf:/xsd: prefixed names, the import of ANS becomes `from generators_context import SparQLWrapper, ans:`, RDF[f\"_{index}\"] becomes rdf:{f\"_{index}\"}. No exception to symmetry.",
+    "tried and rejected: the reads (graph.objects / graph.value / `in graph`) as m{ } islands with `@graph sparql_wrapper.graph` in each function: equivalent, but LONGER (notation ratio 1.0115 against 0.9454 for the rdflib calls), because graph.value(s, p) is already shorter than m{ {s} p ?v }.first() and the receiver costs a line per function. Fusing the two value reads of a kv_pair into one join was not done: it would silently skip a pair with no ans:value where the original raises ValueError (process_value(None)).",
+    "stratum is ns_import_project: the gain measured here is the prefixed names and the import, nothing else.",
+    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

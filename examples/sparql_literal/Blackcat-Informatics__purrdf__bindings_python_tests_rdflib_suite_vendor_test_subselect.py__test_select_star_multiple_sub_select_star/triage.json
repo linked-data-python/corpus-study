@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : requête littérale SPARQL reprise telle quelle dans s{ }, contexte restauré fidèle au dépôt, oracle sensible (une mutation de optimized.ldpy échoue).",
+  "questions": [],
+  "evidence": "check : 3 OK. Contexte restauré (original.py:13-16) comparé au fichier du dépôt purrdf@3aa4ba5 lignes 1-6 : identique. Mutation dans une copie de optimized.ldpy (2e sous-select réécrit en ?label) -> FAIL call[0].result: values differ ; l'oracle n'est donc pas creux. optimized.py retire le PREFIX rdfs (l'espace de noms par défaut de rdflib suffit sur ce Graph()) : sans gravité, et asymétrique à l'inverse (le ldpy paie un @prefix). Gain notation 1.45 : pas candidate pour l'article. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

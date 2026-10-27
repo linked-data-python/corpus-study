@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "optimization-doctrine"
+  ],
+  "summary": "Le pilote n'exerce que trois relations (cible None, Resource, classe simple) : la branche 'Self', le dedoublonnage processed_relations et la garde hasattr sont corrompables sans que le check passe au rouge ; les ratios optimises sont gonfles par des imports retires.",
+  "questions": [
+    {
+      "question": "Acceptez-vous la paire alors que context_shim._SourceThing._valid_relations ne contient ni relation dont la cible est 'Self' (qui reaffecte target_class = cls, lu plus loin pour sh:class) ni relation en double (processed_relations) ?",
+      "where": "original.py:35-39, original.py:24-25 et context_shim.py:58-62 ; translated.ldpy:41-45 et translated.ldpy:30-31",
+      "if_yes": "approuver : la region est prouvee sur les seules trois branches exercees.",
+      "if_no": "needs-work : ajouter au shim (context_shim.py:58-62) une relation dont la cible est une classe nommee 'Self' et une relation repetee, puis relancer check sur les trois artefacts."
+    },
+    {
+      "question": "Faut-il publier les ratios de cette region sans les lignes d'import (care 0.8996 / notation 0.8845 / total 0.7957) plutot que ceux mesures (0.8885 / 0.8561 / 0.7607) ?",
+      "where": "optimized.py:4-5 et optimized.ldpy:4 contre original.py:4-5",
+      "if_yes": "mesurer les trois artefacts sans lignes d'import (ou avec les imports de l'original conserves : 0.9082 / 0.8953 / 0.8131) ; la notation vaut ~0.885, pas 0.856.",
+      "if_no": "garder les ratios mesures ; le retrait de PARAM, bind_prefixes, URIRef (py) et de toute la ligne context_shim (ldpy) compte alors comme gain."
+    }
+  ],
+  "evidence": "check initial : 3x OK. Copies uniques sous un mktemp -d. Mutations appliquees aux trois artefacts (translated.ldpy, optimized.py, optimized.ldpy) : (1) branche Self -> target_class_name=\"Broken\"; target_class=None : 3x OK ; (2) garde 'if relation_key in processed_relations: continue' -> 'if False' : 3x OK ; (3) branche else str(target_class) -> \"Broken\" : 3x OK ; (4) suppression de la garde hasattr(_valid_relations) dans translated.ldpy : OK ; temoin : target_class_name=\"None\" -> \"Nope\" dans translated.ldpy : FAIL (le pilote detecte bien les branches exercees). La branche else (original.py:42-43) est de toute facon inatteignable : original.py:37 leve AttributeError avant sur un objet sans __name__. Tokens (rdfeval.check.sizes sur copies) : mesure care 0.8885 / notation 0.8561 / total 0.7607 ; sans aucune ligne d'import dans les trois fichiers 0.8996 / 0.8845 / 0.7957 ; imports de l'original reinseres dans les deux optimises 0.9082 / 0.8953 / 0.8131. Point 3 (module-state) : noms compares presents dans original mais absents des optimises, donc non compares : optimized.py : message, relation_iri, target_class_iri (PARAM aussi) ; optimized.ldpy : les memes + SH ; ils sont couverts par l'isomorphisme du graphe g, donc sans risque ici, mais la doctrine 'memes noms au niveau du module' n'est pas respectee. Point 1 : sans objet, les deux Literal() recoivent des f-strings (toujours str), aucun datatype exerce : la strate coercion_datatype n'est pas reellement mise a l'epreuve par cette region.",
+  "triaged_by": "sonnet-5.5"
+}

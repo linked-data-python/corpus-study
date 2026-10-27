@@ -48,5 +48,18 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the result rows are sorted directly and compared to a list of IRI tuples (INSIDE.a02 ...) instead of converting both sides with str(); the `actual = sorted([(str(r[0]), str(r[1])) for r in ...])` comprehension disappears. The commented-out debug loop (a dead copy of the query call) is dropped. This comparison is slightly stricter than the original's (it also checks the term type), identical on this fixture where every result is a URIRef.",
+    "optimized.ldpy, from optimized.py: Namespace objects and initNs vanish (@prefix tfun/inside/time), INSIDE.x becomes inside:x, the query string and g.query(q, initNs=...) become one s{ }(g); no interpolation or initBindings is needed (initNs-only region).",
+    "Kept: the `q` variable only on the Python side (it is the query text and is the RDF line itself); the Path/tests_dir lines and the demo harness verbatim.",
+    "Symmetry: outside the namespace declarations, the query and the removed q/initNs, the two files are identical."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name",
+    "s{ }",
+    "call suffix (g)"
+  ]
 }

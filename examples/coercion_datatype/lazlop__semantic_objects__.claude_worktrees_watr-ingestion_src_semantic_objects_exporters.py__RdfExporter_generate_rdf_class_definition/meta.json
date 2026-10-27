@@ -45,5 +45,20 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: unused imports dropped (PARAM, bind_prefixes, URIRef); the hasattr/continue guard on _valid_relations became getattr(base_class, '_valid_relations', []) (same effect: no relation visited); relation._get_iri() and target_class._get_iri() inlined into the add calls; field_comment computed before the adds; the message literal reuses field_comment (f\"s223: {field_comment}\"), since the original text is exactly 's223: ' + field_comment; relation._name replaced by relation_key in the f-string.",
+    "optimized.ldpy: same structure; the four unconditional triples are ONE +{ } (class_iri sh:property prop_node . prop_node a sh:PropertyShape ; sh:path ; rdfs:comment), the two conditional ones ONE +{ } (sh:class ; sh:message). The island-only part of this fusion is the grouping of 4 and 2 triples in two statements; Python has no multi-triple add, so optimized.py keeps 4 + 2 g.add calls (no symmetry violation: nothing here is writable as pure Python).",
+    "the nested f-string f\"s223: {field_comment}\" must be written in interpolation braces ({f\"...\"}): a bare quoted \"s223: {field_comment}\" in the island is a constant plain literal that does NOT interpolate (first attempt FAILED isomorphism for that reason).",
+    "unchanged on purpose: the restored-bindings harness (cls, g, class_iri, classes_to_process, processed_relations), the Self/None/__name__ dispatch for target_class_name (it also reassigns target_class, read later), BNode() as a Python call, the processed_relations guard.",
+    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

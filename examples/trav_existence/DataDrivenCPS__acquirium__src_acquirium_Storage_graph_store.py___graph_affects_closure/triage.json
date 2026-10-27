@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "optimization-doctrine"
+  ],
+  "summary": "Équivalence solide (confirmée sur Dataset/ConjunctiveGraph), mais optimized.py et optimized.ldpy retirent les imports inutilisés du contexte extrait, ce qui gonfle le gain : total 0.77 au lieu de 1.03.",
+  "questions": [
+    {
+      "question": "Les imports du contexte extrait (original.py:4-5, hors des lignes 72-76 de la région) doivent-ils être conservés tels quels dans les artefacts optimisés, comme le harnais commun ?",
+      "where": "optimized.py:4-5 et optimized.ldpy:4 contre original.py:4-5 et translated.ldpy:4-5",
+      "if_yes": "needs-work : restaurer les imports des deux côtés ; les ratios deviennent care 0.83, notation 1.24, total 1.03 (le LD Python ne gagne plus rien), et retirer l'idée d'un gain.",
+      "if_no": "approuver : élaguer le contexte inutile fait partie de la relecture soignée, mais alors la mesure `care` mêle code de région et contexte."
+    }
+  ],
+  "evidence": "check : 3 OK. Copie avec les imports d'origine remis dans optimized.py et optimized.ldpy : tokens care 0.831, notation 1.2373, total 1.0282 (contre 0.6901 / 1.1224 / 0.7746 tels quels). Équivalence : script direct appelant les 4 artefacts sur Dataset(default_union=False) avec triplet en graphe nommé (False partout), Dataset(default_union=True) (True), Dataset triplet dans le défaut (True), ConjunctiveGraph nommé (True), Graph vide (False) : les quatre concordent, donc pas d'equivalence-doubt (le dépôt appelle la fonction avec un Graph() ou un Graph reçu, qui peut être un Dataset). Pilote correct : cas faux avec voisinage, deux disjoncts isolés. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

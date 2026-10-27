@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "optimization-doctrine"
+  ],
+  "summary": "Le pilote ne compare pas le fichier Brick+extensions.ttl ecrit par le script (verifie identique a la main) ; les deux optimises suppriment les noms de module pfxs et extension_files que le pilote ne compare donc plus.",
+  "questions": [
+    {
+      "question": "Acceptez-vous que le pilote ne compare pas le fichier Brick+extensions.ttl ecrit (dernier effet du script), que j'ai verifie isomorphe (30 triplets, memes 7 @prefix) pour les quatre artefacts ?",
+      "where": "driver.py:27 ; translated.ldpy:39-41 et original.py:38-40 ; optimized.ldpy:9 (@graph as)",
+      "if_yes": "approuver sur la foi de la verification manuelle (a consigner).",
+      "if_no": "needs-work : le pilote doit lire Brick+extensions.ttl apres chaque cote et comparer par isomorphie et par lignes @prefix."
+    },
+    {
+      "question": "Acceptez-vous que optimized.py et optimized.ldpy ne definissent plus au niveau module pfxs ni extension_files, alors que la doctrine veut les memes noms au niveau du module ?",
+      "where": "optimized.py:13,23-24 et optimized.ldpy:14,24-26 contre original.py:13,24",
+      "if_yes": "approuver : ce sont des variables locales de script sans lecteur externe.",
+      "if_no": "needs-work : rendre pfxs et extension_files aux deux optimises ou corriger la doctrine."
+    }
+  ],
+  "evidence": "check initial : 3x OK. Copies uniques. Mutation : suppression de tout l'ecriture du fichier (with open... fp.write) dans translated.ldpy : OK (effet non observe) ; suppression de la ligne owl:versionInfo : FAIL x3 ; suppression de la ligne '-{ {rule} sh:prefixes ?pfxs }' dans optimized.ldpy : FAIL ; elargissement de '-{ ?s sh:declare {pfx} }' en '-{ {BRICK} ... }' : FAIL sur translated. Verification manuelle des fichiers ecrits (script d'execution des quatre artefacts dans un dossier etage) : isomorphes a l'original, 30 triplets, 7 lignes @prefix identiques (donc @graph as n'a pas change la serialisation). Test de robustesse : fixture de 60 ontologies avec plusieurs sh:prefixes par regle, sh:declare partage et plusieurs owl:imports/versionInfo, ajoute dans une copie : 3x OK (pas de doute sur la mutation pendant iteration ni sur Graph.set contre remove/add). Point 3 : noms de l'original absents des optimises donc non compares : extension_files, pfxs (translated.ldpy les conserve tous). Tokens : mesure care 0.8447 / notation 0.861 / total 0.7273 ; sans lignes d'import 0.8038 / 0.9091 / 0.7308 ; imports de l'original reinseres 0.8068 / 0.9108 / 0.7348 (le total est quasi inchange, mais la notation vaut ~0.91 et non 0.86). Les optimises sont identiques hors RDF sauf l'ecart declare (Graph.set contre -{ }+{ }, ligne en plus cote ldpy) : pas d'asymetrie. Etiquette 'nom prefixe' normalisee par constructions.normalise ; translated.ldpy n'annonce pas 'interpolation {expr}' (utilisee ligne 23-24, 28-29, 34-36) : sous-declaration sans effet sur les chiffres.",
+  "triaged_by": "sonnet-5.5"
+}
