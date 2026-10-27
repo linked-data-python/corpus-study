@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : 15 graph.add deviennent 8 +{ } (SHACL lisible en Turtle), helpers du shim identiques au dépôt (generate.py:21-57), oracle fort ; 4 @prefix (rdf, rdfs, xsd, owl) déclarés mais jamais employés (bruit, sans effet sur les chiffres).",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (en acceptant que rdflib.collection.Collection reste du Python et que 4 des 7 @prefix soient inutilisés) ?",
+      "where": "translated.ldpy:35-38, 59-64, 82-92 et original.py:29-30, 51-54, 70-78",
+      "if_yes": "la retenir comme exemple add_isolated + add_run_shared_subject ; éventuellement retirer les @prefix rdf/rdfs/xsd/owl inutilisés (lignes 12-15)",
+      "if_no": "approuver quand même la paire pour les chiffres, sans la citer"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Original comparé à corpus/repos/BrickSchema__Brick/alignments/vbis/generate.py:60-125 : identique ; helpers de vbis_context.py identiques aux lignes 21-57 du dépôt. Pilote : 8 lignes de CSV couvrant pattern unique, deux patterns (sh:or), deux tags (sh:in), un tag (sh:hasValue), doublon, classe vide, classe sans tag. Mutants sur une copie, tous détectés (FAIL, 35 vs 35 triplets non isomorphes) : sh:in->sh:or (l.91), sh:hasValue->sh:in (l.88), brick:{bc}->brick:Wrong (l.37), sh:path vbis:hasVBISTag->sh:path sh:xx dans la branche à plusieurs patterns (l.74). Vérifié que vbis:{f\"{bc}Shape\"} / brick:{bc} s'instancient comme Namespace[...] (ldpy.runtime.pname == rdflib Namespace[x] pour 'A B', 'A/B', 'A#B', 'a(b)'). grep : rdf:, rdfs:, xsd:, owl: n'apparaissent que dans les lignes @prefix.",
+  "triaged_by": "sonnet-5.5"
+}

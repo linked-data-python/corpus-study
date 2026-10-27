@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Le pilote ne protège pas le motif `?typeAssertion a rdf:Statement` (le supprimer reste vert) ; de plus la requête est un BGP pur à une variable projetée, donc m{ } passe (vérifié) là où §2 interdit s{ } ; bon candidat d'article une fois ces deux points réglés.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un voisin qui a predicate=rdf:type et subject=obj1 mais n'est PAS typé rdf:Statement, avant d'approuver ?",
+      "where": "driver.py:20-39 (_graph_with_matches : ta3 et ta4 sont typés Statement), translated.ldpy:18 (`?typeAssertion a rdf:Statement .`) et original.py:10",
+      "if_yes": "needs-work : ajouter ce triplet au graphe du pilote (la traduction est correcte, seul l'oracle est faible).",
+      "if_no": "approuver en l'état, sachant que la première ligne du motif n'est pas prouvée."
+    },
+    {
+      "question": "Le pur BGP de trois motifs à une seule variable projetée doit-il être traduit en m{ } (list(m{ ... }(g))) plutôt qu'en s{ } (INSTRUCTIONS.md §2 : « pas de s{ } là où m{ } passe ») ?",
+      "where": "translated.ldpy:16-21 ; original.py:9-13 et :26",
+      "if_yes": "needs-work : réécrire en m{ } ; la paire change de strate d'illustration (lecture d'un BGP, pas bind_initbindings).",
+      "if_no": "garder s{ } (la table des strates prescrit s{ } pour bind_initbindings) et noter que la règle « m{ } d'abord » ne s'applique pas ici."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur la copie : suppression de la ligne `?typeAssertion a rdf:Statement .` -> reste VERT (weak-oracle confirmé). Suppression de la ligne rdf:predicate -> ROUGE (ta3) ; suppression de la ligne rdf:subject -> ROUGE (ta4, et zéro solution). Variante `return list(m{ ?typeAssertion a rdf:Statement . ?typeAssertion rdf:predicate rdf:type . ?typeAssertion rdf:subject {typed_object} }(g))` : check VERT. Dépôt : le seul appelant (python/tests/examples.py:496) passe `entity` issu de make_entity, un URIRef (le piège du str coercé en Literal ne se pose pas). La note de traduction attribue le préfixe rdf: implicite à « Graph.query() » ; c'est faux : _TYPE_QUERY est compilé par prepareQuery au chargement du module, sans graphe (vérifié : prepareQuery('... rdf:Statement ...') réussit seul), c'est le prologue par défaut de rdflib qui résout rdf: ; la conclusion (@prefix rdf: nécessaire côté ldpy) reste vraie. Le nom de module _TYPE_QUERY disparaît de la traduction (sans effet : seule la fonction est comparée). Article : oui comme histoire « prepareQuery module + initBindings -> un îlot, et rdf: n'est plus implicite », sous réserve des deux points ci-dessus.",
+  "triaged_by": "sonnet-5.5"
+}

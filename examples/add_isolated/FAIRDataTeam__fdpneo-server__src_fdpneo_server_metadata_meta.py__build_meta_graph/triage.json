@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Deux mutants sur des expressions de la région survivent (ordre de `created or created_at or now`, repli `prior_state or initial_state`) ; et `from … import p:` ne marche que grâce à un `__namespaces__` écrit à la main dans le shim, absent du dépôt.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote (a) un MODIFY avec `created=` fourni alors que le prior a déjà un dct:created, et (b) un MODIFY dont le prior n'a pas de fdp-o:metadataState ?",
+      "where": "driver.py:72-94 (cas A-E) ; original.py:74 et 80 ; translated.ldpy:72 et 78",
+      "if_yes": "needs-work : ajouter ces deux appels (les expressions sont du Python inchangé, donc risque réel faible, mais deux mutants verts)",
+      "if_no": "approuver : ces deux expressions sont copiées telles quelles hors des îlots"
+    },
+    {
+      "question": "`from context_shim import dct:, owl:, prov:, fdp-o:` doit-il compter comme construction « from … import p: » alors que le dépôt (shared/namespaces.py) n'exporte aucun `__namespaces__` et que le dict est écrit à la main dans le shim ?",
+      "where": "translated.ldpy:22-25 ; context_shim.py:29-37 ; corpus/repos/FAIRDataTeam__fdpneo-server/src/fdpneo_server/shared/namespaces.py (aucun __namespaces__)",
+      "if_yes": "approuver (le crédit se justifie comme usage hypothétique d'un module de préfixes)",
+      "if_no": "retirer « from … import p: » de constructions et employer @prefix dct:/owl:/prov:/fdp-o: dans le bloc"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Original identique au dépôt (meta.py:78-161, une ligne vide près) ; _next_version, _extract_creation, _extract_validated_against, _extract_state identiques ; record_graph_uri équivalent au dépôt et rend un URIRef (donc {record_subject} reste une IRI). Mutants sur copie de translated.ldpy : DÉTECTÉS : Literal(modified or now)->Literal(now) ; branches CREATE/MODIFY échangées ; garde `subject is not None` inversée ; validated_against : ordre échangé ; creator : `subject` seul. SURVIVANTS : (m4) `created or created_at or now` -> `created_at or created or now` ; (m5) `prior_state or initial_state` -> `prior_state`. Équivalents (vérifiés sans effet) : {version} nu à la place de Literal(version), {now} nu, Literal(effective_state) sans .value. Les cinq cas A-E ne contiennent ni MODIFY+created=, ni MODIFY sans état prior. Note : meta.json donne strata [add_isolated] seul alors que la traduction fusionne avec `;` (add_run_shared_subject). Article : pas encore (oracle à renforcer, crédit from … import p: discutable).",
+  "triaged_by": "sonnet-5.5"
+}

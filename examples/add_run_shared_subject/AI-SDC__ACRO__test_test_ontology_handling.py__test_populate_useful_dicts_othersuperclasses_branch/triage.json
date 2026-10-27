@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : 4 .add sur un sujet en 2 îlots +{ } (fusion bloquée par parent1/parent2 intercalés, choix prudent et documenté) ; shim fidèle (PREFIX str, populate_useful_dicts identique au dépôt aux commentaires près, LAST_GRAPH ne fait qu'observer) ; l'article n'y gagne pas : prédicats et sujet restent en {variable}, gain faible.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:demo). Comparé context_shim.populate_useful_dicts à corpus/repos/AI-SDC__ACRO/acro/ontology_handler.py:38-76 : corps identique ; PREFIX = str dans le dépôt (ontology_handler.py:18), donc f<{PREFIX}TestClass> = URIRef(PREFIX + 'TestClass'). Pas d'expérience de mutant : l'isomorphisme porte sur les 4 triplets complets et le test aval assert len(...)>=2 ajoute un contrôle. Réserve non bloquante : translated.ldpy:34-35 pourrait être `{subject} {subclass_ref} {parent1}, {parent2}` (liste d'objets) ; et 'directly-expressible' est juste malgré 2 îlots au lieu d'un seul.",
+  "triaged_by": "sonnet-5.5"
+}

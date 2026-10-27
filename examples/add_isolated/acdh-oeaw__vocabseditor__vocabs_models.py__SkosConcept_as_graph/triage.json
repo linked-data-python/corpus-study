@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : traduction fidèle, le piège du @graph capturé par valeur après `g = g + …` est traité (second `@graph g`) et l'oracle le détecte ; seul @prefix rdf: est inutilisé (`a`).",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article, comme exemple du piège « @graph capture la valeur, pas le nom » (plutôt que comme exemple de gain, 13 add -> 9 +{ }) ?",
+      "where": "translated.ldpy:13, 29-30 et original.py:9, 25",
+      "if_yes": "la retenir pour ce piège (retirer au passage @prefix rdf:, l.8, jamais employé) ; noter que modelprops_to_graph est un no-op dans le shim (_meta.fields=[]), donc ses triples réels ne sont pas montrés",
+      "if_no": "approuver pour les chiffres sans la citer"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo, 2 scénarios). Original identique au dépôt (vocabs/models.py:857-886, indentation près) ; modelprops_to_graph identique à vocabs/utils.py:85-108 ; get_subject() du dépôt rend un URIRef (donc {subj}, {main_concept_scheme} restent des IRI). Mutants sur copie, tous détectés : suppression du second `@graph g` (12 vs 7 triplets, les écritures vont dans le graphe orphelin), suppression du premier `@graph g` (erreur de transpilation), suppression du bloc `;` initial, topConceptOf->inScheme, garde notation modifiée, narrower->broader, dc:source->dc:title. Seul survivant : `if self.broader_concept` -> `is not None`, qui modifie du Python non traduit et que la stub (toujours truthy) ne peut pas distinguer d'un vrai objet Django : sans conséquence pour l'équivalence. grep : rdf: n'apparaît que dans la ligne @prefix.",
+  "triaged_by": "sonnet-5.5"
+}

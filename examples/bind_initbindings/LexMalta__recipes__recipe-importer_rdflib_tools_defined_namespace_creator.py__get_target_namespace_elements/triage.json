@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction plausiblement correcte (épreuve verte aussi sur une fixture enrichie), mais le pilote ne verrait ni la perte de DISTINCT, ni STRSTARTS devenu CONTAINS, ni l'ordre du tri ; peut illustrer l'article (histoire « épissure textuelle .replace -> terme interpolé », pas initBindings) une fois l'oracle renforcé.",
+  "questions": [
+    {
+      "question": "Faut-il renforcer le pilote (fixture : un sujet à deux types ou deux définitions, une IRI qui CONTIENT l'espace de noms sans le commencer ; driver : ordered=True car la région fait elements.sort) avant d'approuver ?",
+      "where": "driver.py:40-49 (run_pair sans ordered, fixture= donc ordered=False par défaut), fixture.ttl (aucun doublon, aucune IRI « contient mais ne commence pas »), translated.ldpy:11 (SELECT DISTINCT) et :22 (FILTER STRSTARTS) ; original.py:10 et :21",
+      "if_yes": "needs-work : ajouter ces cas au fixture et ordered=True ; la traduction elle-même n'a pas besoin de changer (vérifié).",
+      "if_no": "approuver en l'état, en sachant que DISTINCT, STRSTARTS et l'ordre du tri ne sont pas prouvés par le pilote."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur la copie de translated.ldpy, restés VERTS : (1) SELECT DISTINCT -> SELECT ; (2) STRSTARTS -> CONTAINS ; (3) elements.sort(...) supprimé ; (4) elements.sort(..., reverse=True) (le harnais compare en multi-ensemble car fixture= impose ordered=False). Mutants ROUGES (donc couverts) : FILTER supprimé, STRENDS, un prédicat de la chaîne dcterms|rdfs|skos retiré, str(None) -> '', args.target_namespace remplacé. Fixture enrichie dans la copie (ex:f avec 3 définitions et 2 types, ex:g à 2 types sans définition, <http://x.org/?u=http://example.org/ns#z> qui contient l'espace de noms) + ordered=True : la traduction réelle reste VERTE (donc l'ordre des ex aequo sur ?s est identique des deux côtés), et les mutants DISTINCT et CONTAINS passent au ROUGE. Dépôt d'origine : le seul site d'appel (defined_namespace_creator.py:180) passe args.target_namespace, un str argparse, donc {target_namespace} = Literal simple = le littéral SPARQL de l'original ; aucun écart de type réel. Le shim lexmalta_context.py ne restaure que `args` (classe à un attribut), il n'invente rien ; `args` est bien un global du __main__ du dépôt. Écart théorique hors site d'appel : un URIRef passé en target_namespace serait un littéral dans l'original (str.replace) mais une IRI dans la traduction (STRSTARTS lèverait une erreur de type -> zéro solution). Stratum « bind_initbindings » nominal : la région n'emploie pas initBindings (initNs + .replace) ; sans conséquence pour la paire.",
+  "triaged_by": "sonnet-5.5"
+}

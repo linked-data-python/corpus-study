@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : le piège du type réel est correctement géré ({URIRef(synthesis_uri)}, le dépôt passe des str) et l'oracle est solide ; peut illustrer l'article.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (initBindings sur une variable non projetée dans un UNION -> terme interpolé, avec le piège str -> URIRef) ?",
+      "where": "translated.ldpy:11-20 et original.py:8-28",
+      "if_yes": "la retenir pour la strate bind_initbindings, en n'en montrant que le prologue et les deux motifs interpolés ; noter le coût (URIRef(synthesis_uri) écrit deux fois, une fois par bras de l'UNION).",
+      "if_no": "approuver quand même : aucun défaut vérifié."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dépôt : synthesis_uri vient de query_all_syntheses (str(row.synthesis), chemicalinput_query.py:19) ou de synthesis['uri'] ; c'est donc bien un str, et l'URIRef(...) explicite de l'original est préservé (muter en {synthesis_uri} nu -> ROUGE). Mutants sur la copie, tous ROUGES : bras 1 ou bras 2 de l'UNION avec sujet libre (le bras 2 est attrapé grâce à l'appel Synthesis_3 à zéro solution), bras 2 supprimé, hasAddedChemicalInput -> hasChemicalInput, hasAmount -> rdfs:label, OPTIONAL label rattaché à ?step, Literal au lieu d'URIRef sur un seul bras. Les gardes de véracité (`if row.chemical`, `if row.label`, `if row.altName`) sont inchangées dans la traduction (même code Python sur les mêmes lignes). Constructions déclarées toutes employées.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence solide (tous les mutants testés sont rouges) mais pur BGP à une variable projetée où m{ } passe (vérifié) alors que §2 interdit s{ } ; propre et court, peut illustrer l'article selon la réponse.",
+  "questions": [
+    {
+      "question": "Ce BGP de deux motifs à une seule variable projetée (?surface) doit-il être traduit en `list(m{ ?surface a \"BuildingSurface:Detailed\" . ?surface idf:zone_name {zone} })` plutôt qu'en s{ } (§2 : « pas de s{ } là où m{ } passe ») ?",
+      "where": "translated.ldpy:10-13 et original.py:10-15",
+      "if_yes": "needs-work : réécrire en m{ } (la paire change de strate d'illustration) ; ne pas créditer s{ } ici.",
+      "if_no": "approuver et créditer s{ } + interpolation (la table des strates prescrit s{ } pour bind_initbindings) ; la paire peut alors illustrer l'article."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur la copie, tous ROUGES : ligne `a \"BuildingSurface:Detailed\"` supprimée (le voisin « zoneish » fuit), idf:zone_name -> idf:zone, littéral de type changé, {zone} remplacé par une variable libre. Variante `@graph self.rdf` + `return list(m{ ?surface a \"BuildingSurface:Detailed\" . ?surface idf:zone_name {zone} })` : check VERT. Dépôt : seul appelant (ontology.py:157) passe z issu de zones(), des Literal sujets (from_object, ligne ~66) : pas de str, donc pas de coercion Literal/IRI ; sur l'original, zone_surfaces(o, 'z1') (str nu) rend [] alors que la traduction coercerait en Literal, mais aucun appelant ne le fait. Notes vérifiées : idf lié par g.bind('idf', IDF) dans from_object, @prefix idf: correct. `self` explicite et `@graph self.rdf` : liaison restaurée sans logique ajoutée. Article : oui, trois lignes lisibles (dict initBindings + chaîne -> {zone} en position de terme), sous réserve de la réponse.",
+  "triaged_by": "sonnet-5.5"
+}

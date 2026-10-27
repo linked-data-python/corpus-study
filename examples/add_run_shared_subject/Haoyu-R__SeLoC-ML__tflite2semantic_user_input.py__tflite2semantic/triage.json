@@ -1,0 +1,15 @@
+{
+  "priority": "low",
+  "flags": ["article-example"],
+  "summary": "Rien à signaler : 4 .add sur sensorOfNN dans une boucle deviennent un seul +{ } (deux `a`), f<…sensor_{i + 1}_{idOfNN}> équivalent à la concaténation ; mutants détectés ; candidate propre pour l'article.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ? (6 lignes d'origine, 1 îlot de 5 lignes, f<> + prédicats préfixés + `a` répété ; réserve : `Literal(sensor_info_)` et `addHardware(value)` restent interpolés)",
+      "where": "translated.ldpy:14-21 et original.py:11-16",
+      "if_yes": "retenir comme exemple du strate add_run_shared_subject",
+      "if_no": "approuver sans l'article"
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state). Mutants sur copie : suppression de `a sdo:Sensor` -> FAIL (8 vs 6 triplets) ; `sensor_{i}_` au lieu de `sensor_{i + 1}_` -> FAIL (graphe et valeur sensorOfNN). Dépôt : addHardware (l.95-105) et inputOfNN (l.67) identiques au shim ; en réel sensor_list_ est un set d'entiers 0-5 et sensor_info_ une str (l.436-437 environ), donc Literal(sensor_info_) gardé en Python n'introduit pas d'écart. Les valeurs du shim sont illustratives (sensor_list_=[0,2]) : zéro itération non testée mais trivialement équivalente (aucun triplet des deux côtés).",
+  "triaged_by": "sonnet-5.5"
+}

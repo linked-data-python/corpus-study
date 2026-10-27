@@ -1,0 +1,27 @@
+{
+  "priority": "high",
+  "flags": ["shim-invents-logic", "wrong-construction", "classification-doubt"],
+  "summary": "Oracle solide (33 triplets, mutants détectés) mais l'import `from context_shim import aorc:` ne marche que grâce à un `__namespaces__` écrit à la main dans le shim, que le dépôt n'a pas ; et ~8 affectations pures sont réordonnées (la note en annonce 3) sous l'étiquette 'directly-expressible'.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine (blobfish/pyrdf/_AORC.py, __init__.py) n'a aucun `__namespaces__` : le shim context_shim.py:32 en ajoute un à la main pour que `from … import aorc:` (translated.ldpy:5) fonctionne. Acceptez-vous de retirer le crédit 'from … import p:' de `constructions` (ou de le compter comme exigeant une modification du dépôt) ?",
+      "where": "translated.ldpy:5 ; context_shim.py:27-32 ; corpus/repos/Dewberry__blobfish/blobfish/pyrdf/_AORC.py et __init__.py",
+      "if_yes": "retirer 'from … import p:' des constructions (ou déclarer `@prefix aorc: <…aorc.ttl#> .` dans le bloc et ne plus créditer l'import de préfixes) ; shim ramené à restaurer des liaisons seulement",
+      "if_no": "approuver en notant que le gain suppose que le module de projet exporte __namespaces__"
+    },
+    {
+      "question": "Le réordonnancement de ~8 affectations pures (end_date l.33, last_modified/zip/netcdf l.43-45, access_description l.61-63, rfc_office_title/alias l.100-101, hissées avant leur +{ }) est-il compatible avec 'directly-expressible' ? La note meta.json annonce 'trois Literal' hissés, ce qui est inexact.",
+      "where": "translated.ldpy:32-51, 60-69, 100-105 contre original.py:25-28, 35-42, 52-57, 89-92",
+      "if_yes": "garder directly-expressible et corriger la note (8 hissages, aucun effet de bord : les appels node_namer gardent leur ordre)",
+      "if_no": "classer minor-restructuring"
+    },
+    {
+      "question": "Les 9 `Literal(x, datatype=XSD.…)` sur valeur str sont conservés en Python (translated.ldpy:32,33,42,43,60,61,100,101,109) au lieu de `\"{x}\"^^xsd:…` : acceptez-vous ce choix prudent ?",
+      "where": "translated.ldpy:32 et original.py:25",
+      "if_yes": "rien à changer",
+      "if_no": "needs-work : employer la coercition `{x}^^xsd:date` (meta.ref_date etc. sont des str dans le dépôt, parse_transfer.py:73-78)"
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie sans la ligne `__namespaces__` du shim : FAIL (ImportError: cannot import name '__namespaces__'), donc l'import de préfixe dépend entièrement de l'ajout. grep __namespaces__ dans corpus/repos/Dewberry__blobfish : aucun résultat. Mutants sur copie : `prov:used {script_node}` au lieu de source_dataset_node, puis suppression du datatype sur Literal('precipitation') : les deux FAIL (33 vs 33 triplets non isomorphes) : l'oracle est sensible, pas de weak-oracle (2 fixtures, BNodes à identifiants fixes). Tous les termes AORC utilisés sont déclarés dans _AORC.py. Article : non, 128 lignes, dépendance au shim, hissages ; pas lisible en 3 lignes.",
+  "triaged_by": "sonnet-5.5"
+}

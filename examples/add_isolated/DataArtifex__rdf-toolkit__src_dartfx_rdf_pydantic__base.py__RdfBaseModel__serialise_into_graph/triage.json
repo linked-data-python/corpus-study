@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "wrong-construction"
+  ],
+  "summary": "La traduction est équivalente (oracle fort), mais context_shim.py n'est pas « verbatim » comme l'affirment les notes (il retire de la logique d'helpers appelés par la région), et meta.json crédite @prefix, prefixed name et variable que le code n'emploie pas.",
+  "questions": [
+    {
+      "question": "Un shim qui prétend copier verbatim mais retire des branches d'helpers appelés par la région (_value_to_node, _get_rdf_property, _field_type_info, _unwrap_annotation) est-il acceptable pour cette paire ?",
+      "where": "context_shim.py:143-148, 132-140, 156, 247-256 contre corpus/repos/DataArtifex__rdf-toolkit/src/dartfx/rdf/pydantic/_base.py:1615-1636, 1703-1725, 1640-1700, 1564-1572",
+      "if_yes": "approuver (le delta est identique des deux côtés, aucune différence de graphe) mais corriger les notes (« verbatim » est faux)",
+      "if_no": "needs-work : restaurer les helpers tels quels (get_origin/Union/types.UnionType, repli _annotation_metadata, branche Annotated)"
+    },
+    {
+      "question": "Les constructions « prefixed name », « variable » et même « @prefix » doivent-elles être retirées de meta.json, puisque la traduction n'écrit que `a` et des {expr} (aucun nom préfixé, aucun ?var, les prefixes rdf:/xsd: ne sont jamais utilisés) ?",
+      "where": "meta.json (constructions) ; translated.ldpy:12-13, 48, 62, 83",
+      "if_yes": "corriger constructions (garder @graph, +{ }, interpolation {expr}) ; sinon le crédit indu gonfle les comptes",
+      "if_no": "expliquer quel passage emploie un nom préfixé ou un ?var"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo). Original identique au dépôt (_base.py:1335-1409, indentation près). Comparaison du shim au dépôt : _bind_prefixes, _ensure_uri, _python_datatype, _looks_like_uri identiques ; MAIS _value_to_node n'a pas le calcul d'union (get_origin / typing.Union / types.UnionType) avant `URIRef in allowed_types` (dépôt 1564-1572), _get_rdf_property n'a pas le repli sur _annotation_metadata (1630-1636), _unwrap_annotation n'a pas la branche Annotated, _field_type_info teste `origin is Union` sans types.UnionType, LangStringList est un stand-in, _subject_uri est fixé. Ces écarts sont identiques pour les deux versions : ils ne rendent pas la paire non équivalente, mais la région ne tourne pas sur le code du dépôt. Oracle : 4 mutants sur copie, tous détectés (lang= du chemin rapide, garde rdf_type inversée, suppression de `if item is None: continue`, prédicat échangé l.83). J'ai ajouté 2 appels (int, bool, 0, datetime, Decimal, bytes, URIRef, \"\", Enum, Literal en entrée, language=, datatype=, liste avec doublon/chaîne vide, sujet BNode) : OK, donc la coercition de {node}/{subject} ne diffère pas de graph.add. Aucun ?var dans translated.ldpy (grep) ; rdf:/xsd: ne servent qu'aux lignes @prefix. Cas non exercé : valeur imbriquée RdfBaseModel (la stub n'a pas _serialise_into_graph). Gain syntaxique quasi nul (+{ {subject} {predicate} {node} } tout interpolé) : pas un exemple pour l'article.",
+  "triaged_by": "sonnet-5.5"
+}
