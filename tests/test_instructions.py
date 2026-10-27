@@ -36,6 +36,7 @@ def test_no_agent_facing_document_promises_a_deleted_path():
             "--study 403", "rdfeval sample", "rdfeval regions",
             "rdfeval translate")
     for name in ("INSTRUCTIONS.md", "AGENT_BATCH.md", "AGENT_OPTIMIZE.md",
+                 "AGENT_TRIAGE.md",
                  "README.md"):
         text = (ROOT / name).read_text(encoding="utf-8")
         for token in dead:

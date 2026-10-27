@@ -270,6 +270,9 @@ def test_article_export_takes_approved_pairs_only(tmp_path, monkeypatch):
     examples = [make("ok", "approved"), make("draft", "unreviewed")]
     monkeypatch.setattr(article_mod, "iter_examples", lambda study: iter(examples))
     monkeypatch.setattr(article_mod, "ARTICLE_DIR", tmp_path / "out")
+    # without this the test rewrites the study's own table
+    monkeypatch.setattr(article_mod, "CONSTRUCTIONS_TEX",
+                        tmp_path / "constructions.tex")
     monkeypatch.setattr(article_mod, "_licence_of", lambda repo: "MIT")
     article_mod.run({}, STUDY)
     page = (tmp_path / "out" / "remove.md").read_text()

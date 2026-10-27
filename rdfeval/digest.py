@@ -102,7 +102,7 @@ def _files(ex_dir: Path) -> dict:
     Fixtures are the same: one ``fixture.ttl`` is the common case, but a
     region with four branches may carry one Turtle file per branch."""
     known = {"original.py", "driver.py", "translated.ldpy", "meta.json",
-             "review.json", "optimized.py", "optimized.ldpy"}
+             "review.json", "optimized.py", "optimized.ldpy", "triage.json"}
     kept = lambda q: q.name not in known and "__pycache__" not in q.parts
     shims = sorted(q for q in ex_dir.rglob("*.py") if kept(q))
     fixtures = sorted(q for q in ex_dir.rglob("*")
@@ -301,6 +301,16 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
     elif meta.get("translation_status") == "final":
         add(INFO, "not measured",
             "no row in pairs.csv — run `rdfeval compare`")
+
+    from .triage import read_triage
+    triage = read_triage(ex_dir)
+    if triage:
+        level = {"high": DANGER, "medium": WARN, "low": INFO}[triage["priority"]]
+        questions = " ".join(q.get("question", "")
+                             for q in triage.get("questions", []))
+        add(level, "triage %s: %s" % (triage["priority"],
+                                      " ".join(triage.get("flags", [])) or "—"),
+            "%s %s" % (triage.get("summary", ""), questions))
 
     order = {DANGER: 0, WARN: 1, INFO: 2}
     return sorted(flags, key=lambda f: order[f[0]])
@@ -774,6 +784,9 @@ def run(config: dict, study: Study = STUDY, stratum: str | None = None,
                 % (totals["final"], totals["draft"], totals["danger"],
                    totals["approved"], totals["rejected"]))
     body.append("</tbody></table>")
+    if (out / "priorities.html").exists():
+        body.append("<p><a href='priorities.html'>priorities</a> — the "
+                    "agents' triage, high first</p>")
     body.append(
         "<p style='color:var(--dim);max-width:46rem;margin-top:1.5rem'>"
         "A flag says where to look, never what to decide. Verdicts are held "

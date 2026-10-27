@@ -142,3 +142,16 @@ def test_compare_skips_optimized_metrics_until_both_are_proved(tmp_path,
     (ex / "meta.json").write_text(json.dumps(meta))
     # optimized.py must not be read as a context shim
     assert "optimized.py" in compare.NOT_SHIMS
+
+
+def test_triage_ranks_high_first_and_distrusts_bad_files(tmp_path):
+    from rdfeval import triage
+    ex = tmp_path / "r"
+    ex.mkdir()
+    assert triage.read_triage(ex) is None
+    (ex / "triage.json").write_text("{not json")
+    assert triage.read_triage(ex)["priority"] == "high"
+    (ex / "triage.json").write_text(json.dumps(
+        {"priority": "urgent", "flags": ["made-up"], "questions": []}))
+    t = triage.read_triage(ex)
+    assert t["priority"] == "high" and t["unknown_flags"] == ["made-up"]

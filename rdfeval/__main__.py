@@ -11,7 +11,7 @@ from .config import load_config
 STAGES = ("discover", "select", "acquire", "analyze",
           "validate", "compare", "aggregate", "audit",
           "surface", "strata", "check", "status", "article", "review",
-          "digest", "userstudy", "all")
+          "digest", "triage", "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
 # acquire) and the human-in-the-loop stage (translate review) stay explicit.
@@ -99,6 +99,9 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "digest":
             from . import digest
             digest.run(config, study, stratum=args.stratum)
+        elif stage == "triage":
+            from . import triage
+            triage.run(config, study)
         elif stage == "article":
             from . import article
             article.run(config, study)
