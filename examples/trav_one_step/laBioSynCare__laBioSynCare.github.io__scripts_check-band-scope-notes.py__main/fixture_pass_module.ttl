@@ -1,0 +1,100 @@
+# Repair 2026-10-30 -- scenario "everything passes": main() returns 0 and
+# prints its success line, whose four counts (bands, labels and notes
+# checked, oscillations, band intervals) observe the reads of sections 1
+# and 3.  Every association count of section 2 is EXACTLY at its threshold
+# (fixture_pass_instance.ttl), so losing any read makes it fail.
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix sstimv: <https://w3id.org/sstim/vocab#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org/rdfeval#> .
+
+# Decoy listed FIRST: it carries every predicate the region reads, but it is
+# neither a band nor an oscillation.  A read whose subject were widened
+# would take its values first, and they break every check.
+ex:decoy sstim:hzMin "500"^^xsd:decimal ;
+    sstim:hzMax "1"^^xsd:decimal ;
+    sstim:extendedHzMin "900"^^xsd:decimal ;
+    sstim:extendedHzMax "-1"^^xsd:decimal ;
+    sstim:hasTypicalFrequencyBand ex:noBand ;
+    skos:scopeNote "sleep, relaxation and pain relief" .
+
+# Bands.  Neighbours on the same subject: skos:note and skos:editorialNote
+# carry outcome words but are not among the four predicates read.
+sstim:deltaBand a sstim:FrequencyBand ;
+    skos:prefLabel "Delta"@en ;
+    skos:altLabel "delta band" ;
+    skos:definition "0 to 4 Hz" ;
+    skos:scopeNote "A Hz interval." , "" ;
+    skos:note "deep sleep" ;
+    skos:editorialNote "relaxation" ;
+    sstim:hzMin "0"^^xsd:decimal ;
+    sstim:hzMax "4"^^xsd:decimal .
+
+sstim:thetaBand a sstim:FrequencyBand ;
+    skos:prefLabel "Theta"@en ;
+    sstim:hzMin "4"^^xsd:decimal ;
+    sstim:hzMax "8"^^xsd:decimal .
+
+sstim:alphaBand a sstim:FrequencyBand ;
+    skos:prefLabel "Alpha"@en ;
+    skos:scopeNote "8 to 12 Hz, a Hz interval only" ;
+    sstim:hzMin "8"^^xsd:decimal ;
+    sstim:hzMax "12"^^xsd:decimal .
+
+# A single-frequency target: equal bounds are correct.
+sstim:alpha10 a sstim:FrequencyBand ;
+    skos:prefLabel "Alpha 10 Hz"@en ;
+    sstim:hzMin "10"^^xsd:decimal ;
+    sstim:hzMax "10"^^xsd:decimal .
+
+sstim:smrBand a sstim:FrequencyBand ;
+    sstim:hzMin "12"^^xsd:decimal ;
+    sstim:hzMax "15"^^xsd:decimal .
+
+sstim:betaBand a sstim:FrequencyBand ;
+    skos:definition "15 to 30 Hz" ;
+    sstim:hzMin "15"^^xsd:decimal ;
+    sstim:hzMax "30"^^xsd:decimal .
+
+sstim:gammaBand a sstim:FrequencyBand ;
+    sstim:hzMin "30"^^xsd:decimal ;
+    sstim:hzMax "100"^^xsd:decimal .
+
+# Not bands: a blank node typed FrequencyBand (the isinstance(URIRef)
+# filter drops it) and a skos:Concept, both with outcome words and an
+# inverted interval.
+[] a sstim:FrequencyBand ;
+    skos:scopeNote "for sleep" ;
+    sstim:hzMin "5"^^xsd:decimal ;
+    sstim:hzMax "1"^^xsd:decimal .
+sstim:unrelatedConcept a skos:Concept ;
+    skos:scopeNote "sleep and relaxation, but not a band" .
+
+# The six oscillations, each with a typical band contained in its extended
+# range (delta's extendedHzMin is 0: falsy, but present; smr's range equals
+# its band's).
+sstimv:deltaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:deltaBand ;
+    sstim:extendedHzMin "0"^^xsd:decimal ;
+    sstim:extendedHzMax "5"^^xsd:decimal .
+sstimv:thetaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:thetaBand ;
+    sstim:extendedHzMin "3.5"^^xsd:decimal ;
+    sstim:extendedHzMax "9"^^xsd:decimal .
+sstimv:alphaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:alphaBand ;
+    sstim:extendedHzMin "7"^^xsd:decimal ;
+    sstim:extendedHzMax "13"^^xsd:decimal .
+sstimv:smrOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:smrBand ;
+    sstim:extendedHzMin "12"^^xsd:decimal ;
+    sstim:extendedHzMax "15"^^xsd:decimal .
+sstimv:betaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:betaBand ;
+    sstim:extendedHzMin "13"^^xsd:decimal ;
+    sstim:extendedHzMax "32"^^xsd:decimal .
+sstimv:gammaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:gammaBand ;
+    sstim:extendedHzMin "25"^^xsd:decimal ;
+    sstim:extendedHzMax "120"^^xsd:decimal .

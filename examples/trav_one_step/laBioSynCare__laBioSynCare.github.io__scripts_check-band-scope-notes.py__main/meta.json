@@ -46,5 +46,34 @@
     "method": "entry:main",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "entry is now demo(), added identically to both sides: it captures main()'s stderr report and returns (exit code, stderr), and can point module_paths()/instance_paths() at other files; the first call (shim.py's files) is kept, now with its report compared; new scenarios: everything passes (return 0, success line with the four counts, every association count exactly at its threshold, a decoy carrying every predicate listed first, skos:note/editorialNote neighbours, blank-node band, falsy bounds and empty note), one failure per check (outcome word under each of the four skos predicates, hzMin > hzMax, half intervals, range above/below its band, equal extended bounds, missing extendedHzMax, band without interval, no typical band, two extendedHzMin, association counts one below threshold beside neighbours), no band at all, no file at all.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "bands = [] (island removed)",
+      "band type widened",
+      "skos predicate widened (?p) and swapped (skos:note)",
+      "skos subject widened",
+      "single predicate in the skos loop",
+      "assessed = set()",
+      "statuses = set()",
+      "assessed object widened",
+      "statuses subject widened",
+      "oscillation loop -> []",
+      "typical band / extendedHzMin / extendedHzMax subject widened",
+      "extendedHzMax read for extendedHzMin",
+      "band hzMin/hzMax subject widened (sections 3 and 4)",
+      "hzMin read for hzMax (sections 3 and 4)",
+      "`is None` -> truth test (three guards)",
+      ">= -> >",
+      "'range does not contain' branch -> False",
+      "'hzMin exceeds hzMax' branch -> False",
+      "hit = None",
+      "total = 0",
+      ".first() -> last value"
+    ],
+    "remaining": ""
   }
 }

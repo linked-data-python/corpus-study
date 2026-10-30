@@ -132,3 +132,27 @@ def main() -> int:
         f"{bands_with_interval} band intervals run the right way)"
     )
     return 0
+
+
+# Test harness only (repair 2026-10-30), identical on both sides, the
+# region untouched: main() reports its failures on stderr, which the
+# harness does not capture, and reads the files module_paths() /
+# instance_paths() name.  demo() runs main() with those two helpers
+# pointed at the files given (None keeps shim.py's), and returns the exit
+# code together with everything main() wrote on stderr.
+def demo(module_files=None, instance_files=None):
+    import contextlib
+    import io
+    global module_paths, instance_paths
+    saved = module_paths, instance_paths
+    if module_files is not None:
+        module_paths = lambda: list(module_files)
+    if instance_files is not None:
+        instance_paths = lambda: list(instance_files)
+    err = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(err):
+            code = main()
+    finally:
+        module_paths, instance_paths = saved
+    return code, err.getvalue()

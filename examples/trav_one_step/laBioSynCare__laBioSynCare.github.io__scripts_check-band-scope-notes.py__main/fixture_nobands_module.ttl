@@ -1,0 +1,19 @@
+# Repair 2026-10-30 -- scenario "no band": the only FrequencyBand is a
+# blank node (filtered out), so section 1 reports the vacuous lint; the
+# oscillations name typical bands that are not typed as bands.
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix sstimv: <https://w3id.org/sstim/vocab#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+[] a sstim:FrequencyBand ;
+    skos:scopeNote "for sleep" ;
+    sstim:hzMin "5"^^xsd:decimal ;
+    sstim:hzMax "1"^^xsd:decimal .
+
+sstim:someBand sstim:hzMin "8"^^xsd:decimal ;
+    sstim:hzMax "12"^^xsd:decimal .
+sstimv:alphaOscillation a sstim:NeuralOscillationType ;
+    sstim:hasTypicalFrequencyBand sstim:someBand ;
+    sstim:extendedHzMin "7"^^xsd:decimal ;
+    sstim:extendedHzMax "13"^^xsd:decimal .

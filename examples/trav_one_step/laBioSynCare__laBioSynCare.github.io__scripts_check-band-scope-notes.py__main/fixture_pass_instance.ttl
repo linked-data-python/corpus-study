@@ -1,0 +1,24 @@
+# Repair 2026-10-30 -- associations for the "everything passes" and
+# "failures" scenarios: each oscillation has EXACTLY the number
+# MOVED_ASSOCIATIONS expects; theta needs both forms (2 + 2).  The
+# neighbours below must not count.
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix sstimv: <https://w3id.org/sstim/vocab#> .
+@prefix sstimex: <https://w3id.org/sstim/exposure#> .
+@prefix ex: <http://example.org/rdfeval#> .
+
+ex:study1 sstim:evaluatesSubject sstimv:deltaOscillation .
+ex:study2 sstim:evaluatesSubject sstimv:thetaOscillation .
+ex:study3 sstim:evaluatesSubject sstimv:thetaOscillation .
+sstimv:thetaOscillation sstimex:hasKnowledgeStatusAssertion ex:status1 , ex:status2 .
+sstimv:alphaOscillation sstimex:hasKnowledgeStatusAssertion ex:status3 , ex:status4 .
+ex:study4 sstim:evaluatesSubject sstimv:smrOscillation .
+sstimv:betaOscillation sstimex:hasKnowledgeStatusAssertion ex:status5 .
+ex:study5 sstim:evaluatesSubject sstimv:gammaOscillation .
+
+# Neighbours: other predicate towards / from an oscillation, same predicate
+# on another oscillation-like subject or object.
+ex:study9 ex:mentionsSubject sstimv:alphaOscillation , sstimv:thetaOscillation .
+sstimv:thetaOscillation ex:hasOtherAssertion ex:status9 .
+ex:study10 sstim:evaluatesSubject sstimv:otherOscillation .
+sstimv:otherOscillation sstimex:hasKnowledgeStatusAssertion ex:status10 .

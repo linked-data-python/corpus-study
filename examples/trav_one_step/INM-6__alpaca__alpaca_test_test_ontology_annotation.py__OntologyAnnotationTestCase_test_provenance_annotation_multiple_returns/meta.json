@@ -41,7 +41,8 @@
     "CORRECTED from an earlier pass that classified this EXCLUDED because `alpaca` was not importable in this venv: `alpaca-prov` IS published on PyPI (`~/.venvs/ldpy/bin/pip index versions alpaca-prov` -> 0.2.0, 0.1.0, the 'present but uninstalled' case per AGENT_BATCH's dependency guidance, not 'inexistent') and was installed into ~/.venvs/ldpy. The region now genuinely executes end to end through alpaca's own real call-stack introspection, not a stand-in.",
     "Context shim alpaca_context.py: EXAMPLE_NS, InputObject, OutputObject and the @Provenance-decorated process_multiple (plus its __ontology__ metadata assignment), reproduced verbatim from INM-6/alpaca@2b8dd34fc6f9a4c1ed2004e014b3ed9495eda1ba's alpaca/test/test_ontology_annotation.py (module scope, outside the extracted method's own lines 539-631) -- these are genuine test fixtures the upstream file itself defines, not invented logic. self.ONTOLOGY (bound by OntologyAnnotationTestCase.setUpClass) and the assert*/self plumbing are supplied by driver.py instead (a call argument, not a binding the shim should own), via a minimal real unittest.TestCase subclass -- see driver.py.",
     "Second obstacle, found only after installing alpaca: its Provenance decorator reads the CALLING FRAME's source via inspect.getsourcelines()/linecache to build alpaca:codeStatement etc. (alpaca/code_analysis/source_code.py). The harness compiles translated.ldpy's TRANSPILED Python but tags the code object with the original .ldpy path (rdfeval/harness.py:_exec_ldpy, as it must -- that IS the region's file), so a naive linecache read finds the raw island syntax on disk and alpaca's own ast.parse() raises SyntaxError -- nothing to do with any rdflib triple. Fixed entirely within driver.py (no changes to rdfeval/ or ldpy/) by pre-populating linecache.cache for that path with the actual transpiled text before entry/calls run -- the standard technique doctest/IPython use for dynamically compiled code; it changes nothing about what executes, it only lets a third-party library's own introspection see it. This is a genuine, general characteristic of running source-introspecting Python code (frame-based, not just traceback-line, tooling) from a transpiled .ldpy file, worth a note for pilotage even though it does not block this particular region once worked around.",
-    "Anti-hollow-green check performed: changed the expected count on the Parameter-count assertion from 1 to 999 -- rdfeval check FAILed as expected (call[0].result: 'ok' vs ('assertion-failed', '1 != 999')). Restored; check is green again. Also verified the demo()/self plumbing does not itself produce a false green: two fresh _Case() instances compare equal under unittest.TestCase's own __eq__ (type + _testMethodName), and running the region's full activate()/deactivate()/save_provenance() cycle twice in the same process (as run_pair's original-then-translated sequence does) was confirmed safe standalone before relying on it in the driver."
+    "Anti-hollow-green check performed: changed the expected count on the Parameter-count assertion from 1 to 999 -- rdfeval check FAILed as expected (call[0].result: 'ok' vs ('assertion-failed', '1 != 999')). Restored; check is green again. Also verified the demo()/self plumbing does not itself produce a false green: two fresh _Case() instances compare equal under unittest.TestCase's own __eq__ (type + _testMethodName), and running the region's full activate()/deactivate()/save_provenance() cycle twice in the same process (as run_pair's original-then-translated sequence does) was confirmed safe standalone before relying on it in the driver.",
+    "REPAIRED 2026-10-30: `execution_uri = list(prov_graph.subjects(RDF.type, ALPACA.FunctionExecution))[0]` was translated as `m{ ... }.first()`, which returns None when no FunctionExecution exists, so the next `bool(m{ {execution_uri} ... })` sees Literal('None') and fails with AssertionError where the original raises IndexError (unlike the three other `[0]` reads, no count assertion precedes it). Now `list(m{ ?s rdf:type {ALPACA.FunctionExecution} })[0]`; proof: driver call 16 (`_no_execution`) was red (IndexError vs ('assertion-failed', 'False is not true')) and is green after the fix."
   ],
   "article_candidate": true,
   "draft_sha": "bd8748c7992869af",
@@ -60,5 +61,30 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "`_Case` logs every assertEqual/assertTrue with its arguments and compares the logs (multiset) through the `self` argument, so the 7 counts, the 13 membership booleans and each loop iteration's (value, expected) are compared, not only 'ok'; a `perturb` seam added identically to demo() on both sides rewrites the Turtle save_provenance() returns, and 61 new calls edit the PROV graph (extra subject / neighbour for each of the 7 counted classes, no FunctionExecution, another one listed first, drop / move-subject / move-object for each of the 10 membership triples, typed-string and string/float variants of pairName/pairValue, and 10 attribute-loop cases: wrong value, unknown name, missing pairName/pairValue, one/three attributes, an attribute of another subject, two attributes named 'name', the Attribute type moved, two pairNames), re-serialised as N-Triples in a canonical order so both sides iterate alike.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "attribute loop -> []",
+      "attribute loop -> [:1]",
+      "attribute loop -> .first() and []",
+      "attribute loop subject widened",
+      "?s ?p {Parameter} in a count (a1)",
+      "{execution_uri} -> ?x (a2)",
+      ".count(), 0 -> 0, 0 (ProcessFunction, ProcessedData)",
+      "assertTrue(bool(...)) -> assertTrue(True) (a8, pairValue and wasDerivedFrom)",
+      "assertEqual(value, expected[name]) -> pass (a9)",
+      "{attribute} rdf:type Attribute -> {attribute} ?p ?o (a11)",
+      "pairName predicate widened in the loop",
+      "pairValue 45 -> ?v",
+      "pairName \"param_1\" -> ?v",
+      "prov:used subject widened",
+      "input_node read on another class",
+      "execution_uri back to .first()",
+      "InputObject count -> 1"
+    ],
+    "remaining": "The fix moves one site from `.first()` to `list(m{ })[0]`: `.first()` stays credited at the three sites a count==1 assertion guards. article_candidate is still true while the triage judged the pair not article material: to decide."
   }
 }

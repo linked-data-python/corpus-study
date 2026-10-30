@@ -7,11 +7,16 @@
 # Scenario 1: node's namespace equals rootentity's namespace (is_entityns
 # ends up True), hasIdentifierType = numericID ('i'); id="testID:" is
 # prepended because is_entityns is True.
+# Repair 2026-10-30: ex:root1, ex:ns1, ex:ns3node, ex:ns3root and ex:ns4
+# carry ANOTHER predicate first (same subject, other predicate), so a read
+# whose predicate were widened would take it instead.
 ex:node1 base:hasNodeId "12345" ;
          base:hasIdentifierType base:numericID ;
          base:hasNamespace ex:ns1 .
-ex:ns1 base:hasUri "ns://example" .
-ex:root1 base:hasNamespace ex:ns1 .
+ex:ns1 base:hasLabel "ns-label-1" ;
+       base:hasUri "ns://example" .
+ex:root1 base:hasComment "root-comment-1" ;
+         base:hasNamespace ex:ns1 .
 
 # Scenario 2: id passed as None, so no instance-id prefix is used
 # regardless of is_entityns; hasIdentifierType = guidID ('g').
@@ -27,9 +32,11 @@ ex:root2 base:hasNamespace ex:ns2 .
 ex:node3 base:hasNodeId "abcde" ;
          base:hasIdentifierType base:opaqueID ;
          base:hasNamespace ex:ns3node .
-ex:ns3node base:hasUri "ns://node:" .
+ex:ns3node base:hasLabel "ns-label-3node" ;
+           base:hasUri "ns://node:" .
 ex:root3 base:hasNamespace ex:ns3root .
-ex:ns3root base:hasUri "ns://root" .
+ex:ns3root base:hasLabel "ns-label-3root" ;
+           base:hasUri "ns://root" .
 
 # Scenario 4: same namespace again (is_entityns True) and an id that is
 # itself a full IRI (http://...): exercises nodeId_to_iri's is_iri(...)
@@ -38,7 +45,8 @@ ex:ns3root base:hasUri "ns://root" .
 ex:node4 base:hasNodeId "abcde" ;
          base:hasIdentifierType base:opaqueID ;
          base:hasNamespace ex:ns4 .
-ex:ns4 base:hasUri "ns://root4" .
+ex:ns4 base:hasLabel "ns-label-4" ;
+       base:hasUri "ns://root4" .
 ex:root4 base:hasNamespace ex:ns4 .
 
 # Scenario 5 (zero solutions): node5/root5 carry NO hasNodeId,
@@ -57,3 +65,32 @@ ex:decoy base:hasNodeId "not-mine" ;
          base:hasNamespace ex:decoyns .
 ex:decoyns base:hasUri "ns://decoy" .
 ex:node1 base:hasOldNodeId "99999" .
+
+# Repair 2026-10-30.
+# Scenario 6 (several values): two hasNodeId, two hasUri on the shared
+# namespace -- next(objects(...)) and .first() must take the same (first
+# inserted) one.
+ex:node6 base:hasNodeId "first", "second" ;
+         base:hasIdentifierType base:stringID ;
+         base:hasNamespace ex:ns6 .
+ex:ns6 base:hasUri "ns://six-a", "ns://six-b" .
+ex:root6 base:hasNamespace ex:ns6 .
+
+# Scenario 7 (falsy but present): an empty hasNodeId and an empty hasUri
+# are values, not absences -- next(..., 'unknown') keeps them.
+ex:node7 base:hasNodeId "" ;
+         base:hasIdentifierType base:numericID ;
+         base:hasNamespace ex:ns7 .
+ex:ns7 base:hasUri "" .
+ex:root7 base:hasNamespace ex:ns7 .
+
+# Scenario 8 (falsy integer): hasNodeId 0.
+ex:node8 base:hasNodeId 0 ;
+         base:hasIdentifierType base:numericID ;
+         base:hasNamespace ex:ns1 .
+ex:root8 base:hasNamespace ex:ns1 .
+
+# Scenario 9: the node's namespace is a blank node, the root has none.
+ex:node9 base:hasNodeId "nine" ;
+         base:hasIdentifierType base:guidID ;
+         base:hasNamespace [ base:hasUri "ns://blank" ] .

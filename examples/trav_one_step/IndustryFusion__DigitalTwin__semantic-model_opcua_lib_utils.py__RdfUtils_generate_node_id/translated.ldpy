@@ -6,21 +6,16 @@ from rdfutils_context import nodeId_to_iri
 
 def generate_node_id(self, graph, rootentity, node, id):
     @graph graph
-    node_id = m{ {node} {self.basens['hasNodeId']} ?v }.first()
-    if node_id is None:
-        node_id = 'unknown'
-    idtype = m{ {node} {self.basens['hasIdentifierType']} ?v }.first()
-    if idtype is None:
-        idtype = 'unknown'
-    rootns = m{ {rootentity} {self.basens['hasNamespace']} ?v }.first()
-    if rootns is None:
-        rootns = 'unknown'
+    # node and rootentity may be None (owl2instances.py:831-840, 455):
+    # graph.objects(None, p) is then a wildcard, which {None} in m{ } is
+    # not (it becomes Literal('None')) -- these four reads stay rdflib.
+    node_id = next(graph.objects(node, self.basens['hasNodeId']), 'unknown')
+    idtype = next(graph.objects(node, self.basens['hasIdentifierType']), 'unknown')
+    rootns = next(graph.objects(rootentity, self.basens['hasNamespace']), 'unknown')
     rootnsuri = m{ {rootns} {self.basens['hasUri']} ?v }.first()
     if rootnsuri is None:
         rootnsuri = 'unknown'
-    ns = m{ {node} {self.basens['hasNamespace']} ?v }.first()
-    if ns is None:
-        ns = 'unknown'
+    ns = next(graph.objects(node, self.basens['hasNamespace']), 'unknown')
     nsuri = m{ {ns} {self.basens['hasUri']} ?v }.first()
     if nsuri is None:
         nsuri = 'unknown'

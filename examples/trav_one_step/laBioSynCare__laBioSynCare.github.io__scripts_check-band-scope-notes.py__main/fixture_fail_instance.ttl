@@ -1,0 +1,22 @@
+# Repair 2026-10-30 -- associations ONE BELOW the threshold for theta (3 of
+# 4) and alpha (1 of 2), with neighbours that a widened read would count:
+# the failure message states the count found.
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix sstimv: <https://w3id.org/sstim/vocab#> .
+@prefix sstimex: <https://w3id.org/sstim/exposure#> .
+@prefix ex: <http://example.org/rdfeval#> .
+
+ex:study1 sstim:evaluatesSubject sstimv:deltaOscillation .
+ex:study2 sstim:evaluatesSubject sstimv:thetaOscillation .
+ex:study3 sstim:evaluatesSubject sstimv:thetaOscillation .
+sstimv:thetaOscillation sstimex:hasKnowledgeStatusAssertion ex:status1 .
+ex:study6 sstim:evaluatesSubject sstimv:alphaOscillation .
+ex:study4 sstim:evaluatesSubject sstimv:smrOscillation .
+sstimv:betaOscillation sstimex:hasKnowledgeStatusAssertion ex:status5 .
+ex:study5 sstim:evaluatesSubject sstimv:gammaOscillation .
+
+ex:study9 ex:mentionsSubject sstimv:alphaOscillation , sstimv:thetaOscillation .
+sstimv:thetaOscillation ex:hasOtherAssertion ex:status9 .
+sstimv:alphaOscillation ex:hasOtherAssertion ex:status9 .
+ex:study10 sstim:evaluatesSubject sstimv:otherOscillation .
+sstimv:otherOscillation sstimex:hasKnowledgeStatusAssertion ex:status10 .

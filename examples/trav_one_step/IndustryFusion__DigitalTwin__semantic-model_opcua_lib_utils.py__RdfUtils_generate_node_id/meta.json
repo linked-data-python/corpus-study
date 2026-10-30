@@ -27,7 +27,8 @@
     "@graph graph designates the function's own graph parameter as current for the whole body (bound method extracted as a plain function; self is read only for self.basens), so every m{ } stays bare.",
     "meta.json's auto-detected oracle was 'isomorphism' (the extraction pipeline only classified the Namespace(nsuri) constructor call, missing the six graph_read sites), but the region reads a graph and returns a computed value with no graph construction at all: retargeted to the reading oracle (corpus/405) with fixture.ttl and calls=, matching the sibling trav_one_step regions in this batch. Corrected in this meta.json's oracle field below.",
     "nodeId_to_iri, idtype2String and is_iri (module-level helpers in the same source file, not carried by the extraction) are restored via a context shim (rdfutils_context.py), reproduced verbatim from the published source including the 'Warning no idtype found.' print in idtype2String's else branch -- both original.py and translated.ldpy import the identical shim, so its stdout is identical on both sides regardless of translation.",
-    "Fixture scenarios 1-4 mirror the source repository's own semantic-model/opcua/tests/test_libutils.py::test_generate_node_id (same predicate names, same expected output strings, independently recomputed and checked here): same-namespace with a plain id (prepended), id=None (no prefix), different-namespace (id ignored even though non-empty), and same-namespace with an id that is itself a full IRI (nodeId_to_iri's is_iri branch). Scenario 5 is new here: the zero-solution case, where every one-step read is empty and all six values collapse to 'unknown' on both sides."
+    "Fixture scenarios 1-4 mirror the source repository's own semantic-model/opcua/tests/test_libutils.py::test_generate_node_id (same predicate names, same expected output strings, independently recomputed and checked here): same-namespace with a plain id (prepended), id=None (no prefix), different-namespace (id ignored even though non-empty), and same-namespace with an id that is itself a full IRI (nodeId_to_iri's is_iri branch). Scenario 5 is new here: the zero-solution case, where every one-step read is empty and all six values collapse to 'unknown' on both sides.",
+    "REPAIRED 2026-10-30: node and rootentity reach the region as None in the repository (owl2instances.py:831-832 puts `next(g.subjects(RDF.type, rootinstancetype), None)` in rootentities when the type has no instance, :838-840 calls scan_entity(None, ...), whose :455 calls generate_node_id(g, rootentity, node, id) with both None, and the scan recurses into real nodes with the module-level rootentity still None; get_type and get_prefixed do not raise on None, and the node id lands in instance['id']). `graph.objects(None, p)` is a wildcard; `m{ {None} p ?v }` matches Literal('None') and finds nothing. Proof: driver calls 9-11 (root and node None, root None, node None) were red (e.g. URIRef('ns://examplexnodei12345') vs URIRef('unknownxnodexunknown')). The four reads whose subject is node or rootentity therefore stay `next(graph.objects(...), 'unknown')`; the two whose subject is a value read just before (rootns, ns: never None) stay `m{ }.first()` with the `is None` default. A guarded form exists and was checked to parse (`(m{ {node} P ?v } if node is not None else m{ [] P ?v }).first()`), but it writes each pattern twice for a wildcard the original gets from one call; the doctrine for a pattern received as data (INSTRUCTIONS §2: keep the rdflib call and report it) was applied instead."
   ],
   "draft_sha": "783efc84c0082f61",
   "provenance": {
@@ -47,5 +48,20 @@
     "method": "fixture:fixture.ttl entry:generate_node_id",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture: ex:root1, ex:ns1, ex:ns3node, ex:ns3root, ex:ns4 carry another predicate before the one read (same subject, other predicate); new scenarios: several values (two hasNodeId, two hasUri), falsy but present values (\"\" and 0), blank-node namespace with a root that has none; new calls with rootentity and node None (reached by owl2instances.py:831-840, 455), rootentity None, node None.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "rootns/hasUri predicate widened (j8, also as a shape-preserving [1] projection and as hasLabel)",
+      "ns/hasUri predicate widened (j12, same three forms)",
+      "rootns and ns subject widened",
+      "`is None` default -> truth test (rootnsuri, nsuri)",
+      "rootnsuri / nsuri island -> None",
+      "'unknown' default -> 'other' (rootnsuri, nsuri)",
+      "the former m{ } translation of each of the four reads on node/rootentity"
+    ],
+    "remaining": "Four of the six reads are now rdflib (`next(graph.objects(node, p), 'unknown')`) because their subject may be None, a wildcard the language has no form for ({None} -> Literal('None'), known gap 9 of AGENT_TRIAGE, here reached by the repository): is classification `directly-expressible` still right, or `awkward`/`minor-restructuring`? And is the guarded double-pattern form preferable for the study? article_candidate is still true while the triage judged the gain negative: to decide."
   }
 }

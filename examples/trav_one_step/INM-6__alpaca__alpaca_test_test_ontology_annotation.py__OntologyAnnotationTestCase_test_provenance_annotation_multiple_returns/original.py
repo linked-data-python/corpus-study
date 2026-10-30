@@ -109,9 +109,20 @@ def test_provenance_annotation_multiple_returns(self):
 # instance. `demo` turns a failed assertion into a comparable value instead
 # of letting it abort the driver, same convention as the trav_existence /
 # trav_one_step siblings in this stratum that translate a bare `test_*`.
-def demo(self) -> object:
+#
+# `perturb` (repair 2026-10-30) is a seam for the driver, identical on both
+# sides, the region untouched: it rewrites the Turtle that
+# save_provenance() hands the region, so the driver can vary the graph the
+# assertions read (alpaca alone always produces the same passing graph).
+def demo(self, perturb=None) -> object:
+    global save_provenance
+    produced = save_provenance
+    if perturb is not None:
+        save_provenance = lambda: perturb(produced())
     try:
         test_provenance_annotation_multiple_returns(self)
         return "ok"
     except AssertionError as e:
         return ("assertion-failed", str(e))
+    finally:
+        save_provenance = produced
