@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Le prédicat du `-{ {match_s} {match_p} {match_o} }` peut être élargi en joker sans que le pilote ne l'attrape, et l'îlot crédité remplace un `.remove()` lié alors que INSTRUCTIONS.md §2 dit de garder `.remove()` pour un motif reçu en donnée.",
+  "questions": [
+    {
+      "question": "Faut-il enrichir la fixture pour qu'un `-{ }` dont le prédicat fuit en joker échoue (ajouter par exemple `ex:alice ex:likes ex:bob` à DATA, voisin du triplet entièrement lié `(alice, knows, bob)` de l'appel 1) ?",
+      "where": "driver.py:37-53 (DATA) et :116 ; translated.ldpy:27 et original.py:26",
+      "if_yes": "needs-work : ajouter le voisin à DATA, relancer check, vérifier que `-{ {match_s} ?x {match_o} }` échoue (aujourd'hui vert). La traduction elle-même est juste.",
+      "if_no": "Approuver sur ce point : seul le joker sur le sujet, l'objet ou les deux est jugé utile (déjà détecté)."
+    },
+    {
+      "question": "La région, dont la fonction est de retirer un motif reçu en donnée, doit-elle recevoir un crédit `-{ }` et `@graph` pour son seul retrait interne entièrement lié, alors que INSTRUCTIONS.md §2 (pièges) dit « Gardez `.remove()` et signalez » ?",
+      "where": "translated.ldpy:20 et :27 ; original.py:26 ; meta.json (constructions, classification awkward)",
+      "if_yes": "Garder `awkward` et le crédit, mais la mesure du gain de lisibilité ne doit pas compter cette paire comme un cas de `-{ }` favorable (2 lignes pour 1, trois interpolations).",
+      "if_no": "Reclasser en `not-expressible` (ou retirer `-{ }`/`@graph` des constructions créditées) : la paire montre une limite du langage (motif reçu en donnée), pas un usage de `-{ }`."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp) : suppression du `-{ }` -> ECHEC ; sujet élargi `-{ ?x {match_p} {match_o} }` -> ECHEC (appel 4) ; objet élargi -> ECHEC (appels 1 et 5) ; `-{ {match_s} ?x ?y }` -> ECHEC ; MAIS prédicat élargi `-{ {match_s} ?x {match_o} }` -> VERT (aucun voisin partageant sujet et objet avec un triplet apparié, DATA n'en a pas) ; et `if True` à la place de `isinstance(match_s, URIRef)` -> VERT (aucun sujet BNode dans DATA, code python pur non traduit, mais la branche n'est pas exercée). Équivalence : `@graph self.internal_graph` fait un instantané de l'attribut (`_ldpy_g1`) ; la région ne rebinde jamais `internal_graph`, donc équivalent ici. Les termes de l'îlot sont toujours liés (issus de `triples()`), donc ni None ni Literal('None') ne peuvent entrer : le piège « motif en donnée » ne frappe pas l'îlot lui-même. Pas d'appel `(None, None, None)` : justifié par la dépendance à l'ordre d'itération, la région en est responsable.",
+  "triaged_by": "sonnet-5.5"
+}

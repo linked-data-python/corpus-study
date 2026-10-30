@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle, mais le retrait de la description peut voir son sujet élargi en joker (`-{ ?s dcterms:description ?old }`) sans que le pilote ne bronche : le voisinage de l'ontologie n'a aucune description, seulement un dc:title.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il détecter un `-{ }` de description dont le sujet fuit en joker, comme il le fait déjà pour le titre (la ressource ex:Thing porte un dc:title qui doit survivre, mais aucune propriété de description) ?",
+      "where": "driver.py:27-41 (TTL_WITH_LANG, `<http://example.org/onto/Thing>`) ; translated.ldpy:83 et original.py:87",
+      "if_yes": "needs-work : donner à ex:Thing une dcterms:description (ou rdfs:comment) à conserver, relancer check ; le mutant `-{ ?s {desc_prop.property_uri} ?old_description }` doit alors échouer. La traduction est juste ; approuver ensuite.",
+      "if_no": "Approuver tel quel : la symétrie avec le titre suffit et la description suit le même schéma de code."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp) : `-{ ?s {title_prop.property_uri} ?old_title }` -> ECHEC (le dc:title de Thing disparaît) ; `-{ ?s dcterms:description ?old_description }` (équivalent pour la description) -> VERT ; joker sur le prédicat (titre et description) -> ECHEC ; suppression de chaque `-{ }` -> ECHEC ; `dc:description` -> `dc:title` dans le else -> ECHEC ; `{Literal(..., lang=...)}` -> `{new_title}` / `{new_description}` -> ECHEC. Confirmation : en ajoutant à une copie de driver.py `dcterms:description \"other resource description - must survive\"` sur Thing, la traduction reste OK et le mutant sujet-joker de la description échoue. Test supplémentaire : appel avec new_title = new_description = \"\" sur une copie -> OK (l'interpolation `{new_title}` donne bien Literal(\"\"), pas d'écart de véracité ; la garde est `is not None`). Dépôt d'origine : project_service.py:674-678 passe `new_name` et `new_description` (str ou None) : jamais de None dans `{ }` car gardé par `is not None`. L'original est identique au dépôt (lignes 540-646, simple dédentation) ; le shim context.py est un sous-ensemble sans ajout de comportement. `{Literal(new_title, lang=title_prop.language)}` est nécessaire (balise variable), pas une enveloppe inutile.",
+  "triaged_by": "sonnet-5.5"
+}
