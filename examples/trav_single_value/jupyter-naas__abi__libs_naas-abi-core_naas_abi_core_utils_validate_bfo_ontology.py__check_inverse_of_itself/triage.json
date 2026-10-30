@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check: OK. Mutants sur la copie: inv=None, sujet élargi (?x), prédicat remplacé par ?p, == inversé en != : tous FAIL ; .one() FAIL (zéro solution sur ex:noInverse, donc le cas zéro est bien exercé). Mutant `m{ ?x owl:inverseOf {prop} }.first()` : reste OK avec le fixture livré (paires inverses symétriques, ex:hasPart/ex:partOf). Avec un fixture étendu (copie : multiA/multiB/multiC multi-valués dont des auto-inverses, un objet littéral, un auto-inverse supplémentaire) la traduction reste OK, et ce mutant devient FAIL. g.value (any=True par défaut) ne lève donc pas ; sur ce magasin l'ordre de .first() coïncide avec celui de g.value. Shim _short/_label identique au dépôt; région identique aux lignes 1434-1451. Article : non (une ligne, mais @graph + @prefix ajoutent deux lignes et .first() n'est pas plus court que g.value ; meta.json article_candidate=true est excessif).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Driver strengthened (several ordered owl:inverseOf values, two-term neighbours, OWL-namespace property under an `o:` prefix, absent property, empty inputs): the multi-value doubt is lifted (g.value and .first() walk the same triples() order), but the strengthened driver caught `@graph g` rebinding `owl:` on the caller's graph, fixed with the call suffix `m{ … }(g).first()`."
 }

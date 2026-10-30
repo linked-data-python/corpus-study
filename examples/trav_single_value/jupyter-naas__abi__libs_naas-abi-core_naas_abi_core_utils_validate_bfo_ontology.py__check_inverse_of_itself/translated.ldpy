@@ -12,10 +12,9 @@ from naas_context import _short, _label
 
 
 def check_inverse_of_itself(g: Graph, main_properties: set[URIRef]) -> list[dict]:
-    @graph g
     issues = []
     for prop in main_properties:
-        inv = m{ {prop} owl:inverseOf ?v }.first()
+        inv = m{ {prop} owl:inverseOf ?v }(g).first()
         if inv == prop:
             issues.append(
                 {

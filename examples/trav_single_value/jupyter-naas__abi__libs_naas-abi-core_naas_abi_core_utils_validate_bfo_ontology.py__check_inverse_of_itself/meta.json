@@ -14,16 +14,18 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "@graph",
     "m{ }",
     ".first()",
+    "call suffix (g)",
     "nom préfixé",
-    "variable"
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "the extracted region had NO imports at all (rdf_ops: 0, categories: {} -- the stratifier's categoriser missed every graph_read here): Graph, URIRef, OWL and the two helpers _short/_label are module-level names of validate_bfo_ontology.py that the region's own lines never declare. Restored in original.py -- OWL from rdflib itself, _short/_label from the context shim naas_context.py (reduced, faithful copy of the two helpers, since importing the real module needs its own ~1800 lines and its argparse CLI).",
     "`g.value(prop, OWL.inverseOf)` -> `m{ {prop} owl:inverseOf ?v }.first()`: the textbook case of the stratum, one line, no restructuring.",
-    "fixture: ex:selfInverse (self-inverse, flagged), ex:hasPart/ex:partOf (a genuine inverse pair -- exercises `.first()` returning a real value that is NOT equal to prop, so no issue), ex:noInverse (no owl:inverseOf triple at all -- the zero-solution case, `.value()`/`.first()` both None, `None == prop` is False) and ex:otherSelfInverse, a self-inverse property deliberately left OUT of main_properties -- the neighbourhood exclusion happens on the driver's argument, not in the graph, since main_properties is itself an argument, not something the region reads from g."
+    "fixture: ex:selfInverse (self-inverse, flagged), ex:hasPart/ex:partOf (a genuine inverse pair -- exercises `.first()` returning a real value that is NOT equal to prop, so no issue), ex:noInverse (no owl:inverseOf triple at all -- the zero-solution case, `.value()`/`.first()` both None, `None == prop` is False) and ex:otherSelfInverse, a self-inverse property deliberately left OUT of main_properties -- the neighbourhood exclusion happens on the driver's argument, not in the graph, since main_properties is itself an argument, not something the region reads from g.",
+    "repair 2026-10-30: `@graph g` + `m{ {prop} owl:inverseOf ?v }.first()` was wrong, now `m{ {prop} owl:inverseOf ?v }(g).first()` without `@graph`. `@graph g` binds the block's `owl:` on the CALLER's graph (record ldpy/027, `graph.bind` with override): a graph that spells the OWL namespace `o:` has it rebound to `owl:`, so `_short(prop, g)` (a qname) changed the reported `subject` and message -- driver call 3 (a self-inverse o:topObjectProperty) gave 'o:topObjectProperty' vs 'owl:topObjectProperty'. The call suffix reads g without touching its bindings; constructions updated (`@graph` dropped, `call suffix (g)` added, and `interpolation {expr}`, employed by `{prop}` but never declared)."
   ],
   "draft_sha": "aa96db8c5a339d9d",
   "provenance": {
@@ -42,5 +44,21 @@
     "method": "fixture:fixture.ttl entry:check_inverse_of_itself",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six calls added after fixture.ttl, graphs built per side: several owl:inverseOf values added in a stated order (first value the property itself -> flagged, first value another -> not flagged although the property is among its values; an incoming owl:inverseOf added first, against a reversed pattern); neighbours sharing two terms (rdfs:subPropertyOf and owl:equivalentProperty to itself, the literal spelling of its own IRI, a blank-node inverse); a self-inverse property in the OWL namespace from a file that binds it as `o:` (the `_short`/`_label` qname reads the graph's bindings); a property with no triple at all; an empty main_properties; the empty graph.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "inv = None",
+      "m{ ?v owl:inverseOf {prop} } (reversed pattern)",
+      "m{ {prop} ?p ?v } (widened predicate, as a tuple and shape-preserving via next(row[1] ...))",
+      ".first() -> .one()",
+      "prop in list(m{ ... }) (any value equals prop)",
+      "last value instead of first",
+      "str(inv) == str(prop)",
+      "@graph g + receiver-less m{ } (the former translation)"
+    ],
+    "remaining": "Reachability of the fixed defect: it needs an ontology that binds the OWL namespace under another prefix than `owl:` and declares a self-inverse owl:ObjectProperty in the OWL namespace; but `@graph g` also leaves the rebinding on g_combined, which validate_bfo_ontology.py passes to every later check (their `_short` on any OWL IRI). Is overriding a caller's existing binding in `designate` (ldpy/027) the intended semantics, or should it bind without override? Also untouched: article_candidate=true, which the triage judged excessive."
   }
 }
