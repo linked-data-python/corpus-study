@@ -42,7 +42,7 @@
   "oracle": "isomorphism",
   "validation": {
     "status": "equivalent",
-    "method": "module-state",
+    "method": "module-state x 13 inputs",
     "diffs": [],
     "error": null
   },
@@ -73,5 +73,19 @@
       "str(m{ … }.count()) in place of the value (translated.ldpy)"
     ],
     "remaining": ""
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state x 13 inputs",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state x 13 inputs",
+      "diffs": [],
+      "error": null
+    }
   }
 }

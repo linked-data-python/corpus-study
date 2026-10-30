@@ -74,5 +74,19 @@
       "float->int, bool->int, message de la ValueError modifié, 'has_' -> 'hasx_', has_ aussi pour les dict, str(literal) -> literal par défaut, clé sans str(), branche Literal remplacée par True, rdf:Seq -> rdf:Bag, ans:Dictionary -> autre classe, marche des membres qui commence à 0, marche arrêtée par `not item` au lieu de `item is None`, élément de liste = tuple de process_value, branche dict sans récursion, lecture de ans:value supprimée : FAIL sur chacun des artefacts touchés. Au total 60 exécutions de mutants (une par artefact et par mutation) : 57 FAIL, 3 verts (le mutant équivalent de `remaining`)."
     ],
     "remaining": "Un mutant reste vert, équivalent sur toute entrée bien formée : bool(literal) -> str(literal) == 'true' (rdflib normalise la forme lexicale d'un xsd:boolean valide en 'true'/'false'). Les entrées de ce mutant que le fixture ne peut produire sont mal formées. Le gain de notation sans lignes d'import (drapeau optimization-doctrine : 0.985 contre 0.945) et le caractère article_candidate restent à juger par Maxime."
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:fixture-values",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:fixture-values",
+      "diffs": [],
+      "error": null
+    }
   }
 }

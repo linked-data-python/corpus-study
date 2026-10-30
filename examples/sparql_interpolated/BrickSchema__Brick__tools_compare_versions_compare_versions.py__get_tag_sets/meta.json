@@ -73,5 +73,19 @@
       "<{root}x> in optimized.py"
     ],
     "remaining": "article_candidate: the pair stays publishable only with what it now shows (no {{ }} escaping, no .format, query parsed at transpile time, interpolation as binding), not 'the braces just coerce the value': a str root needs the explicit `f<…>`. optimized.ldpy is longer than the f-string of optimized.py (notation ratio > 1)."
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:get_tag_sets",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:get_tag_sets",
+      "diffs": [],
+      "error": null
+    }
   }
 }

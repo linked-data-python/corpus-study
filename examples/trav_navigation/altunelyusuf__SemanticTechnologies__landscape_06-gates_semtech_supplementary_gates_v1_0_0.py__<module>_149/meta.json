@@ -46,7 +46,7 @@
   "article_candidate": true,
   "validation": {
     "status": "equivalent",
-    "method": "module-state",
+    "method": "module-state x 5 inputs",
     "diffs": [],
     "error": null
   },
@@ -86,5 +86,19 @@
       "m{ {s} a ?t } replaced by a fixed type (optimized.ldpy)"
     ],
     "remaining": "article_candidate: not publishable as a trav_navigation example in its current form. The faithful join needs dict.fromkeys to undo the (s, t) multiplicity and a Python-side .first() for the negation, and optimized.ldpy does not use the join at all. Maxime to decide whether the pair is kept as a counter-example (the join changes cardinality) rather than as a gain."
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state x 5 inputs",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state x 5 inputs",
+      "diffs": [],
+      "error": null
+    }
   }
 }

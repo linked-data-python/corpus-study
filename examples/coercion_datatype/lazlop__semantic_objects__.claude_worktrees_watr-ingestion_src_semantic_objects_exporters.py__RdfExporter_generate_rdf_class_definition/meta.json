@@ -80,5 +80,19 @@
       "sh:path from class_iri"
     ],
     "remaining": "Two mutants stay green and are not reachable from the excerpt: the `else: target_class_name = str(target_class)` branch (the preceding `target_class.__name__` raises AttributeError first, so it is dead code in the original too) and the hasattr(base_class, '_valid_relations') guard (the restored binding is classes_to_process = [cls] and cls has the attribute; the real method walks cls.__mro__ when include_hierarchy is set, but changing the binding would edit original.py). The stratum coercion_datatype is not truly exercised: both Literal() receive f-strings (str)."
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
   }
 }

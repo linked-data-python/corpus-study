@@ -85,5 +85,19 @@
       "pseudomon_range=None eager TypeError: optimized.py and optimized.ldpy FAILED, repaired"
     ],
     "remaining": "Two mutants stay green and are equivalent: `elif end <= old_last_end` for `==` (the `<` case is caught by the preceding `if`), and `obs == new_obs` for `obs is new_obs` (a second pass on an equal obsel writes the same values; only identity differs). Not exercised: a graph without any hasTrace triple (new_obs None; original and translated both raise in the cases tried, not added as invalid input). Question 2 of the triage is resolved the strict way: the driver now compares exceptions and optimized.* were fixed, although in the repo pseudomon_range is always an int (Trace.get_pseudomon_range returns int(... or 0)), so Maxime may judge the eager evaluation irrelevant and drop the driver call _case_range_none; the cost is that optimized.* keep two limit variables and the ratio care went from 0.9842 to 1.0032."
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_detect_mon_change",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_detect_mon_change",
+      "diffs": [],
+      "error": null
+    }
   }
 }

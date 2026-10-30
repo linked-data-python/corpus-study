@@ -55,7 +55,7 @@
   "article_candidate": true,
   "validation": {
     "status": "equivalent",
-    "method": "module-state",
+    "method": "custom:module-state+written-file",
     "diffs": [],
     "error": null
   },
@@ -92,5 +92,19 @@
       "suppression du retrait owl:versionInfo (optimized.py), conservation de l'ancien sh:prefixes (translated.ldpy) : FAIL"
     ],
     "remaining": "Le jugement `optimization-doctrine` du tri reste à Maxime : optimized.py et optimized.ldpy ne définissent plus pfxs ni extension_files au niveau module, le pilote ne compare que les noms communs."
+  },
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:module-state+written-file",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:module-state+written-file",
+      "diffs": [],
+      "error": null
+    }
   }
 }
