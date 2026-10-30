@@ -5,6 +5,7 @@ from rdflib import Graph
 from context_shim import minify  # context shim, see meta.json
 
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> as BRICK .
 
 g = Graph()
 
@@ -21,8 +22,8 @@ def test_cycles(g=g):
         res2 = s{
             SELECT DISTINCT ?s ?o WHERE {
                 ?s rdfs:subClassOf ?o .
-                {brick_class} rdfs:subClassOf+ ?s .
-                ?o rdfs:subClassOf+ {brick_class} .
+                {BRICK[minify(brick_class)]} rdfs:subClassOf+ ?s .
+                ?o rdfs:subClassOf+ {BRICK[minify(brick_class)]} .
             }
         }(g)
         for s, o in res2:

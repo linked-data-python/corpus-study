@@ -26,7 +26,8 @@
     "PROOF, not assumption, that the interpolated loop body cannot be positively exercised through run_pair: res1 finding `brick_class` self-reachable via subClassOf+ IS, by construction, a real cycle through `brick_class`; res2's own conditions (`X subClassOf+ s`, `o subClassOf+ X`, `s subClassOf o`) are then satisfied by that very cycle's own edges, so `classes_in_cycles` non-empty implies `loops` non-empty on ANY fixture, for both a correct and a correctly-translated version alike. The assert therefore raises on BOTH sides together whenever the positive branch is real -- and run_pair's per-call try/except calls fo() then ft() inside ONE try block, so if fo() (original) raises, ft() (translated) is never even invoked: there is no way to observe 'both sides agree that a cycle exists' through this harness, only 'the original raised, so we stopped looking.' This is a property of run_pair's exception model applied to this specific test's logic, not a gap this translation left open.",
     "So the fixture (a small two-branch acyclic excerpt of real Brick classes, several hops deep, plus one redundant/skip edge -- brick:Air_Handling_Unit is subClassOf both brick:HVAC_Equipment and, redundantly, brick:Equipment) exercises only the always-true steady state of the real test (Brick.ttl is expected to have zero cycles): classes_in_cycles is empty, the res2 loop body never runs on the FINAL translation, and the check mostly proves (a) both sides transpile/parse/execute against real Brick-shaped data without raising and (b) a translated query that spuriously OVER-matches gets caught, because fo() completing lets ft() run.",
     "ANTI-VERT-CREUX, two rounds. Round 1 (red herring, like generate_brick.py's dead reuse-branch): changed res1's `+` to `*` (zero-or-more) so `classes_in_cycles` becomes every class -- check stayed green, because on a pure parent-edge tree (no back-edge), no interpolated class ever has a DIRECT edge between its forced ancestor-set and descendant-set, so res2 still finds nothing regardless of which classes got spuriously flagged. Round 2 (caught): combined the same `*` with swapping which of the two `{brick_class}` occurrences plays the ancestor role vs the descendant role (`?s rdfs:subClassOf+ {brick_class} . {brick_class} rdfs:subClassOf+ ?o .` instead of the reverse) -- with the redundant skip edge in the fixture this now has something real to match, and `rdfeval check` FAILED with `AssertionError: Loops found in the class hierarchy! {'Air_Handling_Unit -> subClassOf -> Equipment'}`, exactly the spurious pair the swap predicts. Restored afterwards; `diff` against the pre-sabotage backup confirmed byte-identical restoration, and the check is green again.",
-    "article_candidate: no -- the interesting content here is the harness-limitation finding, not a three-line before/after."
+    "article_candidate: no -- the interesting content here is the harness-limitation finding, not a three-line before/after.",
+    "[réparation 2026-10-30] Remplace deux notes ci-dessus : (1) l'îlot interpolé EST exerçable, le harnais comparant désormais les deux levées par type et message (le piège du « un seul try » a disparu) ; (2) « exact identity round-trip » était faux hors de l'espace brick: : l'original lit chaque classe en nom préfixé `brick:%s` % minify(brick_class), donc cherche le cycle sur brick:<nom local> quelle que soit l'IRI réelle, et un cycle rec#P <-> rec#Q lui est invisible (il rend None) alors que l'ancienne traduction, qui interpolait l'IRI complète, levait AssertionError (preuve : appels 4, 5, 6, 9 et 10 du pilote renforcé, rouges avec l'ancienne traduction). translated.ldpy déclare maintenant `@prefix brick: <…Brick#> as BRICK` et interpole `{BRICK[minify(brick_class)]}` ; la forme `brick:{minify(brick_class)}` dans s{ } ne transpile pas (LdpySyntaxError à la suite du nom, avec +, *, ou sans chemin), d'où le trou `{BRICK[…]}`."
   ],
   "draft_sha": "27efe23020aaf4b7",
   "provenance": {
@@ -44,5 +45,23 @@
     "method": "fixture:fixture.ttl entry:test_cycles",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "de fixture= (un graphe acyclique) à 14 appels : le fixture acyclique, un cycle de deux, de trois avec corde, un auto-bouclage (seul, pour que l'assertion se déclenche sur un seul arc), deux cycles disjoints, une chaîne de trois cycles reliés par des ponts, un cycle de quatre (le chemin + est nécessaire), une restriction owl:Restriction en nœud blanc, le graphe vide, et cinq cas hors de l'espace brick: (cycle rec#P <-> rec#Q seul, avec collision de noms locaux, mêlé à un cycle brick:, et deux cas où brick:P n'est que puits ou que source d'un arc vers/depuis le cycle rec). Les levées sont comparées en type et message ; _OrderedGraph trie les lignes de query() parce que le message imprime un ensemble (15 échecs sur 40 PYTHONHASHSEED sans le tri, 0 sur 40 avec) ; docstring qui dit ce que chaque appel exerce.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "traduction d'origine : IRI complète {brick_class} aux deux endroits (appels 4, 5, 6, 9, 10)",
+      "IRI complète au premier seul / au second seul",
+      "BRICK[brick_class] sans minify",
+      "?s rdfs:subClassOf+ ?s à la place du premier motif ; ?o rdfs:subClassOf+ ?o à la place du second",
+      "un seul pas à la place de + dans les deux motifs",
+      "rôles de ?s et ?o échangés dans ?s rdfs:subClassOf ?o",
+      "assert len(loops) < 2",
+      "requête res2 entière remplacée par []",
+      "boucle limitée à la première classe",
+      "SELECT DISTINCT ?s ?s"
+    ],
+    "remaining": "Écart subsistant hors dépôt : si la classe d'un cycle a une IRI sans '#' (ex. http://x/y/P), l'original construit le texte `brick:http://x/y/P` et lève une ParseException SPARQL, alors que la traduction ne trouve simplement rien ; le pilote ne l'exerce pas (il serait rouge) et Brick.ttl ne contient pas de tel cycle (le test existe pour prouver qu'il n'y en a aucun). `res1` avec `*` et un seul pas dans un seul motif sont des mutants équivalents. Jugement non traité : aucun drapeau de jugement n'était posé."
   }
 }

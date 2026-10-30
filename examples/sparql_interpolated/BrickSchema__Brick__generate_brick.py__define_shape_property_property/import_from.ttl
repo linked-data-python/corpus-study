@@ -1,0 +1,20 @@
+# Input for the `import_from` branch of define_shape_property_property: the
+# region parses this file into a scratch graph and copies every (p, o) of the
+# property being defined into the target graph.  The objects deliberately
+# cover what a term-position interpolation could mishandle: falsy literals
+# (the empty string and zero), a language-tagged literal, a typed literal, a
+# blank node and a plain IRI.  ex:hasMissing has no triple here (zero rows),
+# and ex:other must NOT be copied (different subject).
+@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:hasImported
+    rdfs:label "Imported"@en ;
+    rdfs:comment "" ;
+    ex:zero 0 ;
+    ex:when "2026-10-30"^^xsd:date ;
+    ex:link ex:target ;
+    ex:blank [ ex:inner "x" ] .
+
+ex:other rdfs:label "must not be copied" .

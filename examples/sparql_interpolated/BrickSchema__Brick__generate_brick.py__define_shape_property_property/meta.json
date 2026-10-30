@@ -21,7 +21,6 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "from … import p:",
     "g{ }",
     "s{ }",
     "interpolation {expr}",
@@ -37,7 +36,8 @@
     "Genuine finding, not a translation artefact: the original query reads `?p sh:property ?p .` — subject and object are the SAME variable, so the pattern only matches a node that is sh:property of itself. No triple in the region's own domain (SHACL property shapes) is ever reflexive this way, so this branch's 'reuse an existing unconstrained PropertyShape' path is dead in practice on any graph shaped like the ones this function builds. Preserved verbatim (same program, same behaviour), not fixed. Confirmed by exercising it in fixture.ttl: even a shape with an exactly-matching sh:path and no min/maxCount is never picked up, on both sides identically.",
     "context_shim.py stands in for bricksrc.namespaces (the real project namespaces, faithfully reproduced), brickschema.Graph (a thin rdflib.Graph subclass, used here only as a no-argument default-constructor call, so plain Graph is behaviourally identical), and add_relationships (defined elsewhere in the same source file, outside this region; the driver's definitions dict is fully consumed by the keys this region itself pops before reaching that call, so a no-op stand-in is exact for these fixtures, not invented logic).",
     "the import_from branch (external file parse + a second s{ } query on a fresh graph) is present in the translation but not exercised by driver.py's fixtures: reading an arbitrary external RDF file is out of scope for a graph-isomorphism/values check without inventing a second real file to ship.",
-    "anti-hollow-green: sabotaging the reuse-branch query (adding an always-false conjunct) produced no diff, because that branch is dead per the finding above — a red herring, not a weak pilot. Re-sabotaging a triple this fixture DOES exercise (owl:ObjectProperty -> owl:DatatypeProperty on the plain-object-property branch) made the check FAIL as expected (55 vs 55 triples, not isomorphic), confirming the pilot discriminates; then reverted to the correct translation, which is green again."
+    "anti-hollow-green: sabotaging the reuse-branch query (adding an always-false conjunct) produced no diff, because that branch is dead per the finding above — a red herring, not a weak pilot. Re-sabotaging a triple this fixture DOES exercise (owl:ObjectProperty -> owl:DatatypeProperty on the plain-object-property branch) made the check FAIL as expected (55 vs 55 triples, not isomorphic), confirming the pilot discriminates; then reverted to the correct translation, which is green again.",
+    "[réparation 2026-10-30] La note « reflexive » n'est que la moitié de la cause : la requête du cas « existing shape » est morte aussi parce que `SELECT ?x` projette une variable que le motif ne lie jamais (rdflib 7.2.1 renvoie alors []), et le dépôt n'écrit `optional` qu'avec d'autres clés ; la branche import_from n'est pas dans le dépôt mais le pilote la prend désormais (seul endroit où `{prop_name}` en position de sujet est observable). `from … import p:` retiré de constructions (13 @prefix écrits à la main, aucun import de préfixes)."
   ],
   "draft_sha": "6dfe5ddf08700b56",
   "provenance": {
@@ -56,5 +56,25 @@
     "method": "entry:define_shape_property_property",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "de 1 à 20 appels : add_relationships réel (generate_brick.py:85-91, recopié à l'identique dans le pilote et installé sur context_shim avant le chargement des artefacts, le shim restant intact) ; les shapes que le dépôt écrit réellement (LastKnownValueShape, deprecation avec skos:definition, sh:class, sh:minCount/maxCount laissés à add_relationships, values [1, 2, 3, \"Total\"], values falsy [0, \"\"] et []) ; clés restantes (liste vide, Literal(0), valeur dict) ; la garde de la requête de réutilisation avec chaque terme faux tour à tour ; `or` à deux niveaux et vide ; la branche import_from (import_from.ttl : objets falsy, étiquetés, typés, blancs, IRI ; propriété sans triplet ; fichier absent) ; quatre chemins d'erreur (définition None, `or` non itérable, clé `values` restante à côté d'un datatype, clé str restante) comparés en type et message ; shapes réflexives dans fixture.ttl (une libre, une avec minCount, une avec maxCount, une autre) ; docstring qui dit ce que chaque appel exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "add_relationships(...) -> pass",
+      "import_from : requête `{ {prop_name} ?p ?o }` -> `{ ?z ?p ?o }`",
+      "import_from : sujet {prop_name} -> {shape_name}, objet {o} -> {p}",
+      "import_from : branche supprimée",
+      "SELECT ?x -> SELECT ?p (la requête de réutilisation cesserait d'être morte)",
+      "if not prop_defn.pop(\"optional\") inversé",
+      "sh:minCount 1 retiré (deux sites) ou -> 2 (sh:in)",
+      "map(Literal, …) retiré",
+      "owl:ObjectProperty -> DatatypeProperty ; test NumericValue -> False",
+      "récursion de `or` sans graph=graph ; sh:or visant la mauvaise cible",
+      "garde de la requête -> if False (par le chemin d'erreur définition None)",
+      "dans une copie où SELECT ?x devient SELECT ?p des deux côtés : ?p sh:path {prop_name} -> ?zz, chaque FILTER NOT EXISTS -> FILTER(1 = 2) ou retiré"
+    ],
+    "remaining": "La requête de réutilisation (premier îlot s{ }) est morte dans l'original comme dans la traduction (SELECT ?x jamais lié) et jamais atteinte avec ses gardes vraies dans le dépôt ; son interpolation {prop_name} n'est donc observable par aucun appel (les mutants ?zz et FILTER(1 = 2) restent verts), la preuve n'existe que dans une copie où ?x est changé en ?p des deux côtés. Le second îlot (import_from) est exercé, mais le dépôt ne passe jamais cette clé : la strate sparql_interpolated n'y est prouvée que sur un chemin hors dépôt. Le shim context_shim.py garde son add_relationships sans effet (le pilote le remplace) ; wrong-construction non traité."
   }
 }

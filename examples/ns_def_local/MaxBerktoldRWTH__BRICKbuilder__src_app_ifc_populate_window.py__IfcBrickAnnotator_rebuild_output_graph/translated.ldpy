@@ -43,9 +43,13 @@ def rebuild_output_graph(self):
     for @bindings as data in self.annotations_registry.values():
         eq_uri = ifc_inst_ns[data.raw["eq_guid"]]
         ifc_type_name = data.raw["ifc_type"] if data.raw.get("ifc_type") else "IfcSensor"
-        pt_uri = brick_inst_ns[data.raw["point_id"]]
 
         +{ {eq_uri} rdf:type {ifc_core_ns[ifc_type_name]} }
+
+        # Computed AFTER the equipment's triple is written, as in the
+        # original: a row without "point_id" raises here with that triple
+        # already in the graph.
+        pt_uri = brick_inst_ns[data.raw["point_id"]]
 
         # Link Brick point to physical asset -- two .add() sharing subject
         # pt_uri, fused per add_run_shared_subject's construction.

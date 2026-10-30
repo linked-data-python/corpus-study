@@ -42,3 +42,21 @@ ex:areaShapeConstrained a sh:PropertyShape ;
 ex:OtherShapeD sh:property ex:unrelatedShape .
 ex:unrelatedShape a sh:PropertyShape ;
     sh:path ex:hasColor .
+
+# --- Reflexive shapes: the only graphs on which the reuse lookup's pattern
+# `?p sh:property ?p . ?p sh:path <prop>` can match (its SELECT ?x never
+# yields a row, but SELECT ?p would, and the repair proof below uses them).
+# ex:hasReflexive: one unconstrained reflexive shape, must be found.
+ex:reflexiveShape sh:property ex:reflexiveShape ;
+    sh:path ex:hasReflexive .
+# ex:hasConstrained: reflexive but with sh:minCount, must be filtered out.
+ex:reflexiveConstrained sh:property ex:reflexiveConstrained ;
+    sh:path ex:hasConstrained ;
+    sh:minCount 1 .
+# ex:hasMaxed: reflexive but with sh:maxCount only, must be filtered out.
+ex:reflexiveMaxed sh:property ex:reflexiveMaxed ;
+    sh:path ex:hasMaxed ;
+    sh:maxCount 2 .
+# A reflexive shape for a path nobody asks for.
+ex:reflexiveOther sh:property ex:reflexiveOther ;
+    sh:path ex:hasOtherPath .

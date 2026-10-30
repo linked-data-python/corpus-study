@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutant (copie) : le bloc `res2 = s{ … }(g)` remplacé par `res2 = []` reste vert : l'îlot interpolé entier est supprimé sans que le pilote le voie. Écart prouvé par exécution directe des deux versions (original.py avec g lu depuis un fichier turtle ; traduction transpilée) sur un graphe cyclique : brick:A->B->C->A, brick:D->A, plus x:P<->x:Q dans http://other/ns#. Original : AssertionError avec loops = {A->B, B->C, C->A} ; traduction : mêmes trois plus {P->Q, Q->P}. Sur les cycles brick:, les deux messages sont identiques. L'original lève bien dans le cas positif ; seul le harnais (qui s'arrête à la première levée dans un même try) l'empêche de le comparer. Note du traducteur « exact identity round-trip » vraie seulement pour l'espace brick:. Pas pour l'article.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote passe d'un fixture acyclique à 14 appels dont onze portent un cycle, les levées étant comparées en type et message (cycles de 1, 2, 3, 4 arcs, chaîne de cycles, cycles hors brick:) : l'îlot {brick_class} est maintenant exercé et ses mutants sont rejetés ; la traduction était fausse hors de l'espace brick: (l'original lit brick:<nom local>, elle lisait l'IRI complète et levait sur un cycle rec# que l'original ne voit pas), elle interpole maintenant {BRICK[minify(brick_class)]}. Reste hors dépôt : classe sans '#' (ParseException dans l'original seulement)."
 }

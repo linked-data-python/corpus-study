@@ -30,6 +30,38 @@ through `vars()`. `run_pair`'s own comparison machinery falls through to
 plain `==` for an object that is none of Graph/BNode/dict/list/tuple/set,
 so defining `__eq__` on `_FakeSelf` is enough -- no need to touch
 rdfeval/harness.py.
+
+PREFIX BINDINGS.  Graph isomorphism does not see prefix bindings, yet the
+repository reads them back (`send_graph_to_brickbuilder` serialises
+`output_graph` and calls `namespaces()`).  The original makes seven
+`output_graph.bind(prefix, ns)` calls; the translation replaces them with
+`@prefix ... as ...` declarations followed by `@graph self.output_graph`.
+So `_eq` compares, for two graphs, their isomorphism AND the bindings
+(`_bindings_ok`): every (prefix, namespace) pair the ORIGINAL graph binds
+must be bound identically by the translated one.  The check is one-sided on
+purpose: the translated graph may carry extra bindings (rdflib's default
+bindings, or any that `@graph` adds), and that is tolerated.  The left
+operand of `==` is the original side (the harness compares `original ==
+translated`).  Because rdflib's default `Graph()` already binds `brick` to
+the real Brick IRI, the first call alone could not tell a missing
+`@prefix brick:` apart; the second call therefore gives `self.BRICK`,
+`self.REF`, `ns_ifc` and `ns_inst` values that differ from every default.
+
+CALLS.
+  0. the original three-row registry (see `_annotations_registry`);
+  1. custom BRICK/REF/ns_ifc, `ns_inst` already ending in '/', and a
+     registry of str values as the Qt widgets give them (QLineEdit.text()
+     always yields str): empty `ifc_type`, empty `bacnet_name` (guard False
+     although bacnet_type and bacnet_instance are present), `bacnet_name`
+     present with empty `bacnet_instance`, and a bacnet_type needing both
+     munging rules;
+  2. an empty `QSettings` (the two region defaults for `ns_inst` and
+     `ns_ifc`) and an empty registry (nothing but the bindings);
+  3. error paths, one per call because the harness compares the two raises
+     AND what each side wrote before raising: a row without `eq_guid`,
+     without `point_id` (the original has already written the equipment's
+     rdf:type triple, which the graph comparison exposes), without
+     `point_type`, and an `ifc_type` of None.
 """
 from rdflib import Graph, Namespace
 
@@ -38,9 +70,15 @@ from rdfeval.harness import run_pair, graphs_isomorphic
 _MISSING = object()
 
 
+def _bindings_ok(original, translated):
+    """Every (prefix, namespace) the original graph binds, the translation binds too."""
+    got = {(p, str(n)) for p, n in translated.namespaces()}
+    return all((p, str(n)) in got for p, n in original.namespaces())
+
+
 def _eq(a, b):
     if isinstance(a, Graph) and isinstance(b, Graph):
-        return graphs_isomorphic(a, b)
+        return graphs_isomorphic(a, b) and _bindings_ok(a, b)
     if isinstance(a, _FakeSelf) or isinstance(b, _FakeSelf):
         return a == b
     if isinstance(a, (str, bytes)) or isinstance(b, (str, bytes)):
@@ -98,16 +136,17 @@ def _annotations_registry():
 class _FakeSelf:
     """Stands in for the IfcBrickAnnotator instance `rebuild_output_graph(self)` mutates."""
 
-    def __init__(self):
-        self.settings = _Settings({
+    def __init__(self, settings=None, brick=None, ref=None, registry=None):
+        self.settings = _Settings(settings if settings is not None else {
             # deliberately WITHOUT a trailing '#'/'/', so the region's own
             # `if not str(base_inst).endswith(('#', '/')): base_inst += '#'`
             # is exercised identically on both sides.
             "ns_inst": "http://example.org/testproj",
         })
-        self.BRICK = Namespace("https://brickschema.org/schema/Brick#")
-        self.REF = Namespace("https://brickschema.org/schema/Brick/ref#")
-        self.annotations_registry = _annotations_registry()
+        self.BRICK = Namespace(brick or "https://brickschema.org/schema/Brick#")
+        self.REF = Namespace(ref or "https://brickschema.org/schema/Brick/ref#")
+        self.annotations_registry = (_annotations_registry()
+                                     if registry is None else registry)
 
     def __eq__(self, other):
         if not isinstance(other, _FakeSelf):
@@ -117,8 +156,65 @@ class _FakeSelf:
                    for k in keys)
 
 
+def _custom():
+    """BRICK, REF, ns_ifc and ns_inst that differ from every default (call 1)."""
+    return _FakeSelf(
+        settings={"ns_inst": "http://example.org/p/",
+                  "ns_ifc": "http://example.org/ifc-custom#"},
+        brick="http://example.org/brick-custom#",
+        ref="http://example.org/ref-custom#",
+        registry={
+            "a": {  # every field a str, empty ifc_type -> IfcSensor default
+                "eq_guid": "G1", "ifc_type": "",
+                "point_id": "P1", "point_type": "Sensor",
+                "bacnet_name": "T1", "bacnet_type": "AnalogInput",
+                "bacnet_instance": "3",
+            },
+            "b": {  # empty name: guard False although the other fields exist
+                "eq_guid": "G2", "ifc_type": "IfcActuator",
+                "point_id": "P2", "point_type": "Command",
+                "bacnet_name": "", "bacnet_type": "AnalogValue",
+                "bacnet_instance": "4",
+            },
+            "c": {  # name present, empty instance, no type: ",".join of ""
+                "eq_guid": "G3",
+                "point_id": "P3", "point_type": "Setpoint",
+                "bacnet_name": "N3", "bacnet_instance": "",
+            },
+            "d": {  # both munging rules are no-ops, upper case lowered
+                "eq_guid": "G4", "ifc_type": "IfcSensor",
+                "point_id": "P4", "point_type": "Sensor",
+                "bacnet_name": "N4", "bacnet_type": "BinaryInput",
+                "bacnet_instance": "0",
+            },
+        })
+
+
+def _one_row(**fields):
+    row = {"eq_guid": "E1", "point_id": "P1", "point_type": "Sensor"}
+    row.update(fields)
+    for k in [k for k, v in fields.items() if v is _MISSING]:
+        del row[k]
+    return {"r1": {"eq_guid": "E0", "point_id": "P0", "point_type": "Sensor"},
+            "r2": row}
+
+
 VERDICT = run_pair(
     __file__,
     entry="rebuild_output_graph",
-    calls=[lambda: ((_FakeSelf(),), {})],
+    calls=[
+        lambda: ((_FakeSelf(),), {}),
+        lambda: ((_custom(),), {}),
+        # region defaults for ns_inst and ns_ifc
+        lambda: ((_FakeSelf(settings={}, registry=_one_row(
+            ifc_type="IfcDoor", bacnet_name="N", bacnet_type="X",
+            bacnet_instance="1")),), {}),
+        # empty registry: only the bindings remain to compare
+        lambda: ((_FakeSelf(settings={}, registry={}),), {}),
+        # error paths (a first row is written before the second raises)
+        lambda: ((_FakeSelf(registry=_one_row(eq_guid=_MISSING)),), {}),
+        lambda: ((_FakeSelf(registry=_one_row(point_id=_MISSING)),), {}),
+        lambda: ((_FakeSelf(registry=_one_row(point_type=_MISSING)),), {}),
+        lambda: ((_FakeSelf(registry=_one_row(ifc_type=None)),), {}),
+    ],
 )
