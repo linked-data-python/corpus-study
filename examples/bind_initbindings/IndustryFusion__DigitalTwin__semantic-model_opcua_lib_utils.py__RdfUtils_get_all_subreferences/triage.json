@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : `{node}` et `{reference}` remplacent le dictionnaire initBindings et la variable de requête, la requête est identique, le pilote est solide ; paire propre pour l'article (réserve : la matérialisation `list(...)` imposée par la requête paresseuse).",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (initBindings à deux variables non projetées devenant deux interpolations en position de terme) malgré le `list(s{...}(graph))` ajouté avant la garde `len(result) > 0` ?",
+      "where": "translated.ldpy:17-22 et original.py:15-25",
+      "if_yes": "retenir comme exemple ; s{ } est bien la construction qui convient ici (m{ } refuse le chemin `rdfs:subPropertyOf*` : « terme RDF attendu »)",
+      "if_no": "approuver sans la citer (le `list()` hissé, imposé par le défaut `len()` de s{ }, est la seule différence de forme)"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants dans des copies (mktemp -d) de translated.ldpy, tous ROUGES : `subPropertyOf*` -> `+` ; -> sans étoile ; `{node}` -> `?node` ; `{reference}` -> `?s` ; `if len(result) > 0` -> `if False`. Le pilote a donc les voisins qui ne doivent pas matcher (p2, autre noeud) et le cas zéro solution. Dépôt d'origine : 9 sites d'appel dans semantic-model/opcua/owl2instances.py (l. 262, 267, 268, 475, 480, 484, 507, 510, 519), tous avec `opcuans['X']` (URIRef via Namespace.__getitem__) et un noeud issu du graphe : jamais de str ni de None, donc la coercition `{expr}` ne change rien ; les appelants font `for reference, target in children`, compatible avec les lignes rendues. `initNs={'opcua': ...}` est bien mort (aucun nom `opcua:` dans la requête). Vérifié que `m{ }` ne sait pas écrire `rdfs:subPropertyOf*` (erreur du transpileur), donc s{ } est justifié, pas un simple suivi du tableau.",
+  "triaged_by": "sonnet-5.5"
+}

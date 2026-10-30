@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "La requête est textuellement identique à l'original et la substitution `{division}` ×4 est correcte, mais le fixture n'a aucun voisin négatif pour la branche 3 : retirer `owl:onProperty` de la branche 3 ou élargir `a owl:Restriction` en `a ?t` dans les branches 2 et 3 reste vert.",
+  "questions": [
+    {
+      "question": "Faut-il compléter fixture.ttl (un secteur `rdfs:subClassOf` une restriction sur une AUTRE propriété que oeo:OEO_00000504, et un secteur typé par un nœud qui n'est pas un owl:Restriction mais porte les mêmes onProperty/someValuesFrom) avant d'approuver ?",
+      "where": "fixture.ttl:54-59 (seul voisin négatif de restriction, `ex:wrong_prop_sector rdf:type ex:restrictionC`, atteint la branche 2 et jamais la branche 3) ; translated.ldpy:23-24 et :30-31 ; original.py:21-27",
+      "if_yes": "needs-work : ajouter ces deux voisins au fixture ; la traduction elle-même n'a pas à changer (la requête est la même que l'original).",
+      "if_no": "approuver en l'état, sachant que `owl:onProperty` de la branche 3 et `a owl:Restriction` des branches 2 et 3 ne sont pas prouvés par le pilote."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur des copies (mktemp -d) de translated.ldpy. Restés VERTS : (1) `owl:onProperty oeo:OEO_00000504 ;` supprimé dans la branche 3 ; (2) `?restriction2 a owl:Restriction` -> `a ?t` (branche 3) ; (3) `?restriction a owl:Restriction` -> `a ?t` (branche 2) ; (4) `owl:onProperty oeo:OEO_00000504` -> `owl:onProperty ?pp` (branche 3) ; (5) `.lower()` supprimé de la clé de tri (code partagé, hors traduction). ROUGES (donc couverts) : FILTER supprimé ; chaque branche rendue morte (prédicat -> oeo:NOPE) ; `{division}` -> `?division` dans une branche ; `isinstance(row[0], URIRef)` -> True ; `owl:onProperty` supprimé dans la branche 2. Attention : `FILTER(false)` ajouté dans un groupe n'est PAS un mutant fiable, c'est un no-op dans rdflib 7.2.1 (`SELECT * WHERE { ?s ?p ?o . FILTER(false) }` renvoie 1 ligne ; `FILTER(1=2)` en renvoie 0), j'ai donc tué les branches par un prédicat inexistant. Le transpileur produit bien `?__i0..?__i3` liés à `division`, même mécanisme que l'original. `SELECT DISTINCT` est sans effet observable ici (le résultat est ensuite mis dans un `set`). Dépôt d'origine : seul appelant factsheet/helper.py:299, `division` vient de `_sector_division_nodes` qui ne rend que des URIRef (l. 232 et 240), aucun écart de type. Le shim context_shim._label ne restaure qu'une fonction auxiliaire absente de la région, identique des deux côtés.",
+  "triaged_by": "sonnet-5.5"
+}
