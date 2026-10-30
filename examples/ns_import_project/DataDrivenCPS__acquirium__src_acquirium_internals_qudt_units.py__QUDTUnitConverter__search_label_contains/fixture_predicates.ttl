@@ -1,0 +1,49 @@
+# Second input graph for _search_label_contains (repair 2026-10-30): one real
+# unit per tracked predicate, each found by a token no other tracked triple
+# carries, so that every entry of `predicates` - and the bound predicate of
+# the loop's pattern - decides at least one call; and next to them the
+# neighbours a widened or reordered pattern would reach.
+@prefix ex:   <http://example.org/units/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# A real unit whose token sits ONLY under an untracked predicate
+# (rdfs:comment): "commtok" must find nothing.  A pattern whose predicate is
+# widened to a variable finds ex:commented.
+ex:commented a qudt:Unit ;
+    rdfs:comment "Commtok unit" .
+
+# skos:prefLabel decides, with a language tag and a case the search does not
+# share: "MÈTRE" casefolds to the literal's "mètre".
+ex:metre a qudt:Unit ;
+    skos:prefLabel "Mètre"@fr .
+
+# qudt:symbol decides, on a typed literal; an IRI object under the same
+# predicate whose text also holds the token is skipped by the Literal guard,
+# and is alone to hold "symtok-iri": that search must find nothing.
+ex:symunit qudt:conversionMultiplier "1"^^xsd:double ;
+    qudt:symbol "symtok"^^xsd:string .
+ex:iriSymbol a qudt:Unit ;
+    qudt:symbol <http://example.org/units/symtok-iri> .
+
+# qudt:uneceCommonCode decides, on a falsy-looking literal: "0" (the integer
+# zero) is found by the search "0".
+ex:zeroCode a qudt:Unit ;
+    qudt:uneceCommonCode 0 .
+
+# Priority between predicates: "both" is under rdfs:label for ex:labelled and
+# under qudt:symbol for ex:symbolled; the label, earlier in the list, wins.
+ex:symbolled a qudt:Unit ;
+    qudt:symbol "both" .
+ex:labelled a qudt:Unit ;
+    rdfs:label "both" .
+
+# Under a tracked predicate, the token is held by a subject that is not a
+# unit: "skiptok" finds nothing, the guard rejects it.
+ex:notAUnit rdfs:label "skiptok" .
+
+# casefold, not lower: "STRASSE" casefolds to "strasse", as does "Straße".
+ex:strasse a qudt:Unit ;
+    skos:prefLabel "Straße" .

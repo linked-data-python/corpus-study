@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check = OK. Mutants sur une copie (mktemp) : sujet elargi `-{ ?q {p} {o} }` -> ECHEC ; sujet+predicat `-{ ?q ?r {o} }` -> ECHEC ; predicat+objet `-{ {identifier} ?q ?r }` -> ECHEC ; garde `p in double_check_list` -> `True` -> ECHEC ; garde `\"NodeShape\" in identifier` -> `True` -> ECHEC (le property shape perd ses contraintes) ; `sh:in` remplace par `sh:nodeKind` dans la liste -> ECHEC. SURVIT (vert) : predicat elargi `-{ {identifier} ?q {o} }` : dans la fixture, les seuls predicats de la liste qui partagent un objet avec un autre predicat du meme sujet sont sh:minCount 1 / sh:maxCount 1, tous deux dans la liste. Aussi vert : objet elargi `-{ {identifier} {p} ?q }`, mais celui-la est equivalent (tout (identifier, p, *) avec p dans la liste est de toute facon retire). Lecture elargie `m{ ?q ?p ?o }` : equivalente aussi (le retrait est lie a identifier, idempotent). Correctif teste dans une copie : ajout de `sh:order 1 ; sh:name \"x\"` a Person -> la traduction reste OK, le mutant predicat elargi ECHOUE. Garde `p in list` et garde NodeShape : fausses dans le pilote (targetClass/property/node ; PropertyShape), donc bien exercees. Cas zero solution : <NodeShape/Absent> et la liste vide.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le mutant prédicat élargi `-{ {identifier} ?q {o} }` meurt sur le nouveau fixture_neighbours.ttl (jumeaux même sujet/même objet) ; traduction juste, check OK."
 }

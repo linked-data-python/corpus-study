@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Dans une copie (mktemp -d, supprimée) : mutant `for subj, _pp, lit in m{ ?subj ?pp ?lit }(self.graph)` (prédicat de la boucle élargi à un joker) -> check reste OK (survit). Même mutant après ajout au fixture de `ex:zz a qudt:Unit ; rdfs:comment \"kilometre\"` et d'un appel (\"kilometre\",) -> FAIL (None vs UnitDefinition(zz)) : le voisinage manquant suffit donc à le tuer. Autres mutants : retirer rdfs:label -> FAIL (appel 0) ; retirer skos:prefLabel, qudt:symbol ou qudt:uneceCommonCode de la liste -> OK (survivent ; seul ucumCode est exercé). Équivalence de la traduction vérifiée : avec deux unités valides contenant \"gal\" ajoutées au fixture, le résultat (première trouvée) est identique aux deux côtés, donc l'ordre d'itération de m{} sur le store mémoire coïncide avec .triples() ; garde `isinstance(lit, Literal)` correcte (objet IRI sous rdfs:label). Le dépôt n'exporte aucun `__namespaces__` pour internals_namespaces (le shim l'écrit à la main, déjà flaggé). Remarque : le module d'origine utilise QUDT comme nom Python ailleurs (`_looks_like_unit`, qudt_units.py:383), que `from … import qudt:` ne lie pas ; sans incidence sur la région.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le mutant prédicat élargi meurt (vraie unité dont le texte n'est que sous rdfs:comment), chaque prédicat de la liste décide désormais un appel ; traduction juste, check OK."
 }

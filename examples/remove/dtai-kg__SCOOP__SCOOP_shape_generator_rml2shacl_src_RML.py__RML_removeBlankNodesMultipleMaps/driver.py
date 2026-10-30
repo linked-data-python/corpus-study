@@ -11,6 +11,24 @@ constants the region reads); one instance is built per side, around its own
 copy of the fixture, and `__eq__` states the oracle: two runs agree when the
 list of graph dictionaries they collected agrees graph by graph, compared by
 RDF isomorphism through the harness's own `normalise`.
+
+The calls:
+  mapping_document - fixture.ttl: every branch of the body (logical source,
+                     subject map, predicateMap with and without rr:constant,
+                     the rr:predicate/rr:object shortcuts, the RefObjectMap
+                     test), four subjects of (?, ?, rr:TriplesMap) including
+                     one through a predicate other than rdf:type, a triples
+                     map with nothing to collect, and a mapping-shaped node
+                     that is not a triples map;
+  neighbours       - fixture_neighbours.ttl (repair 2026-10-30): next to each
+                     triple the two `-{ }` remove from the local POM graph,
+                     and to the one the existence test `m{ {p} rr:objectMap
+                     {sROM} }` looks for, a neighbour sharing two of its three
+                     terms, so that widening any bound term to a variable
+                     changes the collected graphs (see the fixture's header);
+                     plus a POM with two objectMaps and an empty-string
+                     rr:object, which removes several times from the graph
+                     the loop walks.
 """
 import sys
 
@@ -56,11 +74,18 @@ def mapping_document():
     return ((RML(fixture_graph(FIXTURE)),), {})
 
 
+NEIGHBOURS = Path(__file__).resolve().parent / "fixture_neighbours.ttl"
+
+
+def neighbours():
+    return ((RML(fixture_graph(NEIGHBOURS)),), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry="removeBlankNodesMultipleMaps",
     fixture="fixture.ttl",
-    calls=[mapping_document],
+    calls=[mapping_document, neighbours],
     # ordered=True only if the region imposes an order (sorted, ORDER BY):
     # no store promises one, so results are compared as multisets.
 )

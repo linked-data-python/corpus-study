@@ -48,5 +48,19 @@
     "method": "fixture:fixture.ttl entry:double_check",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Troisième appel `neighbours` sur un nouveau fixture_neighbours.ttl : chaque triplet retiré a un jumeau qui partage deux termes (même sujet et même objet sous un prédicat hors liste : sh:order 1 / sh:minCount 1, sh:name \"x\" / sh:pattern \"x\", sh:deactivated true / sh:uniqueLang true, sh:class / sh:datatype ; même prédicat et objet sur un sujet non ajusté ; l'identifiant en position d'objet), plusieurs objets pour un prédicat, des listes et un nœud anonyme imbriqué, des objets falsy (0, \"\"), une forme dont tous les triplets sont retirés pendant qu'on la parcourt (parcourue en premier), un identifiant en double et un IRI sans « NodeShape ».",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ {identifier} ?q {o} } (prédicat élargi, survivant du tri)",
+      "-{ ?q {p} {o} }",
+      "if p in double_check_list -> if True",
+      "if \"NodeShape\" in identifier -> if True",
+      "-{ } retiré",
+      "m{ ?q ?p ?o } (sujet de la lecture élargi)"
+    ],
+    "remaining": "Mutant équivalent non compté : objet élargi -{ {identifier} {p} ?q } (tout (identifier, p, *) avec p dans la liste est retiré de toute façon)."
   }
 }

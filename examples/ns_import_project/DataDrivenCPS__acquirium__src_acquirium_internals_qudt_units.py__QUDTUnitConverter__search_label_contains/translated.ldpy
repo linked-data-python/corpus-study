@@ -46,9 +46,9 @@ from pathlib import Path
 from rdfeval.harness import fixture_graph
 from qudt_context import ConverterStub
 
-_FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
+_HERE = Path(__file__).resolve().parent
 
 
-def demo(text):
-    stub = ConverterStub(fixture_graph(_FIXTURE))
+def demo(text, fixture="fixture.ttl"):
+    stub = ConverterStub(fixture_graph(_HERE / fixture))
     return _search_label_contains(stub, text)

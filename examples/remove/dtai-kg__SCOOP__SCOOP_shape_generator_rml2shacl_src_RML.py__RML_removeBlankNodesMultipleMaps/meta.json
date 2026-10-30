@@ -23,10 +23,10 @@
     "+{ }",
     "-{ }",
     "m{ }",
-    "suffixe d'appel (g)",
-    "nom prefixe",
+    "call suffix (g)",
+    "prefixed name",
     "variable",
-    "IRI"
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "@graph self.graph designates the attribute directly (no local alias needed), so the ten reads on self.graph become bare m{ }. The five graphs the region BUILDS are local, so every write keeps an explicit receiver: +{ ... }(graphPredicatObjectMap), -{ ... }(graphPredicatObjectMap). This region is a counter-example to the 'one graph at a time' measurement behind @graph: it juggles six graphs at once, and the call suffix is what makes that bearable.",
@@ -57,5 +57,22 @@
     "method": "fixture:fixture.ttl entry:removeBlankNodesMultipleMaps",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Deuxième appel `neighbours` sur un nouveau fixture_neighbours.ttl : à côté de chaque triplet que les deux -{ } retirent du graphe POM local et de celui que cherche le test d'existence `m{ {p} rr:objectMap {sROM} }`, un voisin qui partage deux termes (rr:predicate et rr:objectMap de même objet ; objectMap imbriqué portant rr:object \"v\" ; objectMap bouclé sur lui-même ; nœud POM pointant ex:RealROM ; rr:predicateObjectMap rdfs:seeAlso ex:SeeROM), avec des parents de RefObjectMap qu'aucune autre branche n'écrit ; plus un POM à deux objectMaps et un rr:object \"\" (plusieurs retraits dans le graphe parcouru). constructions : « IRI » retiré (aucun IRI hors des @prefix), « interpolation {expr} » ajouté (employé : {sTM}, {p}…), libellés normés (call suffix (g), prefixed name).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "ligne 55 -{ {p} ?z {o2} } (prédicat élargi)",
+      "ligne 55 -{ ?z {self.OJBECT_MAP} {o2} } (sujet élargi)",
+      "ligne 55 -{ } retiré",
+      "ligne 63 -{ {p} ?z {o2} }",
+      "ligne 63 -{ ?z {self.OBJECT} {o2} } (sujet élargi)",
+      "ligne 63 -{ } retiré",
+      "ligne 68 m{ {p} ?z {sROM} } (prédicat élargi)",
+      "ligne 68 m{ ?z {self.OJBECT_MAP} {sROM} } (sujet élargi)",
+      "ligne 68 m{ {p} {self.OJBECT_MAP} ?z } (objet élargi)"
+    ],
+    "remaining": "Mutants équivalents non comptés : objet élargi des deux -{ } (lignes 55 et 63), qui retirent de toute façon chaque (p, ., *) au fil de la boucle ; le parcours m{ }(graphPredicatObjectMap) voit les mêmes objets malgré les retraits (vérifié avec deux objectMaps sur rdflib 7.2.1). La note de traduction « widening one to a joker makes the driver FAIL » n'était vraie qu'après ce renforcement."
   }
 }

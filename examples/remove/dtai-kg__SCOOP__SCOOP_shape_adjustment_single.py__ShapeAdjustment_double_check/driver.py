@@ -10,6 +10,25 @@ double_check returns nothing: what it produces is the pruned graph, so the
 comparison is the isomorphism of `self.adjusted_graph` (plus the identifier
 list, which must come out untouched).  It is spelled as an `__eq__` on the
 context object because `harness.materialise` cannot walk one on its own.
+
+The calls:
+  adjusted_shapes    - fixture.ttl: two node shapes stripped of most of the
+                       thirteen constraints, a property shape the "NodeShape"
+                       test skips, an identifier with no triple (zero
+                       solutions), a node shape that is not adjusted;
+  nothing_adjusted   - the empty identifier list: nothing is walked;
+  neighbours         - fixture_neighbours.ttl (repair 2026-10-30): every
+                       removed triple has a twin sharing two of its three
+                       terms - same subject and object under a predicate
+                       outside the list (kills a removal whose predicate is
+                       widened to ?q), same predicate and object under a
+                       subject that is not adjusted, the identifier as an
+                       object - plus several objects for one predicate,
+                       nested blank nodes, falsy objects (0, "") and a shape
+                       every triple of which is removed while it is walked.
+                       The identifier list carries a duplicate and a
+                       non-NodeShape IRI, and the order walks the fully
+                       removed shape first.
 """
 from pathlib import Path
 
@@ -48,11 +67,24 @@ def nothing_adjusted():
     return ((Probe(fixture_graph(FIXTURE), []),), {})
 
 
+NEIGHBOURS = HERE / "fixture_neighbours.ttl"
+ADJUSTED_NEIGHBOURS = [
+    URIRef("http://example.com/shapes/PersonNodeShape"),
+    URIRef("http://example.com/NodeShape/Wide"),
+    URIRef("http://example.com/Referrer"),
+    URIRef("http://example.com/NodeShape/Wide"),
+]
+
+
+def neighbours():
+    return ((Probe(fixture_graph(NEIGHBOURS), list(ADJUSTED_NEIGHBOURS)),), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry='double_check',
     fixture="fixture.ttl",
-    calls=[adjusted_shapes, nothing_adjusted],
+    calls=[adjusted_shapes, nothing_adjusted, neighbours],
     # ordered=True only if the region imposes an order (sorted, ORDER BY):
     # no store promises one, so results are compared as multisets.
 )

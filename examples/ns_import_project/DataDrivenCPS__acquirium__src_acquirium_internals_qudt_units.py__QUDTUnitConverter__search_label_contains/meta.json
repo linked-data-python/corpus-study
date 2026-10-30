@@ -47,5 +47,22 @@
     "method": "fixture:fixture.ttl entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "demo(text, fixture=\"fixture.ttl\") : couture dans la partie harnais, identique des deux côtés ; douze appels ajoutés sur fixture_predicates.ttl, fixture.ttl et fixture_empty.ttl : chaque prédicat suivi décide un appel (skos:prefLabel en littéral @fr et casefold, qudt:symbol en littéral typé, qudt:uneceCommonCode sur l'entier 0), une vraie unité dont le texte n'est que sous rdfs:comment (None), la priorité rdfs:label avant qudt:symbol, un sujet non-unité seul porteur (None), un objet IRI seul porteur (\"symtok-iri\", None), casefold de « Straße », la recherche vide sur deux fixtures et un graphe vide.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "m{ ?subj ?pp ?lit } (prédicat élargi, survivant du tri)",
+      "skos:prefLabel retiré de la liste",
+      "qudt:symbol retiré",
+      "qudt:uneceCommonCode retiré",
+      "ordre de la liste changé (qudt:symbol en tête)",
+      "garde isinstance(lit, Literal) retirée",
+      "casefold() -> lower()",
+      "garde _looks_like_unit -> True",
+      "m{ } remplacé par []"
+    ],
+    "remaining": ""
   }
 }

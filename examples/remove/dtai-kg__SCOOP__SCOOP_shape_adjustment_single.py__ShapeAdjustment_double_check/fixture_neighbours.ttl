@@ -1,0 +1,51 @@
+# Second input graph for double_check: the neighbours a too-wide removal would
+# take, and the walk-while-removing order.
+#   * same subject, same object, OTHER predicate - every dropped constraint of
+#     <NodeShape/Wide> has a twin under a predicate outside double_check_list
+#     (sh:order 1 next to sh:minCount 1, sh:name "x" next to sh:pattern "x",
+#     sh:deactivated true next to sh:uniqueLang true, sh:class next to
+#     sh:datatype): a removal whose predicate is widened to a variable takes
+#     the twin with it;
+#   * same predicate, same object, OTHER subject - <NodeShape/Kept>, never an
+#     adjusted identifier, carries the very same constraints;
+#   * same subject, same predicate, several objects - sh:in twice, each a list
+#     (nested blank nodes whose cells stay behind), sh:pattern twice;
+#   * the identifier as OBJECT - <Referrer> points at <NodeShape/Wide> with
+#     sh:node, which must stay;
+#   * a NodeShape IRI where "NodeShape" is not the path segment the first
+#     fixture uses (<shapes/PersonNodeShape>), listed FIRST so the store walks
+#     it before the others, and whose every triple is a constraint: the walk
+#     removes everything it is iterating over.
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+@base <http://example.com/> .
+
+<shapes/PersonNodeShape>
+    sh:minCount 0 ;                                   # dropped
+    sh:maxCount 0 ;                                   # dropped
+    sh:minLength 0 ;                                  # dropped
+    sh:maxLength 0 .                                  # dropped
+
+<NodeShape/Wide> a sh:NodeShape ;
+    sh:minCount 1 ;                                   # dropped
+    sh:order 1 ;                                      # stays (twin of minCount)
+    sh:pattern "x" ;                                  # dropped
+    sh:pattern "y" ;                                  # dropped
+    sh:name "x" ;                                     # stays (twin of pattern)
+    sh:uniqueLang true ;                              # dropped
+    sh:deactivated true ;                             # stays (twin of uniqueLang)
+    sh:datatype schema:Thing ;                        # dropped
+    sh:class schema:Thing ;                           # stays (twin of datatype)
+    sh:in ( "a" "b" ) ;                               # heads dropped, cells stay
+    sh:in ( [ sh:path schema:name ] ) ;               # nested blank node stays
+    sh:languageIn ( "" ) ;                            # dropped (empty string cell stays)
+    sh:maxInclusive 0 .                               # dropped (falsy object)
+
+<NodeShape/Kept> a sh:NodeShape ;
+    sh:minCount 1 ;                                   # stays: not adjusted
+    sh:pattern "x" ;                                  # stays
+    sh:uniqueLang true .                              # stays
+
+<Referrer> sh:node <NodeShape/Wide> ;                 # stays: identifier as object
+    sh:minCount 1 .                                   # stays: not a NodeShape IRI

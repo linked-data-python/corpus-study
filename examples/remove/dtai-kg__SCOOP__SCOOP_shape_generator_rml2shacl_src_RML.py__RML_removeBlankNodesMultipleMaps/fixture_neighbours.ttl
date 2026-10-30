@@ -1,0 +1,54 @@
+# Second input graph for removeBlankNodesMultipleMaps (repair 2026-10-30): one
+# triples map whose predicate-object maps put, next to each triple the region
+# removes or tests, a neighbour sharing two of its three terms.  A removal or
+# an existence test whose bound term is widened to a variable reaches the
+# neighbour, and the graphs the region collects change.
+#   POM same-object  - rr:predicate and rr:objectMap share their object: the
+#                      rr:objectMap removal (line 52) must not take the
+#                      rr:predicate triple (predicate widened);
+#   POM nested-object - the objectMap carries rr:object "v", copied as
+#                      (rr:objectMap, rr:object, "v"); the rr:object removal
+#                      (line 60) must not take it (subject widened);
+#   POM self-loop    - an objectMap whose own rr:objectMap is itself, copied as
+#                      (rr:objectMap, rr:objectMap, ex:LoopOM); the rr:objectMap
+#                      removal (line 52) must not take it (subject widened);
+#   POM two-maps     - two objectMaps and an empty-string rr:object: the loop
+#                      removes from the graph it iterates, more than once;
+#   POM real-ROM     - a POM node pointing at ex:RealROM: the region's test
+#                      `(p, rr:objectMap, sROM)` binds p to the IRI
+#                      rr:predicateObjectMap, not to this node, so the test
+#                      must NOT fire (subject widened would);
+#   rr:predicateObjectMap rr:seeAlso ex:SeeROM - the IRI as subject, but under
+#                      another predicate: must NOT fire (predicate widened
+#                      would).
+# The two RefObjectMaps have parents no other branch writes (ex:PersonMap2,
+# ex:Other), so a wrongly fired test adds a triple nothing else adds.
+@prefix rr:   <http://www.w3.org/ns/r2rml#> .
+@prefix rml:  <http://semweb.mmlab.be/ns/rml#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:   <http://example.org/> .
+
+ex:PersonMap2 a rr:TriplesMap ;
+    rr:subjectMap [ rr:constant ex:alice ] ;
+    rr:predicateObjectMap [ rr:predicate ex:same ;
+                            rr:objectMap ex:same ] ;
+    rr:predicateObjectMap [ rr:object "v" ;
+                            rr:objectMap [ rr:object "v" ] ] ;
+    rr:predicateObjectMap [ rr:predicate ex:loop ;
+                            rr:objectMap ex:LoopOM ] ;
+    rr:predicateObjectMap [ rr:predicateMap [ rr:constant "" ] ;
+                            rr:object "" ;
+                            rr:objectMap [ rml:reference "a" ] ;
+                            rr:objectMap [ rml:reference "b" ] ] ;
+    rr:predicateObjectMap [ rr:predicate ex:knows ;
+                            rr:objectMap ex:RealROM ] .
+
+ex:LoopOM rr:objectMap ex:LoopOM ;
+    rr:termType rr:IRI .
+
+ex:RealROM a rr:RefObjectMap ;
+    rr:parentTriplesMap ex:PersonMap2 .
+
+rr:predicateObjectMap rdfs:seeAlso ex:SeeROM .
+ex:SeeROM a rr:RefObjectMap ;
+    rr:parentTriplesMap ex:Other .
