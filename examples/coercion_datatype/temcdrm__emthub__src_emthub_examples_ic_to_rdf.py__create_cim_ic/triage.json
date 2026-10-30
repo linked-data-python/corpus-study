@@ -1,0 +1,15 @@
+{
+  "priority": "medium",
+  "flags": ["wrong-construction"],
+  "summary": "Traduction fidèle et bien éprouvée (sujets partagés, `{x}^^cim:T` correct), mais cinq `{rdflib.URIRef(x)}` dans les îlots passent aussi en `f<{x}>`, plus spécifique : enveloppe inutile.",
+  "questions": [
+    {
+      "question": "Faut-il remplacer les cinq `{rdflib.URIRef(tnid)}`, `{rdflib.URIRef(t1id)}`, `{rdflib.URIRef(t2id)}` des îlots par `f<{tnid}>`, `f<{t1id}>`, `f<{t2id}>` (aucun `@base` en portée, l'équivalence est vérifiée) ?",
+      "where": "translated.ldpy:50, 55, 77, 81, 95 et original.py:50, 53, 73, 77, 89",
+      "if_yes": "needs-work : remplacer ces enveloppes (déjà vérifié vert) ; la paire n'a alors plus de défaut",
+      "if_no": "approuver en l'état, en acceptant que ces `URIRef(...)` soient une enveloppe que la notation évitait"
+    }
+  ],
+  "evidence": "rdfeval check OK. Sur copie : `sed` des cinq `{rdflib.URIRef(x)}` en `f<{x}>` -> OK (équivalent) ; en `<{x}>` -> erreur de transpilation (il faut le f). Quinze mutants sur les îlots (type changé, p/q inversés, t1id/t2id échangés, ^^ActivePower/ReactivePower échangés, `{p2}`->`{p1}`, `{tnid}`->`{cn}`, îlot supprimé, bloc de génération supprimé…) tous ROUGES : l'oracle (graphe relu du .ttl) est solide ; seule la suppression de `serializer.class_order` reste verte, ce qui est normal (ordre de sérialisation, pas du RDF). Piège `Literal(n, datatype=…)` non-chaîne (INSTRUCTIONS §2) : valeurs pandas/numpy testées dans une copie du pilote avec colonnes entières (np.int64), 1e-5, 1e22, -0.0, nan, inf -> toujours OK, donc `{vmag}^^cim:Voltage` est équivalent. Dépôt (corpus/repos/temcdrm__emthub, ic_to_rdf.py:14-105) : région identique ; un seul appelant (ligne 120) qui passe un `case` avec fichiers matpower. Shim otsrdflib.py : l'en-tête dit « real upstream logic » alors que meta.json le dit « reimplementation » et le paquet n'est pas dans le clone — réécriture invérifiable, mais identique des deux côtés et sans effet sur l'isomorphisme du graphe (aucun triplet perdu, ne trie que l'ordre) : je ne lève pas `shim-invents-logic`, à corriger seulement dans la note. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

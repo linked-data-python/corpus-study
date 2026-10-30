@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : le calcul du datatype et `Literal(self.obj, datatype=datatype)` sont gardés tels quels, seul `graph.add((…))` devient `+{ {subj} {getattr(…)} {literal} }` ; l'interpolation d'un terme déjà construit est la bonne construction ici.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Dépôt (corpus/repos/tableau__altimeter, altimeter/core/graph/links.py:60-77) : corps de to_rdf identique à original.py ; SCALAR_TYPES = (bool, int, float, str, datetime) (graph/__init__.py:3), tous passent par Literal(...) inchangé donc sans risque de coercition différente. Mutants sur copie de translated.ldpy : `{literal}` -> `{self.obj}` ROUGE (grand entier), `datatype=datatype` -> `datatype=None` ROUGE, ajout supprimé (`pass`) ROUGE, prédicat `{getattr(…)}` remplacé par un prédicat fixe ROUGE ; seul `> 2147483647` -> `>= 2147483647` reste vert (la borne n'est pas dans le pilote), mais c'est du Python recopié tel quel et non un îlot, donc pas de quoi baisser la confiance. Le `Literal(...)` ne peut pas devenir `{self.obj}^^xsd:nonNegativeInteger` (datatype conditionnel) : pas de `wrong-construction`. Article : non, c'est un simple `add` à un triplet, sans gain de lecture. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

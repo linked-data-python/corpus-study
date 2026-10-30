@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : `rdflib.Literal(elem.text)` -> `f{elem.text}` sur une `str`, le seul remplacement du fragment, l'oracle module-state compare bien les valeurs du dict.",
+  "questions": [],
+  "evidence": "rdfeval check OK (méthode module-state). Mutants sur copie de translated.ldpy : `f{elem.tag}` ROUGE (valeurs de expected_data différentes), `f{elem.text}@en` ROUGE, `^^<…>` ajouté ROUGE, `for elem in []` ROUGE : l'oracle compare bien le dict (liste de Literal, avec datatype et langue). Dépôt (corpus/repos/tetherless-world__materialsmine, tests/ingest_tester.py:232-233) : la ligne est identique ; `root.iter(\".//Viscoelastic//MeasurementMode\")` est un chemin XPath donné à `.iter()` qui attend un tag, donc ne trouve jamais rien dans un vrai XML (bogue du dépôt, gardé tel quel) : le cas `elem.text is None` (f{None} -> Literal(\"None\")) n'est donc pas atteignable par le dépôt. Le pilote contourne par un arbre ET.Element à tags contenant « / » : choix déclaré et sans logique ajoutée. Article : non, une seule ligne et la région est du code mort dans le dépôt. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
