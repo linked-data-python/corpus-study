@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt",
+    "wrong-construction"
+  ],
+  "summary": "Les deux Namespace sont hissés hors de setUp en @prefix ... as de niveau module alors que la même forme fonctionne dans le corps de la fonction ; les préfixes base:/opcuans: ne servent jamais lexicalement, le @prefix ne fait que refabriquer l'objet Namespace (deux lignes de plus, aucun gain), donc ni `directly-expressible` ni crédit d'un @prefix.",
+  "questions": [
+    {
+      "question": "La paire est-elle bien une restructuration (Namespace construits une fois à l'import et non à chaque setUp, plus deux affectations `self.basens = BASENS`) plutôt qu'une traduction directe, au point de la reclasser `minor-restructuring` ?",
+      "where": "translated.ldpy:7-9 et 13-14 contre original.py:8-9",
+      "if_yes": "Reclasser minor-restructuring ; idéalement placer les deux @prefix ... as dans setUp (vérifié équivalent), ce qui rétablit l'ordre d'origine.",
+      "if_no": "Garder directly-expressible en acceptant que le hissage soit voulu pour que les autres méthodes du TestCase écrivent basens:terme (mais elles n'appartiennent pas à la région)."
+    },
+    {
+      "question": "Le @prefix doit-il être crédité sur cette paire alors que le code n'emploie ni `base:` ni `opcuans:` comme noms préfixés et ne s'en sert que pour obtenir un objet Namespace (sans aucun gain de notation : 2 lignes -> 4) ?",
+      "where": "translated.ldpy:9-10 et original.py:8-9",
+      "if_yes": "Garder le crédit @prefix ... as, en notant que le gain est nul ou négatif sur ce motif.",
+      "if_no": "Compter la région comme non couverte (Namespace-objet seul, Namespace(...) reste la forme la plus spécifique) : résultat pour l'étude, pas un échec."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Transpilation : `__namespaces__['base'] = BASENS = _ldpy_.Namespace('http://base/')` au niveau module, la classe est rdflib.Namespace (type vérifié, valeur égale, .foo et ['x'] identiques), donc pas d'écart de valeur ; le pilote compare par str.__eq__ (le type n'est donc pas observé, mais je l'ai vérifié à part). Variante dans une copie : les deux @prefix ... as BASENS/OPCUANS déplacés dans le corps de setUp, `self.basens = BASENS` conservé -> check OK, donc le hissage au niveau module n'est pas nécessaire, contrairement à ce que dit le commentaire (« long after this block » : l'objet est stocké sur self, la liaison locale suffit). Dépôt d'origine : test_libshacl.py:1021 est le setUp de la région ; les usages self.basens['...'] (lignes 273-317) sont dans d'autres classes ou méthodes, hors région. Le dossier contient aussi la région sœur test_libutils_setUp qui a la même forme (non triée ici). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

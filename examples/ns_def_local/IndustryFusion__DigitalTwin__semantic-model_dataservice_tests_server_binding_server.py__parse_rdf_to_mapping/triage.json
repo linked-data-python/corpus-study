@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (m{ } séparés pour g.value, pas de fusion de jointure, @prefix base: f<{base_ns}>), mais le pilote n'exerce ni la branche opcua:String ni la branche par défaut (avertissement + str) : un mutant sur ces deux branches reste vert.",
+  "questions": [
+    {
+      "question": "Les branches `elif datatype_uri == opcua:String` et `else:` (translated.ldpy:56-60, original.py:63-70) renvoient la classe `str` que materialise() ne sait pas comparer ; acceptez-vous que ces deux branches ne soient pas exercées (relu à la main : la transpilation donne bien URIRef('http://opcfoundation.org/UA/String') et le else est identique au texte d'origine) ?",
+      "where": "translated.ldpy:56-60 et original.py:63-70 ; fixture.ttl (en-tête)",
+      "if_yes": "Approuver : le risque se réduit à une faute de frappe dans un seul terme, relu et correct ; la paire peut entrer dans les chiffres.",
+      "if_no": "needs-work : faire comparer au pilote les types rendus (par exemple en remplaçant `str` par son nom dans le résultat côté harnais, ou en ajoutant un cas String et un cas inconnu avec une normalisation de `type`)."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Le dépôt d'origine (binding_server.py:141-200, seul appelant ligne 205 avec base_ns issu d'argparse, donc str) passe bien une str : f<{base_ns}> équivaut à Namespace(base_ns), pas de @base en portée. Mutations dans une copie : motif de type élargi (rdf:type ?t) -> FAIL ; sujet de bindsMapDatatype élargi (?x) -> FAIL ; îlot du connecteur remplacé par None -> FAIL ; `and` -> `or` dans la garde -> FAIL ; préfixe base: altéré -> FAIL ; opcua:String -> opcua:Strin -> OK (vert à tort) ; `datatype = str` du else -> int, et branche String -> float -> OK (verts à tort). Ces survivants sont des termes de branches non exercées, pas des îlots supprimés ni élargis, d'où medium et non high. Extension du pilote dans une copie : sujet à deux connecteurs et deux datatypes, plus appel avec binding_ns=None et préfixes binding:/uaentity: dans la fixture (branche de repli de g.namespace_manager.store.namespace) -> OK, donc la cardinalité de g.value / .first() et la branche de repli concordent. @graph g + @prefix base: lie en plus le préfixe base: sur g (bind_prefix dans la transpilation), invisible ici car g ne sort pas. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
