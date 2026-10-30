@@ -42,5 +42,16 @@
     "method": "entry:get_type_assertions",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Deux voisins de obj1 (predicate rdf:type, subject obj1) qui ne sont pas typés rdf:Statement : ta5 sans type, ta6 typé ex:NotAStatement ; docstring qui dit quelle ligne du motif exclut chaque voisin.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "suppression de `?typeAssertion a rdf:Statement .`",
+      "suppression de `?typeAssertion rdf:predicate rdf:type .`",
+      "`?typeAssertion rdf:subject {typed_object}` remplacé par une variable libre"
+    ],
+    "remaining": "wrong-construction (s{ } ou m{ } pour un BGP pur) reste à juger. La note de traduction attribue le préfixe rdf: implicite à Graph.query() ; selon le trieur c'est le prologue par défaut de prepareQuery (compilé au chargement du module, sans graphe) : note non corrigée ici, la conclusion (@prefix rdf: nécessaire côté ldpy) reste vraie."
   }
 }

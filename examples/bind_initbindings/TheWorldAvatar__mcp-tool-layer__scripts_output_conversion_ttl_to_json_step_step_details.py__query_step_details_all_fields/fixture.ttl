@@ -31,3 +31,13 @@ ex:other_step a ontosyn:HeatChill ;
     rdfs:label "Other Step" ;
     ex:hasReagent ex:reagentA ;
     ex:hasDuration "5 min" .
+
+# ex:step3 isolates the second query (the step's own rdfs:label): its only
+# rdfs:label is an IRI, so the first query (q_props) reads it with an empty
+# value (no label on that IRI), and only the label query returns the IRI's
+# text for the "label" key. It also carries an rdfs:comment, so a label query
+# on the wrong predicate would surface "A comment" instead.
+ex:step3 a ontosyn:Add ;
+    rdfs:label ex:labelNode ;
+    rdfs:comment "A comment" ;
+    ex:hasDuration "1 min" .

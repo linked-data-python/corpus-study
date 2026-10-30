@@ -48,5 +48,18 @@
     "method": "fixture:fixture.ttl entry:query_step_details_all_fields",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Fixture : ex:step3, dont le seul rdfs:label est une IRI (ex:labelNode, lue vide par la première requête) et qui porte un rdfs:comment ; troisième appel du pilote sur ex:step3 ; docstring qui dit pourquoi cette étape isole le second îlot.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "second îlot remplacé par `labels = []`",
+      "prédicat du second îlot rdfs:label -> rdfs:comment",
+      "sujet du second îlot remplacé par une variable libre",
+      "FILTER(?p != rdf:type) retiré",
+      "OPTIONAL rétiré"
+    ],
+    "remaining": "wrong-construction (le second îlot, BGP pur à un motif, devrait-il être m{ } ?) reste à juger ; meta.json crédite s{ } pour les deux requêtes. Le cas qui prouve le second îlot (rdfs:label à objet IRI) est atypique dans le dépôt réel, où l'étiquette est un littéral déjà ramassé par la première requête."
   }
 }

@@ -20,6 +20,24 @@ distinct OPTIONAL branches -- dcterms:description, rdfs:comment,
 skos:definition -- plus one member with none of the three, to exercise the
 OPTIONAL's unbound/`str(None)` path), and one whose namespace has zero
 members in the same graph (the zero-solution case).
+
+`ordered=True`: the region itself sorts `elements` by IRI
+(`elements.sort(key=lambda tup: tup[0])`), so the order of the two returned
+lists is part of its meaning and is compared, not compared as a multiset
+(the harness would otherwise default to unordered for a fixture run).  Ties
+on the sort key are the several (?s, ?def) rows of one subject, whose
+relative order depends on the solution order -- it is the same on both
+sides here.
+
+The fixture also carries neighbours aimed at three things the first calls
+cannot see:
+- `ex:f` (two rdf:type triples and three definitions) and `ex:g` (two types,
+  no definition): without SELECT DISTINCT a subject typed twice would come
+  back once per type;
+- `<http://x.org/?u=http://example.org/ns#z>`, whose IRI CONTAINS the target
+  namespace without starting with it: FILTER STRSTARTS excludes it, a
+  CONTAINS would not;
+- the sort itself (`ordered=True`).
 """
 from pathlib import Path
 
@@ -41,6 +59,7 @@ VERDICT = run_pair(
     __file__,
     entry="get_target_namespace_elements",
     fixture="fixture.ttl",
+    ordered=True,
     calls=[
         call("http://example.org/ns#"),        # several solutions
         call("http://example.org/zzz#"),        # zero solutions

@@ -43,5 +43,17 @@
     "method": "fixture:fixture.ttl entry:get_target_namespace_elements",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Fixture : ex:f (deux types, trois définitions) et ex:g (deux types, sans définition) pour DISTINCT ; une IRI qui CONTIENT l'espace de noms sans le commencer pour STRSTARTS ; sujets déclarés dans le désordre ; driver : ordered=True, car la région trie elements, et docstring qui dit ce que chaque voisin exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "SELECT DISTINCT -> SELECT",
+      "FILTER STRSTARTS -> FILTER CONTAINS",
+      "elements.sort(...) supprimé",
+      "elements.sort(..., reverse=True)"
+    ],
+    "remaining": "Écart théorique sans site d'appel réel : un URIRef passé en target_namespace serait un littéral dans l'original (str.replace) mais une IRI dans la traduction ; le seul appelant du dépôt passe un str argparse."
   }
 }

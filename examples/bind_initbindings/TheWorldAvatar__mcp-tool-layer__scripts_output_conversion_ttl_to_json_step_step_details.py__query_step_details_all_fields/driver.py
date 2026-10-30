@@ -15,6 +15,15 @@ the first query and it has no `rdfs:label` of its own, so BOTH queries the
 region issues return zero rows for it (the zero-solution case). `ex:other_step`
 in the fixture carries the same predicates as `ex:step1` under a different
 subject and must not leak into either step's results.
+
+Third call: `ex:step3`, whose only `rdfs:label` is an IRI (`ex:labelNode`)
+and which also carries an `rdfs:comment`.  For ex:step1 the first query
+already collects the single literal label under the key "label", so the
+second query (the step's own label) adds nothing there; for ex:step3 the
+first query reads the IRI object as an empty value and only the second query
+puts the IRI's text under "label".  This call is what makes the second island
+visible: replacing it by `labels = []`, changing its predicate, or freeing its
+subject changes the result.
 """
 from pathlib import Path
 
@@ -36,5 +45,6 @@ VERDICT = run_pair(
     calls=[
         call("http://example.org/step1"),
         call("http://example.org/step2"),
+        call("http://example.org/step3"),
     ],
 )

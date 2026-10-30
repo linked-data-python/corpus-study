@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants sur la copie : suppression de la ligne `?typeAssertion a rdf:Statement .` -> reste VERT (weak-oracle confirmé). Suppression de la ligne rdf:predicate -> ROUGE (ta3) ; suppression de la ligne rdf:subject -> ROUGE (ta4, et zéro solution). Variante `return list(m{ ?typeAssertion a rdf:Statement . ?typeAssertion rdf:predicate rdf:type . ?typeAssertion rdf:subject {typed_object} }(g))` : check VERT. Dépôt : le seul appelant (python/tests/examples.py:496) passe `entity` issu de make_entity, un URIRef (le piège du str coercé en Literal ne se pose pas). La note de traduction attribue le préfixe rdf: implicite à « Graph.query() » ; c'est faux : _TYPE_QUERY est compilé par prepareQuery au chargement du module, sans graphe (vérifié : prepareQuery('... rdf:Statement ...') réussit seul), c'est le prologue par défaut de rdflib qui résout rdf: ; la conclusion (@prefix rdf: nécessaire côté ldpy) reste vraie. Le nom de module _TYPE_QUERY disparaît de la traduction (sans effet : seule la fonction est comparée). Article : oui comme histoire « prepareQuery module + initBindings -> un îlot, et rdf: n'est plus implicite », sous réserve des deux points ci-dessus.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (deux voisins non typés rdf:Statement) : le mutant sans la ligne `a rdf:Statement` échoue maintenant, comme ceux qui retirent rdf:predicate ou libèrent rdf:subject ; la traduction reste verte, inchangée."
 }

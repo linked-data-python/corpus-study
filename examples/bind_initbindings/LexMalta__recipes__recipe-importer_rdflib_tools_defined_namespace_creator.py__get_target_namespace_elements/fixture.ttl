@@ -10,14 +10,21 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
+# declared first and out of alphabetical order on purpose, so that the
+# solution order of the store is not already the sorted order the region
+# must produce (a missing or reversed elements.sort must show).
+# ex:g has two types and no definition: (ex:g, unbound) must still be a
+# single row.
+ex:g a ex:Thing, ex:Other .
+
+ex:c a ex:Thing ;
+    skos:definition "Def C" .
+
 ex:a a ex:Thing ;
     dcterms:description "Desc A" .
 
 ex:b a ex:Thing ;
     rdfs:comment "Comment B" .
-
-ex:c a ex:Thing ;
-    skos:definition "Def C" .
 
 # in the target namespace, typed, but no description/comment/definition:
 # the OPTIONAL leaves ?def unbound -- str(None) must survive on both sides.
@@ -32,3 +39,16 @@ other:x a other:Thing ;
 # never the subject of an `a` triple -- excluded by the `?s a ?o` pattern
 # itself, not by the namespace filter.
 ex:e dcterms:description "Should not appear (untyped)" .
+
+# neighbourhood for the SELECT DISTINCT: ex:f has three definitions across
+# the three OPTIONAL branches and two rdf:type triples, so without DISTINCT
+# the same (?s, ?def) pair would come back several times.
+ex:f a ex:Thing, ex:Other ;
+    dcterms:description "Desc F1" ;
+    rdfs:comment "Comment F2" ;
+    skos:definition "Def F3" .
+
+# neighbourhood that must NOT match: the IRI CONTAINS the target namespace
+# without starting with it (STRSTARTS rejects it, a CONTAINS would not).
+<http://x.org/?u=http://example.org/ns#z> a ex:Thing ;
+    dcterms:description "Should not appear (contains, does not start with)" .

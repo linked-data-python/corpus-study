@@ -8,6 +8,13 @@ neighbouring triples that must not match.
 
 No store promises an order over query solutions, and the region does not
 sort its own result, so `ordered=False`.
+
+Neighbours, each excluded by exactly one line of the pattern: ta3 (rdf:type
+Statement about obj1 but another predicate: excluded by the rdf:predicate
+line), ta4 (a type assertion about obj2: excluded by the bound subject),
+ta5 and ta6 (predicate rdf:type and subject obj1 but not typed
+rdf:Statement -- ta5 untyped, ta6 typed ex:NotAStatement: excluded only by
+the `?typeAssertion a rdf:Statement` line).
 """
 from rdflib import Graph, Namespace, RDF
 from rdfeval.harness import run_pair
@@ -35,6 +42,15 @@ def _graph_with_matches():
     g.add((EX.ta4, RDF.type, RDF.Statement))
     g.add((EX.ta4, RDF.predicate, RDF.type))
     g.add((EX.ta4, RDF.subject, EX.obj2))
+    # neighbourhood: a node with predicate rdf:type and subject obj1 that is
+    # NOT typed rdf:Statement (a bare reification-looking resource) -> must
+    # not match; only the `?typeAssertion a rdf:Statement` line excludes it.
+    g.add((EX.ta5, RDF.predicate, RDF.type))
+    g.add((EX.ta5, RDF.subject, EX.obj1))
+    # same, typed as something else than rdf:Statement.
+    g.add((EX.ta6, RDF.type, EX.NotAStatement))
+    g.add((EX.ta6, RDF.predicate, RDF.type))
+    g.add((EX.ta6, RDF.subject, EX.obj1))
     return g
 
 
