@@ -40,5 +40,22 @@
     "method": "entry:filter_graph_by_subjects",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet {s} -> []",
+      "objet {o} -> []",
+      "prédicat {p} -> a",
+      "îlot +{ } supprimé (pass)",
+      "îlot vidé +{ }",
+      "garde str(s) in subjects -> True",
+      "garde -> False",
+      "garde -> véracité `if s`",
+      "@graph new_graph -> @graph graph (écriture dans l'entrée)"
+    ],
+    "remaining": "Liaisons vérifiées : new_graph est un Graph() frais dont rdf: est déjà la liaison par défaut ; @graph n'y change rien (namespaces() identiques), et l'appelant du dépôt (__rdf_to_wide_csv, transform.py:10-54) ne lit que les triplets et str(o)."
   }
 }

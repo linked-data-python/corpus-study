@@ -51,5 +51,20 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "21 termes interpolés des îlots élargi en [] (sujet et objet de chaque îlot, prefLabel/inScheme du bloc ;)",
+      "chacun des 11 îlots supprimé (pass)",
+      "second @graph g supprimé (écritures dans le graphe orphelin)",
+      "garde notation != \"\" -> True / -> False",
+      "garde broader_concept -> True / -> False",
+      "garde prefLabel -> False / -> True",
+      "garde hiddenLabel -> False"
+    ],
+    "remaining": "Trois mutants équivalents, non comptés : `notation != \"\"` -> véracité (CharField sans null=True, models.py:746-752 : toujours une str) ; `broader_concept` -> `is not None` (TreeForeignKey null=True, models.py:753-760 : None ou une instance, toujours vraie) ; garde altLabel -> False (la branche else écrit le même skos:altLabel). Liaisons vérifiées : namespaces() identiques des deux côtés dans les deux scénarios (dc:, rdf:, skos: y sont déjà liés aux mêmes IRI par défaut), ce qui compte puisque rdf_utils.graph_construct_qs (rdf_utils.py:27-52) unit puis sérialise ces graphes."
   }
 }

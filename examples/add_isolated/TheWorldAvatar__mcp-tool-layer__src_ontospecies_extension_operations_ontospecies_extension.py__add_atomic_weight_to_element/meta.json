@@ -47,5 +47,26 @@
     "method": "entry:add_atomic_weight_to_element",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet {parent} -> []",
+      "objet {aw} -> []",
+      "objet {aw} -> {str(aw)} (littéral)",
+      "sujet {parent} -> {element_iri} (str coercée en littéral)",
+      "prédicat hasAtomicWeight -> hasAtomicWeightValue",
+      "îlot supprimé",
+      "îlot vidé",
+      "datatype xsd:float -> xsd:double",
+      "garde parent is None -> True",
+      "garde parent is None -> False",
+      "garde value == \"N/A\" -> True",
+      "garde value == \"N/A\" -> False",
+      "îlot déplacé avant le try (écrit avant la levée de float())"
+    ],
+    "remaining": "Mutant équivalent, non compté : `if parent is None` -> `if not parent` (_safe_parent rend None ou un URIRef à schéma et hôte non vides, jamais falsy). L'îlot est en suffixe d'appel (g) : aucune liaison du graphe que locked_graph relit et sérialise n'est touchée."
   }
 }

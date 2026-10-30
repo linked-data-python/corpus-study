@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : traduction fidèle d'un .add() gardé ; le pilote exerce les trois branches de la garde et le shim reprend bien namespaces.py et produce_terms du dépôt.",
   "questions": [],
   "evidence": "rdfeval check : OK (entry:translate_parent, 3 appels : html_url présent, absent, v non dict). Original identique au dépôt (swh/indexer/metadata_mapping/github.py:65-83, hors commentaire TODO final). context_shim.py comparé à swh/indexer/namespaces.py et metadata_mapping/base.py:55-65 : FORGEFED et produce_terms identiques (SPDX_LICENSES omis, inutilisé) ; Base*/JsonMapping sont des noms vides, non employés. repository est un URIRef, donc {repository} reste une IRI. Mutants sur copie, tous tués : objet {root}, îlot supprimé, garde `isinstance(..., str)` -> True (KeyError), garde `isinstance(v, dict)` retirée (AttributeError).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-30 : 3 mutants sur 10 survivaient (sujet {root} -> [] sur racine BNode seule, garde en véracité, garde en is not None) ; pilote renforcé par la forme du dépôt (racine URIRef déjà typée) et les valeurs \"\"/None/42/objet de html_url, tous tués ; traduction juste."
 }

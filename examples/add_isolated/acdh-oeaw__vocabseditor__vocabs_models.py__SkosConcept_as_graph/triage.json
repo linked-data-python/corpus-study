@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (entry:demo, 2 scénarios). Original identique au dépôt (vocabs/models.py:857-886, indentation près) ; modelprops_to_graph identique à vocabs/utils.py:85-108 ; get_subject() du dépôt rend un URIRef (donc {subj}, {main_concept_scheme} restent des IRI). Mutants sur copie, tous détectés : suppression du second `@graph g` (12 vs 7 triplets, les écritures vont dans le graphe orphelin), suppression du premier `@graph g` (erreur de transpilation), suppression du bloc `;` initial, topConceptOf->inScheme, garde notation modifiée, narrower->broader, dc:source->dc:title. Seul survivant : `if self.broader_concept` -> `is not None`, qui modifie du Python non traduit et que la stub (toujours truthy) ne peut pas distinguer d'un vrai objet Django : sans conséquence pour l'équivalence. grep : rdf: n'apparaît que dans la ligne @prefix.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-30 : 40 mutants (21 termes élargis en [], 11 îlots supprimés, second @graph g retiré, gardes forcées) tous tués par le pilote d'origine, plus 3 mutants équivalents vu les types du dépôt ; liaisons de préfixes identiques des deux côtés ; paire prouvée, rien à changer."
 }

@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : un @graph et un +{ {s} {p} {o} } qui remplacent un .add() de même portée ; seul @prefix rdf: (l.5) est inutilisé.",
   "questions": [],
   "evidence": "rdfeval check : OK (entry:filter_graph_by_subjects, 1 appel). Original identique au dépôt (src/kgpipe_tasks/transform_interop/transform.py:74-79) ; le graphe d'entrée y vient de g.parse(...), donc des BNode, littéraux typés ou à langue sont réels. Dans une copie, pilote étendu (sujet BNode, littéraux lang, xsd:integer, xsd:gYear, xsd:string, \"\", booléen, objet BNode, plus un graphe vide) : toujours OK, donc {s} {p} {o} conserve les termes tels quels. Mutants sur copie, tous tués par le pilote d'origine : `not in`, `if True`, objet {s} au lieu de {o} ; suppression de l'îlot tuée avec le pilote étendu. grep : rdf: n'apparaît que dans la ligne @prefix (déclaration morte, sans crédit indu : elle n'est pas dans `constructions`).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-30 : 9 mutants (termes élargis en [], îlot supprimé ou vidé, gardes forcées et en véracité, receveur @graph changé) tous tués par le pilote d'origine ; paire prouvée, rien à changer."
 }

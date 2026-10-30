@@ -42,5 +42,23 @@
     "method": "entry:translate_parent",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Six appels ajoutés (3 à 8) : la forme du dépôt (racine URIRef du html_url du fork, déjà typée schema:SoftwareSourceCode, comme _translate_to_graph la passe : base.py:250-252, 291, 300 et github.py:57-59) ; une racine BNode sur un graphe qui la mentionne déjà (le sujet devient observable sous isomorphisme) ; html_url valant \"\" (str falsy, écrit URIRef(\"\")), None, 42 et un objet imbriqué (ignorés).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet {root} -> [] (survivait : racine BNode seule sur graphe vide ; tué par les appels 3 et 4)",
+      "garde isinstance(v.get(\"html_url\"), str) -> véracité (survivait ; tué par les appels 5, 7, 8)",
+      "garde isinstance(v.get(\"html_url\"), str) -> is not None (survivait ; tué par les appels 7, 8)",
+      "objet {repository} -> []",
+      "prédicat -> schema:isBasedOn",
+      "objet {repository} -> {v['html_url']} (str coercée en littéral)",
+      "îlot supprimé",
+      "îlot vidé",
+      "garde -> True",
+      "garde -> False"
+    ],
+    "remaining": ""
   }
 }
