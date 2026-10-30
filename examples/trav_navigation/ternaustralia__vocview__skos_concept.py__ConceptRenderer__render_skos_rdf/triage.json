@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : traduction fidèle et pilote solide (voisin concept2, objet nœud blanc avec ses propres triplets, cas absent) ; tous les mutants structurels testés sont tués.",
+  "questions": [],
+  "evidence": "rdfeval check OK (entry:render ; l'oracle est l'isomorphisme du graphe rendu puis relu, par appel). Mutants dans une copie, tous tués (FAIL) : `if type(obj) == BNode` -> `if True` et -> `isinstance(obj, (BNode, URIRef))` (concept2, objet URI, fuit : 7 vs 10 triplets) ; sujet de la lecture externe ou de la lecture interne remplacé par un joker (le pilote lève ou diverge) ; lecture interne ou externe remplacée par [] ; `+{ {obj} {p} {o} }` -> `+{ {subj} ... }` ; (les mutants à préfixe non déclaré échouent à la transpilation et ne comptent pas). Cas ajoutés à la main dans une copie du fixture, check toujours OK : littéraux typés (xsd:integer, xsd:string, booléen), \"\" , @fr, nœud blanc imbriqué dans un nœud blanc (aucune récursion des deux côtés), nœud blanc vide. Le contexte config.py (Config.g parsé depuis fixture.ttl) ne fait que lire ; `render` est identique des deux côtés et ne rend que ce que la région produit. Dépôt d'origine : skos/concept.py:42-51 identique à original.py. Le hissage `subj = URIRef(self.uri)` est imposé par la forme du motif (3-uplet -> paires) et ne fait pas gagner de concision ; pas d'article.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction littérale équivalente (texte SPARQL identique), mais le fixture n'a aucun voisin qui contrôle l'ancre `?s rdf:type rdf:Statement` : supprimer ce motif, ou le remplacer par `?s ?q rdf:Statement`, reste vert ; DISTINCT n'est pas exercé non plus.",
+  "questions": [
+    {
+      "question": "Le fixture doit-il contenir un nœud SANS type rdf:Statement mais avec rdf:predicate/rdf:subject/rdf:object, et un nœud relié à rdf:Statement par un autre prédicat que rdf:type (ainsi que deux nœuds donnant le même triplet (sub, pred, obj), pour DISTINCT) ?",
+      "where": "sample1.turtle:10-30 (tous les nœuds à rdf:predicate sont typés rdf:Statement) ; translated.ldpy:11 et original.py:13",
+      "if_yes": "needs-work : ajouter ces voisins à sample1.turtle (la traduction est inchangée) ; avec eux, les deux mutants ci-dessous sont tués (vérifié).",
+      "if_no": "approuver : la traduction du texte de la requête est identique, mais l'ancre rdf:type rdf:Statement de la première branche n'est alors pas prouvée."
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state ; l'oracle est la valeur du dict `d` et de `res`, le fichier output.json n'est pas comparé). Texte SPARQL de la requête identique caractère par caractère entre original.py:10-17 et translated.ldpy:9-15 ; le préfixe rdf: résout bien dans s{ } sans @prefix (initNs par défaut de rdflib). Mutants dans une copie, RESTÉS OK : (a) `?s rdf:type rdf:Statement . ?s rdf:predicate ?pred` -> `?s rdf:predicate ?pred` (ancre supprimée) ; (b) -> `?s ?q rdf:Statement . ...` (prédicat élargi à une variable) ; (c) `SELECT DISTINCT` -> `SELECT` (cardinalité, aucun doublon dans le fixture). Mutants tués : FILTER supprimé ou changé, branche 1 de l'UNION supprimée, branche 2 élargie (`?s ?q ?pred`), `?s rdf:subject` et `?s rdf:object` élargis en `?s ?q ...`, objet rendu OPTIONAL. Après ajout au fixture (copie) de `_:untyped rdf:predicate ex:knows ; rdf:subject ex:carol ; rdf:object ex:dave` et de `_:other ex:kind rdf:Statement ; rdf:predicate ex:likes ; ...`, check OK et les mutants (a) et (b) sont tués. Le fixture est inventé (sample1.turtle n'est pas dans le dépôt d'origine), noté comme tel par le traducteur.",
+  "triaged_by": "sonnet-5.5"
+}

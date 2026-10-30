@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction mécanique fidèle, mais les trois gardes (stmt rdf:subject s / rdf:predicate p / rdf:object o) peuvent être supprimées ou élargies à un joker sans que le pilote ne bronche : le fixture n'a aucun voisin qui ne diffère que sur un seul des trois termes.",
+  "questions": [
+    {
+      "question": "Le fixture doit-il contenir des énoncés réifiés qui ne diffèrent de (s1, p1, o1) que par un seul terme (même s et p mais autre o ; même s et o mais autre p ; même p et o mais autre s), puisque supprimer ou élargir n'importe laquelle des trois gardes reste vert aujourd'hui ?",
+      "where": "fixture.ttl:14-45 (stmt1, stmt2, stmt3 : stmt2 diffère de stmt1 sur s, p ET o à la fois) ; translated.ldpy:37-39 et original.py:31-33",
+      "if_yes": "needs-work : ajouter au fixture trois énoncés « presque » correspondants (avec un prov:wasDerivedFrom chacun, sinon la sortie ne change pas) ; la traduction elle-même est correcte.",
+      "if_no": "approuver : la traduction est mécanique (guards `not in g` -> `not bool(m{ })`), mais le vert ne prouve alors rien sur les trois gardes."
+    }
+  ],
+  "evidence": "rdfeval check OK (entry:explain_triple). Mutants dans une copie, TOUS restés OK : suppression de chacune des trois gardes (`pass` à la place) ; objet de chaque garde remplacé par un joker `?z` (rdf:subject {s} -> rdf:subject ?z, idem predicate, object) ; prédicat de la garde remplacé par `?q` pour s, p et o ; sujet `?w` à la place de {stmt} dans la garde rdf:subject. Mutants tués (FAIL) : `rdf:type rdf:Statement` supprimé ou élargi, `prov:wasDerivedFrom` -> `?q`, jokers sur chacun des 6 îlots rule/engine/bindings/subject/predicate/object, `{prem}` -> joker, `ps and pp and po` -> `or` ou `ps and pp`, bindings remplacé par {}. Confirmation que le défaut est bien celui du fixture : dans une copie, ajout de trois énoncés (stmtA : même s et p, autre o ; stmtB : même s et o, autre p ; stmtC : même p et o, autre s) avec une dérivation chacun -> check OK, et alors suppression de chaque garde et joker sur l'objet sont TUÉS (FAIL). Reste survivant même avec ce fixture enrichi : `rdf:predicate {p}` -> `?q {p}` (il faudrait un énoncé dont p est l'objet d'un autre prédicat), mutant de moindre portée. Shim helpers.py : _parse_term identique à corpus/repos/synaptixs__ontomesh/src/materializer.py:688-696 (seul le commentaire est retiré). Cas non exercés mais sans écart par construction : cas où un même deriv a plusieurs toolkit:rule (next(g.objects) vs .first(), même premier élément dans l'ordre du store, non démontré) et objet o littéral (_parse_term sur '\"...\"').",
+  "triaged_by": "sonnet-5.5"
+}

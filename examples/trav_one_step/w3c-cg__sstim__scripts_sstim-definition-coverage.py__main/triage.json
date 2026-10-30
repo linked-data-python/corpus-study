@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence solide (données réelles, 8 mutants sur 8 tués) ; mais translated.ldpy réécrit en notation ldpy 4 lignes de contexte situées HORS de la région (skos:Concept, owl:Class, owl:ObjectProperty, owl:DatatypeProperty) et déclare @prefix owl pour elles seules, ce qui gonfle les mesures du côté ldpy alors que la note affirme que ces lignes sont « restaurées verbatim ».",
+  "questions": [
+    {
+      "question": "Les lignes 73-77 de translated.ldpy (construction de `subjects`, hors des lignes 132-173 de la région) doivent-elles être remises telles qu'en original.py (SKOS.Concept, OWL.Class, OWL.ObjectProperty, OWL.DatatypeProperty), avec retrait de `@prefix owl:` (la région n'utilise que skos: et rdfs:) ?",
+      "where": "translated.ldpy:16-18, 73-77 ; original.py:69-73 ; meta.json translation_notes[3] (« restored verbatim in original.py/translated.ldpy »)",
+      "if_yes": "needs-work : restaurer ces 4 lignes à l'identique et supprimer `@prefix owl` ; mesures recalculées (sans correction : 12 îlots dont 4 pname + 1 prefix en contexte, mesurés par rdfeval.ldpy_metrics sur le fichier entier ; ils tombent à 7, dont le `@graph`) ; corriger la note ; check reste OK.",
+      "if_no": "approuver, en acceptant que les crédits (`prefixed name`, `@prefix`) et les mesures comptent du code hors région et que la note soit rectifiée."
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state). diff original.py/translated.ldpy : en dehors des 2 îlots m{ } de la région, 4 occurrences SKOS./OWL. deviennent skos:/owl: dans `subjects` (lignes 73, 74, 77) et 3 @prefix + @graph sont ajoutés. ldpy_metrics.measure_ldpy_source(translated.ldpy) : islands=12 (prefix 3, graph-decl 1, pname 6, match 2) ; seuls 2 pname + 2 match + 2 prefix (skos, rdfs) + le @graph servent à la région. Oracle : module-state compare `checked` (1016), `definitions`, `failures` ([]), `subjects`, `labels`, `graph` ; shim = le vrai manifest et les 18 modules du dépôt (corpus/repos/w3c-cg__sstim), `_REPO` = parents[3] depuis examples/ résolu sur le clone (bon répertoire, vérifié). Mutants dans une copie (avec _REPO figé sur le clone), TOUS tués : défs -> [] ; défs avec sujet joker ; défs -> skos:scopeNote ; labels -> [] ; labels avec sujet joker ; labels réduits à rdfs:label seul ; réduits à skos:prefLabel seul ; prédicat joker ?predicate. Le cas « zéro définition » est exercé (échecs apparaissent quand l'îlot est vidé) : sur le dépôt réel les 1016 termes ont une définition, donc la branche `if not definitions` n'est atteinte par aucune des deux versions telles quelles, mais le mutant `[]` la fait basculer et diverge. Branches restates/brevity jamais prises (failures == [] des deux côtés) ; elles ne dépendent que de `definitions`/`labels`, tous deux comparés. Pas d'article : pas de gain de concision, `{predicate}` en position de prédicat n'économise rien.",
+  "triaged_by": "sonnet-5.5"
+}
