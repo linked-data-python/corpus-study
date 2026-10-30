@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien a signaler : les trois g.value(node, RDF.x) sont bien des m{ {node} rdf:x ?v }(graph).first() independants, equivalents aussi sur valeurs multiples, litteral vide et graphes a contextes.",
+  "questions": [],
+  "evidence": "rdfeval check : OK. Copie dans un dossier mktemp (supprimee). (1) Ajout au pilote d'un noeud tt:HASH avec 5 valeurs pour chacun de rdf:subject/predicate/object, et d'un objet Literal(\"\") avec sujet BNode : check OK (g.value(any=True) et .first() prennent la meme solution, aucune levee des deux cotes). (2) Sonde hors harnais sur la fonction extraite des deux cotes avec Dataset (triples dans un graphe nomme, defaut, default_union=True) et ConjunctiveGraph (nomme, defaut) : meme resultat des deux cotes dans les cinq cas (None pour Dataset/graphe nomme, tuple sinon). (3) La garde `is None` ne porte pas sur la veracite : Literal(\"\") passe pareil des deux cotes. Le pilote livre couvre deja zero solution (objet manquant) et le voisinage (autre noeud HASH, noeud hors TT_NS). Le shim shim_encoding.py ne contient que TT_NS, identique a starlight/model/encoding.py:18. Seuls les mutants de cardinalite (.first() -> .one()) survivraient au pilote livre, equivalence etablie a la main : pas de drapeau.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "`next(g.subjects(RDF.type, SWRL.Imp))` devient `m{ ... }.first()` : sur zero solution l'original leve StopIteration, la traduction rend None puis leve AssertionError ; le pilote (un seul appel, une seule regle) ne peut pas atteindre ce cas.",
+  "questions": [
+    {
+      "question": "L'original `next(g.subjects(RDF.type, SWRL.Imp))` leve StopIteration quand le graphe n'a aucun swrl:Imp, alors que `m{ ?imp rdf:type swrl:Imp }.first()` rend None et fait lever AssertionError plus bas : cette difference de levee suffit-elle a refuser la reecriture comme fidele (a reprendre en next(iter(m{ })) ) ?",
+      "where": "translated.ldpy:27 et original.py:23",
+      "if_yes": "needs-work : ecrire next(iter(m{ ?imp rdf:type swrl:Imp })) (ou equivalent levant StopIteration) et ajouter un appel zero-Imp au pilote ; sinon la paire est classee directly-expressible a tort",
+      "if_no": "approuver en notant que le cas zero Imp est inatteignable avec le vrai rules_to_graph([rule]), qui ajoute toujours un Imp (swrl2rdf_shim.py:166-170)"
+    },
+    {
+      "question": "Le pilote (un seul appel calls=[((PrefixMap(),), {})]) est-il acceptable alors que la regle est construite dans la region et que le cas zero Imp ne peut donc pas etre pousse par les arguments ?",
+      "where": "driver.py:19-23 et original.py:14-23",
+      "if_yes": "approuver (le doute est leve par mon experience sur copie, a noter)",
+      "if_no": "needs-work : faire varier le graphe produit (shim parametrable) pour exercer zero Imp, deux Imp, label absent"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copies dans un dossier mktemp (supprimees). Mutation du shim swrl2rdf_shim.py dans la copie (la ligne graph.add((imp, RDF.type, SWRL_Imp)) remplacee par pass, donc zero swrl:Imp) : check FAIL, 'call[0]: outcome differs (raised StopIteration('') vs raised AssertionError(''))' ; meme ecart si un rdfs:label \"Rule_0\" existe sans Imp (le imp=None interpole ne joue pas de joker ici : aucune correspondance). Le pilote livre reste vert car son seul appel construit toujours un Imp. Sans label ecrit : OK des deux cotes (AssertionError). Deux Imp (le second avec un autre label) : OK 3 fois ; deux rdfs:label sur l'Imp : OK. Mutant .first() -> .one() sur la lecture de l'Imp : reste vert (OK), mutant de cardinalite survivant, d'ou weak-oracle. Shim compare ligne a ligne avec swrl2rdf/{prefixmap,model,builder}.py du clone : seulement des elagages (docstring/annotations, items() raccourci), pas de logique ajoutee. Les mutants d'elargissement n'ont pas pu etre testes proprement : un seul Imp et un seul label dans le graphe.",
+  "triaged_by": "sonnet-5.5"
+}
