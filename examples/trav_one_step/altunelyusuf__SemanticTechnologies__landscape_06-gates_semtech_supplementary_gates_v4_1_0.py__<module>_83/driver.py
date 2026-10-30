@@ -12,6 +12,15 @@ lists/sets of RDF terms and strings, so they are compared directly. Checked
 by deliberately mistranslating the m{ } pattern for `ks` during review: the
 verdict failed on `bad`, `ks` and stdout together, confirming the comparison
 is load-bearing, not vacuous.
+
+`bad` collects every instance, so one fixture serves every case: each
+instance decides one condition of the gate on its own (repair of
+2026-10-30, fixture.ttl inst5..inst11).  inst5 has two notes (keeping only
+the first, or testing `len(notes) < 1`, would let it pass); inst6 one kind
+and a mismatched note (only the third condition fails); inst7 a kind and
+zero notes; inst8/inst9 notes that match as `@en` and `^^xsd:string`
+literals, with a blank-node and an integer provenance; inst10 the falsy
+note ""; inst11 kind and note under neighbour predicates.
 """
 from rdfeval.harness import run_pair
 

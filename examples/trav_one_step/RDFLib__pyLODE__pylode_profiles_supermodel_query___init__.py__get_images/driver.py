@@ -14,6 +14,21 @@ carries ``ex:neighbour``'s image, which must never appear in either result.
 
 The region itself calls ``sorted(...)`` on its result, so order is part of
 its meaning: ``ordered=True``.
+
+Four more calls (repair of 2026-10-30), one small subject each, so that
+every single-value read decides something visible -- a shared subject
+would let a "first found" read stop on the same node every time:
+
+- ``ex:thing-bare``: an image with none of the six properties.  Each
+  ``graph.value`` gives None; ``.first()`` must too (``.one()`` raises).
+- ``ex:thing-double``: two values for each of the six properties, plus a
+  description.  ``graph.value`` keeps the first stored triple and
+  ``.first()`` must keep the same (``.one()`` raises); the description is
+  the only input of ``get_descriptions``.
+- ``ex:thing-falsy``: ``""``, ``""^^xsd:string`` and ``0``, returned as terms.
+- ``ex:thing-unsorted``: five images stored against the sort key (the
+  region's positional call puts the caption in ``.order``), so dropping
+  ``sorted`` shows; two identical images, so dropping ``set`` shows.
 """
 from pathlib import Path
 
@@ -25,6 +40,8 @@ _FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
 
 _WITH_IMAGES = URIRef("http://example.org/thing-with-images")
 _WITHOUT_IMAGES = URIRef("http://example.org/thing-without-images")
+_CASES = [URIRef("http://example.org/" + n) for n in
+          ("thing-bare", "thing-double", "thing-falsy", "thing-unsorted")]
 
 VERDICT = run_pair(
     __file__,
@@ -33,6 +50,9 @@ VERDICT = run_pair(
     calls=[
         lambda: ((_WITH_IMAGES, fixture_graph(_FIXTURE)), {}),
         lambda: ((_WITHOUT_IMAGES, fixture_graph(_FIXTURE)), {}),
+    ] + [
+        (lambda iri=iri: ((iri, fixture_graph(_FIXTURE)), {}))
+        for iri in _CASES
     ],
     ordered=True,
 )

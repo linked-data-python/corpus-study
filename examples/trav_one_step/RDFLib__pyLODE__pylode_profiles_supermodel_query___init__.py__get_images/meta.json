@@ -45,5 +45,19 @@
     "method": "fixture:fixture.ttl entry:get_images",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "quatre appels ajoutés, un petit sujet par cas dans fixture.ttl : ex:thing-bare (image sans aucune des six propriétés : zéro solution pour chaque lecture à valeur unique), ex:thing-double (deux valeurs pour chacune des six propriétés, plus une sdo:description, seule entrée de get_descriptions), ex:thing-falsy (\"\", \"\"^^xsd:string, 0), ex:thing-unsorted (cinq images stockées à rebours de la clé de tri, qui est la légende par l'appel positionnel, et deux images identiques pour set()).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      ".first() -> .one() sur chacune des six lectures (6 mutants)",
+      "chacune des six lectures prend la dernière valeur au lieu de la première (6 mutants)",
+      "sorted(...) retiré",
+      "set(...) retiré",
+      "description = None",
+      "image_ids = []"
+    ],
+    "remaining": ""
   }
 }

@@ -45,5 +45,20 @@
     "method": "entry:_label_for",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "neuf appels ajoutés, un sujet chacun, construits comme aux trois sites d'appel du dépôt (sujet URIRef, uri_str = str(subj)) : labels falsy \"\", 0 et \"false\"^^xsd:boolean, deux labels dont le premier stocké est \"\" (puis l'inverse), label @fr, label IRI, URI sans label à fragment '#' et à '/' final.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if val: -> if val is not None:",
+      ".first() -> .one()",
+      "dernière valeur au lieu de la première",
+      "première valeur vraie au lieu de la première",
+      "next((o for s, o in m{ ?s rdfs:label ?o }(g)), None) (sujet élargi, forme gardée)",
+      "next((o for p, o in m{ {subject} ?p ?o }(g)), None) (prédicat élargi, forme gardée)",
+      "val = None"
+    ],
+    "remaining": "Le mutant .first() or None reste vert et est équivalent (la garde if val: traite déjà tout terme falsy comme absent)."
   }
 }

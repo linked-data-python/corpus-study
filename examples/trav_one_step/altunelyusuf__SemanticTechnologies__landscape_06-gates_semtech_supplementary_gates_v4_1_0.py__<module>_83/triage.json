@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK (module-state). Shim semtech_context.py : 14 clés égales à KIND_DEFNS du dépôt (liste vs dict, itération identique). Région = lignes du dépôt ; ab dans le dépôt est le TTL semtech_abox_v4_1_0.ttl, qui existe : en le substituant au fixture dans une copie, check OK, 129 instances, bad=[]. Mutants tués : suppression de chacun des 3 îlots, sujet libre, prédicat joker/échangé, ?s a... élargi (inst4 fuit), sem:{k}, 'if True', len(ks)<1. SURVIVANTS : notes = list(m{...})[:1] et list(set(...)) (OK) ; len(notes) != 1 -> < 1 (OK, branche Python jamais exercée). Cas à la main (mêmes résultats des deux côtés) : sujet BNode, objet BNode du joker [], deux notes, plusieurs hasSourceProvenance (set), graphe vide, note typée/langue, type Literal. Le joker [] en position objet remplace bien None. sem:Kind{k} testé : check OK. Peut illustrer l'article APRÈS correction de l'enveloppe : 3 lectures d'un pas propres, joker [] contre None, vérifié sur données réelles ; pas de gain de concision.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (instance à deux notes, note discordante, sans note, notes @en/^^xsd:string, note \"\", prédicats voisins) : les deux survivants cités ([:1], < 1) sont tués avec huit autres mutants ; check OK, traduction juste ; wrong-construction laissé au jugement."
 }

@@ -50,5 +50,23 @@
     "names_only_original": [
       "SEM"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl : sept instances ajoutées, chacune décidant seule une condition de la porte (bad les collecte toutes) — inst5 un kind et deux notes, inst6 une note qui ne correspond pas à son kind, inst7 un kind sans note, inst8/inst9 des notes @en et ^^xsd:string qui correspondent (provenance BNode et littéral entier), inst10 la note falsy \"\", inst11 kind et note sous des prédicats voisins ; docstring du pilote mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "notes = list(m{ … })[:1]",
+      "len(notes) != 1 -> len(notes) < 1",
+      "notes = []",
+      "{i} sem:instanceKindNote ?n -> {i} ?p ?n",
+      "{i} rdf:type ?t -> {i} ?p ?t",
+      "{i} rdf:type ?t -> ?i rdf:type ?t",
+      "insts = {s for s, p in m{ ?s ?p [] }}",
+      "troisième condition (note contre kind) retirée",
+      "ks = [...][:1]",
+      "sem:{f\"Kind{k}\"} -> sem:{k}"
+    ],
+    "remaining": "Le mutant notes = list(set(m{ … })) reste vert et est équivalent (les objets d'un graphe pour un sujet et un prédicat sont distincts). Le drapeau wrong-construction (sem:{f\"Kind{k}\"} contre sem:Kind{k}) est un jugement, non traité."
   }
 }

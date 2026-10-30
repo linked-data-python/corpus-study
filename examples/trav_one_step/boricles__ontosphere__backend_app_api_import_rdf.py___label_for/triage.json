@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Appelants du dépôt (import_rdf.py:142,162,233) : sujet URIRef (les BNode sont écartés avant l'appel). Essais à la main sur les deux versions, tous identiques : label \"\", label 0, label @fr, deux labels dont le premier est \"\", label objet IRI, sujet sans label, sujet BNode avec label, 5 labels insérés en ordre inverse (même premier). Mutants sur copie : {subject}->?s FAIL, rdfs:label->rdfs:comment FAIL ; `if val:`->`if val is not None:` reste vert (aucun label falsy dans la fixture) ; `or None` vert (équivalent).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (labels \"\", 0, false, premier label vide puis texte, @fr, IRI, fragments) : le mutant if val is not None est tué, avec .one(), choix d'une autre valeur et élargissements ; check OK, traduction juste."
 }

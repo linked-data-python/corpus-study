@@ -36,3 +36,46 @@ ex:inst3 sem:hasSourceProvenance ex:source3 ;
 # leaked in anyway, it would show up as an extra, wrong entry in `bad`.
 ex:inst4 a sem:KindPlatform ;
     sem:instanceKindNote "WRONG" .
+
+# --- added by the repair of 2026-10-30.  `bad` collects every instance, so
+# each instance below decides one condition of the gate on its own.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# inst5: one kind, TWO notes (both matching) — len(notes) != 1 fails the
+# gate; keeping only the first note, or testing len(notes) < 1, would pass it.
+ex:inst5 sem:hasSourceProvenance ex:source5 ;
+    a sem:KindLibrary ;
+    sem:instanceKindNote "Library", "Library"@en .
+
+# inst6: one kind, one note that does NOT match it — only the third
+# condition (note text against the kind's local name) fails the gate.
+ex:inst6 sem:hasSourceProvenance ex:source6 ;
+    a sem:KindFramework ;
+    sem:instanceKindNote "Library" .
+
+# inst7: one kind, zero notes — the zero-solution case of the
+# instanceKindNote read; fails the gate before notes[0] is reached.
+ex:inst7 sem:hasSourceProvenance ex:source7 ;
+    a sem:KindMethod .
+
+# inst8 and inst9: one kind and one note whose TEXT matches, carried as a
+# language-tagged and as an xsd:string-typed literal — str() makes both pass.
+# inst8's provenance is a blank node, inst9's an integer literal: any object
+# counts for the hasSourceProvenance wildcard.
+ex:inst8 sem:hasSourceProvenance [ sem:label "anonymous source" ] ;
+    a sem:KindStandard ;
+    sem:instanceKindNote "Standard"@en .
+ex:inst9 sem:hasSourceProvenance 0 ;
+    a sem:KindTrend ;
+    sem:instanceKindNote "Trend"^^xsd:string .
+
+# inst10: one kind and the falsy note "" — fails on the third condition.
+ex:inst10 sem:hasSourceProvenance ex:source10 ;
+    a sem:KindCase ;
+    sem:instanceKindNote "" .
+
+# inst11: the note sits under a neighbour predicate and the kind under a
+# neighbour of rdf:type: zero kinds, zero notes for the region — fails.
+ex:inst11 sem:hasSourceProvenance ex:source11 ;
+    sem:kind sem:KindTool ;
+    sem:otherNote "Tool" .

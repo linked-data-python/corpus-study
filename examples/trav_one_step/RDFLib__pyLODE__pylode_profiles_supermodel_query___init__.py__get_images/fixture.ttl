@@ -45,3 +45,49 @@ ex:image-3
     a sdo:ImageObject ;
     sdo:name "Unrelated neighbour image" ;
     sh:order 0 .
+
+# --- added by the repair of 2026-10-30: one small subject per case, so that
+# each of the six single-value reads decides something the oracle sees.
+
+# zero solution for every per-image read: graph.value gives None six times
+# (and __post_init__ turns name/order None into ""/999999); .first() must
+# give None too, where .one() would raise.
+ex:thing-bare sdo:image ex:image-bare .
+ex:image-bare a sdo:ImageObject .
+
+# two values for every per-image read, plus a description (the only
+# input of get_descriptions): graph.value keeps the first triple stored,
+# .first() must keep the same one, where .one() would raise.
+ex:thing-double sdo:image ex:image-double .
+ex:image-double
+    sdo:name "Name A", "Name B"@en ;
+    sdo:description "Described image." ;
+    sdo:encodingFormat "image/png", "image/svg+xml" ;
+    dcterms:source <https://example.org/source-a>, <https://example.org/source-b> ;
+    sdo:caption "Caption A"@en, "Caption B"@fr ;
+    sdo:contentUrl "https://example.org/a.png"^^xsd:anyURI, <https://example.org/b.png> ;
+    sh:order 3, 4 .
+
+# falsy literals ("" and 0) and a typed-versus-plain pair: no truthiness in
+# the region, so they must come back as the terms themselves.
+ex:thing-falsy sdo:image ex:image-falsy .
+ex:image-falsy
+    sdo:name "" ;
+    sdo:encodingFormat ""^^xsd:string ;
+    sdo:caption "" ;
+    sdo:contentUrl "" ;
+    sh:order 0 .
+
+# sort and de-duplication: five images stored in DESCENDING order of the
+# sort key (the region's positional call puts the caption into .order), so
+# that dropping sorted() changes the result; image-dup-1 and image-dup-2
+# carry identical properties, so set() must keep one of them.
+ex:thing-unsorted sdo:image ex:image-e, ex:image-d, ex:image-c, ex:image-b,
+    ex:image-a, ex:image-dup-1, ex:image-dup-2 .
+ex:image-e sdo:caption "E" ; sdo:contentUrl "https://example.org/e.png" .
+ex:image-d sdo:caption "D" ; sdo:contentUrl "https://example.org/d.png" .
+ex:image-c sdo:caption "C" ; sdo:contentUrl "https://example.org/c.png" .
+ex:image-b sdo:caption "B" ; sdo:contentUrl "https://example.org/b.png" .
+ex:image-a sdo:caption "A" ; sdo:contentUrl "https://example.org/a.png" .
+ex:image-dup-1 sdo:caption "Dup" ; sdo:contentUrl "https://example.org/dup.png" .
+ex:image-dup-2 sdo:caption "Dup" ; sdo:contentUrl "https://example.org/dup.png" .

@@ -11,3 +11,17 @@ ex:withLabel rdfs:label "First Label", "Second Label" .
 ex:withoutLabel rdfs:comment "not a label" .
 
 ex:neighbour rdfs:label "Someone else's label" .
+
+# --- added by the repair of 2026-10-30: one subject per way a label can be
+# falsy for the region's `if val:` guard, or decide which value is "the" one.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:emptyLabel rdfs:label "" .                       # falsy plain literal
+ex:zeroLabel rdfs:label 0 .                         # falsy typed literal
+ex:falseLabel rdfs:label "false"^^xsd:boolean .     # falsy typed literal
+ex:emptyThenText rdfs:label "", "Text after empty" .  # first stored is ""
+ex:textThenEmpty rdfs:label "Text before empty", "" . # first stored is text
+ex:frenchLabel rdfs:label "Étiquette"@fr .          # language-tagged
+ex:iriLabel rdfs:label <http://example.org/label-as-iri> .  # IRI object
+<http://example.org/ns#hashFragment> rdfs:comment "no label, '#' fragment" .
+<http://example.org/trailing/> rdfs:comment "no label, empty fragment" .
