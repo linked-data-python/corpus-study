@@ -43,5 +43,18 @@
     "method": "entry:get_nodeshapes",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Quatre appels ajoutés : prop3 (deux formes dont l'ordre des étiquettes « Zeta »/« Alpha » est l'inverse de l'ordre de stockage et des IRI, fixture.ttl), « bn1 » (branche nœud blanc, un BNode ajouté à la main au graphe car Turtle renomme ses nœuds blancs) et « bn2 » (nœud blanc à deux formes, tri sur la branche BNode) ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "prop = BNode(self.iri) -> URIRef(self.iri) (appels bn1, bn2)",
+      "prop = URIRef(self.iri) -> BNode(self.iri) (prop1, otherProp, prop3...)",
+      "shapes.sort(...) -> pass (appel prop3)",
+      "key=lambda s: s.label -> key=lambda s: s.iri (appel prop3)",
+      "tri avec reverse=True"
+    ],
+    "remaining": "Question 2 du trieur (classification : la traduction réécrit le texte de SHAPE_QUERY, hissé hors région, en s{ } ; directly-expressible ou minor-restructuring) non traitée : jugement."
   }
 }

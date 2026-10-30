@@ -1,0 +1,66 @@
+# Miniature stand-in for https://open223.info/223p.ttl, used by driver.py so
+# that the pair no longer depends on a live network fetch. It reproduces only
+# the structure get_possible_properties walks: rdfs:subClassOf chains, SHACL
+# node shapes reaching a class through sh:targetClass (UNION branch 1) or by
+# being the class itself (UNION branch 2), sh:property / sh:path, and paths
+# that are blank nodes (to be filtered out).
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix s223: <http://data.ashrae.org/standard223#> .
+
+# --- a three-level chain: SubZone -> Zone -> Concept -> Root ---------------
+s223:Root a owl:Class .
+s223:Concept a owl:Class ; rdfs:subClassOf s223:Root .
+s223:Zone a owl:Class ; rdfs:subClassOf s223:Concept .
+s223:SubZone a owl:Class ; rdfs:subClassOf s223:Zone .
+
+# branch 1 only, two hops above Zone: a shape that targets Root
+s223:RootShape a sh:NodeShape ;
+    sh:targetClass s223:Root ;
+    sh:property [ sh:path s223:hasRootProperty ] .
+
+# branch 2 only, one hop above Zone: the class IS its own node shape
+s223:Concept a sh:NodeShape ;
+    sh:property [ sh:path s223:hasConceptProperty ] .
+
+# both branches on the queried class itself: a targeting shape, with a
+# property whose path is a blank node (filtered out) and a path that the
+# targeting shape and the class-as-shape both state (counted once)
+s223:ZoneShape a sh:NodeShape ;
+    sh:targetClass s223:Zone ;
+    sh:property [ sh:path s223:contains ] ;
+    sh:property [ sh:path s223:hasZoneProperty ] ;
+    sh:property [ sh:path [ sh:inverseOf s223:isContainedIn ] ] .
+s223:Zone a sh:NodeShape ;
+    sh:property [ sh:path s223:hasZoneProperty ] ;
+    sh:property [ sh:path s223:zoneAsShapeOnly ] .
+
+# below the queried class: must NOT appear for Zone (only for SubZone)
+s223:SubZoneShape a sh:NodeShape ;
+    sh:targetClass s223:SubZone ;
+    sh:property [ sh:path s223:hasSubZoneProperty ] .
+
+# --- a class reached by branch 1 ONLY (no node-shape class, no parent) ------
+s223:Sensor a owl:Class .
+s223:SensorShape a sh:NodeShape ;
+    sh:targetClass s223:Sensor ;
+    sh:property [ sh:path s223:observes ] ;
+    sh:property [ sh:path s223:hasUnit ] .
+
+# --- a class reached by branch 2 ONLY (the class is its own node shape) -----
+s223:Connection a owl:Class , sh:NodeShape ;
+    sh:property [ sh:path s223:cnx ] ;
+    sh:property [ sh:path s223:connectsFrom ] .
+
+# --- a class with no shape at all, and a shape with no sh:property ----------
+s223:Bare a owl:Class .
+s223:EmptyShape a sh:NodeShape ; sh:targetClass s223:Empty .
+s223:Empty a owl:Class .
+
+# --- a neighbour that must not match anything above -------------------------
+s223:Pump a owl:Class ;
+    rdfs:subClassOf s223:Root .
+s223:PumpShape a sh:NodeShape ;
+    sh:targetClass s223:Pump ;
+    sh:property [ sh:path s223:hasPumpProperty ] .

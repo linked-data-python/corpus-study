@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (réseau joignable, ~1 s). Mutants dans un mktemp -d, SPARQL de la traduction : retirer FILTER(!isBlank(?path)) -> FAIL ; `rdfs:subClassOf*` -> `+` -> FAIL ; mais `FILTER(false)` ajouté dans la branche `{ ?shape sh:targetClass ?fromp }` -> OK (vert) et `FILTER(false)` ajouté dans la branche `{ ?fromp a sh:NodeShape . BIND(...) }` -> OK (vert) : chaque branche du UNION est invisible prise seule avec \"Zone\". Le transpileur produit `?__i0 rdfs:subClassOf* ?fromp` + initBinding via S223[term], même mécanisme que l'original, donc l'équivalence logique tient. Confirmé : `s223:{term}` est refusé dans s{ } (« Expected SelectQuery, found 's223' »), l'astuce `@prefix … as S223` + `{S223[term]}` est donc justifiée. Shim FastMCP : passe-plat inoffensif. Le dépôt appelle bien la fonction avec une str (term: str), `S223[term]` est le même objet qu'au départ.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote est hermétique (fixture local ontology_fixture.ttl substitué à l'URL open223.info, bascule RDFEVAL_LIVE_223P=1 vers le réseau) et chaque branche du UNION a son appel : les mutants « branche morte », « sans FILTER isBlank », « subClassOf+ / ? », « sens inversé » et « list au lieu de set » échouent ; la traduction n'a pas changé."
 }

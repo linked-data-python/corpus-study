@@ -25,6 +25,17 @@ CALL_2 -- only `path` set (the one required field), every optional field at
 its dataclass default (None / empty list): every guarded branch is skipped,
 so only the unconditional `sh:path` triple is written -- the zero-optional
 edge.
+
+CALL_3 -- the falsy values, which the first two calls never reach: the
+region guards `min_count`, `max_count`, `order`, `min_inclusive` and
+`max_inclusive` with `is not None`, and `node_class`, `datatype`,
+`node_kind`, `name`, `description`, `in_values` and `pattern` with plain
+truthiness. Here min_count = max_count = order = 0 must be WRITTEN (as
+Literal(0)), the empty-string name / description / pattern and the empty
+URIRef("") node_class / datatype / node_kind must be SKIPPED, and the
+Literal(0) min/max_inclusive (a falsy Literal) must be written. A
+translation that swapped one guard kind for the other would change the
+graph on this call and on no other.
 """
 from rdflib import Graph, Literal, URIRef, XSD
 
@@ -56,8 +67,26 @@ def _case_minimal():
     return ((self, Graph()), {})
 
 
+def _case_falsy():
+    self = PropertyConstraint(
+        path=URIRef("http://example.org/prop3"),
+        node_class=URIRef(""),
+        datatype=URIRef(""),
+        min_count=0,
+        max_count=0,
+        node_kind=URIRef(""),
+        name="",
+        description="",
+        pattern="",
+        min_inclusive=Literal(0),
+        max_inclusive=Literal(0),
+        order=0,
+    )
+    return ((self, Graph()), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry='to_rdf',
-    calls=[_case_full, _case_minimal],
+    calls=[_case_full, _case_minimal, _case_falsy],
 )

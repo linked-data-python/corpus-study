@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Dépôt (corpus/repos/aigora-de__rdf-construct, converters.py) : to_rdf identique ; PropertyConstraint a bien les types déclarés (min_count/max_count int(...), name/description str(...), order int, node_class/datatype URIRef, min/max_inclusive absents des setters, donc Literal|None) ; aucun appelant n'assigne un autre type. Mutants sur copie de translated.ldpy : 'if self.min_count:' VERT, 'if self.order:' VERT, 'if self.name is not None:' VERT (le pilote n'a que min_count=1, order=2, name non vide, et le cas tout-None) ; 'if self.min_inclusive:' ROUGE (Literal(0) falsy y est testé), 'if self.in_values is not None' ROUGE, prédicat échangé ROUGE, '^^xsd:string' ajouté ROUGE. Avec un 3e appel (0, 0, 0, '', '', '') ajouté dans une copie du pilote, la vraie traduction reste verte et les trois mutants passent au rouge. Atteignabilité réelle de 0/'' dans le dépôt : faible (converters.py filtre par 'if exact:' / 'if label:'), donc c'est l'oracle qui est faible, pas la traduction. Article : non pour coercion_datatype — aucun datatype= dans la région, Literal(x) sans datatype partout (int -> xsd:integer, str -> plain) ; c'est un exemple add_isolated (13 îlots), long et sans gain de lecture sur la coercition. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Un troisième appel porte les valeurs fausses (0, \"\", URIRef(\"\"), Literal(0)) : les onze mutants qui permutent garde « is not None » et garde de véracité échouent, la traduction (inchangée) reste verte."
 }

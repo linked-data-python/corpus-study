@@ -50,5 +50,24 @@
     "method": "entry:to_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Troisième appel (_case_falsy) : min_count = max_count = order = 0 (doivent être écrits), name/description/pattern = \"\" et node_class/datatype/node_kind = URIRef(\"\") (doivent être omis), min_inclusive = max_inclusive = Literal(0) (littéral faux, doit être écrit) ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if self.min_count is not None -> if self.min_count",
+      "if self.max_count is not None -> if self.max_count",
+      "if self.order is not None -> if self.order",
+      "if self.name: -> is not None",
+      "if self.description: -> is not None",
+      "if self.pattern: -> is not None",
+      "if self.node_class: -> is not None",
+      "if self.datatype: -> is not None",
+      "if self.node_kind: -> is not None",
+      "if self.min_inclusive is not None -> if self.min_inclusive",
+      "if self.max_inclusive is not None -> if self.max_inclusive"
+    ],
+    "remaining": ""
   }
 }

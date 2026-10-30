@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants dans un mktemp -d : (e) `prop = URIRef(self.iri)` dans translated.ldpy -> OK (vert à tort) ; (b) `shapes.sort(...)` remplacé par `pass` -> OK (vert à tort, les formes sortent déjà dans l'ordre) ; en ajoutant au pilote un appel BNode (`graph.add((Shape4, sh:property, BNode('bn1')))`, `_case('bn1')`), la traduction réelle passe (OK) et le mutant URIRef-seul échoue (FAIL : `[NodeShape('…Shape4','Shape4')]` contre `[]`) : le {prop} avec un BNode est donc correct, c'est le pilote qui est trop pauvre. Dernier test : en donnant au _FakeProperty un SHAPE_QUERY différent (sh:targetClass), la traduction FAIL (retourne [] au lieu de 2 formes) : elle ignore bien self.SHAPE_QUERY. Le texte de SHAPE_QUERY du shim correspond à celui de ShaclProperty (shapiro_model.py:581-590) et pas à celui de RdfClass (:488). Aucune sous-classe de ShaclProperty dans le dépôt, donc pas de divergence réelle.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant la branche nœud blanc (bn1, bn2) et un tri dont l'ordre diffère de l'ordre de stockage (prop3, bn2) : les mutants « URIRef seul » et « sans tri » échouent ; la traduction n'a pas changé."
 }

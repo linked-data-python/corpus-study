@@ -14,3 +14,12 @@ ex:Shape3 sh:property ex:otherProp ;
     rdfs:label "Shape Three" .
 
 # ex:prop2 has no node shape at all -> zero solutions
+
+# ex:prop3 has two node shapes whose labels sort in the OPPOSITE order to the
+# order in which they are stored (and to their IRIs): "Alpha" (ShapeB) must
+# come before "Zeta" (ShapeA), so removing the sort by label changes the list.
+ex:ShapeA sh:property ex:prop3 ;
+    rdfs:label "Zeta" .
+
+ex:ShapeB sh:property ex:prop3 ;
+    rdfs:label "Alpha" .

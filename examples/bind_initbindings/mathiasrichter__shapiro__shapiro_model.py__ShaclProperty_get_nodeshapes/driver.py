@@ -8,13 +8,44 @@ is equality of what both versions produce from the same input graph
 (fixture.ttl), not graph isomorphism. The entry point takes ``self`` rather
 than a graph, so a fake ``self`` is built per call from the fixture instead
 of using ``fixture=`` directly.
+
+Calls:
+
+* prop1: two matching shapes (labels already in alphabetical order), with
+  neighbouring data (Shape3, on otherProp) that must not match;
+* prop2: zero solutions;
+* otherProp: exactly one matching shape;
+* prop3: two matching shapes whose labels ("Zeta", "Alpha") sort in the
+  opposite order to their storage order and to their IRIs, so
+  ``shapes.sort(key=lambda s: s.label)`` changes the result;
+* "bn1": an identifier WITHOUT scheme, i.e. the blank-node branch
+  (``BNode(self.iri)``). Turtle renames the blank nodes it parses, so the
+  driver adds the triple ``ex:Shape4 sh:property _:bn1`` to the fixture graph
+  by hand; ``URIRef("bn1")`` would not match it. This is the common case in
+  real SHACL, where ``sh:property`` objects are almost always blank nodes;
+* "bn2": a second blank node held by two shapes labelled "Zeta" / "Alpha", so
+  the sort is also exercised on the BNode branch.
 """
 from pathlib import Path
+
+from rdflib import BNode, Literal, Namespace, RDFS
 
 from rdfeval.harness import fixture_graph, run_pair
 from shim import SHAPE_QUERY
 
 FIXTURE = "fixture.ttl"
+EX = Namespace("http://example.org/")
+SH = Namespace("http://www.w3.org/ns/shacl#")
+
+
+def _add_blank_node_cases(graph):
+    """Shapes pointing at blank nodes, whose ids the Turtle parser would rename."""
+    graph.add((EX.Shape4, SH.property, BNode("bn1")))
+    graph.add((EX.Shape4, RDFS.label, Literal("Shape Four")))
+    graph.add((EX.ShapeC, SH.property, BNode("bn2")))
+    graph.add((EX.ShapeC, RDFS.label, Literal("Zeta")))
+    graph.add((EX.ShapeD, SH.property, BNode("bn2")))
+    graph.add((EX.ShapeD, RDFS.label, Literal("Alpha")))
 
 
 class _FakeProperty:
@@ -38,6 +69,7 @@ class _FakeProperty:
 def _case(iri):
     def make():
         graph = fixture_graph(Path(__file__).parent / FIXTURE)
+        _add_blank_node_cases(graph)
         return (_FakeProperty(iri, graph, SHAPE_QUERY),), {}
     return make
 
@@ -49,6 +81,9 @@ VERDICT = run_pair(
         _case("http://example.org/prop1"),  # two matching shapes
         _case("http://example.org/prop2"),  # zero solutions
         _case("http://example.org/otherProp"),  # exactly one matching shape
+        _case("http://example.org/prop3"),  # two shapes, sort order != storage order
+        _case("bn1"),  # blank-node branch (no scheme), one shape
+        _case("bn2"),  # blank-node branch, two shapes, sort order != storage order
     ],
     ordered=True,  # the region itself sorts by label
 )
