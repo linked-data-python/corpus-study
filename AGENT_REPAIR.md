@@ -45,6 +45,11 @@ employé et non déclaré), que vous corrigez.
 4. Le pilote renforcé vaut pour les trois artefacts : `check` doit rendre
    toutes ses lignes `OK` à la fin.
 
+**Un mutant qui ne mute rien ne prouve rien** : dans rdflib 7.2.1,
+`FILTER(false)` ne filtre rien (`FILTER(1 = 2)` si). Pour tuer une
+branche, écrivez `FILTER(1 = 2)` ou un prédicat inexistant, et vérifiez
+que le mutant change bien le résultat sur un cas simple.
+
 Un pilote reste **lisible** : une docstring qui dit ce que chaque appel
 exerce, et pourquoi. N'affaiblissez jamais un pilote, ne retirez aucun
 appel existant.
