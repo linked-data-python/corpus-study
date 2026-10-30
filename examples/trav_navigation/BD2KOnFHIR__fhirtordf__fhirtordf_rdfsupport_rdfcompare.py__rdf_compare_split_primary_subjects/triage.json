@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "L'îlot `m{ ?s2 ?p2 {anon_s} }(g)` est dans du code mort (`len([...]) == 0` toujours faux, bug amont) : aucun résultat de l'îlot n'est observable, donc remplacer l'îlot par `[]` ou l'élargir à `?o2` reste vert ; l'équivalence est vide et le crédit `m{ }`/`call suffix`/`interpolation` ne repose sur rien de vérifié.",
+  "questions": [
+    {
+      "question": "Une paire dont le seul îlot est dans une branche morte par construction (aucune entrée ne peut changer la sortie) doit-elle être exclue du décompte des constructions et du gain, ou comptée comme preuve d'expressibilité de la navigation `subject_predicates(anon_s)` ?",
+      "where": "translated.ldpy:9 et original.py:9 (`len([...]) == 0`), fixture.ttl:19-25",
+      "if_yes": "needs-work ou exclusion de la région du décompte (paire non informative) ; sinon à garder avec un drapeau « code mort amont » dans meta.json",
+      "if_no": "approuver en l'état en acceptant que la preuve d'équivalence ne porte que sur la ligne `return` et sur la syntaxe de l'îlot (il se transpile et s'exécute), pas sur sa sémantique"
+    },
+    {
+      "question": "Le shim `run_primary_subjects` (g1 = g, global module) qui ne modélise que le site d'appel primary_subjects(g1) et jamais primary_subjects(g2) (le seul où le bug de capture de g1 mord) est-il acceptable comme restauration de contexte pour cette région ?",
+      "where": "original.py:20-32 et rdfcompare.py:126-129, 139-140 du dépôt",
+      "if_yes": "approuver ce point : la liaison restaurée est bien celle du premier appel du dépôt",
+      "if_no": "needs-work : ajouter un second appel au pilote où g1 diffère de g (deux graphes), ce qui ferait de `g.subjects()` et de l'îlot des lectures sur deux graphes distincts"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur la copie de translated.ldpy, avec le fixture d'origine : (1) `m{ ?s2 ?p2 {anon_s} }(g)` -> `[]` : VERT ; (2) -> `m{ ?s2 ?p2 ?o2 }(g)` (terme lié élargi à tout le graphe) : VERT ; (3) `len([m{ }(g)])` -> `len(m{ }(g))` : ROUGE seulement parce que Match n'a pas de len() (TypeError), ce qui ne dit rien de la sémantique de l'îlot. Confirmé dans le dépôt : rdfcompare.py:126-129 identique à original.py, `[g.subject_predicates(anon_s)]` est une liste d'un élément, la garde est donc toujours fausse. Le fixture a bien un BNode avec arête entrante (_:child) et un sans (_:orphanish), mais comme la garde est morte aucun des deux ne peut changer la sortie ; la sortie de la région se réduit à `{URIRef sujets de g}` (et par la restauration g1 := g, `g1.subjects()` est la seule lecture observée). Le traducteur le dit lui-même dans meta.json ; la question est de savoir si cela doit compter dans les chiffres.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "La fusion en jointure supprime les entrées installsPage où manque targetResource/body/meta (là où g.value rend None puis \"\"), et le pilote (un seul appel, retour \"ok\") laisse vert un îlot dont le prédicat est élargi.",
+  "questions": [
+    {
+      "question": "Une entrée overlay:installsPage incomplète (propriété absente) doit-elle rester dans `entries` avec un champ vide, comme dans l'original ?",
+      "where": "translated.ldpy:38 et original.py:27-31",
+      "if_yes": "needs-work : l'îlot unique ne peut pas absorber `g.value` ; remettre `m{ {pi} overlay:meta ?meta }.first()` (etc.) hors du motif, et rediscuter la classification (minor-restructuring) ; la region est de plus un test dont le but est de détecter ces entrées incomplètes",
+      "if_no": "approuver en consignant dans meta.json que la fusion suppose des entrées complètes (vrai pour les 6 entrées du manifest réel, overlays/wiki-memory/manifest.ttl)"
+    },
+    {
+      "question": "Faut-il faire retourner à demo() les `entries` (ou ajouter un second manifest) pour que l'oracle observe le résultat de l'îlot et pas seulement ok/assertion-failed ?",
+      "where": "driver.py (un seul appel `demo`), original.py:46-51",
+      "if_yes": "needs-work : modifier demo des deux côtés pour renvoyer entries, ajouter un manifest à entrée partielle",
+      "if_no": "approuver en acceptant que seuls les 4 EXPECTED_PAGES soient prouvés"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants VERTS sur la copie (oracle isomorphism, un appel `demo`) : `[] overlay:installsPage ?pi` -> `[] ?pp ?pi` (prédicat élargi, projection ajustée) ; `?pi overlay:targetResource ?tr` -> `?pi ?x ?tr` (idem). Raison : les triplets voisins du fixture (installsContainer, installsShape) n'ont pas de targetResource/body/meta, donc ne produisent aucune ligne parasite, et demo ne renvoie que \"ok\". Divergence confirmée : copie où l'entrée marie-curie perd `overlay:meta` -> original : ('assertion-failed', \"... meta '' should end ...\") ; traduction : ('assertion-failed', \"no installsPage with targetResource ending wiki/people/marie-curie.md; entries=[...]\") : FAIL. Les 6 entrées du manifest réel sont complètes (corpus/repos/LA3D__cogitarelink-solid/overlays/wiki-memory/manifest.ttl), le cas n'est donc pas atteint par le dépôt, mais il l'est par un test dont c'est le rôle de détecter une entrée incomplète. Le traducteur a reconnu le piège dans meta.json sans l'exercer. original.py identique au dépôt (tests/test_frame_model_agreement.py:146-160).",
+  "triaged_by": "sonnet-5.5"
+}

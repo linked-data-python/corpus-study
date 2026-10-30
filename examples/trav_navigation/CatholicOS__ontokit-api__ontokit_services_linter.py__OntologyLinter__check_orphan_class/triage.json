@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "La traduction est équivalente (vérifié sur un fixture enrichi) mais le fixture d'origine laisse vert un îlot élargi (`?s ?r {class_uri}` pour les enfants), un îlot restreint (enfants typés owl:Class) et la suppression de `isinstance(p, URIRef)` : aucun voisinage ne les distingue.",
+  "questions": [
+    {
+      "question": "Faut-il compléter le fixture (une relation autre que rdfs:subClassOf pointant sur une classe orpheline, un parent BNode de type owl:Restriction, un enfant non typé owl:Class, un enfant BNode) pour que ces trois mutants échouent ?",
+      "where": "fixture.ttl (aucun triplet entrant autre que subClassOf sur une classe ; aucun parent BNode) ; translated.ldpy:31-32 et original.py:23-29",
+      "if_yes": "needs-work : ajouter ces cas au fixture (j'en ai ajouté dans une copie : la traduction passe, les trois mutants échouent)",
+      "if_no": "approuver en acceptant que les prédicats de l'îlot enfants et la garde isinstance sur les parents ne soient pas prouvés"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants avec le fixture d'origine, VERTS : (1) `if isinstance(p, URIRef) and p != owl_thing` -> `if p != owl_thing` ; (2) `children = list(m{ ?s rdfs:subClassOf {class_uri} })` + `. ?s a owl:Class` (enfants restreints aux classes typées) ; (3) `m{ ?s rdfs:subClassOf {class_uri} }` -> `m{ ?s ?r {class_uri} }` ; (4) `m{ ?class_uri a owl:Class }` -> `m{ ?class_uri ?r owl:Class }` (reste vert même après enrichissement). ROUGES : suppression de `p != owl_thing`, parents -> prédicat élargi, suppression de la garde BNode sur class_uri. Copie avec fixture enrichi (ex:Rel ex:seeAlso ex:OrphanB ; ex:BnParented avec parent BNode ; enfants ex:Kid / ex:KidB non typés ; enfant BNode) : la traduction passe (équivalente) et les mutants (1), (2), (3) échouent. original.py identique au dépôt (ontokit/services/linter.py:354-393) ; les deux helpers du shim sont ceux de la classe (linter.py:1318, 1326). Les notes sont exactes ; pas de défaut d'équivalence, seulement de preuve.",
+  "triaged_by": "sonnet-5.5"
+}
