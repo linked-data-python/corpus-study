@@ -22,3 +22,18 @@ ex:PlainSuperclass a owl:Class .
 ex:C2 rdfs:subClassOf ex:R3 .
 ex:R3 owl:onProperty ex:p1 ;
       owl:someValuesFrom ex:F9 .
+
+# ex:C3 is shaped like the OwlSchemaGenerator output the repository's test
+# reads (tests/linkml/test_issues/test_linkml_issue_384.py:94-96): blank-node
+# restrictions with owl:allValuesFrom, one filler being xsd:string.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:C3 rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty ex:p1 ; owl:allValuesFrom ex:F1 ] ,
+    [ a owl:Restriction ; owl:onProperty ex:p2 ; owl:allValuesFrom xsd:string ] .
+
+# Neighbourhood for the subClassOf predicate: ex:C4 reaches a restriction
+# that would match (p1, someValuesFrom, F1) through owl:equivalentClass,
+# not rdfs:subClassOf -- must not count.
+ex:C4 owl:equivalentClass ex:R4 .
+ex:R4 owl:onProperty ex:p1 ;
+      owl:someValuesFrom ex:F1 .

@@ -22,7 +22,7 @@
   ],
   "translation_notes": [
     "`rdflib.URIRef(uri) not in rdf.subjects()` -> `not bool(m{ {rdflib.URIRef(uri)} ?p ?o }(rdf))`: subject bound, predicate/object wildcards -- the direct trav_existence idiom for 'is this term ever a subject', more direct than materialising all subjects to test membership.",
-    "not exercised: the force=False + uri-absent branch, which RAISES ValueError. rdfeval.harness.run_pair wraps both sides' call in one try/except with no per-call exception handling, so it aborts the whole verdict on any exception rather than comparing two raises -- a harness limitation (confirms the known constat about a driver's blind spot on raising branches, not a language limitation). That branch differs from the covered ones only by a plain `if force: warn else: raise`, untouched by the translation, so it carries no extra translation risk.",
+    "the force=False + uri-not-a-subject branch RAISES ValueError; the harness compares two raises by type and message, and driver.py exercises it (absent, object-only and predicate-only URIs). The force=True branch's warning is made a compared outcome by turning UserWarning into an error in the driver.",
     "fixture.ttl covers a subject with two triples (several solutions), a URI that appears only as an OBJECT (neighbourhood: must not count as a subject), and a URI absent altogether (zero-solution, exercised via a driver case rather than the fixture alone)."
   ],
   "draft_sha": "e9f9cfd950be984f",
@@ -41,5 +41,22 @@
     "method": "fixture:fixture.ttl entry:_uri_is_subject_in_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "UserWarning transforme en erreur pour tout le pilote (l'avertissement de force=True devient une issue comparee, type et message) ; appels ajoutes : URI absent, seulement objet et seulement predicat (ex:p) avec force=False (levee ValueError comparee), URI present passe en URIRef, et deux sujets ex:other et ex:onlyQ (nouveau voisin `ex:onlyQ ex:q ex:somewhere` dans la fixture) qui tuent un ?p ou un ?o resserre. Les trois appels d'origine sont gardes.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{rdflib.URIRef(uri)} ?p ?o -> ?s ?p ?o",
+      "-> ?s ?p {rdflib.URIRef(uri)}",
+      "-> ?s {rdflib.URIRef(uri)} ?o",
+      "-> {uri} ?p ?o (str coerced to a literal)",
+      "-> {rdflib.URIRef(uri)} <http://example.org/p> ?o",
+      "-> {rdflib.URIRef(uri)} ?p \"v1\"",
+      "raise ValueError(...) -> pass",
+      "warnings.warn(...) -> pass",
+      "if not bool( -> if bool("
+    ],
+    "remaining": ""
   }
 }

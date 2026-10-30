@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants dans des copies : `{rdflib.URIRef(uri)} ?p ?o` -> `?s ?p ?o` : OK (survit) ; remplacement du `raise ValueError(...)` par `pass` : OK (survit) ; tués : suppression du `not` (call[0] lève ValueError), `?s ?p {URIRef(uri)}`. Avec `?s ?p ?o` et un quatrième appel `_case(\"http://example.org/absent\", False)` ajouté au pilote : FAIL `call[3]: outcome differs (raised ValueError(...) vs None)` : le harnais compare bien les levées. Équivalence à la main : `URIRef(uri) not in rdf.subjects()` et `not bool(m{ {URIRef(uri)} ?p ?o }(rdf))` coïncident sur un Graph (les deux appelants du dépôt, fairworkflow.py:68 et fairstep.py:157, passent `rdf` et `force`). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforce (avertissement compare comme levee, appels force=False sur URI absent, seulement objet, seulement predicat, URIRef, deux sujets voisins) : le sujet elargi en ?s et les autres mutants echouent, la traduction etait juste."
 }

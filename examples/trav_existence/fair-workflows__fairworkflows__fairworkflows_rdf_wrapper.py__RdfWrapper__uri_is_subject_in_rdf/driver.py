@@ -8,24 +8,36 @@ The entry point takes three arguments (uri, rdf, force), not just a graph,
 so `calls` supplies (uri, fixture graph, force) explicitly rather than
 relying on run_pair's default single-argument call.
 
-Three cases, chosen to stay OUTSIDE the one branch run_pair cannot compare:
-when `uri` is absent and `force` is False, the region RAISES ValueError, and
-run_pair aborts the whole verdict on any exception from either side rather
-than comparing the two raises -- see rdfeval/harness.py's run_pair, which
-wraps both calls in one try/except with no per-call exception handling. That
-branch is therefore not exercised here; it differs from the others only by
-`if force: warn else: raise`, a plain Python conditional untouched by the
-translation, so the risk of a translation-specific bug there is the same as
-for the branch this driver DOES cover.
+Every call is compared by its outcome: the harness compares a raise on
+both sides as a value (exception type and message), so the branch that
+RAISES ValueError (uri not a subject, force=False) is exercised directly.
+The force=True branch's only effect is `warnings.warn(message,
+UserWarning)`; the driver turns UserWarning into an error for the whole run
+so that this warning, too, becomes a compared outcome (type and message)
+instead of an unobserved side effect. Nothing follows the warning in the
+region, so this changes no other behaviour.
+
+The repository's two callers (fairworkflows/fairworkflow.py:68,
+fairworkflows/fairstep.py:157) pass the user's `uri` through, a `str` in
+its tests; a `URIRef` is also accepted, and one call passes one.
 
   * uri present as a subject (several solutions: it also carries a second
-    triple) -> exists is True, no warning, no exception, returns None.
-  * uri present in the graph but only ever as an OBJECT, never a subject
-    (the neighbour fixture.ttl warns about) -> exists is False; force=True
-    so this WARNS rather than raising -- still returns None, comparably.
+    triple), force=False -> no warning, no exception, returns None.
+  * uri present in the graph only as an OBJECT, force=True -> warns.
   * uri absent from the graph altogether, force=True -> the zero-solution
-    case; also warns rather than raising, returns None.
+    case; warns.
+  * the same three situations with force=False -> the absent and
+    object-only URIs raise ValueError. These kill the subject widened to
+    `?s` (no raise) and the subject moved to the object position.
+  * a uri used only as a PREDICATE, force=False -> raises: kills the
+    subject moved to the predicate position.
+  * uri present, given as a `URIRef` rather than a `str`, force=False ->
+    returns None on both sides.
+  * two more subjects, force=False -> None: ex:other (one triple, IRI
+    object) and ex:onlyQ (its only predicate is ex:q). With ex:present
+    they kill the `?p` or `?o` wildcard narrowed to a constant.
 """
+import warnings
 from pathlib import Path
 
 import rdflib
@@ -33,6 +45,9 @@ import rdflib
 from rdfeval.harness import run_pair, fixture_graph
 
 FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
+
+# the force=True branch's warning becomes a compared outcome
+warnings.simplefilter("error", UserWarning)
 
 
 def _case(uri, force):
@@ -49,5 +64,11 @@ VERDICT = run_pair(
         _case("http://example.org/present", False),
         _case("http://example.org/onlyAnObject", True),
         _case("http://example.org/absent", True),
+        _case("http://example.org/absent", False),
+        _case("http://example.org/onlyAnObject", False),
+        _case("http://example.org/p", False),
+        _case(rdflib.URIRef("http://example.org/present"), False),
+        _case("http://example.org/other", False),
+        _case("http://example.org/onlyQ", False),
     ],
 )

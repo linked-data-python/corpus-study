@@ -17,12 +17,14 @@
     "m{ }",
     ".first()",
     "prefixed name",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "call suffix (g)"
   ],
   "translation_notes": [
     "prefixes: B2->b2",
     "`(f, B2.hasState, B2.Done) in gbk` becomes `bool(m{ {f} b2:hasState b2:Done }(gbk))`; `gbk.value(f, B2.hasEvidence)` becomes `m{ {f} b2:hasEvidence ?ev }(gbk).first()`, both against the explicit (gbk) receiver since no @graph is designated for this module-level script.",
-    "HERE and feats are not defined in the extracted region (module-level script, context lost); restored via shim.py alongside a copy of the referenced ttl fixture, with feats/state data chosen to cover Done+evidence, Done without evidence, not-Done, and no-state neighbours."
+    "HERE and feats are not defined in the extracted region (module-level script, context lost); restored via shim.py alongside a copy of the referenced ttl fixture, with feats/state data chosen to cover Done+evidence, Done without evidence, not-Done, and no-state neighbours.",
+    "constructions: `call suffix (g)` added (both islands are applied to the explicit `(gbk)` receiver); it was employed and not declared."
   ],
   "draft_sha": "e1aaa1731018100b",
   "provenance": {
@@ -43,5 +45,22 @@
     "names_only_original": [
       "B2"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le pilote execute les deux cotes une fois par scenario (shim.HERE pointe sur scenarios/<nom>/, feats construit comme le depot ligne 279 : subjects(RDF.type, B2.Feature)) et compare graphes et valeurs du module a chaque fois. Trois scenarios ajoutes au cas de base : `evidenced` (ev_ok True ; une preuve litterale \"\", une a deux valeurs ; F5 porte b2:Done par un autre predicat ; un non-Feature porte une preuve), `other_evidence` (le seul Done a sa preuve sous un autre predicat, un non-Done porte b2:hasEvidence) et `no_done` (aucun Done, b2:Done sur un sujet qui n'est pas Feature).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{f} b2:hasState b2:Done -> {f} ?p b2:Done",
+      "{f} b2:hasEvidence ?ev -> {f} b2:hasNothing ?ev",
+      "{f} b2:hasEvidence ?ev -> {f} b2:hasState b2:Nope",
+      "{f} b2:hasEvidence ?ev -> {f} ?p ?ev",
+      "{f} b2:hasEvidence ?ev -> ?f b2:hasEvidence ?ev",
+      "{f} b2:hasState b2:Done -> ?f b2:hasState b2:Done",
+      "{f} b2:hasState b2:Done -> {f} b2:hasState ?s",
+      "bool(m{ ... }(gbk)) -> True",
+      "m{ ... }(gbk).first() is not None -> True"
+    ],
+    "remaining": "La ligne 281 (`done`) est du contexte hors region (lineno 282) et sa traduction credite `bool(m{ })` : a juger (perimetre de la region, pas l'equivalence)."
   }
 }

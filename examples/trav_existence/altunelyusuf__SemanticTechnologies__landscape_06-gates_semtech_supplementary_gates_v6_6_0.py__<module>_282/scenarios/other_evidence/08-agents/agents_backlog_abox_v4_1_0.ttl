@@ -1,0 +1,11 @@
+# Scenario where the only Done feature has a proof under ANOTHER predicate,
+# while a feature that is not Done has b2:hasEvidence: ev_ok is False.
+@prefix b2: <http://example.org/backlog#> .
+
+b2:F1 a b2:Feature ;
+    b2:hasState b2:Done ;
+    b2:hasProof b2:Ev1 .
+
+b2:F2 a b2:Feature ;
+    b2:hasState b2:InProgress ;
+    b2:hasEvidence b2:Ev2 .

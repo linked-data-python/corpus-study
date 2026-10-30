@@ -3,10 +3,16 @@
 # subject with more than one triple), the zero-solution case (a URI queried
 # by driver.py that never appears as a subject here), and neighbouring
 # triples that must NOT match (a URI that only appears as an OBJECT, never
-# as a subject).
+# as a subject), and a URI used only as a PREDICATE (ex:p, queried by
+# driver.py: must not count as a subject either).
 @prefix ex: <http://example.org/> .
 
 ex:present ex:p "v1" ;
            ex:q "v2" .
 
 ex:other ex:p ex:onlyAnObject .
+
+# a subject whose only triple uses another predicate and an IRI object:
+# with ex:present and ex:other, kills a predicate or object narrowed from
+# the wildcard
+ex:onlyQ ex:q ex:somewhere .

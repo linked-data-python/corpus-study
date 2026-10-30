@@ -43,5 +43,24 @@
     "method": "fixture:fixture.ttl entry:_contains_restriction",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "sept appels ajoutes, tous en URIRef comme le test du depot (test_linkml_issue_384.py:94-96) : (C1,p1,someValuesFrom,F2) False (p1 et F2 sur deux restrictions), (C1,p1,allValuesFrom,F1) False (pred), (C4,p1,someValuesFrom,F1) False (C4 atteint R4 par owl:equivalentClass, voisin ajoute), (C2,p1,someValuesFrom,F9) True, et C3 a restrictions en noeuds vides avec owl:allValuesFrom et xsd:string comme la sortie d'OwlSchemaGenerator (deux True, un False croise).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "owl:onProperty {prop} -> owl:onProperty ?pp",
+      "?r owl:onProperty -> ?r2 owl:onProperty (join split)",
+      "?r {pred} {filler} -> ?r2 {pred} {filler}",
+      "?r {pred} {filler} -> ?r ?q {filler}",
+      "{c} rdfs:subClassOf ?r -> {c} ?q ?r",
+      "owl:onProperty triple dropped",
+      "filler triple dropped",
+      "{c} -> ?cc",
+      "{filler} -> ?ff",
+      "{pred} -> owl:someValuesFrom",
+      "extra `?r a owl:Restriction`"
+    ],
+    "remaining": ""
   }
 }

@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK (module-state, compare `done` et `ev_ok`). Mutants dans des copies : `{f} b2:hasState b2:Done` -> `{f} ?p b2:Done` : OK (survit) ; `{f} b2:hasEvidence ?ev` -> `{f} b2:hasNothing ?ev` : OK (survit) ; -> `{f} b2:hasState b2:Nope` : OK (survit) ; tués : `?f b2:hasState b2:Done`, `{f} b2:hasState ?s`, `{f} ?p ?ev` (ev_ok True), `?f b2:hasEvidence ?ev`. Véracité : le test d'origine est `is not None`, pas un test de vérité, et `.first()` rend None à zéro solution : pas de piège de littéral faux. Le dépôt (landscape/06-gates/semtech_supplementary_gates_v6_6_0.py:279-282) définit `feats = list(gbk.subjects(RDF.type, B2.Feature))`, le shim le fige à 4 features ; la ligne 281 (`done`) est du contexte hors région (lineno 282), mais sa traduction crédite quand même `bool(m{ })`. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforce par trois scenarios (ev_ok True avec voisin b2:Done sous un autre predicat, preuve sous un autre predicat, aucun Done) : les mutants cites et sept autres echouent, la traduction etait juste ; `call suffix (g)` ajoute aux constructions."
 }
