@@ -4,7 +4,8 @@
 # rdflib's own docs/examples/custom_eval.py). Restored verbatim from
 # RDFLib/rdflib-rdfstar@bceab0a444a : examples/foaf.n3, the canonical
 # dataset this exact script was written against (same script content,
-# same file name, same load call). Identical on both sides.
+# same file name, same load call). Identical on both sides.  The last block of
+# the file is an addition of the repair, see its own comment.
 @prefix cc: <http://creativecommons.org/ns#> .
 @prefix con: <http://www.w3.org/2000/10/swap/pim/contact#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
@@ -289,3 +290,14 @@
         <http://www.w3.org/People/djweitzner/foaf#DJW>,
         <http://www.w3.org/People/karl/karl-foaf.xrdf#me> ;
     foaf:name "Tim Berners-Lee" .
+
+# Addition of the repair (2026-10-30), not part of the restored dataset: three
+# resources that only the query's own class tells apart from the 26 people.
+# example:direct is typed foaf:Agent itself (the zero-length subClassOf* step,
+# which a query for foaf:Person never returns), example:r2d2 is an instance of
+# a subclass of foaf:Agent declared here (one subClassOf step, found by the
+# custom eval but not by a plain BGP), example:rock is no Agent at all.
+<http://example.org/custom_eval#direct> a foaf:Agent .
+<http://example.org/custom_eval#Robot> rdfs:subClassOf foaf:Agent .
+<http://example.org/custom_eval#r2d2> a <http://example.org/custom_eval#Robot> .
+<http://example.org/custom_eval#rock> a <http://example.org/custom_eval#Rock> .

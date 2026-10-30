@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "Copie sous mktemp -d. Mutant A : `ASK { {EX_A} {EX_B} ?x . }` -> rdfeval check OK (vert). Mutant C : `ask = True` -> OK (vert). Mutant B : objet remplacé par une IRI absente -> FAIL (AssertionError côté traduit), donc le pilote attrape seulement un ASK faux, pas un ASK trop large. Contrôle du type : EX_A etc. valent \"<http://example/a>\" (str) dans le dépôt (tests/unit/test_result_patches.py:11-13) ; le retypage en URIRef dans translated.ldpy:6-8 est nécessaire (str nue -> Literal -> ASK faux -> le pilote échouerait) mais ces constantes sont aussi utilisées par _graph_with_one_fact dans le dépôt : dans le dépôt réel la traduction casserait le parse N-Triples, d'où la copie privée _EX_* du shim. Le shim se dit « verbatim » mais renomme EX_* en _EX_* et omet `import starlight` (sans effet ici : askAnswer n'est pas touché par le patch). classification minor-restructuring : cohérente. Ne peut pas illustrer l'article : région de test, rien ne se lit à la sortie, constantes modifiées hors région.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote, désormais écrit à la main, rejoue le test sur douze graphes (fait seul, graphe vide, un voisin par terme du motif, rôles échangés, objet littéral) et compare lever ou non des deux côtés : les mutants à objet, prédicat ou sujet élargis en variable, `ask = True`, `ask = False` et l'assert retiré échouent maintenant (traduction juste) ; le retypage des constantes reste à juger."
 }

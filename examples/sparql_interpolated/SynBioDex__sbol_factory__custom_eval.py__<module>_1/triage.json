@@ -26,5 +26,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants sur translated.ldpy (copie) : ligne 74 (`CUSTOM_EVALS[...] = customEval`) remplacée par `pass` -> toujours OK ; exécutée seule, cette traduction mutilée imprime 0 ligne (contre 26) : le vert vient de la fuite de l'état global depuis original.py. `?s a foaf:Agent` -> `?s a foaf:Person` -> toujours OK (même 26 sujets : zéro-longueur de subClassOf*), alors que `foaf:Organization` -> FAIL, `+{ }` supprimé -> FAIL, `(g)` -> `(Graph())` -> FAIL. Les modifications de original.py (garde __main__ retirée, g.load -> g.parse) sont identiques des deux côtés et confirmées contre custom_eval.py du dépôt (lignes 50-63) ; foaf.n3 n'est pas dans le dépôt (find vide). `% FOAF` et `@prefix foaf:` donnent le même prologue. L'import FOAF reste inutilisé dans translated.ldpy (sans effet).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote isole maintenant CUSTOM_EVALS (registre vidé avant chaque côté, chaque côté doit y avoir enregistré sa propre customEval) et foaf.n3 reçoit trois ressources qui distinguent foaf:Agent de foaf:Person : la ligne d'enregistrement remplacée par pass échoue, ainsi que foaf:Agent -> foaf:Person ; wrong-construction (rdflib.RDFS.subClassOf interpolé) non traité."
 }

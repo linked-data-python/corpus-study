@@ -23,15 +23,62 @@ identical blank node (same predicates, same neighbourhood) -- not a
 difference in what either program computes. stdout_filter blanks out the
 label (never a program's meaning per rdfeval.harness's own docs) so the
 comparison is on content, not on this process-order artefact.
+
+Repair (2026-10-30), three strengthenings.
+
+1. The two sides run in the same process, and rdflib's registry
+   `rdflib.plugins.sparql.CUSTOM_EVALS` is process-global: whatever the
+   original registers stays visible to the translation, so a translation that
+   forgot the registration line would still have its query rewritten by the
+   original's function.  `_isolated` wraps the harness's artefact execution:
+   the registry is emptied before each side, and after it the side must have
+   registered ITS OWN `customEval` (the function object of its own namespace,
+   under "exampleEval", and nothing else); otherwise the side fails with an
+   AssertionError, which run_pair reports as the verdict's error.  The
+   registry is restored afterwards.
+2. foaf.n3 gets three resources the 26 people do not cover (see its last
+   block): one typed foaf:Agent directly, one instance of a declared subclass
+   of foaf:Agent, one that is no Agent.  The query for foaf:Agent now has 28
+   solutions, and a query for foaf:Person (26) or for any other class, or a
+   missing `+{ foaf:Person rdfs:subClassOf foaf:Agent }`, changes the output.
+3. Only the stdout of the query is the observable, so the rows are compared
+   as printed (blank-node labels masked, as above).
 """
 import re
 
+import rdflib
+import rdflib.plugins.sparql
+
+from rdfeval import harness
 from rdfeval.harness import run_pair
 
 
 def _blank_bnode_labels(text: str) -> str:
     return re.sub(r"BNode\('[^']*'\)", "BNode('_')", text)
 
+
+_execute = harness._exec_artefact
+
+
+def _isolated(path, name):
+    """Execute one side with an empty registry and require its own entry."""
+    registry = rdflib.plugins.sparql.CUSTOM_EVALS
+    saved = dict(registry)
+    registry.clear()
+    try:
+        ns, out = _execute(path, name)
+        mine = dict(registry)
+        assert set(mine) == {"exampleEval"}, (
+            f"{path.name} registered {sorted(mine)}, expected ['exampleEval']")
+        assert mine["exampleEval"] is ns["customEval"], (
+            f"{path.name}: CUSTOM_EVALS['exampleEval'] is not its own customEval")
+        return ns, out
+    finally:
+        registry.clear()
+        registry.update(saved)
+
+
+harness._exec_artefact = _isolated
 
 # entry=None executes both modules and compares every rdflib Graph found in
 # the module globals (plus captured stdout).

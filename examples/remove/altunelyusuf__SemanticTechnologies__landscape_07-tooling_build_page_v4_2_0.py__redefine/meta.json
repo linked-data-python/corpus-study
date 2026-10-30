@@ -34,7 +34,7 @@
     "from rdflib import Graph, Namespace, URIRef, Literal se réduit à from rdflib import Graph (Literal absorbé par f\"…\"@en, Namespace et URIRef déjà inutilisés dans l'extrait) et from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV disparaît au profit de deux @prefix",
     "oracle : redefine ne rend rien, tout son effet est sur le graphe de module ; entry=\"redefine\" ne comparerait que la valeur de retour (None) et les arguments, soit un vert vide. Les deux représentations portent donc un banc de démonstration identique mot pour mot (les appels des lignes 61-70 de la source, raccourcis), et l'oracle est l'isomorphisme de g. Ce banc est du remplissage identique des deux côtés : il gonfle les deux surfaces de la même façon",
     "shim de contexte page_context.py : HERE (ligne 12) et SP (ligne 29) ; HERE pointe sur le répertoire de l'exemple, où 04-page/semtech_page_abox_v4_1_0.ttl est un fixture (l'artefact de build n'est pas dans le dépôt)",
-    "fixture écrit contre la région : sp:Page porte deux rdfs:label et deux skos:note (le joker prend les deux de chaque), sp:ReferencesRegion n'est redéfini que sur skos:definition et doit garder son label et sa note de portée, sp:Doc n'a pas encore de skos:scopeNote (cas zéro appariement, le -{ } ne doit rien faire et le +{ } poser), et sp:W1 porte les quatre mêmes prédicats sans être jamais redéfini (le dernier appel ne passe aucune annotation). 20 triplets en entrée, 19 en sortie, ensembles de triplets identiques des deux côtés"
+    "fixture écrit contre la région : sp:Page porte deux rdfs:label et deux skos:note (le joker prend les deux de chaque), sp:ReferencesRegion n'est redéfini que sur skos:definition et doit garder son label et sa note de portée, sp:Doc n'a pas encore de skos:scopeNote (cas zéro appariement, le -{ } ne doit rien faire et le +{ } poser), et sp:W1 porte les quatre mêmes prédicats sans être jamais redéfini (le dernier appel ne passe aucune annotation). 29 triplets en entrée (dont sp:Twin et quatre voisins de sp:Page, qui partagent deux termes sur trois avec un triplet effacé), 28 en sortie, ensembles de triplets identiques des deux côtés"
   ],
   "draft_sha": "50ab4f4ab7420dce",
   "provenance": {
@@ -53,5 +53,16 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le banc de démonstration (identique des deux côtés) gagne cinq appels : scope= sur sp:Page et sp:ReferencesRegion (sujets qui portent déjà un skos:scopeNote, alors que le seul appel scope= visait sp:Doc sans scopeNote), et des valeurs falsy (note=\"\" sur sp:W1, label=\"\" et scope=\"\" sur sp:Doc, defn=\"\" sur sp:ReferencesRegion) pour chacune des quatre gardes ; le fixture gagne sp:Twin (même prédicat et même objet que les triplets effacés de sp:Page, autre sujet) et quatre triplets de sp:Page (même sujet et même objet sous un autre prédicat : skos:prefLabel, rdfs:comment, skos:editorialNote, skos:altLabel) ; docstring du pilote mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "pour chacun des quatre -{ } (rdfs:label, skos:definition, skos:note, skos:scopeNote) : -{ } supprimé, objet lié à un littéral, prédicat remplacé par skos:hiddenLabel, prédicat élargi en variable, sujet élargi en variable, +{ } supprimé",
+      "pour chacune des quatre gardes : `is not None` -> test de vérité (`if x:`) et -> `if True:`",
+      "en particulier le mutant du trieur : -{ {iri} skos:scopeNote ?o } supprimé (vert avant, rouge maintenant)"
+    ],
+    "remaining": ""
   }
 }

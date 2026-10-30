@@ -20,7 +20,22 @@ sp:Page
     skos:note "Rebuilt by the v4.1.0 builder."@en,
               "Rebuilt by the v4.0.0 builder."@en ;
     skos:scopeNote "Covers the fifty-nine class taxonomy."@en ;
-    dcterms:created "2026-01-09"^^xsd:date .
+    dcterms:created "2026-01-09"^^xsd:date ;
+    # same subject, other predicate, same object as each wiped triple: the
+    # predicate of a -{ } must not be widened or swapped
+    skos:prefLabel "Interactive landscape page v4.1.0"@en ;
+    rdfs:comment "The Stage-4 rendering of the v4.0.0 landscape."@en ;
+    skos:editorialNote "Rebuilt by the v4.1.0 builder."@en ;
+    skos:altLabel "Covers the fifty-nine class taxonomy."@en .
+
+# same predicate, same object as sp:Page's wiped triples, other subject: the
+# subject of a -{ } must not be widened (it is never an argument of a call)
+sp:Twin
+    a ipo:Page ;
+    rdfs:label "Interactive landscape page v4.1.0"@en ;
+    skos:definition "The Stage-4 rendering of the v4.0.0 landscape."@en ;
+    skos:note "Rebuilt by the v4.1.0 builder."@en ;
+    skos:scopeNote "Covers the fifty-nine class taxonomy."@en .
 
 # redefined on skos:definition only -- its label and its scope note must stay
 sp:ReferencesRegion

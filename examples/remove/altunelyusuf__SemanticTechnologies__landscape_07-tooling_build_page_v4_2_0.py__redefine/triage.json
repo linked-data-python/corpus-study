@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check = OK. Mutants sur une copie (mktemp), pour les quatre -{ } : sujet elargi en variable, predicat elargi en variable, suppression, objet lie a un litteral, predicat echange, et suppression du +{ } correspondant : tous ECHOUENT pour rdfs:label, skos:definition et skos:note. Pour skos:scopeNote : sujet elargi -> ECHEC, predicat elargi -> ECHEC, suppression du +{ } -> ECHEC, MAIS suppression du -{ {iri} skos:scopeNote ?o } -> VERT, objet lie -> VERT, predicat echange pour skos:altLabel -> VERT. Apres ajout de `redefine(SP.Page, scope=\"Rescoped.\")` aux deux cotes de la copie : check OK, et le mutant sans -{ } scopeNote ECHOUE. Les appels du depot (corpus/repos/altunelyusuf__SemanticTechnologies/landscape/07-tooling/build_page_v4_2_0.py:61-67) ne passent jamais note= ni scope= : le comportement n'est donc pas atteint par le depot, mais la region le contient. Note : ce fichier ecrit `f\"{label}\"@en` alors que la v6_9_0 ecrit `{label}@en` ; sans consequence sur les valeurs str appelantes.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le banc gagne scope= sur deux sujets qui portent déjà un skos:scopeNote, des valeurs vides pour les quatre gardes, et le fixture des voisins qui partagent deux termes sur trois avec chaque triplet effacé : le mutant sans le -{ } de skos:scopeNote échoue maintenant, ainsi que ceux des trois autres -{ } et des quatre gardes (traduction juste)."
 }

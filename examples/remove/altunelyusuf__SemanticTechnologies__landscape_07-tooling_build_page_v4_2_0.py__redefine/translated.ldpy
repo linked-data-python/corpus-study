@@ -24,7 +24,9 @@ def redefine(iri, label=None, defn=None, note=None, scope=None):
 
 # Demo harness (see meta.json), verbatim on both sides: redefine mutates the
 # module graph, so the module-state oracle needs the calls that the builder
-# makes at lines 61-70 of the source file, shortened to their shape.
+# makes at lines 61-70 of the source file, shortened to their shape, plus the
+# calls that the repository never makes (scope on subjects that carry one, an
+# empty string, several annotations at once), see driver.py.
 redefine(SP.Page,
     label="Interactive landscape page v4.2.0",
     defn="The Stage-4 conversational rendering of the v4.0.0 landscape.",
@@ -33,3 +35,8 @@ redefine(SP.ReferencesRegion,
     defn="The references region lists all ninety-three verified entries.")
 redefine(SP.Doc, scope="Stage-3 document, v4.2.0.")
 redefine(SP.W1)
+redefine(SP.Page, scope="Covers the sixty class taxonomy.")
+redefine(SP.ReferencesRegion, scope="Rendered once, in the footer.")
+redefine(SP.W1, note="")
+redefine(SP.Doc, label="", scope="")
+redefine(SP.ReferencesRegion, defn="")
