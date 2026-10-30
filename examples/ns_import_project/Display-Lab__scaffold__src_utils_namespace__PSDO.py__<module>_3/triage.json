@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Import d'une classe de base (AliasingDefinedNamespace), pas d'un espace de noms : aucune construction ne s'applique (constructions: [], fichier identique à l'original), donc `directly-expressible` compte comme un succès une région que le langage n'exerce pas.",
+  "questions": [
+    {
+      "question": "Cette région (un `from src.utils.namespace import AliasingDefinedNamespace`, faux positif du stratificateur, sans îlot ni préfixe possible) doit-elle être classée `excluded` (hors strate) plutôt que `directly-expressible` ?",
+      "where": "meta.json (classification, constructions: []) ; translated.ldpy:4 identique à original.py:4",
+      "if_yes": "passer la classification à `excluded` et la sortir des chiffres de ns_import_project (sinon elle gonfle la part de directly-expressible)",
+      "if_no": "approuver ; la région compte comme une paire triviale sans gain, à mentionner comme telle dans l'article"
+    }
+  ],
+  "evidence": "rdfeval check : OK (pilote sur mesure `import-identity` : même objet classe des deux côtés, trivial puisque les deux fichiers importent du même shim). translated.ldpy est octet pour octet l'original ; rien à exécuter de plus. Le shim namespace_context.py est dit « verbatim » mais retire docstrings/commentaires et simplifie `dict[str, str]` en `dict` (aucune logique changée, pas de shim-invents-logic) ; il omet aussi les imports terminaux de __init__.py (CPO, FHIR, IAO, PSDO), hors région. La classe est utilisée dans le dépôt comme classe de base (_PSDO.py, _CPO.py, _SLOWMO.py) : aucun appelant n'importe un préfixe depuis elle.",
+  "triaged_by": "sonnet-5.5"
+}

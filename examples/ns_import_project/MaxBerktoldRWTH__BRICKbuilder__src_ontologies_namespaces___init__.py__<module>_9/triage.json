@@ -1,0 +1,18 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "wrong-construction"
+  ],
+  "summary": "Le `from … import qudt:, qudtu:, qudtqk:` ne lie plus les noms QUDT/QUDTU/QUDTQK que le reste du module utilise comme objets (clés de `bindings`, `__all__`, `QUDT.degreeCelsius`) : la traduction casse le module, le pilote ne le voit pas car demo() ne déréférence que des termes.",
+  "questions": [
+    {
+      "question": "Cet import est une réexportation (`__all__` lignes 30-32) dont les noms sont employés comme objets Python dans le même fichier (`bindings = {QUDT: \"qudt\", …}` lignes 56-58, `QUDT.degreeCelsius` ligne 182) : confirmez-vous que le remplacer par des préfixes n'est pas équivalent et que le crédit `from … import p:` est indu ici (au mieux, garder `from … import QUDT, QUDTU, QUDTQK` et l'ajouter en plus) ?",
+      "where": "translated.ldpy:9 et original.py:9 ; dépôt : src/ontologies/namespaces/__init__.py:9, 30-32, 56-58, 182",
+      "if_yes": "needs-work ou retirer `from … import p:` de `constructions` (aucun gain : la paire se réduit à une ligne, voire à zéro construction créditable) ; classification à revoir",
+      "if_no": "approuver, en disant dans l'article que la paire isole la ligne d'import et ne traduit pas ses usages en aval"
+    }
+  ],
+  "evidence": "rdfeval check : OK (demo() ne déréférence que QUDT.hasUnit, QUDTU.M, QUDTQK.Length). Dans une copie (mktemp -d, supprimée) j'ai ajouté aux deux côtés la ligne `bindings = {QUDT: \"qudt\", QUDTQK: \"qudtqk\", QUDTU: \"qudtu\"}` (lignes 56-58 du dépôt, qui suivent l'import) : l'original s'exécute, la version traduite lève NameError: name 'QUDT' is not defined. Les notes du traducteur le disent (« the prefix-import form does not bind QUDT… as Python names ») mais en font un détail du harnais plutôt qu'un écart de comportement. Le dépôt n'exporte aucun `__namespaces__` (grep : zéro occurrence ; qudt.py définit des DefinedNamespace) : le shim l'écrit à la main, déjà flaggé mécaniquement. Les classes du shim sont bien des DefinedNamespace réduites (jeu de membres restreint, non pertinent pour une ligne d'import).",
+  "triaged_by": "sonnet-5.5"
+}
