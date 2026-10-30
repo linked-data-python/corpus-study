@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "La fixture ne contient aucun cas qui exerce les gardes de la région : cinq mutants qui élargissent une garde (`if True`) restent verts ; de plus la strate trav_one_step n'est pas traduite (aucun `m{ }`, `RDF_NS.type` interpolé alors que `rdf:` est déclaré).",
+  "questions": [
+    {
+      "question": "La fixture doit-elle être complétée (nœud sélectionné portant aussi un type non autorisé, ChemicalInput sans rdf:type, nœud non-synthèse avec hasChemicalInput, pont vers un nœud sélectionné qui n'est pas un MOP) pour que les gardes soient réellement testées ?",
+      "where": "translated.ldpy:46 (`if t in allowed_types`), :58 (`if (chem_input, rdf:type, ChemicalInput) in g`), :52 (filtre synthèse), :69 (`(mop, rdf:type, MOP) in g`) ; fixture.ttl",
+      "if_yes": "needs-work : ajouter ces cas à fixture.ttl (j'ai vérifié qu'ils tuent les quatre mutants) avant tout décompte.",
+      "if_no": "approuver en l'état, en acceptant que les gardes ne soient pas prouvées."
+    },
+    {
+      "question": "Les lectures `g.objects(s, p)` / `g.subjects` / `(n, p, o) in g` et les `{RDF_NS.type}` laissés en Python sont-ils une construction manquée, alors que meta.json crédite la strate trav_one_step (`for t in m{ {s} rdf:type ?t }`, `bool(m{ … })`, `rdf:`/`rdfs:` déclarés mais jamais utilisés) ?",
+      "where": "translated.ldpy:7-8, 38-42, 45-47, 60-63, 69 ; meta.json strata",
+      "if_yes": "wrong-construction : réécrire les lectures en m{ } ou retirer trav_one_step des strates et rdf:/rdfs: des préfixes crédités.",
+      "if_no": "garder, la note de traduction justifie les boucles Python."
+    }
+  ],
+  "evidence": "check OK. Mutants dans des copies, restés VERTS : `if (chem_input, rdf:type, ChemicalInput) in g:` -> `if True:` ; retrait de `and (mop, rdf:type, MOP) in g` ; `if t in allowed_types:` -> `if True:` ; filtre `(n, rdf:type, ChemicalSynthesis) in g` -> `if True`. (`if mop in selected` -> `if True` est équivalent : un MOP typé est toujours sélectionné.) Mutants tués : retrait de `o in selected` ou `s in selected`, des îlots label / hasChemicalInput, de la skolémisation, changement de prédicat du pont. Dans une copie, ajout à fixture.ttl de `ex:species1 a ex:ExtraType`, `ex:input2` sans type lié à synth4, `ex:species1 hasChemicalInput ex:input1`, un pont synth5 -> ex:species1 : la paire reste OK et les quatre mutants précédents passent à FAIL. Aucune erreur d'équivalence trouvée dans la traduction elle-même.",
+  "triaged_by": "sonnet-5.5"
+}

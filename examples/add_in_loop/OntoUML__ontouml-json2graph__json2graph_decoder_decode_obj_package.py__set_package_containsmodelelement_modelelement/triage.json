@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "classification-doubt"
+  ],
+  "summary": "Équivalence correcte et oracle suffisant, mais la boucle `for @bindings in (générateur de dicts)` est un habillage inutile (le motif n'a qu'une variable, déjà un terme calculé en Python) et les `{URIRef(base + id)}` se disent `f<{base}{id}>` : la paire n'est pas `directly-expressible`.",
+  "questions": [
+    {
+      "question": "Le générateur de dicts `{\"related_id\": URIRef(...)} for related_id in list_related_ids` ne sert qu'à fabriquer des liaisons pour `?related_id` alors que `for related_id in list_related_ids:` + `f<{base}{related_id}>` suffit : faut-il reclasser en minor-restructuring (et ne pas créditer `for @bindings in`) ?",
+      "where": "translated.ldpy:23-27 et original.py:23-30",
+      "if_yes": "reclasser en minor-restructuring ; retirer \"for @bindings in\" de constructions ; exclure de l'article.",
+      "if_no": "garder directly-expressible : la strate add_in_loop attend ce motif."
+    },
+    {
+      "question": "Les enveloppes `{URIRef(args.ARGUMENTS[\"base_uri\"] + ...)}` (sujet et objet) doivent-elles être `f<{args.ARGUMENTS[\"base_uri\"]}{...}>` ?",
+      "where": "translated.ldpy:24 et :27 ; original.py:26-28",
+      "if_yes": "needs-work : réécrire avec f<…> (vérifié équivalent, voir evidence).",
+      "if_no": "garder, mais la note doit dire pourquoi URIRef(...) est préféré."
+    }
+  ],
+  "evidence": "check OK. Dans des copies : (1) boucle simple `for related_id in list_related_ids:` + `+{ f<{base_uri}{package_dict[\"id\"]}> ontouml:containsModelElement f<{base_uri}{related_id}> }` -> check OK, donc le générateur de dicts n'est pas nécessaire. (2) mutant prédicat `ontouml:contains` -> FAIL (tué). (3) mutant `if package_id_contents_list:` -> `if True:` reste vert mais est équivalent (boucle vide, rien ajouté). Le pilote couvre multi, un seul, contents vide et clé absente ; get_package_contents est copié à l'identique, la récursion n'est pas atteinte (base case toujours), sans incidence sur l'écriture des triples. Le shim n'invente pas de logique.",
+  "triaged_by": "sonnet-5.5"
+}

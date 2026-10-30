@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : équivalence vérifiée par six mutants tués, reclassement minor-restructuring honnête (tuples remis en dicts), shim fidèle au dépôt.",
+  "questions": [],
+  "evidence": "check OK (module-state, graphe g2 comparé). Mutants dans des copies, tous tués : retrait de `@en` sur dcterms:source, sur skos:definition, îlot rdfs:range supprimé, rdfs:range -> rdfs:domain, owl:ObjectProperty -> DatatypeProperty, label alimenté par pdef. La clé `prange` omise sur la première ligne équivaut à `if prange:` pour des IRI (toujours vraies) ; sans cas faux possible ici. Shim : S() et REG[\"R-TOGAF\"] correspondent au dépôt (build_core_v5_3_0.py:32, enrichment_l_v5_3_0.py:11-12) ; le tbox de substitution n'est pas lu par la région. `{b.raw[…]}@en` au lieu de `?plab@en` est une limite connue du transpileur, déjà notée.",
+  "triaged_by": "sonnet-5.5"
+}

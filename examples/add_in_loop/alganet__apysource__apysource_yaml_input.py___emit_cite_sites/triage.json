@@ -1,0 +1,25 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Divergence confirmée : si `_text(file, …)` lève (ex. `file: [\"x\"]`), l'original a déjà ajouté `(node, a, sv:CiteSite)` quand la traduction, qui calcule le littéral avant l'îlot, n'ajoute rien ; le pilote (2 appels, aucun chemin d'erreur) ne le voit pas.",
+  "questions": [
+    {
+      "question": "Un `ValueError` levé en cours de boucle doit-il laisser le graphe dans le même état partiel dans les deux versions (l'original a déjà ajouté rdf:type du site courant), ce qui impose de reprendre l'ordre des ajouts ou de classer la paire minor-restructuring avec un pilote qui exerce les levées ?",
+      "where": "translated.ldpy:50 (`bindings = {… Literal(_text(file, …)) …}` avant `+{ }`) et original.py:55-57 (`g.add(type)` avant `Literal(_text(file…))`)",
+      "if_yes": "needs-work : ajouter au pilote des appels qui lèvent (file non textuel, cited_by non-liste, site non-dict, clé inconnue, `line: true`) et comparer le graphe partiel ; reclasser minor-restructuring (hissement du calcul).",
+      "if_no": "approuver en précisant que seul le graphe d'une exécution réussie compte."
+    },
+    {
+      "question": "Le dict `bindings = {\"node\": …, \"file\": …, \"frag\": …}` + `@bindings bindings` est-il un habillage superflu, alors que `+{ {node} a sv:CiteSite ; sv:citingFile {Literal(_text(file, …))} ; … }` passe sans variables ?",
+      "where": "translated.ldpy:50-56 et :66-67 ; original.py:55-58, 69",
+      "if_yes": "wrong-construction : retirer \"@bindings\" de constructions et réécrire avec {expr} (vérifié équivalent, voir evidence).",
+      "if_no": "garder, les variables ?node/?frag rendent le motif plus lisible."
+    }
+  ],
+  "evidence": "check OK sur le pilote d'origine. Dans une copie du driver, ajout de quatre appels : `cited_by` = [{file: ok.py}, {file: [\"x\"]}] -> `check` FAIL : « call[2].arg[0]: graphs not isomorphic (5 vs 4 triples) » (l'original garde le rdf:type du second site avant de lever, la traduction non) ; le check s'arrête au premier échec : les trois autres appels ajoutés (line true, cited_by non-liste, liste vide) n'ont pas été jugés séparément. Réécriture en copie avec `+{ {node} a sv:CiteSite ; sv:citingFile {Literal(_text(file, f\"{where}: file\"))} ; prov:wasDerivedFrom {frag_uri} . {frag_uri} sv:citedBy {node} }` et `+{ {node} sv:citingLine {Literal(line)} }` : check OK sur le pilote d'origine (l'écart du chemin d'erreur n'a pas été testé sur cette réécriture). Mutants tués sur le pilote d'origine : retrait de sv:citedBy, prédicat citingLine échangé, prov:wasDerivedFrom ?node, garde `line is not None` -> True. Appelant réel : yaml_input.py:441 seulement.",
+  "triaged_by": "sonnet-5.5"
+}
