@@ -59,5 +59,21 @@
     "method": "fixture:fixture.ttl entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl seulement : ex:Untouched porte maintenant exactement le même commentaire « DEPRECATED (v0.9): superseded a long time ago. »@en qu'ex:OldClass (voisin de même prédicat et même objet, autre sujet), et ex:OldClass porte ce même littéral sous dcterms:description (même sujet et même objet, autre prédicat) ; l'autre rdfs:comment d'ex:OldClass sert de voisin d'objet. En-tête de fixture.ttl et docstring de driver.py mis à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ ?s rdfs:comment {existing_deprecated_comment} } (sujet élargi ; appel 3)",
+      "-{ {entity_uri} ?p {existing_deprecated_comment} } (prédicat élargi)",
+      "-{ {entity_uri} rdfs:comment ?o } (objet élargi)",
+      "-{ } du commentaire remplacé par pass",
+      "-{ ?s dcterms:isReplacedBy ?old } (sujet élargi)",
+      "-{ {entity_uri} ?p ?old } (prédicat élargi)",
+      "-{ {entity_uri} dcterms:isReplacedBy {replaced_by_uri} } (objet borné)",
+      "-{ } de isReplacedBy remplacé par pass"
+    ],
+    "remaining": "`graph.bind(\"dcterms\", DCTERMS, override=False)` reste inobservé : un Graph() porte déjà dcterms et le harnais `demo` compare le graphe par isomorphisme, sans espaces de noms ; l'observer demanderait de modifier `demo` (dans original.py, interdit). Le contenu de l'article (candidat) reste à juger."
   }
 }

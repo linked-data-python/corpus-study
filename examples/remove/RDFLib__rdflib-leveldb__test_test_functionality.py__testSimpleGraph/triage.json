@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check initial : OK. Mutants sur une copie : l.46 `-{ {tarek} {likes} ?o }` -> VERT ; l.47 pizza->cheese -> VERT (le s{} est paresseux, jamais itéré, alors que g.query de l'original s'exécute) ; l.46 supprimée, l.45 sans (g2), l.24 sans (g2), l.20 {cheese}->{pizza} -> détectés ; l.46 sujet joker (vu par les notes) détecté. La région ne contient AUCUN joker dans son remove (`g.remove((tarek, likes, pizza))`) : elle n'illustre pas l'idiome de la strate `remove` (s, p, None). Clone : original.py est identique au dépôt (test_functionality.py:68-102). Article : NON. Le remove est 1 pour 1 sans joker, les lectures sont 1 pour 1, la région fait 34 lignes contre 35 ; le seul gain est de fusionner trois .add en un îlot, ce qui ne se lit pas en trois lignes.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le Dataset du pilote ajoute, juste avant le retrait, deux voisins de tarek likes pizza (tarek likes cheese, tarek eats pizza) en plus de bob likes pizza : les mutants `-{ {tarek} {likes} ?o }`, `-{ {tarek} ?p {pizza} }` et `-{ ?s {likes} {pizza} }` sont rejetés ; la traduction n'a pas changé ; le mutant de la dernière requête (jetée, paresseuse) reste équivalent et ne peut pas être tué."
 }

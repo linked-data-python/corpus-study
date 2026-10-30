@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check = OK. Mutants sur une copie (mktemp) : remplacer -{ {entity_uri} dcterms:isReplacedBy ?old } par pass -> ECHEC (16 vs 18 triplets) ; joker predicat/objet du commentaire -> ECHEC ; supprimer le -{ } du commentaire -> ECHEC ; sans @en -> ECHEC ; guard was_already_deprecated -> ECHEC ; startswith('DEPRECATED:') -> ECHEC ; MAIS `-{ ?s rdfs:comment {existing_deprecated_comment} }` (sujet joker) -> VERT, et `graph.bind(...)` remplace par pass -> VERT (un Graph() porte deja dcterms par defaut, l'appel ne s'observe jamais). Ajout a la fixture de litteraux piegeux (guillemets, \\n, backslash, @en-GB, ^^xsd:token, deux commentaires DEPRECATED @en/@fr, owl:deprecated \"TRUE\" et ^^xsd:string) et de 5 appels : original et traduction restent equivalents (le passage de Literal dans -{ } est correct). DCTERMS : le depot importe l'espace de rdflib ET le redefinit (deprecator.py:18 et 24), la traduction utilise l'import : meme IRI, sans effet. Pas de .format, pas de None possible dans -{ } (entity_uri, existing_deprecated_comment toujours lies).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "La fixture donne maintenant à ex:Untouched exactement le même commentaire DEPRECATED qu'ex:OldClass, et à ex:OldClass ce littéral sous dcterms:description : les mutants `-{ ?s rdfs:comment {existing_deprecated_comment} }` et `-{ {entity_uri} ?p {existing_deprecated_comment} }` sont rejetés ; la traduction n'a pas changé ; graph.bind reste inobservé (le harnais `demo` ne compare pas les espaces de noms)."
 }

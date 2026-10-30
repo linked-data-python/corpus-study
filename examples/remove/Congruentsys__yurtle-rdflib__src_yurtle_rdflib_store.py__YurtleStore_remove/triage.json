@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check = OK. Mutants sur une copie (mktemp) : suppression du `-{ }` -> ECHEC ; sujet élargi `-{ ?x {match_p} {match_o} }` -> ECHEC (appel 4) ; objet élargi -> ECHEC (appels 1 et 5) ; `-{ {match_s} ?x ?y }` -> ECHEC ; MAIS prédicat élargi `-{ {match_s} ?x {match_o} }` -> VERT (aucun voisin partageant sujet et objet avec un triplet apparié, DATA n'en a pas) ; et `if True` à la place de `isinstance(match_s, URIRef)` -> VERT (aucun sujet BNode dans DATA, code python pur non traduit, mais la branche n'est pas exercée). Équivalence : `@graph self.internal_graph` fait un instantané de l'attribut (`_ldpy_g1`) ; la région ne rebinde jamais `internal_graph`, donc équivalent ici. Les termes de l'îlot sont toujours liés (issus de `triples()`), donc ni None ni Literal('None') ne peuvent entrer : le piège « motif en donnée » ne frappe pas l'îlot lui-même. Pas d'appel `(None, None, None)` : justifié par la dépendance à l'ordre d'itération, la région en est responsable.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le voisinage de la fixture contient maintenant un triplet par terme du triplet lié (même sujet et objet, même prédicat et objet, même sujet et prédicat) : le mutant `-{ {match_s} ?x {match_o} }` est rejeté, ainsi que `if True` à la place de `isinstance(match_s, URIRef)` (nœud anonyme avec fichier source) ; la traduction n'a pas changé."
 }

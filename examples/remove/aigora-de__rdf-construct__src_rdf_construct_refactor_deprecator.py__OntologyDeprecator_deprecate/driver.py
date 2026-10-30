@@ -11,6 +11,12 @@ the region's own return value is a `DeprecationResult`, and rdflib compares a
 hands back the mutated graph itself (compared by isomorphism through the
 harness's `normalise`) together with every counter the region computed.
 
+The fixture holds one neighbour for each term of the fully bound comment
+removal in call 3: `ex:Untouched` carries the very same comment literal (a
+subject leaking into a wildcard would remove it), `ex:OldClass` carries the
+same literal under `dcterms:description` (a predicate leaking into a wildcard
+would remove it), and its other `rdfs:comment` is the object neighbour.
+
 The four calls walk the four paths through the region, and the *third* is the
 one the `remove` stratum exists for: ex:OldClass carries two stale
 dcterms:isReplacedBy values, and one `graph.remove((s, p, None))` — one

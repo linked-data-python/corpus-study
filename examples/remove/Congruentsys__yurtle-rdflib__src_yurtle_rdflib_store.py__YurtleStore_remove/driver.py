@@ -13,6 +13,16 @@ clears the dirty set and returns a count) without touching the filesystem.
 The stand-in compares by internal graph (isomorphism), dirty set and flush
 count — everything the region can change.
 
+The fixture also holds, for the fully-bound call (alice, knows, bob), one
+neighbour per term, each sharing two of the three terms with it and so
+surviving the call: `alice likes bob` (same subject and object, other
+predicate), `carol knows bob` (same predicate and object, other subject) and
+`alice knows carol` (same subject and predicate, other object).  `alice nick
+"Alice"` is the same neighbour for the call on `alice name "Alice"`.  A blank
+node with a `prov:definedIn` file is there so that the `isinstance(match_s,
+URIRef)` guard is observable: its triples are removed by `(None, name, None)`
+but its file must not be dirtied.
+
 The seven calls walk the wildcard shapes a store sees: `(s, p, None)`, a
 fully-bound triple, `(None, p, None)`, the same one-wildcard pattern with
 auto_flush on (so flush() runs), `(s, None, None)` on a subject with no
@@ -41,6 +51,8 @@ DATA = """
 ex:alice a ex:Person ;
     ex:name "Alice" ;
     ex:knows ex:bob, ex:carol ;
+    ex:likes ex:bob ;
+    ex:nick "Alice" ;
     prov:definedIn <file:///w/alice.md> .
 
 ex:bob a ex:Person ;
@@ -49,7 +61,13 @@ ex:bob a ex:Person ;
 
 # no provenance: _resolve_file_for_subject returns None and nothing is dirtied
 ex:carol a ex:Person ;
-    ex:name "Carol" .
+    ex:name "Carol" ;
+    ex:knows ex:bob .
+
+# a blank-node subject WITH provenance: the region must not dirty its file
+# (only a URIRef subject is resolved), whatever the file would be
+[] ex:name "Anon" ;
+    prov:definedIn <file:///w/anon.md> .
 """
 
 

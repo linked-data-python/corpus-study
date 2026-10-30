@@ -32,15 +32,68 @@ several-solutions / zero-solution / non-matching-neighbour cases the reading
 oracle asks for, against the two named graphs the region itself populates;
 the fixture's job is only to prove that reading is scoped to the right named
 graph and does not pick up the unrelated data.
+
+Neighbours of the removed triple.  The region fixes its own data and asserts
+exact counts on it (`len(g) == 3`, "tarek doesn't like cheese" is 0 matches),
+so the fixture cannot seed a neighbour of `(tarek, likes, pizza)` in
+<urn:graph> without breaking the region's own asserts.  What the driver can do
+is add them at the one moment the asserts are over and the removal is about to
+happen: the `Dataset` handed over returns, for <urn:graph>, a `Graph` whose
+`remove()` first adds, once, `tarek likes cheese` (same subject and predicate,
+other object) and `tarek eats pizza` (same subject and object, other
+predicate); `bob likes pizza`, which the region itself adds, is the third
+neighbour (same predicate and object, other subject).  All three must survive
+the removal of the one fully bound triple, and the final-state comparison
+(exact quad sets) sees any that does not.  The hook is the same on both sides
+(original: `g.remove(...)`; translation: `-{ }` ends in `graph.remove(...)`),
+and it adds the same two triples whatever pattern the removal receives, so a
+`-{ }` widened to a variable in any one position removes a neighbour and
+makes the two final states differ.
+
+What this does NOT cover: the region's last line, a query after the removal
+whose result is dropped.  The original executes it and throws the answer
+away; `s{ }` only builds a lazy query that nothing runs.  No change to that
+query can show in the graph, the return value or the output: the mutant that
+changes its `<urn:pizza>` into `<urn:cheese>` survives (it was run), and it is
+an equivalent mutant, not a weakness a driver can mend.
 """
 from pathlib import Path
+from rdflib import Graph, URIRef
 from rdfeval.harness import run_pair
 
 _FIXTURE = Path(__file__).parent / "fixture.ttl"
 
 
+_TAREK = URIRef("urn:tarek")
+_LIKES = URIRef("urn:likes")
+_NEIGHBOURS = (
+    (_TAREK, _LIKES, URIRef("urn:cheese")),   # same subject and predicate
+    (_TAREK, URIRef("urn:eats"), URIRef("urn:pizza")),  # same subject, object
+)
+
+
+class _Context(Graph):
+    """A named graph that, before its first removal, gains two neighbours."""
+
+    _seeded = False
+
+    def remove(self, triple):
+        if not self._seeded:
+            self._seeded = True
+            for t in _NEIGHBOURS:
+                self.add(t)
+        return super().remove(triple)
+
+
 class _DatasetProxy:
     """Forwards to an `rdflib.Dataset` without being a `Graph` instance."""
+
+    def get_context(self, identifier, quoted=False, base=None):
+        if identifier != URIRef("urn:graph"):
+            return self._ds.get_context(identifier, quoted, base)
+        return _Context(store=self._ds.store, identifier=identifier,
+                        namespace_manager=self._ds.namespace_manager,
+                        base=base)
 
     def __init__(self, ds):
         self._ds = ds

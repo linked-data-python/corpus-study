@@ -53,5 +53,18 @@
     "method": "entry:testSimpleGraph",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le Dataset fourni rend, pour <urn:graph>, un Graph dont remove() ajoute une fois, avant le premier retrait, deux voisins du triplet lié (tarek likes cheese : même sujet et prédicat ; tarek eats pizza : même sujet et objet) ; bob likes pizza, ajouté par la région, est le voisin de prédicat et d'objet. La fixture ne pouvait pas les porter : les assertions de la région comptent exactement les triplets de <urn:graph> (len(g) == 3, « tarek doesn't like cheese » = 0). Docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ ?x {likes} {pizza} } (sujet élargi)",
+      "-{ {tarek} ?x {pizza} } (prédicat élargi)",
+      "-{ {tarek} {likes} ?x } (objet élargi)",
+      "-{ {tarek} ?x ?y }",
+      "-{ } remplacé par pass"
+    ],
+    "remaining": "Le mutant `<urn:pizza>` -> `<urn:cheese>` dans la dernière requête (celle d'après le retrait) survit : la requête de l'original est exécutée mais son résultat est jeté, `s{ }` est paresseux et rien n'est exécuté, donc aucun état ni valeur ne la distingue (mutant équivalent). Pour l'exécuter des deux côtés il faudrait ajouter du code à la région. La région ne contient aucun joker dans son -{ } : elle n'illustre pas l'idiome (s, p, None) de la strate ; l'article_candidate est à juger."
   }
 }

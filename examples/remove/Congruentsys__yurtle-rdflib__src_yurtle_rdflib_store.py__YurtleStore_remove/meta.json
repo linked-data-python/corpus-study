@@ -42,5 +42,19 @@
     "method": "entry:remove",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture enrichie d'un voisin par terme du triplet entièrement lié (alice likes bob : même sujet et même objet ; carol knows bob : même prédicat et même objet ; alice knows carol existait déjà : même sujet et même prédicat), de `alice nick \"Alice\"` (voisin de l'appel (alice, name, None)) et d'un nœud anonyme portant prov:definedIn, pour que la garde `isinstance(match_s, URIRef)` s'observe ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ {match_s} ?x {match_o} } (prédicat élargi ; appels 0 et 1)",
+      "-{ ?x {match_p} {match_o} } (sujet élargi)",
+      "-{ {match_s} {match_p} ?x } (objet élargi)",
+      "-{ } remplacé par pass",
+      "isinstance(match_s, URIRef) -> True (appel 2, fichier du nœud anonyme marqué sale)",
+      "auto_flush and _dirty_files -> _dirty_files seul"
+    ],
+    "remaining": "Question 2 du tri (classification awkward vs not-expressible : le motif reçu en donnée, que -{ } ne sait pas porter, et le crédit de -{ }/@graph pour le seul retrait interne lié) : jugement, non traité. Le mutant `graph` instantané vs relu (@graph self.internal_graph) reste équivalent ici."
   }
 }

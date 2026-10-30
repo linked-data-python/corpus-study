@@ -11,6 +11,13 @@
 #     including a comment that starts with "DEPRECATED", carried by another
 #     subject -- a removal whose subject slot leaked into a wildcard would
 #     wipe them out and the oracle would see it.
+#   * one neighbour per term of the fully bound removal
+#     (entity, rdfs:comment, "DEPRECATED (v0.9): superseded a long time ago."@en):
+#     ex:Untouched carries the very same comment (same predicate and object,
+#     other subject), and ex:OldClass carries the very same literal under
+#     dcterms:description (same subject and object, other predicate).  The
+#     third neighbour, same subject and predicate with another object, is
+#     ex:OldClass's other rdfs:comment.
 @prefix ex:      <http://example.org/onto#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
@@ -21,6 +28,7 @@ ex:OldClass a owl:Class ;
     rdfs:comment "A class kept for backwards compatibility."@en,
                  "DEPRECATED (v0.9): superseded a long time ago."@en ;
     dcterms:isReplacedBy ex:StaleOne, ex:StaleTwo ;
+    dcterms:description "DEPRECATED (v0.9): superseded a long time ago."@en ;
     owl:deprecated true .
 
 ex:PlainClass a owl:Class ;
@@ -30,7 +38,8 @@ ex:PlainClass a owl:Class ;
 # --- neighbourhood: the same predicates, another subject ------------------
 ex:Untouched a owl:Class ;
     rdfs:label "Untouched"@en ;
-    rdfs:comment "DEPRECATED: but this one belongs to somebody else."@en ;
+    rdfs:comment "DEPRECATED: but this one belongs to somebody else."@en,
+                 "DEPRECATED (v0.9): superseded a long time ago."@en ;
     dcterms:isReplacedBy ex:StaleThree ;
     owl:deprecated true ;
     rdfs:seeAlso ex:Missing .
