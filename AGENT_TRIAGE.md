@@ -54,8 +54,10 @@ Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
    qui reste vert prouve que l'oracle est faible.
 4. **Un nom qui disparaît d'un côté** n'est pas comparé en mode
    « module-state » (seuls les noms communs le sont).
-5. **Les exceptions** : le harnais ne compare pas deux levées ; une
-   réécriture qui déplace un calcul pouvant lever passe inaperçue.
+5. **Les exceptions** : le harnais compare deux levées (même type, même
+   message), mais seulement sur les appels que le pilote fait : une
+   réécriture qui déplace un calcul pouvant lever passe inaperçue si aucun
+   appel n'atteint la levée.
 6. **Les notes du traducteur** affirmaient des faits faux sur le dépôt
    (« real call sites », « verbatim », « the mirror has no source ») : un
    shim dit verbatim qui ne l'est pas, un `__namespaces__` écrit à la main
@@ -67,6 +69,12 @@ Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
    `directly-expressible`), et dites-le dans la question.
 8. **Des enveloppes inutiles** : `{URIRef(x)}` ou `{Literal(x)}` là où
    `f<…>` ou `{x}` passent (`wrong-construction`, vérifiez l'équivalence).
+9. **Deux écarts du langage sont connus et remontés à Maxime** : `{expr}`
+   valant `None` donne `Literal("None")` (rdflib lève dans un ajout, fait un
+   joker dans un motif) ; l'objet de `s{ }` ne passe pas dans
+   `graph.query()`. Ne les signalez sur une paire que si le **dépôt
+   d'origine** atteint le cas (un appelant réel qui passe `None`, une requête
+   préparée passée à `graph.query`), avec le fichier et la ligne du dépôt.
 
 Deux défauts sont désormais **contrôlés mécaniquement** par le digest, ne
 les recherchez pas à la main : l'écart entre les `constructions` déclarées
