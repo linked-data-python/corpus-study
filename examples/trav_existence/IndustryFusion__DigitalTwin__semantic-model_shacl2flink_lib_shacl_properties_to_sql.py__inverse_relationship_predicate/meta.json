@@ -21,7 +21,8 @@
     "m{ }",
     ".first()",
     "prefixed name",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "variable"
   ],
   "translation_notes": [
     "prefixes: RDF->rdf, SH->sh (RDF/rdf: is imported/declared but unused by this region's own body, mirroring the unused import already present in original.py).",
@@ -47,5 +48,16 @@
     "method": "entry:inverse_relationship_predicate",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Un sixième appel `_first_hop_wrong_predicate` : premier pas qui porte ngsi-ld:hasObject sous ex:other et n'a pas de sh:inversePath (zéro solution pour la première lecture), second pas valide -> None. `constructions` complétée de `variable` (?v était employé, non déclaré).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "première lecture : sh:inversePath -> ?p, dernier élément du tuple (mutant du tri, call[5])",
+      "première lecture : sh:inversePath -> ?p (call[0])",
+      "seconde lecture : sh:inversePath -> ?p (call[0], call[3], call[4])"
+    ],
+    "remaining": "Cardinalité non éprouvée (plusieurs sh:inversePath sur un pas : g.value et .first() choisissent tous deux arbitrairement) ; classement de strate (trav_single_value plutôt que trav_existence) à confirmer."
   }
 }

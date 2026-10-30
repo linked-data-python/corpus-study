@@ -46,5 +46,23 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Fixture synthétique overlays/wiki-memory/shapes/partial.shacl.ttl (NoFrameShape : governsSubject et labelProperty sans frameRole ; NoSubjectShape : frameRole sans governsSubject ni labelProperty) et six appels : NoFrameShape attendu « page » puis « None » (assertion 1 fausse alors que sub:frameRole existe dans le graphe), NoSubjectShape avec subj \"None\" et labelprop None (zéro solution des deux g.value -> ok), puis un appel par assertion 2, 3, 4 où elle seule échoue.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "(a) existence : sujet libre ?x (call[4], call[5])",
+      "(b) existence : sub:labelProperty au lieu de sub:frameRole (call[4], call[5])",
+      "existence : prédicat -> ?p (call[3], call[4])",
+      "(c) assertion 4 -> assert True (call[9])",
+      "(d) assertion 3 -> assert True (call[8])",
+      "(e) assertion 4 : `== labelprop` -> `!= None` (call[6], call[9])",
+      "assertion 2 -> assert True (call[7])",
+      "governsSubject : sujet libre (call[0..2], call[6])",
+      "labelProperty : sujet libre (call[0..2], call[6])",
+      ".first() -> .one() sur labelProperty (call[6])"
+    ],
+    "remaining": ""
   }
 }

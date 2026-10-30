@@ -20,7 +20,8 @@
     "m{ }",
     "call suffix (g)",
     "prefixed name",
-    "variable"
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
@@ -46,5 +47,18 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Trois appels de voisinage : contentclass typé dans g et, dans self.e, seulement sujet de rdfs:label (appelé) ; seulement objet de rdf:type dans self.e (appelé) ; non typé dans g alors qu'un autre sujet l'est (non appelé). Entrées URIRef, comme l'appelant réel (owl2instances.py:601, terme issu d'un résultat SPARQL). `constructions` complétée de `interpolation {expr}` ({contentclass} était employé, non déclaré).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "lecture de self.e : rdf:type -> ?p (call[4])",
+      "lecture de self.e : sujet et objet échangés (call[1], call[5])",
+      "lecture de self.e : ?c ?p {contentclass} (call[1], call[5])",
+      "lecture de g : sujet -> ?c (call[6])",
+      "lecture de g : rdf:type -> ?p (call[2], call[6])"
+    ],
+    "remaining": ""
   }
 }

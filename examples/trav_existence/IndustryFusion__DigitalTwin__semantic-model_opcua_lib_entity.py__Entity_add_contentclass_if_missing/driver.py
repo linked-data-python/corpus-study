@@ -22,6 +22,24 @@ already covered by case 2's negative half):
   4. untyped in `g`, but typed in `self.e` (contentclass absent from `g`
      entirely) -> not called (False and False), and proves the read of `g`
      is not silently satisfied by `self.e`'s own type triple
+
+Neighbourhood that must not match (added by the repair of 2026-10-30, after
+triage showed that widening `rdf:type` to `?p` in the `self.e` read stayed
+green):
+
+  5. typed in `g`; in `self.e` contentclass is the SUBJECT of a non-type
+     triple only (`rdfs:label`) -> called.  Kills the mutant that widens
+     the predicate of the `self.e` read.
+  6. typed in `g`; in `self.e` contentclass is only the OBJECT of an
+     `rdf:type` triple (`ex:inst a ex:c6`) -> called.  Kills a mutant that
+     reads `self.e` with subject and object swapped or widened.
+  7. untyped in `g` but with a non-type triple there, while ANOTHER subject
+     is typed in `g` -> not called.  Kills the mutant that widens the
+     subject of the `g` read (case 3 had no type triple in `g` at all).
+
+The real caller (semantic-model/opcua/owl2instances.py:601) passes
+`shacl_rule['contentclass']`, a term out of a SPARQL result, hence a
+`URIRef`: the driver passes `URIRef`s.
 """
 from rdflib import Graph, Namespace, RDF
 
@@ -65,6 +83,27 @@ VERDICT = run_pair(
             "",
             "@prefix ex: <http://example.org/> . ex:c4 a ex:Thing .",
             EX.c4,
+        ),
+        # 5. g types it; self.e has it only as subject of rdfs:label -> called
+        _case(
+            "@prefix ex: <http://example.org/> . ex:c5 a ex:Thing .",
+            "@prefix ex: <http://example.org/> . "
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . "
+            "ex:c5 rdfs:label \"c5\" .",
+            EX.c5,
+        ),
+        # 6. g types it; self.e has it only as the object of rdf:type -> called
+        _case(
+            "@prefix ex: <http://example.org/> . ex:c6 a ex:Thing .",
+            "@prefix ex: <http://example.org/> . ex:inst a ex:c6 .",
+            EX.c6,
+        ),
+        # 7. g: c7 untyped (label only), another subject typed -> not called
+        _case(
+            "@prefix ex: <http://example.org/> . "
+            "ex:c7 ex:label \"x\" . ex:other a ex:Thing .",
+            "",
+            EX.c7,
         ),
     ],
 )

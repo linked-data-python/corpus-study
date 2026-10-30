@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK. Mutants dans une copie : première lecture `(m{ {steps[0]} ?p ?v }.first() or (None,None))[-1] != NGSILD.hasObject` : check reste OK (survit, élargit le prédicat lié) ; même élargissement sur la seconde lecture : FAIL call[3] (attrapé par le voisin ex:unrelatedPredicate). Dépôt d'origine : l'appelant (shacl2flink/lib/shacl_properties_to_sql.py:2037) passe un path pris dans g, termes RDF réels, pas de None. La cardinalité (plusieurs sh:inversePath sur un pas : g.value any=True contre .first()) n'est pas exercée mais les deux choisissent arbitrairement. Les notes classent honnêtement la région hors trav_existence (c'est du trav_single_value). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé d'un appel où le premier pas porte ngsi-ld:hasObject sous un autre prédicat que sh:inversePath ; le mutant ?p du tri meurt (call[5]), la traduction était juste, check OK."
 }

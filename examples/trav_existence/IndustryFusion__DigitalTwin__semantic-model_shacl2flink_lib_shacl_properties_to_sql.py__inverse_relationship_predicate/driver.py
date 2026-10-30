@@ -20,6 +20,13 @@ with no sh:inversePath at all (plus a neighbouring unrelated triple on
 that same node, to prove the read does not match on it), and a second hop
 whose sh:inversePath is itself a blank node (the nested-expression case
 the docstring calls out by name).
+
+Added by the repair of 2026-10-30, after triage showed that widening the
+predicate of the FIRST read to `?p` stayed green: a first hop that carries
+ngsi-ld:hasObject under another predicate than sh:inversePath, and has no
+sh:inversePath of its own (zero solutions for the first read), with a valid
+second hop -> None.  Kills that mutant, and exercises the zero-solution
+case of the first read (`.first()` -> None, `None != hasObject`).
 """
 from rdflib import BNode, Graph, URIRef
 from rdflib.collection import Collection
@@ -47,6 +54,18 @@ def _wrong_first_hop():
     g = Graph()
     step1, step2 = BNode(), BNode()
     g.add((step1, SH.inversePath, EX.somethingElse))
+    g.add((step2, SH.inversePath, EX.hasCartridge))
+    path = BNode()
+    Collection(g, path, [step1, step2])
+    return (g, path), {}
+
+
+def _first_hop_wrong_predicate():
+    # step1 points at ngsi-ld:hasObject through ex:other, not sh:inversePath;
+    # the second hop is valid -> None.  Neighbourhood for the first read.
+    g = Graph()
+    step1, step2 = BNode(), BNode()
+    g.add((step1, EX.other, NGSILD.hasObject))
     g.add((step2, SH.inversePath, EX.hasCartridge))
     path = BNode()
     Collection(g, path, [step1, step2])
@@ -91,5 +110,6 @@ VERDICT = run_pair(
     __file__,
     entry="inverse_relationship_predicate",
     calls=[_canonical, _wrong_first_hop, _wrong_length,
-           _second_hop_missing, _second_hop_is_bnode],
+           _second_hop_missing, _second_hop_is_bnode,
+           _first_hop_wrong_predicate],
 )

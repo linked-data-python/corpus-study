@@ -1,0 +1,26 @@
+# Synthetic (no counterpart in the source repository), added by the repair
+# of 2026-10-30: two shapes that each lack part of the frame annotations,
+# and serve as each other's neighbourhood.
+#
+# - wiki:NoFrameShape has sub:governsSubject and sub:labelProperty but NO
+#   sub:frameRole, while wiki:NoSubjectShape in the same graph HAS one: the
+#   existence read `(shape, SUB.frameRole, None) in g` must be false for
+#   NoFrameShape although sub:frameRole occurs in the graph, and although
+#   NoFrameShape has other sub: triples.
+# - wiki:NoSubjectShape has sub:frameRole but NO sub:governsSubject and NO
+#   sub:labelProperty: the zero-solution case of the two `g.value` reads
+#   (`str(None) == "None"`, `None == None`), while NoFrameShape carries
+#   both predicates for a leaking subject to pick up.
+@prefix wiki: <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix sub:  <https://pod.vardeman.me/vault/ontology/substrate#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+
+wiki:NoFrameShape
+    a sh:NodeShape ;
+    sub:governsSubject "<>" ;
+    sub:labelProperty dct:title .
+
+wiki:NoSubjectShape
+    a sh:NodeShape ;
+    sub:frameRole "page" .

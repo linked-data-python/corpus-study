@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK. Mutants dans une copie : lecture de self.e avec `rdf:type` -> `?p` : check reste OK (survit) ; même lecture avec le sujet -> `?c` : FAIL call[0] ; lecture de g avec `?p` : FAIL call[2]. Le cas 1 met dans e un autre sujet, jamais contentclass avec un prédicat différent. Note non retenue comme drapeau : le seul appelant (semantic-model/opcua/owl2instances.py:601) passe shacl_rule['contentclass'], issu de get_type (opcua/lib/utils.py:770-776) qui peut valoir None ; {None} donnerait Literal(\"None\") alors que g.value(None, RDF.type) est un joker, mais je n'ai pas établi que la ligne 601 est atteinte avec None. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé de trois appels de voisinage (contentclass non typé mais présent dans self.e, objet de rdf:type dans self.e, autre sujet typé dans g) ; le mutant ?p sur la lecture de self.e meurt (call[4]), la traduction était juste, check OK."
 }
