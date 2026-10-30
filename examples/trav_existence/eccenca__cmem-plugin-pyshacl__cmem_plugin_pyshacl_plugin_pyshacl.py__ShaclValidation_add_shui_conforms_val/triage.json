@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "`{Literal(False, datatype=XSD.boolean)}` est une enveloppe inutile pour une constante : le littéral Turtle `false` donne le même graphe ; la note sur le piège du booléen ne vaut que pour une valeur calculée.",
+  "questions": [
+    {
+      "question": "Le littéral constant doit-il s'écrire `false` (ou `\"false\"^^xsd:boolean`) dans l'îlot `+{ }`, comme le demande la ligne `coercion_datatype` d'INSTRUCTIONS.md §2 pour une valeur constante ?",
+      "where": "translated.ldpy:34 et original.py:30",
+      "if_yes": "needs-work : remplacer `{Literal(False, datatype=XSD.boolean)}` par `false` ; l'enveloppe `Literal(...)` est un crédit indu de l'interpolation `{expr}` (constructions à corriger).",
+      "if_no": "approuver : garder l'enveloppe si Maxime considère que la fidélité à `Literal(False, datatype=...)` prime sur la forme Turtle."
+    }
+  ],
+  "evidence": "rdfeval check OK. Copie avec `false` à la place de `{Literal(False, datatype=XSD.boolean)}` : OK (même graphe isomorphe). Mutants de la lecture (`{i} ?p ?o`, `?s sh:focusNode ?o`) et du prédicat d'écriture (`?q`) tués par call[0]. Dans une copie, ajout au pilote de `_mutate([\"result3\"], [])` (zero solution via la vraie fonction) : FAIL `raised AssertionError('Subject None must be an rdflib term') vs Graph` : l'original lève, la traduction écrit en silence `\"None\" shui:conforms false` (écart connu `{expr}` valant None) ; la note du traducteur « `+{ }` appelle `add((None,...))` donc lève » est fausse, et le zéro-solution n'est prouvé que par le mode « read » qui recopie la lecture hors de la région. Je ne le signale pas comme drapeau : le dépôt (plugin_pyshacl.py:664-673) passe les `sh:ValidationResult` du rapport pyshacl, qui portent toujours un `sh:focusNode`, et je n'ai pas trouvé de chemin qui donne None. Le stratifieur a mal étiqueté la paire (`.value()` utilisé comme sujet, pas comme test d'existence) : la note le dit déjà. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

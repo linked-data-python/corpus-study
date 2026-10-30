@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "La fonction ne rend rien et le pilote ne compare ni les avertissements ni la levée dans les cas où `uri` est absent : le terme lié `{rdflib.URIRef(uri)}` peut être remplacé par `?s` sans que rien ne change.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote les appels `force=False` sur un URI absent et sur un URI seulement objet (la levée `ValueError`, comparée par le harnais), avant d'approuver ?",
+      "where": "driver.py:49-51 (3 appels : un seul `force=False`, sur l'URI présent) ; translated.ldpy:16 et original.py:16",
+      "if_yes": "needs-work : ajouter `_case(\"http://example.org/absent\", False)` et `_case(\"http://example.org/onlyAnObject\", False)` ; la note « run_pair abandonne sur toute exception » est périmée, le harnais compare deux levées.",
+      "if_no": "approuver en admettant que la liaison du sujet n'est pas prouvée."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants dans des copies : `{rdflib.URIRef(uri)} ?p ?o` -> `?s ?p ?o` : OK (survit) ; remplacement du `raise ValueError(...)` par `pass` : OK (survit) ; tués : suppression du `not` (call[0] lève ValueError), `?s ?p {URIRef(uri)}`. Avec `?s ?p ?o` et un quatrième appel `_case(\"http://example.org/absent\", False)` ajouté au pilote : FAIL `call[3]: outcome differs (raised ValueError(...) vs None)` : le harnais compare bien les levées. Équivalence à la main : `URIRef(uri) not in rdf.subjects()` et `not bool(m{ {URIRef(uri)} ?p ?o }(rdf))` coïncident sur un Graph (les deux appelants du dépôt, fairworkflow.py:68 et fairstep.py:157, passent `rdf` et `force`). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

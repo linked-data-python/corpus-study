@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "shim-invents-logic"
+  ],
+  "summary": "Les deux lectures par triplet exact ((2) `top_entity rdf:type C` et (4) `o rdf:type cls`) survivent à l'élargissement du prédicat en `?p` (et (2) à celui du sujet ou de l'objet), faute de voisin qui ne diffère que par le prédicat ; le shim de `_resolve_expected_top_entity_uri`, dit « verbatim », omet la branche « un seul candidat typé » du dépôt.",
+  "questions": [
+    {
+      "question": "Faut-il exiger, avant d'approuver, un voisin qui ne diffère que par le prédicat (ex. `ex:e1 ex:other ex:TopClass`, et `ex:p2 ex:other ex:PartClass`) et un cas où le sujet de `rdf:type TopClass` est un autre sujet que `top_entity` ?",
+      "where": "translated.ldpy:50 (`{top_entity} rdf:type {URIRef(top_class_iri)}`) et :66 (`{o} rdf:type {target_cls}`) ; original.py:47 et :63 ; driver.py cas B et D",
+      "if_yes": "needs-work : ajouter ces voisins aux fixtures de B et D (le prédicat de (2) et (4) devient alors vérifié) ; la paire reste exclue des chiffres jusque-là.",
+      "if_no": "approuver en admettant que le prédicat des deux lectures `rdf:type` n'est pas prouvé par le pilote (seul le prédicat de (3) l'est)."
+    },
+    {
+      "question": "Le shim doit-il reproduire la branche de `_resolve_expected_top_entity_uri` (build.py:175-176, `if len(typed_entities) == 1: return str(typed_entities[0])`) plutôt que de rendre toujours `entity_uri` ?",
+      "where": "context_shim.py:28 et corpus/repos/TheWorldAvatar__mcp-tool-layer/src/pipelines/main_kg_building/build.py:131-176 ; driver.py cas A",
+      "if_yes": "needs-work : le shim n'est pas verbatim (la note du traducteur est fausse) ; dans le dépôt, le cas A (`<other> a TopClass`, `entity_uri` = e1 non typé) résout `top_entity` à `<other>` et ne lève pas « missing subject » ; refaire le shim (ou le pilote) pour que les cas A-C suivent le chemin réel.",
+      "if_no": "approuver : le shim est un stand-in identique des deux côtés, la région mesurée est inchangée ; corriger seulement la note « verbatim »."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutants sur translated.ldpy, dans des copies : `rdf:type {URIRef(top_class_iri)}` -> `?p {URIRef(top_class_iri)}` : OK (survit) ; `{top_entity} rdf:type {URIRef(top_class_iri)}` -> `?s rdf:type {URIRef(top_class_iri)}` : OK (survit) ; -> `{top_entity} rdf:type ?c` : OK (survit) ; `{o} rdf:type {target_cls}` -> `{o} ?p {target_cls}` : OK (survit). Tués : prédicat de (3) élargi en `?p` (FAIL call[3..5]), sujet de (3) élargi, classe de (4) remplacée par un sujet libre `?s`, (1) restreint à `rdf:type` ou à objet = sujet. Les garde (1) `not any(g.triples(...))` : les triplets sont des tuples toujours vrais, donc `bool(m{ })` est équivalent (pas de piège de véracité). Shim : lecture de build.py:131-176 (pas exécutée) ; la fonction réelle rend l'unique entité typée quand `entity_uri` n'est pas typé, le shim rend `entity_uri`. Les copies ont été supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

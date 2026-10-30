@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "`ev_ok` vaut False par construction (F2 est Done sans preuve) : l'îlot `b2:hasEvidence` peut être remplacé par un prédicat inexistant sans effet, et le prédicat de `hasState` élargi en `?p` reste vert.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un jeu de données où `ev_ok` vaut True (tous les Done ont une preuve) et un voisin qui porte `b2:Done` par un autre prédicat, avant d'approuver ?",
+      "where": "translated.ldpy:9 et :11 ; original.py:8 et :10 ; shim.py:13 (feats) ; 08-agents/agents_backlog_abox_v4_1_0.ttl (F2 Done sans preuve)",
+      "if_yes": "needs-work : ajouter au fixture un état Done complet (ou un second pilote avec `feats` sans F2) et `ex:F5 b2:otherState b2:Done` ; sans cela le prédicat de `hasState` et tout l'îlot `hasEvidence` ne sont pas prouvés.",
+      "if_no": "approuver en admettant que seul le résultat `ev_ok=False` et la liste `done` sont comparés."
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state, compare `done` et `ev_ok`). Mutants dans des copies : `{f} b2:hasState b2:Done` -> `{f} ?p b2:Done` : OK (survit) ; `{f} b2:hasEvidence ?ev` -> `{f} b2:hasNothing ?ev` : OK (survit) ; -> `{f} b2:hasState b2:Nope` : OK (survit) ; tués : `?f b2:hasState b2:Done`, `{f} b2:hasState ?s`, `{f} ?p ?ev` (ev_ok True), `?f b2:hasEvidence ?ev`. Véracité : le test d'origine est `is not None`, pas un test de vérité, et `.first()` rend None à zéro solution : pas de piège de littéral faux. Le dépôt (landscape/06-gates/semtech_supplementary_gates_v6_6_0.py:279-282) définit `feats = list(gbk.subjects(RDF.type, B2.Feature))`, le shim le fige à 4 features ; la ligne 281 (`done`) est du contexte hors région (lineno 282), mais sa traduction crédite quand même `bool(m{ })`. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
