@@ -44,5 +44,22 @@
     "method": "fixture:fixture.ttl entry:_division_members",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl complété de voisins qui partagent les autres termes de la branche et diffèrent d'un seul : restriction de la branche 3 (rdfs:subClassOf) sur une autre owl:onProperty, nœud de restriction non typé owl:Restriction atteint par rdf:type et par rdfs:subClassOf, restrictions de bonne propriété mais de mauvais remplissage (someValuesFrom division2, owl:allValuesFrom division1) atteintes par les deux formes, un membre à étiquette en minuscules et un membre sans étiquette pour la clé de tri (.lower(), repli sur l'IRI) ; troisième appel pour ex:division2, qui a des membres par chaque branche ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "suppression de owl:onProperty dans la branche 3",
+      "?restriction2 a owl:Restriction -> a ?t (branche 3)",
+      "?restriction a owl:Restriction -> a ?t (branche 2)",
+      "owl:onProperty oeo:OEO_00000504 -> owl:onProperty ?pp (branche 3, puis branche 2)",
+      "owl:someValuesFrom -> owl:allValuesFrom (branches 2 et 3)",
+      "suppression de .lower() dans la clé de tri",
+      "repli `or str(node)` -> `or \"\"`",
+      "rdfs:subClassOf -> rdf:type dans la branche 3",
+      "FILTER (?sector != {division}) -> FILTER (1 = 2)"
+    ],
+    "remaining": ""
   }
 }

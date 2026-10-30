@@ -56,3 +56,50 @@ ex:wrong_prop_sector rdf:type ex:restrictionC ;
 ex:restrictionC a owl:Restriction ;
     owl:onProperty ex:someOtherProperty ;
     owl:someValuesFrom ex:division1 .
+
+# --- added by the repair (see meta.json "repair") ---------------------------
+# Neighbours that share the other terms of branch 3 (rdfs:subClassOf a
+# restriction) and must NOT match it, one per bound term:
+#   - right type, right someValuesFrom, WRONG owl:onProperty (restrictionC,
+#     above, now also reached through rdfs:subClassOf);
+#   - right onProperty, right someValuesFrom, but the restriction node is NOT
+#     typed owl:Restriction (notRestriction), reached by BOTH rdf:type (branch
+#     2's shape) and rdfs:subClassOf (branch 3's shape);
+#   - right type and onProperty, WRONG filler: someValuesFrom division2
+#     (restrictionD) and owl:allValuesFrom division1 (restrictionE), reached
+#     by both shapes.
+ex:wrong_prop_sector_sub rdfs:subClassOf ex:restrictionC ;
+    rdfs:label "WrongPropSub" .
+
+ex:notRestriction a ex:SomethingElse ;
+    owl:onProperty oeo:OEO_00000504 ;
+    owl:someValuesFrom ex:division1 .
+ex:typed_by_non_restriction rdf:type ex:notRestriction ;
+    rdfs:label "TypedByNonRestriction" .
+ex:sub_of_non_restriction rdfs:subClassOf ex:notRestriction ;
+    rdfs:label "SubOfNonRestriction" .
+
+# Division2 has members of its own, through every branch: a call for division2
+# returns them and none of division1's.
+ex:restrictionD a owl:Restriction ;
+    owl:onProperty oeo:OEO_00000504 ;
+    owl:someValuesFrom ex:division2 .
+ex:typed_division2 rdf:type ex:restrictionD ;
+    rdfs:label "TypedDivision2" .
+ex:sub_division2 rdfs:subClassOf ex:restrictionD ;
+    rdfs:label "SubDivision2" .
+
+ex:restrictionE a owl:Restriction ;
+    owl:onProperty oeo:OEO_00000504 ;
+    owl:allValuesFrom ex:division1 .
+ex:typed_all_values rdf:type ex:restrictionE ;
+    rdfs:label "TypedAllValues" .
+ex:sub_all_values rdfs:subClassOf ex:restrictionE ;
+    rdfs:label "SubAllValues" .
+
+# Sort key: a member of division1 with a LOWERCASE label ("biomass" sorts
+# before "Energy" only if the key lower-cases) and a member with no label (the
+# key falls back to its IRI, which sorts between "energy" and "transport").
+ex:biomass oeo:OEO_00000504 ex:division1 ;
+    rdfs:label "biomass" .
+ex:unlabelled oeo:OEO_00000504 ex:division1 .

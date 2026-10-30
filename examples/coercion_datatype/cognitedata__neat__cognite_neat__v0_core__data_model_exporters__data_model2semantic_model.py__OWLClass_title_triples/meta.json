@@ -44,5 +44,21 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "pilote réécrit à la main : context_shim est retiré de sys.modules avant l'exécution de chaque côté, de sorte que chacun importe son propre shim et attache `OWLClass.title_triples` à sa propre classe OWLClass (avant, les deux côtés partageaient la classe, le second chargement écrasait le premier et le pilote comparait la traduction avec elle-même) ; il vérifie que les deux classes sont distinctes et que chaque propriété est celle de son fichier ; sept appels aux types du dépôt (id_ URIRef avec namespace en '#', en '/' et en '#_', libellé multi-mots, non ASCII, None, \"\", et un libellé non str truthy) avec comparaison des levées (type et message) ; docstring qui dit ce que chaque appel exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "translated.ldpy : dcterms:title -> dcterms:creator",
+      "translated.ldpy : if self.label: -> if True:",
+      "translated.ldpy : séparateur \" - \" -> \" ~ \"",
+      "translated.ldpy : return [] -> return [1]",
+      "translated.ldpy : remove_namespace_from_uri(self.id_) -> self.id_",
+      "original.py : DCTERMS.title -> DCTERMS.creator",
+      "original.py : if self.label: -> if self.label is not None:",
+      "original.py : séparateur \" - \" -> \" ~ \""
+    ],
+    "remaining": ""
   }
 }

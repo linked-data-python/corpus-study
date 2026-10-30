@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Expériences sur copie : (1) translated.ldpy `dcterms:title` -> `dcterms:creator` : VERT ; (2) original.py `DCTERMS.title` -> `DCTERMS.creator` : VERT ; (3) translated.ldpy `if self.label:` -> `if True:` et `return []` -> `return [1]` : VERT ; (4) littéral ` - ` -> ` ~ ` dans translated.ldpy : VERT, et dans original.py : VERT. Cause : OWLClass vient de context_shim, objet unique dans sys.modules ; _exec_artefact charge original.py puis translated.ldpy, le second `OWLClass.title_triples = …` remplace le premier, et demo() des deux côtés lit donc la propriété traduite. Dépôt : title_triples (data_model2semantic_model.py:202-213) identique à original.py ; remove_namespace_from_uri du shim est une réduction fidèle de rdf_.py:34-87 (branche validation='prefix') ; label est `str | None`. Seule paire de tout examples/ avec ce motif d'affectation sur classe du shim (grep). Pas d'article : le gain est nul (`DCTERMS.title` -> `dcterms:title` plus une ligne @prefix, le Literal reste en rdflib).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote réparé : chaque côté charge maintenant son propre shim et appelle sa propre propriété (le vert précédent comparait la traduction avec elle-même) ; les mutants sur translated.ldpy et sur original.py échouent maintenant."
 }
