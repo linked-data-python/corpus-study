@@ -1,6 +1,8 @@
 {
   "priority": "low",
-  "flags": ["article-example"],
+  "flags": [
+    "article-example"
+  ],
   "summary": "Rien à signaler : 4 .add sur sensorOfNN dans une boucle deviennent un seul +{ } (deux `a`), f<…sensor_{i + 1}_{idOfNN}> équivalent à la concaténation ; mutants détectés ; candidate propre pour l'article.",
   "questions": [
     {
@@ -11,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK (module-state). Mutants sur copie : suppression de `a sdo:Sensor` -> FAIL (8 vs 6 triplets) ; `sensor_{i}_` au lieu de `sensor_{i + 1}_` -> FAIL (graphe et valeur sensorOfNN). Dépôt : addHardware (l.95-105) et inputOfNN (l.67) identiques au shim ; en réel sensor_list_ est un set d'entiers 0-5 et sensor_info_ une str (l.436-437 environ), donc Literal(sensor_info_) gardé en Python n'introduit pas d'écart. Les valeurs du shim sont illustratives (sensor_list_=[0,2]) : zéro itération non testée mais trivialement équivalente (aucun triplet des deux côtés).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : `@graph g` rebindait schema/sosa_extend/ssn_extend que le g du dépôt porte et sérialise ; pilote renforcé (passe avec le g du dépôt, liaisons comparées), traduction corrigée en `+{ … }(g)`."
 }

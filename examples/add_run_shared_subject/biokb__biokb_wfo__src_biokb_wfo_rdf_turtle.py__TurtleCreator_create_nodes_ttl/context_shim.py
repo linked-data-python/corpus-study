@@ -7,7 +7,7 @@
 #
 # get_empty_graph is the region's own helper (present in the real
 # rdf/turtle.py, just above the extracted lines): it returns a fresh
-# rdflib.Graph. It also stashes the graph it built onto the caller's local
+# rdflib.Graph with the four prefixes the real helper binds. It also stashes the graph it built onto the caller's local
 # `self` (found via the call stack -- get_empty_graph() is called bare, not
 # as self.get_empty_graph(), so there is no other channel back) because
 # create_nodes_ttl's own return value is only a file path: comparing that
@@ -30,7 +30,7 @@
 import sys
 from types import SimpleNamespace
 
-from rdflib import Graph, Namespace
+from rdflib import XSD, Graph, Namespace
 from rdflib.compare import to_isomorphic
 
 BASIC_NODE_LABEL = "Taxon"
@@ -39,7 +39,13 @@ EXPORT_FOLDER = "/tmp/biokb_wfo_export"           # unused by the region
 
 
 def get_empty_graph() -> Graph:
+    # The four bind() calls are verbatim from the real helper
+    # (rdf/turtle.py:27-34): the ttl file the region writes carries them.
     g = Graph()
+    g.bind("w", namespaces.WFO_NS)
+    g.bind("n", namespaces.NODE_NS)
+    g.bind("r", namespaces.REL_NS)
+    g.bind("xs", XSD)
     caller_self = sys._getframe(1).f_locals.get("self")
     if caller_self is not None:
         caller_self.produced_graph = g

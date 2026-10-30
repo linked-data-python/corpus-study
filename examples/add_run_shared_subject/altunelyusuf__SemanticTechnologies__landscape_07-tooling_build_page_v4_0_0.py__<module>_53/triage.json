@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : un seul g.add traduit en @graph g + +{ } (ONT en IRI littérale, littéral @en constant), fixture réelle du dépôt, aucune branche ni levée possible.",
   "questions": [],
   "evidence": "rdfeval check : OK (module-state). Région d'un seul g.add (lignes 53-53 ; le site du tirage couvrait aussi la ligne 54, hors région, sans conséquence). HERE du shim pointe vers le clone réel (corpus/repos/.../landscape), donc 04-page/semtech_page_abox_v3_0_0.ttl est le fichier du dépôt, pas une fixture inventée ; ONT = URIRef(\"http://example.org/semtech/page\") identique à <http://example.org/semtech/page> (build_page_v4_0_0.py du dépôt). Un seul add : le défaut « évaluation avant ajout » ne s'applique pas. Prefixes élagués à rdfs: seul, imports élagués : propre.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : tous les mutants d'îlot meurent ; seul un renommage de préfixe survivait, pilote renforcé (liaisons de g comparées, le dépôt sérialise g), traduction juste."
 }

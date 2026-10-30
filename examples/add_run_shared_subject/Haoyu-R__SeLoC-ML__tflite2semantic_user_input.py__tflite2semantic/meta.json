@@ -18,7 +18,7 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "@graph",
+    "call suffix (g)",
     "+{ }",
     "prefixed name",
     "f<…>",
@@ -31,7 +31,8 @@
     "addHardware(value) returns a URIRef looked up from a plain Python dict keyed by an int code -- not a Namespace attribute with a constant local part -- so it stays a Python call, interpolated bare as `{addHardware(value)}`, not a prefixed name.",
     "Literal(sensor_info_) kept as an explicit Python call (interpolated as `{Literal(sensor_info_)}`) rather than bare `{sensor_info_}`, for the same reason as the dp-web4 region in this stratum: no ambiguity about the coercion policy producing the same plain literal.",
     "missing bindings: this is a module-level for-loop extracted from inside `tflite2semantic`, so sensor_list_, sensor_info_ (the function's own parameters), idOfNN and inputOfNN (computed earlier in the same function body) and addHardware (a nested function defined just above the loop) are not in the extracted context. Restored via context_shim.py: addHardware and the input-URI construction copied verbatim from the pinned commit; idOfNN/sensor_info_/sensor_list_ are illustrative call-site values of the right shape (two of addHardware's recognised sensor codes, so the loop runs twice with two different RDF.type values).",
-    "anti-vert-creux: pointed ssnextend:provideInput at sensorOfNN instead of inputOfNN in translated.ldpy; rdfeval check failed with 'graphs not isomorphic (8 vs 8 triples)' (same triple count, different content); restored, check OK again."
+    "anti-vert-creux: pointed ssnextend:provideInput at sensorOfNN instead of inputOfNN in translated.ldpy; rdfeval check failed with 'graphs not isomorphic (8 vs 8 triples)' (same triple count, different content); restored, check OK again.",
+    "Correction (réparation 2026-10-30) : `@graph g` avec `@prefix sdo:`, `sosaextend:`, `ssnextend:` rebindait sur g les espaces que le dépôt y a déjà liés sous `schema`, `sosa_extend` et `ssn_extend` (tflite2semantic_user_input.py:31-41) ; g est sérialisé en Turtle à la fin du script (l. 473 et 476), les trois préfixes du dépôt disparaissaient de la sortie. Preuve : pilote rejoué avec le g du dépôt (liaisons comprises), « prefix bindings lost [schema, sosa_extend, ssn_extend] ». L'îlot écrit maintenant dans g par le suffixe d'appel `+{ … }(g)`, qui ne touche pas aux liaisons ; `@graph g` retiré."
   ],
   "article_candidate": true,
   "draft_sha": "151cb55d561cc771",
@@ -50,5 +51,21 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deuxième passe « repo-graph » : les deux artefacts recopiés en dossier temporaire, `g = Graph()` remplacé par le graphe du module du dépôt (l. 17-41 verbatim, neuf bind()), comparés sur g par isomorphisme et sur les liaisons (toute liaison de l'original doit se retrouver dans la traduction) ; docstring qui le justifie par la sérialisation des l. 473 et 476.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "traduction d'origine (`@graph g` + `@prefix sdo:` etc.) : liaisons schema, sosa_extend, ssn_extend perdues",
+      "îlot supprimé",
+      "sujet {sensorOfNN} -> []",
+      "{addHardware(value)} -> []",
+      "{Literal(sensor_info_)} -> []",
+      "{inputOfNN} -> []",
+      "second `a sdo:Sensor` retiré",
+      "sensor_{i + 1} -> sensor_{i}"
+    ],
+    "remaining": "Mutants équivalents, non comptés : renommer `sdo:` ou `sosaextend:` est sans effet depuis que l'îlot passe par `(g)` (aucune liaison posée). constructions : « @graph » remplacé par « call suffix (g) » ; la paire reste-t-elle candidate pour l'article sous cette forme ?"
   }
 }

@@ -9,7 +9,6 @@ from context_shim import addHardware, idOfNN, inputOfNN, sensor_info_, sensor_li
 ssn_extend = Namespace("https://w3id.org/tinyml-schema/neural-network-schema/ssn_extend/")
 sosa_extend = Namespace("https://w3id.org/tinyml-schema/neural-network-schema/sosa_extend/")
 g = Graph()
-@graph g
 
 for i, value in enumerate(sensor_list_):
     sensorOfNN = f<https://w3id.org/tinyml-schema/neural-network-schema/neuralnetwork/sensor_{i + 1}_{idOfNN}>
@@ -18,4 +17,4 @@ for i, value in enumerate(sensor_list_):
            a sdo:Sensor ;
            sosaextend:hasSensorInfo {Literal(sensor_info_)} ;
            ssnextend:provideInput {inputOfNN}
-    }
+    }(g)

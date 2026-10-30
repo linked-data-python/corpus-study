@@ -30,7 +30,8 @@
     "Literal(taxon.full_name, datatype=XSD.string) etc. (valeur CALCULEE, pas constante) -> {taxon.full_name}^^xsd:string : verifie a la main que ce n'est PAS equivalent a une interpolation nue -- rdflib 7.2.1, Literal('x') != Literal('x', datatype=XSD.string) (le premier a .datatype=None, RDF 1.1 les dit egaux en theorie mais rdflib ne les construit pas egaux) -- la coercition par defaut (litteral simple) aurait donc SILENCIEUSEMENT change le graphe. `^^xsd:string` est la construction qui preserve exactement le datatype explicite d'origine.",
     "region non executable telle qu'extraite, corrigee dans original.py ET translated.ldpy a l'identique (regle 'rendre executable') : `import logging` manquant (logger: logging.Logger = ... leve un NameError sans lui) ; biokb_wfo (le paquet du depot) et tqdm ne sont pas installes dans cet environnement -- routes vers context_shim.py (biokb_wfo.constants, biokb_wfo.db.models, biokb_wfo.rdf.namespaces, tqdm).",
     "get_empty_graph() n'est pas dans la region extraite (aide presente plus haut dans le meme fichier source, hors des lignes 89-153) : shimmee en une simple Graph() fraiche. Piege methodologique evite : create_nodes_ttl ne RETOURNE qu'un chemin de fichier (ttl_path), independant du contenu du graphe -- comparer seulement la valeur de retour aurait ete un vert creux (voir INSTRUCTIONS_403 section 3). get_empty_graph() capture donc le graphe produit sur `self.produced_graph` (self recupere via la pile d'appel, puisque get_empty_graph() est appele nu, pas en self.get_empty_graph()) ; TurtleCreator.__eq__ (driver.py/context_shim.py) compare ce graphe par isomorphisme, ce qui fait du mecanisme normal de run_pair (comparaison des arguments d'appel) le veritable oracle. Verifie en sabotant volontairement une des trois +{ } de translated.ldpy : le pilote bascule bien en FAIL.",
-    "self.__ttls_folder : nom PAS mangle par Python (mangling uniquement lexical, a l'interieur d'un `class ...:` -- la region est extraite au niveau module, hors de toute classe)."
+    "self.__ttls_folder : nom PAS mangle par Python (mangling uniquement lexical, a l'interieur d'un `class ...:` -- la region est extraite au niveau module, hors de toute classe).",
+    "Correction (réparation 2026-10-30) : le get_empty_graph du dépôt lie XSD sous `xs` (rdf/turtle.py:27-34) et la région sérialise le graphe dans nodes.ttl ; `@graph graph` avec `@prefix xsd:` rebindait XSD sous `xsd`, et `xs:` disparaissait du fichier. Le shim avait réduit get_empty_graph à un Graph() nu, ce qui cachait l'écart ; ses quatre bind() sont rétablis. Preuve : pilote étendu, « graph/file prefix bindings lost [('xs', XSD)] ». Le préfixe de la traduction est maintenant `xs:` (`^^xs:string`), celui du dépôt."
   ],
   "draft_sha": "140443f747d645ca",
   "provenance": {
@@ -48,5 +49,25 @@
     "method": "entry:create_nodes_ttl",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deuxième passe « extended » : chaque côté appelé dans son propre dossier temporaire, comparé sur le chemin rendu, le graphe produit (isomorphisme et liaisons), nodes.ttl relu (triplets et préfixes), les enregistrements du logger du module, stdout et la levée ; trois cas : les lignes d'origine, des lignes aux types du dépôt (parent_id chaîne de chiffres, \"0\" et \"\", ipni \"\" et None, full_name avec guillemet, antislash, saut de ligne, é), zéro ligne. context_shim.py : get_empty_graph rétablit les quatre bind() du dépôt (w, n, r, xs).",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "traduction d'origine (`@prefix xsd:` sous `@graph graph`) : liaison xs perdue dans le graphe et le fichier",
+      "îlot principal supprimé",
+      "îlot HAS_PARENT supprimé",
+      "îlot SAME_AS supprimé",
+      "{parent_uri} -> []",
+      "{ipni_uri} -> []",
+      "{taxon.full_name}^^xs:string -> []",
+      "^^xs:string retiré sur role",
+      "if taxon.parent_id -> True / False / is not None",
+      "if taxon.ipni -> True / False / is not None",
+      "@prefix xs: renommé",
+      "logger.info retiré"
+    ],
+    "remaining": "Le shim garde des IRI example.org pour WFO_NS/NODE_NS/REL_NS/IPNI_NS et BASIC_NODE_LABEL = \"Taxon\" (le dépôt : https://www.worldfloraonline.org/taxon/wfo-, https://biokb.scai.fraunhofer.de/wfo/node#, …, \"DbWfo\") : sans effet sur l'équivalence, mais pas verbatim."
   }
 }

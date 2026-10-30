@@ -13,7 +13,7 @@ from context_shim import (
     tqdm,
 )
 from context_shim import namespaces as ns
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xs: <http://www.w3.org/2001/XMLSchema#> .
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -46,9 +46,9 @@ def create_nodes_ttl(self) -> str:
             taxon_uri = ns.WFO_NS[str(taxon.id).zfill(10)]
             +{ {taxon_uri} a {ns.NODE_NS[taxon.rank.capitalize()]} ;
                    a {ns.NODE_NS[BASIC_NODE_LABEL]} ;
-                   {ns.REL_NS["name"]} {taxon.full_name}^^xsd:string ;
-                   {ns.REL_NS["rank"]} {taxon.rank}^^xsd:string ;
-                   {ns.REL_NS["role"]} {taxon.role}^^xsd:string }
+                   {ns.REL_NS["name"]} {taxon.full_name}^^xs:string ;
+                   {ns.REL_NS["rank"]} {taxon.rank}^^xs:string ;
+                   {ns.REL_NS["role"]} {taxon.role}^^xs:string }
             if taxon.parent_id:
                 parent_uri = ns.WFO_NS[str(taxon.parent_id).zfill(10)]
                 +{ {taxon_uri} {ns.REL_NS["HAS_PARENT"]} {parent_uri} }
