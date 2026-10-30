@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "shim-invents-logic"
+  ],
+  "summary": "Le graphe est vide donc la boucle ne tourne jamais, et le contexte ajoute trois requêtes qui n'existent qu'APRÈS la région dans le dépôt, ce qui change la requête que la boucle de la ligne 86 exécute (la 3e du dépôt, pas la 6e).",
+  "questions": [
+    {
+      "question": "Faut-il alimenter curr_graph avec le vrai fichier du dépôt (rdf_crcns_query.rdf.xml, 734 triplets, déjà dans le clone) dans original.py et translated.ldpy, plutôt que laisser Graph() vide ?",
+      "where": "original.py:5 et translated.ldpy:7 (curr_graph = Graph()) ; dépôt : python/odml/scripts/rdf_crcns_query.py:18-19 (curr_graph.parse(FILE_PATH)) et fichier rdf_crcns_query.rdf.xml voisin",
+      "if_yes": "needs-work : parser le fichier du dépôt des deux côtés ; l'oracle compare alors des lignes réelles (voir evidence).",
+      "if_no": "approuver en acceptant que la paire ne prouve que « la requête parse et s'exécute sur un graphe vide »."
+    },
+    {
+      "question": "Le contexte doit-il s'arrêter à la 3e affectation de q (dépôt, ligne 69), puisque la boucle de la ligne 86 s'exécute dans le dépôt avec cette requête et que les trois suivantes (lignes 91, 120, 153) sont du code postérieur à la région ?",
+      "where": "original.py:42-115 et translated.ldpy:44-117 (affectations 4 à 6 de q) ; dépôt : rdf_crcns_query.py:69-85 (q juste avant le for de la ligne 86) et :91,:120,:153",
+      "if_yes": "needs-work : retirer les trois requêtes ajoutées ; sinon trois îlots s{ } sont crédités pour du code hors région et la boucle utilise une requête qui n'est pas la sienne (elle lèverait AttributeError sur row.doisec avec des données réelles).",
+      "if_no": "garder, mais alors dire que la région est « le fichier jusqu'à la ligne 178 » et non « les lignes 86-88 »."
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state, graphe vide, sortie vide). Mutants sur copies de translated.ldpy, tous VERTS : ?datasec a odml:Nope ; ?d a odml:Nope dans la dernière requête ; FILTER (1 = 2) dans la dernière requête ; suppression de toute la dernière requête (q devient la 5e) ; boucle remplacée par `for row in []`. Dans le dépôt, les for des lignes 47, 64, 86, 115, 148, 178 suivent respectivement les q des lignes 38, 51, 69, 91, 120, 153 : celui de la ligne 86 voit la 3e. Avec le contexte actuel mais le vrai fichier .rdf.xml parsé des deux côtés (copie), rdfeval check échoue des deux côtés par AttributeError: doisec (la 6e requête n'a pas ?doisec) : preuve que le contexte n'est pas celui du dépôt. Dans une copie réduite à q1-q3 + parse du vrai fichier, check OK et l'oracle devient sensible : FILTER (1 = 2) sur la 3e requête -> FAIL stdout differs ; ?uriX -> FAIL ; \"identifier\" -> \"identifierZ\" -> FAIL ; seul un mutant sur la 2e requête (non utilisée) reste vert. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
