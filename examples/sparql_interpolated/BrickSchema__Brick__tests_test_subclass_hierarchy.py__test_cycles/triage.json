@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "Le pilote ne prouve rien de l'îlot interpolé `{brick_class}` (corps de boucle jamais exécuté sur un graphe acyclique : remplacer toute la requête res2 par `[]` reste vert) ; et sur un graphe cyclique hors de l'espace brick: la traduction diverge de l'original.",
+  "questions": [
+    {
+      "question": "L'îlot res2 avec `{brick_class}` (le but de la strate) n'est atteint par aucun appel du pilote : faut-il exclure la paire des chiffres de sparql_interpolated tant qu'un moyen d'exercer la branche cyclique (le pilote ne peut observer qu'une levée commune aux deux côtés) n'est pas trouvé ?",
+      "where": "translated.ldpy:21-27 ; driver.py:27-30 ; fixture.ttl (entièrement acyclique) ; meta.json translation_notes (« PROOF… cannot be positively exercised »)",
+      "if_yes": "needs-work : ajouter un moyen d'observer la levée (appel où l'AssertionError est comparée en type et message des deux côtés, par exemple un fixture cyclique avec un pilote qui enveloppe l'entrée) ou exclure la paire du dénombrement des traductions prouvées.",
+      "if_no": "approuver, en acceptant que cette paire ne démontre rien sur l'interpolation en position de terme."
+    },
+    {
+      "question": "L'original reconstruit l'IRI en `brick:%s` % minify(brick_class), donc toujours dans l'espace brick: ; la traduction interpole l'IRI complète. Sur un cycle de classes hors de https://brickschema.org/schema/Brick# l'original ne le voit pas (seul le message d'assertion en pâtit), la traduction si. Cet écart (les deux versions lèvent, mais avec des messages différents) suffit-il à ne pas la compter « directly-expressible » équivalente ?",
+      "where": "translated.ldpy:23-24 et original.py:25-27",
+      "if_yes": "classification-doubt/needs-work : soit ajouter un appel (fixture cyclique mêlant brick: et un autre espace) pour montrer l'écart, soit corriger la note qui affirme une « exact identity round-trip ».",
+      "if_no": "approuver : l'écart n'existe que sur des cycles hors brick:, absents de Brick.ttl, et ne change que le message d'une assertion."
+    }
+  ],
+  "evidence": "rdfeval check OK. Mutant (copie) : le bloc `res2 = s{ … }(g)` remplacé par `res2 = []` reste vert : l'îlot interpolé entier est supprimé sans que le pilote le voie. Écart prouvé par exécution directe des deux versions (original.py avec g lu depuis un fichier turtle ; traduction transpilée) sur un graphe cyclique : brick:A->B->C->A, brick:D->A, plus x:P<->x:Q dans http://other/ns#. Original : AssertionError avec loops = {A->B, B->C, C->A} ; traduction : mêmes trois plus {P->Q, Q->P}. Sur les cycles brick:, les deux messages sont identiques. L'original lève bien dans le cas positif ; seul le harnais (qui s'arrête à la première levée dans un même try) l'empêche de le comparer. Note du traducteur « exact identity round-trip » vraie seulement pour l'espace brick:. Pas pour l'article.",
+  "triaged_by": "sonnet-5.5"
+}

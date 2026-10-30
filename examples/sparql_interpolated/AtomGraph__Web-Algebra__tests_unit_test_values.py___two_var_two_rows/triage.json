@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "La traduction renvoie un objet PreparedQuery paresseux (`return s{ … }` sans `(g).execute()`) là où l'original renvoie un rdflib `Result` ; le pilote le masque en matérialisant le résultat, mais les appelants réels du dépôt exigent un `Result`.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine exige un `rdflib.query.Result` en retour (Values.execute lève une erreur si `data` n'est pas un `Result`) ; la traduction renvoie un PreparedQuery paresseux, qui ne serait pas accepté. Faut-il considérer la paire comme non équivalente et la renvoyer en needs-work pour qu'elle écrive `s{ … }(g).execute()` ?",
+      "where": "translated.ldpy:13 et original.py:13 ; dépôt : corpus/repos/AtomGraph__Web-Algebra/src/web_algebra/operations/sparql/values.py:67-70 et :132, tests/unit/test_values.py:76 et :93",
+      "if_yes": "needs-work : ajouter `(g).execute()` à la fin de la ligne 13 (la paire reste verte, voir evidence) et dire dans la note que le type de retour compte.",
+      "if_no": "approuver en acceptant que le type de retour diffère (PreparedQuery contre Result), ce qui rend la paire non substituable chez les appelants du dépôt."
+    }
+  ],
+  "evidence": "rdfeval check OK sur la paire telle quelle. Exécution directe de la traduction transpilée : `_two_var_two_rows()` renvoie `ldpy.runtime.PreparedQuery`, `isinstance(v, rdflib.query.Result)` est False, `.vars` lève AttributeError. Dans une copie où j'ai ajouté `(g).execute()` en fin de ligne 13, le retour est un `SPARQLResult` (isinstance Result True, vars [s, o]) ET `rdfeval check` reste OK : le pilote ne distingue donc pas les deux versions (harness.materialise parcourt n'importe quel itérable). Dans le dépôt, Values.execute teste `isinstance(data, Result)` (values.py:67) et lit `data.vars`/`data.bindings` ; les tests passent `_two_var_two_rows()` à `execute` (test_values.py:76, :93). Types d'entrée vérifiés : EX_P/EX_A/EX_B sont des `str`, donc `{URIRef(...)}` est nécessaire (une `str` interpolée deviendrait un Literal) ; `f<{EX_P}>` n'est pas accepté dans s{ } (essayé : erreur de syntaxe), et dans `+{ }` il serait équivalent faute de @base, sans gain. Le `+{ }` à deux triples et `@graph as g` sont corrects. Pas pour l'article tant que le retour diffère.",
+  "triaged_by": "sonnet-5.5"
+}
