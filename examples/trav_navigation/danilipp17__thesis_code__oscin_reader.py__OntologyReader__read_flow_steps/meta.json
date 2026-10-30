@@ -45,5 +45,23 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Après run_pair sur fixture.ttl, le pilote ré-exécute chaque artefact sur 9 graphes de cas en ne changeant que la ligne de contexte `self, wp_uri = build_fixture()` (-> un shim._Reader frais sur le graphe du cas, wp_uri URIRef comme dans le dépôt, reader.py:671) et compare step_info, step_uri_to_name et stdout : deux agents à clé dans les deux ordres d'insertion (le break), agent inconnu et clé \"\" avant un agent à clé, agent à clé sur une autre étape, combinaisons de types (start+conditional, end+conditional, start+end), tous les champs portés par des prédicats voisins, valeurs multiples (nextStep, arguments dont une IRI et un littéral à langue), workflow sans étape à côté d'un autre qui en a, graphe vide.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "break -> pass",
+      "{step_uri} -> ?zz dans l'îlot hasAssociatedAgent",
+      "hasAssociatedAgent -> ?pp",
+      "nextStep -> ?pp",
+      "hasDecoratorArgument -> ?pp",
+      "rdf:type -> ?pp (StartStep, ConditionalStep, EndStep)",
+      "{wp_uri} -> ?w",
+      "îlot hasAssociatedAgent -> []",
+      "nextStep et hasDecoratorArgument tronqués à [:1]",
+      "ordre inversé des agents associés"
+    ],
+    "remaining": "L'équivalence du break repose sur l'ordre d'insertion commun à g.objects() et m{ } sur le store Memory (dit dans la docstring) ; le populator du dépôt ne lie qu'un agent par étape (populator.py:913-920)."
   }
 }

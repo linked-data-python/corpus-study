@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants sur copie : élargir un terme lié ({wp_uri}, {step_uri} -> ?w/?s) dans l'îlot externe, nextStep, hasDecoratorArgument, hasAssociatedAgent, StartStep, ConditionalStep, EndStep -> tous ECHOUENT ; remplacer chacun des trois îlots à boucle par [] -> ECHOUENT ; `if key:` -> `if True:` -> ECHOUE. SURVIT : `break` -> `pass` (un seul agent à clé dans le fixture). Copie enrichie (deux agents à clé de plus sur step:Cond) : le pair reste OK, et le mutant sans `break` ECHOUE alors -> l'équivalence tient pour une valeur multiple et l'ordre est le même. Les mutants sur la logique Python non traduite (`is_conditional and not is_start`, `isinstance(lit, Literal)`, `pass` -> `raise` sur JSONDecodeError) survivent aussi mais ce code est copié tel quel des deux côtés, donc sans incidence sur l'équivalence. shim.py ne contient que des liaisons (self.g, _str_value, _int_value, _local_name).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé le 2026-10-30 (9 graphes de cas par substitution de la ligne de contexte) : le break de la recherche d'agent est observé dans les deux ordres, traduction inchangée et verte."
 }

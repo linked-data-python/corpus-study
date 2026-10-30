@@ -48,5 +48,25 @@
     "method": "fixture:fixture.ttl entry:check_property_no_type",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Trois appels au lieu d'un : fixture.ttl, un second fixture fixture_cases.ttl (chacun des quatre membres de property_types dans CHAQUE boucle, un sujet typé par owl:Class dans chaque boucle, un ensemble de types mixte, des sujets à deux rdfs:domain / deux rdfs:range / deux de chaque pour la cardinalité de graph.subjects, et des voisins : type porté par rdfs:seeAlso, sujet sans domain ni range, builtin et nœud anonyme dans la boucle range, type de propriété en VALEUR de rdfs:domain) et un graphe vide.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rdf:Property -> rdf:Propert",
+      "owl:ObjectProperty -> owl:ObjectPropert",
+      "owl:AnnotationProperty -> owl:AnnotationPropert",
+      "owl:DatatypeProperty -> owl:DatatypePropert",
+      "second m{ {subj} a ?t } -> rdfs:seeAlso",
+      "m{ {subj} a ?t } -> ?p (chaque boucle)",
+      "?subj rdfs:domain [ ] -> ?subj ?pp [ ]",
+      "?subj rdfs:range [ ] -> ?subj ?pp [ ]",
+      "set(m{ ?subj rdfs:domain [ ] }) (doublons de sujet perdus)",
+      "if not existing -> if True",
+      "chaque boucle externe -> []",
+      "garde is_builtin retirée"
+    ],
+    "remaining": ""
   }
 }

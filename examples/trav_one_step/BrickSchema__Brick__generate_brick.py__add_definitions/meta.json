@@ -49,5 +49,21 @@
     "method": "entry:add_definitions",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Ce que la région journalise est comparé (un handler sur le logger racine imprime niveau et message, comparés comme stdout appel par appel) ; deux graphes de plus : les formes que le générateur du dépôt écrit (limites à deux et trois niveaux sous brick:Limit, une sous deux parents, un alias en profondeur avec owl:equivalentClass, une classe reliée par skos:broader seulement, un voisin owl:sameAs, une hiérarchie brick:Class qui contient certains setpoints inférés et pas d'autres) et la hiérarchie d'origine sans brick:Setpoint sous brick:Class (brick:Limit, atteint par le seul pas de longueur zéro de `*`, journalise alors son avertissement) ; trois CSV de cas écrits dans un répertoire temporaire où l'appel s'exécute (seeAlso sans définition, ligne à deux colonnes, terme répété, virgule entre guillemets ; ligne trop longue après une bonne -> ValueError, graphe partiel comparé ; en-tête seul). Les graphes lient leurs préfixes comme le G du dépôt (generate_brick.py:74) : la requête brute d'origine en dépend, s{ } et @graph non, et le dépôt ne l'appelle jamais sur un graphe sans liaisons.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rdfs:subClassOf* -> rdfs:subClassOf",
+      "rdfs:subClassOf* -> rdfs:subClassOf+",
+      "m{ {param} brick:aliasOf ?o } -> ?pp, -> owl:equivalentClass, -> [], {param} -> ?zz",
+      "+{ seeAlso } retiré",
+      "+{ definition } retiré",
+      "garde len(definition) > len(header) retirée",
+      "garde definition[2] retirée",
+      "garde len(definition[1]) -> True"
+    ],
+    "remaining": "SELECT DISTINCT est un mutant équivalent (le chemin `*` de rdflib rend chaque paire une fois, même sous deux parents) : non compté. La question wrong-construction du tri (suffixe `(graph)` de s{ } redondant avec @graph graph) reste à juger."
   }
 }

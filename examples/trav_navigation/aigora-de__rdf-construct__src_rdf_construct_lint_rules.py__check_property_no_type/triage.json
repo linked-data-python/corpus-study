@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants sur copies : `if not types.intersection(property_types)` -> `if True` ECHOUE ; `if not existing` -> `if True` ECHOUE ; retrait de `not is_builtin(subj)` ECHOUE ; second `m{ ?subj rdfs:range [ ] }` -> rdfs:domain ECHOUE ; `types = set()` ECHOUE. Mais `owl:ObjectProperty` -> `owl:ObjectPropert`, `rdf:Property` -> `rdf:Propert` et `owl:AnnotationProperty` -> `owl:AnnotationPropert` restent VERTS (seul owl:DatatypeProperty est dans le fixture). Fixture enrichi en copie (sujets typés par chacun des trois autres types, un sujet à deux rdfs:domain, un à deux rdfs:range, un à deux de chaque) : OK, donc les doublons de sujet (graph.subjects renvoie un sujet par triple) sont reproduits à l'identique par m{ }. context_shim.py : fidèle au dépôt (aucune logique ajoutée). Pas article-example : substitution 1-pour-1 sans gain net.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé le 2026-10-30 (fixture_cases.ttl + graphe vide) : les quatre membres de property_types sont exercés dans les deux boucles, les mutants de faute de frappe meurent, traduction inchangée et verte ; set() sur la boucle range est un mutant équivalent (le dédoublonnage `existing` l'absorbe)."
 }

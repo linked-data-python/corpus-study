@@ -1,0 +1,45 @@
+# Second input graph for check_property_no_type (repair 2026-10-30): the
+# cases fixture.ttl leaves out.  Each subject decides one term of the region.
+@prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Each of the four members of property_types, in each loop: a typo on any
+# of them turns that subject into an issue.
+ex:pDomRdf rdfs:domain ex:C ; a rdf:Property .
+ex:pDomObj rdfs:domain ex:C ; a owl:ObjectProperty .
+ex:pDomAnn rdfs:domain ex:C ; a owl:AnnotationProperty .
+ex:pDomDat rdfs:domain ex:C ; a owl:DatatypeProperty .
+ex:pRanRdf rdfs:range ex:C ; a rdf:Property .
+ex:pRanObj rdfs:range ex:C ; a owl:ObjectProperty .
+ex:pRanAnn rdfs:range ex:C ; a owl:AnnotationProperty .
+ex:pRanDat rdfs:range ex:C ; a owl:DatatypeProperty .
+
+# Typed, but by nothing in property_types: types is NOT empty and still an
+# issue, in each loop.
+ex:qDomClass rdfs:domain ex:C ; a owl:Class .
+ex:qRanClass rdfs:range ex:C ; a owl:Class .
+
+# Several types, one of them a property type: not an issue.
+ex:qMixed rdfs:range ex:C ; a owl:Class , owl:ObjectProperty .
+
+# Cardinality of the outer loops: graph.subjects() yields a subject once per
+# triple.  Two domains -> two issues (the domain loop does not dedup); two
+# ranges -> one issue (the range loop's `existing` check); two of each ->
+# two issues, both with the domain message.
+ex:dupDom rdfs:domain ex:C , ex:D .
+ex:dupRan rdfs:range ex:C , ex:D .
+ex:dupBoth rdfs:domain ex:C , ex:D ; rdfs:range ex:E , ex:F .
+
+# Neighbours that must NOT decide anything:
+# - a property type reached through another predicate than rdf:type
+ex:seeAlsoTyped rdfs:domain ex:C ; rdfs:seeAlso owl:ObjectProperty .
+# - a subject with no domain/range at all (only another predicate)
+ex:onlyComment rdfs:comment "no domain, no range" ; rdfs:subPropertyOf ex:x .
+# - a builtin subject in the range loop, untyped
+owl:fakeProp rdfs:range ex:C .
+# - a blank node in the range loop
+[] rdfs:range ex:C .
+# - the property type as a SUBJECT's domain value, not its type
+ex:domIsType rdfs:domain owl:ObjectProperty .

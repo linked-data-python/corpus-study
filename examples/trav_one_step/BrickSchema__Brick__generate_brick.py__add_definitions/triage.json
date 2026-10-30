@@ -1,6 +1,9 @@
 {
   "priority": "medium",
-  "flags": ["weak-oracle", "wrong-construction"],
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
   "summary": "Équivalence plausible et mutants d'îlot tués, mais le fixture n'a aucune hiérarchie à deux niveaux : le `*` de `rdfs:subClassOf* brick:Limit` (cas réel de Brick) n'est pas prouvé, et le suffixe `(graph)` de `s{ }` est redondant avec `@graph graph`.",
   "questions": [
     {
@@ -17,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Région identique aux lignes 687-764 du clone (diff vide) ; le shim n'ajoute que les Namespace et un brickschema.Graph vide (sous-classe d'rdflib.Graph), rien de logique. Seule altération de la région : le docstring de la traduction écrit « skos:definitions »/« rdfs:seeAlso » au lieu de « SKOS.definitions »/« RDFS.seeAlso » (cosmétique). Mutants dans une copie : is_alias = [] ROUGE ; aliasOf->sameAs ROUGE ; `param != brick:Limit and`->`True and` ROUGE ; `{URIRef(definition[2])}`->`{definition[2]}` ROUGE (l'enveloppe URIRef est nécessaire, sinon Literal) ; `if len(definition[1])`->`if True` ROUGE ; lang en->fr ROUGE ; brick:Limit->brick:Setpoint dans le s{ } ROUGE. SURVIVANT : `rdfs:subClassOf*` -> `rdfs:subClassOf` (OK) ; avec Deep_Max_Limit ajouté au fixture dans la copie, ce mutant devient ROUGE. Suffixe `(graph)` retiré : OK. Le BIND f-string reste en graph.query brut : tenté en s{ } avec `brick:{setpoint}` -> LdpySyntaxError (confirme la note), code Python/SPARQL identique des deux côtés ; son résultat n'alimente qu'un logging.warning non observé par le pilote, sans effet sur l'équivalence de la partie traduite. Non signalé : le cas `{expr}`=None (param vient de ligne de requête, jamais None).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé le 2026-10-30 (journal comparé, hiérarchies profondes du dépôt, cas où brick:Limit seul avertit, CSV de cas) : le `*` est prouvé, traduction inchangée et verte ; la question du suffixe (graph) reste un jugement."
 }
