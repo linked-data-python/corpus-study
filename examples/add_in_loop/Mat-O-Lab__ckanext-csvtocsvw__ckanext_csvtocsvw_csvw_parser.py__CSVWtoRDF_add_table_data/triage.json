@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check OK. Mutants dans des copies, tous VERTS avec le pilote d'origine : (a) `oa:value {cell}^^{format}` -> `{cell}^^xsd:string` ; (b) `+ data[\"dialect\"][csvw:skipRows]` supprimé de row_num (rejeté dès que skipRows=2 dans la fixture). Rejetés : `if unit:` -> `if False:`. Pilote étendu (colonnes xsd:boolean, xsd:date, xsd:dateTime, xsd:int, cellules \"1\", \"True\", \"007\", \"\", dateTime avec fuseau) : la traduction reste équivalente (littéraux normalisés identiquement, ex. '007'->'7'), donc pas de défaut de traduction, seulement un oracle pauvre. Les cellules réelles sont toujours des str (csvw_parser.py:parse_csv_from_url_to_list applique str() à chaque cellule), et les formats DataStoreTypes (boolean/date/dateTime) tombent précisément dans cette branche en usage réel. `f<{self.csv_url}/row={row_num}>` : OK dans une copie. Les deux bugs préservés (`.format(table)` ligne 32, `else: URIRef(cell)` mort) sont bien dans le dépôt et identiques des deux côtés ; la branche about_url falsy n'est pas exercée (KeyError des deux côtés). Classification directly-expressible et absence de `for @bindings` : acceptable (boucles imbriquées avec logique, pas des lignes de données).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant un second appel (skipRows=2, colonnes xsd:boolean/date/dateTime/int, cellules str) : les mutants `{cell}^^xsd:string`, skipRows et headerRowCount retirés de row_num, et `if unit:` -> `if False:` sont tous rejetés ; la traduction n'a pas changé."
 }

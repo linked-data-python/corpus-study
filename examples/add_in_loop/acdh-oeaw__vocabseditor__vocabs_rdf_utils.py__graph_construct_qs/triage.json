@@ -27,5 +27,6 @@
     }
   ],
   "evidence": "check OK. Mutants dans des copies, rejetés : `@graph g` du haut de boucle sorti avant la boucle (10 vs 9 triples) ; `@graph g` de la boucle collection sorti avant la boucle (10 vs 5) ; branche legacy_id remplacée par create_uri (exception). VERT à tort : `if x.contributor:` -> `if x.creator:` (translated.ldpy:36). Variante avec `{i.strip()}`, `f<{y.legacy_id}>`, `f<{y.create_uri()}>` : OK. original.py = lignes 27-53 du dépôt à l'identique (diff vide) ; get_subject()/as_graph() du dépôt rendent des URIRef/Graph (vocabs/models.py:544, 345), donc `{collection}` et `{main_concept_scheme}` gardent leur type d'IRI. Shim minimal, sans logique. Aucune des écritures n'est en `for @bindings` : justifié dans les notes, mais la stratum add_in_loop n'est donc créditée que par `+{ }` dans des boucles ordinaires.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant une collection avec seulement creator et une avec seulement contributor : le mutant `if x.contributor:` -> `if x.creator:` (et l'inverse) est rejeté ; la traduction n'a pas changé."
 }

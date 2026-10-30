@@ -51,5 +51,15 @@
     "method": "entry:graph_construct_qs",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "troisième appel (RESULTS_3) : un concept dont une collection n'a qu'un creator (contributor vide) et l'autre qu'un contributor (creator vide, deux noms), de sorte que les gardes `if x.creator:` et `if x.contributor:` se distinguent ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if x.contributor: -> if x.creator: (5 vs 4 triplets)",
+      "if x.creator: -> if x.contributor: (5 vs 5, non isomorphes)"
+    ],
+    "remaining": "Jugements non traités : classification directly-expressible vs awkward (trois @graph g à ré-écrire après chaque g = g + ...) ; Literal(i.strip()), URIRef(y.legacy_id), URIRef(y.create_uri()) à écrire {i.strip()} et f<{...}> (cosmétique, vérifié équivalent par le triage) ; la note de meta.json dit « plain {i} » alors que le code écrit Literal(...)."
   }
 }

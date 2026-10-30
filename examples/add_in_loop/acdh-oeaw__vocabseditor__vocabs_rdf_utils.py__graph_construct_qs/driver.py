@@ -33,6 +33,15 @@ translated.ldpy re-declares `@graph g` after each one (see meta.json).
 
 RESULTS_2 -- a single concept with no collection at all: the minimal case,
 only the scheme graph and the one `skos:inScheme` triple.
+
+RESULTS_3 -- one concept with two collections that each have only ONE of the
+two fields: COLL_3 has a `creator` and an empty `contributor`, COLL_4 an empty
+`creator` and a `contributor` (both are TextFields in the repository, blank
+string when unset).  Without them the guards `if x.creator:` and
+`if x.contributor:` cannot be told apart: COLL_1 has both, COLL_2 neither.
+Checked on a copy of translated.ldpy: replacing `if x.contributor:` by
+`if x.creator:` is rejected, and so is `if x.creator:` replaced by
+`if x.contributor:`.
 """
 from rdfeval.harness import run_pair
 from rdflib import Graph, Literal, URIRef
@@ -83,9 +92,28 @@ CONCEPT_2 = ModelStub(
     collection=QuerySetStub([]),
 )
 
+COLL_3 = ModelStub(
+    subject=URIRef("http://example.org/collection/3"),
+    graph=Graph(),
+    creator="Dave",
+    contributor="",
+    has_members=QuerySetStub([]),
+)
+COLL_4 = ModelStub(
+    subject=URIRef("http://example.org/collection/4"),
+    graph=Graph(),
+    creator="",
+    contributor="Eve; Frank",
+    has_members=QuerySetStub([]),
+)
+
 RESULTS_1 = QuerySetStub([CONCEPT_1, CONCEPT_2])
 RESULTS_2 = QuerySetStub([ModelStub(uri="http://example.org/concept/3", graph=Graph(),
                                      scheme=SCHEME, collection=QuerySetStub([]))])
+
+RESULTS_3 = QuerySetStub([ModelStub(uri="http://example.org/concept/4", graph=Graph(),
+                                     scheme=SCHEME,
+                                     collection=QuerySetStub([COLL_3, COLL_4]))])
 
 VERDICT = run_pair(
     __file__,
@@ -93,5 +121,6 @@ VERDICT = run_pair(
     calls=[
         ((RESULTS_1,), {}),
         ((RESULTS_2,), {}),
+        ((RESULTS_3,), {}),
     ],
 )

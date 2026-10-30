@@ -49,5 +49,17 @@
     "method": "entry:add_table_data",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deuxième appel (_make_self_typed) : table avec csvw:skipRows=2 et headerRowCount=1 (le csvw:url .../row=N dépend des deux termes de row_num), colonnes xsd:boolean (\"True\", \"1\", \"\"), xsd:date, xsd:dateTime (avec et sans fuseau) et xsd:int (\"007\"), cellules toujours str comme dans le dépôt (parse_csv_from_url_to_list applique str()), de sorte que le datatype calculé de oa:value n'est plus toujours xsd:string ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "oa:value {cell}^^{format} -> {cell}^^xsd:string",
+      "terme data[\"dialect\"][csvw:skipRows] retiré de row_num",
+      "terme data[\"dialect\"][csvw:headerRowCount] retiré de row_num",
+      "if unit: -> if False:"
+    ],
+    "remaining": "Jugements non traités (drapeau wrong-construction) : l'IRI csvw:url reste en {URIRef(\"{}/row={}\".format(...))} au lieu de f<{self.csv_url}/row={row_num}> (le triage l'a vérifié équivalent)."
   }
 }

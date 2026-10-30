@@ -20,7 +20,9 @@
     "@prefix",
     "@graph",
     "+{ }",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "prefixed name",
+    "typed literal"
   ],
   "translation_notes": [
     "prefixes: prov->prov, cvdo->cvdo, ndice->ndice, virtrdf->virtrdf, geo->geo, dowl->dowl, XSD->xsd, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl",
@@ -46,5 +48,17 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture reader (_context.py) étendu de trois lignes : ObjectId int 7, X float, Y int, iso3 \"MEX, FRA ,\" (items à strip(), dernier item vide) et accents ; ObjectId \"abc\" avec X=\"5\" et Y=\"\" ; ObjectId \"\" avec X=\"\" et Y=\"6\" ; dernier iso3 invalide pour que le global iso2 reste None des deux côtés ; docstring de driver.py écrite (le stub d'origine ne disait rien).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "suppression de `and latitude != ''` (72 vs 71 triplets)",
+      "suppression de `and longitude != ''` (72 vs 71)",
+      "isoitem = isoitem.strip() -> isoitem = isoitem (72 vs 71)",
+      "datatype xsd:nonNegativeInteger -> xsd:integer (non isomorphes, 71 vs 71)"
+    ],
+    "remaining": "Jugements non traités (drapeau wrong-construction) : les deux littéraux typés calculés restent en {Literal(..., datatype=...)} au lieu de {iso2.alpha_2}^^xsd:string et f\"POINT(...)\"^^virtrdf:Geometry (triage : vérifiés équivalents). Le reader reste un stand-in écrit à la main (le CSV n'est pas versionné)."
   }
 }

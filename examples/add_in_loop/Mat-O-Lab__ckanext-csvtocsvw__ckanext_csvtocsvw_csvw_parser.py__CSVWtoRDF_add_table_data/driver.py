@@ -19,6 +19,26 @@ tables:
     collection) and once with a single URI;
   - a default (annotation) column, both with and without ``csvw:aboutUrl``,
     exercising the computed-datatype literal (``oa:value``).
+
+A second call (``_make_self_typed``) exercises what the first one cannot
+tell apart.  Cells are always ``str`` in the repository
+(``parse_csv_from_url_to_list`` applies ``str()`` to each cell), and the
+CSVW formats DataStoreTypes produces (boolean, date, dateTime) fall in the
+default (annotation) branch, where ``oa:value`` is ``{cell}^^{format}``:
+
+  - columns of format xsd:boolean ("True", "1", ""), xsd:date, xsd:dateTime
+    (with and without a time zone), xsd:int ("007"), so that the datatype of
+    ``oa:value`` is not always xsd:string and the lexical forms get
+    normalised by rdflib;
+  - a table with ``csvw:skipRows`` = 2 and ``csvw:headerRowCount`` = 1, so
+    that the ``csvw:url`` ``.../row=N`` of each row depends on both terms of
+    ``row_num``.
+
+Mutants of translated.ldpy checked in copies, each rejected by this driver:
+``oa:value {cell}^^{format}`` -> ``{cell}^^xsd:string``; the
+``data["dialect"][csvw:skipRows]`` term removed from ``row_num``; the
+``data["dialect"][csvw:headerRowCount]`` term removed; ``if unit:`` ->
+``if False:``.
 """
 from types import SimpleNamespace
 
@@ -78,10 +98,43 @@ def _make_self():
     )
 
 
+def _make_self_typed():
+    table_c = URIRef("http://example.org/tableC")
+    return SimpleNamespace(
+        csv_url="http://example.org/tableC.csv",
+        tables={
+            table_c: {
+                "about_url": "http://example.org/tableC/row-{GID}",
+                "dialect": {CSVW.skipRows: 2, CSVW.headerRowCount: 1},
+                "columns": {
+                    "gid": {CSVW.name: Literal("GID")},
+                    "flag": {CSVW.name: Literal("flag"), CSVW.format: XSD.boolean},
+                    "day": {
+                        CSVW.name: Literal("day"),
+                        CSVW.format: XSD.date,
+                        CSVW.aboutUrl: "http://example.org/prop/day-{GID}",
+                    },
+                    "ts": {CSVW.name: Literal("ts"), CSVW.format: XSD.dateTime},
+                    "n": {CSVW.name: Literal("n"), CSVW.format: XSD.int},
+                    "plain": {CSVW.name: Literal("plain")},
+                },
+                "lines": [
+                    ["1", "True", "2020-04-01", "2020-04-01T10:00:00", "007", "a"],
+                    ["2", "1", "2021-12-31", "2020-04-01T10:00:00+02:00", "7", ""],
+                    ["3", "", "", "", "", "c"],
+                ],
+            },
+        },
+    )
+
+
 from rdfeval.harness import run_pair
 
 VERDICT = run_pair(
     __file__,
     entry='add_table_data',
-    calls=[lambda: ((_make_self(), Graph()), {})],
+    calls=[
+        lambda: ((_make_self(), Graph()), {}),
+        lambda: ((_make_self_typed(), Graph()), {}),
+    ],
 )

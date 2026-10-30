@@ -15,7 +15,8 @@
 # (checked via `gh api repos/dice-group/COVID19DS/contents/...`: the
 # directory holds only README, nuts/ and toRdf.py), so no real row data can
 # be recovered at all. This is a hand-written stand-in with the same shape
-# an iterable of OrderedDict rows, string-valued, using the real column
+# an iterable of OrderedDict rows, string-valued (except the int/float
+# rows added by the repair), using the real column
 # names the function branches on (ObjectId, iso3, adm0_name, X, Y, source,
 # published) plus one generic column to exercise the dynamic-predicate
 # default branch. It covers: several solutions (3 rows), a comma-separated
@@ -68,5 +69,38 @@ reader = [
         ("source", "https://example.org/costa-rica-info"),
         ("published", "2020-06-15"),
         ("extra_col", "third row note"),
+    ]),
+    # Rows added by the repair (see driver.py).  pd.read_csv(...,
+    # keep_default_na=False).to_dict('records') yields int/float for numeric
+    # columns, so ObjectId/X/Y are not always str in the repository.
+    OrderedDict([
+        ("ObjectId", 7),
+        ("iso3", "MEX, FRA ,"),
+        ("adm0_name", "c\u00f4te d'ivoire"),
+        ("X", 1.5),
+        ("Y", 2),
+        ("source", "http://example.org/s"),
+        ("published", "2020-07-01"),
+        ("extra_col", "caf\u00e9"),
+    ]),
+    OrderedDict([
+        ("ObjectId", "abc"),
+        ("iso3", "MEX"),
+        ("adm0_name", "peru"),
+        ("X", "5"),
+        ("Y", ""),
+        ("source", ""),
+        ("published", ""),
+        ("extra_col", ""),
+    ]),
+    OrderedDict([
+        ("ObjectId", ""),
+        ("iso3", "zzz"),
+        ("adm0_name", ""),
+        ("X", ""),
+        ("Y", "6"),
+        ("source", "x"),
+        ("published", ""),
+        ("extra_col", "last"),
     ]),
 ]
