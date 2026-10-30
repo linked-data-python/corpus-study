@@ -45,3 +45,26 @@ ex:UntargetedShape a sh:NodeShape ;
 # a NodeShape: must not match the first motif (rdf:type sh:NodeShape).
 ex:NotAShape sh:targetClass ex:Person ;
     sh:property ex:NameShape .
+
+# CONFLICTING WRITES on one sh:path (order-sensitive). process_property_shape
+# is last-write-wins on a path's range cardinality (sh:maxCount), so the
+# order in which the join yields its (shape, target_class, prop_shape)
+# triples decides the final `properties` -- this is what makes ordered=True
+# bite. ex:name already gets maxCount-less writes above; here five more
+# writes with five different maxCount values reach it, from two shapes and
+# four property shapes (ex:MaxOne, ex:MaxFive, ex:MaxNine in the first
+# shape; ex:MaxTwo in the second), so a reordering of the join that ends
+# on another write (reversed overall, for one) changes the final value.
+ex:ConflictShape a sh:NodeShape ;
+    sh:targetClass ex:Person ;
+    sh:property ex:MaxOne, ex:MaxFive, ex:MaxNine .
+
+ex:MaxOne sh:path ex:name ; sh:maxCount 1 .
+ex:MaxFive sh:path ex:name ; sh:maxCount 5 .
+ex:MaxNine sh:path ex:name ; sh:maxCount 9 .
+
+ex:OtherConflictShape a sh:NodeShape ;
+    sh:targetClass ex:Organisation ;
+    sh:property ex:MaxTwo .
+
+ex:MaxTwo sh:path ex:name ; sh:maxCount 2 .

@@ -44,5 +44,14 @@
     "method": "fixture:fixture.ttl entry:extract_shacl_constraints",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Fixture : écritures conflictuelles sur ex:name (quatre property shapes, deux node shapes, sh:maxCount 1/5/9/2), qui rendent ordered=True effectif.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "for … in reversed(list(m{ … }))"
+    ],
+    "remaining": "Seule la dernière écriture par chemin est observable : un réordonnancement qui la conserve n'est pas distingué."
   }
 }

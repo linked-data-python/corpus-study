@@ -48,5 +48,15 @@
     "method": "fixture:fixture.ttl entry:run_check_undefined_parent",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Fixture : classes à plusieurs parents (ex:Multi : trois parents non définis, un défini, owl:Thing, deux labels ; ex:Multi2 qui en partage deux ; ex:Mixed : un défini, un non défini) ; comparaison en multiensemble.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "une seule solution par class_uri (« premier parent seulement »)",
+      "break après la première issue"
+    ],
+    "remaining": ""
   }
 }

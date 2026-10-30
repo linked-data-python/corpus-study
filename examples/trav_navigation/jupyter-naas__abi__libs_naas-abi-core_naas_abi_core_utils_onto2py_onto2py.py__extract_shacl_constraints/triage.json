@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutant dans une copie : `for ... in reversed(list(m{...}))` reste OK sur la fixture livrée (ordre non observé malgré ordered=True) ; avec 4 property shapes conflictuelles ajoutées (S1: N1 maxCount 1, N2 5, N3 9 ; S2: N4 2 sur ex:name), la traduction réelle reste OK et le mutant inversé FAIL. Fuzz de 300 graphes aléatoires (formes IRI/BNode, 0-3 targetClass, 0-4 property, absence de rdf:type NodeShape, insertion mélangée), process_property_shape remplacé par un enregistreur : la séquence exacte d'appels (prop_shape, classe) est identique original/traduction dans 300/300 cas. Dépôt : SHACL = rdflib.Namespace(\"http://www.w3.org/ns/shacl#\") (onto2py.py:1286), conforme au driver ; le shim process_property_shape est identique à onto2py.py:1717-1748 sauf l'annotation `g: rdflib.Graph` supprimée (cosmétique, la note dit « unmodified »). Le shim ignore class_info (comme l'original) : l'argument classes[...] n'est donc jamais observé.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé : l'ordre de la jointure est désormais observé (le mutant inversé tombe) ; traduction juste. Un réordonnancement qui finit sur la même dernière écriture reste invisible, par construction de la région."
 }

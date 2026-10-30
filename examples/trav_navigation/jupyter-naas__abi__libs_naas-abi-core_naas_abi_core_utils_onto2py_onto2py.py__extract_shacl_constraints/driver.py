@@ -17,14 +17,22 @@ this driver supplies the real SHACL namespace explicitly; the translation
 mirrors that by writing `{SHACL.NodeShape}` etc. as interpolated predicate
 terms in the `m{ }` pattern instead of a `@prefix`.
 
-`ordered=True`: several property shapes across different node shapes can
-target the SAME property path, and process_property_shape's writes to that
-shared PropertyInfo are last-write-wins, so the join's *order* (not just its
-final content) is part of the region's meaning. The translation preserves it
-exactly -- `m{ }`'s nested nested-loop join is evaluated in written order,
-identical to the original's loop nesting (shape, then target_class, then
-prop_shape) -- but the fixture does not happen to create a conflicting write,
-so this flag currently documents intent more than it bites.
+`ordered=True`: several property shapes across different node shapes target
+the SAME property path (ex:name: MaxOne, MaxFive, MaxNine in ex:ConflictShape,
+MaxTwo in ex:OtherConflictShape, with five different sh:maxCount values),
+and process_property_shape's writes to that shared PropertyInfo are
+last-write-wins, so the order in which the join yields its triples decides
+the final `properties` -- the only thing the driver can observe, since the
+shim records nothing else. Then `ordered=True` bites: a mutant that iterates
+the join in reverse ends with another maxCount for ex:name and fails. A
+reordering that happens to end on the same last write (ex:MaxTwo) is not
+seen: only the last write to a path is observable. The order is reachable in the
+repository: extract_shacl_constraints (onto2py.py:1360) is run on the whole
+ontology graph, where two node shapes may constrain one path with different
+cardinalities. The sh:maxCount-less ex:NameShape / ex:AgeShape of the first
+shape still exercise the fan-out (2 target classes x 2 property shapes), the
+Python filter on `classes`, the zero-solution shape and the one-motif-only
+neighbours.
 """
 from pathlib import Path
 

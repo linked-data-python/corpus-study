@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutant dans une copie : ne garder que la première solution par class_uri (`_seen`) -> rdfeval check reste OK (VERT), donc le fixture ne distingue pas une jointure d'un « premier parent seulement ». Copie avec fixture enrichi (ex:Multi : parents U1,U2,U3,ClassG,owl:Thing + deux rdfs:label ; ex:Multi2 : U3,U1) et ordered=True : la traduction passe (OK, ordre de la liste identique), le même mutant échoue (FAIL). Shim (LintResult, _get_label, _get_local_name) comparé au dépôt : identique ; LintIssueType est un Enum au lieu de StrEnum, `.value` identique. Zéro solution (graphe vide) et voisinage (BNode classe, BNode/littéral parent, owl:Thing, parent défini) bien couverts.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé : la cardinalité de la jointure (un issue par parent non défini d'une classe) est désormais prouvée ; deux mutants tués, traduction juste."
 }

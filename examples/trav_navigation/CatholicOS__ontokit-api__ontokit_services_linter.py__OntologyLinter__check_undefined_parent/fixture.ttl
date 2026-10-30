@@ -37,3 +37,18 @@ ex:ClassI a owl:Class ;
 # a parent that is a literal (malformed data): excluded the same way.
 ex:ClassJ a owl:Class ;
     rdfs:subClassOf "not-a-class" .
+
+# Several parents on ONE class (the cardinality the join must preserve; real
+# ontologies routinely give a class many superclasses). ex:Multi has three
+# undefined parents, a defined one and owl:Thing, plus two labels (so
+# _get_label's "first label" is read for each of its three issues);
+# ex:Multi2 shares two of those undefined parents with ex:Multi (same
+# parent, different child must stay two issues); ex:Mixed has a defined
+# parent listed alongside one undefined parent (only one issue).
+ex:Multi a owl:Class ;
+    rdfs:subClassOf ex:U1, ex:U2, ex:U3, ex:ClassG, owl:Thing ;
+    rdfs:label "Multi" , "Multi bis" .
+ex:Multi2 a owl:Class ;
+    rdfs:subClassOf ex:U3, ex:U1 .
+ex:Mixed a owl:Class ;
+    rdfs:subClassOf ex:ClassG, ex:UndefinedM .

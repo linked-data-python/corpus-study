@@ -20,6 +20,14 @@ neighbours that must NOT match -- owl:Thing as parent, a defined parent, a
 class with no parent at all, a non-owl:Class subject, a blank-node class, a
 blank-node parent and a literal parent -- see fixture.ttl), and an empty
 graph for the zero-solution case.
+
+The fixture also holds classes with SEVERAL parents (ex:Multi: three
+undefined, one defined, owl:Thing; ex:Multi2 sharing two of those; ex:Mixed:
+one defined and one undefined). They exercise what the join of the
+translation must preserve: one solution per (class, parent) pair, hence one
+issue per undefined parent of a class, not "the first parent only" (a mutant
+that keeps one solution per class_uri, or breaks after the first issue,
+fails). Results are compared as multisets, as the region imposes no order.
 """
 from pathlib import Path
 
