@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le prédicat ou l'objet du `-{ {s} {p} {o} }` peuvent être élargis en jokers sans que le pilote le voie : le graphe de départ n'a aucun triplet voisin partageant le sujet et l'objet, ou le sujet et le prédicat, d'un triplet visé.",
+  "questions": [
+    {
+      "question": "Faut-il enrichir `seed()` pour qu'un `-{ }` dont le prédicat ou l'objet fuit en joker échoue (ajouter par exemple `ex:s1 ex:name ex:o1` et `ex:s1 ex:likes ex:o2` au graphe, voisins respectifs du triplet visé `(s1, likes, o1)`) ?",
+      "where": "driver.py:56-61 (`seed()`) et :63-68 (`CASES`) ; translated.ldpy:21 et original.py:19-20",
+      "if_yes": "needs-work : ajouter les deux voisins à `seed()`, relancer check, vérifier que `-{ {s} ?x {o} }` et `-{ {s} {p} ?x }` échouent (aujourd'hui verts). La traduction elle-même est juste.",
+      "if_no": "Approuver sur ce point : seul le joker sur le sujet est jugé utile (déjà détecté par la graine S2 qui partage `(likes, o1)`)."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp). ECHEC : `-{ }` -> `pass`, sujet élargi, prédicat+objet, sujet+prédicat, sujet+objet, tout élargi, garde `if True`, garde `m{ {s} {p} ?z }`, `URIRef`<->`Literal` échangés. VERTS : `-{ {s} ?x {o} }` (prédicat élargi) et `-{ {s} {p} ?x }` (objet élargi), ainsi que la garde `m{ {s} ?z {o} }` et `m{ ?z {p} {o} }`. Cause : le graphe a (s1 likes o1), (s1 name \"Alice\"), (s2 likes o1) : pour chaque triplet visé il n'y a aucun voisin qui partage sujet+objet ni sujet+prédicat. Équivalence sur la fidélité elle-même : dans une copie, j'ai étendu `seed()` (littéraux `\"Alice\"@en`, `\"Bob\"^^xsd:string`, `\"5\"^^xsd:integer`, `\"\"`, `\"0\"`, `\"None\"`, un littéral qui ressemble à une IRI) et `CASES` (neuf cas de plus, dont un prédicat non absolu et une IRI d'objet appartenant à un autre sujet) : check reste OK, donc `bool(m{ {s} {p} {o} })` et `-{ {s} {p} {o} }` se comportent comme `(s, p, o) in g` / `g.remove((s, p, o))` y compris sur les littéraux typés, étiquetés, vides ou faux. s, p, o sont toujours des termes liés (jamais `None`), donc l'écart `{expr}` = `None` ne s'applique pas. Dépôt d'origine : les appelants (ontospecies_extension/main.py:302-321) passent des `str`. Shim : `_is_abs_iri` est identique au dépôt (l.49-53) ; `locked_graph` est simplifié (FileLock et sérialisation retirés, hors région), sans logique ajoutée.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote n'observe aucun des noms préfixés crédités (`rdf:type`, `slowmo:Candidate`, `slowmo:RegardingMeasure`, `slowmo:AncestorTemplate`) : le seul appel qui crée le candidat le retire aussitôt, et le chemin où le candidat est gardé n'est pas exercé.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel où `add_motivating_information` réussit (un `mi` dont `slowmo:RegardingMeasure` est le `MEASURE`) en comparant le graphe muté par isomorphisme, pour que les trois affectations `candidate[...] = ...` traduites en noms préfixés soient observées ?",
+      "where": "translated.ldpy:14-16 (`candidate[rdf:type] = slowmo:Candidate`, etc.) et :9-10 (`@prefix`), original.py:14-16 ; driver.py:78-85 (deux appels, tous deux `return None`)",
+      "if_yes": "needs-work : ajouter l'appel (le `Resource` rendu ne se compare pas, il faut comparer `measure.graph` à part comme `GraphProbe` le fait déjà pour les arguments), relancer check, vérifier que les mutants ci-dessous échouent. La traduction elle-même est équivalente.",
+      "if_no": "Retirer `@prefix` / `prefixed name` des constructions créditées pour cette paire (seul l'îlot `-{ }` et `@graph` sont observés) ; sinon le chiffre de l'article crédite des constructions non vérifiées."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp). ECHEC : `-{ }` -> `pass`, rétréci à `rdf:type` ou à `slowmo:RegardingMeasure`, sujet élargi à `?x`. VERTS (le point faible) : suppression de `candidate[rdf:type] = slowmo:Candidate` ; suppression de `candidate[slowmo:AncestorTemplate] = template` ; suppression de `candidate[slowmo:RegardingMeasure] = measure` ; `slowmo:Candidate` -> `slowmo:Wrong` ; `@prefix slowmo:` pointé sur `http://example.com/other#` ; `@prefix rdf:` pointé sur rdfs. Cause : l'appel 2 efface `(candidate, ?, ?)`, donc ce que les affectations ont écrit n'est jamais vu. Vérification de l'équivalence sur le chemin non exercé : script à part dans la copie (non commité) qui lance les deux versions avec un `mi` qui correspond à la mesure et compare les graphes : `iso: True 15 15` pour la traduction fidèle ; avec `rdf:type` supprimé `iso: False 15 14` ; avec le mauvais `slowmo:` `iso: False 15 7` et le candidat est perdu. Les IRI sont bien celles du dépôt (`src/utils/namespace/_SLOWMO.py` : `_NS = http://example.com/slowmo#`, termes `Candidate`, `RegardingMeasure`, `AncestorTemplate` déclarés, aucun alias), donc l'équivalence tient ; seule la preuve manque. Shim : `add_motivating_information` est tronquée de la boucle `Signal` (déclaré dans l'en-tête) mais la condition de retour `None`, qui seule envoie la région vers son `-{ }`, est celle du dépôt (candidate_pudding.py:43-66) ; `add_convenience_properties` est identique au dépôt (91-116).",
+  "triaged_by": "sonnet-5.5"
+}

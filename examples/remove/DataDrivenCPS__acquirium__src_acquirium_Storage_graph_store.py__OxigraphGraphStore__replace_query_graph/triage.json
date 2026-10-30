@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le graphe à vider ne contient qu'un seul triplet (`stale ex:p 1`), donc un `-{ }` rétréci à `?s ex:p ?o`, à `stale ?p ?o` ou à `?s ?p 1` reste vert : l'oracle ne prouve pas que les trois jokers vident vraiment tout le graphe.",
+  "questions": [
+    {
+      "question": "Faut-il enrichir le graphe `_URI` du pilote de plusieurs triplets qui diffèrent par le sujet, le prédicat et l'objet (par exemple `stale ex:p 1`, `stale2 ex:q 5`, `stale ex:r \"x\"`), pour que le vidage de tout le graphe soit effectivement observé ?",
+      "where": "translated.ldpy:17-18 (`-{ ?s ?p ?o }`) et original.py:17-18 ; harness, translated.ldpy:50-51 (le graphe `_URI` initial)",
+      "if_yes": "needs-work : enrichir le graphe de la région dans le harnais des DEUX fichiers (il est identique des deux côtés), relancer check, vérifier que les trois rétrécissements ci-dessous échouent. La traduction elle-même est juste.",
+      "if_no": "Approuver : l'équivalence est établie à la main (même appel `graph.remove((None, None, None))` côté runtime) et seule la force de l'oracle est en cause, pas la traduction."
+    }
+  ],
+  "evidence": "check = OK (module-state). Transpilation vérifiée : `-{ ?s ?p ?o }` se réduit à `graph.remove((None, None, None))` (ldpy/runtime.py:785-811, un seul motif), identique à l'original ; `@graph target` capture `target` une fois, et la région ne le reliait jamais. Mutants sur une copie (mktemp), tous ECHEC : îlot -> `pass`, rétréci à `?s ex:q ?o`, `@graph` pointé sur l'autre graphe nommé (le voisin le détecte). Mutants VERTS : `-{ ?s <ex:p> ?o }`, `-{ <ex:stale> ?p ?o }`, `-{ ?s ?p 1 }`, `-{ ?s ?p ?o . ?s ?p ?o }` (le dernier est équivalent) ; aussi `if not len(graph):` -> `if False:` (équivalent : un `nt` vide se charge sans effet, mais la branche d'arrêt anticipé n'est donc pas distinguée). Ce sont des rétrécissements de jokers, pas un îlot supprimé ni un terme lié élargi : medium plutôt que high. Shim : `timed_debug` est identique mot pour mot à acquirium/internals/_log.py ; `_Inner.load` reproduit le chargement N-Triples dans le graphe nommé, sans logique propre à la région. Le seuil 8 Mo (`bulk_load`) n'est pas exercé mais n'est pas touché par la traduction.",
+  "triaged_by": "sonnet-5.5"
+}

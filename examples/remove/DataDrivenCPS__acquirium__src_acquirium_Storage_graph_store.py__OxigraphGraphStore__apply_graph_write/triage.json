@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : `target.remove((None, None, None))` devient `-{ ?s ?p ?o }(target)`, que le runtime exécute en `graph.remove((None, None, None))` (appel identique), et le pilote tue tous les mutants essayés.",
+  "questions": [],
+  "evidence": "check = OK. Transpilation : `_ldpy_.remove_from((target), (Variable('s'), Variable('p'), Variable('o')))` ; `remove_from` (ldpy/runtime.py:785) avec un seul motif fait `graph.remove((None, None, None))`, donc strictement le même appel que l'original. Mutants sur une copie (mktemp), tous ECHEC : îlot remplacé par `pass`, rétréci à `?s a ?o`, à `?s ex:label ?o`, à `ex:sensor1 ?p ?o`, `if replace:` -> `if True:` (appel 2) et -> `if False:`. Le fixture a un voisinage qui discrimine (EXISTING contient un triplet `a`, un triplet `ex:label`, deux sujets) et trois appels (replace vrai, faux, entrant vide). Pas de shim ni de modification de original.py au-delà de `import logging` (identique des deux côtés). Dépôt d'origine : `target` vient de `self.source_dataset.graph(uri)` (graph_store.py:664-669), un `Graph`, comme dans le pilote ; l'appel réel (graph_store.py:897) ne passe pas de motif en donnée.",
+  "triaged_by": "sonnet-5.5"
+}
