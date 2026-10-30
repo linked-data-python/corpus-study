@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidele, mais plusieurs termes lies de -{ } et du test d'existence `m{ {p} {OJBECT_MAP} {sROM} }` peuvent etre elargis en variable sans que le pilote rougisse : la fixture n'a aucun voisin partageant les autres termes (les notes disent pourtant que « widening one to a joker makes the driver FAIL »).",
+  "questions": [
+    {
+      "question": "Les -{ } des lignes 55 et 63 et le test d'existence de la ligne 68 doivent-ils rester bornes sur chacun de leurs termes lies (predicat et sujet compris), et la fixture doit-elle donc contenir des voisins qui partagent deux termes avec la cible (meme objet sous un autre predicat, ROM pointee par un autre sujet ou un autre predicat que rr:predicateObjectMap) ?",
+      "where": "translated.ldpy:55 et original.py:52 ; translated.ldpy:63 et original.py:60 ; translated.ldpy:68 et original.py:65 ; fixture.ttl",
+      "if_yes": "La fixture est insuffisante : needs-work. Ajouter a fixture.ttl, sur ex:PersonMap : `rr:predicateObjectMap [ rr:predicate ex:same ; rr:objectMap ex:same ] ; rr:predicateObjectMap [ rr:object \"v\" ; rr:objectMap [ rr:object \"v\" ] ] ; rr:predicateObjectMap [ rr:predicate ex:knows ; rr:objectMap ex:RealROM ]`, puis `ex:RealROM a rr:RefObjectMap ; rr:parentTriplesMap ex:PersonMap .` et `rr:predicateObjectMap rr:seeAlso ex:SeeROM . ex:SeeROM a rr:RefObjectMap ; rr:parentTriplesMap ex:Note .`. Teste : la traduction reste OK et les mutants ligne 55 predicat, ligne 63 sujet, ligne 68 predicat et sujet echouent ; reste vert, par construction exotique, le sujet elargi de la ligne 55. La traduction elle-meme est juste.",
+      "if_no": "Approuver tel quel ; mais alors la region ne prouve rien sur la portee des termes lies de ses retraits et du test RefObjectMap."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp), 25 au total. ECHOUENT : tous les elargissements des lectures m{ } (sujet ou predicat) lignes 21, 24, 31, 41, 43, 51, 52, 59, 70 (mutants a arite corrigee : `for _z, p, o in m{ ?_z ?p ?o }`), le predicat elargi de la ligne 63, la lecture `rr:RefObjectMap` -> `rr:TriplesMap`, `if p2 == rr:predicateMap` -> `if False`, `{self.PREDICATE}` -> `{p2}`, l'objet elargi de la ligne 68. SURVIVENT (verts) : (1) ligne 55 `-{ {p} ?z {o2} }`, `-{ ?z {OJBECT_MAP} {o2} }` ; (2) ligne 63 `-{ ?z {OBJECT} {o2} }` ; (3) ligne 68 `m{ {p} ?z {sROM} }` et `m{ ?z {OJBECT_MAP} {sROM} }` : le seul triple (?, objectMap, ex:JoinROM) de la fixture a pour sujet l'IRI rr:predicateObjectMap, donc l'elargissement ne change rien ; un POM realiste (`[ ... rr:objectMap ex:X ]`, sujet BNode) n'existe pas dans la fixture. Aussi verts mais equivalents : objet elargi `-{ {p} {OJBECT_MAP} ?z }` et `-{ {p} {OBJECT} ?z }` (toute valeur de (p, ., .) est retiree de toute facon). Correctif teste dans une copie (ajouts ci-dessus a fixture.ttl) : check reste OK sur la traduction ; echouent alors les mutants ligne 55 predicat, ligne 63 sujet, ligne 68 predicat et sujet ; survit ligne 55 sujet elargi (exige un objectMap imbrique dont l'objet est le noeud lui-meme). Note : si l'on ajoute seulement un POM -> ex:RealROM dont le parent est deja produit (BareMap), le mutant reste vert (triple deja ajoute, idempotent) : il faut un parent distinct. Les termes d'ecriture +{ } ne peuvent pas etre elargis (une variable non liee supprime le triple). constructions declare « suffixe d'appel (g) » et « nom prefixe » au lieu des libelles normes (rabattus par normalise).",
+  "triaged_by": "sonnet-5.5"
+}

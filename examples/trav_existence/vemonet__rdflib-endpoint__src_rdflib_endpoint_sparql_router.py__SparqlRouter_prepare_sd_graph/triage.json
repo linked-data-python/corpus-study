@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote compare le graphe avec lui-meme : original.py et translated.ldpy font `from shim import self`, le module shim est mis en cache, donc les deux cotes partagent le meme Graph ; une traduction qui n'ajoute rien, ou ajoute un autre triplet, reste verte.",
+  "questions": [
+    {
+      "question": "Chaque cote doit-il travailler sur son propre graphe `self.service_description` (et non sur l'objet unique qu'un `from shim import self` mis en cache rend aux deux), et le graphe de depart doit-il contenir des voisins du triplet cible (autre objet pour sd:resultFormat, autre predicat avec formats:RDF_XML, autre sujet) pour que la garde `not bool(m{ … })` soit exercee ?",
+      "where": "driver.py:11-15 ; shim.py:18-24 ; translated.ldpy:7-12 et original.py:4-7",
+      "if_yes": "Le pilote est insuffisant : needs-work. Re-importer shim a neuf pour chaque cote (retirer `shim` de sys.modules avant chaque execution, ou faire creer le graphe par le pilote) et amorcer le graphe de shim.py avec `(sd_subj, sd:resultFormat, formats:Turtle)`, `(sd_subj, sd:feature, formats:RDF_XML)` et `(ex:other, sd:resultFormat, formats:RDF_XML)`. Teste dans une copie : la traduction reste OK, les quatre mutants ci-dessous echouent.",
+      "if_no": "Approuver tel quel ; mais alors la region ne prouve rien : le vert ne distingue pas la traduction d'une absence de traduction."
+    }
+  ],
+  "evidence": "check = OK. Constat 1 (meta) : `rdfeval.harness._run_python/_run_ldpy` executent les deux artefacts dans la meme interpretation, et `from shim import …` rend le meme module (sys.modules) : `self.service_description` est un seul Graph, deja modifie par original.py quand translated.ldpy s'execute, et la comparaison module-state `service_description` compare l'objet a lui-meme. Mutants de translated.ldpy sur une copie (mktemp), tous VERTS : remplacer `+{ … }` par `pass` ; remplacer le triplet ajoute par `sd:resultFormat formats:Turtle` ; garde `if True` ; garde elargie en objet `sd:resultFormat ?x`, en predicat `?q formats:RDF_XML`, en sujet `?z …`, ou RDF_XML -> Turtle. Constat 2 : meme avec un graphe de depart amorce dans shim.py, les mutants de garde restent verts tant que le module est partage. Correctif teste dans une copie : driver.py retire `shim` de sys.modules avant chaque `_exec_artefact` et shim.py amorce les trois triplets ci-dessus -> check OK sur la traduction, ECHEC (4 vs 3 triplets) sur les trois gardes elargies et sur `pass`. La garde `if not … : add` est idempotente (add d'un triplet deja present), donc l'equivalence est vraisemblable ; c'est la preuve qui manque. Dans le depot d'origine (sparql_router.py:418) sd_subj vaut `next(...) or BNode()`, le shim le fixe a une URIRef : sans consequence pour `{sd_subj}`. Le shim ne fait que restaurer des liaisons (SD et FORMATS identiques a rdflib_endpoint/utils.py:5-6).",
+  "triaged_by": "sonnet-5.5"
+}

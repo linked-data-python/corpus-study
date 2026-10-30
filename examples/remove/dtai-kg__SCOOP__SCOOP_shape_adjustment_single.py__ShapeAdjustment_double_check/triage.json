@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidele, mais la fixture n'a aucun voisin partageant le sujet et l'objet d'une cible avec un autre predicat : le -{ } dont le predicat est elargi en variable reste vert.",
+  "questions": [
+    {
+      "question": "Le retrait -{ {identifier} {p} {o} } doit-il rester borne au predicat p (et non retirer aussi (identifier, q, o) pour un predicat q hors de double_check_list qui partage le meme objet) et le piege « meme sujet, meme objet, autre predicat » est-il voulu dans la fixture ?",
+      "where": "translated.ldpy:13 et original.py:10 ; fixture.ttl (<NodeShape/Person>, <NodeShape/Address>)",
+      "if_yes": "La fixture est insuffisante : needs-work. Ajouter dans fixture.ttl, sur <NodeShape/Person>, `sh:order 1 ; sh:name \"x\"` (meme objet que sh:minCount 1, predicats hors liste) ; verifier que `-{ {identifier} ?q {o} }` echoue. La traduction elle-meme est juste.",
+      "if_no": "Approuver tel quel ; mais alors la region ne prouve rien sur la portee du predicat dans le retrait."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp) : sujet elargi `-{ ?q {p} {o} }` -> ECHEC ; sujet+predicat `-{ ?q ?r {o} }` -> ECHEC ; predicat+objet `-{ {identifier} ?q ?r }` -> ECHEC ; garde `p in double_check_list` -> `True` -> ECHEC ; garde `\"NodeShape\" in identifier` -> `True` -> ECHEC (le property shape perd ses contraintes) ; `sh:in` remplace par `sh:nodeKind` dans la liste -> ECHEC. SURVIT (vert) : predicat elargi `-{ {identifier} ?q {o} }` : dans la fixture, les seuls predicats de la liste qui partagent un objet avec un autre predicat du meme sujet sont sh:minCount 1 / sh:maxCount 1, tous deux dans la liste. Aussi vert : objet elargi `-{ {identifier} {p} ?q }`, mais celui-la est equivalent (tout (identifier, p, *) avec p dans la liste est de toute facon retire). Lecture elargie `m{ ?q ?p ?o }` : equivalente aussi (le retrait est lie a identifier, idempotent). Correctif teste dans une copie : ajout de `sh:order 1 ; sh:name \"x\"` a Person -> la traduction reste OK, le mutant predicat elargi ECHOUE. Garde `p in list` et garde NodeShape : fausses dans le pilote (targetClass/property/node ; PropertyShape), donc bien exercees. Cas zero solution : <NodeShape/Absent> et la liste vide.",
+  "triaged_by": "sonnet-5.5"
+}
