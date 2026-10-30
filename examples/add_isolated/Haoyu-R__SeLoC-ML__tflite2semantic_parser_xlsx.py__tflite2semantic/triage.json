@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Le pilote (entry=None, j = 5 figé dans le shim) n'exécute que la branche else : les deux îlots des branches j == 0 et dernière couche ne sont jamais exécutés, et supprimer l'un d'eux laisse le check vert ; en outre `{Literal(j+1)}` / `{Literal(j)}` sont des enveloppes inutiles (`{j+1}`, `{j}` passent).",
+  "questions": [
+    {
+      "question": "Le pilote ne doit-il exercer que la branche médiane (j = 5, OperatorsLength() = 10), alors que les 4 des 7 `+{ }` des branches j == 0 et dernière couche ne sont jamais exécutés par la comparaison ?",
+      "where": "context_shim.py (j = 5, OperatorsLength() -> 10), translated.ldpy:14-23 et original.py:11-20",
+      "if_yes": "approuver malgré tout (l'équivalence des deux autres branches est établie à la main : voir evidence)",
+      "if_no": "needs-work : rendre la région multi-scénarios (j = 0, 5, 9) dans le driver, pour que ces îlots comptent dans le chiffre"
+    },
+    {
+      "question": "Faut-il remplacer `{Literal(j+1)}` et `{Literal(j)}` par `{j+1}` et `{j}` (l'entier Python est coercé en Literal xsd:integer, identique) ?",
+      "where": "translated.ldpy:16, 22, 26, 29",
+      "if_yes": "wrong-construction : corriger la traduction (4 enveloppes retirées) et relancer le check",
+      "if_no": "garder `Literal(…)` explicite et approuver"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Dans des copies : (1) j = 5 : suppression du `+{ {neuralNetwork} {nnet.inputLayer} {inputLayer} }` de la branche j == 0 -> check reste OK (mutant survivant, la branche n'est jamais atteinte). (2) Le même check avec j = 0 puis j = 9 dans le shim : OK dans les deux cas (la traduction est équivalente sur les trois branches, mais le pilote livré ne le montre pas) ; échanger inputLayer/outputLayer dans les prédicats de ces branches fait alors FAIL (non isomorphe), donc le défaut est la couverture, pas la traduction. (3) `{Literal(j+1)}`/`{Literal(j)}` -> `{j+1}`/`{j}` : OK pour j = 0, 5, 9. Dépôt d'origine (tflite2semantic_parser_xlsx.py:376-411) : idOfNN = str(uuid.uuid4()) donc `idOfNN` est bien une str concaténée dans un URIRef ; addCommonInfo (l.376-391) écrit réellement dans g (rdf:type nnet:Layer, shapeIn/shapeOut, etc.) et est inerte dans le shim : ces triples sont hors région (hors lignes 393-411) et le stub n'ajoute pas de logique, mais le graphe comparé est donc bien plus pauvre que celui du dépôt. Le doublon de `hasIndex` dans la branche else est un artefact fidèle du dépôt (l.408 et 411), sans effet sur un graphe (ensemble).",
+  "triaged_by": "sonnet-5.5"
+}

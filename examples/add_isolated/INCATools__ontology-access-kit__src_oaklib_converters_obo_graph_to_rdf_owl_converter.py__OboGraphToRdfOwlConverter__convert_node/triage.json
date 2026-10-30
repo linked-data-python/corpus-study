@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : traduction fidèle (6 g.add -> 6 `+{ }` avec `a owl:X` et `rdfs:label {source.lbl}`), pilote à 6 appels qui couvre chaque branche d'îlot ; seul @prefix rdf: (l.5) est inutilisé (`a`).",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (six branches if/elif, un seul `@graph target`, `a owl:Class` et le littéral simple par coercition de `{source.lbl}`) ?",
+      "where": "translated.ldpy:17-33 et original.py:15-29",
+      "if_yes": "la retenir ; retirer au passage `@prefix rdf:` (translated.ldpy:15), jamais employé",
+      "if_no": "approuver pour les chiffres sans la citer"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:_convert_node, 6 appels). Original identique au dépôt (src/oaklib/converters/obo_graph_to_rdf_owl_converter.py:92-111, indentation près) ; Node.lbl est une str dans le dépôt, donc `{source.lbl}` = Literal(str) simple ; _uri_ref du dépôt rend un URIRef. Mutants sur copie : suppression de l'îlot owl:Class, NamedIndividual->Class, DatatypeProperty->ObjectProperty : tous détectés (FAIL non isomorphe). Survivants : `if source.lbl` -> `is not None` et suppression du `raise ValueError` : ils portent sur du Python non traduit, recopié à l'identique ; sans conséquence pour l'équivalence des îlots (aucun appel du pilote n'atteint la levée ni un label vide, mais ces lignes ne sont pas dans une notation LD).",
+  "triaged_by": "sonnet-5.5"
+}

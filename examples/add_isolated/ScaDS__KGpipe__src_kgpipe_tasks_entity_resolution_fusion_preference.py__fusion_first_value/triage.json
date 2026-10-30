@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction correcte, mais le shim réduit canonicalize_entity_term/canonicalize_property_term à l'identité : `+{ {s} {p} {o} }` à la place de `+{ {s_can} {p_can} {o_can} }` reste vert, donc le point central de la région (les termes canonisés) n'est pas prouvé par le pilote livré.",
+  "questions": [
+    {
+      "question": "Le shim doit-il garder canonicalize_entity_term identique à l'identité, de sorte que s_can == s dans tout le pilote et que {s_can} ne se distingue pas de {s} ?",
+      "where": "kgpipe_context.py:60-65 (canonicalize_*), translated.ldpy:30 et 41 et original.py:30 et 41",
+      "if_yes": "approuver : l'équivalence est établie par mon expérience (voir evidence) ; c'est une limite de pilote déjà déclarée dans meta.json",
+      "if_no": "needs-work : faire que canonicalize_entity_term remappe au moins une IRI (ex. Alice -> Alice2) dans le shim, pour que la substitution s_can/p_can/o_can pèse dans le verdict"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Dans des copies : remplacer les deux `+{ {s_can} {p_can} {o_can} }` par `+{ {s} {p} {o} }` -> check reste OK (mutant survivant). Avec un canonicalize_entity_term qui remappe Alice -> Alice2 dans la copie du shim : la traduction fidèle reste OK (donc équivalente) et le mutant `{s}` fait FAIL. Autres mutants détectés : suppression de chacun des deux îlots (7 vs 4 et 7 vs 6 triplets), `rdf:type` -> `rdfs:label` dans la garde, négation de la garde sur o_can. Dépôt (src/kgpipe_tasks/entity_resolution/fusion/preference.py:147-212) : les vrais canonicalize_* renvoient un URIRef (ou le terme tel quel), donc `{s_can}` reste une IRI et `{o_can}` un terme RDF, pas de coercition de str ; l'identité du shim est bien le chemin « pas de correspondance » du dépôt, pas une logique inventée. Les listes selected/discarded (TrackRecord) ne sont pas comparées par le harnais. @prefix owl:, rdfs:, skos: sont déclarés mais inutilisés (seul rdf: l'est, via `rdf:type` en expression).",
+  "triaged_by": "sonnet-5.5"
+}

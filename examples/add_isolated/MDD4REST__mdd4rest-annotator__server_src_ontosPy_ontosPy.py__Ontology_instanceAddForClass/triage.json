@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : deux `+{ {x} a {aClass} }` fidèles, driver écrit à la main qui couvre les 6 branches (URIRef, str avec et sans ns, ns explicite, deux levées, chaîne vide) et compare graphe et résultat/erreur.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:instanceAddForClass, driver à la main). Original identique au dépôt (server/src/ontosPy/ontosPy.py:1168-1188). allclasses vient de __getAllClasses (l.408 ss.), des URIRef, donc `{aClass}` reste une IRI ; sessionGraph = rdflib.Graph() et sessionNS = Namespace(...) comme dans le shim (l.161-162). Mutants sur copie, tous détectés : suppression de l'îlot URIRef (cas A), suppression de l'îlot str (cas B, C, F), sujet/objet échangés. Remarque sans effet sur la paire : setSessionGraphNamespace (l.177-181) peut mettre une str dans sessionNS, ce qui ferait lever `ns[anInstance]` des deux côtés de la même façon.",
+  "triaged_by": "sonnet-5.5"
+}
