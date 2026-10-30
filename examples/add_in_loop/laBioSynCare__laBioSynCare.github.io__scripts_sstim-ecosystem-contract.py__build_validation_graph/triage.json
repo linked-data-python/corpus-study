@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Équivalence plausible mais la fixture ne contient aucun triplet du catalogue hors des 4 prédicats du profil sur une cible retenue : élargir `profile_predicates` à tous les prédicats de la cible reste vert, alors que « profil fermé » est l'objet de la fonction.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au catalogue (ontology/instances/implementations/implementations.ttl) un triplet d'une cible retenue (ex. ex:targetA) avec un prédicat hors profil (ex. ex:protocol ex:p1), que le résultat ne doit pas contenir ?",
+      "where": "translated.ldpy:93-104 et original.py:37-48 ; fixture : ontology/instances/implementations/implementations.ttl (targetA n'a que les 4 prédicats du profil)",
+      "if_yes": "needs-work : enrichir la fixture avec ce voisinage qui ne doit pas matcher, puis relancer check.",
+      "if_no": "approuver : le profil fermé n'a pas besoin d'être exercé."
+    }
+  ],
+  "evidence": "check OK. Copie : `for predicate in profile_predicates:` remplacé par `for predicate in set(catalog.predicates(target, None)):` reste VERT (le catalogue ne contient, pour les cibles A et C, que des prédicats du profil). Mutants tués : première boucle vidée (14 vs 10 triplets), `dcterms:description` retiré du profil (14 vs 13), objet remplacé par {target} (14 vs 13). Le dépôt (scripts/sstim-ecosystem-contract.py:383-409) est identique à l'original.py ; shim.parse_graph est l'équivalent de celui du dépôt (l.376-380), ROOT/ONTOLOGY_DIR dépaysés. Note secondaire : les définitions `SSTIM = Namespace(...)`/`ECO = Namespace(...)` disparaissent de translated.ldpy au profit de `@prefix` (non comparés en mode entry), et 3 des 8 `@prefix` (owl, prov, xsd) ne servent pas dans la région.",
+  "triaged_by": "sonnet-5.5"
+}

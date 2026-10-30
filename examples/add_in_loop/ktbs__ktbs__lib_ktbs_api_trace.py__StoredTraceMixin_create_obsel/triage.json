@@ -1,0 +1,30 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction",
+    "weak-oracle"
+  ],
+  "summary": "Graphe équivalent et boucles bien couvertes (3 appels, dont collections vides), mais `from context_shim import ktbs:` repose sur un `__namespaces__` écrit à la main que le dépôt n'exporte pas, 5 `Literal(...)` sont superflus, et `ktbs:Obsel` passé à `post_graph` n'est pas observé par le pilote.",
+  "questions": [
+    {
+      "question": "Le crédit `from … import p:` (et le `ktbs:` des 8 sites d'écriture) est-il indu, puisque lib/ktbs/namespace.py n'exporte aucun `__namespaces__` (le dépôt écrit `from ..namespace import KTBS` et `KTBS.hasTrace`) ?",
+      "where": "translated.ldpy:11 et context_shim.py:53 ; dépôt : lib/ktbs/namespace.py (grep __namespaces__ dans lib/ = 0)",
+      "if_yes": "needs-work : retirer \"from … import p:\" des constructions (et réécrire avec `{KTBS.x}` ou un `@prefix ktbs:` déclaré), ne pas compter ce crédit.",
+      "if_no": "garder, en acceptant que le shim fabrique le protocole d'import."
+    },
+    {
+      "question": "Les `{Literal(int(begin))}`, `{Literal(int(end))}`, `{Literal(begin_dt)}`, `{Literal(end_dt)}` et `{Literal(label)}` sont-ils des enveloppes inutiles, alors que `{int(begin)}`, `{begin_dt}`, `{label}` passent ?",
+      "where": "translated.ldpy:68,78,81,91,118 et original.py:66,76,79,89,122",
+      "if_yes": "needs-work : retirer les `Literal(...)` dans les îlots (wrong-construction, la paire reste équivalente).",
+      "if_no": "garder tel quel."
+    },
+    {
+      "question": "Le pilote est-il trop faible parce que `_TraceStub.post_graph` ignore son dernier argument, de sorte que `ktbs:Obsel` (translated.ldpy:120 et 124, hors îlot) peut être faux sans que rien ne change ?",
+      "where": "translated.ldpy:120 et context_shim.py:207-211 ; original.py:124",
+      "if_yes": "needs-work : faire capturer `_obsel_type` au stub (et le comparer), ou retirer le crédit « ktbs:Obsel hors îlot ».",
+      "if_no": "approuver : l'effet hors graphe est hors périmètre de l'étude."
+    }
+  ],
+  "evidence": "check OK. Copie : `ktbs:Obsel` -> `ktbs:Nope` à la ligne 120 reste vert (post_graph du stub l'ignore ; la branche `self.factory(..., [ktbs:Obsel])` n'est jamais atteinte car demo() passe no_return=True). Copie : les 5 `{Literal(x)}` remplacés par `{int(begin)}`, `{int(end)}`, `{begin_dt}`, `{end_dt}`, `{label}` restent verts. grep __namespaces__ dans corpus/repos/ktbs__ktbs/lib : aucun résultat ; l'original fait `from ..namespace import KTBS`. Les mutants d'îlots (boucles, hasBegin/hasEnd, label, inverse_relations) sont tués par CALL_1 à 3 ; les 4 boucles ont les cas absent (CALL_2) et vide (CALL_3). Docstring du driver : CALL_1 dit « explicit URIRef subject » mais passe une str (donc Literal) ; la branche subject=URIRef n'est exercée que via get_default_subject, sans effet sur la traduction.",
+  "triaged_by": "sonnet-5.5"
+}
