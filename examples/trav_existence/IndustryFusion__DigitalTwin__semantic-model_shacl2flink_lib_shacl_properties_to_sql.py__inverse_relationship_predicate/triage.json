@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (g.value -> m{ }.first(), None conservé), mais le pilote ne met aucun voisin non-sh:inversePath sur le premier saut : élargir le prédicat de la première lecture en ?p reste vert.",
+  "questions": [
+    {
+      "question": "Faut-il exiger au pilote un cas où le premier pas a (step1, ex:autre, ngsi-ld:hasObject) sans sh:inversePath et où le second est valide (attendu : None) ?",
+      "where": "driver.py:44-52 (_wrong_first_hop) et translated.ldpy:32 contre original.py:28",
+      "if_yes": "needs-work : ajouter ce cas ; la traduction est correcte.",
+      "if_no": "approuver : accepter la couverture actuelle (la seconde lecture, elle, est protégée par _second_hop_missing)."
+    }
+  ],
+  "evidence": "check : OK. Mutants dans une copie : première lecture `(m{ {steps[0]} ?p ?v }.first() or (None,None))[-1] != NGSILD.hasObject` : check reste OK (survit, élargit le prédicat lié) ; même élargissement sur la seconde lecture : FAIL call[3] (attrapé par le voisin ex:unrelatedPredicate). Dépôt d'origine : l'appelant (shacl2flink/lib/shacl_properties_to_sql.py:2037) passe un path pris dans g, termes RDF réels, pas de None. La cardinalité (plusieurs sh:inversePath sur un pas : g.value any=True contre .first()) n'est pas exercée mais les deux choisissent arbitrairement. Les notes classent honnêtement la région hors trav_existence (c'est du trav_single_value). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

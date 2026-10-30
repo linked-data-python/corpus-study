@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "shim-invents-logic"
+  ],
+  "summary": "Le pilote ne peut qu'exécuter le chemin où tous les assert passent : supprimer l'îlot de la dernière lecture (assert True) ou élargir son sujet reste vert ; et original.py retire de la région le parse d'un fichier différent par slug.",
+  "questions": [
+    {
+      "question": "Une région dont aucun assert ne peut être exercé dans sa branche fausse (le harnais abandonne au premier appel qui lève) doit-elle être jugée non prouvée, donc exclue ou refaite autour d'un pilote capable de comparer deux levées ?",
+      "where": "driver.py:14-19, fixture.ttl et translated.ldpy:27 contre original.py:26",
+      "if_yes": "needs-work : retirer la paire des chiffres ou changer le harnais ; les cinq lectures n'ont de preuve que sur le chemin vert.",
+      "if_no": "approuver avec réserve : n'accepter la paire que comme preuve de syntaxe, pas d'équivalence des lectures."
+    },
+    {
+      "question": "Le retrait de `g = rdflib.Graph(); g.parse(f)` et du assert f.exists() (le dépôt parse sept fichiers distincts, original.py en vérifie sept fois le même) change-t-il la région au point de ne plus la compter comme dans le dépôt (rdf_ops 10 dont graph_ctor et serialize_parse jamais mesurés) ?",
+      "where": "original.py:9-21 et meta.json translation_notes contre corpus/repos/LA3D__cogitarelink-solid/tests/test_interop_foundation.py:111-116",
+      "if_yes": "needs-work : compter la région sur les seules lectures, ou la retirer ; les 2 opérations graph_ctor/serialize_parse sont créditées sans être comparées.",
+      "if_no": "approuver : le graphe injecté est une restauration de liaison, pas de logique."
+    }
+  ],
+  "evidence": "check : OK. Mutants dans une copie : `bool(m{ {a} st:manages ?x })` -> `True` : check reste OK (îlot supprimé) ; -> `bool(m{ ?s st:manages ?x })` (sujet élargi, le leurre ex:decoyAssignment est écarté par le sujet mais la fixture contient aussi assign1) : OK ; -> `m{ {a} ?p ?x }` : OK ; en revanche retirer `a st:Manager` : FAIL call[0] et élargir le sujet de st:hasAssignment : FAIL call[0]. Les notes du traducteur reconnaissent que la branche fausse est inexercable (harnais abandonne au premier lève). En plus, le cas zéro manager lève StopIteration dans l'original (next sans défaut) mais, traduit, `.first()` rend None puis `{mgr}` donnerait Literal(\"None\") et un AssertionError : types d'exception différents, jamais comparés. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction correcte, mais la lecture de self.e est sous-testée : aucun cas où contentclass figure dans self.e avec un autre prédicat que rdf:type ; élargir rdf:type en ?p sur cette lecture reste vert.",
+  "questions": [
+    {
+      "question": "Faut-il exiger au pilote un cas où contentclass est typé dans g et n'a, dans self.e, qu'un triplet non-rdf:type (ex. ex:c5 rdfs:label \"x\" dans e_data, attendu : add_enum_class appelé) ?",
+      "where": "driver.py:56-84 (cas 1 à 4) et translated.ldpy:12 (seconde moitié du and) contre original.py:8",
+      "if_yes": "needs-work : ajouter ce cinquième appel ; la traduction est correcte, le pilote est incomplet.",
+      "if_no": "approuver : accepter que seule la lecture de g soit discriminée par le voisinage."
+    }
+  ],
+  "evidence": "check : OK. Mutants dans une copie : lecture de self.e avec `rdf:type` -> `?p` : check reste OK (survit) ; même lecture avec le sujet -> `?c` : FAIL call[0] ; lecture de g avec `?p` : FAIL call[2]. Le cas 1 met dans e un autre sujet, jamais contentclass avec un prédicat différent. Note non retenue comme drapeau : le seul appelant (semantic-model/opcua/owl2instances.py:601) passe shacl_rule['contentclass'], issu de get_type (opcua/lib/utils.py:770-776) qui peut valoir None ; {None} donnerait Literal(\"None\") alors que g.value(None, RDF.type) est un joker, mais je n'ai pas établi que la ligne 601 est atteinte avec None. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
