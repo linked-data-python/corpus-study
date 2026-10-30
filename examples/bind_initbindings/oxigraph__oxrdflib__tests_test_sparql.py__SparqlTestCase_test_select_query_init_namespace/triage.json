@@ -4,5 +4,6 @@
   "summary": "rien à signaler : `initNs` devient `@prefix ex:`, `.execute()` est nécessaire (le test appelle `.serialize()` sur le Result) et s{ } est la seule construction possible pour `SELECT (ex:foo AS ?s) WHERE {}` ; l'assertion codée en dur est un oracle fort.",
   "questions": [],
   "evidence": "rdfeval check : OK. Mutants dans des copies mktemp -d : @prefix ex: <http://example.com/> -> <http://example.org/> ROUGE (AssertionError sur l'IRI attendue) ; `.execute()` retiré ROUGE (« 'PreparedQuery' object has no attribute 'serialize' »). Le corps du test est inchangé, `Graph(\"Oxigraph\")` conservé des deux côtés, la requête est constante (WHERE {} : pas de donnée de graphe lue, donc le fixture vide est légitime). Dépôt d'origine : la région correspond aux lignes 104-113 de tests/test_sparql.py. Paire sans intérêt particulier pour l'article (gain nul : un dict initNs devient une ligne @prefix, plus un .execute()).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : la traduction s{ }(g).execute() faisait répondre rdflib à la place du store Oxigraph (requête déjà analysée déclinée par NotImplementedError, repli silencieux) ; le pilote enregistre désormais quel moteur répond, la traduction redevient le code d'origine et la paire passe en not-expressible (question dans repair.remaining)."
 }

@@ -20,9 +20,9 @@
     "@prefix",
     "@graph",
     "+{ }",
-    "nom préfixé",
-    "variable",
-    "littéral typé"
+    "prefixed name",
+    "interpolation {expr}",
+    "typed literal"
   ],
   "translation_notes": [
     "prefixes: RDF->rdf, VOID->void",
@@ -48,5 +48,25 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "pilote réécrit sur les helpers du harnais : la comparaison d'état de module de run_pair (graphes par isomorphisme, valeurs communes, stdout) faite deux fois, telle quelle puis sur des copies temporaires des deux artefacts où la ligne de contexte `distinctForPartitions = True` devient `False` (argument nommé de generateVoID dans le dépôt) ; en plus, chaque liaison de préfixe du `res` de l'original doit se retrouver dans celui de la traduction ; docstring qui dit ce que chaque passe exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "garde `if distinctForPartitions:` forcée à True (tué seulement par la seconde passe)",
+      "garde forcée à False",
+      "premier +{ } supprimé",
+      "second +{ } supprimé",
+      "{dataset} -> [] (sujet du premier triplet)",
+      "{part} -> [] (objet de void:classPartition, puis sujet du second +{ })",
+      "{c} -> []",
+      "{classCount[c]} -> {str(classCount[c])}",
+      "void:classes 1 -> \"1\"",
+      "void:entities {len(classes[c])} -> {len(classProps[c])}",
+      "@graph res -> @graph Graph()",
+      "liaison void: réécrite vers un autre espace de noms dans res (tuée par le contrôle des liaisons)"
+    ],
+    "remaining": "constructions corrigé (erreur matérielle) : `variable` retiré (aucun ?var dans la traduction), `interpolation {expr}` ajouté (sept termes interpolés), libellés remis en anglais. Le digest signale encore `typed literal` déclaré sans `^^` : le seul littéral typé est l'entier Turtle abrégé `1` (void:classes 1) ; garder ou retirer ce crédit est un jugement. Aucun appelant de generateVoID dans le dépôt : un `res` fourni par l'appelant avec ses propres liaisons n'est pas exercé."
   }
 }

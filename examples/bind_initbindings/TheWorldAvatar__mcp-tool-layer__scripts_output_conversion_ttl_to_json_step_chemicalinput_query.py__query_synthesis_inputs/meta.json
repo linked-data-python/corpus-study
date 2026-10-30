@@ -48,5 +48,22 @@
     "method": "entry:query_synthesis_inputs",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "bras 1 de l'UNION : {URIRef(synthesis_uri)} -> ?synthesis",
+      "bras 2 de l'UNION : {URIRef(synthesis_uri)} -> ?synthesis",
+      "bras 1 : {URIRef(synthesis_uri)} -> []",
+      "bras 2 : {URIRef(synthesis_uri)} -> []",
+      "{URIRef(synthesis_uri)} -> {synthesis_uri} (littéral str, les deux bras)",
+      "îlot s{ } vidé (results = [])",
+      "OPTIONAL rdfs:label supprimé",
+      "OPTIONAL ontosyn:hasAmount supprimé",
+      "OPTIONAL ontosyn:hasAlternativeNames supprimé"
+    ],
+    "remaining": "Mutants équivalents, non comptés : DISTINCT retiré (le regroupement Python replie les doublons), garde `if row.chemical` retirée (?chemical toujours lié par l'UNION), garde `if alt` retirée (row.altName vrai implique str non vide)."
   }
 }

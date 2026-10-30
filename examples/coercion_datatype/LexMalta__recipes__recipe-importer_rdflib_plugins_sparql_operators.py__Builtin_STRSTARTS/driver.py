@@ -21,12 +21,28 @@ CALL_3 -- both arg1/arg2 language-tagged `@fr`, matching: exercises
 context_shim.py) on the way in, without changing the coercion at the
 boundary -- the *return* value is a fresh, untagged boolean Literal either
 way.
+
+CALL_4/5 -- what the SPARQL evaluator really passes besides plain strings:
+an `xsd:string`-typed arg1 (accepted by `string()`), and an empty arg2
+(`STRSTARTS(?x, "")` is true: the coerced value is True from an empty,
+falsy string).
+
+CALL_6..9 -- the guard `_compatibleStrings(a, b)` and its four raising
+paths, each a SPARQLError compared by type and message: arg2 tagged @fr
+against arg1 tagged @en, arg2 tagged against a plain arg1, an IRI arg1
+(`STRSTARTS(?s, "x")` on a subject), and an `xsd:integer` arg2.  Without
+them, deleting the guard line from either side stays green.
 """
 from types import SimpleNamespace
 
-from rdflib import Literal
+from rdflib import XSD, Literal, URIRef
 
 from rdfeval.harness import run_pair
+
+
+def _call(arg1, arg2):
+    return ((SimpleNamespace(arg1=arg1, arg2=arg2), None), {})
+
 
 VERDICT = run_pair(
     __file__,
@@ -35,5 +51,11 @@ VERDICT = run_pair(
         ((SimpleNamespace(arg1=Literal("hello world"), arg2=Literal("hello")), None), {}),
         ((SimpleNamespace(arg1=Literal("hello world"), arg2=Literal("bye")), None), {}),
         ((SimpleNamespace(arg1=Literal("café", lang="fr"), arg2=Literal("caf", lang="fr")), None), {}),
+        _call(Literal("hello world", datatype=XSD.string), Literal("hello")),
+        _call(Literal("hello"), Literal("")),
+        _call(Literal("hello", lang="en"), Literal("he", lang="fr")),
+        _call(Literal("hello"), Literal("he", lang="fr")),
+        _call(URIRef("http://example.org/hello"), Literal("http")),
+        _call(Literal("12345"), Literal(12, datatype=XSD.integer)),
     ],
 )

@@ -41,5 +41,19 @@
     "method": "entry:Builtin_STRSTARTS",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six appels ajoutés (neuf au total) : arg1 typé xsd:string et arg2 vide (STRSTARTS(?x, \"\") vrai), puis les quatre chemins de levée de la garde _compatibleStrings, comparés par type et message de SPARQLError (étiquettes @en/@fr incompatibles, arg2 étiqueté contre arg1 nu, arg1 IRI, arg2 xsd:integer) ; docstring complétée.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot retiré (return a.startswith(b), bool Python nu)",
+      "f{str(a.startswith(b))} (littéral \"True\" sans type)",
+      "f{int(a.startswith(b))} (xsd:integer)",
+      "f{True} (garde forcée à True)",
+      "f{b.startswith(a)} (arguments échangés)",
+      "ligne _compatibleStrings(a, b) retirée (tué seulement par les appels ajoutés)"
+    ],
+    "remaining": "Mutant équivalent, non compté : f{Literal(str(a.startswith(b)), datatype=XSD.boolean)} (rdflib normalise la forme lexicale \"True\" en \"true\")."
   }
 }

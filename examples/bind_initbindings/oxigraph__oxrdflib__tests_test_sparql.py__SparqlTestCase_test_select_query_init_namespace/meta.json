@@ -14,21 +14,17 @@
     "sparql": 1
   },
   "translation_status": "final",
-  "classification": "directly-expressible",
-  "constructions": [
-    "@prefix",
-    "prefixed name",
-    "s{ }",
-    "call suffix (g)",
-    ".execute()"
-  ],
+  "classification": "not-expressible",
+  "constructions": [],
   "translation_notes": [
     "initNs-only case (no initBindings anywhere in this test method): `initNs={\"ex\": \"http://example.com/\"}` is a static IRI known at transpile time, so it becomes a module-level `@prefix ex: <http://example.com/> .`, and the query's prologue is inherited from it, per the stratum's correspondence rule. No interpolation is needed.",
     "`g.query(TEXT, initNs=...)` collapses into an `s{ }` island written literally at the point of use. `SELECT (ex:foo AS ?s) WHERE {}` returns a lazy `PreparedQuery` when called on a graph (`s{ }(g)`); the region calls `.serialize()` on the result, which `PreparedQuery` does not proxy, so `.execute()` is needed to obtain rdflib's actual `Result` object -- verified directly against ldpy/runtime.py's `PreparedQuery`: iterating or testing an island's truth value is enough for SELECT/ASK/CONSTRUCT, but getting the `Result` itself (to call a method on it) needs the explicit `.execute()`.",
     "the region's WHERE clause is empty (`WHERE {}`): an empty basic graph pattern matches exactly once, unconditionally, independent of any triple in `g`. The stratum's usual fixture requirement (several solutions / zero solutions / non-matching neighbourhood) does not apply -- there is no graph data this query reads at all. fixture.ttl documents this rather than fabricating triples the query would never look at; see driver.py.",
     "`self` (the test's own `self.assertEqual`) is not a graph, so the default `fixture=` wiring does not fit; `calls=` supplies a plain `unittest.TestCase('assertEqual')` instead -- `SparqlTestCase(unittest.TestCase)` in the source file defines no setUp of its own. The region's `self.assertEqual(...)` against the hard-coded expected JSON (copied verbatim into both original.py and translated.ldpy) is itself the oracle: a mismatch on either side already raises inside the call and fails the check.",
     "installed oxrdflib==0.5.0 (and its pyoxigraph~=0.5.0 dependency) into ~/.venvs/ldpy to register the 'Oxigraph' rdflib store plugin the region needs (`Graph(\"Oxigraph\")`) -- present on PyPI, absent from the venv; rdflib stayed pinned at 7.2.1 (oxrdflib requires rdflib>=6.3,<8.0). Registration is via the package's setuptools entry points (rdf.plugins.store), not an import side effect, so no shim import is needed on either side.",
-    "checked the anti-hollow-green discipline: corrupting translated.ldpy (ex:foo -> ex:bar) makes the check FAIL as expected (self.assertEqual raises); restored before finalising."
+    "checked the anti-hollow-green discipline: corrupting translated.ldpy (ex:foo -> ex:bar) makes the check FAIL as expected (self.assertEqual raises); restored before finalising.",
+    "repair 2026-10-30 -- the s{ } translation was wrong, and notes 1, 2 and 6 above describe it: `s{ SELECT (ex:foo AS ?s) WHERE {} }(g).execute()` hands `Graph.query` an already parsed rdflib Query, which `OxigraphStore.query` refuses with NotImplementedError ('The already parsed Queries are not supported by Oxigraph store', oxrdflib/store.py), so rdflib silently answers with its OWN engine; the region is a test of the Oxigraph store's `initNs` handling, and the translated test no longer reaches it. Proof: driver.py now records what OxigraphStore.query does (original: answered; translation: declined), and with a store patched to ignore `initNs` the original raises SyntaxError while the translation still passes.",
+    "no construction of the language is correct here: every s{ } goes through the runtime's `_prepare_sparql` and reaches the store as a parsed Query, and without s{ } a `@prefix` cannot feed `initNs`. translated.ldpy is therefore byte-identical to original.py, `constructions` is empty, and the classification is not-expressible. Minimal extract: `Graph(\"Oxigraph\").query(\"SELECT (ex:foo AS ?s) WHERE {}\", initNs={\"ex\": \"http://example.com/\"})` -- a query that must be evaluated by a store which only accepts query TEXT."
   ],
   "draft_sha": "dce266fe8337e5c8",
   "provenance": {
@@ -46,5 +42,19 @@
     "method": "entry:test_select_query_init_namespace",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "enregistreur sur OxigraphStore.query, installé une fois pour le processus donc identique des deux côtés : il imprime si le store a répondu ou décliné (NotImplementedError), et le harnais compare le stdout de chaque appel ; docstring complétée (« Which engine answers »).",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "@prefix ex: <http://example.org/> (IRI du préfixe changée)",
+      "ex:foo -> ex:bar",
+      "(ex:foo AS ?s) -> (ex:foo AS ?t)",
+      ".execute() retiré",
+      "WHERE {} -> WHERE { FILTER(1 = 2) }",
+      "traduction d'origine s{ }(g).execute() : le store Oxigraph décline la requête déjà analysée et rdflib répond avec son propre moteur"
+    ],
+    "remaining": "Classification passée à not-expressible (la seule correction possible est le code d'origine) : confirmer que « un store qui n'accepte que le TEXTE d'une requête » (oxrdflib, NotImplementedError sur un Query analysé, repli silencieux de rdflib) est bien un manque du langage à remonter avec l'écart connu « l'objet de s{ } ne passe pas dans graph.query() », et non une région à exclure parce qu'elle teste le store plutôt que des données."
   }
 }

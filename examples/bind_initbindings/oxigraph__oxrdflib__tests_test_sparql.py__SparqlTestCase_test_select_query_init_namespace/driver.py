@@ -18,10 +18,39 @@ its own (see meta.json). Two such instances, built the same way for each
 side, compare equal via `TestCase.__eq__` (same class, same
 `_testMethodName`), so the harness's generic per-argument comparison does
 not need special-casing.
+
+Which engine answers.  The region is a test of oxrdflib's Oxigraph store:
+what it checks is that the STORE's own SPARQL engine (pyoxigraph) honours
+`initNs`.  `rdflib.Graph.query` first offers the query to the store, and
+silently falls back to rdflib's own evaluator when the store raises
+NotImplementedError -- which `OxigraphStore.query` does for an already
+parsed `Query` object (oxrdflib/store.py).  The assertion alone cannot see
+which engine produced the row, so `OxigraphStore.query` is wrapped below by
+a recorder, installed once for the whole process and therefore identical
+for both sides: it prints whether the store answered or declined.  The
+harness compares each call's stdout, so a side whose query never reaches
+pyoxigraph -- a test that no longer tests the store -- is a difference.
 """
 import unittest
 
+from oxrdflib.store import OxigraphStore
+
 from rdfeval.harness import run_pair
+
+_store_query = OxigraphStore.query
+
+
+def _recording_query(self, query, *args, **kwargs):
+    try:
+        result = _store_query(self, query, *args, **kwargs)
+    except NotImplementedError as e:
+        print(f"OxigraphStore.query declined: {e}")
+        raise
+    print("OxigraphStore.query answered")
+    return result
+
+
+OxigraphStore.query = _recording_query
 
 VERDICT = run_pair(
     __file__,

@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK (module-state). Région = lignes 84-99 de LexMalta/recipes recipe-importer/rdflib/void.py (vérifié) ; dans le dépôt classCount est un defaultdict(int) et les autres valeurs sont des len() : tous des int, donc le fixture a les bons types (dont 0). Copies : distinctForPartitions=False des deux côtés : OK ; mutant `if True:` à la place de `if distinctForPartitions:` dans la traduction : reste vert (la branche False n'est pas exercée), mais la ligne `if` est conservée telle quelle dans la traduction, donc sans conséquence ici. Le fixture (lignes 9-23) est ajouté à la région des deux côtés : des données, pas de la logique.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : la garde `if distinctForPartitions:` forcée à True survivait ; le pilote rejoue maintenant le module avec distinctForPartitions = False et contrôle les liaisons de préfixes de res, la traduction reste juste ; `constructions` corrigé (variable -> interpolation {expr})."
 }
