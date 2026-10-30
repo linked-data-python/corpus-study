@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction 1-pour-1 propre (bool(m{ }) et lectures à prédicat interpolé équivalents), mais la garde `bool(m{ ?cs a skos:ConceptScheme })` n'est prouvée par aucun appel : la branche `raise` n'est jamais atteinte et la garde peut être remplacée par `True` sans que le pilote ne bronche.",
+  "questions": [
+    {
+      "question": "La garde `bool(m{ ?cs a skos:ConceptScheme })` doit-elle être considérée comme couverte par le fait que la boucle suivante emploie exactement le même motif (donc que son équivalence avec `(None, RDF.type, SKOS.ConceptScheme) in g` est établie par lecture), même si aucun appel n'atteint la levée de l'exception ?",
+      "where": "translated.ldpy:33 et original.py:41-42, 117-118 ; driver.py:calls (un seul appel)",
+      "if_yes": "approuver : la garde est équivalente par construction, la limite du harnais (une levée interrompt la comparaison) est déjà consignée dans meta.json",
+      "if_no": "needs-work : étendre le harnais ou ajouter un appel sans skos:ConceptScheme comparant les deux levées (type et message), ou compter la paire comme weak-oracle dans les chiffres"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutant sur copie : `if bool(m{ ?cs a skos:ConceptScheme }):` -> `if True:` reste VERT (la branche else n'est jamais prise). Copie avec un second skos:ConceptScheme (créateur, licence) : OK ; copie avec deux dct:license et deux dct:subject sur ex:scheme1 : OK sur trois exécutions (ordre de parcours identique ici, mais non garanti par m{ } d'après les notes ; le fixture évite volontairement les triples multiples). Prédicat interpolé `{cp}`/`{descp}`/`{sp}` : URIRef construits par allow_properties, aucun problème de type d'entrée (original.py:27-31). context_shim.py comparé à rdflib 5.0.0 graph.py:722-796 (pip download) : identique à la signature près (`labelProperties=None` avec défaut SKOS/RDFS en corps), aucune logique inventée. Pas article-example : le gain est nul (substitution 1-pour-1, preferredLabel conservé).",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "shim-invents-logic"
+  ],
+  "summary": "La traduction est équivalente et propre (jointure `, ?class_type` à cardinalité exacte, deux mutants échouent), mais shim.py ne reproduit pas fidèlement _local_name du dépôt : il lève IndexError là où l'original renvoie le texte.",
+  "questions": [
+    {
+      "question": "Faut-il remplacer le shim par une copie verbatim de `_load_graph` et `_local_name` du dépôt (owl_to_mermaid.py:11-23), qui y sont définis dans le même fichier, au lieu d'une réimplémentation ?",
+      "where": "shim.py:14-18 et corpus/repos/ScaDS__KGpipe/src/kgpipe_view/owl_to_mermaid.py:11-17",
+      "if_yes": "needs-work : recopier les deux fonctions du dépôt (branche `if \"/\" in text` et `return text` comprises) ; sans effet sur le verdict (même shim des deux côtés) mais la note « minimal reimplementation » est un écart de fidélité",
+      "if_no": "approuver en notant dans meta.json que le shim diverge du dépôt pour les IRI sans `#` ni `/` (urn:, bnode), cas que le fixture n'atteint pas"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dépôt : `_local_name` fait `rsplit(\"#\")[-1]` si `#`, sinon `rsplit(\"/\")[-1]` si `/`, sinon `return text`. Shim : `s.rsplit(\"/\", 1)[1]` sans repli, donc IndexError pour un type de classe sans `/` ni `#` (ex. urn:x). Cela ne fausse pas l'équivalence (même shim des deux côtés) mais retire des branches du dépôt ; `g.parse(str(ttl_path))` vs `g.parse(ttl_path)` sans effet. Mutants sur copie : `if class_type != owl:Class:` -> `if True:` échoue (['Class', ...]) ; jointure réduite à `?class_node rdf:type ?class_type` échoue (UiLayer en trop) : l'oracle tient. Classification directly-expressible plausible, constructions déclarées toutes employées, pas de wrapper inutile. Pas article-example : gain de 3 lignes réel mais paire entachée par le shim tant qu'il n'est pas corrigé.",
+  "triaged_by": "sonnet-5.5"
+}

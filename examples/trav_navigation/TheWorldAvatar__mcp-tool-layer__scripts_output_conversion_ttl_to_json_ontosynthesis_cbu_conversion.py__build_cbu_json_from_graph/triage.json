@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "`ccdc = str(ccdc_val) if ccdc_val else \"N/A\"` remplace un test sur une liste par un test de véracité d'un littéral : un rdf:hasCCDCNumber \"\" (ou 0) est écarté par la traduction mais produit une entrée par l'original ; le fixture n'a pas ce cas.",
+  "questions": [
+    {
+      "question": "Un ontomops:hasCCDCNumber valant le littéral vide (\"\") ou 0 doit-il produire une entrée avec mopCCDCNumber \"\" comme dans l'original (test `if ccdc_vals`, vrai pour une liste non vide), et non être traité comme absent (« N/A », continue) ?",
+      "where": "translated.ldpy:33-34 et original.py:35-36",
+      "if_yes": "needs-work : remplacer `if ccdc_val` par `if ccdc_val is not None` (ou garder `list(m{ })`), ajouter un MOP au CCDC \"\" au fixture, rediscuter la note qui dit que `.first()` est sans effet observable",
+      "if_no": "approuver en consignant que la garde suppose un CCDC jamais vide ni nul (écart de véracité à noter dans meta.json)"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copie avec `ex:mopEmptyCcdc a ontomops:MetalOrganicPolyhedron ; ontomops:hasCCDCNumber \"\" .` : FAIL, l'original ajoute une entrée {mopCCDCNumber: '', cbuFormula1: 'N/A', ...}, la traduction l'omet. Même résultat avec `ontomops:hasCCDCNumber 0`. Mutants sur copie du fixture d'origine, tous rouges : label, hasChemicalFormula du CBU, rdfs:label et hasChemicalFormula via owl:sameAs remplacés par `[]` ; l'oracle est donc solide pour les îlots, seul le cas falsy manque. mop_helpers.py est présenté comme verbatim et lit `graph` en rdflib pur des deux côtés : lu, aucune logique ajoutée. Les autres lectures (liste `formula_vals` gardée, boucles séparées) sont équivalentes ; l'ordre de `names` et de `cbu_data` reste à l'ordre de parcours du store (non testé avec ex æquo de formules). Dépôt d'origine : aucun ttl ni appelant ne montre un CCDC vide, donc le risque est théorique mais le défaut est bien celui du pilote (véracité d'un littéral). Pas article-example.",
+  "triaged_by": "sonnet-5.5"
+}

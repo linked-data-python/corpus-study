@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "La jointure fusionnée binding/variable/value (translated.ldpy:46) supprime silencieusement un binding sans rs:value (l'original range `{var: None}`) et produit un produit cartésien si un binding a deux valeurs ; le fixture n'a aucun binding incomplet.",
+  "questions": [
+    {
+      "question": "Un noeud rs:binding portant rs:variable mais aucun rs:value doit-il donner `sol[Variable(var)] = None` comme dans l'original (graph.value renvoie None), et non être omis de la solution ?",
+      "where": "translated.ldpy:46-47 et original.py:45-47",
+      "if_yes": "needs-work : la fusion `?b rset:variable ?var . ?b rset:value ?val` ne conserve pas la sémantique ; remettre `graph.value(b, RS.variable)` / `.value` en lecture séparée (m{ {b} rset:value ?v }.first()), corriger l'affirmation « sûre ici » de meta.json, rediscuter la classification",
+      "if_no": "approuver en consignant dans meta.json que la fusion suppose qu'un binding porte toujours variable ET value (écart de cardinalité/optionnalité à noter) ; l'affirmation « sinon l'original plante » n'est vraie que pour un rs:variable manquant (Variable(None) lève TypeError), pas pour un rs:value manquant"
+    },
+    {
+      "question": "Faut-il compléter le fixture avec un binding sans rs:value et un binding à deux rs:value, puisque rien ne les couvre alors que la fusion change leur résultat ?",
+      "where": "fixture.ttl (sol1-sol3, ex:orphanBinding) ; driver.py:calls",
+      "if_yes": "needs-work : ajouter ces cas au fixture (je les ai ajoutés dans une copie : la traduction échoue dans les deux)",
+      "if_no": "approuver en acceptant que le cas binding incomplet / multi-valué ne soit pas prouvé"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copie avec `ex:sol4 rs:binding ex:b4x . ex:b4x rs:variable \"x\" .` ajouté à ex:rs1 : FAIL call[0], original -> bindings [..., {}, {x: None}], traduction -> [..., {}, {}]. Copie avec un second `ex:b2x rs:value ex:bob2` : FAIL (original prend une valeur via graph.value, la traduction itère les deux lignes de la jointure, la dernière écrase dans le dict). Copie avec un binding sans rs:variable (`ex:b5 rs:value 7`) : FAIL, l'original lève TypeError (Variable(None)), la traduction omet silencieusement le binding : donc l'affirmation des notes ne couvre que ce cas-là. Le reste est équivalent : la boucle extérieure sur les solutions est bien séparée (sol3 vide conservé), le cas zéro-ResultSet est couvert par CONSTRUCT_DATA, ASK true/false couverts, voisinage orphanBinding/notAResultSet présent. Pas de défaut de type d'entrée : `rs`, `s`, `b` viennent du graphe. Pas article-example.",
+  "triaged_by": "sonnet-5.5"
+}
