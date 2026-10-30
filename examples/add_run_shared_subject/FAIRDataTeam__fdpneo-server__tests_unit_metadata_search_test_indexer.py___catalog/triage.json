@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "wrong-construction"
+  ],
+  "summary": "Le crédit `from context_shim import dct:` repose sur un `__namespaces__` écrit à la main dans le shim alors que fdpneo_server.shared.namespaces ne l'exporte pas : la construction « from … import p: » est créditée à tort, alors que `{DCT.title}` passe.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine n'exportant aucun `__namespaces__` (DCT n'y est qu'un rdflib.Namespace), faut-il retirer le crédit « from … import p: » et traduire par `from context_shim import DCT` + `{DCT.title}` ?",
+      "where": "context_shim.py:17 (`__namespaces__ = {\"dct\": DCT}`), translated.ldpy:6 et 15, original.py:5 et 11",
+      "if_yes": "needs-work : réécrire translated.ldpy avec `{DCT.title}`, supprimer `__namespaces__` du shim, retirer « from … import p: » de `constructions`",
+      "if_no": "approuver en l'état (le crédit est alors assumé comme cas des 21 déjà remontés)"
+    },
+    {
+      "question": "La traduction avec `{DCT.title}` est-elle bien la construction la plus spécifique ici (aucun préfixe `dct:` n'existant dans le dépôt, DCT y étant un objet Python importé) ?",
+      "where": "translated.ldpy:12-15",
+      "if_yes": "classer en wrong-construction pour le crédit indu et corriger comme ci-dessus",
+      "if_no": "laisser la paire telle quelle, drapeau wrong-construction levé"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:_catalog). `grep -rn __namespaces__ corpus/repos/FAIRDataTeam__fdpneo-server` : aucun résultat ; src/fdpneo_server/shared/namespaces.py ne définit que des `Namespace(...)` (DCT = Namespace(\"http://purl.org/dc/terms/\") l. 31). Expérience sur copie mktemp : `import dct:` -> `import DCT`, `dct:title` -> `{DCT.title}`, `__namespaces__` supprimé du shim : rdfeval check reste OK, donc la construction créditée n'apporte rien et n'est pas dans le dépôt. Le reste est fidèle : `s = URIRef(REC)` avec REC str (test_indexer.py:20), IRI dcat#Catalog brute comme dans le dépôt, Literal(\"Cat\") sans langue ; pilote à un appel sans branche, suffisant (aucune branche dans la région).",
+  "triaged_by": "sonnet-5.5"
+}

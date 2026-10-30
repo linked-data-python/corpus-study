@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "`{Literal(i['annotationText']['value'])}` est une enveloppe inutile (`{i['annotationText']['value']}` donne le même graphe), et `@prefix rdf:` est déclaré sans usage puisque le type s'écrit `a` ; le reste est fidèle et l'oracle solide.",
+  "questions": [
+    {
+      "question": "Peut-on réécrire l'objet en `rdfs:label {i['annotationText']['value']}` (sans `Literal(...)`) et retirer le `@prefix rdf:` inutilisé ?",
+      "where": "translated.ldpy:2 (@prefix rdf) et translated.ldpy:19 (`{Literal(i['annotationText']['value'])}`) ; original.py:14",
+      "if_yes": "needs-work : retirer l'enveloppe Literal et le préfixe rdf: inutilisé, puis relancer rdfeval check",
+      "if_no": "approuver (garder Literal explicite pour la lisibilité de l'équivalence avec l'original)"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo). Copie mktemp : `{Literal(x)}` -> `{x}` : check reste OK, y compris avec une annotationText entière (42) et vide (\"\") ajoutées au pilote, donc enveloppe sans effet pour les types que le dépôt peut fournir (str issue du JSON SPARQL). Pilote étendu dans la copie (bilatuUria renvoyant None -> TypeError avalé par le `except: pass`, texte 42, texte vide, guillemet dans le texte, clé annotationText absente) : toujours OK ; mutants `rdfs:label` -> `rdfs:comment` et sujet/objet permutés tués, donc l'oracle est sain. Le dépôt (gate_cloud.py:79-98) fait renvoyer None ou un dict à bilatuUria dans les cas d'erreur, mais `URIRef(uria)` est construit hors îlot des deux côtés : même comportement. `@graph self.grafoa` est sûr : self.grafoa est posé dans __init__ (gate_cloud.py:38) et jamais réaffecté. Shim : getType verbatim (gate_cloud.py:49-57 comparé), balioztatu/bilatuUria remplacés par des tables de fixture parce qu'ils lisent input() et interrogent un triple store : restauration de liaisons, pas de logique ajoutée.",
+  "triaged_by": "sonnet-5.5"
+}

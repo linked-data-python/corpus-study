@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler et paire très propre : deux `g.add` sur EX.Widget deviennent un seul `+{ ex:Widget a owl:Class ; rdfs:label \"Widget\" }`, littéral sans langue conservé.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article ?",
+      "where": "translated.ldpy:13-16 et original.py:14-15",
+      "if_yes": "la retenir comme exemple minimal de fusion d'ajouts à sujet partagé (deux appels `g.add((EX.Widget, ...))` -> un îlot de deux lignes)",
+      "if_no": "la laisser en low sans drapeau (gain réel mais très petit, et le `demo()` de harnais l'alourdit dans le dossier)"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo). Le seul ajout à original.py est demo() (appel de graph_untagged_label.__wrapped__()), identique des deux côtés : harnais pytest>=8, pas de logique. Dépôt : EX = Namespace(\"http://example.org/\") (tests/unit/test_ontology_service.py:13), donc ex: correspond ; Literal(\"Widget\") sans langue dans le dépôt (l. 54). Mutants sur copie mktemp : `\"Widget\"@en` -> FAIL (2 vs 2 triples) ; `owl:Class` -> `rdfs:Class` -> FAIL. Pas de branche, pas de None possible : une seule exécution suffit.",
+  "triaged_by": "sonnet-5.5"
+}
