@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check OK. Mutants sur une copie : (a) q5 `?JaneSmith vcard:FN ?jn.` (contrainte « Jane Smith » supprimée) -> OK (vert) ; (b) q5 `foaf:knows ?Jx` -> OK (vert) ; (c) q3 `vcard:Family ?f` -> FAIL ; (d) q3 `\"Smith\"` sans xsd:string -> FAIL ; (e) q5 `vcard:Given` -> `vcard:Note` -> FAIL. Cause : un seul sujet (ex:john) a foaf:knows, et il ne connaît que Jane. Équivalence confirmée par ailleurs : original et traduction rejoués sur le vrai corpus/repos/usc-gria__sw-kg/materials/rdflib/rdf/example3.rdf (parse xml) -> stdout identique, check OK ; et sur un fixture mêlant littéraux simples, @en et ^^xsd:string (« Smith », « Jane Smith ») -> OK. L'original.py ne diffère du dépôt que par le chargement (github_storage + parse remplacé par fixture.ttl). La note sur `../rdf/example3.rdf` est exacte (github_storage = \"../rdf/\"). Réserve mineure : la traduction supprime les noms FOAF, XSD, Literal, Namespace, prepareQuery, github_storage du module (non comparés en module-state), sans effet ici. Article : pas en l'état (5 requêtes longues, gain = disparition de prepareQuery/initNs, oracle à renforcer d'abord).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Fixture renforcé (un voisin par terme des motifs de q3 et q5, littéraux simples et @en à côté des ^^xsd:string, second connaisseur de Jane) : les mutants (a) et (b) du tri et dix autres sont tués par la sortie standard ; la traduction était juste."
 }

@@ -32,3 +32,37 @@ ex:dp3 base:mqttTopic "topic/3" .
 # exposing it, so the join dead-ends (zero solutions for this arm).
 ex:device4 onem2m:hasFunctionality ex:func4 .
 ex:func4 rdf:type base:EventFunctionality .
+
+# --- Added by the repair of 2026-10-30 (triage: weak-oracle) ---------------
+
+# Duplicate row: a second device carries the same functionality, so the
+# query (no DISTINCT) yields (func1, "topic/1") TWICE.  A DISTINCT added to
+# the translation drops one copy and the multiset comparison sees it.
+ex:device1b onem2m:hasFunctionality ex:func1 .
+
+# Neighbour that must NOT match: a typed EventFunctionality exposed by a
+# service with a data point and a topic, but no device has it.  Removing the
+# ?device onem2m:hasFunctionality ?eventfunc pattern would let it through.
+ex:func5 rdf:type base:EventFunctionality .
+ex:serv5 onem2m:exposesFunctionality ex:func5 .
+ex:serv5 onem2m:hasOutputDataPoint ex:dp5 .
+ex:dp5 base:mqttTopic "topic/5" .
+
+# Neighbour that must NOT match: a data point of a matching chain also has
+# another predicate; widening base:mqttTopic to a variable would add a row.
+ex:dp2 base:otherTopic "not-a-topic" .
+
+# Neighbour that must NOT match: a matching service with a data point that
+# has no mqttTopic at all (the last pattern dead-ends).
+ex:device6 onem2m:hasFunctionality ex:func6 .
+ex:func6 rdf:type base:EventFunctionality .
+ex:serv6 onem2m:exposesFunctionality ex:func6 .
+ex:serv6 onem2m:hasOutputDataPoint ex:dp6 .
+
+# Neighbour that must NOT match: the service is linked to the data point by
+# another predicate than hasOutputDataPoint.
+ex:device7 onem2m:hasFunctionality ex:func7 .
+ex:func7 rdf:type base:EventFunctionality .
+ex:serv7 onem2m:exposesFunctionality ex:func7 .
+ex:serv7 onem2m:hasInputDataPoint ex:dp7 .
+ex:dp7 base:mqttTopic "topic/7" .

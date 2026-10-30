@@ -43,5 +43,18 @@
     "method": "fixture:fixture.ttl entry:get_event_functions",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl: a duplicate row (a second device shares func1; the query has no DISTINCT), an EventFunctionality exposed by a service but held by no device, a data point with an extra predicate, a data point without mqttTopic, a service linked by hasInputDataPoint; driver.py: a second call on an empty graph (zero solutions: no row printed, empty JSON, empty Result).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "SELECT -> SELECT DISTINCT",
+      "pattern ?device onem2m:hasFunctionality ?eventfunc removed",
+      "?dp base:mqttTopic ?topic -> ?dp ?p ?topic",
+      "?serv onem2m:hasOutputDataPoint ?dp -> ?serv ?q ?dp",
+      "base:EventFunctionality -> ?ty"
+    ],
+    "remaining": ""
   }
 }

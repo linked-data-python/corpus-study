@@ -29,3 +29,60 @@ ex:bob
 
 ex:carol
     vcard:Note "no FN or Family here"^^xsd:string .
+
+# --- Added by the repair of 2026-10-30 (triage: weak-oracle) ---------------
+# The bound literals of q3 and q5 ("Smith" and "Jane Smith", both
+# ^^xsd:string, written as terms in the translation's patterns) must each be
+# decisive: one neighbour per term of each pattern, sharing the other two.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# A second person who knows Jane (as MattJones does in the repository's
+# example3.rdf): q5 has two solutions.
+ex:matt
+    vcard:FN "Matt Jones"^^xsd:string ;
+    vcard:Given "Matt"^^xsd:string ;
+    foaf:knows ex:jane .
+
+# q5, the bound full name: Dan knows Bob, whose FN is not "Jane Smith".
+# Dropping the "Jane Smith" constraint (or widening it to a variable) lets
+# Dan through.
+ex:dan
+    vcard:Given "Dan"^^xsd:string ;
+    foaf:knows ex:bob .
+
+# q5, the datatype of the bound literal: Erin knows people whose full name is
+# "Jane Smith" WITHOUT xsd:string (plain, and @en). Not the same term: they
+# must not match, and a plain "Jane Smith" in the pattern would match them
+# instead of Jane.
+ex:erin
+    vcard:Given "Erin"^^xsd:string ;
+    foaf:knows ex:plainjane , ex:enjane .
+ex:plainjane vcard:FN "Jane Smith" .
+ex:enjane vcard:FN "Jane Smith"@en .
+
+# q5, the predicate of the bound pattern: Gina knows someone who has
+# "Jane Smith"^^xsd:string under another predicate than vcard:FN.
+ex:gina
+    vcard:Given "Gina"^^xsd:string ;
+    foaf:knows ex:hank .
+ex:hank vcard:NICKNAME "Jane Smith"^^xsd:string .
+
+# q5, foaf:knows: Ivan is related to Jane by another predicate.
+ex:ivan
+    vcard:Given "Ivan"^^xsd:string ;
+    foaf:made ex:jane .
+
+# q5, ?Subject vcard:Given: Kate knows Jane but has no given name, only a
+# nickname; the row must not appear (and a widened predicate would add rows).
+ex:kate
+    vcard:NICKNAME "Katie"^^xsd:string ;
+    foaf:knows ex:jane .
+
+# q3, the bound family name: "Smith" plain and "Smith"@en are other terms,
+# and "Smith"^^xsd:string under another predicate must not match either.
+ex:liam vcard:Family "Smith" .
+ex:mia vcard:Family "Smith"@en .
+ex:noah vcard:NICKNAME "Smith"^^xsd:string .
+
+# q4: an e-mail under vcard:EMAIL (as in example3.rdf) is not foaf:email.
+ex:olga vcard:EMAIL "olga@example.org"^^xsd:string .

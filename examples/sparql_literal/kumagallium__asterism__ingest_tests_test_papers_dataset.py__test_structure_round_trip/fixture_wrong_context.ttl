@@ -1,0 +1,16 @@
+# Input graph for test_structure_round_trip, passed through demo(fixture=...).
+# Everything links up, but the reference context is not PAPER/fulltext: the
+# original fails at the last assertion (the only call that reaches it).
+@base <https://kumagallium.github.io/asterism/papers/resource/> .
+@prefix po: <http://www.essepuntato.it/2008/12/pattern#> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix nif: <http://persistence.uni-leipzig.de/nlp2rdf/ontologies/nif-core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://example.org/> .
+
+<paper/PMC5951533> po:contains <sec/1> .
+<sec/1> a doco:Section ; po:contains <para/1> .
+<para/1> a doco:Paragraph ; po:contains <sent/1> .
+<sent/1> a doco:Sentence ;
+    prov:wasQuotedFrom <paper/PMC5951533> ;
+    nif:referenceContext <paper/PMC5951533/abstract> .

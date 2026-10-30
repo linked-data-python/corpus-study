@@ -1,0 +1,18 @@
+# Input graph for test_structure_round_trip, passed through demo(fixture=...).
+# Zero solutions for the interpolated paper: only ANOTHER paper has a complete
+# chain (with its up-links). The original fails at the first assertion (no
+# path from PAPER); {rdflib.URIRef(PAPER)} widened to ?paper finds the OTHER
+# chain and fails later, at the u_paper == PAPER assertion.
+@base <https://kumagallium.github.io/asterism/papers/resource/> .
+@prefix po: <http://www.essepuntato.it/2008/12/pattern#> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix nif: <http://persistence.uni-leipzig.de/nlp2rdf/ontologies/nif-core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://example.org/> .
+
+<paper/OTHER> po:contains <sec/X> .
+<sec/X> a doco:Section ; po:contains <para/X> .
+<para/X> a doco:Paragraph ; po:contains <sent/X> .
+<sent/X> a doco:Sentence ;
+    prov:wasQuotedFrom <paper/OTHER> ;
+    nif:referenceContext <paper/OTHER/fulltext> .

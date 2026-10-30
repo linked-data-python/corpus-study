@@ -53,5 +53,25 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl: a second knower of Jane (as in the repository's example3.rdf); a knower of someone not named \"Jane Smith\"; \"Jane Smith\" plain and @en (other terms than ^^xsd:string); \"Jane Smith\"^^xsd:string under another predicate; a relation to Jane other than foaf:knows; a knower without vcard:Given; \"Smith\" plain, @en and under another predicate for q3; an e-mail under vcard:EMAIL for q4. driver.py docstring says what the fixture exercises.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "q5 \"Jane Smith\"^^xsd:string -> ?jn",
+      "q5 ?JaneSmith -> ?Jx in foaf:knows",
+      "q5 \"Jane Smith\"^^xsd:string -> plain",
+      "q5 -> \"Jane Smith\"@en",
+      "q5 vcard:FN -> ?pf",
+      "q5 foaf:knows -> ?pk",
+      "q5 vcard:Given -> ?pg",
+      "q3 \"Smith\"^^xsd:string -> ?f",
+      "q3 -> plain \"Smith\"",
+      "q3 vcard:Family -> ?pf",
+      "q4 foaf:email -> ?pe",
+      "q1 vcard:FN -> ?pp"
+    ],
+    "remaining": ""
   }
 }

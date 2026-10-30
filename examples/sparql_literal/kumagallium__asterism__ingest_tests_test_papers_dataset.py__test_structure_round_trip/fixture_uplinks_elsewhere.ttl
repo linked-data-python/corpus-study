@@ -1,0 +1,23 @@
+# Input graph for test_structure_round_trip, passed through demo(fixture=...).
+# The 'down' path from PAPER is complete, but its sentence has NO up-link;
+# another sentence, in another paragraph and section, has both. The original
+# fails at the second assertion ('cannot walk back up'). Widening the
+# interpolated {rdflib.URIRef(sent)} to a variable finds the other sentence:
+# with both occurrences widened to one variable it fails later (u_para !=
+# para); with only the subject of prov:wasQuotedFrom widened it passes.
+@base <https://kumagallium.github.io/asterism/papers/resource/> .
+@prefix po: <http://www.essepuntato.it/2008/12/pattern#> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix nif: <http://persistence.uni-leipzig.de/nlp2rdf/ontologies/nif-core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://example.org/> .
+
+<paper/PMC5951533> po:contains <sec/1> .
+<sec/1> a doco:Section ; po:contains <para/1> .
+<para/1> a doco:Paragraph ; po:contains <sent/1> .
+<sent/1> a doco:Sentence .
+
+<sec/Y> po:contains <para/Y> .
+<para/Y> po:contains <sent/Y> .
+<sent/Y> prov:wasQuotedFrom <paper/PMC5951533> ;
+    nif:referenceContext <paper/PMC5951533/fulltext> .

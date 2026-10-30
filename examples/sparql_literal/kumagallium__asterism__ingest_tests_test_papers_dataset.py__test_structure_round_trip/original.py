@@ -14,7 +14,8 @@
 #
 # The function itself only asserts and returns None; `demo()` turns a failed
 # assertion into a comparable value instead of letting run_pair abort on the
-# first raise, same convention as that example.
+# first raise, same convention as that example. Its `fixture` parameter
+# (repair of 2026-10-30) chooses the graph _seed_ttl() reads.
 import os
 
 import rdflib
@@ -22,9 +23,14 @@ import rdflib
 PAPER = "https://kumagallium.github.io/asterism/papers/resource/paper/PMC5951533"
 
 
+# Harness seam (identical on both sides): which fixture _seed_ttl() reads,
+# set by demo() so the driver can vary the input graph.
+_FIXTURE = "fixture.ttl"
+
+
 def _seed_ttl() -> str:
     here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, "fixture.ttl"), encoding="utf-8") as f:
+    with open(os.path.join(here, _FIXTURE), encoding="utf-8") as f:
         return f.read()
 
 
@@ -69,7 +75,9 @@ def test_structure_round_trip() -> None:
     assert ctx == PAPER + "/fulltext"
 
 
-def demo() -> object:
+def demo(fixture: str = "fixture.ttl") -> object:
+    global _FIXTURE
+    _FIXTURE = fixture
     try:
         test_structure_round_trip()
         return "ok"

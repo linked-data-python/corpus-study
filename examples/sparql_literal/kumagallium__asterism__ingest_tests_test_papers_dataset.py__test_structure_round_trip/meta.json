@@ -46,5 +46,25 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Seam: demo(fixture=...) sets the file _seed_ttl() reads (identical harness edit in original.py and translated.ldpy, region body untouched); 12 new fixtures, one call each, each making one pattern decisive whatever the store order: only another paper has a chain (zero solutions for PAPER), sec/para/sent typed otherwise, each po:contains link of the down path replaced by another predicate, up-links on another sentence only, no wasQuotedFrom, no referenceContext, wrong context, and decoys written before the real chain for the up-query patterns only an order can expose.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{rdflib.URIRef(PAPER)} -> ?paper",
+      "both {rdflib.URIRef(sent)} -> ?sentx",
+      "{rdflib.URIRef(sent)} subject of wasQuotedFrom -> ?sx",
+      "?para po:contains {rdflib.URIRef(sent)} -> ?sx (order-dependent: fixture_decoys_first)",
+      "?sec a doco:Section -> ?c1, and removed",
+      "?para a doco:Paragraph -> ?c2, and removed",
+      "?sent a doco:Sentence -> ?c3, and removed",
+      "po:contains -> variable predicate in each of the three down links",
+      "prov:wasQuotedFrom -> ?p4",
+      "nif:referenceContext -> ?p5",
+      "up ?sec po:contains ?para -> ?p6 (order-dependent)",
+      "up ?para po:contains {sent} -> ?p7"
+    ],
+    "remaining": "LIMIT 1 removed from both queries stays green: the test reads only down[0] and up[0], so the mutant is not observable (the translation keeps LIMIT 1 verbatim). Two up-query kills rely on the store yielding the decoys first (no ORDER BY in the original)."
   }
 }

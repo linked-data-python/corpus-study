@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants sur une copie : SELECT -> SELECT DISTINCT : VERT ; motif ?device onem2m:hasFunctionality ?eventfunc retiré : VERT ; ?dp base:mqttTopic ?topic -> ?dp ?p ?topic : VERT. Tués : ordre de projection permuté, motif rdf:type retiré ou changé, exposesFunctionality retiré, hasOutputDataPoint cassé, LIMIT 1, serialize xml, return None, print des lignes retiré (la sortie standard est comparée). Appelant réel (aggregatPreload.py:195-208) : g = Graph() rempli par parse json-ld, un rdflib.Graph ordinaire ; les cinq voisines du dépôt utilisent DISTINCT, celle-ci non, donc des doublons sont plausibles sur données réelles. initNs/prepareQuery partagés par six fonctions : le gain de longueur (5 @prefix contre un dict) est moins net que dans la région isolée. Candidate à l'article : peut-être après renforcement, mais le gain est faible (le préfixe passe de 2 à 5 lignes, .execute() requis).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Fixture renforcé (doublon de ligne, service sans device, prédicat voisin sur le datapoint, deux impasses de la jointure) et appel sur graphe vide : les trois mutants cités par le tri (DISTINCT, motif ?device retiré, ?p à la place de base:mqttTopic) sont tués, la traduction reste verte et n'a pas changé."
 }

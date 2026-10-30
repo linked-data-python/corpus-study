@@ -1,0 +1,36 @@
+# Input graph for test_structure_round_trip, passed through demo(fixture=...).
+# The complete PAPER chain of fixture.ttl, but with the neighbours that must
+# not match written FIRST, so that the store yields them first and LIMIT 1
+# (no ORDER BY) would take them if a pattern were widened. These kills depend
+# on the store's yield order, unlike the other fixture_*.ttl, which make each
+# mutant visible whatever the order:
+#   * another paper's complete chain ({rdflib.URIRef(PAPER)} -> ?paper);
+#   * a sentence-less paragraph para/Z, in a section, that also mentions
+#     sent/1 by another predicate, and contains its own sentence
+#     (?para po:contains {sent} widened in its predicate or its object);
+#   * an index that lists para/1 by another predicate (?sec po:contains ?para
+#     widened in its predicate, in the 'up' query).
+@base <https://kumagallium.github.io/asterism/papers/resource/> .
+@prefix po: <http://www.essepuntato.it/2008/12/pattern#> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix nif: <http://persistence.uni-leipzig.de/nlp2rdf/ontologies/nif-core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://example.org/> .
+
+<paper/OTHER> po:contains <sec/X> .
+<sec/X> a doco:Section ; po:contains <para/X> .
+<para/X> a doco:Paragraph ; po:contains <sent/X> .
+<sent/X> a doco:Sentence ;
+    prov:wasQuotedFrom <paper/OTHER> ;
+    nif:referenceContext <paper/OTHER/fulltext> .
+
+<index> ex:lists <para/1> .
+<sec/Z> po:contains <para/Z> .
+<para/Z> po:contains <sent/Z> ; ex:mentions <sent/1> .
+
+<paper/PMC5951533> po:contains <sec/1> .
+<sec/1> a doco:Section ; po:contains <para/1> .
+<para/1> a doco:Paragraph ; po:contains <sent/1> .
+<sent/1> a doco:Sentence ;
+    prov:wasQuotedFrom <paper/PMC5951533> ;
+    nif:referenceContext <paper/PMC5951533/fulltext> .
