@@ -53,5 +53,23 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "enregistreur (sous-classe de _TraceStub définie dans driver.py, substituée dans le module partagé, identique des deux côtés) qui imprime ce que reçoivent post_graph (paramètres, trust, obsel, type d'obsel), force_state_refresh et factory, stdout comparé par appel ; cinq appels de plus : CALL_4 à la forme des appelants réels (utest/test_ktbs_api_trace.py:116 : id relatif, type et clés d'attributs portant .uri, begin=0, end=None, valeurs d'attribut 0, \"\", False, None, NaN, liste, True, label \"\"), CALL_5 (sujet URIRef explicite, id BNode, dates ISO avec décalage, relations/inverse/sources en ressources .uri, relation dupliquée, label 0), CALL_6 (sujet \"\", begin=True), CALL_7 et CALL_8 (levées : type None, begin flottant) ; branche no_return=False (factory, jamais atteinte par demo()) exercée après run_pair en réexécutant les deux côtés sur CALL_1 et CALL_4, verdict ré-émis une fois.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "ktbs:Obsel -> ktbs:Nope dans post_graph (survivait)",
+      "[ktbs:Obsel] -> [ktbs:Nope] dans factory (jamais atteint auparavant)",
+      "{Literal(int(begin))} -> {begin} (begin=True)",
+      "{Literal(label)} -> {str(label)} (label=0)",
+      "{subject} -> {str(subject)}",
+      "générateur des attributs vidé",
+      "valeur Node d'attribut -> Literal(val)",
+      "relations : objet -> rtype",
+      "inverse_relations : ?s ?p permutés",
+      "source_obsels -> []"
+    ],
+    "remaining": "Mutant équivalent non compté : {Literal(label)} -> {label} reste vert (même littéral pour str, int, \"\" et 0 ; ne diffère que pour un label déjà nœud RDF, qu'aucun appelant du dépôt ne passe). Jugements non traités : wrong-construction (crédit `from … import p:` fondé sur un __namespaces__ écrit à la main dans le shim ; enveloppes {Literal(x)})."
   }
 }

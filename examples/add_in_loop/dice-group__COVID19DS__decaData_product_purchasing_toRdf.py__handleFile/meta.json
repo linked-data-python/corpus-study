@@ -51,5 +51,18 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "CSV reconstitué porté de 2 à 4 lignes et aux dix colonnes que décrit le README du jeu de données (BRAND, SUB_CATEGORY, PERSONA ajoutées) : ligne 3 avec STORE_ZIP_CODE vide (la garde `row[heading] != \"\"` du bloc zipcodes décide ; sans elle zipcodes.matching('') lève), QTY négatif (remboursement) et NET_SALES \"0\" ; ligne 4 avec un code postal à zéro initial (02139) et des cellules vides ; types de colonnes mixtes inférés par pandas (int, float, str) comme sur le vrai fichier ; docstring du pilote qui dit ce que chaque ligne exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "garde du bloc zip `if row[heading] != \"\":` -> `if True:` (survivait avec l'ancien CSV)",
+      "garde de la valeur -> `if True:`",
+      "second îlot zip (ndice:{adm} a dowl:Country ; rdfs:label) supprimé",
+      "city <-> county dans @bindings",
+      "?o lié à metapredicate au lieu de metaobject"
+    ],
+    "remaining": "Jugement non traité : wrong-construction (les `@bindings {…}` et `?var` sont-ils un crédit indu face à l'interpolation directe, et les `{Literal(const, datatype=…)}` de la provenance des enveloppes inutiles) — question 1 du tri, inchangée."
   }
 }

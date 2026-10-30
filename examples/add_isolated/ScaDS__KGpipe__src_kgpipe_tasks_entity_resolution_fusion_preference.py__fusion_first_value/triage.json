@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (module-state). Dans des copies : remplacer les deux `+{ {s_can} {p_can} {o_can} }` par `+{ {s} {p} {o} }` -> check reste OK (mutant survivant). Avec un canonicalize_entity_term qui remappe Alice -> Alice2 dans la copie du shim : la traduction fidèle reste OK (donc équivalente) et le mutant `{s}` fait FAIL. Autres mutants détectés : suppression de chacun des deux îlots (7 vs 4 et 7 vs 6 triplets), `rdf:type` -> `rdfs:label` dans la garde, négation de la garde sur o_can. Dépôt (src/kgpipe_tasks/entity_resolution/fusion/preference.py:147-212) : les vrais canonicalize_* renvoient un URIRef (ou le terme tel quel), donc `{s_can}` reste une IRI et `{o_can}` un terme RDF, pas de coercition de str ; l'identité du shim est bien le chemin « pas de correspondance » du dépôt, pas une logique inventée. Les listes selected/discarded (TrackRecord) ne sont pas comparées par le harnais. @prefix owl:, rdfs:, skos: sont déclarés mais inutilisés (seul rdf: l'est, via `rdf:type` en expression).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé : vrais canonicaliseurs du dépôt sur une petite table de correspondances et fixture complété ; les mutants {s}/{p}/{o} des deux îlots meurent ; traduction juste, check OK."
 }

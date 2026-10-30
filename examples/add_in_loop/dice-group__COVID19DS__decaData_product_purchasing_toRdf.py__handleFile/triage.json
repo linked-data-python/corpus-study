@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (module-state). Corps de handleFile identique au dépôt (diff, lignes 35-117). repl() identique ; le CSV est reconstitué (absent du dépôt, dit dans les notes). Mutants dans une copie, tués : type, hasCity/hasCounty échangés, geo:geometry, datatypes (geom, adm, float, date, integer, string, UPC), postalCode, quantity, Entity, dateTime, hadPrimarySource, garde de ligne, îlot zip 1 ou 2 supprimé. SURVIVANTS : `if row[heading] != \"\":` (ligne 93) remplacé par `if True:` -> vert ; (la zone des îlots ne dépend du reste que si le code postal est vide, jamais le cas). Variante testée dans une copie : traduction sans @bindings ni ?var (interpolations directes, `^^xsd:string`, `^^xsd:dateTime`, `{metapredicate} {metaobject}` en position de prédicat/objet, + @prefix xsd) -> rdfeval check OK. Pas de `for @bindings in` : choix défendu dans les notes, la strate ne mesure donc rien sur la boucle ; `zipcodes` n'est pas dans le venv `ldpy` ? (installé, exécuté). Pas d'état global partagé : g est recréé dans chaque module.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé : CSV à 4 lignes et 10 colonnes, dont un code postal vide qui tue le mutant `if True:` sur la garde du bloc zip ; traduction juste, check OK."
 }

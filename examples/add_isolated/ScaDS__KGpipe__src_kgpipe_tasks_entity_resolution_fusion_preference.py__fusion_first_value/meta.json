@@ -45,5 +45,22 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le pilote remplace, identiquement des deux côtés, les canonicaliseurs identité du shim par les vrais corps de preference.py:147-175 sur un petit MatchCluster, ajoute ex:knows (propriété d'ontologie non fusable) à allowed_predicates, et complète le fixture : sujet remappé (src:A1 -> res:Frank), sujet remappé sur un sujet déjà étiqueté (discarded sur le terme canonique), prédicat remappé vers l'ontologie cible et vers RDFS seul, objet rdf:type remappé dans l'espace cible, branche non fusable avec sujet remappé puis avec prédicat et objet remappés, doublon du seed détecté sur le triplet canonique, nœud blanc sujet (étiquette fixe pour un ordre d'itération identique), objets falsy 0 et \"\" ; selected/discarded (TrackRecord) comparés en multiensembles après run_pair, verdict ré-émis une fois.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot 1 : {s_can} -> {s} (survivait)",
+      "îlot 1 : {p_can} -> {p}",
+      "îlot 1 : {o_can} -> {o}",
+      "îlot 2 : {s_can} -> {s} (survivait)",
+      "îlot 2 : {p_can} -> {p}",
+      "îlot 2 : {o_can} -> {o}",
+      "îlot 1 supprimé",
+      "îlot 2 supprimé",
+      "garde rdf:type -> rdfs:label"
+    ],
+    "remaining": ""
   }
 }
