@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : équivalence établie (deux branches de `use_fdof` et entrée `str` exercées, valeurs des espaces de noms conformes au dépôt) ; seule réserve, le `__namespaces__` du shim est écrit à la main (dépôt : aucun) donc `from … import p:` est un crédit sous question générale.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:set_profile). Comparé nanopub/namespaces.py du dépôt (corpus/repos/Nanopublication__nanopub-py) : FDOF=https://w3id.org/fdof/ontology#, FDOC=https://w3id.org/fdoc/o/terms/ identiques au shim ; grep `__namespaces__` dans le dépôt : zéro occurrence. fdo_record.py:137-139 du dépôt est identique à original.py ; `self.tuples[pred] = URIRef(uri)` est une écriture de dict, pas un graphe, et le pilote compare le dict muté (SimpleNamespace) sur les deux branches : le mutant « branches échangées » tué (noté par le traducteur, la logique est triviale à relire). `fdof:` est importé mais jamais déréférencé dans la région (convention du traducteur : ligne d'import = une unité) ; la région n'a aucun îlot RDF, le gain se réduit à deux noms préfixés. Pas de mutant relancé.",
+  "triaged_by": "sonnet-5.5"
+}

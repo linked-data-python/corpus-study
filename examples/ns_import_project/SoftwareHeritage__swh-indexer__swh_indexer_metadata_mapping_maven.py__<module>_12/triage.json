@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Région = une ligne d'import (rdf_ops=0) ; `prefixed name` n'est employé que dans un `demo()` ajouté par le traducteur, le terme étant tiré de maven.py:81 qui est hors région ; `__namespaces__` du shim écrit à la main (swh/indexer/namespaces.py n'en exporte pas).",
+  "questions": [
+    {
+      "question": "`prefixed name` n'apparaît que dans `demo()` (ajouté des deux côtés, absent du dépôt, qui ne l'emploie qu'aux lignes 81 et 163 de maven.py, hors de cette région) : faut-il le retirer de `constructions` et ne garder que `from … import p:` ?",
+      "where": "meta.json (constructions), translated.ldpy:20-21 (demo) et original.py:20-21 ; dépôt : swh/indexer/metadata_mapping/maven.py:12 (région), :81 et :163 (usages)",
+      "if_yes": "constructions = [\"from … import p:\"] seulement",
+      "if_no": "approuver en l'état, en notant que le crédit du nom préfixé vient d'un harnais de démonstration"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo). Shim swh_namespaces_context.py : SCHEMA = Namespace(\"http://schema.org/\") identique à swh/indexer/namespaces.py du dépôt ; grep `__namespaces__` dans le dépôt : zéro occurrence. Défaut n°4 : SCHEMA disparaît du côté traduit, mais maven.py ne l'emploie que comme `SCHEMA.codeRepository` (l.81) et `SCHEMA.license` (l.163), passés comme prédicat à `add_url_if_valid` : tous deux exprimables en `schema:…`, rien ne casse. Un seul appel de pilote, un seul terme ; le mutant `schema:wrongTerm` est tué (noté par le traducteur).",
+  "triaged_by": "sonnet-5.5"
+}

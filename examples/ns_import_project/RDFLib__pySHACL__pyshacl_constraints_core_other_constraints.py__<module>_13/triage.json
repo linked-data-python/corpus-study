@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "La traduction est la seule ligne d'import `from … import rdfs:, sh:, RDF_type, SH_property` : aucun nom préfixé n'y figure, donc `prefixed name` est un crédit indu ; `__namespaces__` du shim écrit à la main (pyshacl/consts.py n'en exporte pas).",
+  "questions": [
+    {
+      "question": "translated.ldpy ne contient aucun nom préfixé (c'est une ligne d'import), mais `constructions` déclare `prefixed name` : faut-il le retirer de `constructions` ?",
+      "where": "meta.json (constructions) et translated.ldpy:4 ; dépôt : pyshacl/constraints/core/other_constraints.py:13 (usages réels aux lignes 19-25, 110, 148, hors région)",
+      "if_yes": "constructions = [\"from … import p:\"] seulement ; le gain de `sh:`/`rdfs:` dans les 13 usages du fichier n'est pas mesuré par cette région",
+      "if_no": "approuver, en considérant `rdfs:, sh:` de l'import comme les noms préfixés crédités"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Shim pyshacl_consts_context.py : RDFS/SH/RDF_type/SH_property identiques à pyshacl/consts.py:5-11, 63, 76 ; aucun `__namespaces__` dans consts.py. Défaut n°4 : RDFS et SH disparaissent du côté traduit et ne sont pas comparés par le module-state ; le pilote y supplée en comparant `__namespaces__` du module traduit aux objets du shim, ce qui détecte un mauvais IRI mais compare le shim à lui-même (ne prouve pas le dépôt ; les IRI ont été relus à la main contre consts.py). Dans le fichier du dépôt, SH/RDFS ne servent que de `SH.X`, `SH[\"in\"]`, `RDFS.Resource` : tous exprimables en `sh:`/`rdfs:`, rien ne disparaît qui soit utilisé autrement. `RDF_type`, `SH_property` restent des noms Python des deux côtés.",
+  "triaged_by": "sonnet-5.5"
+}

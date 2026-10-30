@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "La région est une seule ligne d'import (rdf_ops=0) : `prefixed name` et `interpolation {expr}` ne sont employés que dans un `demo()` ajouté par le traducteur, pas dans le code du dépôt de cette région ; le crédit `from … import p:` repose sur le `__namespaces__` manuel du shim (le dépôt n'en exporte aucun).",
+  "questions": [
+    {
+      "question": "`prefixed name` et `interpolation {expr}` n'apparaissent dans la paire que dans `demo()` (ajouté des deux côtés par le traducteur, absent du dépôt) : faut-il les retirer de `constructions` pour cette région et ne garder que `from … import p:` ?",
+      "where": "meta.json (constructions), translated.ldpy:23-24 (demo) et original.py:23-24 ; dépôt : prez/config.py:13 (la ligne d'import seule), usages réels config.py:67, 76, 94-95",
+      "if_yes": "constructions = [\"from … import p:\"] seulement ; ne pas compter cette paire pour le gain de `ep:{…}` (les vrais usages sont dans d'autres régions du fichier)",
+      "if_no": "approuver en l'état, en notant dans l'article que le crédit de ces deux constructions vient d'un harnais de démonstration"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo). Shim prez_ns_context.py : EP/REG/TERN identiques à prez/reference_data/prez_ns.py:6,7,11 du dépôt ; aucun `__namespaces__` dans ce fichier du dépôt (écrit à la main par le shim). Défaut n°4 : EP, REG, TERN disparaissent du côté traduit, mais config.py ne les emploie que comme `TERN.hasSimpleValue`, `REG.status`, `EP[\"...\"]` (lignes 67, 76, 94-95), tous exprimables en `tern:`/`reg:`/`ep:{…}` : rien ne casse dans le fichier complet. Petite inexactitude des notes : `system/object` n'est pas dans config.py (c'est dependencies.py:421, base_router.py:147), config.py n'a que `system/profile-listing`/`profile-object`. Paire sans valeur d'équivalence à contester (un import et trois chaînes), classification directly-expressible acceptable.",
+  "triaged_by": "sonnet-5.5"
+}
