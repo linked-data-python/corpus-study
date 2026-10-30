@@ -1,0 +1,15 @@
+{
+  "priority": "medium",
+  "flags": ["wrong-construction"],
+  "summary": "Les trois g.value traduits en m{ }(g).first() sont équivalents (y compris pour un littéral vide, faux des deux côtés) et l'oracle est solide, mais `g.objects(parent, RML_NS.source, True)` reste en rdflib natif sans que les notes le disent, alors que m{ {parent} {…source} ?o }(g) passe et serait la construction attendue (trav_one_step).",
+  "questions": [
+    {
+      "question": "Faut-il traduire `sources = g.objects(parent, rml_vocab.RML_NS.source, True)` en `m{ {parent} {rml_vocab.RML_NS.source} ?o }(g)`, la paire étant sinon sous-traduite sans justification dans les notes (seul g.value(None, RDF.type, Database, True) est expliqué) ?",
+      "where": "translated.ldpy:12 et original.py:11",
+      "if_yes": "needs-work léger : traduire la ligne et mettre à jour constructions/notes ; la paire reste verte (vérifié) ; la classification `awkward` ne repose alors plus que sur la ligne g.value(..., True).",
+      "if_no": "approuver en l'état, en acceptant que le flag unique=True justifie de laisser g.objects natif ; demander alors que la note le dise."
+    }
+  ],
+  "evidence": "rdfeval check OK. Dépôt d'origine pyrml/pyrml_core.py:1770-1795 : région et ligne `g.value(None, RDF.type, D2RQ_NS.Database, True)` strictement identiques ; la signature rdflib 7.2.1 Graph.value(subject, predicate, object, default, any) confirme que le 4e argument est `default` (db vaut True si rien ne matche), donc la note du traducteur est exacte et le g.value natif est fidèle. Dans une copie : fixture étendue (sources BNode portant csvw:url / sd:endpoint \"\" / jdbcDSN 0, csvw:url \"\" seul, deux csvw:url \"\" et \"x\" dans les deux ordres, sd:endpoint \"\" + jdbcDSN \"jdbc\", parent inconnu) : OK. Mutants : îlot sparql -> False FAIL ; sujet élargi `?x` ou `?source` FAIL ; jointure ajoutée FAIL ; .first() -> .one() FAIL (zéro solution au parent3) : l'oracle tue tout. Remplacer la ligne g.objects par m{ {parent} {rml_vocab.RML_NS.source} ?o }(g) : OK sur le pilote et sur la fixture étendue. Shim context_shim.py : espaces de noms et stubs Source/SQLSource, sans logique inventée.",
+  "triaged_by": "sonnet-5.5"
+}

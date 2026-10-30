@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : les deux g.value -> m{ }.first() et les deux itérations sont équivalents, le shim reprend les méthodes du dépôt (écarts de docstring et d'espaces seulement) et le pilote tue tous les mutants essayés.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Comparaison par AST du shim scoop_context.py avec corpus/repos/dtai-kg__SCOOP/SCOOP/shape_adjustment_single.py : getSource, getSubjectMap, clean_shared_key, getPredicate, getObjectMap, getFunctionValue, parseTemplate_csv, parseReference_csv ne diffèrent que par docstrings, commentaires et espaces (le shim retire aussi des attributs de __init__ que la région ne lit pas) : pas de shim-invents-logic. Dans une copie, fixture étendue : triples map à logicalSource / subjectMap / predicateObjectMap BNode (dont un pom rdf:type), triples map à deux logicalSource et deux subjectMap : OK. Mutants : îlot subjects -> [] FAIL ; sujet du logicalSource élargi à ?z FAIL ; prédicat subjectMap échangé avec logicalSource FAIL ; sujet du POM élargi FAIL ; `== rdf:value` au lieu de rdf:type FAIL ; .first() -> .one() FAIL (tm2 sans logicalSource : zéro solution, g.value rend None). Une seule valeur de chaque propriété par triples map dans le pilote : le choix de la « première » en cas de deux valeurs n'est pas contrôlé mais est non spécifié des deux côtés. Pas de gain de lisibilité net : pas candidate à l'article.",
+  "triaged_by": "sonnet-5.5"
+}

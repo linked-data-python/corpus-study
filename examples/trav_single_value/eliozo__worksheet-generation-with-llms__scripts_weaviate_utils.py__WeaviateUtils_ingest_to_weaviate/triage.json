@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : subjects(...) -> m{ }(graph) et les quatre graph.value -> m{ }(graph).first() sont équivalents (str(None) = \"None\" et int(None) levant la même exception, attrapée, des deux côtés), et l'oracle par client Weaviate factice tue tous les mutants essayés.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Dans une copie, fixture étendue : trois Problem complets dont un avec deux problemText@lv et cinq solutionText répartis sur deux solutions (concaténation ordonnée), un Problem à plusieurs valeurs de problemID/olympiadType/problemGrade/problemYear, un Problem sans problemID (str(None) -> \"None\"), un Problem sujet BNode, une solution BNode et une solution littérale (m{ } avec un littéral en sujet ne lève rien, comme graph.objects), plusieurs insertions comparées dans l'ordre : OK. Mutants (fixture d'origine) : sujet de rdf:type -> [] FAIL ; sujet élargi sur problemGrade, problemText, solutionText FAIL ; olympiadType lu via problemID FAIL ; problemID lu via problemYear FAIL ; boucle des solutions -> [] FAIL ; classe Problem -> Other FAIL ; .first() -> .one() FAIL (problem2 sans problemGrade : zéro solution). Séparateur de concaténation \\n\\n -> \\n : FAIL sur la fixture étendue seulement (la fixture d'origine n'a qu'un solutionText@lv par problème, la branche de concaténation n'y est pas exercée) mais la traduction est correcte. Le choix de la première valeur en cas de plusieurs valeurs concorde ici dans la copie (ordre de l'index), non spécifié des deux côtés. Pas de gain de lisibilité : pas candidate à l'article.",
+  "triaged_by": "sonnet-5.5"
+}
