@@ -139,6 +139,17 @@ def detected(ldpy_source: str) -> set[str]:
     return used
 
 
+# A typed or a language-tagged literal can be written where no span tells it
+# apart (`{x}^^xsd:int`, a `s{ }` query, a Python string holding SPARQL), so
+# whether one is USED cannot be read without doubt.  Whether one CAN be used
+# can: no `^^` (no `@lang` after a quote or a brace) anywhere in the code
+# means a credit for nothing.  These two are checked in that direction only.
+_CLAIM_ONLY = {
+    "typed literal": re.compile(r"\^\^"),
+    "language literal": re.compile(r"[\"'}]@[A-Za-z]"),
+}
+
+
 def mismatch(declared, ldpy_source: str) -> tuple[list[str], list[str]]:
     """(declared but not used, used but not declared), checkable names only.
 
@@ -149,4 +160,8 @@ def mismatch(declared, ldpy_source: str) -> tuple[list[str], list[str]]:
     named, _ = normalise(declared)
     used = detected(ldpy_source)
     claimed = {c for c in named if c in CHECKED}
-    return sorted(claimed - used), sorted(used - claimed)
+    body = "\n".join(line for line in ldpy_source.splitlines()
+                     if not line.lstrip().startswith("#"))
+    unused = {c for c in named
+              if c in _CLAIM_ONLY and not _CLAIM_ONLY[c].search(body)}
+    return sorted((claimed - used) | unused), sorted(used - claimed)

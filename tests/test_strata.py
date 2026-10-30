@@ -415,3 +415,19 @@ def test_construction_credit_is_checked_against_the_code():
     # the IRI a @prefix binds is not an IRI term of the translation
     assert mismatch(["@prefix", "IRI"], "@prefix ex: <http://e.org/> .\n")[0] == ["IRI"]
     assert "f<…>" not in mismatch(["f<…>"], "@prefix ns: f<{base}> .\n")[0]
+
+
+def test_a_literal_credit_needs_its_marker_somewhere_in_the_code():
+    """`{Literal(x, datatype=XSD.int)}` is Python inside an island: crediting
+    it as a typed literal counts for the notation what it did not write."""
+    from rdfeval.constructions import mismatch
+    head = ("@prefix ex: <http://example.org/> .\n"
+            "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n@graph g\n")
+    py = head + "+{ ex:a ex:p {Literal(x, datatype=XSD.int)} ; ex:q {Literal(y, lang='en')} }\n"
+    assert mismatch(["typed literal", "language literal"], py)[0] == [
+        "language literal", "typed literal"]
+    ld = head + "+{ ex:a ex:p {x}^^xsd:int ; ex:q \"y\"@en }\n"
+    assert mismatch(["typed literal", "language literal"], ld)[0] == []
+    assert mismatch(["language literal"], head + "+{ ex:a ex:q {y}@en }\n")[0] == []
+    # a comment is not code
+    assert mismatch(["typed literal"], "# \"1\"^^xsd:int\n")[0] == ["typed literal"]
