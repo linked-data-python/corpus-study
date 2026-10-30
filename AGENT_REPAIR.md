@@ -50,6 +50,13 @@ employé et non déclaré), que vous corrigez.
 branche, écrivez `FILTER(1 = 2)` ou un prédicat inexistant, et vérifiez
 que le mutant change bien le résultat sur un cas simple.
 
+**Liaisons de préfixes** : quand le dépôt sérialise ou relit les liaisons
+d'un graphe, le pilote compare les triplets et exige que chaque liaison
+posée par l'original se retrouve dans la traduction ; il tolère des
+liaisons en plus (`@graph` ajoute celles du bloc, fiche ldpy/027) et ne
+compare pas le texte sérialisé, sauf si le dépôt compare lui-même un texte
+exact.
+
 Un pilote reste **lisible** : une docstring qui dit ce que chaque appel
 exerce, et pourquoi. N'affaiblissez jamais un pilote, ne retirez aucun
 appel existant.

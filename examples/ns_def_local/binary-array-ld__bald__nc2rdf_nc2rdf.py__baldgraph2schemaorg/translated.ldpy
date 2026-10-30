@@ -45,11 +45,12 @@ def baldgraph2schemaorg(graph, path=None, baseuri=None):
        container = BNode()
 
     @prefix so: <http://schema.org/> .
-    +{ {container} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> so:Dataset }(schema_g)
+    @graph schema_g
+    +{ {container} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> so:Dataset }
 
     if path is not None and isUrl(path):
        predUri = <http://schema.org/url>
-       +{ {container} {predUri} {URIRef(path)} }(schema_g)
+       +{ {container} {predUri} {URIRef(path)} }
 
     for row in qres:
        currField = getBasename(str(row[0])).strip()
@@ -62,12 +63,12 @@ def baldgraph2schemaorg(graph, path=None, baseuri=None):
                 if len(kw) == 0:
                    continue
                 lit = Literal(kw)
-                +{ {container} {predUri} {lit} }(schema_g)
+                +{ {container} {predUri} {lit} }
              continue
 
           #print('schemaorg:' + mapping_idx[currField], "\t", row[1])
           lit = Literal(row[1])
-          +{ {container} {predUri} {lit} }(schema_g)
+          +{ {container} {predUri} {lit} }
     #
     # Add some distrbution details
     #

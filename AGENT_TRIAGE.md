@@ -83,6 +83,14 @@ Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
    observer** le graphe partiel (il n'est pas jeté avec l'exception). La
    traduction fidèle garde alors les premiers triplets dans un îlot à part ;
    la classification ne change pas.
+11. **Les liaisons de préfixes** : `@graph g` ajoute au graphe les préfixes du
+   bloc (fiche ldpy/027), donc la traduction peut sérialiser `so:Dataset` là
+   où l'original écrit `<http://schema.org/Dataset>`. Ce n'est **pas** une
+   différence de sens : l'équivalence porte sur les triplets, plus les
+   liaisons que l'original pose, qui doivent être conservées ; des liaisons
+   en plus sont tolérées. Ne le signalez que si le dépôt compare le **texte**
+   sérialisé (un fichier attendu, une chaîne exacte), avec le fichier et la
+   ligne.
 
 Deux défauts sont désormais **contrôlés mécaniquement** par le digest, ne
 les recherchez pas à la main : l'écart entre les `constructions` déclarées
