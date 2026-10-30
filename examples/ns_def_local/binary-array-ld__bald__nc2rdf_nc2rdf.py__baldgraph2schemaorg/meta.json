@@ -20,8 +20,8 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "@graph",
     "+{ }",
+    "call suffix (g)",
     "prefixed name",
     "IRI"
   ],
@@ -30,7 +30,8 @@
     "The one local `so = Namespace(\"http://schema.org/\")` (namespace_ctor) becomes `@prefix so: <http://schema.org/> .`; its single use `so.Dataset` (namespace_term) becomes `so:Dataset`. Not bound `as so` since the object itself is never used, only the prefix.",
     "The four schema_g.add((...)) calls (triple_add) become `+{ }` under a single `@graph schema_g` for the function: add_isolated is the more specific construction here even though the region is drawn from the ns_def_local stratum, per the instruction to always credit the most specific construction. Each add stayed a separate +{ } (no `;` merging) since they are independent statements, some conditional, some inside a loop -- merging would be the DELETE-WHERE-style join pitfall's write-side analogue and would change which triples get added when a branch is skipped.",
     "The static `URIRef(\"http://schema.org/url\")` became the IRI literal `<http://schema.org/url>`; the two runtime-built `URIRef(\"http://schema.org/\" + mapping_idx[currField])` were left as URIRef(...) rather than rewritten to f<...{expr}...>, matching the instruction to translate only the ns_def_local idiom itself (no unrequested refactor of unrelated term construction).",
-    "driver.py builds an input graph inline (bald:Container with a plain field, a comma-separated 'keywords' field including a blank entry, and one unmapped predicate that must not appear in the output) since the oracle is isomorphism on the function's *return* value, not a read of a pre-existing fixture file."
+    "driver.py builds an input graph inline (bald:Container with a plain field, a comma-separated 'keywords' field including a blank entry, and one unmapped predicate that must not appear in the output) since the oracle is isomorphism on the function's *return* value, not a read of a pre-existing fixture file.",
+    "`@graph schema_g` liait `so` sur le graphe retourné (documenté : le graphe hérite des préfixes du bloc), ce que l'original ne fait pas : `Namespace(...)` n'est qu'une valeur locale. Le dépôt sérialise ce graphe (nc2rdf.py:96-104, `schema_g.serialize(format=outformat)`) : turtle/n3 écrivait `so:Dataset` au lieu de `<http://schema.org/Dataset>` ou `ns1:`, xml `ns1`. Le pilote renforcé, qui compare list(g.namespaces()) et les sérialisations turtle, n3 et xml, était rouge sur les neuf appels ; les quatre `+{ }` ont maintenant le suffixe récepteur `(schema_g)` à la place de `@graph schema_g`, qui n'ajoute aucune liaison, et le pilote est vert. Le préfixe `@prefix so:` reste, il sert à `so:Dataset`."
   ],
   "draft_sha": "df4c3b6533f5b41a",
   "provenance": {
@@ -48,5 +49,24 @@
     "method": "entry:baldgraph2schemaorg",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "pilote réécrit à la main (run_pair ne compare que l'isomorphisme) : neuf appels, chacun comparant l'exception (type et message) ou, pour le graphe retourné, l'isomorphisme, list(g.namespaces()) et la sérialisation turtle, n3 et xml (identifiants de nœuds blancs normalisés). Appels : path et baseuri None ; path http et baseuri (garde isUrl vraie, `URIRef(path)` et `URIRef(baseuri)`) ; path non-URL avec baseuri ; path https sans baseuri ; baseuri et path vides (`URIRef(\"\")`, garde fausse) ; path entier ; graphe sans conteneur ; conteneur sans champ ; graph=None (exception de graph.query). Le graphe d'entrée porte un champ simple, des keywords avec entrées vides, un prédicat non mappé, un prédicat à espace final, un littéral vide, un littéral typé, un objet IRI et un second sujet qui n'est pas un conteneur.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "traduction d'origine avec `@graph schema_g` (liaison `so`, namespaces et sérialisations différents)",
+      "îlot `+{ {container} {predUri} {URIRef(path)} }` remplacé par pass",
+      "`{URIRef(path)}` -> `{Literal(path)}`",
+      "<http://schema.org/url> -> urlX",
+      "`container = URIRef(baseuri)` -> `BNode()`",
+      "`if baseuri is not None` -> `if baseuri`",
+      "garde `isUrl(path)` retirée (`path is not None` seul) ou inversée",
+      "keywords : strip, saut des entrées vides ou `continue` retirés",
+      "`Literal(row[1])` -> `row[1]`",
+      "`currField.strip()` retiré",
+      "so:Dataset -> so:DatasetX"
+    ],
+    "remaining": "Mutant équivalent : retirer `path is not None` de la garde reste vert (isUrl(None) est faux). Le shim `schemaOrg.distribution` rend le graphe tel quel (le dépôt n'a pas de méthode à trois arguments) : son effet réel n'est pas observé. La traduction crédite `+{ }(schema_g)` et non plus `@graph` : le langage n'a pas de `@graph` qui ne lie pas les préfixes."
   }
 }

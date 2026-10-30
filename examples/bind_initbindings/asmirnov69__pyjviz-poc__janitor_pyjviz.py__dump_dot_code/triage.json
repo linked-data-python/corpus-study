@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants dans des copies mktemp -d (modification vérifiée par diff avant chaque essai) : (M1) retirer `?m <pyj:cmc> {cmc}` des requêtes 4 et 5 -> VERT ; (M2) retirer `?df <pyj:cmc> {cmc}` des deux -> VERT ; (M3) retirer `?df <pyj:cmc> {cmc}` de la seule requête 5 -> VERT ; (M4) retirer `?m <pyj:cmc> {cmc}` de la seule requête 5 -> VERT. À l'inverse : supprimer la branche `|<pyj:method-call-arg>` -> ROUGE ; retirer `<pyj:cmc> {cmc}` de la requête 1 (dataframes) -> ROUGE ; idem de la requête 2 (méthodes) -> ROUGE. Cause : pour chaque cmc, les arêtes de la fixture relient toujours deux nœuds de la même cmc, donc la contrainte de cmc sur l'un des deux bouts est redondante. Dépôt d'origine : les cmc sont toujours des IRI `<pyj:cmc:N>` (janitor/pyjrdflogger.py:67-69), jamais des BNode ni des littéraux ; `{cmc}` y vaut donc un URIRef, comme l'`initBindings={'cmc': cmc}` d'origine : pas de problème de coercition. Pas de `None` possible (cmc vient d'un résultat de requête). Choix s{ } justifié (chemin de propriétés `|`, hors de portée de m{ }) ; la variable `?cmc` n'est pas projetée, donc interpolation conforme au tableau des strates.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le fixture reçoit des arêtes entre un dataframe et une méthode de cmc différentes ; les quatre mutants du trieur (retrait de `?m <pyj:cmc> {cmc}` ou de `?df <pyj:cmc> {cmc}`, dans la requête 4 ou la 5) échouent maintenant, et la traduction, inchangée, reste verte."
 }

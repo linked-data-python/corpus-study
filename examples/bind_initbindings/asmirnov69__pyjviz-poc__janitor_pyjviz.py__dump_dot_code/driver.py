@@ -8,7 +8,10 @@ isomorphism, so `fixture.ttl` is parsed fresh for each side and passed as
 Two calls: the populated fixture (two clusters, a labelled one and a
 "none"-labelled one, each exercising all five queries, plus a stray
 neighbourhood tagged with a CMC that is itself untyped and so must not
-appear at all) and an empty graph (the zero-CMC case, `cmcs == []`).
+appear at all; and inter-cmc edges, method-call, method-call-arg and
+method-return, running from a dataframe of one cmc to a method of the other,
+so that the `?df <pyj:cmc> {cmc}` and the `?m <pyj:cmc> {cmc}` constraints of
+the two edge queries are each needed on their own) and an empty graph (the zero-CMC case, `cmcs == []`).
 """
 from rdflib import Graph
 

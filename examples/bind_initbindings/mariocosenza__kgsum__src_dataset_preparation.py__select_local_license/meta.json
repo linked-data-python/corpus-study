@@ -25,7 +25,8 @@
     "`prepareQuery(TEXT, initNs=...)` collapses into an `s{ }` island written literally at the point of use, still assigned to `Q_LOCAL_DCTERMS_LICENSE` -- an island is an expression, so binding it to a name and later calling `Q_LOCAL_DCTERMS_LICENSE(parsed_graph)` (`call suffix (g)`) behaves exactly like writing `s{ ... }(parsed_graph)` inline; verified with the transpiler.",
     "`log_query(Q_LOCAL_DCTERMS_LICENSE)` (a project helper that only logs `str(query)`, see dataset_preparation_shim.py) is kept as-is: it receives the `s{ }` Query object itself, not a call result, on both sides.",
     "added `import logging` to original.py (restored context: the real file imports it at the top and defines `logger`/`log_query` a few lines above this function, none of which are inside the extracted lines 264-278) and moved `log_query` into dataset_preparation_shim.py, transcribed verbatim from src/dataset_preparation.py -- it is a helper the region calls but does not define, per AGENT_BATCH.md's shim convention.",
-    "checked the anti-hollow-green discipline: corrupting translated.ldpy (dcterms:license -> dcterms:cheese) makes the check FAIL as expected; restored before finalising."
+    "checked the anti-hollow-green discipline: corrupting translated.ldpy (dcterms:license -> dcterms:cheese) makes the check FAIL as expected; restored before finalising.",
+    "`s{ }` appelée sur un graphe est paresseuse : `Q(parsed_graph)` ne lève plus à l'appel quand l'argument n'est pas un graphe (None, str, objet), l'erreur sortait du `try` et le `except` n'était pas pris, alors que l'original journalise et rend `set()` ; la traduction force maintenant la requête dans le `try` avec `.execute()`. Preuve : le pilote renforcé (None, str, objet) était rouge avant la correction (RuntimeError ou AttributeError contre set()), vert après. Le dépôt ne passe jamais autre chose qu'un Graph (`_guess_format_and_parse` renvoie un Graph ou lève), l'écart n'est donc pas atteint par le dépôt, mais la traduction est désormais fidèle au `try/except`."
   ],
   "draft_sha": "2893c533fdb6c956",
   "provenance": {
@@ -43,5 +44,21 @@
     "method": "fixture:fixture.ttl entry:select_local_license",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six appels ajoutés aux deux d'origine : un graphe dont la seule licence est le littéral vide, un graphe à sujet nœud blanc et licence littéral typé (xsd:integer 0), puis la branche `except` avec None, une str et un objet quelconque (qui doivent rendre set() des deux côtés), et un Graph dont `triples` lève (erreur pendant l'évaluation : même exception, type et message, des deux côtés). Docstring du pilote mise à jour.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "traduction d'origine sans `.execute()` : None, str et objet (RuntimeError / AttributeError contre set())",
+      "`.execute()` retiré",
+      "`return set()` du except remplacé par `return None`",
+      "`except Exception` réduit à `ValueError` ou à `KeyError`",
+      "LIMIT 1 -> LIMIT 2 ; LIMIT supprimé",
+      "`str(row.license)` -> `row.license`",
+      "filtre `if row.license` ajouté (licence vide)",
+      "dcterms:license -> dcterms:rights"
+    ],
+    "remaining": "Le dépôt d'origine n'atteint pas le `except` (toujours un Graph) : la correction n'a aucun effet sur les chiffres. L'effet de `log_query` (journalise `str(query)`, un PreparedQuery d'un côté, un objet s{ } de l'autre) reste non observé."
   }
 }

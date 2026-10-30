@@ -41,5 +41,19 @@
     "method": "fixture:fixture.ttl entry:dump_dot_code",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl reçoit cinq arêtes inter-cmc (method-call, method-call-arg et method-return) entre un dataframe d'une cmc et une méthode de l'autre cmc, dans les deux sens, de sorte que chaque contrainte `?df <pyj:cmc> {cmc}` et `?m <pyj:cmc> {cmc}` des requêtes 4 et 5 soit nécessaire à elle seule (sans elle, le nœud n'est pas dans `nodes` et l'appel lève KeyError) ; la docstring du pilote le dit. Les deux appels du pilote sont inchangés.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "retrait de `?m <pyj:cmc> {cmc}` de la requête 4 seule",
+      "retrait de `?df <pyj:cmc> {cmc}` de la requête 4 seule",
+      "retrait de `?m <pyj:cmc> {cmc}` de la requête 5 seule",
+      "retrait de `?df <pyj:cmc> {cmc}` de la requête 5 seule",
+      "retrait des deux contraintes cmc de la requête 4",
+      "`method-call|method-call-arg` réduit à `method-call` ou à `method-call-arg`"
+    ],
+    "remaining": ""
   }
 }

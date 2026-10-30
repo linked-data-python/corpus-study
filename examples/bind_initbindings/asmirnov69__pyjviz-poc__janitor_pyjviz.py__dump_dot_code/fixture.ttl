@@ -50,3 +50,14 @@
     pyj:cmc <pyj:cmc-unknown> .
 
 <pyj:df-stray> pyj:method-call <pyj:m-stray> .
+
+# Inter-cmc edges: a dataframe of one cmc linked to a method of ANOTHER cmc
+# (method-call, method-call-arg and method-return), so that each of the
+# `?df <pyj:cmc> {cmc}` and `?m <pyj:cmc> {cmc}` constraints of the last two
+# queries is needed on its own: without either of them the edge is returned
+# for a cmc that has only one of its ends, and the node lookup fails.
+<pyj:df1> pyj:method-call <pyj:m2> .
+<pyj:df2> pyj:method-call <pyj:m1> .
+<pyj:df1> pyj:method-call-arg <pyj:m2> .
+<pyj:m2> pyj:method-return <pyj:df1> .
+<pyj:m1> pyj:method-return <pyj:df2> .

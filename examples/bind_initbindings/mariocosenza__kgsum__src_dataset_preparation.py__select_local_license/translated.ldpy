@@ -19,7 +19,7 @@ def select_local_license(parsed_graph):
     }
     log_query(Q_LOCAL_DCTERMS_LICENSE)
     try:
-        qres = Q_LOCAL_DCTERMS_LICENSE(parsed_graph)
+        qres = Q_LOCAL_DCTERMS_LICENSE(parsed_graph).execute()
     except Exception as e:
         logger.warning(f"SPARQL error in select_local_license: {e}")
         return set()
