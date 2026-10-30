@@ -4,7 +4,7 @@
 # Executability: BASEDIR and S() -- defined earlier in the same source file,
 # just outside this region -- restored via context_predecl.py (context shim,
 # see meta.json).
-@prefix sem: <http://example.org/semtech#> .
+@prefix semtech: <http://example.org/semtech#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -21,8 +21,8 @@ for @bindings as b in [
     {"pid": "performsActivity", "plab": "performs activity", "pdef": "This property links a governance role to the activity it performs.", "prange": SEM.GovernanceActivity},
     {"pid": "appliesRule", "plab": "applies rule", "pdef": "This property links a governance activity to the rule it applies when a change or dispute arises.", "prange": SEM.GovernanceRule},
 ]:
-    +{ sem:{?pid} a owl:ObjectProperty ;
+    +{ semtech:{?pid} a owl:ObjectProperty ;
                   rdfs:label {b.raw["plab"]}@en ;
                   skos:definition {b.raw["pdef"]}@en ;
                   dcterms:source {S("R-TOGAF")}@en }
-    +{ sem:{?pid} rdfs:range ?prange }
+    +{ semtech:{?pid} rdfs:range ?prange }

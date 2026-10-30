@@ -4,7 +4,7 @@
 # Executability: BASEDIR, load(), nodes and cls_iri -- defined earlier in
 # the same source file, just outside this region -- restored via
 # context_predecl.py (context shim, see meta.json).
-@prefix sem: <http://example.org/semtech#> .
+@prefix semtech: <http://example.org/semtech#> .
 from rdflib import Graph, Namespace
 from context_predecl import BASEDIR, load, nodes, cls_iri
 en = load("enrichment_n", "v6_0_0")
@@ -14,4 +14,4 @@ g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v6_2_0.ttl")
 
 @graph g2
 for @bindings in [{"s": IRI[s_], "p": p_, "d": IRI[d_]} for s_, p_, d_ in en.NEW_RELATIONS]:
-    +{ ?s sem:{?p} ?d }
+    +{ ?s semtech:{?p} ?d }

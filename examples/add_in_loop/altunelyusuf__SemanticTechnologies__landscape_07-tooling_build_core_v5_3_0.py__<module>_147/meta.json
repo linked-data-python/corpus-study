@@ -33,8 +33,26 @@
     "sem:{?pid} exercises 0.4.0's local-part instantiation (?pid resolves against the current bindings on every row); pid is a plain identifier with no space or slash, so concatenation is safe and e<...> is not needed.",
     "plab and pdef feed a language literal (Literal(x, lang=\"en\")). {b.raw[\"plab\"]}@en / {b.raw[\"pdef\"]}@en glue the tag onto the interpolation, per terms.md and graphs.md; used b.raw rather than ?plab/?pdef directly in term position because gluing an RDF suffix straight onto a bare ?var is not supported by the transpiler (confirmed: 'for @bindings in [...]: +{ ex:{?id} ex:label ?plab@en }' fails to parse with \"'}' attendu pour fermer l'ilot de graphe\").",
     "dcterms:source keeps S(\"R-TOGAF\") -- a call to the helper restored in context_predecl.py, itself copied from the source file's own S()/REG (verified against the real repository at altunelyusuf/SemanticTechnologies@bad0fa7c46: S(*keys) joins REG[k][\"cite\"], and REG[\"R-TOGAF\"][\"cite\"] comes from landscape/07-tooling/enrichment_l_v5_3_0.py's EXT6) -- unrelated to any bindings row, so left as a plain Python interpolation with the @en suffix glued on, not a bindings key.",
-    "Sabotage-tested: retargeting the second +{ } from ?prange to a nonexistent ?wrongvar (so the range triples are silently dropped) makes rdfeval check fail (15 vs 13 triples, not isomorphic); restored before finalising."
+    "Sabotage-tested: retargeting the second +{ } from ?prange to a nonexistent ?wrongvar (so the range triples are silently dropped) makes rdfeval check fail (15 vs 13 triples, not isomorphic); restored before finalising.",
+    "Repair 2026-10-30: the prefix is now `semtech:`, not `sem:` (supersedes 'SEM->sem' above). The real semtech_tbox_v5_2_0.ttl binds `semtech:` to http://example.org/semtech#, and `@graph g2` under `@prefix sem:` rebound that namespace to `sem:`, dropping `semtech:` from g2 -- which the repository serialises right after the region (build_core_v5_3_0.py:157), so the tbox it writes changed its prefixes. Hidden because the placeholder tbox declared no `semtech:`; with the real header copied into it, the driver's binding check failed on the old translation (('semtech', 'http://example.org/semtech#') missing) and passes with `@prefix semtech:`."
   ],
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "renforcé : le tbox de substitution porte les huit lignes @prefix du vrai semtech_tbox_v5_2_0.ttl (dont semtech:), et le pilote, après le verdict module-state de run_pair inchangé, exige que chaque liaison de préfixe du g2 de l'original se retrouve dans celui de la traduction (le dépôt sérialise g2 à la ligne 157)",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "premier +{ } supprimé",
+      "second +{ } (rdfs:range) supprimé",
+      "?prange élargi en []",
+      "sujet semtech:{?pid} rendu constant",
+      "sujet du second îlot non lié (?nopid)",
+      "@en retiré de rdfs:label",
+      "valeur de dcterms:source remplacée",
+      "\"prange\": None ajouté à la première ligne",
+      "@prefix sem: au lieu de semtech: (liaison semtech: écrasée par @graph) -- tué par la seule vérification des liaisons"
+    ],
+    "remaining": ""
+  },
   "draft_sha": "5e15895b77082a8a",
   "provenance": {
     "generated_at": "2026-08-28T17:54:59.512492+00:00",

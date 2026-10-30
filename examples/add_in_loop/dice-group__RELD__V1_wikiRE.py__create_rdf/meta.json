@@ -28,6 +28,22 @@
     "Context shim (context_shim.py): nyt, relation and rel_data are defined earlier in the same function (create_rdf), outside the extracted lines (193-198), inside a `for i, (rel, info) in enumerate(output.items()):` loop this region does not otherwise need. Restored with a real row copied verbatim from the repository's own AllRelationWithCrossCheck.csv (WikidataIds=P19, 'place of birth'/'place_of_birth', Nrid=4001) plus one neighbouring row whose RE-NYT-Relation is blank in the real file, so rel_data.loc[...] is not trivially the whole table and nyt='place_of_birth' takes the `if str(nyt) != 'nan':` branch that is this region's only RDF-producing path -- an empty-branch fixture would have been a hollow green.",
     "Sabotage-tested: retargeting the object from {URIRef(res+\"R-\"+str(nytid))} to {URIRef(relation)} (the subject's own value) makes rdfeval check fail (1 vs 1 triples, not isomorphic); restored before finalising."
   ],
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "renforcé : après le verdict module-state de run_pair inchangé (ligne P19, garde vraie), un second passage avec la ligne P569 du vrai CSV, dont RE-NYT-Relation est vide (nyt = NaN lu comme wikiRE.py:192 le lit) : garde fausse, issue (levée) et graphe g comparés ; les liaisons de préfixe de g comparées dans les deux passages",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "+{ } supprimé",
+      "sujet élargi en []",
+      "objet élargi en []",
+      "objet interpolé en str nue (Literal)",
+      "garde forcée à False",
+      "garde forcée à True -- tué par le seul passage P569",
+      "garde réécrite `if nyt:` (NaN est vrai) -- tué par le seul passage P569",
+      "@prefix o: au lieu de owl: (liaison owl: écrasée par @graph) -- tué par la vérification des liaisons"
+    ],
+    "remaining": ""
+  },
   "draft_sha": "e70735eb797c1fa1",
   "provenance": {
     "generated_at": "2026-08-28T17:55:00.036921+00:00",

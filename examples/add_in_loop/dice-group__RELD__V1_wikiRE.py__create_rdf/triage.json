@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : un seul îlot `+{ }`, fidèle au dépôt, les `URIRef(...)` sont nécessaires (une str interpolée deviendrait un Literal).",
   "questions": [],
   "evidence": "check OK (module-state). Le contexte du shim reproduit fidèlement corpus/repos/dice-group__RELD/V1/wikiRE.py (relation = res+\"R-\"+str(ID) l.133, nyt = rel_data.loc[...].iloc[0] l.191, bloc `if str(nyt) != 'nan'` l.192-198) ; `relation` et `res+\"R-\"+str(nytid)` sont des str dans le dépôt, donc `{URIRef(...)}` est l'enveloppe qu'il faut. La branche 'nan' (graphe vide) n'est pas exercée, mais la garde est copiée à l'identique des deux côtés (même ligne Python) : pas de risque d'écart. Le mutant du traducteur (objet remplacé par URIRef(relation)) est bien tué.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Traduction juste ; pilote renforcé d'un passage sur la ligne P569 (RE-NYT-Relation vide, nyt = NaN) qui tue les deux mutants survivants de la garde (`if True:`, `if nyt:`), et d'une vérification des liaisons de g ; check OK."
 }

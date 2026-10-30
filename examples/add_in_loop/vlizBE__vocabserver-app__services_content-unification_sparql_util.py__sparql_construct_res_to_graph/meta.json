@@ -25,6 +25,21 @@
     "Textbook add_in_loop: a single .add() on a fresh Graph() inside a for loop becomes @graph g + +{ {s} {p} {o} }, one island replacing the .add call, no restructuring.",
     "Context shim json_to_term_shim.py reconstructs json_to_term from the same source file (services/content-unification/sparql_util.py) at the pinned commit; it is not itself an RDF operation, just SPARQL-JSON-to-term glue the region depends on."
   ],
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "renforcé : deux appels ajoutés après l'appel nominal inchangé -- objets faux en vérité pour rdflib (\"\", \"0\"^^xsd:integer, \"false\"^^xsd:boolean), langue sous la clé CONSTRUCT 'lang', types 'typed-literal' et 'bnode', triplet en double ; puis un résultat sans aucune liaison",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "+{ } supprimé",
+      "sujet élargi en []",
+      "objet élargi en []",
+      "prédicat pris dans le sujet",
+      "objet interpolé depuis la valeur str brute",
+      "garde de vérité `if o:` ajoutée devant +{ } -- tuée par le seul appel des valeurs fausses",
+      "@graph sur un autre graphe que g"
+    ],
+    "remaining": ""
+  },
   "article_candidate": true,
   "draft_sha": "1ddc0285e52384ed",
   "provenance": {

@@ -1,5 +1,17 @@
 # Placeholder for landscape/02-ontology/semtech_tbox_v5_2_0.ttl.
-# This region never reads g2's pre-existing content, only adds to it, so
-# the base graph's actual content cannot affect this region's correctness.
+# This region never reads g2's pre-existing triples, only adds to it, so
+# the base graph's actual content cannot affect the triples it writes.
+# The prefix declarations, however, are copied verbatim from the real file
+# (lines 1-8): parsing them binds `semtech:` on g2, and the repository
+# serialises g2 right after this region (build_core_v5_3_0.py:157), so the
+# region must not replace that binding.
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix semtech: <http://example.org/semtech#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
 <http://example.org/semtech#> a owl:Ontology .
