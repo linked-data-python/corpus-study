@@ -50,5 +50,22 @@
     "method": "fixture:fixture.ttl entry:_extract_shapes",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deux appels ajoutés : fixture_params.ttl, où chacun des 4 object_parameters et des 30 subject_parameters donne une forme atteignable par lui seul (objets des paramètres sujet-seuls : IRI, littéraux, liste, qui ne doivent pas devenir des formes), plus des listes sh:and et sh:xone (membres IRI, BNode, littéraux, un membre avec sh:path dans chacune, une liste vide) ; et un graphe vide (zéro solution) ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sh:qualifiedValueShape -> sh:qualifiedValueShap dans subject_parameters",
+      "sh:hasValue -> sh:hasValu",
+      "sh:minLength, sh:maxLength retirés",
+      "object_parameters réduit à [sh:property]",
+      "sh:targetSubjectsOf retiré",
+      "sh:property retiré de subject_parameters",
+      "sh:xone retiré de la liste des listes",
+      "sh:and retiré de la liste des listes",
+      "m{ {shapename} sh:path [] } -> m{ {shapename} ?p [] }"
+    ],
+    "remaining": "Jugements non traités : la région illustre mal trav_existence (une seule garde d'existence, le reste est trav_one_step) et le tri déconseille l'exemple d'article alors que meta.json porte article_candidate: true."
   }
 }

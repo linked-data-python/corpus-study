@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!-- Input in the form the repository really reads: get_common_data() passes
+     oeo-full.owl, an RDF/XML release whose header (2.14.0, checked
+     2026-10-30) declares xmlns:obo and xmlns:dc exactly as below. The
+     queries' obo: and dc: prefixes come from these declarations. -->
+<rdf:RDF xmlns="https://openenergyplatform.org/ontology/oeo/"
+     xml:base="https://openenergyplatform.org/ontology/oeo/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:oeo="https://openenergyplatform.org/ontology/oeo/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:terms="http://purl.org/dc/terms/">
+    <owl:Ontology rdf:about="https://openenergyplatform.org/ontology/oeo/">
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The Open Energy Ontology</dc:description>
+        <terms:description>dcterms, not dc: must not become the description</terms:description>
+    </owl:Ontology>
+    <owl:Class rdf:about="https://openenergyplatform.org/ontology/oeo/OEO_00000001">
+        <rdfs:label xml:lang="en">energy</rdfs:label>
+        <rdfs:subClassOf rdf:resource="https://openenergyplatform.org/ontology/oeo/OEO_00000002"/>
+        <obo:IAO_0000115 xml:lang="en">A definition in English.</obo:IAO_0000115>
+        <obo:IAO_0000115 xml:lang="de">Eine Definition.</obo:IAO_0000115>
+        <obo:IAO_0000116>An editor note.</obo:IAO_0000116>
+        <obo:IAO_0000116 rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A typed editor note.</obo:IAO_0000116>
+        <obo:IAO_0000117>Term editor: neighbour of 115/116, must not match.</obo:IAO_0000117>
+    </owl:Class>
+    <owl:Class rdf:about="https://openenergyplatform.org/ontology/oeo/OEO_00000002">
+        <rdfs:label>energy carrier</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0000057"/>
+                <owl:someValuesFrom rdf:resource="https://openenergyplatform.org/ontology/oeo/OEO_00000001"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000001"/>
+    </owl:Class>
+</rdf:RDF>

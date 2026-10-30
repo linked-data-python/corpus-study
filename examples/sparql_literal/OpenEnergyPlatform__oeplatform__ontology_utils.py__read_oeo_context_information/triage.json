@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK (2 appels). Mutants dans une copie, tous FAIL : FILTER(!isBlank) retiré, subClassOf -> subPropertyOf, IAO_0000116 -> IAO_0000115, requête label sur Graph() vide, dc:description -> dc:title, IAO_0000115 -> IAO_0000116 : l'oracle est solide sur les îlots. Expérience du doute : fixture sans la ligne @prefix obo (IRI écrites en entier) et ontology='oeo' -> FAIL « call[0]: outcome differs (raised Exception('Unknown namespace prefix : obo') vs résultat) ». À l'inverse, dc: lié dans le fixture à dcterms reste vert : rdflib lie dc: à elements/1.1 d'office (le fichier ne peut pas le redéfinir, il obtient dc1), et rdfs: aussi ; seul obo: dépend vraiment du fichier. Le gabarit oeo_ext_template_empty.owl du dépôt déclare xmlns:dc elements/1.1 (il ne déclare pas obo), signe que la déclaration dépend des fichiers. q_global est renvoyé tel quel (Result chez l'original, requête paresseuse chez la traduction) mais aucun appelant du dépôt ne l'utilise (ontology/views.py ne lit que la description) : pas de doute là-dessus. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant l'entrée réelle (RDF/XML à l'en-tête de oeo-full.owl, où obo: vient des xmlns), la branche else avec 'oeox' et le cas zéro solution : le mutant dc:description -> ?p, vert avant, est rejeté ; la traduction n'a pas changé, et l'écart sur un fichier sans obo: reste à juger, le dépôt ne l'atteignant pas (la release 2.14.0 déclare obo:)."
 }

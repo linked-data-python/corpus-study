@@ -45,5 +45,14 @@
     "method": "entry:read_oeo_context_information",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "trois appels ajoutés : fixture_oeo.owl (RDF/XML dont l'en-tête reprend celui de la release oeo-full.owl 2.14.0, la seule entrée que passe le dépôt via get_common_data : xmlns:obo, xmlns:dc, xml:base ; littéraux @en/@de, typé xsd:string et simple ; deux définitions et deux notes sur une classe ; dcterms:description et obo:IAO_0000117 en voisins ; superclasse BNode et IRI sur une même classe) avec ontology='oeo' puis 'oeox' (OEO_EXT_NAME, branche else sur un graphe où les requêtes obo: auraient trouvé des lignes), et fixture_none.ttl (zéro solution pour les cinq requêtes, chaque triplet sur un prédicat voisin) ; docstring mise à jour, y compris le cas volontairement non exercé.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "?s dc:description ?o -> ?s ?p ?o (vert avec l'ancien pilote)"
+    ],
+    "remaining": "Le doute du tri est réel mais hors d'atteinte du dépôt : sur un fichier qui ne déclare pas obo:, l'original lève « Unknown namespace prefix : obo » et la traduction répond (son @prefix est figé à la transpilation, et aucun îlot ne peut lire les préfixes du fichier parsé). Le seul appelant (ontology/views.py:57 -> get_common_data(OPEN_ENERGY_ONTOLOGY_NAME), file='oeo-full.owl') lit la release OEO, dont l'en-tête téléchargé le 2026-10-30 (openenergyplatform.org/ontology/oeo/releases/oeo-full.owl, 2.14.0) déclare xmlns:obo=\"http://purl.obolibrary.org/obo/\" et xmlns:dc elements/1.1 : à Maxime de dire si cette dépendance de l'original aux déclarations du fichier, que la traduction efface, compte comme un écart (réponse « oui » attendue à la question du tri)."
   }
 }

@@ -1,0 +1,51 @@
+# Second input graph for _extract_shapes (repair of 2026-10-30): every
+# predicate of the two parameter lists, each giving one shape reachable ONLY
+# through it, so a typo or a dropped entry in either list changes the set.
+#   - object_parameters (4): ex:O_<name> is the object of sh:<name> and has
+#     no other triple; its subject ex:S_<name> is reached through
+#     subject_parameters (all four are in both lists).
+#   - subject-only parameters (26): ex:S_<name> sh:<name> <value>; the value
+#     (an IRI, a literal or a list) must NOT become a shape, since these
+#     parameters are read on the subject side only.
+#   - sh:and / sh:xone lists (fixture.ttl only has sh:or): IRI, blank-node
+#     and literal members; members carrying sh:path are excluded; an empty
+#     list (rdf:nil) adds nothing.
+@prefix ex:  <http://example.org/> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:S_property sh:property ex:O_property .
+ex:S_node sh:node ex:O_node .
+ex:S_qualifiedValueShape sh:qualifiedValueShape ex:O_qualifiedValueShape .
+ex:S_not sh:not ex:O_not .
+ex:S_qualifiedMinCount sh:qualifiedMinCount 1 .
+ex:S_qualifiedMaxCount sh:qualifiedMaxCount 2 .
+ex:S_class sh:class ex:SomeClass .
+ex:S_datatype sh:datatype xsd:string .
+ex:S_nodeKind sh:nodeKind sh:IRI .
+ex:S_minCount sh:minCount 1 .
+ex:S_maxCount sh:maxCount 3 .
+ex:S_minExclusive sh:minExclusive 0 .
+ex:S_minInclusive sh:minInclusive 0 .
+ex:S_maxExclusive sh:maxExclusive 10 .
+ex:S_maxInclusive sh:maxInclusive 10 .
+ex:S_minLength sh:minLength 2 .
+ex:S_maxLength sh:maxLength 8 .
+ex:S_pattern sh:pattern "^a" .
+ex:S_languageIn sh:languageIn ( "en" "fr" ) .
+ex:S_uniqueLang sh:uniqueLang true .
+ex:S_equals sh:equals ex:pEq .
+ex:S_disjoint sh:disjoint ex:pDis .
+ex:S_lessThan sh:lessThan ex:pLt .
+ex:S_lessThanOrEquals sh:lessThanOrEquals ex:pLe .
+ex:S_closed sh:closed false .
+ex:S_hasValue sh:hasValue ex:SomeValue .
+ex:S_targetClass sh:targetClass ex:TargetClass .
+ex:S_targetNode sh:targetNode ex:TargetNode .
+ex:S_targetObjectsOf sh:targetObjectsOf ex:pTo .
+ex:S_targetSubjectsOf sh:targetSubjectsOf ex:pTs .
+
+ex:AndParent sh:and ( ex:AndMember [ a ex:W ] [ sh:path ex:pathInList ] "lit" 5 ) .
+ex:XoneParent sh:xone ( ex:XoneMember ex:XonePathMember ) .
+ex:XonePathMember sh:path ex:p .
+ex:EmptyOrParent sh:or () .

@@ -51,5 +51,19 @@
     "method": "fixture:fixture.ttl entry:parse_triples",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "cinq appels ajoutés : fixture_export.rdf (copie de vocabs/tests/example_skos_export.rdf, l'entrée du test du dépôt, RDF/XML, language='en', plusieurs valeurs par prédicat) ; un graphe sans skos:ConceptScheme dont les voisins partagent deux termes du motif de garde (la branche raise, comparée comme levée : contrairement à ce que dit le pilote d'origine, le harnais compare les levées) ; deux schémas, dont un avec deux dct:license (écrasement et champ license resté du premier) ; un creator IRI à côté d'un littéral et une description typée ; un dc:source IRI (AttributeError des deux côtés) ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if bool(m{ ?cs a skos:ConceptScheme }) -> if True",
+      "garde -> m{ ?cs a [] }",
+      "garde -> m{ ?cs ?p skos:ConceptScheme }",
+      "boucle des schémas limitée au premier",
+      "dct:license limitée à la première valeur",
+      "subject, language, description limités à la première valeur"
+    ],
+    "remaining": "La note de meta.json selon laquelle run_pair abandonne la comparaison dès qu'un côté lève est périmée (le harnais compare type et message) ; elle reste en place, le pilote réparé exerce la levée."
   }
 }

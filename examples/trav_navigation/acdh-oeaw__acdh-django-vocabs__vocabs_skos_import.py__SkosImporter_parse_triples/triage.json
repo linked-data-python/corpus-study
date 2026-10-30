@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutant sur copie : `if bool(m{ ?cs a skos:ConceptScheme }):` -> `if True:` reste VERT (la branche else n'est jamais prise). Copie avec un second skos:ConceptScheme (créateur, licence) : OK ; copie avec deux dct:license et deux dct:subject sur ex:scheme1 : OK sur trois exécutions (ordre de parcours identique ici, mais non garanti par m{ } d'après les notes ; le fixture évite volontairement les triples multiples). Prédicat interpolé `{cp}`/`{descp}`/`{sp}` : URIRef construits par allow_properties, aucun problème de type d'entrée (original.py:27-31). context_shim.py comparé à rdflib 5.0.0 graph.py:722-796 (pip download) : identique à la signature près (`labelProperties=None` avec défaut SKOS/RDFS en corps), aucune logique inventée. Pas article-example : le gain est nul (substitution 1-pour-1, preferredLabel conservé).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant la branche raise (graphe sans skos:ConceptScheme, voisins à deux termes), l'entrée du test du dépôt (example_skos_export.rdf), deux schémas et des valeurs multiples : la garde remplacée par True ou élargie et les lectures limitées à la première valeur, tous verts avant, sont rejetés ; la traduction n'a pas changé."
 }

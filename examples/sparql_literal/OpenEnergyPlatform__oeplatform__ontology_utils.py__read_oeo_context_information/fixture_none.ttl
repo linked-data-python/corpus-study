@@ -1,0 +1,16 @@
+# Zero-solution input for read_oeo_context_information: none of the five
+# patterns matches. Every triple shares the subject or the object shape of a
+# pattern but uses a neighbouring predicate (rdfs:comment, dcterms:description,
+# obo:IAO_0000117, owl:equivalentClass), so a pattern widened to ?p matches.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/onto/> .
+
+<http://example.org/onto/> dcterms:description "Not dc:description" .
+ex:A a owl:Class ;
+    rdfs:comment "Not a label" ;
+    owl:equivalentClass ex:B ;
+    obo:IAO_0000117 "Not a definition nor a note" .
