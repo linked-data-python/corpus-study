@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidele (BNodes compris), mais la fixture n'a aucun voisin partageant deux termes avec les cibles : le -{ } dont le predicat est elargi en variable, le test `not m{ }` dont le predicat est elargi, et le m{ } `nv` dont le sujet est elargi restent verts.",
+  "questions": [
+    {
+      "question": "Le retrait -{ {s} {p} {ev} } doit-il rester borne au predicat p (et non retirer aussi (s, p', ev) pour un autre predicat p') et le piege « meme sujet, meme objet, autre predicat » est-il voulu dans la fixture ?",
+      "where": "translated.ldpy:72 et original.py:71 (remove) ; translated.ldpy:64 et original.py:63 (test d'existence) ; translated.ldpy:40 et original.py:39 (new_values) ; fixture.ttl et fixture_new.ttl",
+      "if_yes": "La fixture est insuffisante : needs-work. Ajouter a fixture.ttl `ex:Sensor rdfs:seeAlso ex:Device, ex:Component, ex:Physical` et `ex:Actuator rdfs:seeAlso ex:Device`, et a fixture_new.ttl `ex:Sensor rdfs:domain ex:Env` et `ex:Actuator rdfs:subClassOf ex:Device` ; verifier que les trois mutants (`-{ {s} ?q {ev} }`, `not m{ {s} ?q {o} }`, `m{ ?q {p} ?nv }`) echouent. La traduction elle-meme est juste.",
+      "if_no": "Approuver tel quel ; mais alors la region ne prouve rien sur la portee du predicat et du sujet dans ses trois motifs."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp) : -{ } supprime (pass) -> ECHEC (16 vs 14 triplets) ; sujet elargi `-{ ?q {p} {ev} }` -> ECHEC ; sujet+predicat ou sujet+objet elargis -> ECHEC ; `not m{ ?q {p} {o} }` et `not m{ {s} {p} ?q }` -> ECHEC ; `m{ {s} ?q ?nv }` et `m{ ?q {p} ?ev }`, `m{ {s} ?q ?ev }` -> ECHEC. SURVIVENT (verts) : (1) predicat elargi `-{ {s} ?q {ev} }` ; (2) predicat elargi `not m{ {s} ?q {o} }` ; (3) sujet elargi `m{ ?q {p} ?nv }` (la branche « garder l'existant si le neuf n'a rien » n'est exercee que parce qu'aucun sujet du graphe neuf n'a rdfs:domain). Aussi vert : objet elargi `-{ {s} {p} ?q }`, mais celui-la est equivalent (au moment du retrait, (s, p) n'a qu'une valeur dans result.graph, comme l'annoncent les notes). Dans une copie, j'ai ajoute les triplets ci-dessus aux deux fixtures : check reste OK sur la traduction et les trois mutants (1)-(3) echouent. Test BNodes : sujets anonymes, objets BNode (owl:Restriction), BNode objet d'un seeAlso, dans les deux fixtures : equivalent (OK) ; seuls les messages de conflit portant des identifiants de BNode different entre les deux cotes (artefact d'un parse par cote, pas de la traduction). Pas de None possible (s, p, o, ev toujours lies).",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le -{ } de skos:scopeNote est supprime sans que le pilote le voie : le seul appel qui passe `scope` vise sp:Doc, qui n'a pas de scopeNote (zero appariement) ; les trois autres -{ } sont bien exerces.",
+  "questions": [
+    {
+      "question": "Le -{ {iri} skos:scopeNote ?o } doit-il etre exerce sur un sujet qui porte deja un skos:scopeNote (comme sp:Page, qui en a un dans la fixture) ?",
+      "where": "translated.ldpy:22 et original.py:13 (scopeNote) ; original.py:24 / translated.ldpy:34 (le seul appel avec scope=, sur sp:Doc) ; fixture 04-page/semtech_page_abox_v4_1_0.ttl:20-22 (sp:Doc sans scopeNote)",
+      "if_yes": "Needs-work : ajouter `redefine(SP.Page, scope=\"...\")` au banc des deux representations (original.py et translated.ldpy, identique des deux cotes) ; verifie : le check reste OK et le mutant sans le -{ } echoue.",
+      "if_no": "Approuver : mais alors le quatrieme -{ } de la region n'est pas prouve par l'oracle."
+    }
+  ],
+  "evidence": "check = OK. Mutants sur une copie (mktemp), pour les quatre -{ } : sujet elargi en variable, predicat elargi en variable, suppression, objet lie a un litteral, predicat echange, et suppression du +{ } correspondant : tous ECHOUENT pour rdfs:label, skos:definition et skos:note. Pour skos:scopeNote : sujet elargi -> ECHEC, predicat elargi -> ECHEC, suppression du +{ } -> ECHEC, MAIS suppression du -{ {iri} skos:scopeNote ?o } -> VERT, objet lie -> VERT, predicat echange pour skos:altLabel -> VERT. Apres ajout de `redefine(SP.Page, scope=\"Rescoped.\")` aux deux cotes de la copie : check OK, et le mutant sans -{ } scopeNote ECHOUE. Les appels du depot (corpus/repos/altunelyusuf__SemanticTechnologies/landscape/07-tooling/build_page_v4_2_0.py:61-67) ne passent jamais note= ni scope= : le comportement n'est donc pas atteint par le depot, mais la region le contient. Note : ce fichier ecrit `f\"{label}\"@en` alors que la v6_9_0 ecrit `{label}@en` ; sans consequence sur les valeurs str appelantes.",
+  "triaged_by": "sonnet-5.5"
+}
