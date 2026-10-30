@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "classification-doubt"
+  ],
+  "summary": "Traduction fidèle et oracle solide (cinq mutants tués), mais le déballage Resource -> identifier est une ligne de Python ajoutée qui n'existe pas dans l'original (il vient de Resource.add par héritage) : la paire n'est pas un simple changement de notation.",
+  "questions": [
+    {
+      "question": "La ligne ajoutée `trk = rsc.identifier if isinstance(rsc, Resource) else rsc` (nécessaire parce que +{ }(self.graph) contourne Resource.add) suffit-elle à déclasser la paire de `directly-expressible` à `minor-restructuring` ?",
+      "where": "translated.ldpy:9 et original.py:8",
+      "if_yes": "reclasser en minor-restructuring ; la fidélité est établie, seul le décompte du gain change",
+      "if_no": "approuver en l'état (la ligne n'est que la restitution de l'API Resource, appel réel galacteek/ui/mediaplayer/__init__.py:1075 passe bien une Resource)"
+    }
+  ],
+  "evidence": "rdfeval check OK. Shim context_shim.py comparé au dépôt (corpus/repos/isaacgravenor__neo-galacteek, ld/__init__.py ipsTermUri, ld/rdf/resources/__init__.py IPR, multimedia.py property track) : identique, aucune logique ajoutée. Mutants sur copie de translated.ldpy, tous ROUGES : suppression de l'îlot -{ } (numTracks doublé au 2e appel), trk = rsc (une Resource dans un triplet), {len(self.track)} -> {0}, suppression de +{ } track, {str(len(...))}. Le littéral int donne xsd:integer des deux côtés (Literal(len(..)) == coercition). Zéro solution sans objet ici (le -{ } sur numTracks absent au 1er appel est exercé). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

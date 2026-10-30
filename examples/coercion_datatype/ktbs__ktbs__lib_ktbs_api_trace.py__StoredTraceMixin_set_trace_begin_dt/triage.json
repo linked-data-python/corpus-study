@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "`f{Literal(val, datatype=xsd:dateTime)}` est un passe-plat inutile, et `graph.remove((uri, p, None))` reste en rdflib alors que `-{ s p ?o }(graph)` passe : la paire ne fait presque rien en LD Python mais crédite `f{ }` et `@prefix`.",
+  "questions": [
+    {
+      "question": "Le `graph.remove((self.uri, KTBS.hasTraceBegin, None))` doit-il être traduit en `-{ {self.uri} {KTBS.hasTraceBegin} ?o }(graph)` (strate `remove`, motif écrit et joker lexical) au lieu d'être laissé en rdflib ?",
+      "where": "translated.ldpy:17 et original.py:15 (graph.remove) ; translated.ldpy:16 (f{Literal(...)})",
+      "if_yes": "needs-work : écrire le -{ }(graph) et retirer l'enveloppe f{ } (Literal(val, datatype=xsd:dateTime) passe sans elle) ; la note du traducteur ('opaque editable graph') est démentie, l'îlot accepte (graph) sur n'importe quel graphe",
+      "if_no": "approuver en reconnaissant que la paire ne crédite que @prefix pour un gain nul"
+    }
+  ],
+  "evidence": "rdfeval check OK. Dans une copie : remplacement de graph.remove par -{ {self.uri} {KTBS.hasTraceBegin} ?o }(graph) : check OK ; retrait de l'enveloppe f{ }, Literal(val, datatype=xsd:dateTime) nu : check OK. Le graphe de edit() vient d'EditableCore.edit (lib/ktbs/engine/base.py:296-300), un graphe rdflib. Le pilote n'a qu'un appel sans triplet voisin hasTraceBegin d'un autre sujet ni hasTraceBeginDT préexistant : sans conséquence tant que seul set/remove rdflib est exécuté, mais il ne protégerait pas le -{ }. Dépôt : set_trace_begin_dt (trace.py:384-392) identique à original.py. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Trois des quatre `f{Literal(..., datatype=/lang=)}` enveloppent un Literal déjà construit (passe-plat sans effet) et créditent `f{ }` à tort ; seul `f{value_str}` fait la coercition, et il est sans gain face à `Literal(value_str)`.",
+  "questions": [
+    {
+      "question": "Les trois `f{Literal(value_str, datatype=...)}` / `f{Literal(value_str, lang=lang)}` (translated.ldpy:63, 67, 71, 75) doivent-ils compter comme des usages de `f{ }` alors que le résultat est identique sans l'enveloppe ?",
+      "where": "translated.ldpy:63, 67, 71, 75 et original.py:63, 67, 71, 75 (le site utile est translated.ldpy:77)",
+      "if_yes": "approuver, en sachant que le gain est nul sur ces sites (la note du traducteur le dit elle-même)",
+      "if_no": "needs-work : retirer ces enveloppes (la paire devient un seul f{value_str}) et ramener `constructions` au seul site utile, ou classer la région comme non couverte"
+    }
+  ],
+  "evidence": "rdfeval check OK. Corps de original.py identique, indentation près, aux lignes 429-510 du dépôt (corpus/repos/jupyter-naas__abi, Oxigraph.py). Copie du pilote avec un appel de plus (datatype xsd:string, xsd:boolean 'True', valeur vide en xsd:integer, valeur vide avec langue, littéral sans datatype, ' 7 ' en xsd:long, '0123' en xsd:decimal, bindings vides) : vert, donc f{Literal(..)} est bien un passe-plat. Mutants sur copie : f{value_str.strip()} VERT (aucune valeur du pilote n'a d'espace, sans conséquence réelle car str), Literal(value_str, lang=lang) -> Literal(value_str) ROUGE. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

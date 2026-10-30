@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "equivalence-doubt",
+    "wrong-construction"
+  ],
+  "summary": "`Literal(x)` est remplacé par `{x}` nu : identique pour str, int, float, bool, datetime, None, mais URIRef et BNode deviennent des nœuds au lieu de littéraux ; et onze enveloppes `{URIRef(x)}` se disent `f<{x}>`.",
+  "questions": [
+    {
+      "question": "Une propriété de données (hors `_object_properties`) d'une entité RDFEntity peut-elle, dans le dépôt, porter une valeur URIRef ou BNode (par exemple `creator: Any`) ?",
+      "where": "translated.ldpy:60, 82, 93 ({self.label}, {item}, {prop_value}) et original.py:55, 77, 88 (Literal(...))",
+      "if_yes": "needs-work : écrire {Literal(item)} aux trois sites (ou ajouter un appel au pilote avec un URIRef en propriété de données)",
+      "if_no": "approuver ce point : les appelants réels (ObjectStorageService.py:57, 69, 74) ne passent que str et int, et created_at est un datetime"
+    },
+    {
+      "question": "Remplacer les onze `{URIRef(x)}` par `f<{x}>` (x déjà str ; pas de @base) est-il le rendu attendu de la construction ?",
+      "where": "translated.ldpy:53, 78, 80, 82, 89, 91, 93 et original.py:48, 73, 75, 77, 84, 86, 88",
+      "if_yes": "needs-work : réécrire en f<{...}> (je l'ai fait dans une copie : la paire reste verte, y compris avec une IRI relative)",
+      "if_no": "approuver l'enveloppe URIRef(...) telle quelle"
+    }
+  ],
+  "evidence": "rdfeval check OK. Dans des copies du pilote avec un appel supplémentaire à la fois : label=None, datetime tz-aware et date, int/float/0/'', IRI relative, liste mêlant '' 0 1.5, dict : tous verts (Literal(None) et {None} donnent tous deux Literal('None')). Valeur URIRef en propriété de données : ROUGE (graphs not isomorphic, URIRef contre Literal) ; BNode : ROUGE ; label=URIRef : ROUGE. Aucun appelant réel trouvé dans corpus/repos/jupyter-naas__abi qui place un URIRef/BNode dans ces champs (les ObjectPut/ObjectDeleted n'ont que prefix, key, size_bytes), d'où medium et non high. Avec les onze {URIRef(x)} réécrits en f<{x}> : pilote et cas IRI relative verts. Note : un mutant `if item._uri not in visited` -> `if True` reste vert (Leaf.rdf ignore visited, aucun appel n'atteint un enfant déjà visité) mais ce code est du Python identique des deux côtés, hors îlots. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
