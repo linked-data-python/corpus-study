@@ -18,10 +18,15 @@ cover, deliberately: a complete row; missing cells of each of the four
 datatypes the region marks "unknown" (IRI, xsd:string, xsd:integer,
 xsd:date), which are what the four `remove` calls delete; a LINK containing a
 space (the `quote_plus` branch); and both separators of the
-`Alternative source` column.
+`Alternative source` column.  Three further rows give the `remove` calls
+neighbours they must leave alone (missing ISO / COUNTRY / SOURCE, which write
+`cvdr:unknown` and "unknown"@en rather than the removed markers; "Unknown" and
+"unknown " in text cells), the input types a spreadsheet read gives (float
+PCODE, datetime dates) and falsy cells (an ID of 0, "" cells).
 """
 
 import copy
+import datetime
 
 _ROWS = [
     {
@@ -88,6 +93,80 @@ _ROWS = [
         "LINK": None,
         "ENTRY_DATE": "2020-04-03",
         "Alternative source": "https://example.org/alt/3 AND https://example.org/alt/4",
+    },
+    {
+        # the neighbours the four `remove` calls must NOT touch: ISO,
+        # COUNTRY and SOURCE are missing, so the row writes cvdr:unknown (an
+        # IRI in the cvdr namespace, not the bare IRI "unknown" that the
+        # first remove deletes), "unknown"@en (a language literal, not the
+        # xsd:string one) and, for the ISO, cvdr:unknown isoCodeRegion
+        # "unknown"^^xsd:string, a triple whose SUBJECT is not this row's;
+        # COMMENTS "Unknown" and ADMIN_LEVEL_NAME "unknown " differ from the
+        # marker by case and by a trailing space; the Alternative source ends
+        # in ';', so the split leaves an empty last item (URIRef('')).
+        "ID": 4,
+        "ISO": None,
+        "COUNTRY": None,
+        "REGION": None,
+        "ADMIN_LEVEL_NAME": "unknown ",
+        "PCODE": 4321,
+        "LOG_TYPE": "Introduction / extension of measures",
+        "CATEGORY": "Public health measures",
+        "MEASURE": "Mask wearing",
+        "TARGETED_POP_GROUP": "Yes",
+        "COMMENTS": "Unknown",
+        "NON_COMPLIANCE": "Fines",
+        "DATE_IMPLEMENTED": "2020-05-01",
+        "SOURCE": None,
+        "SOURCE_TYPE": "Media",
+        "LINK": "https://example.org/mask  with spaces",
+        "ENTRY_DATE": "2020-05-02",
+        "Alternative source": "https://example.org/alt/5;",
+    },
+    {
+        # the input types a real spreadsheet read gives: float PCODE, dates
+        # as datetime objects, and falsy cells (0, "") that are not missing:
+        # an ID of 0, an empty LINK (URIRef('') after strip), an empty
+        # ADMIN_LEVEL_NAME, a PCODE of 0.
+        "ID": 0,
+        "ISO": "MEX",
+        "COUNTRY": "Mexico",
+        "REGION": "Americas",
+        "ADMIN_LEVEL_NAME": "",
+        "PCODE": 0,
+        "LOG_TYPE": "Phase-out measure",
+        "CATEGORY": "Lockdown",
+        "MEASURE": "Curfew",
+        "TARGETED_POP_GROUP": "No",
+        "COMMENTS": "",
+        "NON_COMPLIANCE": "Not applicable",
+        "DATE_IMPLEMENTED": datetime.datetime(2020, 6, 1, 0, 0),
+        "SOURCE": "",
+        "SOURCE_TYPE": "Government",
+        "LINK": "",
+        "ENTRY_DATE": datetime.datetime(2020, 6, 2, 0, 0),
+        "Alternative source": "",
+    },
+    {
+        # a float PCODE and an unknown PCODE next to an integer one
+        "ID": 6,
+        "ISO": "MEX",
+        "COUNTRY": "Mexico",
+        "REGION": "Americas",
+        "ADMIN_LEVEL_NAME": "National",
+        "PCODE": 4321.0,
+        "LOG_TYPE": "Introduction / extension of measures",
+        "CATEGORY": "Lockdown",
+        "MEASURE": "Curfew",
+        "TARGETED_POP_GROUP": "No",
+        "COMMENTS": "unknown",
+        "NON_COMPLIANCE": "Not applicable",
+        "DATE_IMPLEMENTED": datetime.datetime(2020, 6, 3, 0, 0),
+        "SOURCE": "Ministry",
+        "SOURCE_TYPE": "Government",
+        "LINK": "https://example.org/mex/6",
+        "ENTRY_DATE": "2020-06-04",
+        "Alternative source": "https://example.org/alt/6 and https://example.org/alt/7",
     },
 ]
 

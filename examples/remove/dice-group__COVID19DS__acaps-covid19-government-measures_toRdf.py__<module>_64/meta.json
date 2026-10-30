@@ -22,12 +22,13 @@
     "@graph",
     "+{ }",
     "-{ }",
-    "f<...>",
-    "nom prefixe",
+    "f<…>",
+    "prefixed name",
     "IRI",
     "variable",
-    "litteral type",
-    "litteral avec langue"
+    "typed literal",
+    "language literal",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: cvdo->cvdo, cvdr->cvdr, dbpediaOwl->dbpediaowl, dcmi->dcmi, prov->prov, dowl->dowl, RDF->a, RDFS->rdfs, XSD->xsd. dbpediaowl: and dowl: are two prefixes for the same IRI (http://dbpedia.org/ontology/): the aliasing is upstream's, kept 1:1. FOAF, OWL, DCTERMS, SKOS were imported and never used; the whole `from rdflib...` import block becomes dead once Namespace/Literal/URIRef/RDF/RDFS/XSD are absorbed, so both import lines are dropped.",
@@ -57,5 +58,22 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture (context_shim.py) étendu de trois lignes : ISO, COUNTRY, SOURCE manquants (donc cvdr:unknown, \"unknown\"@en et un triplet dont le sujet est cvdr:unknown, que les quatre remove ne retirent pas), \"Unknown\" et \"unknown \" (casse, espace), Alternative source finissant par ';', LINK avec espaces ; une ligne aux types réels d'un tableur (PCODE flottant, dates datetime) et aux valeurs fausses non manquantes (ID 0, PCODE 0, chaînes vides) ; une ligne avec le marqueur \"unknown\" saisi en texte ; docstring de driver.py écrite.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ ?s ?p \"unknown\"^^xsd:string } -> -{ ?s ?p \"unknown\"@en } (126 vs 131 triplets)",
+      "ajout de -{ ?s ?p \"unknown\"@en } (126 vs 124)",
+      "ajout de -{ ?s ?p cvdr:unknown } (126 vs 124)",
+      "ajout de -{ ?s cvdo:hasISO3 cvdr:unknown } (126 vs 125)",
+      "-{ cvdr:{dice} ?p \"unknown\"^^xsd:string } limité au sujet de la ligne (126 vs 127)",
+      "DELETE WHERE avec lcase(str(?o)) = \"unknown\" ajouté (126 vs 123)",
+      "DELETE WHERE avec strstarts(str(?o), \"unknown \") ajouté (126 vs 125)",
+      "chacun des quatre -{ } retiré",
+      "xsd:integer -> xsd:decimal (126 vs 127)"
+    ],
+    "remaining": "Le mutant `-{ ?s ?p \"unknown\" }` (littéral simple) reste vert, équivalent : le programme n'écrit aucun littéral sans datatype ni langue. 'IRI' (le `<unknown>` du premier -{ }) est déclaré et employé, mais le détecteur de rdfeval.constructions ne reconnaît que les IRI avec schéma et le signale comme non employé."
   }
 }

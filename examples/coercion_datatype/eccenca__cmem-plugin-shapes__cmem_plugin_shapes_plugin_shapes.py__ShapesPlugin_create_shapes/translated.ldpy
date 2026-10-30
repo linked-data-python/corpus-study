@@ -22,11 +22,13 @@ def create_shapes(self) -> None:
 
         if class_uuid not in class_uuids:
             self.shapes_count += 1
-            name = self.get_name(cls)
             +{
                 {node_shape_uri} a sh:NodeShape ;
-                   sh:targetClass f<{cls}> ;
-                   sh:name {name}@en ;
+                   sh:targetClass f<{cls}>
+            }(self.shapes_graph)
+            name = self.get_name(cls)
+            +{
+                {node_shape_uri} sh:name {name}@en ;
                    rdfs:label {name}@en
             }(self.shapes_graph)
             class_uuids.add(class_uuid)

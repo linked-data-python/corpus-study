@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK sur la paire telle quelle. Exécution directe de la traduction transpilée : `_two_var_two_rows()` renvoie `ldpy.runtime.PreparedQuery`, `isinstance(v, rdflib.query.Result)` est False, `.vars` lève AttributeError. Dans une copie où j'ai ajouté `(g).execute()` en fin de ligne 13, le retour est un `SPARQLResult` (isinstance Result True, vars [s, o]) ET `rdfeval check` reste OK : le pilote ne distingue donc pas les deux versions (harness.materialise parcourt n'importe quel itérable). Dans le dépôt, Values.execute teste `isinstance(data, Result)` (values.py:67) et lit `data.vars`/`data.bindings` ; les tests passent `_two_var_two_rows()` à `execute` (test_values.py:76, :93). Types d'entrée vérifiés : EX_P/EX_A/EX_B sont des `str`, donc `{URIRef(...)}` est nécessaire (une `str` interpolée deviendrait un Literal) ; `f<{EX_P}>` n'est pas accepté dans s{ } (essayé : erreur de syntaxe), et dans `+{ }` il serait équivalent faute de @base, sans gain. Le `+{ }` à deux triples et `@graph as g` sont corrects. Pas pour l'article tant que le retour diffère.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "La traduction était fausse : elle renvoyait un PreparedQuery paresseux là où le dépôt exige un rdflib Result ; elle écrit maintenant `s{ ... }(g).execute()`, et le pilote (écrit à la main, car run_pair matérialise tout itérable) compare le type, vars, bindings et les lignes ordonnées ; l'ancienne forme échoue, ORDER BY DESC, l'ordre des variables et un littéral changé sont aussi rejetés."
 }

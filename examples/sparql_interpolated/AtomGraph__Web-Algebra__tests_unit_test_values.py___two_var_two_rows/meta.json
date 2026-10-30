@@ -27,7 +27,8 @@
   "translation_notes": [
     "The predicate is an f-string hole spliced INSIDE the SPARQL angle brackets (`<{EX_P}>`), i.e. textual query assembly; in ldpy this becomes {URIRef(EX_P)} as the whole predicate term (term-position interpolation, an initBindings entry) inside s{ SELECT ?s ?o WHERE { ?s {URIRef(EX_P)} ?o } ORDER BY ?s } -- no query text is concatenated, and EX_P (a bare str) is wrapped in URIRef(...) because a plain string interpolated in term position would coerce to a Literal, not an IRI.",
     "Also translated the two isolated g.add() calls (add_isolated, same region) to a single +{ } with two `.`-separated triples: most-specific construction per INSTRUCTIONS_403 SS2, not left as raw rdflib .add().",
-    "ordered=True in the driver because the region's own query specifies ORDER BY ?s."
+    "ordered=True in the driver because the region's own query specifies ORDER BY ?s.",
+    "Correction du 2026-10-30 : la traduction renvoyait `return s{ ... }`, un PreparedQuery paresseux, là où l'original renvoie un rdflib Result (g.query) ; Values.execute exige `isinstance(data, Result)` (values.py:67) et lit data.vars et data.bindings. Écrit `s{ ... }(g).execute()`. Le pilote, qui matérialise tout itérable, ne voyait pas la différence ; il observe maintenant le type, vars, bindings et les lignes."
   ],
   "draft_sha": "cc674147fc8e2d70",
   "provenance": {
@@ -45,5 +46,17 @@
     "method": "entry:_two_var_two_rows",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "driver.py réécrit à la main (run_pair matérialise tout itérable, donc un PreparedQuery et un Result s'y confondent) : chaque côté est appelé deux fois, et le pilote compare isinstance(r, Result), r.type, r.vars, r.bindings et les lignes itérées, dans l'ordre (ORDER BY ?s), comme Values.execute les lit ; il constate aussi que l'original rend un Result.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "retrait de `(g).execute()` (l'ancienne traduction : PreparedQuery, is_rdflib_Result True vs False, vars et bindings absents)",
+      "ORDER BY DESC(?s) (lignes inversées)",
+      "SELECT ?o ?s (vars ['s','o'] vs ['o','s'])",
+      "littéral \"v2\" -> \"v3\""
+    ],
+    "remaining": "Le mutant qui remplace le prédicat `{URIRef(EX_P)}` par une variable reste vert, équivalent : la région construit elle-même un graphe qui n'a qu'un prédicat, rien ne peut le distinguer."
   }
 }

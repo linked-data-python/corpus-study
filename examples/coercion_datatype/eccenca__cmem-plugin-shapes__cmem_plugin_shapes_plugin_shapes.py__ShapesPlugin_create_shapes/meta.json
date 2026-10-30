@@ -37,7 +37,8 @@
     "no missing-dependency case here despite this repository's name (cmem-plugin-shapes): the extracted `create_shapes` body and the demo() harness only need `rdflib`/`uuid`/`types` (stdlib + already-installed rdflib) -- `cmem_client`/`cmem_plugin_base`, which the rest of the module imports for the `@Plugin(...)` decorator and the real get_class_dict/get_name (SPARQL + network calls), are never reached once those two methods are stubbed out by demo()'s SimpleNamespace. Checked: no pip install needed, nothing to classify as excluded.",
     "demo harness (identical on both sides): create_shapes(self) reads self.shapes_graph / self.shapes_graph_iri / self.shapes_count (plain state) and calls self.get_class_dict() (a SPARQL SELECT over the plugin's configured data graph in the real plugin) and self.get_name(iri) (a network call to Corporate Memory's /explore/title endpoint) -- neither reachable outside a running Corporate Memory instance. `self` is a SimpleNamespace exposing stub callables for both plus the three plain attributes; demo(class_dict) calls create_shapes(self) and returns self.shapes_graph (the observable effect), not self.",
     "driver calls: CALL_1 (two classes, a property shared between them to exercise the prop_uuid dedup-but-still-link branch, and one inverse property to exercise SHUI.inversePath + the arrow-prefixed name) exercises every construction and both coercion_datatype call-site shapes at once; CALL_2 (empty class_dict) is the zero-triples edge, checking no triple is written outside the loop.",
-    "anti-hollow-green: changed `shui:showAlways \"true\"^^xsd:boolean` to `\"false\"^^xsd:boolean` in translated.ldpy -- rdfeval check correctly failed (call[0].result: graphs not isomorphic, 24 vs 24 triples: same count, different content), then restored -- confirmed OK again."
+    "anti-hollow-green: changed `shui:showAlways \"true\"^^xsd:boolean` to `\"false\"^^xsd:boolean` in translated.ldpy -- rdfeval check correctly failed (call[0].result: graphs not isomorphic, 24 vs 24 triples: same count, different content), then restored -- confirmed OK again.",
+    "Correction du 2026-10-30 : le premier îlot du nœud hissait `name = self.get_name(cls)` avant ses quatre triplets, alors que l'original écrit `a sh:NodeShape` et `sh:targetClass` avant d'appeler get_name ; quand get_name lève (ValueError, erreur HTTP), le graphe partiel différait (15 contre 13 triplets, 4 contre 2). L'îlot est scindé en deux, autour de l'appel, comme les `add` d'origine ; vérifié par les scénarios get_name-raises-* du pilote (graphe partiel, exception, shapes_count, appels à get_name)."
   ],
   "draft_sha": "a37be6995460f787",
   "provenance": {
@@ -55,5 +56,30 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "driver.py réécrit à la main (le harnais demo ne rend que le graphe d'une exécution sans échec) : les deux appels d'origine par demo(), plus onze scénarios où self est construit dans le pilote avec un graphe de départ de catalogue (init_shapes_graph) et un get_class_dict au format réel (str, bool) ; comparés : exception (type et message), graphe après l'appel même levée, shapes_count, liste ordonnée des IRI passés à get_name. Scénarios : propriété partagée entre classes, même propriété deux fois dans une classe (data True puis False), deux sens, shapes_graph_iri en # et en /, noms vides et à guillemet/saut de ligne/antislash/accent, noms distincts classe/propriété, get_name qui lève pour la deuxième classe, pour la deuxième propriété et pour la première classe, dict vide, classe sans propriété.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "get_name hissé avant les deux premiers triplets du nœud (l'ancienne traduction : 15 vs 13 et 4 vs 2 triplets, scénarios get_name-raises-node et get_name-raises-first-node)",
+      "`if prop_uuid not in prop_uuids` -> True (shapes_count 4 vs 5 et appels à get_name)",
+      "`if prop_uuid not in prop_uuids` -> False",
+      "retrait de self.shapes_count += 1 (nœud, puis propriété)",
+      "`if prop['inverse']` -> False",
+      "retrait de 'name = \"← \" + name'",
+      "nodeKind constant (sh:IRI, puis sh:Literal)",
+      "sh:targetClass et sh:path sans f<>",
+      "suffixe 'inverse' retiré de l'uuid",
+      "get_name(cls) au lieu de get_name(prop['property'])",
+      "format_namespace retiré",
+      "sh:property déplacé hors de la boucle des propriétés / supprimé",
+      "@fr au lieu de @en (nœud et propriété)",
+      "\"true\" sans datatype",
+      "shui:inversePath \"false\"",
+      "triplet 'a sh:NodeShape' retiré",
+      "sh:name d'un nom vide remplacé"
+    ],
+    "remaining": "Deux mutants restent verts, tous deux équivalents : `class_uuid not in class_uuids` -> True (get_class_dict rend un dict, dont les clés sont distinctes, donc les uuid5 aussi : la garde de classe est inatteignable) et `if prop['inverse'] is True` (inverse est un bool réel, via str2bool)."
   }
 }

@@ -10,4 +10,4 @@ def _two_var_two_rows():
     @graph as g
     +{ {URIRef(EX_A)} {URIRef(EX_P)} "v1" .
        {URIRef(EX_B)} {URIRef(EX_P)} "v2" }
-    return s{ SELECT ?s ?o WHERE { ?s {URIRef(EX_P)} ?o } ORDER BY ?s }
+    return s{ SELECT ?s ?o WHERE { ?s {URIRef(EX_P)} ?o } ORDER BY ?s }(g).execute()
