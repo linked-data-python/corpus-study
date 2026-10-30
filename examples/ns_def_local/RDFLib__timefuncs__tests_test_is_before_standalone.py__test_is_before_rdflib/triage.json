@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : traduction mot pour mot (sed `before:x` -> `BEFORE.x` redonne original.py à la ligne du Namespace près), shim fidèle au dépôt ; gain réel mais mince (1 Namespace, 30 accès).",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (en acceptant que le gain soit purement syntaxique : 30 BEFORE.xNN deviennent before:xNN, dans un test qui n'écrit aucun triplet) ?",
+      "where": "translated.ldpy:9-26 et original.py:9-26",
+      "if_yes": "Retenir comme exemple ns_def_local élémentaire, sans graphe construit.",
+      "if_no": "Approuver quand même pour les chiffres ; ne pas la citer."
+    }
+  ],
+  "evidence": "rdfeval check : OK. `sed 's/before:\\([A-Za-z0-9]*\\)/BEFORE.\\1/g' translated.ldpy | diff - original.py` ne montre que la ligne du Namespace : aucun nom ne diffère. _shim.py comparé au dépôt (tests/test_is_before_standalone.py:52-): is_before_rdflib et _path_exists identiques, aux annotations de type et à un espace près. Le `return True` ajouté est identique des deux côtés. Mutants dans une copie : IRI du préfixe altérée -> FAIL ; un positif a05/b05 -> a05/b06 -> FAIL ; mais les arguments des cinq assertions négatives altérés, ou l'assertion a08 supprimée, restent verts (l'oracle ne distingue pas ces noms, d'où le contrôle textuel par sed). Aucun nom ne collisionne avec une méthode de str (a01..b11, foo, bar). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

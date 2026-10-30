@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (type réel de self et de endpoint/result_format vérifié), mais le pilote n'a que deux appels (tout ou rien) : permuter les gardes `if self.endpoint` / `if self.result_format` reste vert.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote un appel où seul endpoint est posé (result_format absent), de sorte que les deux gardes soient distinguées ?",
+      "where": "driver.py:31-38 ; translated.ldpy:18-22 et original.py:13-17",
+      "if_yes": "needs-work (mineur) : ajouter l'appel ; vérifié en copie que le mutant de permutation devient alors FAIL et que la paire reste verte, donc approuvable ensuite.",
+      "if_no": "Approuver en acceptant que l'oracle ne départage pas les deux gardes ; leur texte est identique à l'original ligne à ligne."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dépôt : SPARQLSource (pyrml_core.py:1912) hérite de AbstractMap -> TermMap -> IdentifiedNode, endpoint/result_format sont des URIRef ou None (lignes 1917-1942) ; `self` n'est donc ni URIRef ni BNode. En copie, avec une classe IdentifiedNode imitant TermMap (id URIRef puis BNode), l'original et la traduction produisent les mêmes triplets : le sujet reste l'objet self (pas de coercion en URIRef) pour les deux ids. Mutants dans une copie : supprimer l'îlot endpoint, supprimer l'îlot type, `if True`, `if not`, IRI du préfixe sd -> FAIL ; permuter les gardes -> OK (survit). Avec un troisième appel (endpoint seul) ajouté au pilote de la copie, la paire reste OK et le mutant de permutation devient FAIL. Écart sans conséquence : @graph g précède @prefix sd, mais le graphe rendu a quand même la liaison sd (g.namespaces() : sd en plus par rapport à l'original) ; to_rdf ne sert dans le dépôt qu'à fusionner des triplets (g += …, graph_add_all) qui ne recopient pas les liaisons. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

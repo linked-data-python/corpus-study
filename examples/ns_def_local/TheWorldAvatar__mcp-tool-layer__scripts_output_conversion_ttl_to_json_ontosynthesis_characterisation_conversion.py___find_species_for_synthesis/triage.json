@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction fidèle et oracle solide (11 mutants sur 12 tués, le survivant est équivalent), mais 'interpolation {expr}' est crédité alors que le seul `{synth}` est dans un f-string Python, pas dans un îlot ldpy.",
+  "questions": [
+    {
+      "question": "'interpolation {expr}' doit-il être retiré des constructions déclarées, puisque `<{synth}>` se trouve dans le f\"\"\"…\"\"\" de la requête SPARQL (Python pur, inchangé) et qu'aucune expression n'est interpolée dans un îlot ldpy ?",
+      "where": "translated.ldpy:15-22 ; meta.json constructions",
+      "if_yes": "wrong-construction : corriger les constructions à [@prefix, prefixed name] ; la paire reste approuvable pour le reste.",
+      "if_no": "Approuver telle quelle."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Après substitution mécanique des noms préfixés par rdfs.label/RDF.type/ontosyn.x/ontospecies.x, translated.ldpy ne diffère de original.py que par les deux lignes Namespace supprimées (et les @prefix de tête). Les deux IRI des @prefix sont celles des Namespace. Mutants dans une copie, tous FAIL : étiquette de synth, étiquette de out, hasProductName, étiquette de species, rdfs:Species, IRI ontosyn, hasChemicalOutput du repli, requête directe, `species_names & target_names` -> `species_names`, suppression du suffixe ' synthesis'. Survivants : retrait du `if not target_names` (équivalent : l'intersection est vide) et du dédoublonnage `seen` (inatteignable : graph.subjects() ne répète pas un sujet) ; ce sont des mutants de code Python inchangé. Le pilote couvre bien direct, repli et zéro solution, avec species C voisin non apparié. Shim : _select_uris du dépôt (lignes 42-49) a en plus `if getattr(row, \"uri\", None)` ; le shim l'omet, sans effet ici (la requête lie toujours ?uri, valeur non vide) et identique des deux côtés. Les @prefix sont posés au niveau du module alors que les Namespace étaient locaux à la fonction : sans effet observable. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

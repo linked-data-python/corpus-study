@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction",
+    "classification-doubt"
+  ],
+  "summary": "Les sept self.output_graph.bind() de l'original, que la traduction remplace par des @prefix + @graph, ne sont pas observés par l'oracle (isomorphisme) alors que le dépôt les lit (namespaces() ligne 318) : supprimer les @prefix brick/ref reste vert ; en outre huit {self.BRICK.x}/{bacnet_ns[...]} s'écrivent en noms préfixés, et le calcul de pt_uri est hissé avant le premier ajout.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote une comparaison des liaisons de préfixe du graphe produit (g.namespaces()) des deux côtés, de sorte que la suppression d'un @prefix (brick, ref, …) fasse échouer la paire ?",
+      "where": "translated.ldpy:21-27 et original.py:12-13,26-29,35 ; driver.py (_eq compare les graphes par graphs_isomorphic seulement)",
+      "if_yes": "needs-work : ajouter la comparaison des namespaces dans _eq ; l'équivalence réelle est vérifiée à la main (les 8 liaisons sont identiques des deux côtés), donc la paire redeviendra verte.",
+      "if_no": "Approuver en acceptant que l'essentiel du gain (7 bind() supprimés) ne soit pas prouvé par l'oracle ; le dépôt lit pourtant ces liaisons (send_graph_to_brickbuilder, ifc_populate_window.py:318-319)."
+    },
+    {
+      "question": "La traduction doit-elle écrire les termes constants des espaces de noms déjà déclarés en noms préfixés (brick:isPointOf, ref:hasExternalReference, ref:BACnetReference, bacnet:object-identifier, bacnet:object-name, bacnet:objectOf, bacnet:objectIdentifier, bldg:sample-device) plutôt qu'en {self.BRICK.isPointOf}, {bacnet_ns[\"object-name\"]}… ?",
+      "where": "translated.ldpy:46-48,60,70-79 ; déclarations aux lignes 21-26",
+      "if_yes": "wrong-construction : needs-work. Les `as _brick`, `as _ref`, `as bacnet_ns`, `as bldg_ns` deviennent alors inutiles (aucun n'est lu) ; 'plain literal' est aussi déclaré dans constructions sans qu'aucun littéral simple n'apparaisse (seul ?bacnet_name).",
+      "if_no": "Laisser tel quel, mais retirer 'plain literal' des constructions déclarées."
+    },
+    {
+      "question": "Cette paire est-elle bien `directly-expressible` alors que la traduction passe de `.items()` à `.values()`, hisse l'affectation pt_uri avant le premier ajout et déplace le triplet rdf:type du nœud BACnet, trois réécritures faisables en Python pur ?",
+      "where": "translated.ldpy:37-47,53-56 et original.py:515-531",
+      "if_yes": "Approuver la classification ; l'écart (graphe partiel laissé par une ligne sans point_id) est inatteignable dans le dépôt, où les huit clés sont toujours posées (ifc_populate_window.py:803-811, 859-868).",
+      "if_no": "Reclasser en minor-restructuring ; le gain attribuable à la notation est alors plus petit que celui mesuré."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants dans une copie : supprimer les lignes `@prefix brick:` et `@prefix ref:` -> OK (vert), et g.namespaces() ne contient plus brick ni ref ; changer l'IRI du @prefix ref -> OK ; en revanche suppression du bloc hasExternalReference, prédicat object-name/isPointOf changé, défaut IfcSensor, garde bacnet_name -> True, remplacement analogvalue, IRI bacnet, datatype : tous FAIL (l'oracle voit bien les triplets). Équivalence des liaisons établie à la main : g.namespaces() des deux versions donne les mêmes 8 liaisons (bacnet, bldg, brick, brickInst, ifc, ifcInst, rdf, ref). Dépôt : bacnet_name est une str issue de QLineEdit.text().strip(), bacnet_instance/type aussi (ifc_populate_window.py:241-243) ; en copie, avec des valeurs piégeuses (\"http://example.org/x y\", \"<urn:a>\", \" 42 \", None, \"{x}\") le pilote reste OK, donc ?bacnet_name == Literal(str) tient. Réécriture en noms préfixés des 8 termes dans une copie : OK. Ligne sans point_id dans une copie du pilote : FAIL (l'original a déjà ajouté le triplet eq_uri rdf:type avant le KeyError, la traduction non) ; cas inatteignable dans le dépôt. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
