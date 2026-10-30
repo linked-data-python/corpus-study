@@ -29,7 +29,9 @@
     "graph binding restored (see original.py header): `response_graph` was built from a live HTTP round-trip through an in-process FastAPI TestClient wired to the real prez app + a pyoxigraph store loaded from test_data/*.ttl (tests/conftest.py: `client`, `an_fc_link`, `a_spaceprez_dataset_link`, `a_feature_link` -- three chained fixture calls), one of corpus/403's '163 regions with no visible graph'. Replaced `client`/`a_feature_link` with an explicit `response_graph` parameter and dropped the now-unused `client.get(...)`/`Graph().parse(data=...)` lines; the one read under study is otherwise untouched.",
     "NOTABLE FINDING for this stratum, same shape as the sibling LA3D region of this batch: `next(response_graph.triples(expected_response_1))` is syntactically the trav_single_value idiom this region was sampled for, but `expected_response_1` is a FULLY BOUND triple -- all three terms known, zero variables. The value `next()` returns is never used for anything but its truthiness in the bare `assert`; there is no 'single value I expect' to bind, only a membership test. Per INSTRUCTIONS_403 SS2 ('la construction la plus specifique'), the most specific construction is therefore trav_existence's `bool(m{ })` -- the exact worked example in querying.md#the-single-expected-value-and-existence (`assert bool(m{ ex:b a ex:Sensor })`) -- not `.first()`/`.one()`: this region contributes ZERO occurrences of `.first()`/`.one()` despite its stratum label.",
     "`expected_response_1` (a plain tuple, used only as the argument to `.triples()`) was inlined directly into the `m{ }` pattern rather than kept as a separate variable: this is the notation's native form for a literal triple (every worked example in querying.md/migrate-from-rdflib.md writes the pattern in place, never builds a tuple first) and there is no island form for 'a Python tuple of terms used as a whole pattern' -- not a restructuring of control flow, just the direct spelling the doc itself uses for this exact shape.",
-    "zero-solution branch cannot be exercised through this driver: the entire function body IS the one `assert`, so a fixture where the triple is absent would make the ORIGINAL side raise inside `run_pair`'s single try/except, which aborts the whole comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py) -- same limitation already documented on the sibling LA3D region of this batch. Hardened the fixture instead with neighbourhood data (a second Feature of the same type, a second type on the same subject) that must not satisfy the exact triple."
+    "zero-solution branch cannot be exercised through this driver: the entire function body IS the one `assert`, so a fixture where the triple is absent would make the ORIGINAL side raise inside `run_pair`'s single try/except, which aborts the whole comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py) -- same limitation already documented on the sibling LA3D region of this batch. Hardened the fixture instead with neighbourhood data (a second Feature of the same type, a second type on the same subject) that must not satisfy the exact triple.",
+    "Repair 2026-10-30: `assert bool(m{ Feature1 rdf:type geo:Feature })` was not faithful when the triple is absent: the original raises StopIteration('') from `next()`, the translation raised AssertionError(''), and the harness compares raises (the note above that says it cannot is wrong). The strengthened driver shows it on four absent-triple graphs; the translation is now `assert next(iter(m{ ... })) is not None`, which raises the same StopIteration and passes when the triple is present.",
+    "Language observation: an m{ } that projects NO variable yields an empty `Row()`, which is falsy, so the literal rewrite `assert next(iter(m{ ... }))` fails on a PRESENT triple (verified: check FAIL on call 0). The `is not None` keeps the assert a no-op beyond the StopIteration, as the original's assert on a 3-tuple is."
   ],
   "draft_sha": "c02d3272d7b9a443",
   "provenance": {
@@ -47,5 +49,21 @@
     "method": "fixture:fixture.ttl entry:test_feature",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "four calls added after fixture.ttl: an empty graph, and three absent-triple graphs that each hold one neighbour sharing two of the three terms (Feature2 a geo:Feature; Feature1 a dcat:Dataset; Feature1 rdfs:seeAlso geo:Feature).",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "assert True",
+      "assert bool(m{ ... }) (the previous translation: AssertionError vs StopIteration)",
+      "assert next(iter(m{ ... })) without `is not None` (fails on the present triple)",
+      "?s rdf:type geo:Feature",
+      "Feature1 rdf:type ?t",
+      "Feature1 ?p geo:Feature",
+      "m{ ... }.first() is not None",
+      "m{ ... }.one()"
+    ],
+    "remaining": "The faithful form is `assert next(iter(m{ ... })) is not None`: m{ } is still the only island, but `next(iter(...))` and `is not None` are Python scaffolding around it, and the earlier note argued for `bool(m{ })` as the most specific construction. Should the pair stay `directly-expressible`, or move to `minor-restructuring` / `awkward`? And is the StopIteration-vs-AssertionError gap (both fail the pytest test) a difference the study must preserve?"
   }
 }

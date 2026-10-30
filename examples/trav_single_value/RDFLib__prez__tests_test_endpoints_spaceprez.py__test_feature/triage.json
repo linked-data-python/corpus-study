@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Copies (mktemp, supprimees). Mutants restes VERTS : `assert True` a la place de `assert bool(m{ })` ; motif elargi `?s rdf:type geo:Feature` ; motif elargi `<Feature1> rdf:type ?t` (le fixture contient Feature2 et Feature1 a dcat:Dataset). Fixture sans le type geo:Feature de Feature1 : FAIL 'call[0]: outcome differs (raised StopIteration('') vs raised AssertionError(''))'. Les notes (translation_notes et le raisonnement du driver) affirment que le harnais ne peut pas comparer deux levees : c'est faux, harness.py (~l.384) compare type et message. Le choix `bool(m{ })` plutot que `.first()` est justifie, mais le triplet etant entierement lie la paire ne montre aucune valeur.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (graphe vide + trois voisins à deux termes communs, triplet absent) : la traduction `assert bool(m{ })` levait AssertionError au lieu de StopIteration, corrigée en `assert next(iter(m{ … })) is not None` ; check OK, mutants cités morts."
 }

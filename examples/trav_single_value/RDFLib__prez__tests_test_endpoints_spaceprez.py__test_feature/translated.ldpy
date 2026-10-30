@@ -20,4 +20,4 @@ from rdflib.namespace import DCAT, GEO, RDF
 
 def test_feature(response_graph):
     @graph response_graph
-    assert bool(m{ <https://example.com/spaceprez/Feature1> rdf:type geo:Feature })
+    assert next(iter(m{ <https://example.com/spaceprez/Feature1> rdf:type geo:Feature })) is not None

@@ -18,13 +18,17 @@
     "@prefix",
     "@graph",
     "m{ }",
-    ".first()"
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: SWRL->swrl, RDF->rdf, RDFS->rdfs",
     "swrl2rdf is not installed in the venv: original.py and translated.ldpy both import from swrl2rdf_shim.py, a verbatim subset of swrl2rdf/{prefixmap,model,builder}.py from the pinned commit (context shim, see AGENT_BATCH.md); the region under study (the two reads) is untouched.",
     "next(g.subjects(RDF.type, SWRL.Imp)) -> m{ ?imp rdf:type swrl:Imp }.first(); g.value(imp, RDFS.label) -> m{ {imp} rdfs:label ?label }.first(); both single-solution reads over the same graph, no join needed since the second pattern reads a different predicate on an already-bound subject.",
-    "driver shares one PrefixMap instance between both sides (calls=[((PrefixMap(),), {})], not a callable factory) because PrefixMap has no __eq__: two fresh-but-equal instances would be reported as differing by identity; rules_to_graph only reads it, so sharing is safe."
+    "driver shares one PrefixMap instance between both sides (calls=[((PrefixMap(),), {})], not a callable factory) because PrefixMap has no __eq__: two fresh-but-equal instances would be reported as differing by identity; rules_to_graph only reads it, so sharing is safe.",
+    "Repair 2026-10-30: `m{ ?imp rdf:type swrl:Imp }.first()` was not faithful to `next(g.subjects(RDF.type, SWRL.Imp))` on a graph with no swrl:Imp: the original raises StopIteration(''), the translation returned None and raised AssertionError('') on the next line. The strengthened driver reaches that case through a seam on rules_to_graph; the translation is now `next(iter(m{ ?imp rdf:type swrl:Imp }))`, which also takes the first of two Imps without raising, as `next()` does (`.one()` would raise). The label read stays `.first()`, which matches `g.value` on zero, one and two labels."
   ],
   "article_candidate": false,
   "draft_sha": "efab715feabf38fd",
@@ -43,5 +47,22 @@
     "method": "entry:test_rule_label_written_as_rdfs_label",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "a seam: the driver wraps swrl2rdf_shim.rules_to_graph (real builder, then a per-call edit keyed by the PrefixMap instance) before the harness executes the two sides; eight calls added with the repository's PrefixMap({'ex': 'http://example.org/'}): real graph, no Imp, no Imp but rdfs:seeAlso swrl:Imp, two Imps, label moved to another node, two labels, empty label, language-tagged label.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "m{ ?imp rdf:type swrl:Imp }.first() (the previous translation)",
+      "imp read .one()",
+      "?imp ?p swrl:Imp (result shape kept)",
+      "?imp rdf:type ?t (result shape kept)",
+      "label read .one()",
+      "?s rdfs:label ?label (result shape kept)",
+      "{imp} ?p ?label (result shape kept)",
+      "label read -> None",
+      "assert True"
+    ],
+    "remaining": "The faithful form `next(iter(m{ ... }))` is not `.first()`/`.one()`: neither reduction raises StopIteration on zero solutions while taking the first of several. Should the pair stay `directly-expressible`? Does the language want a reduction with next() semantics? And is the zero-Imp case worth preserving, given that the real rules_to_graph always writes one Imp (swrl2rdf_shim.py:166-170)?"
   }
 }

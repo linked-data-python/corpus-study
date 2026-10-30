@@ -17,8 +17,9 @@
     "@graph",
     "m{ }",
     ".first()",
-    "nom préfixé",
-    "variable"
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "the extracted region had NO imports at all: Graph, OWL, RDF, RDFS, URIRef and five helpers (_short, _label, _own_namespaces, _named_classes, _named_object_properties) are module-level names the region's own lines never declare. Restored in original.py -- OWL/RDF/RDFS/URIRef/Graph from rdflib itself, the five helpers from naas_context.py (faithful, reduced copy).",
@@ -27,7 +28,8 @@
     "`filler_pred` is a Python loop variable ranging over (owl:allValuesFrom, owl:someValuesFrom), so `g.value(bnode, filler_pred)` needs a variable in PREDICATE position: `m{ {bnode} {filler_pred} ?v }.first()`. graphs.md says interpolation works 'in any term position'; this is the first region in this batch to actually need it in predicate position rather than subject, and it transpiles and runs exactly as documented.",
     "`OWL.allValuesFrom` / `OWL.someValuesFrom` in the loop's own tuple (not inside an island) were also rewritten to `owl:allValuesFrom` / `owl:someValuesFrom`, per the general 'EX.Thing -> ex:Thing, wherever a Python expression may appear' rewrite in migrate-from-rdflib.md -- not required by the trav_single_value row specifically, but it is the same mechanical rewrite and leaves no OWL.* namespace access behind.",
     "`_severity` and `_is_known` are closures DEFINED INSIDE check_restriction_references, after `@graph g`; both read `g` themselves through `m{ }`/`bool(m{ })` with no @graph of their own. Empirically verified (not documented explicitly in current-graph.md/declarations.md, which only shows a top-level and a def-vs-def example): a nested `def` written textually inside a block that has an active `@graph` sees it -- block scope follows Python's own nesting, one level of def or several. Confirms rather than contradicts current-graph.md, but is worth recording since it was not obvious from the reference alone.",
-    "fixture: three owl:Restriction bnodes reached from three different owners (r1: onProperty declared/not flagged, allValuesFrom undeclared-but-in-ex's-own-namespace -> WARNING; r2: onProperty undeclared and outside ex: -> ERROR; r3: someValuesFrom is a well-known rdfs: term -> not flagged via the vocab-prefix branch of _is_known), plus r4 with NO rdfs:subClassOf owner at all -- the zero-solution case for `m{ ?owner rdfs:subClassOf {bnode} }.first()`, which must `continue` and append nothing -- and neighbourhood triples (an ordinary subclass edge, an onProperty-shaped triple on an unreached bnode) that must not surface. Ran original.py directly against the fixture to confirm it is not a vacuous pass: 2 issues fire (the WARNING and the ERROR described above), not 0."
+    "fixture: three owl:Restriction bnodes reached from three different owners (r1: onProperty declared/not flagged, allValuesFrom undeclared-but-in-ex's-own-namespace -> WARNING; r2: onProperty undeclared and outside ex: -> ERROR; r3: someValuesFrom is a well-known rdfs: term -> not flagged via the vocab-prefix branch of _is_known), plus r4 with NO rdfs:subClassOf owner at all -- the zero-solution case for `m{ ?owner rdfs:subClassOf {bnode} }.first()`, which must `continue` and append nothing -- and neighbourhood triples (an ordinary subclass edge, an onProperty-shaped triple on an unreached bnode) that must not surface. Ran original.py directly against the fixture to confirm it is not a vacuous pass: 2 issues fire (the WARNING and the ERROR described above), not 0.",
+    "Repair 2026-10-30: no translation defect found. The strengthened driver (seven blank-node graphs, one per read of the region) keeps the pair equivalent and kills the mutants the triage cited; `constructions` now also declares `interpolation {expr}`, used by `{iri}`, `{bnode}` and `{filler_pred}` but missing from the list, and spells `nom préfixé` as the canonical `prefixed name`."
   ],
   "draft_sha": "75332ef17131a43f",
   "provenance": {
@@ -46,5 +48,24 @@
     "method": "fixture:fixture.ttl entry:check_restriction_references",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "seven calls added after fixture.ttl: IRIs known only through rdf:type next to an IRI with triples but no rdf:type and an IRI that is only an rdf:type object; a declared owl:DatatypeProperty; one restriction with two onProperty values, two allValuesFrom fillers and two owners; absent or non-IRI values (no onProperty, literal onProperty, blank-node filler, orphan with an outgoing subClassOf, two owners reached only through owl:equivalentClass); two non-restriction neighbours (typed owl:Class, owl:Restriction as object of rdfs:seeAlso); the empty IRI as owner and onProperty; the empty graph.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "bool(m{ {iri} a ?x }) -> False",
+      "bool(m{ {iri} ?p ?x })",
+      "bool(m{ ?x a {iri} })",
+      "(owl:allValuesFrom,) without owl:someValuesFrom",
+      ".first() -> .one() on onProperty, filler and both owner reads",
+      "?bnode a ?t",
+      "?bnode ?p owl:Restriction",
+      "?owner ?p {bnode} in both owner reads",
+      "{bnode} rdfs:subClassOf ?owner in both owner reads",
+      "{bnode} ?p ?v in place of onProperty and of {filler_pred}",
+      "onProperty read and both owner reads -> None"
+    ],
+    "remaining": "One mutant survives and is equivalent: `m{ ?s a owl:DatatypeProperty }` -> `[]`, since every declared datatype property also satisfies the rdf:type test of `_is_known` (same redundancy in the original). Nothing else to judge from the repair."
   }
 }

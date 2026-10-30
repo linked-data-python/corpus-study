@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Copies dans un dossier mktemp (supprimees). Mutation du shim swrl2rdf_shim.py dans la copie (la ligne graph.add((imp, RDF.type, SWRL_Imp)) remplacee par pass, donc zero swrl:Imp) : check FAIL, 'call[0]: outcome differs (raised StopIteration('') vs raised AssertionError(''))' ; meme ecart si un rdfs:label \"Rule_0\" existe sans Imp (le imp=None interpole ne joue pas de joker ici : aucune correspondance). Le pilote livre reste vert car son seul appel construit toujours un Imp. Sans label ecrit : OK des deux cotes (AssertionError). Deux Imp (le second avec un autre label) : OK 3 fois ; deux rdfs:label sur l'Imp : OK. Mutant .first() -> .one() sur la lecture de l'Imp : reste vert (OK), mutant de cardinalite survivant, d'ou weak-oracle. Shim compare ligne a ligne avec swrl2rdf/{prefixmap,model,builder}.py du clone : seulement des elagages (docstring/annotations, items() raccourci), pas de logique ajoutee. Les mutants d'elargissement n'ont pas pu etre testes proprement : un seul Imp et un seul label dans le graphe.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé par une couture sur rules_to_graph (zéro, deux Imp ; label absent, double, vide, ailleurs) : `.first()` rendait None au lieu de lever StopIteration, corrigé en `next(iter(m{ ?imp rdf:type swrl:Imp }))` ; check OK, mutants morts."
 }

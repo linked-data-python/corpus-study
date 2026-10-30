@@ -24,5 +24,5 @@ def test_rule_label_written_as_rdfs_label(prefix_map: PrefixMap) -> None:
     )
     g = rules_to_graph([rule], prefix_map)
     @graph g
-    imp = m{ ?imp rdf:type swrl:Imp }.first()
+    imp = next(iter(m{ ?imp rdf:type swrl:Imp }))
     assert str(m{ {imp} rdfs:label ?label }.first()) == "Rule_0"
