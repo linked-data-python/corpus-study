@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : le test du dépôt s'exécute des deux côtés, son assert (9 paires attendues) sert d'oracle et le shim _context.py ne change aucune logique.",
+  "questions": [],
+  "evidence": "check : OK. data/is_during.ttl identique octet pour octet à tests/functions/data/is_during.ttl du dépôt (corpus/repos/RDFLib__timefuncs). Test original.py = tests/functions/test_is_during.py du dépôt, à l'ajout de `return actual` près. _context.py comparé par AST à timefuncs/funcs.py : _path_exists et is_during identiques ; is_contained_by identique sauf `except Exception as err` devenu `except Exception` (docstrings, annotations et import local de Literal retirés) -> aucune logique ajoutée ni retirée, mais la note 'verbatim' est imprécise. register_custom_function(TFUN.isDuring, is_during, raw=True) reproduit timefuncs/__init__.py:28. Mutants dans des copies (tous FAIL, outcome differs sauf le dernier) : arguments isDuring(?b, ?a) permutés, FILTER nié, '?a a time:Instant', '?b a time:Instant', isDuring(?a, ?a), requête suivie de '+ []'. SELECT DISTINCT reste vert : équivalent, car les 9 paires sont distinctes. initNs={time, tfun} équivaut aux @prefix time:/tfun:. Les 18 termes 'prefixed name' viennent presque tous de la liste expected (réécriture de str(ID.x) en str(id:x)), pas de la requête ; le préfixe `id:` masque le builtin `id` mais n'est jamais utilisé comme identifiant Python. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

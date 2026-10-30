@@ -1,0 +1,31 @@
+{
+  "priority": "high",
+  "flags": [
+    "shim-invents-logic",
+    "classification-doubt",
+    "weak-oracle"
+  ],
+  "summary": "original.py remplace la f-string du dépôt (agri_image_meta/utils/sparql_queries.py:125-153, `{optional_str}`/`{filter_str}` interpolés) par une constante valable pour le seul chemin sans argument, alors que les appelants réels (tests/test_utils.py:289 et 295) passent cameraID et field_id : à la ligne 176 `query` n'est pas un littéral.",
+  "questions": [
+    {
+      "question": "La région du dépôt est la seule ligne `results = g.query(query)` (sparql_queries.py:176), où `query` est une f-string assemblée avec `{optional_str}` et `{filter_str}` (lignes 122-153) ; la paire, elle, fige `query` en constante pour le chemin où tous les arguments optionnels valent None. Cette constante inventée par original.py est-elle un écart inacceptable à l'original ?",
+      "where": "original.py:25-47 (constante) et sparql_queries.py:125-153 du dépôt",
+      "if_yes": "needs-work : retirer la paire de sparql_literal (ou l'exclure du décompte) ; le site réel est sparql_interpolated.",
+      "if_no": "approuver en tenant compte que le gain ne vaut que pour ce chemin."
+    },
+    {
+      "question": "Faut-il reclasser la paire hors `directly-expressible` et hors du crédit s{ } littéral, puisque le site réel ne s'écrit pas s{ }(g) sans réécrire l'assemblage des fragments FILTER/OPTIONAL en Python ?",
+      "where": "meta.json (classification, constructions) ; translated.ldpy:24-45",
+      "if_yes": "changer classification (au moins minor-restructuring) ou invalider la paire pour l'étude.",
+      "if_no": "conserver la classification."
+    },
+    {
+      "question": "Le pilote est-il trop faible, sachant que supprimer `ORDER BY ?imageName` ou l'OPTIONAL de platformID dans translated.ldpy laisse la vérification verte ?",
+      "where": "driver.py:7-14 (un seul passage, entry=None) et fixture.ttl (aucun agimage:platformID, images déjà dans l'ordre alphabétique)",
+      "if_yes": "needs-work : ajouter une image dotée de platformID et des images dont l'ordre d'insertion diffère du tri.",
+      "if_no": "accepter l'oracle tel quel."
+    }
+  ],
+  "evidence": "check : OK (module-state). Lecture du dépôt : sparql_queries.py:122-153 construit `query` par f-string avec {optional_str}/{filter_str} ; tests/test_utils.py:289 appelle query_images_by_location_and_properties(g, cameraID=...) et :295 avec field_id=..., deux chemins où optional_str est non vide ; seul le chemin sans argument donne une constante. Le texte de la constante diffère du dépôt par les lignes vides de {optional_str}/{filter_str} (sans effet SPARQL). Mutants dans des copies : ORDER BY retiré -> OK (survit), OPTIONAL platformID retiré -> OK (survit), DISTINCT ajouté -> OK ; en revanche ORDER BY DESC, OPTIONAL plotID retiré, exif:SerialNumber altéré, FILTER(1 = 2) dans le dernier OPTIONAL -> FAIL. Par ailleurs, translated.ldpy:31 écrit exif:SerialNumber à la place de l'IRI <…ns#SerialNumber> du dépôt (même IRI, contournement du '#' dans s{ } annoncé par la note). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
