@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : `m{ ?s ?p ?o }` détruit en `s, _p, _o` est l'équivalent exact de g.subjects(), l'oracle tue 5 mutants sur 5, et `awkward` est justifié.",
+  "questions": [],
+  "evidence": "check : OK. Mutants sur translated.ldpy, tous tués (5 sur 5) : îlot remplacé par [] ; suppression du isinstance(s, URIRef) (un BNode fuit dans le résultat) ; prédicat fixé à rdf:type ; prédicat fixé à ex:hasLabel ; sélecteur '#' changé ; la forme m{ ?s [] [] } est rejetée par le transpileur (« prédicat attendu »), ce qui confirme qu'il n'existe pas de forme plus courte sur la position prédicat. Le fixture contient un sujet à IRI barre oblique, un sujet à IRI dièse, un BNode (à exclure) et un fichier absent (isfile). Non exercé : la branche `except Exception` (fichier Turtle mal formé, ligne scan), mais elle est textuellement identique des deux côtés et l'îlot n'y change rien. La note renvoie à AGENT_BATCH.md (existe). Classification awkward cohérente avec la paire (triple complet détruit pour n'en garder qu'une variable).",
+  "triaged_by": "sonnet-5.5"
+}

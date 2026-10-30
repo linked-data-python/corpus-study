@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : traduction fidèle, oracle solide (16 mutants sur 16 tués, BNode vérifié), @base <Referable/category> contourne proprement le « / » non légal en nom préfixé.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (huit lectures `next(graph.objects(subject=…, predicate=AASNameSpace.AAS[\"…\"]), None)` sur quatre lignes deviennent `m{ {subject} <Referable/category> ?o }.first()`) ?",
+      "where": "translated.ldpy:14-17 et original.py:12-16",
+      "if_yes": "garder article_candidate ; noter que l'IRI relative sous @base est la forme à montrer",
+      "if_no": "laisser en low sans drapeau : le gain est répétitif et la région est une méthode extraite au niveau module avec un shim pydantic"
+    }
+  ],
+  "evidence": "check : OK. Région identique au dépôt (app/models/referable.py:88-158, à l'indentation près). Mutants sur translated.ldpy, tous tués : sujet joker (catégorie, displayName, description), prédicat joker ou échangé (idShort, language, text), boucles displayName/description remplacées par [], text_ref/lang_ref forcés à None pour displayName et description. Copie avec un fixture en blank nodes (_:en, _:de, _:d1) comme ceux que le dépôt crée (rdflib.BNode() à referable.py:56 et :73, donc {display_ref} interpole bien un BNode dans le dépôt) : check reste OK. Les appels couvrent le cas zéro solution (ex:noCategory), un voisin qui ne doit pas matcher (ex:otherSubject) et un displayName sans texte. Le shim remplace Extension.from_rdf par str(extension_ref) dans HasExtensions.from_rdf (contexte hors région, le fixture n'a aucune extension) : sans effet sur la paire. Ordre des display names : la liste de modèles est comparée en multiset, un seul .first() par propriété et le fixture a une valeur par propriété, donc l'ordre arbitraire de next/.first() n'intervient pas.",
+  "triaged_by": "sonnet-5.5"
+}

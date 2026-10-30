@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote ne compare que le code de retour (toujours 1) : les messages d'échec vont sur stderr, que le harnais ne capture pas, donc 14 mutants sur 14 restent verts, îlots supprimés compris ; la traduction semble pourtant fidèle.",
+  "questions": [
+    {
+      "question": "Acceptez-vous comme preuve d'équivalence un pilote dont l'unique appel renvoie 1 des deux côtés, alors que ni le rapport d'échec (écrit sur stderr, non capturé) ni la branche de succès (return 0 et son print) ne sont observés ?",
+      "where": "driver.py:15-18, original.py:155-158 (print(..., file=sys.stderr)) et original.py:160-168 (chemin de succès)",
+      "if_yes": "approuver en l'état (déconseillé : la lecture de chaque îlot peut être corrompue sans que le vert bouge)",
+      "if_no": "needs-work : rediriger stderr dans la comparaison (ou un stdout_filter / un wrapper dans le pilote qui renvoie les messages d'échec), et ajouter un second appel avec fixtures où tout passe (return 0 + print) et des cas hzMin>hzMax, bande sans intervalle, plage étendue ne contenant pas la bande"
+    }
+  ],
+  "evidence": "check : OK. Exécuté original.main() sur les fixtures : renvoie 1 avec 6 échecs imprimés sur stderr (betaBand 'relax', 4 associations perdues, gammaOscillation sans bande). run_pair ne redirige que stdout (harness.py:381-384), donc seul le résultat 1 est comparé. Mutants appliqués à translated.ldpy, tous VERTS : bands=[] (îlot 1 supprimé) ; m{ {band} ?p ?o } (prédicat élargi en joker) ; un seul prédicat dans la boucle skos ; assessed=set() ; statuses=set() ; boucle sorted(m{...}) remplacée par [] ; hzMin lu à la place de hzMax (bande) ; extendedHzMax lu à la place de extendedHzMin ; hzMax→hzMin ; >= changé en > ; branche 'plage ne contient pas la bande' remplacée par False ; branche 'hzMin exceeds hzMax' remplacée par False ; hit=None ; total=0. Les mutants non-îlots verts confirment que le message n'est pas observé ; ceux qui suppriment ou élargissent un îlot suffisent pour high. Lecture manuelle : les neuf îlots sont les équivalents exacts des appels rdflib (m{...}.first() pour next(…, None), {oscillation}/{band} IRI vraies : SSTIM_V[name] et isinstance URIRef), shim.py ne fait que pointer module_paths/instance_paths vers les fixtures (le dépôt lit manifest.json et un rglob, hors région), région identique au dépôt (original.py:76-174 = scripts/check-band-scope-notes.py). Classification et constructions plausibles.",
+  "triaged_by": "sonnet-5.5"
+}
