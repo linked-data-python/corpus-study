@@ -47,5 +47,21 @@
     "method": "entry:csv_to_owl_subclass (output files, isomorphism)",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Four cases instead of one, each also comparing return value, stdout (WARN lines decide the branch; output path masked), whether a file is written, and the xmlns declarations of the written RDF/XML (original's set must be in the translation's): 'synthetic' (the former CSV, unchanged); 'branches' (A <= all R.C, quantifier 'only' and 'SOME', textual 'all' restriction, textual restriction without superclass, intersection without superclass, row without quantifier, property-only row, GCI with 'some'); 'repo' (the repository's own subclass.csv and prefixiri.csv, copied verbatim as subclass_repo.csv and prefixiri_repo.csv: default ':' prefix on the OWL namespace, xml:base, other column order); 'missing' (nonexistent CSV: no file written). Temporary directory now removed.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "owl:allValuesFrom island of the A <= R.C case removed",
+      "allValuesFrom -> someValuesFrom in the A <= R.C case",
+      "allValuesFrom -> someValuesFrom in build_restriction",
+      "intersection subClassOf island unguarded (if True)",
+      "simple A <= B subClassOf island removed",
+      "quantifier .lower() dropped",
+      "WARN message changed",
+      "owl namespace rebound to another prefix before serialisation"
+    ],
+    "remaining": "Not a repair flag: the translator's note says helpers.py is copied verbatim, but _bind_prefixes_to_graph lost its comments and its `return bound_count` (no effect here, the caller ignores it); the note stays inaccurate."
   }
 }

@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (module-state). Région comparée à corpus/repos/dice-group__RELD/V1/NYT_New.py:215-306 : identique au blanc près. validate.py : logique des quatre fonctions identique au dépôt (seule la mise en forme change). Mutants sur copie : suppression des îlots de la branche `containsNumber` et de la branche `check_type`, pour le sujet et pour l'objet : restent VERTS (4 survivants) ; échange rdfs:label -> rdfs:comment dans la branche containsNumber : VERT ; suppression des îlots du `else`, hasNamedEntity, type d'entité nommée, `score`, numOfRelation : détectés. Réécriture dans une copie de Literal(lang='en'), Literal(datatype=XSD.string/integer), URIRef(relation/sent_id) par les îlots spécifiques : OK. `prop:{key}` et `dbo:{remove_alphaNumeric(…)}` : essayés avec clé vide, espace, barre oblique, chiffre initial : même IRI que prop+key (pas d'écart). Les clés réelles de sentence.tokenize (V1/sentence.py) sont des noms sûrs. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Driver strengthened (extended fixture run through a seam in the driver, real input shape): the four containsNumber/check_type islands and prop:{key} are now proved; the five triage mutants and five more are killed, translation unchanged, check OK."
 }

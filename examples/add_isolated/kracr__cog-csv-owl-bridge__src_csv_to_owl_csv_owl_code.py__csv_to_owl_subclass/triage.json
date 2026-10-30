@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Région comparée au dépôt (corpus/repos/kracr__cog-csv-owl-bridge, csv_owl_code.py:266-380) : identique. helpers.py : load_prefixes, resolve_uri, ensure_declaration, reconstruct_intersection, normalize_ns_for_join identiques au dépôt ; _bind_prefixes_to_graph NON verbatim (commentaires retirés et `return bound_count` supprimé), sans effet ici car l'appelant ignore la valeur — la note « copied verbatim » est inexacte, à corriger si on la garde. Mutants sur copie : suppression de l'îlot `owl:allValuesFrom` du cas A⊑R : VERT ; échange someValuesFrom -> allValuesFrom du même cas : détecté ; suppression des îlots de build_restriction (some et else), de l'intersection, de chaque subClassOf (textuel, intersection, GCI, simple, lien A->restriction) : tous détectés. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Driver strengthened (A <= all R.C row and seven other branch rows, the repository's real CSV and prefix files, missing CSV, stdout, file written, xmlns bindings): the allValuesFrom island is now proved, eight mutants killed, translation unchanged, check OK."
 }

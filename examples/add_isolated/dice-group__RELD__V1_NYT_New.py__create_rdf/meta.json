@@ -52,5 +52,20 @@
       "prop",
       "res"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Second run 'extended': the driver replaces the fixture block (info, subject_dict, object_dict) of both artefacts, textually and identically, with one that keeps the two existing entries and adds two in the repository's real shape (int counters 0 and 1 keyed by surface text, tokenize dicts with int counts including 0 and a bool direction, numOfRelation 0): texts 'Apollo 11'/'Route 66' take both containsNumber branches, '...'/'' both check_type branches; several non-entity keys reach prop:{key}. The artefacts are run from a temporary copy so original.py and translated.ldpy stay untouched (their metrics too); one combined verdict.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "subject containsNumber island removed",
+      "subject check_type island removed",
+      "object containsNumber island removed",
+      "object check_type island removed",
+      "rdfs:label -> rdfs:comment in each of the four branches",
+      "subject containsNumber label computed as in else (remove_alphaNumeric)",
+      "prop:{key} -> prop:score"
+    ],
+    "remaining": "Only the wrong-construction question of the triage (Literal(..., lang=)/Literal(..., datatype=)/URIRef(...) kept as interpolations instead of language/typed literals and f<...>): not handled by the repair."
   }
 }

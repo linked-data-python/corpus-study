@@ -37,5 +37,21 @@
     "method": "entry:test_nonmatching_fact_yields_zero_rows",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Custom driver: seam on _graph_with_one_fact in each side's globals (not the region) with four graphs: the repository helper (a b c), empty, neighbours sharing two of the three pattern terms (a b c, x b nope, a y nope), and a match (a b nope); the failing assert is identified by its source line (the asserts carry no message; .ldpy lines mapped back through the transpiler's language map). Every case runs under plain rdflib, then with starlight's import-time patch of Result.__iter__ (the test module does `import starlight`, tests/unit/test_result_patches.py:7), copied verbatim as the shim starlight_result_patches.py, applied once for both sides and removed afterwards. Under plain rdflib the match fails at `r.bindings == []`, under the patch at `list(r) == []`, identically on both sides.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "subject -> ?s",
+      "predicate -> ?p",
+      "subject and predicate -> ?s ?p",
+      "subject -> <http://example/zz>",
+      "predicate -> <http://example/zz>",
+      "object -> ?o",
+      "object -> <http://example/c>",
+      "second and third asserts removed"
+    ],
+    "remaining": ""
   }
 }

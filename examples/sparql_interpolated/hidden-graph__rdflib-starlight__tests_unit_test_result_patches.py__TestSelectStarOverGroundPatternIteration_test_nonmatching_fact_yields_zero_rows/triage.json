@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants sur translated.ldpy (copie), restés verts : sujet -> `?s` ; prédicat -> `?p` ; sujet et prédicat -> `?s ?p` ; sujet -> `<http://example/zz>` avec objet `<…/nope>`. Mutants détectés : objet -> `<…/c>` (FAIL, outcome differs), objet -> `?o` (FAIL), îlot remplacé par `[]` (FAIL, `'list' object has no attribute 'bindings'`). Le shim ne fait que restaurer `_graph_with_one_fact` (identique à tests/unit/test_result_patches.py:16-19), pas d'invention de logique ; l'`import starlight` du fichier d'origine (lignes 8) est hors région et absent du shim, donc le correctif de Result.__iter__ que le test est censé vérifier n'est pas actif — sans effet ici car le cas zéro ligne passe aussi sans correctif. Les IRI de la traduction sont identiques à celles des constantes EX_A/EX_B/EX_NOPE de l'original ; `.execute()` et `(g)` sont employés (r.bindings l'exige) ; `awkward` est cohérent avec la note (une constante déjà entourée de chevrons ne peut pas être interpolée sans devenir un Literal). Pas pour l'article.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Driver strengthened (graph seam with neighbours and a matching fact, failing assert identified, plain and starlight-patched Result.__iter__): the subject and predicate IRIs are now proved, eight mutants killed, translation unchanged, check OK."
 }
