@@ -1,0 +1,24 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "`for ... return` + raise devient `.first()` + `if subject is not None` : restructuration du flot de contrôle (faisable en Python pur avec next(..., None)), classée directly-expressible, et la branche zéro solution n'est pas exercée par le pilote (équivalente à la main).",
+  "questions": [
+    {
+      "question": "La paire doit-elle être reclassée minor-restructuring, puisque la boucle à retour précoce et chute vers le raise devient une affectation `.first()` suivie d'une garde `is not None`, réécriture qu'un `next(graph.subjects(...), None)` permet aussi en Python pur ?",
+      "where": "translated.ldpy:9-12 et original.py:7-9",
+      "if_yes": "classification minor-restructuring (le gain en lignes n'est plus attribuable à la seule notation).",
+      "if_no": "garder directly-expressible."
+    },
+    {
+      "question": "La branche zéro solution (graphe sans owl:Ontology, levée de RuntimeError) doit-elle compter comme exercée, alors que le harnais ne peut pas comparer une exception et que le mutant `if subject is not None` -> `if True` reste vert ?",
+      "where": "translated.ldpy:10-12 et original.py:9 ; driver.py:21-33 ; fixture.ttl:12-20",
+      "if_yes": "approuver : j'ai vérifié à la main que les deux versions lèvent RuntimeError('src: no owl:Ontology declaration found') sur un graphe vide.",
+      "if_no": "needs-work : ajouter à run_pair un moyen de comparer deux levées, ou accepter explicitement l'écart d'oracle."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Appelant du dépôt (check_iri_resolution.py:77) : Graph parsé du Turtle, jamais None. À la main : graphe vide -> même RuntimeError et même message des deux côtés ; sujet BNode premier -> même terme ; 6 permutations d'ordre d'insertion de 3 ontologies -> même premier élément. Mutants sur copie : `.first()`->`.one()` FAIL, pattern élargi (?p, ?o) FAIL, subject=None FAIL ; `if True` vert (zéro solution jamais atteint) ; message du raise modifié vert.",
+  "triaged_by": "sonnet-5.5"
+}

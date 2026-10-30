@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (m{ {subject} rdfs:label ?o }(g).first() à la place de g.value, garde `if val:` conservée) ; le pilote n'exerce aucun label falsy (\"\" ou 0), donc un mutant sur la garde de véracité reste vert, mais l'équivalence est établie à la main.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il contenir un sujet dont le rdfs:label est le littéral vide (\"\") pour exercer la garde de véracité `if val:` sur un terme falsy, alors que l'équivalence est déjà vérifiée à la main ?",
+      "where": "translated.ldpy:14 et original.py:10 ; driver.py:23-43",
+      "if_yes": "needs-work léger : ajouter ex:emptyLabel rdfs:label \"\" à fixture.ttl et un appel au pilote ; la paire reste ensuite approuvable (low).",
+      "if_no": "approuver en l'état : la garde est reprise telle quelle, `.first()` renvoie le même terme que g.value."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Appelants du dépôt (import_rdf.py:142,162,233) : sujet URIRef (les BNode sont écartés avant l'appel). Essais à la main sur les deux versions, tous identiques : label \"\", label 0, label @fr, deux labels dont le premier est \"\", label objet IRI, sujet sans label, sujet BNode avec label, 5 labels insérés en ordre inverse (même premier). Mutants sur copie : {subject}->?s FAIL, rdfs:label->rdfs:comment FAIL ; `if val:`->`if val is not None:` reste vert (aucun label falsy dans la fixture) ; `or None` vert (équivalent).",
+  "triaged_by": "sonnet-5.5"
+}

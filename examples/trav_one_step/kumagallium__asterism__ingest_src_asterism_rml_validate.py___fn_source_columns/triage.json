@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction littérale et correcte (f<{pred}> bien choisi, BNode gérés), mais le pilote n'exerce jamais le prédicat fnml:functionExecution ancien ni la branche `if found: continue` (référence ET functionExecution sur la même inputValueMap) : deux mutants restent verts.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter à la fixture une inputValueMap qui porte à la fois un reference et un functionExecution, et une functionExecution au prédicat fnml:functionExecution (ancien), pour exercer `if found: continue` et la seconde itération de `_FUNCTION_EXECUTION_PREDS` ?",
+      "where": "translated.ldpy:33-37 et original.py:35-39 ; fixture.ttl",
+      "if_yes": "needs-work léger : ajouter ces deux cas à fixture.ttl (le pilote les prendra tels quels) ; sinon la paire est correcte.",
+      "if_no": "approuver en l'état : le code des deux branches est repris verbatim, seul l'oracle est incomplet."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dépôt d'origine : l'appelant (rml_validate.py:1034) passe un fe issu de graph.objects, en pratique un BNode (tests Turtle test_substrate.py:259-352 : functionExecution [ ... ]) ; je l'ai reproduit sur copie avec une fixture entièrement en BNode (sauf le fe racine) : OK, résultat {colA, colB} des deux côtés, et la récursion passe déjà des BNode à {fe}. Mutants sur copie : retirer la récursion FAIL, ?p ?o à la place de f<{fe_pred}>/f<{in_pred}>/f<{ivm_pred}>/f<{rp}> FAIL ; `if found:`->`if False:` vert ; f<{fe_pred}> remplacé par le seul prédicat rml: vert ; `break` après cols.add vert (cardinalité). shim.py ne contient que les deux constantes, identique des deux côtés.",
+  "triaged_by": "sonnet-5.5"
+}
