@@ -6,10 +6,32 @@
 ex:targetA a sstim:SensoryStimulationImplementation ;
     rdfs:label "Target A" ;
     dcterms:description "Implementation A" ;
-    sstim:implementsFramework ex:frameworkX .
+    sstim:implementsFramework ex:frameworkX ;
+    # outside the closed profile: a retained target must NOT bring these along
+    ex:protocol ex:p1 ;
+    rdfs:comment "A comment outside the profile" ;
+    dcterms:title "A title outside the profile" .
 
 ex:targetB a ex:SomeOtherKind ;
     rdfs:label "Target B not in profile" .
 
 ex:targetC a sstim:SensoryStimulationImplementation, ex:OtherType ;
-    rdfs:label "Target C" .
+    rdfs:label "Target C", "Target C (second label)" ;
+    ex:protocol ex:p2 , ex:p3 .
+
+# In the catalog with the profile type and every profile predicate, but the
+# artifact only points at it through another predicate, never through
+# eco:relationshipTarget: it must stay out.
+ex:targetD a sstim:SensoryStimulationImplementation ;
+    rdfs:label "Target D" ;
+    dcterms:description "Implementation D" ;
+    sstim:implementsFramework ex:frameworkY ;
+    ex:protocol ex:p4 .
+
+# Right type and relationship target, but nothing else: the profile finds only
+# its rdf:type triple.
+ex:targetE a sstim:SensoryStimulationImplementation .
+
+# Reached only by the edge-case call of the driver (never by fixture.ttl).
+ex:targetF a sstim:SensoryStimulationImplementation ;
+    rdfs:label "Target F" .

@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check OK. 9 mutants dans une copie, tous VERTS : l.38 `rdf:type`->`rdf:foo` (quotedNonAsserted du sujet) ; l.59 `rml:BlankNode`->`rml:Nope` ; l.93 `{property}`->`rml:nope` (predicateobjects function) ; l.110 `quotedTriplesMap`->`nope` ; l.126 `joinCondition`->`nope` ; l.129 `rml:child`->`rml:nope` ; l.131 `rml:parent`->`rml:nope` ; l.138 `rml:IRI`->`rml:nope` ; l.140 `rml:Literal`->`rml:nope`. Contrôles, bien tués : l.24 `subjectMap`->`nope` et l.133 `rml:language`->`rml:nope`. Le shim reprend les helpers du dépôt (yarrrml.py l.31-92 et 511-555) et les constantes RML (constants.py, RML_NAMESPACE = 'http://w3id.org/rml/') sans logique ajoutée. `{rdflib.term.Literal(parameter[1][2:-1])}` (l.52,54,129,131) pourrait s'écrire `{parameter[1][2:-1]}` (non vérifié, mineur).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote renforcé (94 cas, exceptions et graphe partiel comparés) est vert sur la traduction inchangée : les neuf îlots cités par le tri sont maintenant observés."
 }

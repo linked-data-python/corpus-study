@@ -31,7 +31,8 @@
     "CONSTAT — `from module import cpo:` ne rattrape pas le cas : la forme exige que le module de vocabulaire soit lui-même un module ldpy exportant `__namespaces__` (vérifié : `ImportError: cannot import name '__namespaces__'` sur un module Python ordinaire). Le shim de contexte, lui, doit rester du Python pur puisque `original.py` l'importe sans le crochet d'import.",
     "Les trois `candidate[X] = y` restent du Python, et ce n'est pas un renoncement : `Resource.__setitem__` appelle `graph.set()` (retire l'existant avant d'ajouter) là où `+{ }` appelle `add`, et il convertit un `Resource` en son identifiant. `+{ }` changerait la sémantique. L'API `Resource` de rdflib n'a pas d'îlot — c'est une lecture/écriture par objet, hors du périmètre annoncé.",
     "Pilote : le shim `scaffold_context.py` porte les vocabulaires et les deux fonctions voisines appelées par la région (`add_motivating_information`, taillée de son filtrage par `Signal` ; `add_convenience_properties`, verbatim). Deux appels, les deux chemins qui rendent `None` : sans chemin causal (le graphe ne doit pas bouger) et avec chemin causal mais sans information motivante (le candidat est créé puis retiré, le graphe doit revenir à l'identique — c'est le chemin de la strate).",
-    "LIMITE DU PILOTE — le troisième chemin rend le `Resource` candidat, et `harness.materialise` ne sait pas comparer un `Resource` rdflib : `Resource.__iter__` rend des triplets `(s, p, o)` de `Resource`, sujet compris, donc la marche récurse sans fin. Les deux arguments sont passés via un `GraphProbe` (un `Resource` dont l'itération rend le graphe) pour que l'oracle voie le graphe muté ; le chemin du candidat accepté n'est pas exercé."
+    "LIMITE DU PILOTE — le troisième chemin rend le `Resource` candidat, et `harness.materialise` ne sait pas comparer un `Resource` rdflib : `Resource.__iter__` rend des triplets `(s, p, o)` de `Resource`, sujet compris, donc la marche récurse sans fin. Les deux arguments sont passés via un `GraphProbe` (un `Resource` dont l'itération rend le graphe) pour que l'oracle voie le graphe muté ; le chemin du candidat accepté n'est pas exercé.",
+    "Réparation du 2026-10-30 : le pilote d'origine (deux appels, run_pair) est remplacé par un pilote à la main qui exerce aussi le chemin du candidat accepté ; la LIMITE DU PILOTE ci-dessus est donc levée (les Resource sont comparés par une description, non par materialise)."
   ],
   "draft_sha": "5677ba0eecde5f0b",
   "provenance": {
@@ -50,5 +51,27 @@
     "method": "entry:create_candidate",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "pilote réécrit à la main (la valeur de retour est un Resource, que run_pair ne sait pas comparer) : vrais Resource passés comme dans le dépôt, 11 cas ; comparaison de l'exception levée (type et message), des graphes par isomorphisme et d'une description du Resource rendu (None, ou Resource du graphe de la mesure, identifiant noeud blanc typé slowmo:Candidate). Les deux appels d'origine (no_pathway, nothing_motivating) sont conservés ; s'y ajoutent : chemin causal de valeur fausse (Literal(0)), garde d'absence et de fausseté avec une information motivante qui serait acceptée, candidat antérieur de même type/mesure/gabarit qui doit survivre au retrait, chemin accepté (le candidat est gardé : les trois affectations deviennent visibles), second gabarit voisin, gabarit incomplet (le helper lève après les trois écritures), graphes séparés (gabarit hors du graphe de la mesure) avec et sans information motivante ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ } -> pass",
+      "-{ } rétréci à rdf:type ou à slowmo:RegardingMeasure",
+      "sujet du -{ } élargi à ?x",
+      "-{ ?c slowmo:RegardingMeasure {mesure} } et -{ ?c rdf:type slowmo:Candidate } (candidat antérieur retiré)",
+      "candidate[rdf:type] = ... supprimée",
+      "candidate[slowmo:AncestorTemplate] = ... supprimée ou pointée sur la mesure",
+      "candidate[slowmo:RegardingMeasure] = ... supprimée ou pointée sur le gabarit",
+      "slowmo:Candidate -> slowmo:Wrong",
+      "@prefix slowmo: vers un autre IRI",
+      "@prefix rdf: vers rdfs",
+      "garde `not template.value(...)` -> `is None` ou supprimée",
+      "@graph g -> @graph template.graph",
+      "test de add_motivating_information supprimé",
+      "add_convenience_properties supprimé"
+    ],
+    "remaining": "Mutant équivalent, non tué : ajouter `-{ ?s ?p {candidate.identifier} }` (le candidat n'est jamais objet d'un triplet). Jugement non traité : `@prefix cpo` impossible (espace de noms à alias), déjà dit dans translation_notes."
   }
 }

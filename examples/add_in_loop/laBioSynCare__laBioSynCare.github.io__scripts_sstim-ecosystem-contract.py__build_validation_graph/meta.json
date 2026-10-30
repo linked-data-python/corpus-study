@@ -43,5 +43,21 @@
     "method": "fixture:fixture.ttl entry:build_validation_graph",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "catalogue et fixture enrichis du voisinage qui ne doit pas être copié : cibles retenues (targetA, targetC) portant des prédicats hors profil (ex:protocol, rdfs:comment, dcterms:title) et deux rdfs:label ; targetD dans le catalogue mais atteinte par un autre prédicat que eco:relationshipTarget ; targetE (type seul) ; targetZ absente du catalogue ; targetA atteinte deux fois ; trois appels de plus : artefact vide, artefact avec cible littérale / triplet de profil déjà présent / cible atteinte depuis un noeud du catalogue, artefact dont aucune cible n'est retenue ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "for predicate in profile_predicates -> tous les prédicats de la cible (26 contre 21 triplets)",
+      "chacun des quatre prédicats du profil retiré tour à tour",
+      "continue -> pass (cible hors profil)",
+      "eco:relationshipTarget -> eco:someOtherProperty",
+      "test de type de la cible rendu toujours vrai/faux",
+      "catalog.objects(target, predicate) -> catalog.objects(None, predicate)",
+      "objet {obj} -> {target} ou sujet {target} -> {obj}",
+      "copie des triplets de l'artefact supprimée"
+    ],
+    "remaining": "Jugement non traité : les @prefix owl, prov, xsd de translated.ldpy ne servent pas dans la région (note secondaire du tri)."
   }
 }

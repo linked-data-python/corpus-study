@@ -1,8 +1,11 @@
-# Input graph for laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__build_validation_graph — written during translation.
-# Covers: several relationshipTarget solutions (targetA matches the catalog
-# profile type, targetB does not and must be skipped), the zero-solution
-# case (targetD is in the catalog but nothing points at it), and
-# neighbouring triples that must NOT match (rel4 uses a different predicate).
+# Input graph for laBioSynCare__laBioSynCare.github.io__scripts_sstim-ecosystem-contract.py__build_validation_graph — written during translation, reinforced at repair.
+# Covers: several relationshipTarget solutions (targetA, targetC and targetE
+# match the catalog profile type, targetB does not, targetZ is not in the
+# catalog at all: both must be skipped), a catalog node (targetD) that the
+# artifact reaches only through another predicate, and neighbouring triples
+# that must NOT match (rel4 uses a different predicate; the catalog holds
+# predicates outside the closed profile for the retained targets, which the
+# result must not contain).  targetA is reached twice (two relationships).
 @prefix ex: <http://example.org/> .
 @prefix eco: <https://w3id.org/sstim/ecosystem#> .
 
@@ -10,3 +13,9 @@ ex:rel1 eco:relationshipTarget ex:targetA .
 ex:rel2 eco:relationshipTarget ex:targetB .
 ex:rel3 eco:relationshipTarget ex:targetC .
 ex:rel4 eco:someOtherProperty ex:targetA .
+ex:rel5 eco:someOtherProperty ex:targetD .
+ex:rel6 eco:relationshipTarget ex:targetE .
+ex:rel7 eco:relationshipTarget ex:targetZ .
+ex:rel8 eco:relationshipTarget ex:targetA .
+# the artifact's own triple about a catalog target: kept as is, not completed
+ex:targetA ex:artifactNote "from the artifact" .

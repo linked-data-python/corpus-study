@@ -45,5 +45,28 @@
     "method": "statement:seeded-globals+isomorphism",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "pilote réécrit à la main (cas par cas) : 94 cas au lieu d'un, chacun exécuté sur les deux côtés avec comparaison de l'exception levée (type et message) et du graphe, partiel compris ; cas 0 = make_fixture() d'origine. Couvre chaque branche des sujets (chaîne, '', None, liste, dict à value, sans value, function, quoted, quotedNonAsserted, précédences), des conditions str1/str2/autre/vide/non textuelle (listes comme dans le dépôt, tuples comme dans make_fixture), des termtypes valides et invalides aux deux sites, des graphes (chaîne, '', 0), des trois positions predicates/objects/graphs ensemble, de chaque forme de dict (function, mappings, quoted, quotedNonAsserted, value) avec leurs précédences, de language/datatype/type et de leur précédence, des levées KeyError/IndexError/TypeError/ValueError, de plusieurs mappings dans un même graphe ; docstring qui dit ce que chaque groupe exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "l.38 quotedNonAsserted du sujet rdf:type -> nope",
+      "rml:BlankNode -> rml:Nope aux deux sites (sujet, terme d'objet)",
+      "property -> rml:nope pour la branche function des predicateobjects",
+      "quotedTriplesMap -> nope (site predicateobjects)",
+      "joinCondition -> nope",
+      "rml:child -> nope",
+      "rml:parent -> nope",
+      "rml:IRI -> nope",
+      "rml:Literal -> nope",
+      "rdf:type rml:NonAssertedTriplesMap -> rml:Nope aux deux sites quotedNonAsserted",
+      "rml:parentTriplesMap -> nope",
+      "ordre des propriétés predicateMap/objectMap/graphMap permuté ou dupliqué",
+      "rml:language, rml:datatype, rml:graphMap, rml:constant -> nope ; branches language/datatype/mappings désactivées",
+      "parameter[1][2:-1] -> parameter[1][2:]",
+      "test de type du sujet str inversé, type iri inversé, message ValueError changé"
+    ],
+    "remaining": "Non prouvé : l'ordre de list(set)[0] pour une référence `mappings` à un ensemble de plusieurs éléments (le dépôt passe des ensembles ; le pilote n'utilise que des ensembles d'un élément car l'ordre d'un ensemble n'est pas stable, donc [0] -> [-1] reste vert sur ces cas). Cosmétique non vérifié : {rdflib.term.Literal(parameter[1][2:-1])} pourrait s'écrire {parameter[1][2:-1]}."
   }
 }

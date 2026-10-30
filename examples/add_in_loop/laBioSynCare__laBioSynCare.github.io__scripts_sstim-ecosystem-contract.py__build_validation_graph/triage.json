@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check OK. Copie : `for predicate in profile_predicates:` remplacé par `for predicate in set(catalog.predicates(target, None)):` reste VERT (le catalogue ne contient, pour les cibles A et C, que des prédicats du profil). Mutants tués : première boucle vidée (14 vs 10 triplets), `dcterms:description` retiré du profil (14 vs 13), objet remplacé par {target} (14 vs 13). Le dépôt (scripts/sstim-ecosystem-contract.py:383-409) est identique à l'original.py ; shim.parse_graph est l'équivalent de celui du dépôt (l.376-380), ROOT/ONTOLOGY_DIR dépaysés. Note secondaire : les définitions `SSTIM = Namespace(...)`/`ECO = Namespace(...)` disparaissent de translated.ldpy au profit de `@prefix` (non comparés en mode entry), et 3 des 8 `@prefix` (owl, prov, xsd) ne servent pas dans la région.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote renforcé (catalogue enrichi d'un voisinage hors profil, trois appels de plus) est vert sans toucher à la traduction : la boucle sur le profil fermé est maintenant observée, et l'élargir à tous les prédicats de la cible est rejeté."
 }
