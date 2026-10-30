@@ -163,6 +163,7 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
     if study.incremental_review:
         agg["by_stratum"] = _by_stratum(ok)
         agg["by_construction"] = _by_construction(ok)
+        agg["unattested_constructions"] = _unattested(ok)
         agg["by_oracle"] = {
             o: len([p for p in ok if p.get("oracle") == o])
             for o in sorted({p.get("oracle") for p in ok if p.get("oracle")})}
@@ -229,10 +230,13 @@ def _by_construction(ok: list[dict]) -> dict:
     """How often each island of the language actually served, and where.
 
     This is what lets a construction be credited or debited on its own
-    rather than hidden inside a global average.
+    rather than hidden inside a global average.  An unattested construction
+    (``constructions.UNATTESTED``) is not credited: ``_unattested`` counts it.
     """
+    from .constructions import UNATTESTED
     out: dict = {}
-    for c in sorted({c for p in ok for c in p.get("constructions", [])}):
+    for c in sorted({c for p in ok for c in p.get("constructions", [])}
+                    - set(UNATTESTED)):
         sub = [p for p in ok if c in p.get("constructions", [])]
         out[c] = {
             "pairs": len(sub),
@@ -241,6 +245,15 @@ def _by_construction(ok: list[dict]) -> dict:
             "tokens_reduction_pct": _dist([_reduction(p, "tokens") for p in sub]),
         }
     return out
+
+
+def _unattested(ok: list[dict]) -> dict:
+    """What ``_by_construction`` leaves out, so nothing is dropped silently."""
+    from .constructions import UNATTESTED
+    return {c: {"pairs": len([p for p in ok
+                              if c in p.get("constructions", [])]),
+                "stratum": stratum, "reason": reason}
+            for c, (stratum, reason) in UNATTESTED.items()}
 
 
 def _band_csv(agg: dict, study: Study = STUDY) -> None:

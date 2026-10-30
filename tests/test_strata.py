@@ -196,6 +196,44 @@ def test_only_approved_pairs_enter_the_aggregates(tmp_path, monkeypatch):
     assert agg["by_construction"]["-{ }"]["pairs"] == 1
 
 
+def test_an_unattested_construction_is_counted_apart_not_credited(
+        tmp_path, monkeypatch):
+    """`from … import p:` pays only once the exporting module is in ldpy, and
+    no repository's is: every use rests on an export the translator wrote.
+    The aggregates set it apart, and the provenance table cites nothing."""
+    import json
+    from rdfeval import aggregate, article
+    from rdfeval.study import STUDY
+
+    meta = {"region_id": "r", "repository": "o/r", "path": "m.py",
+            "lineno": 1, "stratum": "ns_import_project",
+            "strata": ["ns_import_project"], "translation_status": "final",
+            "constructions": ["from … import p:", "+{ }"],
+            "oracle": "isomorphism", "review_status": "approved",
+            "classification": "directly-expressible",
+            "validation_status": "equivalent",
+            "python": {"code_loc": 10, "tokens": 100, "chars": 200,
+                       "syntax_nodes": 50, "rdf_ops": 3, "islands": 0},
+            "ldpy": {"code_loc": 6, "tokens": 60, "chars": 120,
+                     "syntax_nodes": 30, "rdf_ops": 3, "islands": 1},
+            "ratios": {}}
+    monkeypatch.setattr(aggregate, "load_pairs", lambda study: [meta])
+    monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
+    aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
+                  STUDY)
+    agg = json.loads((tmp_path / "aggregate.json").read_text())
+    assert set(agg["by_construction"]) == {"+{ }"}
+    assert agg["unattested_constructions"]["from … import p:"]["pairs"] == 1
+
+    monkeypatch.setattr(article, "iter_examples",
+                        lambda study: [(tmp_path, meta)])
+    table = article.constructions_table(STUDY)
+    row = next(line for line in table.splitlines() if "import p:" in line)
+    assert "not attested" in row and "m.py" not in row
+    assert "m.py" in next(line for line in table.splitlines()
+                          if line.startswith(r"\texttt{+\{ \}}"))
+
+
 def test_check_reports_a_pair_that_does_not_transpile(tmp_path):
     from rdfeval.check import check
     (tmp_path / "translated.ldpy").write_text("x = ?\n")

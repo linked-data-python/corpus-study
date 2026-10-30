@@ -37,6 +37,19 @@ CONSTRUCTIONS = (
     "call suffix (g)", "global/nonlocal modifier",
 )
 
+# Constructions a translation can use but the corpus cannot attest: they pay
+# only once ANOTHER module is written in ldpy, which no repository is.  Every
+# use found rests on a `__namespaces__` the translator wrote into a shim.
+# They are reported apart, never credited with a citation or a reduction.
+# Value: (the stratum drawn for them, why).
+UNATTESTED = {
+    "from … import p:": (
+        "ns_import_project",
+        "needs the exporting module written in ldpy (its `__namespaces__`); "
+        "no repository has one, so every use rests on an export the "
+        "translator wrote"),
+}
+
 # What people write -> what it is.  Accents, spacing and the two languages of
 # the project are folded away before lookup, so only real synonyms live here.
 _ALIASES = {
