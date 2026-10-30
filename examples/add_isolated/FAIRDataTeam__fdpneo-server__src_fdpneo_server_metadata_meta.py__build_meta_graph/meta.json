@@ -49,5 +49,16 @@
     "method": "entry:build_meta_graph (hand-rolled: MetaResult.graph compared by isomorphism, other fields by equality)",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Deux cas ajoutés : F, un MODIFY avec `created=`/`modified=` fournis alors que le prior a déjà un dct:created (état prior ARCHIVED, initial_state PUBLISHED ignoré) ; G, un MODIFY dont le prior n'a pas de fdp-o:metadataState (repli sur initial_state=PUBLISHED). La docstring du pilote passe de cinq à sept cas.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`created or created_at or now` -> `created_at or created or now`",
+      "`prior_state or initial_state` -> `prior_state`",
+      "`prov:atTime {Literal(now)}` -> `{Literal(effective_created)}`"
+    ],
+    "remaining": "Le drapeau wrong-construction reste à juger : `from … import p:` repose sur un `__namespaces__` écrit à la main dans le shim, absent du dépôt ; et meta.json ne déclare que la strate add_isolated alors que la traduction fusionne avec `;`."
   }
 }

@@ -50,5 +50,18 @@
     "method": "call:ontology_to_ttl+read-back-isomorphism",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Le pilote sérialise désormais deux ontologies (nominale, et sans description) : la nominale gagne un parent `broader` absent de `ontology.nodes`, des propriétés FLOAT et BOOLEAN, et des propriétés DATE, POINT et LIST (membres du vrai PropertyType que xsd_for ne mappe pas, donc le repli XSD.string). Le shim reçoit les trois membres DATE, POINT, LIST du vrai PropertyType (src/seocho/ontology/core.py:65-73).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`if parent in ontology.nodes` -> `if True`",
+      "défaut `XSD.string` de xsd_for.get -> `XSD.integer`",
+      "`if ontology.description` -> `if True`",
+      "FLOAT -> xsd:double",
+      "BOOLEAN -> xsd:string"
+    ],
+    "remaining": "Le drapeau wrong-construction (7 `{Literal(x)}` remplaçables par `{x}`) n'est pas traité : c'est un jugement."
   }
 }

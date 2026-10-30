@@ -7,6 +7,20 @@ entry-mode comparison would) proves nothing about the graph's content, so
 this driver calls both versions itself, reads each Turtle file back into a
 fresh graph, and checks isomorphism directly (the region's own oracle,
 per meta.json: ``"oracle": "isomorphism"``).
+
+Two ontologies are serialised, each by both versions:
+
+* ``_make_ontology()`` -- the nominal one.  Besides STRING/INTEGER/DATETIME
+  properties it now has FLOAT and BOOLEAN properties (so the
+  FLOAT->xsd:decimal and BOOLEAN->xsd:boolean mappings are checked), a
+  property of type DATE, POINT and LIST (members of the real
+  ``PropertyType`` that ``xsd_for`` does not map, so they exercise the
+  ``xsd_for.get(..., XSD.string)`` default), and a node whose ``broader``
+  lists both a known parent and a parent absent from ``ontology.nodes``
+  (the ``if parent in ontology.nodes`` guard).
+* ``_make_ontology(description="")`` -- an ontology without a description,
+  which exercises the ``if ontology.description`` guard (no rdfs:label on
+  the ontology IRI).
 """
 import io
 import json
@@ -20,11 +34,11 @@ from rdfeval.harness import graphs_isomorphic
 from shim import NodeDef, Ontology, Property, PropertyType, RelDef
 
 
-def _make_ontology() -> Ontology:
+def _make_ontology(description: str = "A small ontology of companies and people.") -> Ontology:
     return Ontology(
         name="Company Graph",
         namespace="https://example.org/onto/",
-        description="A small ontology of companies and people.",
+        description=description,
         nodes={
             "Company": NodeDef(
                 description="A registered business entity.",
@@ -32,11 +46,16 @@ def _make_ontology() -> Ontology:
                 properties={
                     "name": Property(PropertyType.STRING, description="Legal name"),
                     "founded": Property(PropertyType.DATETIME),
+                    "revenue": Property(PropertyType.FLOAT),
+                    "listed": Property(PropertyType.BOOLEAN),
+                    "closedOn": Property(PropertyType.DATE),
+                    "headquarters": Property(PropertyType.POINT),
+                    "tags": Property(PropertyType.LIST),
                 },
             ),
             "Startup": NodeDef(
                 description="A young company.",
-                broader=["Company"],
+                broader=["Company", "Organisation"],
                 same_as=None,
             ),
             "Person": NodeDef(
@@ -89,25 +108,28 @@ def main() -> None:
         return
 
     diffs: list[str] = []
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_path = Path(tmp)
-        out_path_o = tmp_path / "original.ttl"
-        out_path_t = tmp_path / "translated.ttl"
-        try:
-            ns_o["ontology_to_ttl"](_make_ontology(), out_path_o)
-            ns_t["ontology_to_ttl"](_make_ontology(), out_path_t)
-        except Exception:
-            verdict["error"] = traceback.format_exc(limit=8)
-            print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
-            return
+    from rdflib import Graph
+    for label, description in (("nominal", "A small ontology of companies and people."),
+                               ("no-description", "")):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            out_path_o = tmp_path / "original.ttl"
+            out_path_t = tmp_path / "translated.ttl"
+            try:
+                ns_o["ontology_to_ttl"](_make_ontology(description), out_path_o)
+                ns_t["ontology_to_ttl"](_make_ontology(description), out_path_t)
+            except Exception:
+                verdict["error"] = traceback.format_exc(limit=8)
+                print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+                return
 
-        from rdflib import Graph
-        g_o = Graph().parse(source=str(out_path_o), format="turtle")
-        g_t = Graph().parse(source=str(out_path_t), format="turtle")
-        if not graphs_isomorphic(g_o, g_t):
-            diffs.append(
-                f"serialised graphs not isomorphic ({len(g_o)} vs {len(g_t)} triples)"
-            )
+            g_o = Graph().parse(source=str(out_path_o), format="turtle")
+            g_t = Graph().parse(source=str(out_path_t), format="turtle")
+            if not graphs_isomorphic(g_o, g_t):
+                diffs.append(
+                    f"[{label}] serialised graphs not isomorphic "
+                    f"({len(g_o)} vs {len(g_t)} triples)"
+                )
 
     if out_o != out_t:
         diffs.append("stdout differs at module level")

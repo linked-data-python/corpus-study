@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK ; le texte Turtle sérialisé est identique octet pour octet entre original et traduction (les @prefix du module ne fuient pas dans g.bind). Mutants sur une copie (mktemp -d) de translated.ldpy : garde Any de source/target, gardes description (node, propriété, relation), same_as des nœuds et des relations, mapping DATETIME, alias de relation, domain/range échangés : FAIL. Restent VERTS : (1) `if parent in ontology.nodes` -> `if True` ; (2) `xsd_for.get(p.property_type, XSD.integer)` en défaut ; (3) `if ontology.description` -> `if True` ; aussi FLOAT->xsd:double et BOOLEAN->xsd:string (types absents de l'ontologie du pilote). Ni `for @bindings` ni variable `?x` n'est utilisé : la strate add_in_loop est créditée avec de simples boucles Python + `+{ }` (justifiable, boucles non row-shaped, mais la note ne le dit pas). Shim : _safe_local conforme au dépôt (src/seocho/ontology/serialization.py:212-226) ; PropertyType du shim = 5 membres sur 8. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote sérialise maintenant une seconde ontologie sans description et une première avec parent `broader` absent, FLOAT/BOOLEAN et DATE/POINT/LIST (ajoutés au shim d'après le vrai PropertyType) : les trois mutants vivants et les variantes FLOAT et BOOLEAN passent au rouge, la traduction reste juste."
 }

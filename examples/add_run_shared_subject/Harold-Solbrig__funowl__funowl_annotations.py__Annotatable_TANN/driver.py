@@ -24,13 +24,33 @@ Three cases:
   * `subj_tuple_two_annotations` -- same, with two annotations, so the loop
     below the reified block also runs twice on the same reified subject `x`.
 
-Every Annotation built here has annotations=[] (no further nesting): TANN's
-own recursive `annotation.TANN(g, t)` call then hits `if self.annotations:`
-False and returns immediately, on both sides, so the shim's Annotation.TANN
-(a guard, not a real implementation -- see context_shim.py) is never
-actually exercised by these fixtures.
+Every Annotation built here has annotations=[] (no further nesting), so the
+shim's Annotation.TANN (a guard, not a real implementation -- see
+context_shim.py) is never reached.  The recursion `annotation.TANN(g, t)` is
+nevertheless proven: the annotations of the BNode cases below are
+`MarkedAnnotation`s, a driver-local subclass whose TANN adds one marker
+triple `(t[0], EX.recursed, t[2])` to `g`.  If the region stopped calling
+`annotation.TANN(g, t)`, or called it with another graph or another triple,
+the marker would be missing or different and the isomorphism would fail.
+
+Four cases then exercise `clone_subgraph` on BNodes, which is what the
+interpolated `{clone_subgraph(g, subj[0]) if USE_BNODE_COPIES else subj[0]}`
+holes do and what distinguishes the translation from a plain rewrite (in the
+real repository the elements of the annotated triple come from `.to_rdf(g)`
+and are often BNodes):
+
+  * `bnode_chain` -- subj = (b, hasPart, d) where b -> c is a chain of
+    BNodes in `g` carrying triples: the source must be cloned along with its
+    BNode subgraph.
+  * `bnode_self_loop` -- subj = (b, p, b): source and target are the same
+    BNode with a self-referential triple (each clone gets its own copy).
+  * `bnode_self_loop_with_neighbourhood` -- same, plus a triple of another
+    BNode pointing INTO b, which must not be cloned.
+  * `bnode_target_literal` -- subj = (b, p, Literal): the target is not a
+    BNode and must be left untouched while the source is cloned; also a
+    triple whose source is a URIRef and whose target is a BNode.
 """
-from rdflib import Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import OWL
 
 from context_shim import Annotatable, Annotation
@@ -42,6 +62,62 @@ AP2 = URIRef("http://example.org/onto#comment")
 SRC = URIRef("http://example.org/onto#Widget")
 PROP = URIRef("http://example.org/onto#hasPart")
 TARGET_IRI = URIRef("http://example.org/onto#Cog")
+
+
+EX_RECURSED = URIRef("http://example.org/onto#recursed")
+
+
+class MarkedAnnotation(Annotation):
+    """Annotation whose TANN leaves a witness in `g` that it was called,
+    with which graph and which triple (see module docstring)."""
+
+    def TANN(self, g, subj):
+        g.add((subj[0], EX_RECURSED, subj[2]))
+
+
+def bnode_case(build_graph, subj, annotations):
+    """Like `case`, but the Graph is pre-populated by `build_graph(g)`
+    (BNode neighbourhood that clone_subgraph walks); `subj` and its BNodes
+    are shared by both sides, only the Graph is fresh per call."""
+    self_obj = Annotatable(annotations, annotation_type=OWL.Axiom)
+
+    def factory():
+        g = Graph()
+        build_graph(g)
+        return ((self_obj, g, subj), {})
+    return factory
+
+
+B1, B2, B3 = BNode(), BNode(), BNode()
+HAS_PART = URIRef("http://example.org/onto#hasPart")
+LABEL = URIRef("http://example.org/onto#label")
+LINK = URIRef("http://example.org/onto#link")
+
+
+def _chain(g):
+    g.add((B1, LABEL, Literal("b1")))
+    g.add((B1, LINK, B2))
+    g.add((B2, LABEL, Literal("b2")))
+    g.add((B2, LINK, TARGET_IRI))
+
+
+def _self_loop(g):
+    g.add((B1, LABEL, Literal("loop")))
+    g.add((B1, LINK, B1))
+
+
+def _self_loop_neighbourhood(g):
+    _self_loop(g)
+    g.add((B1, LINK, B2))
+    g.add((B2, LABEL, Literal("child")))
+    g.add((B3, LINK, B1))          # points INTO b1: must not be cloned
+    g.add((B3, LABEL, Literal("parent")))
+
+
+def _source_and_literal(g):
+    g.add((B1, LABEL, Literal("b1")))
+    g.add((B1, LINK, B2))
+    g.add((B2, LABEL, Literal("b2")))
 
 
 def case(subj, annotations):
@@ -68,5 +144,23 @@ VERDICT = run_pair(
         # subj is a triple, two annotations follow the reified subject.
         case((SRC, PROP, TARGET_IRI),
              [Annotation(AP1, Literal("Ana")), Annotation(AP2, Literal("v1"))]),
+        # BNode elements carrying triples in g; recursion witnessed by
+        # MarkedAnnotation.
+        bnode_case(_chain, (B1, HAS_PART, TARGET_IRI),
+                   [MarkedAnnotation(AP1, Literal("Ana"))]),
+        bnode_case(_chain, (SRC, HAS_PART, B1),
+                   [MarkedAnnotation(AP1, Literal("Ana")),
+                    MarkedAnnotation(AP2, Literal("v1"))]),
+        bnode_case(_chain, (B1, HAS_PART, B2),
+                   [MarkedAnnotation(AP1, Literal("Ana"))]),
+        bnode_case(_self_loop, (B1, PROP, B1),
+                   [MarkedAnnotation(AP1, Literal("Ana"))]),
+        bnode_case(_self_loop_neighbourhood, (B1, PROP, B1),
+                   [MarkedAnnotation(AP1, Literal("Ana"))]),
+        bnode_case(_source_and_literal, (B1, PROP, Literal("lit")),
+                   [MarkedAnnotation(AP1, Literal("Ana"))]),
+        # subj is a BNode (not a tuple): no reification, no cloning, the
+        # recursion is still witnessed.
+        bnode_case(_chain, B1, [MarkedAnnotation(AP1, Literal("Ana"))]),
     ],
 )

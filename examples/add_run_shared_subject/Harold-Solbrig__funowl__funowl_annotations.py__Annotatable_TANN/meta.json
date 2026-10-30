@@ -51,5 +51,18 @@
     "method": "entry:TANN",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Sept appels ajoutés : source BNode en chaîne de BNodes portant des triplets dans g, cible BNode, source et cible BNode (chaîne), auto-référence (b,p,b) seule et avec un BNode voisin pointant vers b, cible Literal avec source BNode, sujet BNode nu (sans réification). Les annotations de ces appels sont des MarkedAnnotation (sous-classe locale au pilote) dont TANN ajoute à g le triplet témoin (t[0], ex:recursed, t[2]) : l'appel récursif `annotation.TANN(g, t)` est ainsi prouvé sans toucher au shim.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`clone_subgraph(g, subj[0]) ...` -> `subj[0]`",
+      "`clone_subgraph(g, subj[2]) ...` -> `subj[2]`",
+      "suppression de `annotation.TANN(g, t)`",
+      "suppression de `g.add(t)`",
+      "`owl:annotatedProperty {subj[1]}` -> `{subj[0]}`"
+    ],
+    "remaining": "Le retour None possible de to_rdf (fun_owl_choice.py:77 du dépôt) n'est pas couvert ; la récursion sur des annotations imbriquées réelles non plus (le shim lève) : seul l'appel récursif est témoigné."
   }
 }

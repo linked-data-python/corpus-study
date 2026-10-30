@@ -1,6 +1,8 @@
 {
   "priority": "high",
-  "flags": ["weak-oracle"],
+  "flags": [
+    "weak-oracle"
+  ],
   "summary": "La traduction paraît correcte (vérifiée avec des BNodes) mais le pilote n'exerce jamais clone_subgraph sur un BNode : retirer l'appel dans l'îlot reste vert, alors que dans le dépôt les éléments du triplet viennent de .to_rdf(g) et sont souvent des BNodes.",
   "questions": [
     {
@@ -10,7 +12,7 @@
       "if_no": "approuver en acceptant que l'évaluation d'un clone_subgraph à effet de bord (il ajoute des triplets à g) dans un trou {…} de +{ } ne soit pas prouvée"
     }
   ],
-  "evidence": "rdfeval check OK. Sur copie, remplacement de `clone_subgraph(g, subj[0]) if USE_BNODE_COPIES else subj[0]` par `subj[0]` (translated.ldpy:31) : OK avec le pilote d'origine (mutant non détecté) ; FAIL avec un pilote étendu (16 vs 13 triplets, etc.). Pilote étendu, traduction non modifiée : OK sur 4 appels (subj=(b,hasPart,d) avec b->c chaîne de BNodes ; (b,p,b) auto-référent ; (b,p,b) avec voisinage ; (b,p,Literal)) : donc pas d'equivalence-doubt, l'évaluation du clone dans le trou est équivalente. Autres mutants : suppression de `g.add(t)` détecté ; la branche `else subj[...]` est morte (USE_BNODE_COPIES=True dans le shim). Second trou de l'oracle : annotation.TANN récursif jamais atteint (garde du shim context_shim.py:91-95 lève si annotations imbriquées), donc la récursion sur t n'est pas testée. Dans le dépôt to_rdf peut retourner None (fun_owl_choice.py:77), cas non couvert non plus. Article : pas en l'état (trous {…} lourds, oracle faible)."
-  ,
-  "triaged_by": "sonnet-5.5"
+  "evidence": "rdfeval check OK. Sur copie, remplacement de `clone_subgraph(g, subj[0]) if USE_BNODE_COPIES else subj[0]` par `subj[0]` (translated.ldpy:31) : OK avec le pilote d'origine (mutant non détecté) ; FAIL avec un pilote étendu (16 vs 13 triplets, etc.). Pilote étendu, traduction non modifiée : OK sur 4 appels (subj=(b,hasPart,d) avec b->c chaîne de BNodes ; (b,p,b) auto-référent ; (b,p,b) avec voisinage ; (b,p,Literal)) : donc pas d'equivalence-doubt, l'évaluation du clone dans le trou est équivalente. Autres mutants : suppression de `g.add(t)` détecté ; la branche `else subj[...]` est morte (USE_BNODE_COPIES=True dans le shim). Second trou de l'oracle : annotation.TANN récursif jamais atteint (garde du shim context_shim.py:91-95 lève si annotations imbriquées), donc la récursion sur t n'est pas testée. Dans le dépôt to_rdf peut retourner None (fun_owl_choice.py:77), cas non couvert non plus. Article : pas en l'état (trous {…} lourds, oracle faible).",
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Sept appels BNode ajoutés (chaîne, auto-référence, voisinage, cible Literal, sujet BNode) avec annotations témoins MarkedAnnotation pour la récursion : retirer clone_subgraph de subj[0] ou de subj[2], ou l'appel annotation.TANN, passe au rouge ; la traduction reste juste."
 }

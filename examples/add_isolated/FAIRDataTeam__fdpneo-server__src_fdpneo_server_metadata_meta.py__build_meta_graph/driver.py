@@ -19,7 +19,7 @@ isomorphism (the add_isolated/add_run_shared_subject oracle, design record
 corpus/403), the other three fields (``operation``, ``version``, ``state``)
 by plain equality.
 
-Five cases exercise every conditional branch in the region:
+Seven cases exercise every conditional branch in the region:
 
   * A -- CREATE, subject given, no prior: dct:creator (from subject) AND
     prov:wasAssociatedWith are both emitted; fdp-o:validatedAgainst is not
@@ -33,6 +33,15 @@ Five cases exercise every conditional branch in the region:
   * D -- MODIFY, validated_against explicitly overrides what prior recorded.
   * E -- CREATE with the privileged `created=`/`modified=` import overrides,
     and a non-default `initial_state`.
+  * F -- MODIFY with `created=`/`modified=` supplied while the prior ALREADY
+    has a dct:created: the explicit `created` must win over the prior one
+    (`created or created_at or now`, not `created_at or created or now`);
+    the prior state is ARCHIVED and `initial_state=PUBLISHED` is ignored on
+    MODIFY.
+  * G -- MODIFY whose prior has created/creator/version but NO
+    fdp-o:metadataState: `prior_state` is None, so the state falls back to
+    `initial_state` (`prior_state or initial_state`); `initial_state` is
+    PUBLISHED, distinct from the default DRAFT.
 """
 from __future__ import annotations
 
@@ -52,14 +61,15 @@ IMPORT_CREATED = datetime(2020, 3, 4, tzinfo=timezone.utc)
 IMPORT_MODIFIED = datetime(2020, 3, 5, tzinfo=timezone.utc)
 
 
-def _prior_graph():
+def _prior_graph(state="PUBLISHED"):
     from rdflib import Graph, Literal, URIRef
     g = Graph()
     subj = URIRef("https://example.org/records/r1")
     g.add((subj, ctx.DCT["created"], Literal(PRIOR_CREATED)))
     g.add((subj, ctx.DCT["creator"], URIRef("https://example.org/agents/alice")))
     g.add((subj, ctx.OWL["versionInfo"], Literal(3)))
-    g.add((subj, ctx.FDP_METADATA_STATE, Literal("PUBLISHED")))
+    if state is not None:
+        g.add((subj, ctx.FDP_METADATA_STATE, Literal(state)))
     g.add((subj, ctx.FDP_VALIDATED_AGAINST, URIRef("https://example.org/profiles/p1/v1")))
     return g
 
@@ -91,6 +101,17 @@ CASES = [
                   initial_state=ctx.MetadataState.PUBLISHED,
                   created=IMPORT_CREATED, modified=IMPORT_MODIFIED),
      "E create+privileged import overrides"),
+    (lambda: dict(record_iri="https://example.org/records/r1",
+                  prior=_prior_graph(state="ARCHIVED"),
+                  subject="https://example.org/agents/erin", now=NOW,
+                  initial_state=ctx.MetadataState.PUBLISHED,
+                  created=IMPORT_CREATED, modified=IMPORT_MODIFIED),
+     "F modify+created override over prior created, prior state kept"),
+    (lambda: dict(record_iri="https://example.org/records/r1",
+                  prior=_prior_graph(state=None),
+                  subject="https://example.org/agents/frank", now=NOW,
+                  initial_state=ctx.MetadataState.PUBLISHED),
+     "G modify+prior without state falls back to initial_state"),
 ]
 
 verdict = {"example": HERE.name, "equivalent": False,

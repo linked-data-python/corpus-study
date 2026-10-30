@@ -15,6 +15,9 @@ class PropertyType(Enum):
     FLOAT = "FLOAT"
     BOOLEAN = "BOOLEAN"
     DATETIME = "DATETIME"
+    DATE = "DATE"
+    POINT = "POINT"
+    LIST = "LIST"
 
 
 @dataclass

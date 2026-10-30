@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Original identique au dépôt (meta.py:78-161, une ligne vide près) ; _next_version, _extract_creation, _extract_validated_against, _extract_state identiques ; record_graph_uri équivalent au dépôt et rend un URIRef (donc {record_subject} reste une IRI). Mutants sur copie de translated.ldpy : DÉTECTÉS : Literal(modified or now)->Literal(now) ; branches CREATE/MODIFY échangées ; garde `subject is not None` inversée ; validated_against : ordre échangé ; creator : `subject` seul. SURVIVANTS : (m4) `created or created_at or now` -> `created_at or created or now` ; (m5) `prior_state or initial_state` -> `prior_state`. Équivalents (vérifiés sans effet) : {version} nu à la place de Literal(version), {now} nu, Literal(effective_state) sans .value. Les cinq cas A-E ne contiennent ni MODIFY+created=, ni MODIFY sans état prior. Note : meta.json donne strata [add_isolated] seul alors que la traduction fusionne avec `;` (add_run_shared_subject). Article : pas encore (oracle à renforcer, crédit from … import p: discutable).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote a deux cas de plus (MODIFY avec `created=` fourni sur un prior déjà daté ; MODIFY dont le prior n'a pas de metadataState) : les deux mutants vivants (ordre de `created or created_at or now`, repli `prior_state or initial_state`) passent au rouge, la traduction reste juste."
 }
