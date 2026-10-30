@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "Le pilote ne fait qu'un appel (path=None, baseuri=None) : les branches `isUrl(path)` et `baseuri` ne sont pas exercées (supprimer l'îlot `+{ … {URIRef(path)} }` reste vert), et `@prefix so:` ajoute au graphe retourné une liaison `so` que l'original ne pose pas alors que le dépôt sérialise ce graphe.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine sérialise le graphe retourné en n3/turtle/xml (nc2rdf.py:96-104, `schema_g.serialize(format=outformat)`) : accepte-t-on que la sortie texte change (préfixe `so:` au lieu de `ns1:`) pour cette paire ?",
+      "where": "translated.ldpy:47-49 et original.py:47-48 ; dépôt corpus/repos/binary-array-ld__bald/nc2rdf/nc2rdf.py:96-104",
+      "if_yes": "Approuver sur ce point : le comportement observable du dépôt (graphe) est le même, seule la sérialisation textuelle diffère.",
+      "if_no": "needs-work : écrire `<http://schema.org/Dataset>` (sans @prefix) ou ajouter un appel au pilote qui compare `list(g.namespaces())` / la sérialisation turtle ; ou ne pas créditer `@prefix` ici."
+    },
+    {
+      "question": "Faut-il ajouter au pilote des appels avec `path=\"http://example.org/f.nc\", baseuri=\"http://example.org/d\"` et avec un `path` non-URL, pour que les branches `isUrl(path)` et `URIRef(baseuri)` soient prouvées ?",
+      "where": "driver.py:34-37 ; translated.ldpy:43,51-53 et original.py:43,50-52",
+      "if_yes": "needs-work : ajouter les appels au pilote (un mutant qui supprime l'îlot `+{ {container} {predUri} {URIRef(path)} }` ou remplace `URIRef(baseuri)` par `BNode()` reste vert aujourd'hui).",
+      "if_no": "Approuver sans cette preuve (le risque est borné : `{container}` est un BNode ou un URIRef et `{URIRef(path)}` est nécessaire car `{path}` serait un littéral)."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur une copie, tous passés par `rdfeval check` : (1) `+{ {container} {predUri} {URIRef(path)} }` remplacé par `pass` -> OK (survit) ; (2) `{URIRef(path)}` -> `{Literal(path)}` et `<http://schema.org/urlX>` -> OK (survit) ; (3) `container = URIRef(baseuri)` -> `BNode()` -> OK (survit) ; (4) `so:Dataset` -> `so:DatasetX` -> FAIL (l'îlot du type est tué). Transpilé et comparé à la main avec `path='http://example.org/f.nc', baseuri='http://example.org/d'` : graphes isomorphes (6 triples), `{URIRef(path)}` correct. Mais `g.namespaces()` diffère (l'original n'a pas `so`, la traduction oui via `designate`) et la sérialisation turtle diffère : `ns1:Dataset` contre `so:Dataset`. Le dépôt lit les liaisons : nc2rdf.py:96-104 (nc2schemaorg) fait `schema_g.serialize(format=outformat)` (n3 par défaut), donc l'écart est observable dans la sortie du CLI, non vu par l'isomorphisme. Shim : `schemaOrg.distribution(container, graph, baseuri)` est inventé (le dépôt n'a pas de méthode à trois arguments, lib/bald/__init__.py:1463) et rend le graphe tel quel, donc l'effet réel de `distribution` n'est pas observé ; identique des deux côtés, noté comme tel par le traducteur, je ne lève pas `shim-invents-logic`. `isUrl` et `getBasename` du shim sont conformes au dépôt (nc2rdf.py:18-27). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "`@prefix sh: … as SH` avec `SH.ignoredProperties` / `SH[\"in\"]` est inutile : `(sh:ignoredProperties, sh:in)` passe et reste vert, contrairement à ce que dit la note du traducteur ; le reste est fidèle et l'oracle est solide.",
+  "questions": [
+    {
+      "question": "La traduction doit-elle écrire `for pred in (sh:ignoredProperties, sh:in):` et supprimer `as SH`, puisque la note « as SH needed » est fausse ?",
+      "where": "translated.ldpy:26 et 31 ; original.py:26 et 30 ; meta.json translation_notes[0]",
+      "if_yes": "needs-work : réécrire avec les noms préfixés (déjà vérifié vert dans une copie) et corriger la note ; la paire reste ensuite approuvable.",
+      "if_no": "Approuver : l'écart est cosmétique, l'équivalence est prouvée et `as SH` n'a aucun effet sur le résultat."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copie avec `@prefix sh: <…> .` sans `as SH` et `for pred in (sh:ignoredProperties, sh:in):` : OK (`sh:in` est donc accepté, malgré le mot-clé Python). Mutants sur copie, tous FAIL (donc l'oracle est fort ici) : suppression de `-{ ?s sh:order ?o }`, suppression de `-{ {subject} {pred} {head} }`, `sorted(items, key=str)` -> `items`, `sh:order` -> `sh:orderX`, suppression de `+{ {subject} {pred} {new_head} }`, `SH[\"in\"]` -> `SH[\"inX\"]`, `SH.ignoredProperties` -> `…X`. Cas d'un sujet BNode pour `sh:order` / `sh:in` / liste vide `()` (que ShaclGenerator produit, absent de fixture.ttl) : ajouté à la fixture de la copie, toujours OK, et la suppression de l'îlot `-{ ?s sh:order ?o }` y donne FAIL. Le shim `_blank_node_labels` est identique des deux côtés ; la branche non-forêt (`to_canonical_graph`) est du code non traduit, inchangé. Aucune liaison de préfixe observable (graphe local, sortie N-Triples). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
