@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le fixture ne contient qu'une équipe et aucune condition sans maxTurns : élargir l'ancre `{team_uri}` ou `{term_uri}` (hasSubCondition) à une variable reste vert, de même que `if mt is not None` -> `if True`.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote une seconde équipe (avec ses propres conditions de terminaison et sous-conditions) et un TurnLimit sans hasMaxTurns avant d'approuver ?",
+      "where": "translated.ldpy:62 et :84 (ancres {team_uri}, {term_uri}) ; translated.ldpy:65 et :97 (garde `mt is not None`) ; original.py:55-57, 91-93, 60, 114",
+      "if_yes": "needs-work : ajouter un voisin (team2 + conditions) et un TurnLimit sans maxTurns au graphe construit dans original.py ET translated.ldpy ; l'équivalence de fond est probable (mêmes boucles, mêmes gardes) mais non prouvée.",
+      "if_no": "approuver en acceptant que la portée des ancres ne soit pas testée (déconseillé : c'est exactement le défaut des îlots élargis)."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Sur copie, mutants qui SURVIVENT (vert) : `for _t, term_uri in m{ ?_t agentoscin:hasTerminationCondition ?term_uri }` (ancre {team_uri} élargie : une seule équipe dans le graphe) ; `for _t, sub_uri in m{ ?_t agentoscin:hasSubCondition ?sub_uri }` (idem) ; `if mt is not None` -> `if True` aux deux endroits (aucun maxTurns absent) ; `or \"OR\"` -> `or \"XX\"` (opérateur toujours présent) ; `or \"\"` du trigger -> `or \"Z\"` (trigger toujours présent). Mutants qui ECHOUENT : îlot externe ou îlot hasSubCondition remplacé par [] ; type de condition élargi (`?x a …RoutingTermination`, `?x a …EventBasedTermination`) ; `if max_turns is None` -> `if True` ; branche EventBased supprimée. Les îlots ne fusionnent rien, donc pas de défaut de cardinalité de jointure ici ; le problème est la portée des ancres. Les helpers `_int_value`/`_str_value` sont du Python pur sur self.g, hors traduction.",
+  "triaged_by": "sonnet-5.5"
+}

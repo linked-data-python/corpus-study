@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Les onze `g.value` -> `.first()` sont fidèles (valeurs multiples comprises), mais l'ancre `rdf:type dh:Haushaltsposten` élargie à `rdf:type ?c` reste verte : le « voisin » P5 n'a aucun rdf:type, alors que le dépôt a des sujets typés skos:Concept dans le même graphe.",
+  "questions": [
+    {
+      "question": "Faut-il typer le voisin du fixture (P5, ou un ajout) d'un autre rdf:type, par exemple skos:Concept comme dans le dépôt, avec dh:soll > 0, pour que l'outer loop soit réellement testée ?",
+      "where": "fixture.ttl:44-46 (p:P5 sans `a`, contrairement au commentaire « not typed dh:Haushaltsposten ») ; translated.ldpy:27 et original.py:20",
+      "if_yes": "needs-work : ajouter un sujet typé autrement dans fixture.ttl ; avec lui le mutant `for s, _c in m{ ?s rdf:type ?_c }` ECHOUE, donc la traduction est correcte et sera approuvable.",
+      "if_no": "approuver, en sachant que la portée de l'ancre de type n'est pas prouvée."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Sur copie : `for s, _c in m{ ?s rdf:type ?_c }` SURVIT (aucun sujet du fixture n'a un autre type) ; avec un sujet `p:C1 a skos:Concept ; dh:soll \"77\"` ajouté au fixture, le même mutant ECHOUE. Dépôt : preprocess_graph.py:174 et :187 itèrent `g.subjects(RDF.type, SKOS.Concept)` dans le même graphe. Pour chacun des 11 `.first()` (einzelplan, bereich, digiKlasse, gruppe, funktion, jahr, isPartOf, description, num(pred)), élargir le sujet `{s}` -> `?_s` ECHOUE ; `.first()` -> `.last()` ECHOUE ; subject et outer remplacés par [] ECHOUENT. Copie à valeurs multiples (deux dh:soll, dh:einzelplan, dh:bereich, dh:jahr, dcterms:isPartOf, schema:description, dh:ist sur P1, plus un sujet à deux types) : OK, donc `.first()` choisit la même valeur que `g.value`. Non signalé comme drapeau mais à noter : shim.py n'est pas verbatim, contrairement à ce que suggèrent les notes (first_label sans SCHEMA.name, local_name différent de preprocess_graph.py:59-64, get_top_level et extract_phrases réécrits à la place de preprocess_graph.py:166-170 et :82+) ; ces helpers sont hors région et identiques des deux côtés, donc sans effet sur l'équivalence.",
+  "triaged_by": "sonnet-5.5"
+}
