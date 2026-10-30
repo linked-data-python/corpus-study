@@ -1,0 +1,51 @@
+# Branches fixture.ttl cannot carry through run_pair (driver.py, _branch_cases):
+# the opcua:String branch and the default branch return the class `str`,
+# which the harness cannot compare, so the driver compares type names.
+# base_ns is passed as "http://example.org/vocab#".  No binding:/uaentity:
+# prefix here: the call without binding_ns reaches sys.exit(1).
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix opcua: <http://opcfoundation.org/UA/> .
+@prefix bs: <http://example.org/vocab#> .
+@prefix other: <http://example.org/other#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# opcua:String branch.
+bs:s1 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns1;i=2001" ;
+    bs:bindsMapDatatype opcua:String .
+
+# Default branch (warning printed): an OPC UA type the region does not know.
+bs:s2 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns2;i=2002" ;
+    bs:bindsMapDatatype opcua:Float .
+
+# Default branch: the datatype written as a string literal, not an IRI --
+# a Literal never equals opcua:Double.
+bs:s3 a bs:BoundMap ;
+    bs:bindsConnectorParameter "i=2003" ;
+    bs:bindsMapDatatype "http://opcfoundation.org/UA/Double" .
+
+# Falsy connector values: "" and 0 are present but fail the `and` guard.
+bs:s4 a bs:BoundMap ;
+    bs:bindsConnectorParameter "" ;
+    bs:bindsMapDatatype opcua:Double .
+bs:s5 a bs:BoundMap ;
+    bs:bindsConnectorParameter 0 ;
+    bs:bindsMapDatatype opcua:Boolean .
+
+# Neighbours sharing two of the three terms of each pattern: right type and
+# objects, properties in another namespace; a BoundMap class of another
+# namespace with the right properties.
+bs:s6 a bs:BoundMap ;
+    other:bindsConnectorParameter "nsu=http://example.org/ns6;i=2006" ;
+    other:bindsMapDatatype opcua:Double .
+bs:s7 a other:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns7;i=2007" ;
+    bs:bindsMapDatatype opcua:Int32 .
+
+# Two connector parameters and two datatypes on one map: g.value and
+# .first() each keep one of them (the same one on rdflib's Memory store),
+# where a join of the three patterns would yield four rows.
+bs:s8 a bs:BoundMap ;
+    bs:bindsConnectorParameter "nsu=http://example.org/ns8;i=2008", "nsu=http://example.org/ns8;i=3008" ;
+    bs:bindsMapDatatype opcua:Double, opcua:Int32 .

@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Dans des copies du pilote avec un appel supplémentaire à la fois : label=None, datetime tz-aware et date, int/float/0/'', IRI relative, liste mêlant '' 0 1.5, dict : tous verts (Literal(None) et {None} donnent tous deux Literal('None')). Valeur URIRef en propriété de données : ROUGE (graphs not isomorphic, URIRef contre Literal) ; BNode : ROUGE ; label=URIRef : ROUGE. Aucun appelant réel trouvé dans corpus/repos/jupyter-naas__abi qui place un URIRef/BNode dans ces champs (les ObjectPut/ObjectDeleted n'ont que prefix, key, size_bytes), d'où medium et non high. Avec les onze {URIRef(x)} réécrits en f<{x}> : pilote et cas IRI relative verts. Note : un mutant `if item._uri not in visited` -> `if True` reste vert (Leaf.rdf ignore visited, aucun appel n'atteint un enfant déjà visité) mais ce code est du Python identique des deux côtés, hors îlots. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant les types réels du dépôt (répliques pydantic d'ObjectPut/ObjectDeleted : int 0, datetime UTC et naïf, label None, creator JSON sous toutes ses formes, Literal mal formé de from_iri) et un enfant déjà visité : cinq mutants rejetés, la traduction reste verte ; le cas URIRef/BNode en propriété de données, jamais atteint par le dépôt, reste à juger."
 }

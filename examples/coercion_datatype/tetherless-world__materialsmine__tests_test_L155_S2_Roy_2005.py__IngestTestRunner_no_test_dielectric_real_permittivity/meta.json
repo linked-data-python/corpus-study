@@ -42,5 +42,18 @@
     "method": "entry:no_test_dielectric_real_permittivity",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le pilote enveloppe la doublure du shim (même objet module des deux côtés) : après l'affichage (str, datatype) du shim, il imprime le repr() de tout ce que la région transmet (runner, les deux listes, le dict des descriptions), donc la classe, la forme lexicale, le datatype, la langue de chaque terme et le type des conteneurs ; docstring mise à jour. Le shim n'est pas modifié.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "Literal(\"Frequency (Hz)\") -> Literal(..., lang=\"en\") (vert avant la réparation)",
+      "[f{p} for p in ...] -> tuple(f{p} for p in ...) (vert avant la réparation)",
+      "f{f} -> f{str(f)}",
+      "f{p} -> Literal(p, datatype=XSD.decimal)",
+      "Literal(\"Measured at 25 Celsius\") -> Literal(..., datatype=XSD.string)"
+    ],
+    "remaining": "Mutant équivalent, non compté : f{p} -> Literal(str(p), datatype=XSD.double) donne le même terme (même forme lexicale, même valeur). Les valeurs sont des constantes flottantes du dépôt, sans branche : un seul appel suffit. Rien d'autre à juger sur l'équivalence ; l'avis « pas d'exemple d'article » du tri reste à Maxime."
   }
 }

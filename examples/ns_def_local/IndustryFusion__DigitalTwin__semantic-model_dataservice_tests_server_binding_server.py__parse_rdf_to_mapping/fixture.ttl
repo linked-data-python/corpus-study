@@ -18,6 +18,10 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix opcua: <http://opcfoundation.org/UA/> .
 @prefix bs: <http://example.org/vocab#> .
+# Declared for the call that passes binding_ns=None and uaentity_ns=None:
+# the region then reads them from the graph's namespace manager.
+@prefix binding: <http://example.org/binding#> .
+@prefix uaentity: <http://example.org/uaentity#> .
 
 bs:map1 a bs:BoundMap ;
     bs:bindsConnectorParameter "nsu=http://example.org/ns1;i=1001" ;

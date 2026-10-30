@@ -48,5 +48,18 @@
     "method": "entry:rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "cinq appels ajoutés : un enfant déjà présent dans `visited` (case_visited_leaf) ; des répliques pydantic d'ObjectPut et d'ObjectDeleted (mêmes champs, _property_uris, model_config) remplies des valeurs réelles du dépôt — str/str/int 0 d'ObjectStorageService.py:57,69,74, created_at datetime UTC posé par EventService.publish, label None, created naïf, creator: Any sous toutes les formes JSON d'EventCodec (str, '', 0, 1.5, True, False, dict, liste), et le chemin model_construct de from_iri avec un Literal xsd:dateTime mal formé ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if prop_value._uri not in visited -> if True (leafMarker en trop)",
+      "liste {item} -> {str(item)} (0, 1.5, True perdent leur datatype)",
+      "liste {item} -> {item or ''} (0 et False deviennent \"\")",
+      "scalaire {prop_value} -> {prop_value or ''} (size_bytes=0, creator=False)",
+      "scalaire {prop_value} -> {prop_value.isoformat() ...} (xsd:dateTime devient chaîne)"
+    ],
+    "remaining": "Mutant équivalent, non compté : rdfs:label {self.label} -> {str(self.label)} (label est str ou None, et Literal(None) == Literal('None')). Le doute du tri reste une question de jugement : `{x}` diffère de `Literal(x)` quand x est déjà un terme RDF (URIRef ou BNode devient un nœud au lieu d'un littéral, vérifié rouge par le tri) ; aucun chemin du dépôt n'en place dans une propriété de données (appelants : str/int/datetime ; from_iri convertit les IRI en str via _coerce_rdf_value ; EventCodec relit du JSON), mais `creator` est typé Any — faut-il écrire {Literal(item)} par prudence ? La note de traduction qui dit « même coercition que Literal() » est donc vraie sur les types atteints seulement. Jugement wrong-construction (onze {URIRef(x)} contre f<{x}>) non traité."
   }
 }

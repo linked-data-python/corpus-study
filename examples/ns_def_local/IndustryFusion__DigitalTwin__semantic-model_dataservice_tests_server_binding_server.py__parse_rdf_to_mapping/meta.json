@@ -50,5 +50,21 @@
     "method": "entry:parse_rdf_to_mapping",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deux appels run_pair ajoutés (binding_ns/uaentity_ns None, lus dans les préfixes de fixture.ttl après les liaisons que posent @graph g et @prefix base: ; fixture_real.ttl, copie verbatim de tests/ontdirs/testConnector/bindings.ttl du dépôt, sous la base par défaut du CLI) et trois appels comparés par le pilote lui-même avant run_pair, via _exec_python/_exec_ldpy, parce que le harnais ne sait comparer ni la classe `str` rendue ni un SystemExit : fixture_branches.ttl (branche opcua:String, branche par défaut avec son avertissement, datatype écrit en littéral, connecteurs \"\" et 0, voisins partageant deux termes sur trois, une carte à deux valeurs par propriété) et les deux sys.exit(1). Résultat comparé avec le nom de chaque type, code de sortie, lignes imprimées en multi-ensemble ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "opcua:String -> opcua:Strin (vert avant la réparation)",
+      "else : datatype = str -> int (vert avant)",
+      "branche String : datatype = str -> float (vert avant)",
+      "@prefix base: f<{base_ns}> -> IRI constante <http://example.org/vocab#> (vert avant)",
+      "les trois m{ } fondus en une jointure ?s a base:BoundMap ; bindsConnectorParameter ?c ; bindsMapDatatype ?d (vert avant)",
+      "garde `connector_attribute and datatype_uri` -> `is not None` (vert avant)",
+      "garde binding -> if False ; garde uaentity -> if False (verts avant)",
+      "print de l'avertissement supprimé (vert avant)"
+    ],
+    "remaining": "Rien d'équivalence à juger sur les entrées du dépôt. Pour mémoire : @graph g et @prefix base: font g.bind() sur le graphe lu, et bind (override=True) retire une liaison existante du même IRI ; si un fichier liait binding: ou uaentity: exactement à base_ns, à opcua: ou à rdf:, la traduction sortirait en sys.exit(1) là où l'original continue. Le dépôt ne l'atteint pas (owl2instances.py:729-731 forge `<prefix>bindings/` et `<prefix>entity/`). opcua_ns disparaît du module traduit (names_only_original) ; binding_server.py ne l'emploie que dans la région (ligne 40)."
   }
 }
