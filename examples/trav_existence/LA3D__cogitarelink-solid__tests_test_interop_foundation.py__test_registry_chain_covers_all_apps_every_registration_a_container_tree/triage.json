@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction équivalente et oracle solide (les assert servent de test), mais la région ne contient aucun idiome d'existence (que des `.first()` et un `list(m{ })`), et le `Namespace` local `REG_NS` ainsi que les `rdflib.URIRef(X + \"…\")` sont laissés en rdflib là où `@prefix registry:` et `f<…>` passent.",
+  "questions": [
+    {
+      "question": "Faut-il exiger que `REG_NS = rdflib.Namespace(\"…/registry#\")` (défini dans la fonction, idiome `ns_def_local`) devienne `@prefix registry: <…/registry#> .` dans le bloc, avec `registry:contacts-person` etc. à la place des dix `REG_NS[\"…\"]` (« registry:contacts-person » est un nom préfixé valide) ?",
+      "where": "translated.ldpy:31-32 et 37-41 (original.py:30-31 et 36-40)",
+      "if_yes": "needs-work : promouvoir `registry:` en `@prefix` (et éventuellement `rdflib.URIRef(ABTREE_NS + \"PersonContainerTree\")` en `f<{ABTREE_NS}PersonContainerTree>`, sans @base donc équivalent) ; relancer `rdfeval check`. Les constructions créditées augmentent d'un `@prefix` et de cinq noms préfixés.",
+      "if_no": "approuver : la note du traducteur assume le choix de garder `REG_NS` pour un diff minimal ; la paire reste correcte mais sous-crédite les îlots. Envisager aussi de la sortir du compte de la strate `trav_existence` (aucun `bool(m{ })`)."
+    }
+  ],
+  "evidence": "`rdfeval check` : OK. Six mutants dans une copie, tous tués (FAIL) : sujet de la ligne 28 remplacé par `?x`, sujet de la ligne 23, de la ligne 21 (`{OWNER}`→`?x`), de la ligne 35, de `REG_NS[\"id-schemes\"]` (l. 41) et de `REG_NS[\"contacts-person\"]` (l. 37). Le harnais compare bien les levées (« outcome differs (None vs raised AssertionError…) »), contrairement à ce que dit la note du traducteur ; tous les `assert` de la région jouent le rôle d'oracle, donc l'oracle est solide sur le chemin nominal. Le fixture est monovalué (un seul `registeredShapeTree` par registration), donc `.first()` vs `g.value(any=True)` n'est pas distingué en cas multivalué ; équivalent par construction (`value` rend la première valeur), non signalé. Aucune garde de véracité (les valeurs sont des IRI).",
+  "triaged_by": "sonnet-5.5"
+}

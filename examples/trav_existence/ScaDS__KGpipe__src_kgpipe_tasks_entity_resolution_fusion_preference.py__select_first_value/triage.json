@@ -1,0 +1,18 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "`not any(seed_graph.objects(s, p))` teste la véracité des objets : un littéral faux dans le graphe cible (\"\" , 0, false) compte pour absent dans l'original (la valeur source est alors ajoutée), présent dans `not bool(m{ … })` (elle est écartée) ; le pilote n'a aucun littéral faux.",
+  "questions": [
+    {
+      "question": "Dans KGpipe, la branche « fusable » (rdfs:label, rdf:type, propriétés de max_cardinality 1) doit-elle conserver le test de véracité d'`any(...)`, de sorte qu'un label `\"\"`, un entier `0` ou un booléen `false` déjà présent dans le graphe cible compte pour absent et laisse adopter la valeur source ?",
+      "where": "translated.ldpy:64 et original.py:59 ; garde non fusable inchangée (translated.ldpy:76, original.py:71, `in` est un test d'appartenance, pas de véracité)",
+      "if_yes": "needs-work : écrire `if not any(m{ {s_can} {p_can} ?o }):` (le `any` garde la véracité de rdflib) ; ajouter au pilote des cibles avec `rdfs:label \"\"`, `\"0\"^^xsd:integer` et `\"false\"^^xsd:boolean` pour une propriété de max_cardinality 1, et classer la paire en conséquence.",
+      "if_no": "approuver en notant que l'équivalence n'est vraie que modulo les littéraux faux (cas où l'original relève plutôt d'un bogue) ; ajouter tout de même les appels au pilote pour documenter l'écart."
+    }
+  ],
+  "evidence": "`rdfeval check` : OK sur la paire telle quelle. Dans une copie, trois appels ajoutés au pilote (source avec une valeur, cible avec `rdfs:label \"\"` ; cible `ex:count \"0\"^^xsd:integer` avec ontologie max_cardinality 1 ; cible `ex:flag \"false\"^^xsd:boolean` idem) : FAIL `call[1].result: graphs not isomorphic (2 vs 1 triples); call[2]… (2 vs 1); call[3]… (2 vs 1)` (l'original ajoute la valeur source, la traduction l'écarte). `bool(Literal(''))`, `bool(Literal(0))`, `bool(Literal(False))` valent False sous rdflib 7.2.1. Un quatrième appel (littéraux avec langue, BNode, xsd:string, voisinage même sujet/autre langue) reste vert : le défaut est bien la véracité, pas le typage. Le pilote ne regarde en outre que le graphe de sortie : les fichiers `.selected.json`/`.discarded.json` (qui changent aussi avec la garde) ne sont jamais comparés, et `ontology_props` est toujours vide, donc aucune propriété de max_cardinality 1 autre que label/type n'est exercée.",
+  "triaged_by": "sonnet-5.5"
+}

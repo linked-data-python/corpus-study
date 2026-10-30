@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : `not any(g.triples(…))` → `not bool(m{ ?s rdf:type prov:Entity })`, équivalent (les triplets sont des tuples toujours vrais), oracle à deux fixtures (absent/présent + voisinage rdf:type) qui tue les mutants.",
+  "questions": [],
+  "evidence": "`rdfeval check` : OK. Quatre mutants dans une copie : `prov:Entity`→`prov:Activity` (FAIL sur le cas avec prov), `?s rdf:type ?o` (FAIL sur le cas sans prov grâce au voisinage `ex:Property`), `rdf:type`→`rdfs:label` (FAIL), `(output_graph)` ajouté en suffixe (FAIL, TypeError). Le shim `context_shim.py` remplace le sous-processus CLI par la copie d'un fixture choisi par un fichier marqueur : c'est de l'échafaudage identique des deux côtés, qui ne touche pas la lecture mesurée (le vrai `run_metadata_cli` lance `python -m json2graph.decode`, repos/…/test_main.py:1457). Les `@prefix rdfs:`/`xsd:` sont déclarés mais inutilisés (comme les imports d'origine) : sans conséquence sur les constructions déclarées. Gain faible (une ligne de `any(triples)` contre une ligne de `bool(m{ })` plus une ligne `@graph`), donc pas un bon exemple d'article.",
+  "triaged_by": "sonnet-5.5"
+}
