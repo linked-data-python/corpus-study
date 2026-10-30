@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence solide (8 mutants sur 8 tués, graphe de 15 triplets en isomorphisme) ; seule réserve : `{Literal(f\"Person {i}\")}` est une enveloppe inutile là où `{f\"Person {i}\"}` passe, et la doublure `parse_graph` ôte toute valeur probante aux `assert` finales (hors région mesurée).",
+  "questions": [
+    {
+      "question": "Acceptez-vous de réécrire `{Literal(f\"Person {i}\")}` en `{f\"Person {i}\"}` (ou `\"Person {i}\"`), la valeur étant un str constant sans langue ni datatype ?",
+      "where": "translated.ldpy:58 et original.py:55 (`Literal(f\"Person {i}\")`)",
+      "if_yes": "corriger la traduction (enveloppe superflue, wrong-construction) puis approuver",
+      "if_no": "approuver telle quelle"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:test_property_paths). Copie mktemp : `{Literal(f\"Person {i}\")}` -> `{f\"Person {i}\"}` : check reste OK (équivalent). Mutants (tous FAIL, graphs not isomorphic) : \"Test Org\"->\"Test Org2\", second EX.department {dept2}->{dept1}, dept1 manager->dept2, dept2 employee person2->person1, boucle `a EX.Person`->EX.Organization, proj1 leader person2->person1, EX.project proj1->dept1. Constructions déclarées (@graph, +{ }, plain literal, interpolation) conformes (mismatch = ([], [])). Shim context_shim.py : doublure de pydantic_rdf (non installé), parse_graph renvoie deux listes de 2 éléments quel que soit le graphe ; cela ne touche pas l'oracle (isomorphisme sur l'argument graph, établi avant l'appel) mais les `assert len(...) == 2` ne prouvent rien ; en amont le test est xfail. Le troisième groupe (4 triplets à sujets non adjacents) n'est pas un sujet partagé, mais la traduction ne le prétend pas.",
+  "triaged_by": "sonnet-5.5"
+}

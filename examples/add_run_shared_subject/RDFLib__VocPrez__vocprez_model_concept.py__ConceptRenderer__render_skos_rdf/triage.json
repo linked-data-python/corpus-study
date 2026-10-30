@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence et oracle solides (8 mutants sur 8 tués, les deux boucles et les deux branches exercées), mais les quatre `+{ }` des boucles enveloppent `Literal(prop.value)`, `URIRef(prop.uri)` et `URIRef(prop.value)` là où `{prop.value}` et `f<{prop.uri}>`/`f<{prop.value}>` passent.",
+  "questions": [
+    {
+      "question": "Les valeurs `prop.uri` et `prop.value` étant toujours des str dans le dépôt, acceptez-vous que `{Literal(prop.value)}`, `{URIRef(prop.uri)}` et `{URIRef(prop.value)}` soient jugés des enveloppes superflues (réécriture en `{prop.value}`, `f<{prop.uri}>`, `f<{prop.value}>`) ?",
+      "where": "translated.ldpy:38,40,46,48 ; original.py:41,43,49,51 ; dépôt vocprez/source/_source.py:352-357,396-407 (`val = r[\"o\"][\"value\"]`, `prop = r[\"p\"][\"value\"]`, str issus du JSON SPARQL)",
+      "if_yes": "corriger la traduction (wrong-construction) ; aucun `@base` en portée, donc `URIRef(x)` = `f<{x}>`",
+      "if_no": "approuver telle quelle"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copie mktemp : remplacer les trois enveloppes par `{prop.value}`, `f<{prop.uri}>`, `f<{prop.value}>` : check reste OK. Dépôt : Property(prop, label, val, …) avec prop et val str (_source.py:353-354,389-407), donc pas de URIRef non-http (ex. urn:) qui rendrait `Literal(prop.value)` distinct de `{prop.value}` sur une valeur déjà IRI. Mutants (tous FAIL) : inScheme {cs}->{c}, skos:definition->skos:note, chaque `+{ }` des quatre branches remplacé par pass, boucle related_instances vidée, lang=\"en\"->\"fr\". Shim vocprez/_config.py : DEFAULT_LANGUAGE=\"en\" comme _config/template.py:10, rien d'ajouté. Le pilote compare des graphes re-parsés (pas les Response) ; les `g.bind` (identiques) ne sont pas observés par l'isomorphisme mais le code est le même des deux côtés.",
+  "triaged_by": "sonnet-5.5"
+}

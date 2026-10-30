@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence et oracle solides (12 mutants sur 12 tués, shim fidèle au dépôt), mais `constructions` crédite `typed literal` sans aucun `^^` (tous les littéraux typés sont des `{Literal(…, datatype=XSD.x)}`) et `from … import p:` que le code n'emploie pas.",
+  "questions": [
+    {
+      "question": "Faut-il retirer `typed literal` et `from … import p:` de `constructions`, ou récrire les littéraux typés en `{pws['Name']}^^xsd:string` (équivalent à l'oracle) ?",
+      "where": "meta.json constructions ; translated.ldpy:33-34,39-41,47,49,53,55 et original.py:26-27,30-31,33,38,40,44,46",
+      "if_yes": "corriger `constructions` (au minimum retirer `from … import p:`, signalé par le digest) et/ou employer `^^` pour les littéraux typés ; paire sinon approuvable",
+      "if_no": "approuver telle quelle ; le crédit typed literal reste indu car aucun `^^` n'est écrit"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:triplify). rdfeval.constructions.mismatch = (['from … import p:'], []). Copies mktemp, check OK dans les trois cas : Name/ActivityCodeLong/Owner -> `{x}^^xsd:string` ; PopulationServed/Connections -> `{x}^^xsd:int` ; Deactivation -> `{x}^^xsd:date` (équivalence établie sur le pilote seul, non sur des valeurs numpy). Shim shim.py : comparé à corpus/repos/SAWGraph__water-kg/datasets/sdwis/sdwa_pws.py:94-180 (Initial_KG, get_attributes, get_iris) : identique aux virgules finales et espaces près ; `prefixes` sans les lignes commentées du dépôt : pas de logique inventée. Mutants (tous FAIL) : trois îlots de rdf:type conditionnels retirés, rdfs:label->rdfs:comment, sujet CDS->PWS, inCombinedSystem CDS->PWS, primarySourceType->PWS, XSD.date->dateTime (deactivation et lastReport), XSD.int->long, datatype string retiré, garde `!= \"NP\"` ->`!= \"CWS\"`. Branche `Type == \"NP\"` non exercée par le pilote mais la garde est du Python identique des deux côtés. Un KeyError sur Connections/ActivityCodeLong lèverait avant tout ajout côté traduction (îlot évalué d'un bloc) et après un ajout partiel côté original ; le graphe `kg` local est perdu dans les deux cas.",
+  "triaged_by": "sonnet-5.5"
+}

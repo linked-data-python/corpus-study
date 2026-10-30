@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence et oracle solides (7 mutants d'îlot sur 7 tués), mais `constructions` crédite `IRI` (aucun `<…>` dans le code, le digest le signale) et `typed literal` (le datatype passe par `Literal(…, datatype=nsxsd:dateTime)` dans une interpolation, pas par `^^`), et `{Literal(full_msg)}` / `{Literal(\"%s\" % context)}` sont des enveloppes inutiles.",
+  "questions": [
+    {
+      "question": "Faut-il retirer `IRI` et `typed literal` de `constructions` et compter les deux `Literal(...)` à chaîne seule comme des enveloppes superflues (`{full_msg}` et `{\"%s\" % context}` suffisent) ?",
+      "where": "meta.json constructions ; translated.ldpy:65 et translated.ldpy:73 ; original.py:57 et original.py:63",
+      "if_yes": "corriger `constructions` (retrait de IRI et typed literal), simplifier les deux interpolations ; paire sinon approuvable (équivalence établie)",
+      "if_no": "approuver telle quelle ; accepter le crédit IRI/typed literal malgré l'absence de `<…>` et de `^^` dans le code"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:demo). rdfeval.constructions.mismatch(constructions, translated.ldpy) = (['IRI'], []) : IRI déclaré, non employé. Typed literal : non vérifié mécaniquement ; le code n'a aucun `^^`. Dépôt (corpus/repos/LexMalta__recipes/recipe-importer/pyRdfa/options.py:234,247,261) : top_class est toujours RDFA_Warning/Info/Error (URIRef de ns_rdfa), info_class un URIRef ou None, context un str/URIRef/None, donc `{top_class}`/`{info_class}` n'ont pas de problème de coercition ; msg est un str. Copie mktemp : `{Literal(full_msg)}`->`{full_msg}` et `{Literal(\"%s\" % context)}`->`{\"%s\" % context}` : check reste OK. Mutants (tous FAIL) : îlot `a {top_class}` retiré, îlot `a {info_class}` retiré, nsdc:date->nsdc:description, context {htbnode}->{bnode}, nsht:Request->nsht:Response, requestURI context->msg, nsrdfa:context->nsdistill:context. Shim processor_context.py : constantes de namespace + ProcessorGraph.__init__ (options.py:41-47) fidèles, aucune logique ajoutée ; date figée dans le pilote, légitime. Branche `node != None` non exercée mais hors îlots et identique des deux côtés.",
+  "triaged_by": "sonnet-5.5"
+}
