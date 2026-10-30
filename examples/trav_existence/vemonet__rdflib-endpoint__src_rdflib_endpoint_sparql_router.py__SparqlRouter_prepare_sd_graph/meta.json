@@ -17,12 +17,14 @@
     "@graph",
     "m{ }",
     "+{ }",
-    "prefixed name"
+    "prefixed name",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "`not any(g.triples((s, p, o)))` becomes `not bool(m{ {s} p o })`, and the guarded `.add(...)` becomes `+{ }` on the @graph-designated self.service_description.",
     "self and sd_subj are unannotated method context (self.service_description, a local bound earlier in prepare_sd_graph); rdflib_endpoint is not installed here either. Restored via shim.py using the real, standard SD (SPARQL 1.1 Service Description) and formats (W3C formats) vocabularies rdflib_endpoint.utils actually binds.",
-    "added an identical `service_description = self.service_description` line to both original.py and translated.ldpy so the pilot's module-state comparison has a graph to compare (self is not a module-level Graph)."
+    "added an identical `service_description = self.service_description` line to both original.py and translated.ldpy so the pilot's module-state comparison has a graph to compare (self is not a module-level Graph).",
+    "Repair 2026-10-30: `constructions` lacked `interpolation {expr}`, which `{sd_subj}` employs in both islands; added. The translation itself was right: the isolated driver is green on five scenarios."
   ],
   "draft_sha": "0518dc1050016c3f",
   "provenance": {
@@ -44,5 +46,20 @@
       "FORMATS",
       "SD"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Hand-written driver replacing the generic run_pair: drops `shim` from sys.modules before each side so each side gets its own self.service_description (asserted distinct), and runs five scenarios per side: empty graph; the three neighbours sharing two terms with the guarded triple (sd_subj sd:resultFormat formats:Turtle, sd_subj sd:feature formats:RDF_XML, ex:other sd:resultFormat formats:RDF_XML); triple already present; sd_subj a fresh BNode (the repository's `next(...) or BNode()`, sparql_router.py:418) with another blank node carrying the triple; and BNode already carrying it. Also checks on the original that each scenario adds the expected 1 or 0 triples.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "+{ } replaced by pass",
+      "added triple's object RDF_XML -> Turtle",
+      "guard object widened to ?x",
+      "guard predicate widened to ?q",
+      "guard subject widened to ?z",
+      "guard object RDF_XML -> Turtle",
+      "guard replaced by if False"
+    ],
+    "remaining": "The guard replaced by `if True` stays green, and must: g.add of a triple already present is a no-op, so the guard has no observable effect on the graph; this is equivalence, not a weak oracle."
   }
 }

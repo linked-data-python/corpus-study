@@ -35,3 +35,27 @@ ex:c4 skos:prefLabel "Animal"@en .
 ex:scheme2 a skos:ConceptScheme .
 ex:other skos:hasTopConcept ex:decoy .
 ex:decoy skos:prefLabel "Decoy"@en .
+
+# neighbourhood of the FIRST query's two triple patterns, each sharing two
+# terms with a pattern and carrying a label that the FILTER keeps: the
+# scheme with another predicate (skos:member), a concept pointing at the
+# scheme with another predicate (skos:inScheme, which only the fallback
+# query reads), a concept that is top concept of another scheme.  A
+# predicate or object widened to a variable would let one of them in.
+ex:scheme1 skos:member ex:n1 .
+ex:n1 skos:prefLabel "Neighbour member"@en .
+ex:n2 skos:inScheme ex:scheme1 .
+ex:n2 skos:prefLabel "Neighbour in scheme"@en .
+ex:n3 skos:topConceptOf ex:scheme2 .
+ex:n3 skos:prefLabel "Neighbour other scheme"@en .
+
+# a label in a third language, on a concept of scheme1: the FILTER must
+# drop it for "en" and "fr" alike.
+ex:c5 skos:topConceptOf ex:scheme1 .
+ex:c5 skos:prefLabel "Tier"@de .
+
+# ex:scheme3 has NO top concept, only skos:inScheme members: the first
+# query finds nothing and the function reaches its fallback query, whose
+# GRAPH ?g clause raises on the plain rdflib.Graph the repository uses.
+ex:k1 skos:inScheme ex:scheme3 .
+ex:k1 skos:prefLabel "Kilo"@en .

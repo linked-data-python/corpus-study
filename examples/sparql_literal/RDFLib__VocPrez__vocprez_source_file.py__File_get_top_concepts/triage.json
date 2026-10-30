@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "Copie sous mktemp -d. Mutant `skos:inScheme` -> `skos:inFoo` dans le second SELECT : rdfeval check OK (vert). Appel ajouté (schéma inexistant, ou ex:scheme2) : original et traduction lèvent la même Exception (« requiring a dataset »), donc comparable à la main mais pas par le harnais ; self.gr est un Graph() simple partout dans le dépôt (file.py:55, load_pickle_graph), la branche est donc morte en production. Premier SELECT : retrait de ORDER BY, de la désjonction `lang(?pl) = \"\"`, d'une branche UNION -> FAIL (bon) ; retrait de DISTINCT -> vert mais équivalent (le cache pl_cache déduplique). Type : vocab.uri est str(cs[0]) (file.py:98-100) -> URIRef nécessaire (bare `{vocab.uri}` donnerait un Literal) ; `<{vocab.uri}>` dans s{ } ne transpile pas ; `{f<{vocab.uri}>}` : check OK sur les deux appels. self.language : str (`language or DEFAULT_LANGUAGE`), jamais None, donc `{self.language}` équivalent à `\"{language}\"`. Article : non (la moitié de la région est du code qui lève).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Branche de repli désormais exécutée : levée comparée sur le Graph réel du dépôt, valeurs comparées sur un Dataset (fixture_dataset.trig) ; voisins ajoutés aux deux requêtes, tous les mutants essayés échouent (dont skos:inFoo) ; traduction juste."
 }

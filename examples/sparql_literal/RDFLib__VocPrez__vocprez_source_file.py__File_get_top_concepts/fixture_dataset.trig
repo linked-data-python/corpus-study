@@ -1,0 +1,48 @@
+# Dataset input for RDFLib__VocPrez__vocprez_source_file.py__File_get_top_concepts:
+# exercises the FALLBACK query (len(tcs) == 0), whose `GRAPH ?g { ... }`
+# branch needs a dataset to evaluate at all.  The repository itself always
+# passes a plain Graph (see driver.py), so this file exists only to compare
+# the two versions of the fallback query's text.
+#
+# ex:scheme3 has no skos:hasTopConcept / skos:topConceptOf in the DEFAULT
+# graph, so the first query finds nothing.  The fallback then reads:
+#   - in the default graph (second UNION branch): a skos:inScheme member;
+#   - in the named graph ex:ng (GRAPH ?g branch): a skos:hasTopConcept
+#     concept and two skos:inScheme members, one with a no-language label;
+# plus neighbours that must not match: a concept pointing at the scheme
+# with another predicate (skos:related in the default graph,
+# skos:topConceptOf -- which the fallback does not read -- in the named
+# one; the default graph cannot hold skos:topConceptOf, the first query
+# would find it), the scheme with skos:member, another scheme, and a label
+# in another language.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix ex: <http://example.org/> .
+
+ex:k1 skos:inScheme ex:scheme3 .
+ex:k1 skos:prefLabel "Kilo"@en .
+ex:k6 skos:inScheme ex:scheme3 .
+ex:k6 skos:prefLabel "Mike" .
+ex:k7 skos:inScheme ex:scheme3 .
+ex:k7 skos:prefLabel "November"@de .
+ex:d1 skos:related ex:scheme3 .
+ex:d1 skos:prefLabel "Decoy related"@en .
+ex:scheme3 skos:member ex:d2 .
+ex:d2 skos:prefLabel "Decoy member"@en .
+ex:d3 skos:inScheme ex:scheme4 .
+ex:d3 skos:prefLabel "Decoy other scheme"@en .
+
+ex:ng {
+    ex:scheme3 skos:hasTopConcept ex:k2 .
+    ex:k2 skos:prefLabel "Lima"@en .
+    ex:k3 skos:inScheme ex:scheme3 .
+    ex:k3 skos:prefLabel "Juliet"@en .
+    ex:k3 skos:prefLabel "Juliette"@fr .
+    ex:k8 skos:inScheme ex:scheme3 .
+    ex:k8 skos:prefLabel "Oscar" .
+    ex:d4 skos:topConceptOf ex:scheme3 .
+    ex:d4 skos:prefLabel "Decoy named top concept of"@en .
+    ex:scheme3 skos:member ex:d5 .
+    ex:d5 skos:prefLabel "Decoy named member"@en .
+    ex:other skos:hasTopConcept ex:d6 .
+    ex:d6 skos:prefLabel "Decoy named other scheme"@en .
+}

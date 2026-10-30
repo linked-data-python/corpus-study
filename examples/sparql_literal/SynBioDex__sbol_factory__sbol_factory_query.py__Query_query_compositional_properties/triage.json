@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "Copie sous mktemp -d, mutants de translated.ldpy. VERTS : q1 sans `rdf:type owl:ObjectProperty` ; q2 sans `rdf:type` ; q2 sans `rdfs:subPropertyOf` ; q2 sans `?restriction owl:onProperty ?property_uri` ; `rdf:rest*` -> `rdf:rest` ; sans DISTINCT ; `list(set(x))` -> `x`. ROUGES : q1 sans `subPropertyOf` ; q1 sans le chemin (owl:unionOf/...)* ; q2 remplacée par []. `{class_uri}` nu -> call[0] rend [] (le fixture attrape bien le piège str/URIRef) ; `{f<{class_uri}>}` -> check OK. Autre point : l'original dépend des liaisons de préfixes du graphe (sbol: et rdf:/rdfs: liés par Query.graph.namespace_manager.bind, query.py:23-28 ; owl: par défaut rdflib) alors que la traduction les déclare lexicalement par @prefix : équivalent pour le dépôt, mais le pilote (fixture Turtle qui lie ses préfixes) ne l'exerce pas. Le driver restaure `self` par une classe _Self au __eq__ toujours vrai : ne touche que la comparaison des arguments, pas le résultat. Article : pas en l'état ; possible après renforcement du fixture (l'échec silencieux str->Literal est un bon exemple).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Fixture renforcé (un voisin par motif et par requête, listes unionOf en tête/3e/imbriquée, propriété trouvée par les deux requêtes) et appel ex:ClassB ajouté : les cinq mutants verts du tri échouent désormais ; traduction juste."
 }

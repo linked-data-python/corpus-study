@@ -46,5 +46,22 @@
     "method": "entry:get_top_concepts",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Five calls added to the two existing ones: ex:scheme3 (no top concept) and an unknown scheme on the repository's plain Graph, which reach the fallback query and raise on its GRAPH ?g clause (the raise is compared, type and message); and ex:scheme3 in en and fr plus an unknown scheme on an rdflib.Dataset (new fixture_dataset.trig) where the fallback query evaluates, with named-graph and default-graph members, no-language labels and neighbours. fixture.ttl gained neighbours sharing two terms with each pattern of the first query (skos:member, skos:inScheme, topConceptOf another scheme) and a third-language label. g.VOCABS is now filled once with one id per scheme (it was overwritten by each _case).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "second query skos:inScheme -> skos:inFoo (GRAPH branch and default branch)",
+      "skos:inScheme / skos:hasTopConcept predicate widened to ?p (both queries, each branch)",
+      "object widened to ?o (first query, fallback branches)",
+      "first query subject widened",
+      "lang(?pl) = \"\" arm dropped (each of the three FILTERs)",
+      "language FILTER replaced by FILTER(1 = 1) in each fallback branch",
+      "GRAPH ?g removed",
+      "fallback skipped (if False)",
+      "ORDER BY dropped from the fallback"
+    ],
+    "remaining": "The Dataset calls exercise a query the repository never evaluates successfully (self.gr is always a plain Graph, so the fallback always raises there); whether its interpolations deserve credit is Maxime's call (triage question 1). The {URIRef(vocab.uri)} vs {f<{vocab.uri}>} question is untouched (wrong-construction)."
   }
 }

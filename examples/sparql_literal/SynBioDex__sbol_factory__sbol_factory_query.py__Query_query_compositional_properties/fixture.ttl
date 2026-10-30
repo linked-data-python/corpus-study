@@ -40,3 +40,90 @@ ex:associatesWith a owl:ObjectProperty ;
 
 # Isolated class, connected to nothing above: the zero-solution call.
 ex:ClassZ a owl:Class .
+
+# ---------------------------------------------------------------------------
+# Neighbours that each break ONE constraint of one query and keep the others
+# (added by the repair pass): a mutant that drops or widens that constraint
+# lets exactly that neighbour into ex:ClassA's result.
+
+# FIRST query (type, subPropertyOf, domain path).
+# rdf:type: an owl:DatatypeProperty (object widened / type dropped), and a
+# property linked to owl:ObjectProperty by rdfs:seeAlso (predicate widened).
+ex:q1Datatype a owl:DatatypeProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain ex:ClassA .
+ex:q1SeeAlsoType rdfs:seeAlso owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain ex:ClassA .
+# rdfs:subPropertyOf: another super-property (object widened), and
+# sbol:directlyComprises through rdfs:seeAlso (predicate widened).
+ex:q1OtherSuper a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:otherRelation ;
+    rdfs:domain ex:ClassA .
+ex:q1SeeAlsoSuper a owl:ObjectProperty ;
+    rdfs:seeAlso sbol:directlyComprises ;
+    rdfs:domain ex:ClassA .
+# domain path: ex:ClassA as rdfs:range (predicate), in an owl:intersectionOf
+# list (unionOf widened), in a union that does not contain it, and a
+# property whose domain is ex:ClassB only (object of the path).
+ex:q1Range a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:range ex:ClassA .
+ex:q1Intersection a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain [ owl:intersectionOf ( ex:ClassA ex:ClassOther ) ] .
+ex:q1UnrelatedUnion a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain [ owl:unionOf ( ex:ClassOther ex:ClassYetAnother ) ] .
+ex:onlyB a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain ex:ClassB .
+
+# Positive cases of the domain path's other shapes, for ex:ClassA: first
+# member of the list (zero rdf:rest: kills rdf:rest+), third member (two
+# rdf:rest: kills rdf:rest and rdf:rest?), and a union nested in a union
+# (two applications of the outer *: kills * -> ?).
+ex:q1UnionHead a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain [ owl:unionOf ( ex:ClassA ex:ClassOther ) ] .
+ex:q1UnionThird a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain [ owl:unionOf ( ex:ClassOther ex:ClassYetAnother ex:ClassA ) ] .
+ex:q1UnionNested a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain [ owl:unionOf ( [ owl:unionOf ( ex:ClassYetAnother ex:ClassA ) ] ex:ClassOther ) ] .
+
+# SECOND query (type, subPropertyOf, subClassOf restriction, onProperty).
+# None of these has an rdfs:domain, so the first query never sees them.
+ex:q2Datatype a owl:DatatypeProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises .
+ex:q2SeeAlsoType rdfs:seeAlso owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises .
+ex:q2OtherSuper a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:otherRelation .
+ex:q2SeeAlsoSuper a owl:ObjectProperty ;
+    rdfs:seeAlso sbol:directlyComprises .
+ex:ClassA rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty ex:q2Datatype ] ,
+    [ a owl:Restriction ; owl:onProperty ex:q2SeeAlsoType ] ,
+    [ a owl:Restriction ; owl:onProperty ex:q2OtherSuper ] ,
+    [ a owl:Restriction ; owl:onProperty ex:q2SeeAlsoSuper ] .
+# rdfs:subClassOf: a restriction reached by owl:equivalentClass (predicate
+# widened); owl:onProperty: a property reached by owl:someValuesFrom
+# (predicate widened); a restriction of ex:ClassB (class widened).
+ex:q2Equivalent a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises .
+ex:ClassA owl:equivalentClass [ a owl:Restriction ; owl:onProperty ex:q2Equivalent ] .
+ex:q2SomeValues a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises .
+ex:ClassA rdfs:subClassOf [ a owl:Restriction ; owl:someValuesFrom ex:q2SomeValues ] .
+ex:q2OnlyB a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises .
+ex:ClassB rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:q2OnlyB ] .
+
+# Found by BOTH queries for ex:ClassA (a domain and a restriction): it is in
+# property_types twice before the final list(set(...)), which must keep one.
+ex:comprisesBoth a owl:ObjectProperty ;
+    rdfs:subPropertyOf sbol:directlyComprises ;
+    rdfs:domain ex:ClassA .
+ex:ClassA rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:comprisesBoth ] .

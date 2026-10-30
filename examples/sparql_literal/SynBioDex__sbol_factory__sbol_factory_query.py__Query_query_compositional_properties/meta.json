@@ -44,5 +44,27 @@
     "method": "fixture:fixture.ttl entry:query_compositional_properties",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl gained, for each triple pattern of each query, a neighbour breaking only that pattern (object changed and predicate changed: owl:DatatypeProperty, rdfs:seeAlso, sbol:otherRelation, rdfs:range, owl:intersectionOf, owl:equivalentClass, owl:someValuesFrom, a restriction of ex:ClassB), union lists with ex:ClassA first, third and nested, and ex:comprisesBoth found by both queries. A third call (ex:ClassB) with its own positives. The graph is bound to the prefixes Query.__init__ binds (query.py:23-28); _Self.__eq__ compares graphs by isomorphism instead of always True; the driver refuses to run if rdflib's CUSTOM_EVALS is not empty.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rdf:type owl:ObjectProperty dropped (each query)",
+      "rdf:type object or predicate widened (each query)",
+      "rdfs:subPropertyOf dropped or widened in object or predicate (each query)",
+      "owl:onProperty dropped or widened",
+      "rdfs:subClassOf widened",
+      "class term widened to a variable (each query)",
+      "rdf:rest* -> rdf:rest, rdf:rest+, rdf:rest?",
+      "outer * -> ?",
+      "owl:unionOf -> owl:intersectionOf or an alternative with it",
+      "rdfs:domain -> rdfs:range or an alternative with it",
+      "property path removed",
+      "either query replaced by []",
+      "list(set(x)) -> x",
+      "{URIRef(class_uri)} -> bare {class_uri}"
+    ],
+    "remaining": "Removing DISTINCT stays green, and must: list(set(...)) deduplicates anyway. The {URIRef(class_uri)} vs {f<{class_uri}>} question is untouched (wrong-construction)."
   }
 }
