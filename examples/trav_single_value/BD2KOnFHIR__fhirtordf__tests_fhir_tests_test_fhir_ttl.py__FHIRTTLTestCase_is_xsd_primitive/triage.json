@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : cinq lectures g.value / g.objects traduites en m{ }.first() / m{ }, zéro solution et repli someValuesFrom/onDatatype exercés, tous les mutants d'îlot tués.",
+  "questions": [],
+  "evidence": "rdfeval check de la région : 1 OK. original.py identique à tests/fhir_tests/test_fhir_ttl.py:12-31 (modulo l'indentation) ; shim FHIR/DottedNamespace identique au dépôt. Dépôt : is_xsd_primitive est appelée avec des IRI simples (test_fhir_ttl.py:39, g.subjects(RDFS.subClassOf, FHIR.Primitive)), pas de None ni de littéral. Mutants (copie mktemp -d, supprimée), tous FAIL : onProperty -> None ; onProperty == FHIR.value -> True ; onProperty == FHIR.value -> != None ; allValuesFrom -> None ; someValuesFrom -> None ; onDatatype -> None ; onDatatype -> allValuesFrom ; someValuesFrom -> allValuesFrom ; boucle -> [] ; {prim} -> ?z. Survivants, tous dans du Python hors îlot : suppression de `isinstance(node, BNode) and` (équivalent sur ce fixture, mais la ligne est identique des deux côtés), `if not base_type` -> `is None`, `if isinstance(base_node, BNode)` -> `if True` (la garde protège le cas {None} -> Literal('None'), mais l'original la porte aussi et elle n'est jamais enlevée). Ratio notation > 1 (m{ {node} owl:allValuesFrom ?o }(g).first() vs g.value(node, OWL.allValuesFrom)) : pas d'article-example.",
+  "triaged_by": "sonnet-5.5"
+}

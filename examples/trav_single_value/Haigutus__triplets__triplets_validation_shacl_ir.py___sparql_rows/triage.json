@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : genexp à f-string convertie en boucles imbriquées (annoncé, minor-restructuring correct car la limite du langage est réelle), pilote solide avec 15 mutants d'îlot tous tués.",
+  "questions": [],
+  "evidence": "rdfeval check de la région : 1 OK. original.py identique à shacl_ir.py:357-385. Limite de langage vérifiée : `f\"P {m{ ex:a ex:p ?o }(g).first()}\"` donne LdpySyntaxError (« îlot dans un trou d'f-string »), donc la restructuration est forcée et la classification minor-restructuring est juste (pas une refactorisation cachée : mêmes lectures, même ordre, même join). Copie (mktemp -d, supprimée) : fixture portée à 12 déclarations sh:declare sous une même ontologie, OK trois fois de suite, donc l'ordre des lignes PREFIX concaténées reste identique entre graph.objects et m{ } (dépendance d'ordre réelle de la chaîne `prefixes`, non garantie par le langage mais stable ici). Mutants, tous FAIL : sh:path -> None / sh:sparql ; select -> message ; message -> None / select ; prefix <-> namespace ; prefix -> None ; boucle declare -> [] ; boucle prefixes -> [] ; sujets {sparql}, {ontology}, {shape_uri} remplacés par une variable ; prefixes -> select. Appelants du dépôt (shacl_ir.py:267, 307, 350) passent un rdflib.Graph : pas de None dans les sujets. Pas d'article-example : la version LD Python est plus longue que l'original.",
+  "triaged_by": "sonnet-5.5"
+}
