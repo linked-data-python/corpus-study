@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (module-state). Copies (mktemp, supprimees). Un second `EX.tg2 a csvw:TableGroup` ajoute aux deux cotes -> la traduction leve 'ValueError: m{ }.one() : plusieurs solutions' ; sans TableGroup -> StopIteration (original) vs ValueError. Mutants tues par le pilote : `m{ {data_node} ?pp ?subject }` (9 vs 11 triplets), `[]` pour `m{ {note} ?p ?o }` et `m{ {column} ?p ?o }`, retrait de `if subject:` (9 vs 11 triplets). Variantes equivalentes : propertyUrl litteral, colonne BNode, plusieurs describes, plusieurs objets pour le meme predicat (OK). shim rmlmapper_shim.py : strip_namespace identique a rmlmapper.py:40-49 du depot ; les trois autres fonctions sont des stubs jamais appeles, pas de logique inventee. La fixture est entierement fabriquee (un seul fixture dans original.py, une seule ligne, la branche `else` jamais exercee), mais elle est partagee par les deux versions et la branche else ne contient aucun ilot.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "driver: 9 inputs added through a scratch copy per input (two/zero TableGroups, missing/two describes, a lookups input with neighbours and falsy values, literal propertyUrl, empty mapping) plus outcome/warnings/bindings comparison; it made the translation fail (.one() vs next()), now `next(iter(m{ }))`, check OK."
 }

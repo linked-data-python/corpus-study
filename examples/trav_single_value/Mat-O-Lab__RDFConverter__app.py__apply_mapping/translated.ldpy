@@ -56,7 +56,7 @@ if duplicate_for_table and is_rdf_data and rows and template_url and template_co
     # map_content=mapping_graph.serialize()
     # mapping_graph.serialize("map_graph.ttl")
     # data_graph.serialize("data_graph.ttl")
-    tablegroup = m{ ?tablegroup rdf:type csvw:TableGroup }(data_graph).one()
+    tablegroup = next(iter(m{ ?tablegroup rdf:type csvw:TableGroup }(data_graph)))
     column_maps = {}
     for column in m{ ?column rdf:type csvw:Column }(data_graph):
         column_maps[column] = {

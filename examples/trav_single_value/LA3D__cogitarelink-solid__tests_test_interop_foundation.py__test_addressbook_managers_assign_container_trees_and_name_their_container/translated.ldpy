@@ -26,7 +26,7 @@ def test_addressbook_managers_assign_container_trees_and_name_their_container(ma
     for slug, (tree_local, ctr_url) in AB_MANAGERS.items():
         g = manager_graphs[slug]
         @graph g
-        mgr = m{ ?mgr a st:Manager }.one()
+        mgr = next(iter(m{ ?mgr a st:Manager }))
         a = m{ {mgr} st:hasAssignment ?a }.first()
         assert a is not None, f"{slug}: no st:hasAssignment"
         assert m{ {a} st:assigns ?v }.first() == rdflib.URIRef(ABTREE_NS + tree_local), slug

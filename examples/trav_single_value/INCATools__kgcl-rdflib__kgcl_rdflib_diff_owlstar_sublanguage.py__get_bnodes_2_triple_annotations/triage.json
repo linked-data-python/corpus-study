@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check: OK. Mutants sur la copie: remplacer `(i, p, o)` par `(None, p, o)` et `(i, owl:annotatedSource, source)` par `(None, ...)` restent OK (sujet ignoré par demo). Les gardes Python `not isinstance(source|property|target|p, BNode)` retirées restent OK aussi (aucun cas du fixture n'a d'objet BNode pour annotatedSource/Property/Target; code identique des deux côtés, donc sans incidence sur la traduction). Tous les mutants sur les îlots sont tués (source=None, prédicat échangé dans les 3 lectures .first(), set() ou prédicat échangé dans les lectures complètes, boucle m{ {i} ?p ?o } vidée, exclude altéré, isinstance(i,BNode) retiré). Fixture étendu (annotatedSource/Target multi-valués, objet BNode, 3 bnodes) : toujours OK, l'ordre de .first() coïncide avec celui de next(g.objects) sur ce magasin. Le cas zéro-solution de .first() par bnode est inatteignable (intersection), confirmé par lecture. Seul changement de texte hors îlots: le commentaire « generators » -> « matches », et `OWL` retiré de l'import, sans effet.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "driver: demo() keeps the subject of each collected triple and six inputs were added (empty, two-valued in both orders, extras first, blank-node source/property/target, falsy values); the doubt was unfounded, check OK, and the (i,p,o)->(None,p,o) mutant that stayed green now fails."
 }

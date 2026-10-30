@@ -76,13 +76,21 @@ def _term_key(t):
     return ("bnode",) if isinstance(t, BNode) else ("term", repr(t))
 
 
+# The SUBJECT of each collected triple is kept too (repair 2026-10-30): it
+# is the dict key itself on every line the region writes, and a BNode has
+# no identity across the two parses, so it is recorded relative to the key
+# ("self") -- anything else (None, another node) shows as itself.
+def _subject_key(s, key):
+    return ("self",) if s == key else _term_key(s)
+
+
 def demo(g) -> object:
     annotations = get_bnodes_2_triple_annotations(g)
     entries = []
     for key, triples in annotations.items():
         key_entry = ("bnode",) if isinstance(key, BNode) else ("named", str(key))
         triple_entries = sorted(
-            (_term_key(p), _term_key(o)) for (_, p, o) in triples
+            (_subject_key(s, key), _term_key(p), _term_key(o)) for (s, p, o) in triples
         )
         entries.append((key_entry, triple_entries))
     return sorted(entries, key=repr)

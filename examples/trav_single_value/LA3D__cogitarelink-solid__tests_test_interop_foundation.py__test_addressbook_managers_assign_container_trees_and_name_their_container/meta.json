@@ -23,7 +23,6 @@
     "@graph",
     "m{ }",
     ".first()",
-    ".one()",
     "prefixed name",
     "variable",
     "interpolation {expr}"
@@ -35,7 +34,8 @@
     "`a = g.value(mgr, ST.hasAssignment)` immediately checked with `assert a is not None` -> `.first()`: this is exactly `g.value`'s own idiom (never raises, None on zero solutions), and the explicit None-check downstream is preserved verbatim.",
     "the two `g.value(a, ST.assigns/.manages) == URIRef(...)` reads -> `.first()` each: same reasoning, `g.value` never raises and the comparison already tolerates `None`.",
     "zero-solution branch cannot be exercised through this driver: every read here feeds a bare `assert` inside the one function call `run_pair` invokes, which aborts the whole comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py) -- same limitation already documented on the sibling region of this batch (trav_existence/...test_registry_chain_covers_all_apps_every_registration_a_container_tree). Hardened the fixture instead with a decoy assignment (urn:ex:decoy:a2) unconnected to any manager's st:hasAssignment, to catch an over-broad pattern.",
-    "each manager's data is kept in its OWN isolated graph (driver.py re-partitions fixture.ttl by subject closure from a synthetic per-slug root IRI, since the real code parses four separate files each with their own `<>`): merging all four into one shared graph would make `m{ ?mgr a st:Manager }.one()` see four candidates instead of one, which is not what the original tests and would make the match's outcome store-order dependent."
+    "each manager's data is kept in its OWN isolated graph (driver.py re-partitions fixture.ttl by subject closure from a synthetic per-slug root IRI, since the real code parses four separate files each with their own `<>`): merging all four into one shared graph would make `m{ ?mgr a st:Manager }.one()` see four candidates instead of one, which is not what the original tests and would make the match's outcome store-order dependent.",
+    "Repair 2026-10-30: `next(g.subjects(RDF.type, ST.Manager))` was translated `m{ ?mgr a st:Manager }.one()`, which raised ValueError where the original raised StopIteration (no manager: driver calls 'empty' and 'no-manager') and raised ValueError where the original took the first manager (two managers: 'two-managers-ok-first' passed, '-bad-first' failed on the assignment assert). Now `next(iter(m{ ?mgr a st:Manager }))`: a match is iterable but not an iterator, so `iter()` is needed; next() then raises StopIteration('') on zero and takes the first the store yields on several, as the original. The earlier note that the harness stops at the first side that raises was wrong: run_pair compares two raises by type and message, and the driver now uses it."
   ],
   "draft_sha": "8e0c73aa9dd186de",
   "provenance": {
@@ -54,5 +54,21 @@
     "method": "entry:test_addressbook_managers_assign_container_trees_and_name_their_container",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "13 calls instead of 1: the four REAL manager files of the origin repo parsed as the test parses them, then 11 inputs that replace the 'person' graph (the first the loop visits): empty, no st:Manager with neighbours holding a valid assignment (another rdf:type, another predicate to st:Manager), two managers in both store orders, no hasAssignment with a neighbour that has one, two assignments in both orders, missing st:assigns / st:manages with the right value on another predicate written first and on a neighbour assignment, a wrong tree, hasAssignment \"\" and 0",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "m{ ?mgr a st:Manager }.one() (the former translation)",
+      "m{ ?mgr a st:Manager }.first()",
+      "list(m{ ?mgr a st:Manager })[-1]",
+      "next(iter(m{ ?mgr a ?t })) and next(iter(m{ ?mgr ?pp st:Manager }))",
+      "m{ ?x st:hasAssignment ?a }.first(), m{ {mgr} ?pp ?a }.first(), list(...)[-1]",
+      "m{ ?x st:assigns ?v }.first() and m{ {a} ?pp ?v }.first()",
+      "m{ ?x st:manages ?v }.first() and m{ {a} ?pp ?v }.first()",
+      "assert a is not None -> assert a"
+    ],
+    "remaining": "The mgr read is now `next(iter(m{ }))`, not a reduction of the language (`.one()` dropped from constructions): does the pair stay directly-expressible, and should the language offer a `next()`-like reduction (first, raise on none)?"
   }
 }

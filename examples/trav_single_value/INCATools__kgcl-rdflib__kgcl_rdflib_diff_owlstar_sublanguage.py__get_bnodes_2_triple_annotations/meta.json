@@ -50,5 +50,20 @@
     "method": "fixture:fixture.ttl entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "demo() (identical on both sides, region untouched) now keeps the SUBJECT of every collected triple, recorded relative to the dict key ('self'); six inputs added to fixture.ttl: empty graph, the three owl:annotated* predicates each two-valued in both orders (which value next()/.first() take is visible), extra triples written before the owl:annotated* ones (a widened .first() predicate would return them), a blank-node source / property / target each on its own annotation (the isinstance guards drop that annotation's extras), falsy values \"\" / 0 / false",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "(i, p, o) -> (None, p, o) in the inner scan (survived the old demo, checked)",
+      "(i, owl:annotatedSource, source) -> (None, ...)",
+      "list(m{ {i} owl:annotated* ?o })[-1] in place of .first(), for each of the three reads",
+      "m{ {i} ?pp ?o }.first() in place of each of the three reads",
+      "each `not isinstance(source|property|target, BNode)` guard -> True",
+      "set(m{ ?s owl:annotatedSource [] }) -> owl:annotatedProperty",
+      "for p, o in [] in place of m{ {i} ?p ?o }"
+    ],
+    "remaining": "The zero-solution case of the three single-value reads (next() raises StopIteration, .first() gives None) stays unreachable by construction (the loop only visits source & property & target); the triage's classification question (directly-expressible vs minor-restructuring for the 3-tuple -> 2-tuple rewrite) is untouched."
   }
 }

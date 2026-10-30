@@ -22,7 +22,6 @@
     "@prefix",
     "m{ }",
     ".first()",
-    ".one()",
     "+{ }",
     "call suffix (g)"
   ],
@@ -34,7 +33,8 @@
     "next(data_graph.objects(subject=column, predicate=CSVW.propertyUrl), column) kept as native rdflib: the default is the column itself, not None, and m{ }.first() only ever yields None on no match -- exactly the case flagged by the batch reminder. Signalled, not forced.",
     "tablegroup = next(data_graph[: RDF.type : CSVW.TableGroup]) -> .one(): approximate. next() without a default takes the FIRST match and only raises on zero; .one() raises on zero OR more than one. The two coincide only because the fixture (and presumably the real data) has exactly one csvw:TableGroup.",
     "mapping_graph.predicate_objects(subject=column) and mapping_graph.predicate_objects(note) translated as m{ {s} ?p ?o }(g) -- a full two-variable traversal, not this stratum's single-value idiom, but the most specific construction available; results converted with tuple(_r) because the harness's materialise() cannot reconstruct the ldpy Row subclass of tuple nested inside a dict (Row.__new__() missing 'fields') -- a harness/runtime limitation, not a translation choice.",
-    "mapping_graph.subjects(unique=True) kept native: no island expresses a deduplicated whole-graph subject scan; m{ ?s ?p ?o } would repeat a subject once per triple."
+    "mapping_graph.subjects(unique=True) kept native: no island expresses a deduplicated whole-graph subject scan; m{ ?s ?p ?o } would repeat a subject once per triple.",
+    "Repair 2026-10-30: `tablegroup = next(data_graph[: RDF.type : CSVW.TableGroup])` was translated `.one()`, which raised ValueError where the original took the first of two csvw:TableGroup (driver inputs 'two-tablegroups-ab'/'-ba') and raised ValueError instead of StopIteration on none ('no-tablegroup'). Now `next(iter(m{ ?tablegroup rdf:type csvw:TableGroup }(data_graph)))`: same first value (the match walks graph.triples like the original), same StopIteration('') on zero."
   ],
   "article_candidate": false,
   "draft_sha": "83425bb08b781aed",
@@ -56,5 +56,22 @@
     "names_only_original": [
       "CSVW"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "the region runs on 10 inputs instead of 1: the driver copies the artefacts into a scratch directory per input and replaces the restored data_graph/mapping_graph block on both sides alike (rows computed as app.py:1461 does); inputs: two TableGroups in both orders, none (with neighbours), a row without csvw:describes (TypeError on both sides), a row describing two nodes in both orders, a two-row 'lookups' input (two values, none while a neighbour node has one, falsy \"\" and 0, a column without propertyUrl, column neighbours, two notes), a literal propertyUrl, an empty mapping graph. For every input it also executes both sides itself and compares the outcome (a module-level raise by type and message), the warnings emitted and the joined_graph prefix bindings (the original's row* bindings must be present)",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "m{ ?tablegroup rdf:type csvw:TableGroup }(data_graph).one() (the former translation)",
+      ".first() and list(...)[-1] for tablegroup",
+      "?tablegroup rdf:type [] and ?tablegroup [] csvw:TableGroup",
+      "?column [] csvw:Column and ?column rdf:type []",
+      "m{ [] ?p ?o }(mapping_graph) for the column and for the note reads",
+      "data_node: list(...)[-1], m{ [] csvw:describes ?data_node }, m{ {row} [] ?data_node }",
+      "subject: list(...)[-1], m{ [] {property} ?subject }, m{ {data_node} [] ?subject }",
+      "if subject: -> if subject is not None:",
+      "the first +{ } replaced by pass"
+    ],
+    "remaining": "The tablegroup read is now `next(iter(m{ }))`, not a reduction of the language (`.one()` dropped from constructions); the variable is dead in the repository (app.py:1477). A blank-node column is not exercised: each side parses its own graph, so a BNode key of column_maps and its printed id differ whatever the translation does."
   }
 }
