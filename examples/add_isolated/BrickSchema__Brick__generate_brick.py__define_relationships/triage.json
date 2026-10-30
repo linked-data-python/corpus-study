@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : 9 .add() -> 8 +{ } sous un seul @graph graph, gardes conservées, deux triplets adjacents sans condition fusionnés à bon droit ; seules les gardes `prop.startswith(BRICK)` ne sont pas exercées par le pilote, et le dépôt n'atteint pas ce cas.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:define_relationships, 1 appel, graphe muté comparé par isomorphisme). Original identique au dépôt (BrickSchema__Brick/generate_brick.py:618-684) ; add_relationships du shim identique à generate_brick.py:85-91 (le `graph=G` par défaut devient `graph=None`, sans effet : le pilote passe toujours graph=). Mutants sur copies mktemp, tous détectés (graphes non isomorphes) : suppression de chacun des 9 îlots (subPropertyOf, a brick:Relationship, a {prop_type}, sh:or enumeration, sh:class cls, sh:class range, sh:or NumericValue, sh:datatype, sh:property), sh:path {prop}->{propshape}, sh:PropertyShape->sh:NodeShape, sh:datatype {dtype_defn} figé à bsh:NumericValue, `if superprop is not None`->`if True`. Survivants, tous sur du Python non traduit : `if prop.startswith(BRICK)` -> `if True` (deux gardes), `len(definitions)==0` -> `False`, `elif range_defn is not None` -> `True`, `(tuple, list)` -> `list` : le pilote ne donne que des clés BRICK (ou converties en BRICK) ; bricksrc/relationships.py n'a que des clés str (donc converties par BRICK[prop]), la branche non-BRICK (où propshape resterait non lié ou périmé) n'est jamais atteinte par le dépôt. `{prop}`, `{cls}`, `{range_defn}`, `{domain}` sont des URIRef au dépôt (BRICK.*, QUDT.*, RDFS.*).",
+  "triaged_by": "sonnet-5.5"
+}

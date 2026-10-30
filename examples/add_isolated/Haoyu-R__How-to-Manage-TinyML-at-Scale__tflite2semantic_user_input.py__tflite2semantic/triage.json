@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction fidèle (3 îlots, gardes input/output conservées, oracle module-state qui tue les mutants d'îlot), mais `{Literal(x)}` est une enveloppe inutile (`{x}` produit le même graphe, y compris avec un ndarray comme au dépôt) et le shim, dit « verbatim », ne l'est pas (couleurs ANSI retirées).",
+  "questions": [
+    {
+      "question": "Faut-il écrire `nnet:shapeIn {interpreter.get_input_details()[0]['shape']}` (et shapeOut) sans l'enveloppe `Literal(...)` ?",
+      "where": "translated.ldpy:25 et 27, original.py:20 et 22",
+      "if_yes": "classer wrong-construction (needs-work) : retirer Literal() ; équivalence vérifiée, y compris avec un np.ndarray int32 comme au dépôt",
+      "if_no": "approuver ; Literal() explicite toléré (entrée de type non-str, coercion implicite jugée moins lisible)"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Original identique au dépôt (Haoyu-R__How-to-Manage-TinyML-at-Scale/tflite2semantic_user_input.py:373-386, indentation près) ; `layer` est un URIRef aux trois sites d'appel (l.391/397/404) donc {layer} reste une IRI. Mutants sur copies mktemp tous détectés : suppression de chacun des 3 îlots, shapeIn lisant get_output_details, `if input_layer`->`if True`, `a nnet:Layer`->`a nnet:Layer, nnet:Layer2`. Survivants : `{Literal(shape)}`->`{shape}` (OK, shim à liste ; OK aussi après avoir remplacé les listes du shim par des np.array int32, comme tf.lite), `a`->`rdf:type` (équivalence légitime). Shim tflite_context.py : « bodies reproduced verbatim » est inexact : addActivation du dépôt (l.~353-357) imprime avec CRED/CEND (échappements ANSI), le shim imprime sans ; les commentaires de addTrainable (dépôt l.~335-338) sont retirés ; `hasTensor` devient `_hasTensor`. Sans effet RDF (même shim des deux côtés), non marqué shim-invents-logic. Branche `else: addActivation(layer, 0)` jamais prise (hasActivation=True) mais c'est du Python non traduit. Triple `@prefix rdf:/rdfs:/sdo:` inutilisés (rdf: remplacé par `a`).",
+  "triaged_by": "sonnet-5.5"
+}

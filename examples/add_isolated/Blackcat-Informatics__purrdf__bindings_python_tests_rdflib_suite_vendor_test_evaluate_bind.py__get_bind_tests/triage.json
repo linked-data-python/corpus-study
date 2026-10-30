@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction fidèle et oracle solide (graphe par isomorphisme via check.__closure__), mais l'unique îlot écrit `{URIRef(base + \"thing\")}` là où `f<{base}thing>` est la construction spécifique ; aucun @base, donc équivalent.",
+  "questions": [
+    {
+      "question": "Faut-il exiger `+{ f<{base}thing> f<{base}ns#comment> \"anything\" }` à la place de `{URIRef(base + \"thing\")} {URIRef(base + \"ns#comment\")}` (base est une str locale, aucun @base en portée) ?",
+      "where": "translated.ldpy:10 et original.py:9",
+      "if_yes": "classer wrong-construction (needs-work) : réécrire avec f<…> ; la paire reste équivalente et redevient propre",
+      "if_no": "approuver tel quel ; l'enveloppe URIRef() est un choix toléré (la str nue serait coercée en littéral, d'où le URIRef)"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:get_bind_tests, isomorphisme du graphe atteint par check.__closure__). Original identique au dépôt (Blackcat-Informatics__purrdf/bindings/python/tests/rdflib_suite/vendor/test_evaluate_bind.py:11-39) hors indentation. Copie mktemp : remplacement par `f<{base}thing> f<{base}ns#comment>` -> check OK ; même copie avec `f<{base}thinG>` -> FAIL (non isomorphe), donc l'oracle détecte une IRI fausse. Le `g.query(... % expr)` de check() reste du Python rdflib : l'expr est du texte SPARQL collé, pas un terme, donc pas de crédit manqué. Les littéraux <…> des tuples yieldés sont comparés par égalité dans le pilote.",
+  "triaged_by": "sonnet-5.5"
+}

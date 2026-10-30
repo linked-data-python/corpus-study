@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction fidèle et oracle correct (3 combinaisons de drapeaux), mais `{URIRef(RIGHTS)}` est une enveloppe inutile : `f<{RIGHTS}>` donne le même graphe.",
+  "questions": [
+    {
+      "question": "Faut-il remplacer `{URIRef(RIGHTS)}` par `f<{RIGHTS}>` (RIGHTS est une str constante du module, aucun @base en portée) ?",
+      "where": "translated.ldpy:22 et original.py:20",
+      "if_yes": "classer wrong-construction (needs-work) : réécrire en f<{RIGHTS}> ; équivalence vérifiée",
+      "if_no": "approuver tel quel ; URIRef() explicite toléré pour lisibilité"
+    }
+  ],
+  "evidence": "rdfeval check : OK (entry:_graph, 3 appels : défauts, tout à False, mixte). Original identique au dépôt (FAIRDataTeam__fdpneo-server/tests/unit/data/test_distributions.py:27-39) ; DIST et RIGHTS identiques (l.14-15) ; DCAT/DCT du shim identiques à src/fdpneo_server/shared/namespaces.py:30-31 (la note dit « lines 28-29 », numéros inexacts mais IRI exactes). Copie mktemp : `{URIRef(RIGHTS)}` -> `f<{RIGHTS}>` : check OK ; suppression de l'îlot dcat:downloadURL : FAIL (4 vs 3 triplets). Les entrées sont des booléens, aucun piège de type d'entrée. `{subject}` (URIRef(DIST), réutilisé dans 4 îlots) est justifié.",
+  "triaged_by": "sonnet-5.5"
+}
