@@ -1,0 +1,15 @@
+{
+  "priority": "high",
+  "flags": ["equivalence-doubt"],
+  "summary": "`expand_name` rend une `str` (pas une URIRef) quand l'entrée est une IRI complète ; l'original la lie telle quelle par initBindings, la traduction l'interpole `{concept}` / `{v}` et la coerce en littéral — et le dépôt appelle bien `narrower` avec une IRI complète sous forme de `str`, chemin que le pilote n'exerce pas.",
+  "questions": [
+    {
+      "question": "Le dépôt appelle `narrower` avec des IRI complètes en `str` (vocab.py:278 `concept = str(_s.getVocabRoot(vocabulary)[0])` puis `s.narrower(c, v, ...)` ; test_navocab.py:62-66 qui attend 3 puis 2 résultats avec une `str` d'IRI complète). Dans ce cas `expand_name` rend la `str` inchangée (expand_curie lève ValueError, l'IRI est « https:… »), donc `{concept}` et `{v}` deviennent des littéraux alors que l'original lie une `str` : faut-il considérer la traduction comme non équivalente et la renvoyer en needs-work (entrée enveloppée dans `URIRef(...)` côté traduction, et appel de pilote avec une IRI complète en `str`) ?",
+      "where": "translated.ldpy:16 et :21-22 contre original.py:19, :30 ; driver.py:70-73 (aucun appel avec une IRI complète) ; dépôt : tools/vocab.py:278-282, tools/tests/test_navocab.py:62-66, tools/navocab/__init__.py:214-221",
+      "if_yes": "needs-work : traiter la valeur `str` (par ex. `{URIRef(concept)}` / `{URIRef(v)}`, ou signaler que la paire change le type d'entrée accepté), et ajouter au pilote un appel avec une IRI complète en `str`.",
+      "if_no": "approuver en acceptant que la traduction ne soit équivalente que pour les CURIE et les URIRef, pas pour les IRI en `str` que le dépôt passe réellement."
+    }
+  ],
+  "evidence": "rdfeval check OK. Les 4 appels du pilote donnent des résultats non vides/vides distincts (3, 2, 0, 3 abrégés) : l'oracle est solide pour les CURIE (`ex:Animal` → URIRef). Chemin non couvert : dans une copie, avec le même `_Store`, `narrower(s, 'http://example.org/Animal')` rend [] des deux côtés (expand_name rend une str), donc ajouter cet appel au pilote resterait vert sans rien prouver (le store du pilote est un Graph mémoire, pas le store SQLAlchemy du dépôt où le test du dépôt obtient 3 avec une str). Divergence de type montrée : sur un graphe où l'objet de skos:broader est le Literal \"http://example.org/Animal\", l'original rend [] et la traduction rend ['http://example.org/X'] ; quand l'objet est l'URIRef, les deux rendent []. Donc la traduction lie un Literal là où l'original lie une str ; dans le store réel (rdflib-sqlalchemy, non installé ici) je n'ai pas pu exécuter l'original, mais le test du dépôt (attend 3 avec une str d'IRI) indique qu'il y apparie des IRI, ce qu'un Literal ne ferait pas. Notes du traducteur : « concept/v already travel safely » est vrai pour les URIRef seulement.",
+  "triaged_by": "sonnet-5.5"
+}

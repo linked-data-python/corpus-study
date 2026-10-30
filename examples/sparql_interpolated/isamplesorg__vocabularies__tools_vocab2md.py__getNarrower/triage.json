@@ -1,0 +1,15 @@
+{
+  "priority": "high",
+  "flags": ["weak-oracle"],
+  "summary": "Le pilote passe `r` et `v` en `str` : l'original et la traduction rendent [] pour les trois appels, l'oracle ne compare donc que des listes vides ; avec les URIRef que le dépôt passe réellement la paire est équivalente (vérifié à la main).",
+  "questions": [
+    {
+      "question": "Faut-il renvoyer la paire en needs-work pour que le pilote passe `r` et `v` en `rdflib.URIRef` (comme le dépôt, où `r` vient des résultats d'une requête sur le graphe) afin que les appels « plusieurs solutions » et « filtre de schéma » aient un résultat non vide ?",
+      "where": "driver.py:21-25 (`call(None, \"http://example.org/Animal\")` etc.) ; dépôt : tools/vocab2md.py:178-189 (getVocabRoot rend les URIRef de `row[0]`), :242 et :256 (termTree/termJsonTree rappellent getNarrower avec les termes rendus), :344-356",
+      "if_yes": "needs-work : remplacer les chaînes du pilote par des `rdflib.URIRef(...)` ; la paire elle-même n'a pas à changer.",
+      "if_no": "approuver en acceptant que l'oracle ne vérifie pas la requête (les trois appels rendent [])."
+    }
+  ],
+  "evidence": "rdfeval check OK. Exécution directe des deux versions sur fixture.ttl : avec les `str` du pilote, les 3 appels rendent 0 résultat des deux côtés (une str dans initBindings ne s'apparie pas à une IRI, et `{(r)}` d'une str devient un Literal) ; avec `rdflib.URIRef` pour v et r : 3 / 2 / 0 résultats, listes égales. Mutants dans une copie, `rdfeval check` reste OK dans les deux cas : `skos:broader` → `skos:related` dans les deux branches ; `skos:inScheme {v}` → `skos:inScheme skos:nope`. Chez les appelants du dépôt `v` vaut None (narrower_v = None, vocab2md.py:339-345) et `r` est une URIRef venue du graphe : pas de divergence str/Literal ici, pas de cas None. L'échappement `{(r)}` contourne un défaut du transpileur (noté par le traducteur) sans changer l'expression.",
+  "triaged_by": "sonnet-5.5"
+}
