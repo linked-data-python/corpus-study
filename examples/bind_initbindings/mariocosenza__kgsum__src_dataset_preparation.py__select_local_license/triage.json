@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "`Q(parsed_graph)` est paresseux : toute erreur levée à l'appel (argument qui n'est pas un graphe) sort du `try` et n'est plus rattrapée en `set()` comme dans l'original ; le pilote n'exerce jamais la branche `except`. Corrigé par `.execute()` dans la copie (sans effet ailleurs).",
+  "questions": [
+    {
+      "question": "Faut-il exiger `qres = Q_LOCAL_DCTERMS_LICENSE(parsed_graph).execute()` dans le `try` (comme la paire oxrdflib du même strate), et un appel du pilote avec un non-graphe, plutôt que d'approuver telle quelle, sachant que le dépôt d'origine ne passe jamais autre chose qu'un Graph (process_file_full_inplace l. 390-402 et l. 458-466 : `_guess_format_and_parse` renvoie un Graph ou lève) ?",
+      "where": "translated.ldpy:20 (`qres = Q_LOCAL_DCTERMS_LICENSE(parsed_graph)`) et original.py:24 (`parsed_graph.query(...)`) ; driver.py (deux appels, tous deux avec un Graph)",
+      "if_yes": "needs-work : traduction avec `.execute()` + appel du pilote avec `None`, pour que le `try/except` garde la même sémantique ; le cas n'est pas atteint par le dépôt, donc impact nul sur les chiffres si on ne corrige pas",
+      "if_no": "approuver : le `try/except` est inatteignable dans le dépôt (toujours un Graph), l'écart est théorique"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Expérience dans une copie mktemp -d (transpileur ldpy installé, original.py et translated.ldpy importés) : `select_local_license(None)`, `('x')` et `(object())` -> original : journalise « SPARQL error » et rend `set()` ; traduction : lève RuntimeError « s{ } with no graph » (None) ou AttributeError (str, object) HORS du try, au moment de l'itération de la compréhension. Avec `.execute()` ajouté dans la copie : les trois cas rendent `set()` comme l'original et rdfeval check reste OK. Contre-épreuve : une erreur levée PENDANT l'évaluation (Graph dont `triples` lève) sort du try des deux côtés, car rdflib est lui aussi paresseux : l'écart ne concerne que les erreurs d'appel. Mutants du reste de la requête : LIMIT 1 -> LIMIT 2 ROUGE ; LIMIT supprimé ROUGE (la fixture a bien deux licences et le voisinage dcterms:title). Le pilote ne fait que deux appels (fixture, graphe sans licence) et n'atteint jamais le `except`. s{ } est justifié (LIMIT 1 ; pas de m{ }). Appels du dépôt : aucun ne passe None ni une str. Le `log_query` du shim est repris verbatim ; il journalise `str(query)` d'un PreparedQuery d'un côté, d'un objet s{ } de l'autre : effet non observé, non vérifié.",
+  "triaged_by": "sonnet-5.5"
+}

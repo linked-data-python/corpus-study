@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction mécanique propre (texte de la requête identique caractère pour caractère, initNs devenu @prefix), mais l'oracle ne distingue pas la branche `time:ProperInterval` des deux VALUES : aucune paire de la fixture amont impliquant un ProperInterval ne satisfait tfun:starts.",
+  "questions": [
+    {
+      "question": "Acceptez-vous d'approuver cette paire bien que les deux listes `VALUES ?a_type / ?b_type { time:Interval time:ProperInterval }` ne soient exercées que par `time:Interval` (le texte de la requête étant identique à l'original, l'écart ne pourrait venir que d'une recopie fautive, que j'exclus) ?",
+      "where": "translated.ldpy:30-32 et original.py:28-30 ; data/starts.ttl lignes a09/b09 et a10/b10 (seuls ProperInterval, aucun lien intervalStarts)",
+      "if_yes": "approuver ; le défaut est celui du test amont, pas de la traduction",
+      "if_no": "needs-work : ajouter à data/starts.ttl (et à la copie fixture.ttl) une paire ProperInterval liée par time:intervalStarts, attendue dans `expected` des deux côtés — mais ce serait modifier le test amont, donc plutôt classer la paire comme faiblement prouvée sur cette branche"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Comparaison textuelle de la requête (original.py vs bloc s{ }, espaces et lignes vides normalisés) : identique. Mutants dans des copies mktemp -d : FILTER tfun:starts(?a,?b) -> FILTER(?a != ?b) ROUGE ; `?b a ?b_type` -> `?b a time:Interval` ROUGE ; VALUES ?a_type ou ?b_type -> `{ time:Interval time:Interval }` ROUGE (doublons de lignes) ; en revanche remplacer `time:ProperInterval` par `time:Nothing` dans les DEUX VALUES reste VERT : la branche ProperInterval n'est pas observée. (Note de langage : un VALUES à un seul élément `{ time:Interval }` est refusé par le transpileur — « Expected SelectQuery, found 'VALUES' » — probablement lu comme un trou d'interpolation ; sans effet sur la paire.) Shim context_shim.py : le code de `starts` et `_path_exists` est identique (AST) à timefuncs/funcs.py@dd3bde8 ; seule la docstring de `starts` est amputée de son exemple SPARQL, et seul `tfun:starts` est enregistré (le dépôt enregistre tout le module) : sans effet, pas de logique inventée. Pas de collision préfixe/nom : `starts:` est un préfixe lexical, `starts` (la fonction importée) reste un nom Python, aucun avertissement du transpileur, et la paire est verte. s{ } est la seule construction possible (VALUES + fonction FILTER personnalisée, hors de portée de m{ }). Le pilote se limite à `demo()` qui exécute le test amont avec ses assertions.",
+  "triaged_by": "sonnet-5.5"
+}

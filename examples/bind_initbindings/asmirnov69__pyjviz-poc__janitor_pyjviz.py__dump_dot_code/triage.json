@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "La traduction (interpolation `{cmc}` à la place de initBindings) est correcte en lecture, mais l'oracle laisse passer la suppression d'une contrainte `<pyj:cmc> {cmc}` dans les requêtes d'arêtes (4e et 5e) : la fixture n'a aucune arête entre deux cmc différentes.",
+  "questions": [
+    {
+      "question": "Faut-il renvoyer la paire en needs-work pour ajouter au fixture une arête method-call (et une method-return) entre un dataframe d'une cmc et une méthode d'une AUTRE cmc, de façon que `?df <pyj:cmc> {cmc}` et `?m <pyj:cmc> {cmc}` soient chacun nécessaires ?",
+      "where": "translated.ldpy:57 et :61 ; original.py:57 et :61 ; fixture.ttl (aucune arête inter-cmc : df1/m1 sont tous deux cmc1, df2/m2 tous deux cmc2, l'arête parasite df-stray/m-stray porte une cmc jamais typée pyj:CMC)",
+      "if_yes": "needs-work : ajouter les arêtes inter-cmc au fixture, relancer rdfeval check avec les mutants ci-dessous ; la traduction elle-même n'a pas à changer",
+      "if_no": "approuver en acceptant que les motifs `{cmc}` des requêtes 4 et 5 soient prouvés par la seule lecture du texte (identique à l'original au remplacement près de `?cmc` par `{cmc}`)"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants dans des copies mktemp -d (modification vérifiée par diff avant chaque essai) : (M1) retirer `?m <pyj:cmc> {cmc}` des requêtes 4 et 5 -> VERT ; (M2) retirer `?df <pyj:cmc> {cmc}` des deux -> VERT ; (M3) retirer `?df <pyj:cmc> {cmc}` de la seule requête 5 -> VERT ; (M4) retirer `?m <pyj:cmc> {cmc}` de la seule requête 5 -> VERT. À l'inverse : supprimer la branche `|<pyj:method-call-arg>` -> ROUGE ; retirer `<pyj:cmc> {cmc}` de la requête 1 (dataframes) -> ROUGE ; idem de la requête 2 (méthodes) -> ROUGE. Cause : pour chaque cmc, les arêtes de la fixture relient toujours deux nœuds de la même cmc, donc la contrainte de cmc sur l'un des deux bouts est redondante. Dépôt d'origine : les cmc sont toujours des IRI `<pyj:cmc:N>` (janitor/pyjrdflogger.py:67-69), jamais des BNode ni des littéraux ; `{cmc}` y vaut donc un URIRef, comme l'`initBindings={'cmc': cmc}` d'origine : pas de problème de coercition. Pas de `None` possible (cmc vient d'un résultat de requête). Choix s{ } justifié (chemin de propriétés `|`, hors de portée de m{ }) ; la variable `?cmc` n'est pas projetée, donc interpolation conforme au tableau des strates.",
+  "triaged_by": "sonnet-5.5"
+}
