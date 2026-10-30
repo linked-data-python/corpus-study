@@ -10,3 +10,11 @@ ex:defaultAgeValue rdfs:label "Default Age"^^xsd:string .
 
 # Neighbour that must NOT match: a label on an unrelated resource.
 ex:someOtherValue rdfs:label "Unrelated"^^xsd:string .
+
+# --- Repair (2026-10-30) ----------------------------------------------------
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+# The label of the anonymous property shape's sh:defaultValue (shape.ttl,
+# ex:PlaceShape), and a second predicate on the same subject that a widened
+# `{nodeValURL} ?p ?nodeValLb` read would append.
+ex:defaultPlace rdfs:label "Montreal" ;
+    skos:note "not a label" .

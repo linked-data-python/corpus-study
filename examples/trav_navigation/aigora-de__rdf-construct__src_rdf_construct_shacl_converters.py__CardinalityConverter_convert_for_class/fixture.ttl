@@ -107,3 +107,78 @@ _:r13 a owl:Restriction .
 # motif trivially but is not an owl:Restriction.
 ex:Widget rdfs:subClassOf ex:RegularSuper .
 ex:RegularSuper a owl:Class .
+
+# ---------------------------------------------------------------------------
+# Repair (2026-10-30): ex:Thing, the driver's third call, carries the cases the
+# triage found unexercised. Each one changes the result of a known mutant or
+# of the earlier three-motif join.
+#
+# t1: a restriction with TWO owl:onProperty (a merged or malformed graph).
+# `source_graph.value` takes one of them, so the original yields ONE
+# constraint; a join that absorbs onProperty yields two.
+ex:Thing rdfs:subClassOf _:t1 .
+_:t1 a owl:Restriction ;
+    owl:onProperty ex:pa, ex:pb ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+
+# t2: an owl:Restriction whose subject is an IRI, not a blank node: skipped
+# by the `isinstance(superclass, BNode)` guard, and only by it.
+ex:Thing rdfs:subClassOf ex:NamedRestriction .
+ex:NamedRestriction a owl:Restriction ;
+    owl:onProperty ex:pc ;
+    owl:cardinality "2"^^xsd:nonNegativeInteger .
+
+# t3: onProperty is an anonymous inverse property (a BNode): skipped by the
+# `isinstance(on_prop, URIRef)` guard, and only by it.
+ex:Thing rdfs:subClassOf _:t3 .
+_:t3 a owl:Restriction ;
+    owl:onProperty [ owl:inverseOf ex:pd ] ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+
+# t4: cardinality 0 and nothing else: `if exact:` is false on Literal 0, so
+# no constraint at all; `if exact is not None:` would add one.
+ex:Thing rdfs:subClassOf _:t4 .
+_:t4 a owl:Restriction ;
+    owl:onProperty ex:pe ;
+    owl:cardinality "0"^^xsd:nonNegativeInteger .
+
+# t5: several values for someValuesFrom and for onClass: `.first()` must take
+# the same one as `value()`.
+ex:Thing rdfs:subClassOf _:t5 .
+_:t5 a owl:Restriction ;
+    owl:onProperty ex:pf ;
+    owl:someValuesFrom ex:C1, ex:C2 .
+ex:Thing rdfs:subClassOf _:t6 .
+_:t6 a owl:Restriction ;
+    owl:onProperty ex:pg ;
+    owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:D1, ex:D2 .
+
+# Neighbours for the "bound term widened to a variable" mutants: each shares
+# two of the three terms of one motif and differs in the third.
+# t7: linked to ex:Thing by another predicate than rdfs:subClassOf.
+ex:Thing rdfs:seeAlso _:t7 .
+_:t7 a owl:Restriction ;
+    owl:onProperty ex:ph ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+# t8: points at owl:Restriction by another predicate than rdf:type.
+ex:Thing rdfs:subClassOf _:t8 .
+_:t8 rdfs:seeAlso owl:Restriction ;
+    owl:onProperty ex:pi ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+# t9: typed with another class than owl:Restriction.
+ex:Thing rdfs:subClassOf _:t9 .
+_:t9 a owl:Class ;
+    owl:onProperty ex:pj ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+# t10: carries its property under another predicate than owl:onProperty.
+ex:Thing rdfs:subClassOf _:t10 .
+_:t10 a owl:Restriction ;
+    rdfs:label "t10" ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger .
+# t11: a restriction whose only content is owl:hasValue, which no branch
+# reads: no constraint, unless a single-value read is widened to `?p`.
+ex:Thing rdfs:subClassOf _:t11 .
+_:t11 a owl:Restriction ;
+    owl:onProperty ex:pk ;
+    owl:hasValue ex:SomeValue .

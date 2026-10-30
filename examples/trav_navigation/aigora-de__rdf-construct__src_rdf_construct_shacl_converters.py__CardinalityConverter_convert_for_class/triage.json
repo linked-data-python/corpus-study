@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Copie avec ex:W2 (restriction à `owl:onProperty ex:pa, ex:pb`) : original -> contraintes pa, pf, pg ; traduction -> pa, pb, pf, pg : FAIL (call[2]). Même fixture avec un seul onProperty et ordered=True : OK, donc les autres cas (restriction IRI, onProperty BNode inverseOf, cardinalité 0, valeurs multiples de someValuesFrom/onClass) sont équivalents ; l'ordre de la liste est identique. Mutants sur le fixture d'origine, tous VERTS : suppression de `isinstance(superclass, BNode)`, suppression de `isinstance(on_prop, URIRef)`, `if exact:` -> `if exact is not None:` ; avec le fixture enrichi ils échouent tous trois. Les notes disent que la cardinalité est conservée sans traiter le cas du onProperty multiple. Appels réels (generator.py:174, 241) : cls et superclass sont des URIRef issues du graphe, aucun problème de type d'entrée. Pas candidate article tant que la cardinalité diverge.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (3e appel ex:Thing : double owl:onProperty, restriction nommée par IRI, onProperty inverse anonyme, cardinalité 0, valeurs multiples, voisins par terme lié) ; il a fait tomber la jointure à trois motifs, corrigée en lisant owl:onProperty par .first() hors d'une jointure à deux motifs ; check OK, 15 mutants tués."
 }

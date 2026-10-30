@@ -26,11 +26,12 @@
   ],
   "translation_notes": [
     "prefixes: RDFS->rdfs, OWL->owl. RDF and XSD stay unused in the region's own body (they are only reached through context_shim's `_is_datatype`), so no @prefix rdf:/xsd: is declared -- an unused prefix would be noise.",
-    "the region's ONE navigation loop is really a hand-written 3-pattern join wearing a `for` + two early `continue`s: `for superclass in source_graph.objects(cls, RDFS.subClassOf)` narrowed by `(superclass, RDF.type, OWL.Restriction) not in source_graph` (an existence check) and then `source_graph.value(superclass, OWL.onProperty)` (a single-value lookup that must also succeed). All three share the variable `superclass`, so they fuse into one `m{ {cls} rdfs:subClassOf ?superclass . ?superclass a owl:Restriction ; owl:onProperty ?on_prop }` yielding (superclass, on_prop) pairs directly -- this IS the stratum's headline gain, just arrived at by recognising a filter-chain as a join rather than starting from two literal nested `for`s.",
-    "the `isinstance(superclass, BNode)` check cannot move into the pattern (m{ } has no term-kind filter) and is kept exactly where Python would run it, now applied per-solution instead of gating a second selector. This does not change which (superclass, on_prop) pairs end up producing a constraint: an owl:Restriction that is not itself a blank node is vanishingly rare in real OWL and either way the original never got to it (isinstance(BNode) fails BEFORE the Restriction/onProperty checks in the original, whereas the joined version checks Restriction/onProperty first and BNode-ness after) -- purely a reordering of two pure, side-effect-free reads, so the OBSERVABLE result is identical; noted rather than silently exploited.",
+    "the region's ONE navigation loop is a hand-written join wearing a `for` + early `continue`s: `for superclass in source_graph.objects(cls, RDFS.subClassOf)` narrowed by `(superclass, RDF.type, OWL.Restriction) not in source_graph` (an existence check). Both share the variable `superclass`, so they fuse into one `m{ {cls} rdfs:subClassOf ?superclass . ?superclass a owl:Restriction }` -- the stratum's headline gain. The following `source_graph.value(superclass, OWL.onProperty)` stays OUTSIDE the join, as `m{ {superclass} owl:onProperty ?v }.first()`: value() takes one onProperty, a joined motif would yield one solution per value.",
+    "the `isinstance(superclass, BNode)` check cannot move into the pattern (m{ } has no term-kind filter) and stays a Python guard, now applied per-solution after the Restriction check instead of before it -- a reordering of two pure, side-effect-free reads, so the observable result is identical (the driver's ex:Thing call has an owl:Restriction named by an IRI, which only this guard drops).",
     "the eleven subsequent `source_graph.value(superclass, OWL.x)` single-value reads (exact/min/max/qualified/qualified-min/qualified-max cardinality, onClass, onDataRange, someValuesFrom, allValuesFrom) are each the textbook trav_single_value idiom and become `m{ {superclass} owl:x ?v }.first()` -- same construction the stratum table assigns to `g.value`, applied here inside a trav_navigation region because 'always the most specific construction' is per-idiom, not per-stratum.",
     "fixture.ttl carries ten positive restrictions on ex:Widget (one per branch, including both arms of `_is_datatype`: the XSD-namespace check via someValuesFrom xsd:integer, and the rdfs:Datatype-declaration check via allValuesFrom ex:StatusEnum) and four negative neighbours that each satisfy exactly one or two of the three joined motifs but not all three -- proving the fusion actually joins. A second driver call on ex:Gadget (zero restrictions) exercises the empty-list zero-solution case.",
-    "`self` is a shared, stateless CardinalityConverter-shim instance reused for every call on both sides (see driver.py): a fresh instance per side would fail the harness's default `==` (object identity) for a reason with nothing to do with the translation."
+    "`self` is a shared, stateless CardinalityConverter-shim instance reused for every call on both sides (see driver.py): a fresh instance per side would fail the harness's default `==` (object identity) for a reason with nothing to do with the translation.",
+    "Repair 2026-10-30: the translation fused owl:onProperty into the join, so a restriction carrying two owl:onProperty yielded two constraints where the original's `value()` yields one; proven by the driver's third call (ex:Thing, restriction t1: original pa only, translation pa and pb), fixed by reading onProperty with `.first()` outside a two-motif join."
   ],
   "article_candidate": true,
   "draft_sha": "c861c5ea2d88d642",
@@ -49,5 +50,28 @@
     "method": "fixture:fixture.ttl entry:convert_for_class",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "third call on ex:Thing with eleven new fixture restrictions: two owl:onProperty on one restriction, an IRI-named owl:Restriction, an onProperty that is an owl:inverseOf blank node, owl:cardinality 0 alone, several someValuesFrom and onClass values, one neighbour per bound term of the restriction motifs (rdfs:seeAlso for subClassOf, rdfs:seeAlso owl:Restriction for rdf:type, owl:Class for owl:Restriction, rdfs:label for onProperty) and an owl:hasValue-only restriction",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "drop isinstance(superclass, BNode) guard",
+      "drop isinstance(on_prop, URIRef) guard",
+      "`if exact:` -> `if exact is not None:`",
+      "rdfs:subClassOf -> ?p",
+      "rdf:type -> ?p",
+      "owl:Restriction -> ?k",
+      "{cls} -> ?c",
+      "owl:onProperty -> ?p",
+      "owl:onProperty fused back into the join",
+      "join -> []",
+      "owl:someValuesFrom -> ?p",
+      "owl:allValuesFrom -> ?p",
+      "owl:cardinality -> ?p",
+      "owl:onDataRange -> ?p",
+      "someValuesFrom .first() -> last value"
+    ],
+    "remaining": "the join now covers two motifs instead of three: whether the pair stays directly-expressible and article_candidate is Maxime's call (triage question 1)."
   }
 }

@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants dans une copie : `if config.include_labels:` -> `if True:` reste OK ; `if config.include_descriptions:` -> `if True:` reste OK (=> oracle faible) ; en revanche `-> if False:`, `rdfs:label` échangé contre `rdfs:comment`, `_is_datatype` remplacé par True, retrait du filtre isinstance URIRef : tous FAIL. Équivalence par ailleurs confirmée (copie) avec une fixture enrichie : rdfs:range à 4 valeurs, rdfs:label/comment multi-valués dont des \"\" (g.value vs .first() : même premier élément, même véracité), et un appel avec les deux drapeaux à False : OK. Dépôt d'origine : cls est un URIRef (generator.py:174, :241), donc {cls} sans écart ; le shim (XSD_DATATYPES, _is_datatype, ShaclConfig, PropertyConstraint) reprend fidèlement converters.py:209-296 et config.py:65-66. Pas de jointure possible ici (lectures optionnelles) : la région n'a aucun gain de fusion.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (drapeaux de ShaclConfig à False et croisés, classe sans propriété, label/comment vides, range rdfs:Datatype hors XSD, labels multiples, voisins rdfs:seeAlso) ; la traduction tient, check OK, 14 mutants tués dont les deux `if True:`."
 }

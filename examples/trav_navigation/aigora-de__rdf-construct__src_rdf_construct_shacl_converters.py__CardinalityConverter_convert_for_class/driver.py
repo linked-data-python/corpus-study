@@ -14,10 +14,25 @@ comparison (a fresh instance per side would fail `_compare_value`'s default
 `==`, which is object identity here, for no reason connected to translation
 correctness).
 
-Two calls: `ex:Widget`, which has ten matching restrictions exercising every
-branch plus four non-matching neighbours (see fixture.ttl); and `ex:Gadget`,
+Three calls: `ex:Widget`, which has ten matching restrictions exercising every
+branch plus four non-matching neighbours (see fixture.ttl); `ex:Gadget`,
 which has no restrictions at all -- the zero-solution case, returning `[]`
-on both sides.
+on both sides; and `ex:Thing` (added by the 2026-10-30 repair), which carries
+what the first two do not reach:
+
+- a restriction with TWO owl:onProperty: `value()` takes one, so the original
+  builds one constraint where a join absorbing onProperty builds two;
+- an owl:Restriction named by an IRI, and one whose onProperty is an
+  anonymous inverse property: each is dropped by exactly one isinstance guard
+  (BNode, URIRef), so removing either guard changes the result;
+- `owl:cardinality 0` alone: `if exact:` is false on a zero literal, so no
+  constraint -- `if exact is not None:` would add one;
+- several values for someValuesFrom and onClass: `.first()` must pick the
+  value `value()` picks;
+- one neighbour per bound term of the restriction motifs (another predicate
+  than rdfs:subClassOf, than rdf:type, than owl:onProperty; another class than
+  owl:Restriction) and an owl:hasValue-only restriction: each kills the mutant
+  that widens that term to a variable.
 """
 from pathlib import Path
 
@@ -40,6 +55,6 @@ def _call(cls_local):
 VERDICT = run_pair(
     __file__,
     entry='convert_for_class',
-    calls=[_call("Widget"), _call("Gadget")],
+    calls=[_call("Widget"), _call("Gadget"), _call("Thing")],
     fixture="fixture.ttl",
 )

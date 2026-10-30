@@ -13,6 +13,22 @@ sees it via stdout.
 fixture.ttl / shape.ttl are part of the translation: together they hold
 several solutions of the patterns the region reads, propShapes missing one
 of the optional predicates, and neighbouring triples that must NOT match.
+
+The 2026-10-30 repair enriched both files (the call itself is in the
+driving code of the two artefacts, which it leaves unchanged):
+
+- ex:PlaceShape is the shape the repository really writes
+  (rdf/demo_shape.shacl): anonymous property shapes, one with a
+  sh:defaultValue labelled in dataGraph, one with an empty sh:description
+  (``if nodeURL:`` is false on "", ``if True:`` would add a nodeLink key);
+- ex:NotAShape2 (typed sh:PropertyShape) and ex:NotAShape3 (``rdfs:seeAlso
+  sh:NodeShape``) have skos:example AND a sh:property, so the NodeShape guard
+  is observable: replacing it with ``True``, or widening its rdf:type or
+  sh:NodeShape to a variable, adds their labels;
+- one neighbour per bound predicate (rdfs:seeAlso for skos:example,
+  sh:targetClass beside sh:property, rdfs:comment beside sh:path/sh:name/
+  sh:description, skos:note beside rdfs:label in dataGraph) kills the mutants
+  that widen that predicate to a variable.
 """
 from rdfeval.harness import run_pair
 

@@ -45,5 +45,27 @@
     "method": "fixture:fixture.ttl entry:convert_for_class",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "four calls added: ex:Person with both config flags False, with only include_labels, with only include_descriptions, and ex:Place (no property, zero solutions); fixture adds an empty label and comment, a range declared rdfs:Datatype outside XSD, a property with two labels, and neighbours sharing two terms of a motif under rdfs:seeAlso",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`if config.include_labels:` -> `if True:`",
+      "`if config.include_descriptions:` -> `if True:`",
+      "include_labels guard -> include_descriptions",
+      "rdfs:domain -> ?p",
+      "{cls} -> ?c",
+      "rdfs:range -> ?p",
+      "rdfs:label -> ?p",
+      "rdfs:comment -> ?p",
+      "`if label:` -> `if label is not None:`",
+      "`if comment:` -> `if comment is not None:`",
+      "drop isinstance(prop, URIRef) guard",
+      "label .first() -> last value",
+      "outer m{ } -> []",
+      "_is_datatype -> False"
+    ],
+    "remaining": ""
   }
 }

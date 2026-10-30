@@ -26,3 +26,58 @@ ex:OtherShape a sh:NodeShape .
 # Neighbour that must NOT reach nodeLabels: has skos:example but is not a
 # sh:NodeShape, so the `(s, rdf:type, sh:NodeShape) in shape` guard excludes it.
 ex:NotAShape skos:example ex:exampleNotAShape .
+
+# --- Repair (2026-10-30) ----------------------------------------------------
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# The shape the repository really writes (rdf/demo_shape.shacl): a NodeShape
+# with anonymous property shapes, one of them with a sh:defaultValue whose
+# label is in dataGraph. It also has a sh:targetClass, a second predicate on
+# the same subject, which a `{s} ?p ?propShape` mutant would walk into, and
+# its first property shape carries an rdfs:comment, a second predicate on
+# the propShape, which a widened sh:path/sh:name/sh:description read would see.
+ex:PlaceShape a sh:NodeShape ;
+    skos:example <https://example.org/place/0001> ;
+    sh:targetClass ex:Place ;
+    sh:property [
+        sh:path ex:tookPlaceAt ;
+        sh:name "Place" ;
+        sh:description "https://example.org/doc#place" ;
+        rdfs:comment "a comment no branch reads" ;
+        sh:defaultValue ex:defaultPlace ;
+    ] ;
+    sh:property [
+        sh:path ex:placeNote ;
+        sh:name "Place note" ;
+        # An empty description: `if nodeURL:` is false on "", so nodeLink
+        # gets no "Place note" key; `if True:` would add one.
+        sh:description "" ;
+    ] .
+
+# Has skos:example and a sh:property, but is typed sh:PropertyShape, not
+# sh:NodeShape: only the NodeShape guard keeps it out, and it shares the
+# subject and rdf:type with the guard's motif (kills `sh:NodeShape -> ?k`).
+ex:NotAShape2 a sh:PropertyShape ;
+    skos:example ex:exampleNotAShape2 ;
+    sh:property ex:np2 .
+ex:np2 sh:path ex:q ;
+    sh:name "Q" ;
+    sh:description "https://example.org/doc#q" .
+
+# Points at sh:NodeShape by another predicate than rdf:type (kills
+# `rdf:type -> ?t` in the guard).
+ex:NotAShape3 rdfs:seeAlso sh:NodeShape ;
+    skos:example ex:exampleNotAShape3 ;
+    sh:property ex:np3 .
+ex:np3 sh:path ex:r ;
+    sh:name "R" ;
+    sh:description "https://example.org/doc#r" .
+
+# Reaches an example through another predicate than skos:example (kills
+# `skos:example -> ?p` in the outer loop).
+ex:SeeAlsoShape a sh:NodeShape ;
+    rdfs:seeAlso ex:exampleSeeAlso ;
+    sh:property ex:np4 .
+ex:np4 sh:path ex:t ;
+    sh:name "T" ;
+    sh:description "https://example.org/doc#t" .

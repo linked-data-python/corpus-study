@@ -16,7 +16,8 @@ ex:name rdfs:domain ex:Person ;
 # (not a datatype), no label, no comment — the independently-optional
 # fields must each be absent on their own, not lost together.
 ex:knows rdfs:domain ex:Person ;
-    rdfs:range ex:Person .
+    rdfs:range ex:Person ;
+    rdfs:seeAlso ex:Friendship .
 
 # Solution 3: domain ex:Person, only a label configured, range absent
 # entirely (zero-solution case for the range lookup on this property).
@@ -33,3 +34,29 @@ ex:title rdfs:domain ex:Book ;
 # isinstance(prop, URIRef) guard, not by the pattern itself.
 _:bn rdfs:domain ex:Person ;
     rdfs:range xsd:string .
+
+# --- Repair (2026-10-30) ----------------------------------------------------
+# Solution 4: empty label and comment: `if label:` / `if comment:` are false
+# on "", so name and description stay None; `is not None` would set "".
+ex:empty rdfs:domain ex:Person ;
+    rdfs:label "" ;
+    rdfs:comment "" .
+
+# Solution 5: a range declared rdfs:Datatype outside the XSD namespace (the
+# second arm of _is_datatype), and several labels: `.first()` must take the
+# value `value()` takes.
+ex:status rdfs:domain ex:Person ;
+    rdfs:range ex:StatusCode ;
+    rdfs:label "status", "state" .
+ex:StatusCode a rdfs:Datatype .
+
+# Neighbours for the "bound term widened to a variable" mutants:
+# ex:related shares the object ex:Person with the domain motif under another
+# predicate, so `?prop ?p {cls}` would pick it up.
+ex:related rdfs:seeAlso ex:Person ;
+    rdfs:label "related" .
+# ex:knows carries an rdfs:seeAlso and no label nor comment: a label or
+# comment read widened to `{prop} ?p ?x` would find it.
+
+# ex:Place (the driver's last call) has no property at all: zero solutions,
+# the region returns [].

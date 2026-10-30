@@ -19,18 +19,20 @@ def convert_for_class(
     @graph source_graph
 
     # Find restrictions that this class is a subclass of, that are actually
-    # owl:Restriction nodes carrying an onProperty: one join instead of a
-    # loop feeding two hand-written checks (a BNode-typed superclass, then
-    # "(superclass, RDF.type, OWL.Restriction) in graph", then a first
-    # value() lookup for onProperty that must also succeed).
-    for superclass, on_prop in m{ {cls} rdfs:subClassOf ?superclass .
-                                   ?superclass a owl:Restriction ;
-                                       owl:onProperty ?on_prop }:
+    # owl:Restriction nodes: one join instead of a loop feeding a
+    # hand-written existence check
+    # "(superclass, RDF.type, OWL.Restriction) in graph".
+    for superclass in m{ {cls} rdfs:subClassOf ?superclass .
+                         ?superclass a owl:Restriction }:
         # m{ } has no term-kind filter, so the "is it a blank node" check
-        # stays a plain Python guard -- unchanged in position or effect.
+        # stays a plain Python guard.
         if not isinstance(superclass, BNode):
             continue
 
+        # onProperty stays a single-value read outside the join: value()
+        # takes ONE owl:onProperty, a joined motif would yield one solution
+        # per value.
+        on_prop = m{ {superclass} owl:onProperty ?v }.first()
         if not isinstance(on_prop, URIRef):
             continue
 

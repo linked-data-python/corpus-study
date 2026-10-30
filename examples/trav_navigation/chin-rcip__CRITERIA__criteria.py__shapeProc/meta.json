@@ -47,5 +47,27 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "shape.ttl gains the repository's own shape form (ex:PlaceShape: anonymous property shapes, a sh:defaultValue labelled in dataGraph, an empty sh:description), two non-NodeShapes that have skos:example AND a sh:property (typed sh:PropertyShape; rdfs:seeAlso sh:NodeShape), and one neighbour per bound predicate (rdfs:seeAlso, sh:targetClass, rdfs:comment); fixture.ttl gains the default value's label and a skos:note beside it. The single call in the artefacts' driving code is unchanged.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "NodeShape guard -> True",
+      "guard rdf:type -> ?t",
+      "guard sh:NodeShape -> ?k",
+      "`if nodeURL:` -> `if True:`",
+      "skos:example -> ?p",
+      "skos:example island -> []",
+      "sh:property -> ?p",
+      "{s} -> ?x in the sh:property read",
+      "sh:path -> ?p",
+      "sh:name -> ?p",
+      "sh:description -> ?p",
+      "sh:defaultValue -> ?p",
+      "rdfs:label -> ?p",
+      "(dataGraph) -> (shape)"
+    ],
+    "remaining": ""
   }
 }
