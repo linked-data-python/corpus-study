@@ -13,6 +13,16 @@ inside build_cbu_json_from_graph (kind: statement, not a function), so `run`
 gives it a callable shape and returns `procedures`, the list the region
 builds. Solution order (which MOP, which CBU, is visited first) is not part
 of this region's meaning -- default `ordered=False` for a fixture run.
+
+fixture.ttl was extended by the repair of 2026-10-30 (triage:
+equivalence-doubt); see its last section. It adds MOPs whose CCDC literal is
+falsy in Python ("" and 0: the original tests the list of values, so both
+must still produce an entry), a MOP with two CCDC numbers (first value
+kept, no exception), and neighbours sharing two of the three terms of a
+pattern -- a non-MOP pointing at the MOP class through another predicate,
+an orphan CBU with its own owl:sameAs, extra properties (one an IRI with a
+label) on a real CBU and a real chemical input -- so that widening any
+bound term of the region's patterns into a variable changes the result.
 """
 from rdfeval.harness import run_pair
 

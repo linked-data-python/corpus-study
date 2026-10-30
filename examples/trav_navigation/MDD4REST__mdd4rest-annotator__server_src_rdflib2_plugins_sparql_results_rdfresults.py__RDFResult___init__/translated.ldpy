@@ -44,8 +44,9 @@ def __init__(self, source, **kwargs):
 
         for s in m{ {rs} rset:solution ?s }:
             sol = {}
-            for b, var, val in m{ {s} rset:binding ?b . ?b rset:variable ?var . ?b rset:value ?val }:
-                sol[Variable(var)] = val
+            for b in m{ {s} rset:binding ?b }:
+                sol[Variable(m{
+                    {b} rset:variable ?var }.first())] = m{ {b} rset:value ?val }.first()
             self.bindings.append(sol)
     elif type_ == 'ASK':
         self.askAnswer = askAnswer.value

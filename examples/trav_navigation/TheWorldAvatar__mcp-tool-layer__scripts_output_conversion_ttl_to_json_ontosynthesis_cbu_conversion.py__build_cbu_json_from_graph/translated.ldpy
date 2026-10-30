@@ -38,7 +38,7 @@ def run(graph):
         if _is_guest_mop(mop):
             continue
         ccdc_val = m{ {mop} ontomops:hasCCDCNumber ?v }.first()
-        ccdc = str(ccdc_val) if ccdc_val else "N/A"
+        ccdc = str(ccdc_val) if ccdc_val is not None else "N/A"
 
         if ccdc == "N/A":
             continue

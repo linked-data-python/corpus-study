@@ -30,3 +30,10 @@ ex:NotAResultSet a ex:SomeOtherType ;
 ex:strayBinding rs:variable "stray" ; rs:value "should-not-appear" .
 # a solution-shaped resource not linked from ex:rset via rs:solution.
 ex:strayOrphanSolution rs:binding ex:strayBinding .
+# Neighbours sharing two of the three terms of a region pattern (repair of
+# 2026-10-30): a non-ResultSet resource with its own rs:solution (kills the
+# widening of `{rs} rs:solution ?s` to `?x rs:solution ?s`), and a resource
+# pointing at rs:ResultSet through another predicate (kills the widening of
+# `?rs a rs:ResultSet` to `?rs ?p rs:ResultSet`).
+ex:NotAResultSet rs:solution ex:strayOrphanSolution .
+ex:mentionsType ex:about rs:ResultSet .

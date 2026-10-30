@@ -21,7 +21,7 @@
 
 ex:rs1 a rs:ResultSet ;
     rs:resultVariable "x", "y" ;
-    rs:solution ex:sol1, ex:sol2, ex:sol3 .
+    rs:solution ex:sol1, ex:sol2, ex:sol3, ex:sol4 .
 
 ex:sol1 rs:binding ex:b1x, ex:b1y .
 ex:b1x rs:variable "x" ; rs:value ex:alice .
@@ -40,3 +40,26 @@ ex:orphanBinding rs:variable "z" ; rs:value 999 .
 # neighbourhood: has a resultVariable-shaped triple but is never typed
 # rs:ResultSet, so it must never be the `rs` the region binds.
 ex:notAResultSet rs:resultVariable "bogus" .
+
+# Repair of 2026-10-30 (triage: equivalence-doubt, weak-oracle).
+# sol4: a binding that names its variable but carries NO rs:value -- the
+# zero-solution case of the innermost value read. The region's
+# `graph.value(b, RS.value)` gives None, so the row must read {x: None}; a
+# translation that joins ?b rs:variable ?var . ?b rs:value ?val drops the
+# binding and yields {} instead.
+ex:sol4 rs:binding ex:b4x .
+ex:b4x rs:variable "x" .
+
+# Neighbours sharing two of the three terms of a region pattern, so that
+# widening one bound term into a variable changes the result:
+# - a non-ResultSet subject with its own rs:solution (`{rs} rs:solution ?s`
+#   widened to `?x rs:solution ?s`), whose solution reaches a binding;
+ex:notAResultSet rs:solution ex:straySolution .
+# - a solution not reachable from ex:rs1 that links the orphan binding
+#   (`{s} rs:binding ?b` widened to `?x rs:binding ?b`);
+ex:straySolution rs:binding ex:orphanBinding .
+# - a subject typed with something else, and one pointing at rs:ResultSet
+#   through another predicate (`?rs rdf:type rs:ResultSet` widened in its
+#   object or its predicate).
+ex:notAResultSet rdf:type ex:SomethingElse .
+ex:mentionsType ex:about rs:ResultSet .

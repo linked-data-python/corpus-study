@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Copie avec `ex:mopEmptyCcdc a ontomops:MetalOrganicPolyhedron ; ontomops:hasCCDCNumber \"\" .` : FAIL, l'original ajoute une entrée {mopCCDCNumber: '', cbuFormula1: 'N/A', ...}, la traduction l'omet. Même résultat avec `ontomops:hasCCDCNumber 0`. Mutants sur copie du fixture d'origine, tous rouges : label, hasChemicalFormula du CBU, rdfs:label et hasChemicalFormula via owl:sameAs remplacés par `[]` ; l'oracle est donc solide pour les îlots, seul le cas falsy manque. mop_helpers.py est présenté comme verbatim et lit `graph` en rdflib pur des deux côtés : lu, aucune logique ajoutée. Les autres lectures (liste `formula_vals` gardée, boucles séparées) sont équivalentes ; l'ordre de `names` et de `cbu_data` reste à l'ordre de parcours du store (non testé avec ex æquo de formules). Dépôt d'origine : aucun ttl ni appelant ne montre un CCDC vide, donc le risque est théorique mais le défaut est bien celui du pilote (véracité d'un littéral). Pas article-example.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (CCDC \"\" et 0, deux CCDC, voisins à deux termes communs) : la garde de véracité `if ccdc_val` tombait ; corrigée en `is not None`, check vert, seize mutants tués."
 }

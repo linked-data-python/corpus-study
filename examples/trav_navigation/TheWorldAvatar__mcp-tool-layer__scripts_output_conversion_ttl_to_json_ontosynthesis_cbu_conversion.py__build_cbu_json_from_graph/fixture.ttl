@@ -70,3 +70,39 @@ ex:cbuC ontomops:hasCBUFormula "ZZZ-third-cbu-dropped" ;
 # neighbourhood
 ex:cbuOrphan ontomops:hasCBUFormula "ORPHAN-FORMULA" ; rdfs:label "OrphanCBU" .
 ex:chemInputOrphan rdfs:label "OrphanChemInput" .
+
+# ---- Repair of 2026-10-30 (triage: equivalence-doubt) ----
+# A CCDC number whose literal is FALSY in Python: the original tests the
+# LIST of values (`if ccdc_vals`), true as soon as one value exists, so
+# these two MOPs produce entries with mopCCDCNumber "" and "0". A
+# translation that tests the term itself (`if ccdc_val`) treats them as
+# absent ("N/A" -> continue) and drops both entries.
+ex:mopEmptyCcdc a ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber "" ;
+    ontomops:hasChemicalBuildingUnit ex:cbuB .
+ex:mopZeroCcdc a ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber 0 .
+
+# Two CCDC numbers: the original keeps the first value of graph.objects;
+# the translation must keep the same one (and must not raise, as .one()
+# would).
+ex:mopTwoCcdc a ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber "666666", "777777" .
+
+# Neighbours sharing two of the three terms of a region pattern, so that
+# widening a bound term into a variable changes the result:
+# - points at the MOP class through another predicate, with a valid CCDC
+#   (`?mop rdf:type <MOP>` widened in its predicate);
+ex:notAMop ex:about ontomops:MetalOrganicPolyhedron ;
+    ontomops:hasCCDCNumber "444444" .
+# - a CBU-shaped node outside any MOP that has its own owl:sameAs
+#   (`{cbu} owl:sameAs ?v` widened in its subject);
+ex:cbuOrphan owl:sameAs ex:chemInputOrphan .
+# - other properties on a real CBU and on a real chemical input, one of
+#   them an IRI with a label of its own (`{cbu} owl:sameAs ?v`,
+#   `{cbu} rdfs:label ?v`, `{chem_input} rdfs:label ?v` ... widened in
+#   their predicate).
+ex:cbuA ex:note "cbu note must not appear" ;
+    ex:relatedTo ex:unrelatedThing .
+ex:unrelatedThing rdfs:label "unrelated label must not appear" .
+ex:chemInputA ex:note "chem input note must not appear" .

@@ -28,7 +28,37 @@ varying binding count, including one with NO bindings at all, plus
 neighbouring triples that must NOT be picked up), ASK (a small inline
 graph), and CONSTRUCT (an empty graph -- no rs:ResultSet at all, the
 zero-solution case for the very first read in the region).
+
+Calls added by the repair of 2026-10-30 (triage: weak-oracle), each aimed
+at a mutant that stayed green with the three calls above:
+
+* ASK whose answer is `false` -- `askAnswer is not None` must classify it
+  as ASK; the mutant `if askAnswer:` (a false literal treated as absent)
+  turns it into a SELECT.
+* ASK whose `rs:boolean` is a literal of an unknown datatype --
+  `askAnswer.value` is None, so both sides must raise the same "Malformed
+  boolean" exception. (A malformed `xsd:boolean` such as "maybe" does not
+  reach the raise: rdflib 7.2.1 maps it to False, so it is not used.)
+* the SELECT result given as a TEXT STREAM rather than a Graph, with
+  `format="turtle"`: the region's `graph.parse(source, **kwargs)` branch.
+  This is the input type rdflib itself passes (`Result.parse` ->
+  `RDFResultParser.parse(source, **kwargs)` -> `RDFResult(source, ...)`,
+  rdflib/query.py:198 and rdfresults.py in the LexMalta clone).
+* a DAWG-style result graph built from blank nodes only (the shape of the
+  real result-set files), with a binding that has rs:variable but NO
+  rs:value (the zero-solution case of the innermost value read: the
+  dict must hold None for that variable).
+* a binding that has rs:value but NO rs:variable: `Variable(None)` raises
+  TypeError on both sides; the mutant `Variable(m{...}.first() or "x")`
+  does not raise.
+
+fixture.ttl also gained neighbours sharing two of the three terms of a
+pattern (`ex:NotAResultSet rs:solution ...`, `ex:mentionsType
+ex:about rs:ResultSet`), so that widening the bound subject of
+`{rs} rs:solution ?s` or the predicate of `?rs a rs:ResultSet` into a
+variable changes the result.
 """
+from io import StringIO
 from collections import Counter
 from pathlib import Path
 
@@ -44,6 +74,38 @@ ASK_TTL = """
 @prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
 ex:rset a rs:ResultSet ;
     rs:boolean true .
+"""
+
+ASK_FALSE_TTL = """
+@prefix ex: <http://example.org/> .
+@prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
+ex:rset a rs:ResultSet ;
+    rs:boolean false .
+"""
+
+ASK_MALFORMED_TTL = """
+@prefix ex: <http://example.org/> .
+@prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
+ex:rset a rs:ResultSet ;
+    rs:boolean "maybe"^^ex:unknownDatatype .
+"""
+
+BNODE_SELECT_TTL = """
+@prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
+@prefix ex: <http://example.org/> .
+[] a rs:ResultSet ;
+    rs:resultVariable "a", "b" ;
+    rs:solution [ rs:binding [ rs:variable "a" ; rs:value ex:one ] ,
+                             [ rs:variable "b" ; rs:value "two"@en ] ] ,
+                [ rs:binding [ rs:variable "a" ; rs:value 3 ] ,
+                             [ rs:variable "b" ] ] .
+"""
+
+NO_VARIABLE_TTL = """
+@prefix rs: <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
+[] a rs:ResultSet ;
+    rs:resultVariable "a" ;
+    rs:solution [ rs:binding [ rs:value "orphan" ] ] .
 """
 
 
@@ -93,5 +155,11 @@ VERDICT = run_pair(
         _case(lambda: fixture_graph(FIXTURE)),
         _case(lambda: Graph().parse(data=ASK_TTL, format="turtle")),
         _case(Graph),
+        _case(lambda: Graph().parse(data=ASK_FALSE_TTL, format="turtle")),
+        _case(lambda: Graph().parse(data=ASK_MALFORMED_TTL, format="turtle")),
+        lambda: ((_Receiver(), StringIO(FIXTURE.read_text())),
+                 {"format": "turtle"}),
+        _case(lambda: Graph().parse(data=BNODE_SELECT_TTL, format="turtle")),
+        _case(lambda: Graph().parse(data=NO_VARIABLE_TTL, format="turtle")),
     ],
 )

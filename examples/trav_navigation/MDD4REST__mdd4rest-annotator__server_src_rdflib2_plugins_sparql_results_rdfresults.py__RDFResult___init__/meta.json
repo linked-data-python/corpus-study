@@ -32,7 +32,8 @@
     "`graph.value(predicate=RDF.type, object=RS.ResultSet)` (sujet libre) -> `m{ ?rs rdf:type rset:ResultSet }.first()` ; `graph.value(rs, RS.boolean)` -> `m{ {rs} rset:boolean ?v }.first()`.",
     "Le cas de la strate, sur la chaine SELECT (boucle imbriquee de selecteurs : graph.objects(rs, solution) puis, par solution, graph.objects(s, binding) puis DEUX graph.value(b, ...)) : la jointure interne binding/variable/value fusionne en un seul `m{ {s} rset:binding ?b . ?b rset:variable ?var . ?b rset:value ?val }` (sure ici : un noeud de binding porte toujours variable ET value ensemble dans ce vocabulaire, sinon le code original lui-meme plante sur Variable(None)). La boucle EXTERIEURE sur les solutions reste son propre `m{ {rs} rset:solution ?s }`, PAS fusionnee avec la jointure interne : une solution sans binding (sol3 du fixture) doit produire un dict vide dans self.bindings, ce qu'une jointure complete solution+binding supprimerait silencieusement (piege de cardinalite explicite de INSTRUCTIONS_403 SS2). Verifie en cassant volontairement le predicat rset:solution : le pilote detecte la perte de la ligne sol3 (bindings passe de 3 elements dont {} a 0).",
     "harnais run() ajoute a l'identique dans les deux fichiers (exclu des metriques de surface) : la region est un corps `__init__(self, source, **kwargs)` extrait d'une classe, pas une fonction autonome -- run() lui fournit un self jetable (SimpleNamespace) et rend un dict simple des attributs, seule forme que la comparaison structurelle du harnais (dict/liste/ensemble) sait vraiment parcourir (deux SimpleNamespace se comparent par egalite exacte, ordre inclus ; ici l'ordre des solutions et des bindings n'est pas garanti).",
-    "graph.value(predicate=, object=) sans sujet ne renvoie qu'UN match arbitraire : un seul fixture ne peut donc porter qu'un seul sujet `a rs:ResultSet` sans rendre la branche executee non deterministe. 4 appels, chacun son graphe : fixture.ttl (SELECT, motif riche : plusieurs solutions, cas zero-solution interne pour sol3, voisinage ex:orphanBinding/ex:notAResultSet qui ne doit pas matcher), plus deux petits graphes ASK (true/false) et un graphe CONSTRUCT sans aucun rs:ResultSet -- ce dernier est le cas zero-solution du `m{ }.first()` du haut de la fonction."
+    "graph.value(predicate=, object=) sans sujet ne renvoie qu'UN match arbitraire : un seul fixture ne peut donc porter qu'un seul sujet `a rs:ResultSet` sans rendre la branche executee non deterministe. 4 appels, chacun son graphe : fixture.ttl (SELECT, motif riche : plusieurs solutions, cas zero-solution interne pour sol3, voisinage ex:orphanBinding/ex:notAResultSet qui ne doit pas matcher), plus deux petits graphes ASK (true/false) et un graphe CONSTRUCT sans aucun rs:ResultSet -- ce dernier est le cas zero-solution du `m{ }.first()` du haut de la fonction.",
+    "Repair of 2026-10-30: the inner join `m{ {s} rset:binding ?b . ?b rset:variable ?var . ?b rset:value ?val }` (third note above) was WRONG and is replaced by the original's per-binding reads, `for b in m{ {s} rset:binding ?b }` with `m{ {b} rset:variable ?var }.first()` and `m{ {b} rset:value ?val }.first()`: the strengthened driver showed the join dropping a binding without rs:value (original {x: None}, join {}), keeping the last of two rs:value instead of the first, and silently skipping a binding without rs:variable where the original raises TypeError on Variable(None); the claim that a binding always carries both is false for rs:value. The region therefore no longer fuses any pattern: every read is single-pattern, as in the LexMalta twin of this file."
   ],
   "draft_sha": "ab67beaa3c855198",
   "provenance": {
@@ -51,5 +52,26 @@
     "method": "entry:run",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl: ex:sol4 (binding with rs:variable but no rs:value) and neighbours sharing two terms (ex:notAResultSet rs:solution / rdf:type ex:SomethingElse, ex:straySolution rs:binding ex:orphanBinding, ex:mentionsType ex:about rs:ResultSet). Four calls added: MULTI_VALUE (two rs:value on one binding), NO_VARIABLE (rs:value without rs:variable, TypeError on both sides), ASK with an unknown-datatype literal (the 'Malformed boolean' raise), and a text stream instead of a Graph (the graph.load branch, AttributeError on both sides under rdflib 7.2.1).",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "the original fused join ?b rset:variable ?var . ?b rset:value ?val (fails on sol4, MULTI_VALUE, NO_VARIABLE)",
+      "if askAnswer is not None -> if askAnswer",
+      "Variable(m{ ... }.first() or 'x')",
+      "raise Exception('Malformed boolean ...') -> pass",
+      "graph.load(...) -> graph = source",
+      "self.bindings.append(sol) only when sol is non-empty",
+      "{rs} rset:solution ?s -> ?x rset:solution ?s",
+      "?rs rdf:type rset:ResultSet -> ?rs ?p rset:ResultSet / ?rs rdf:type ?o",
+      "{rs} rset:boolean -> {rs} ?p",
+      "{rs} rset:resultVariable -> ?x rset:resultVariable",
+      "{s} rset:binding ?b -> ?x rset:binding ?b / {s} ?p ?b",
+      "{b} rset:variable / rset:value -> {b} ?p",
+      "m{ {b} rset:value ?val }.first() -> .one()"
+    ],
+    "remaining": "Avec la jointure retirée, la paire n'emploie plus de m{ } multi-motifs alors que sa strate est trav_navigation : à Maxime de dire si `directly-expressible` et `constructions` restent justes (aucun îlot déclaré n'a disparu)."
   }
 }

@@ -54,5 +54,25 @@
     "method": "fixture:fixture.ttl entry:__init__",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "five calls added: ASK false; ASK with a literal of unknown datatype (value None, the 'Malformed boolean' raise); the SELECT result given as a text stream with format='turtle' (the graph.parse branch, the input type rdflib's Result.parse passes); a blank-node-only DAWG-style result with a binding lacking rs:value; a binding lacking rs:variable (TypeError on both sides). fixture.ttl: neighbours ex:NotAResultSet rs:solution and ex:mentionsType ex:about rs:ResultSet.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if askAnswer is not None -> if askAnswer",
+      "Variable(m{ {b} rs:variable ?var }.first() or 'x')",
+      "raise Exception('Malformed boolean ...') -> pass",
+      "graph.parse(source, **kwargs) removed",
+      "{rs} rs:solution ?s -> ?x rs:solution ?s",
+      "?rs a rs:ResultSet -> ?rs ?p rs:ResultSet",
+      "{rs} rs:boolean -> {rs} ?p",
+      "{rs} rs:resultVariable -> ?x rs:resultVariable",
+      "{s} rs:binding ?b -> ?x rs:binding ?b / {s} ?p ?b",
+      "{b} rs:variable / rs:value -> {b} ?p",
+      "{b} rs:value ?val -> ?x rs:value ?val",
+      "m{ {b} rs:value ?val }.first() -> .one()"
+    ],
+    "remaining": ""
   }
 }

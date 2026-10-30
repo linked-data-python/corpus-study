@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Copie avec `ex:sol4 rs:binding ex:b4x . ex:b4x rs:variable \"x\" .` ajouté à ex:rs1 : FAIL call[0], original -> bindings [..., {}, {x: None}], traduction -> [..., {}, {}]. Copie avec un second `ex:b2x rs:value ex:bob2` : FAIL (original prend une valeur via graph.value, la traduction itère les deux lignes de la jointure, la dernière écrase dans le dict). Copie avec un binding sans rs:variable (`ex:b5 rs:value 7`) : FAIL, l'original lève TypeError (Variable(None)), la traduction omet silencieusement le binding : donc l'affirmation des notes ne couvre que ce cas-là. Le reste est équivalent : la boucle extérieure sur les solutions est bien séparée (sol3 vide conservé), le cas zéro-ResultSet est couvert par CONSTRUCT_DATA, ASK true/false couverts, voisinage orphanBinding/notAResultSet présent. Pas de défaut de type d'entrée : `rs`, `s`, `b` viennent du graphe. Pas article-example.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (binding sans rs:value, deux rs:value, sans rs:variable, booléen sans valeur, source en flux, voisins à deux termes) : la jointure interne tombait sur les trois premiers cas ; traduction corrigée en lectures séparées par binding, check vert."
 }

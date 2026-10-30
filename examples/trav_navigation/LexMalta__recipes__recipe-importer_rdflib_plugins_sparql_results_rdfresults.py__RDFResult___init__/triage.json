@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutant `if askAnswer:` dans une copie -> OK (VERT). Mutant `Variable(... .first() or 'x')` -> OK (VERT : aucune liaison sans rs:variable). Copie avec quatre appels ajoutés (graphe de résultat entièrement en BNode comme les fichiers DAWG réels, ASK false, `rs:boolean \"0\"^^xsd:boolean` avec rs:solution, valeurs multiples pour rs:value / rs:variable) et ordered=True : la traduction passe (OK) ; le mutant `if askAnswer:` y échoue (FAIL). original.py = dépôt, à la déindentation près (diff). ldpy émet un LdpyWarning ('rs' à la fois préfixe et nom Python, ligne 18) que meta.json mentionne ; je n'ai trouvé aucune ambiguïté réelle dans ce fichier. Pas candidate article : aucune jointure fondue (les boucles imbriquées restent, avec raison : sol = {} par solution), la paire illustre trav_single_value plutôt que la navigation.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (ASK false, booléen sans valeur, source en flux texte, résultat en nœuds anonymes, binding sans rs:value ou sans rs:variable, voisins à deux termes communs) : les deux mutants cités et douze autres échouent, la traduction était juste."
 }
