@@ -56,5 +56,23 @@
     "method": "fixture:fixture.ttl entry:parse_owl_with_rdflib",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Two calls added: fixture_branches.ttl (new) and an empty ontology (\"\"). fixture_branches.ttl decides every branch fixture.ttl left open: class with collectionName only (default style, no typeField/typeValue key), mappingStyle alone with a non-default value for classes and edges, falsy values (\"\" style/collectionName/edgeCollectionName, typeField 0, typeValue \"\") that the `if x:` guards and `or` chains must skip, an `or` chain that yields \"\" rather than None, xsd:integer/xsd:boolean ranges, two values for one read (xsd:int and xsd:integer, two domains with the same local name: order-independent), edges without domain/range, a class with truthy typeField/typeValue placed first, and neighbours reaching owl:Class / owl:DatatypeProperty / owl:ObjectProperty through rdfs:seeAlso. The input stays a str, as in the repository.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`if type_field:` / `if type_value:` -> True, and -> `is not None`",
+      "default \"COLLECTION\" / \"DEDICATED_COLLECTION\" -> other string",
+      "phys:mappingStyle -> phys:style (classes and edges)",
+      "`if domain:` / `if range_:` -> True (physical edges)",
+      "rdfs:range -> rdfs:domain in the datatype loop",
+      "`if coll:` / `if edge_coll:` -> `is not None`; class style `or` -> `is not None` fallback; edge collectionName fallback dropped",
+      "rdf:type widened to a variable in each of the five subject loops (result shape kept), owl:Class widened in the physical loop",
+      "subject of each value read widened to a variable (typeField, typeValue, mappingStyle, collectionName, style, edgeCollectionName, rdfs:domain, rdfs:range; result shape kept)",
+      ".first() -> .one() on rdfs:range (datatype) and rdfs:domain (physical edges)",
+      "physical class loop replaced by []"
+    ],
+    "remaining": ""
   }
 }

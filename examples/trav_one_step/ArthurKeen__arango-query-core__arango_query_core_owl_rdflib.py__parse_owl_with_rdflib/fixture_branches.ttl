@@ -1,0 +1,113 @@
+# Second input Turtle for ArthurKeen__arango-query-core__arango_query_core_owl_rdflib.py__parse_owl_with_rdflib,
+# written at repair (2026-10-30). fixture.ttl covers the main reads; this one
+# covers the branches and defaults it leaves undecided. Each value read by
+# g.value / .first() appears here absent, falsy ("" or 0), and twice, and
+# each subject read has a neighbour that shares two of its three terms.
+#
+# Classes (physical mapping, `if coll:` and the style `or` chain)
+#  - ex:Typed (first in the file): truthy typeField/typeValue, so a read of
+#    either that ignored its subject would hand them to the classes below;
+#  - ex:Plain: collectionName only -> style defaults to "COLLECTION", and
+#    neither typeField nor typeValue key is written;
+#  - ex:Mapped: phys:mappingStyle alone, with a NON-default value -> the
+#    fallback half of the style `or` is the only one that answers;
+#  - ex:EmptyStyle: phys:style "" falls through to phys:mappingStyle;
+#    typeField 0 and typeValue "" are falsy, so neither key is written;
+#  - ex:EmptyColl: collectionName "" -> `if coll:` false, not in physical;
+#  - ex:MetaClass: rdfs:seeAlso owl:Class (owl:Class reached by another
+#    predicate than rdf:type) -> must not be an entity.
+# Datatype properties
+#  - ex:age (xsd:integer), ex:flag (xsd:boolean): a range other than
+#    xsd:string, so reading rdfs:domain in place of rdfs:range shows;
+#  - ex:count: two ranges that map to the same simple type (xsd:int,
+#    xsd:integer) -> the result does not depend on which one comes first,
+#    but a read that insists on exactly one value would raise;
+#  - ex:untypedRange: domain without range -> no "type" key;
+#  - ex:notAProp: rdfs:seeAlso owl:DatatypeProperty, with domain and range
+#    -> must not become a property of ex:Plain.
+# Object properties (conceptual and physical relationships)
+#  - ex:bareEdge: edgeCollectionName only -> style defaults to
+#    "DEDICATED_COLLECTION", conceptual from/to "Any", physical keys
+#    "domain"/"range" absent;
+#  - ex:mappedEdge: collectionName and mappingStyle (non-default) only ->
+#    both fallback halves answer; two domains with the same local name
+#    (ex:Plain, other:Plain) and no range;
+#  - ex:falsyEdge: edgeCollectionName "" and style "" fall through to
+#    collectionName / mappingStyle; range without domain;
+#  - ex:emptyEdge: edgeCollectionName "" and collectionName "" -> the `or`
+#    chain yields "" (not None), and `if edge_coll:` keeps it out of physical;
+#  - ex:notAnEdge: rdfs:seeAlso owl:ObjectProperty with an
+#    edgeCollectionName -> must appear nowhere.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix phys: <http://arangodb.com/schema/physical#> .
+@prefix ex: <http://example.org/onto#> .
+@prefix other: <http://example.org/other#> .
+
+ex:Typed a owl:Class ;
+    phys:collectionName "typed" ;
+    phys:typeField "kind" ;
+    phys:typeValue "Typed" .
+
+ex:Plain a owl:Class ;
+    phys:collectionName "plains" .
+
+ex:Mapped a owl:Class ;
+    phys:collectionName "mapped" ;
+    phys:mappingStyle "GENERIC_WITH_TYPE" .
+
+ex:EmptyStyle a owl:Class ;
+    phys:collectionName "empty_style" ;
+    phys:style "" ;
+    phys:mappingStyle "EMBEDDED" ;
+    phys:typeField 0 ;
+    phys:typeValue "" .
+
+ex:EmptyColl a owl:Class ;
+    phys:collectionName "" .
+
+ex:MetaClass rdfs:seeAlso owl:Class ;
+    phys:collectionName "meta_should_not_appear" .
+
+ex:age a owl:DatatypeProperty ;
+    rdfs:domain ex:Plain ;
+    rdfs:range xsd:integer .
+
+ex:flag a owl:DatatypeProperty ;
+    rdfs:domain ex:Plain ;
+    rdfs:range xsd:boolean .
+
+ex:count a owl:DatatypeProperty ;
+    rdfs:domain ex:Mapped ;
+    rdfs:range xsd:int, xsd:integer .
+
+ex:untypedRange a owl:DatatypeProperty ;
+    rdfs:domain ex:Plain .
+
+ex:notAProp rdfs:seeAlso owl:DatatypeProperty ;
+    rdfs:domain ex:Plain ;
+    rdfs:range xsd:date .
+
+ex:bareEdge a owl:ObjectProperty ;
+    phys:edgeCollectionName "bare_edges" .
+
+ex:mappedEdge a owl:ObjectProperty ;
+    rdfs:domain ex:Plain, other:Plain ;
+    phys:collectionName "mapped_edges" ;
+    phys:mappingStyle "GENERIC_WITH_TYPE" .
+
+ex:falsyEdge a owl:ObjectProperty ;
+    rdfs:range ex:Mapped ;
+    phys:edgeCollectionName "" ;
+    phys:collectionName "fallback_edges" ;
+    phys:style "" ;
+    phys:mappingStyle "EMBEDDED" .
+
+ex:emptyEdge a owl:ObjectProperty ;
+    phys:edgeCollectionName "" ;
+    phys:collectionName "" .
+
+ex:notAnEdge rdfs:seeAlso owl:ObjectProperty ;
+    rdfs:domain ex:Plain ;
+    phys:edgeCollectionName "not_an_edge" .

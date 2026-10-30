@@ -1,0 +1,15 @@
+# Input graph written at repair (2026-10-30) for
+# CatholicOS__ontokit-api__ontokit_services_ontology_extractor.py__OntologyMetadataExtractor__extract_description.
+# ex:OntoEmptyValue carries two dc:description values, the empty one first
+# (insertion order), then a dcterms:description. The `if value:` guard must
+# skip "" and keep reading the SAME property: the answer is the second
+# dc:description, not "" and not the dcterms one. Read both through
+# ontology_iri (first loop) and through the global loop (ontology_iri=None).
+@prefix ex: <http://example.org/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:OntoEmptyValue a owl:Ontology ;
+    dc:description "", "Second dc:description, after an empty one." ;
+    dcterms:description "Should be shadowed by the second dc:description." .

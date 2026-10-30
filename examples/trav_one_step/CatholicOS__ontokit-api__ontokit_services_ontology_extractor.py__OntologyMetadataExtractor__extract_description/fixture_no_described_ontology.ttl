@@ -1,0 +1,23 @@
+# Input graph written at repair (2026-10-30) for
+# CatholicOS__ontokit-api__ontokit_services_ontology_extractor.py__OntologyMetadataExtractor__extract_description.
+# The only owl:Ontology has no description; the descriptions sit on
+# neighbours that share two of the three terms of the global read
+# `?s rdf:type owl:Ontology`:
+#  - ex:NotAnOntology is typed, but owl:Class (object differs);
+#  - ex:SeeAlsoOntology reaches owl:Ontology by rdfs:seeAlso (predicate
+#    differs).
+# With ontology_iri=None the region must return None: widening either term
+# of the global read into a variable, or the subject of the reads in the
+# global loop, returns one of the descriptions below instead.
+@prefix ex: <http://example.org/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:OntoBare a owl:Ontology .
+
+ex:NotAnOntology a owl:Class ;
+    dc:description "Typed, but not an ontology." .
+
+ex:SeeAlsoOntology rdfs:seeAlso owl:Ontology ;
+    dc:description "Linked to owl:Ontology by another predicate." .

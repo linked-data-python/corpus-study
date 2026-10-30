@@ -50,5 +50,21 @@
     "method": "fixture:fixture.ttl entry:_extract_description",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Six calls added, on three new small fixtures (fresh per side): fixture_no_described_ontology.ttl (the only owl:Ontology has no description; descriptions on an owl:Class and on a subject linked to owl:Ontology by rdfs:seeAlso: None expected), with ontology_iri None and ex:OntoBare; fixture_second_ontology.ttl (first owl:Ontology without description, then a BNode ontology with rdfs:comment only: the global loop must reach its second subject and last property); fixture_empty_values.ttl (dc:description \"\" then a second dc:description, plus dcterms) through both loops; and fixture.ttl with ontology_iri=\"\", a falsy str, the type the repository passes (ontology_extractor.py:150).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "global read `?s rdf:type owl:Ontology`: object widened, predicate widened (result shape kept)",
+      "global loop limited to its first subject (`[:1]`)",
+      "subject of the reads in the global loop and in the first loop widened to a variable (shape kept)",
+      "objects limited to the first value (`[:1]`), in both loops",
+      "`desc_properties[:2]` in the global loop",
+      "predicate of the reads widened to a variable, in both loops (shape kept)",
+      "`if value:` -> True, in both loops",
+      "global loop replaced by [], and gated on `not ontology_iri` (the quirk 'fixed')"
+    ],
+    "remaining": ""
   }
 }

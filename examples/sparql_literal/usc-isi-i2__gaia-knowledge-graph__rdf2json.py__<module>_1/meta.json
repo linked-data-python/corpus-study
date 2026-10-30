@@ -39,5 +39,20 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "sample1.turtle gains four nodes, each deciding one part of the query: _:untyped (reification triples, no rdf:type), _:otherlink (ex:kind rdf:Statement), _:claim (typed ex:Claim with an rdf:predicate: only the second UNION branch answers) and _:st1dup (same triple as _:st1, for DISTINCT); driver docstring says what each node makes visible. The module-state oracle compares d and res, i.e. what output.json receives.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "anchor `?s rdf:type rdf:Statement` dropped from branch 1",
+      "branch 1 rdf:type widened to a variable (`?s ?q rdf:Statement`)",
+      "branch 1 object rdf:Statement widened to a variable",
+      "DISTINCT dropped",
+      "branch 1 rdf:predicate widened to a variable",
+      "FILTER dropped; branch 2 killed with FILTER(1 = 2); branch 1 killed with FILTER(1 = 2)",
+      "branch 2 rdf:type widened; rdf:subject / rdf:object widened"
+    ],
+    "remaining": "Nothing on equivalence: the SPARQL text is identical on both sides and every part of it is now decided by a node of the fixture. sample1.turtle stays a fixture invented for the study (the repository has none)."
   }
 }

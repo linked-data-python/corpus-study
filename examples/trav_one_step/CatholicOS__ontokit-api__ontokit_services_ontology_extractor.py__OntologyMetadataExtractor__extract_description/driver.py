@@ -41,6 +41,31 @@ Five calls against the shared fixture, plus one against a fresh empty graph:
 ex:NotAnOntology in fixture.ttl carries a dc:description but is never typed
 owl:Ontology and is never passed as ontology_iri: the neighbourhood that
 must not leak into any of the six results above.
+
+Calls 1-6 never take the global loop past its first subject: ex:OntoDC comes
+first in the store and has a dc:description, so the global read
+`?s rdf:type owl:Ontology` and the reads inside that loop were not pinned
+down.  Calls 7-12, added at repair (2026-10-30), each run on their own
+small fixture (fresh per side) and decide one of them:
+
+7. fixture_no_described_ontology.ttl, ontology_iri=None -- the only
+   owl:Ontology has no description, the descriptions sit on an owl:Class
+   and on a subject linked to owl:Ontology by rdfs:seeAlso: the answer is
+   None.  Widening rdf:type or owl:Ontology into a variable, or the subject
+   of the reads in the global loop, returns a description instead.
+8. same fixture, ontology_iri=ex:OntoBare -- the first loop finds nothing
+   for a subject given explicitly, and the global loop too: None.
+9. fixture_second_ontology.ttl, ontology_iri=None -- the first owl:Ontology
+   in store order has no description, the second (a blank node) has only
+   rdfs:comment: the global loop must reach its second subject and the last
+   property of the priority list, and interpolate a BNode.
+10. fixture_empty_values.ttl, ontology_iri=ex:OntoEmptyValue -- two
+    dc:description values, "" first: `if value:` must skip "" and keep
+    reading the same property (the second value wins over dcterms).
+11. same fixture, ontology_iri=None -- the same through the global loop.
+12. fixture.ttl, ontology_iri="" -- a falsy str, the type the repository
+    passes (ontology_extractor.py:150, from _find_ontology_iri, a str or
+    None): no subject to check, global loop only.
 """
 from pathlib import Path
 
@@ -80,13 +105,31 @@ def call_zero_solutions():
     return ((SELF, Graph(), None), {})
 
 
+def _on(name, iri):
+    def case():
+        return ((SELF, fixture_graph(HERE / name),
+                 None if iri is None else str(iri)), {})
+    case.__name__ = f"call_{name}_{iri}"
+    return case
+
+
+REPAIR_CALLS = [
+    _on("fixture_no_described_ontology.ttl", None),
+    _on("fixture_no_described_ontology.ttl", EX.OntoBare),
+    _on("fixture_second_ontology.ttl", None),
+    _on("fixture_empty_values.ttl", EX.OntoEmptyValue),
+    _on("fixture_empty_values.ttl", None),
+    _on("fixture.ttl", ""),
+]
+
+
 VERDICT = run_pair(
     __file__,
     entry='_extract_description',
     fixture="fixture.ttl",
     calls=[call_dc_priority, call_dcterms_fallback, call_comment_fallback,
            call_global_fallthrough_quirk, call_no_ontology_iri_global_search,
-           call_zero_solutions],
+           call_zero_solutions] + REPAIR_CALLS,
     # ordered=True only if the region imposes an order (sorted, ORDER BY):
     # no store promises one, so results are compared as multisets.
 )

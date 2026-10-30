@@ -28,3 +28,33 @@ ex:alice ex:name "Alice" .
 _:incomplete a rdf:Statement ;
     rdf:predicate ex:hasRole ;
     rdf:subject ex:bob .
+
+# Added at repair (2026-10-30), each one aimed at a part of the query that the
+# nodes above did not pin down:
+# - carries the reification triples but has no rdf:type at all: matches
+#   nothing, so dropping the `?s rdf:type rdf:Statement` anchor shows;
+_:untyped rdf:predicate ex:knows ;
+    rdf:subject ex:carol ;
+    rdf:object ex:dave .
+
+# - linked to rdf:Statement by another predicate than rdf:type: matches
+#   nothing, so widening rdf:type into a variable shows;
+_:otherlink ex:kind rdf:Statement ;
+    rdf:predicate ex:likes ;
+    rdf:subject ex:carol ;
+    rdf:object ex:erin .
+
+# - typed with something other than rdf:Statement AND carrying rdf:predicate:
+#   only the second UNION branch matches (pred = ex:Claim, not ex:says), so
+#   widening the object rdf:Statement into a variable shows;
+_:claim a ex:Claim ;
+    rdf:predicate ex:says ;
+    rdf:subject ex:dave ;
+    rdf:object ex:frank .
+
+# - a second statement node giving the same (sub, pred, obj) as _:st1: DISTINCT
+#   keeps a single ex:acme in alice's worksFor list.
+_:st1dup a rdf:Statement ;
+    rdf:predicate ex:worksFor ;
+    rdf:subject ex:alice ;
+    rdf:object ex:acme .

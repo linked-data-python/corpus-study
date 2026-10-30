@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants dans une copie, tous restés OK : `if type_field:`->`if True:` ; `if type_value:`->`if True:` ; défaut \"COLLECTION\"->\"X\" ; défaut \"DEDICATED_COLLECTION\"->\"X\" ; `{cls} phys:mappingStyle`->`phys:style` ; `{prop} phys:mappingStyle`->`phys:style` (arêtes) ; `if domain:`->`if True:` et `if range_:`->`if True:` (arêtes physiques) ; `{prop} rdfs:range`->`rdfs:domain` dans la boucle datatype (invisible : l'unique range est xsd:string, qui est aussi le défaut de _xsd_to_simple). Mutants tués (FAIL) : `if domain_name in entity_props:`->True ; défaut \"Any\"->\"Y\". La note affirme une vérification anti-vert-creux sur un seul mutant (collectionName). Fuzz de 400 ontologies Turtle aléatoires (valeurs multiples, littéraux \"\", \"0\", 0, @en ; sans BNodes dont l'id est aléatoire) : repr(MappingBundle) identique original/traduction dans 400/400. Shim MappingBundle/MappingSource/_local_name/_xsd_to_simple conforme à mapping.py:129-143 et owl_rdflib.py:130-153. Les 20 g.value->m{ }.first() allongent le texte sans gain (pas de jointure possible), `?v` réutilisé partout.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (fixture_branches.ttl : défauts, replis de `or`, valeurs fausses \"\"/0, deux valeurs, voisins par rdfs:seeAlso ; appel sur ontologie vide) : les dix mutants cités et une vingtaine d'autres sont tués, check OK, traduction inchangée."
 }

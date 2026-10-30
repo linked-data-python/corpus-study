@@ -1,0 +1,16 @@
+# Input graph written at repair (2026-10-30) for
+# CatholicOS__ontokit-api__ontokit_services_ontology_extractor.py__OntologyMetadataExtractor__extract_description.
+# Two owl:Ontology subjects, in this order in the file (the in-memory store
+# yields them in insertion order): ex:OntoBare has no description, the
+# blank node after it has only rdfs:comment. With ontology_iri=None the
+# global loop must go past its first subject, and past the first two
+# properties of the priority list, to answer — and it interpolates a BNode
+# in subject position.
+@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:OntoBare a owl:Ontology .
+
+[] a owl:Ontology ;
+    rdfs:comment "Anonymous ontology, comment only." .

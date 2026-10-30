@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK. Région comparée au dépôt (ontology_extractor.py:386-415) : identique à l'indentation près. Sur le fixture tout appel hors OntoComment/OntoDCTERMS retourne 'DC wins.' parce que ex:OntoDC est le premier owl:Ontology du store, il a dc:description : la boucle globale s'arrête toujours à son premier sujet. Mutants sur translated.ldpy, VERTS : global `[s for s,c in m{ ?s rdf:type ?c }]` (sans filtre owl:Ontology, donc ex:NotAnOntology jamais atteint malgré le commentaire du fixture), sous-îlot global `{ont_subject}`→`?x` joker, `list(m{…})[:1]` sur les ontologies (un seul sujet examiné), idem sur les objets, `desc_properties[:2]` dans la boucle globale. Mutants tués : boucle 1→[], joker sur sujet de la boucle 1, boucle globale→[]/→`[]`, ordre des propriétés. Pas d'objet à valeur vide dans le fixture (la garde `if value:` n'est pas exercée), ni de prédicat à deux valeurs. Ordre : m{} = graph.triples imbriqué (runtime.py:Match.solutions), même ordre que graph.objects/subjects. Article : propre mais gain modeste (deux m{} dans 2 boucles imbriquées) ; non tant que l'oracle est faible.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Six appels ajoutés sur trois petits fixtures (aucune ontologie décrite + voisins, deuxième sujet BNode avec rdfs:comment seul, dc:description \"\" puis une seconde valeur, ontology_iri=\"\") : les cinq mutants cités et neuf autres sont tués, check OK, traduction inchangée."
 }
