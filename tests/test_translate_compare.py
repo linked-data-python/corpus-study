@@ -347,6 +347,21 @@ def test_order_is_ignored_at_every_depth_not_just_the_top():
     assert len(diffs) == 2, "a missing element is still a difference"
 
 
+def test_a_row_keeps_its_column_order_when_rows_are_unordered():
+    """ordered=False frees the order of the rows, not of a row's columns: a
+    glue that swaps (concept, label) into (label, concept) is a difference."""
+    from rdfeval.harness import _compare_value
+    a = [("c1", "Alpha"), ("c2", "Beta")]
+    diffs: list = []
+    _compare_value(a, list(reversed(a)), "r", diffs, ordered=False)
+    assert diffs == []
+    _compare_value(a, [(l, c) for c, l in a], "r", diffs, ordered=False)
+    assert len(diffs) == 1
+    _compare_value({"k": [("c1", "x")]}, {"k": [("x", "c1")]}, "r", diffs,
+                   ordered=False)
+    assert len(diffs) == 2, "at every depth"
+
+
 def test_turtle_a_abbreviates_rdf_type_in_predicate_position_only():
     """`a` is a predicate abbreviation: `RDF.type` as an OBJECT stays a term."""
     from ldpy.transpiler import transpile

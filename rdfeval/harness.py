@@ -179,11 +179,17 @@ def _unordered(value):
     the outer list would fail such a pair for a reason that is not its
     meaning.  A region that *does* impose an order says ``ordered=True``, and
     then nothing is sorted.
+
+    A tuple is a row, not a collection: its positions are its meaning (a
+    region returning ``(concept, label)`` is not one returning ``(label,
+    concept)``), so only its elements are made order-free, never the tuple.
     """
     value = normalise(value)
     if isinstance(value, dict):
         return {k: _unordered(v) for k, v in sorted(value.items(), key=repr)}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, tuple):
+        return tuple(_unordered(v) for v in value)
+    if isinstance(value, list):
         return sorted((_unordered(v) for v in value), key=repr)
     return value
 
@@ -245,7 +251,9 @@ def normalise(value):
         return ("bnode",)
     if isinstance(value, dict):
         return {k: normalise(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, tuple):
+        return tuple(normalise(v) for v in value)
+    if isinstance(value, list):
         return [normalise(v) for v in value]
     if isinstance(value, set):
         return sorted(map(repr, (normalise(v) for v in value)))
