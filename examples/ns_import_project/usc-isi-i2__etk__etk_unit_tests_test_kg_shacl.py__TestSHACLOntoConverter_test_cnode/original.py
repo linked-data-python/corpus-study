@@ -31,10 +31,12 @@ def test_cnode(self):
 # against the pinned commit: TestSHACLOntoConverter has no setUp/fixtures
 # this test relies on). Restores the binding the extraction lost
 # (AGENT_BATCH's "163 regions" case) without touching the region body.
+# `case` lets the driver pass a TestCase that records every assert* call
+# (identical on both sides); demo() alone keeps the original behaviour.
 import unittest
 
 
-def demo():
-    case = unittest.TestCase()
+def demo(case=None):
+    case = case if case is not None else unittest.TestCase()
     test_cnode(case)
     return "ok"

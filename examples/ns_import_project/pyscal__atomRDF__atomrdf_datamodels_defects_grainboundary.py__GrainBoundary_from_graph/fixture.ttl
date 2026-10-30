@@ -1,18 +1,18 @@
 # Input graph for pyscal__atomRDF__atomrdf_datamodels_defects_grainboundary.py__GrainBoundary_from_graph
-# Covers: several solutions of the defect pattern (sample1), the
-# zero-solution case when the type doesn't match (sample2), and
-# neighbouring triples (a TwistGrainBoundary sibling type) that must NOT
-# match.
 #
-# A third case -- a sample with NO cmso:hasMaterial at all -- is
-# deliberately NOT covered here: get_material(graph, sample) then returns
-# None, and `graph.triples((None, CDCO.hasCrystallographicDefect, None))`
-# treats that None as a WILDCARD subject (rdflib triple-pattern semantics),
-# matching every defect in the whole graph regardless of sample -- while
-# `m{ {material} cdco:hasCrystallographicDefect ?o }` interpolates {material}
-# as a TERM, not a pattern wildcard. The two are not the same operation once
-# the subject is unbound; exercising it would test that gap, not this
-# region's own namespace-import construction. See translation_notes.
+# One anchor per way the region can decide (see driver.py for the calls).
+# The material node is the decisive term of the defect pattern, the defect
+# node of the rdf:type read; each anchor has a neighbour that shares two of
+# the three terms of a pattern and must not be visited.
+#
+# A sample with NO cmso:hasMaterial (ex:sample3, ex:sample-typed-only) is
+# covered: get_material returns None, and the original's
+# `graph.triples((None, CDCO.hasCrystallographicDefect, None))` treats that
+# None as a WILDCARD subject -- it then reads the defects of EVERY material
+# in the graph.  The repository reaches it: AtomicScaleSample.from_graph
+# (atomrdf/datamodels/structure.py:818-862) only requires the sample to have
+# an rdf:type, then calls field_type.from_graph(graph, sample) for
+# grain_boundary.
 @prefix ex: <http://example.org/> .
 @prefix cmso: <http://purls.helmholtz-metadaten.de/cmso/> .
 @prefix pldo: <http://purls.helmholtz-metadaten.de/cdos/pldo/> .
@@ -37,3 +37,55 @@ ex:pd1_gb a pldo:GrainBoundary ;
 ex:sample2 cmso:hasMaterial ex:material2 .
 ex:material2 cdco:hasCrystallographicDefect ex:pd2_twist .
 ex:pd2_twist a pldo:TwistGrainBoundary .
+
+# sample-typed-only: the sample exists (it has an rdf:type, which is all the
+# repository's caller checks) but has no cmso:hasMaterial -> material None.
+ex:sample-typed-only a cmso:AtomicScaleSample .
+
+# sample4: a material with no defect at all -> the loop never runs.
+ex:sample4 cmso:hasMaterial ex:material4 .
+ex:material4 a cmso:CrystallineMaterial .
+
+# sample5: two GrainBoundary defects on one material -> the FIRST one in
+# store order is returned (sigma 3 or 7: the two sides must agree).
+ex:sample5 cmso:hasMaterial ex:material5 .
+ex:material5 cdco:hasCrystallographicDefect ex:pd5_a, ex:pd5_b .
+ex:pd5_a a pldo:GrainBoundary ; pldo:hasSigmaValue "3"^^xsd:integer .
+ex:pd5_b a pldo:GrainBoundary ; pldo:hasSigmaValue "7"^^xsd:integer .
+
+# sample6 / sample7: a defect with TWO rdf:type values; graph.value returns
+# one of them, so the rdf:type read decides whether it matches.  Written in
+# both orders.
+ex:sample6 cmso:hasMaterial ex:material6 .
+ex:material6 cdco:hasCrystallographicDefect ex:pd6 .
+ex:pd6 a pldo:GrainBoundary, pldo:TwistGrainBoundary ; pldo:hasSigmaValue "13"^^xsd:integer .
+ex:sample7 cmso:hasMaterial ex:material7 .
+ex:material7 cdco:hasCrystallographicDefect ex:pd7 .
+ex:pd7 a pldo:TwistGrainBoundary, pldo:GrainBoundary ; pldo:hasSigmaValue "17"^^xsd:integer .
+
+# sample8: a defect with no rdf:type (typev None, skipped) beside a
+# GrainBoundary (sigma 11).
+ex:sample8 cmso:hasMaterial ex:material8 .
+ex:material8 cdco:hasCrystallographicDefect ex:pd8_untyped, ex:pd8_gb .
+ex:pd8_untyped pldo:hasSigmaValue "1"^^xsd:integer .
+ex:pd8_gb a pldo:GrainBoundary ; pldo:hasSigmaValue "11"^^xsd:integer .
+
+# sample9: neighbours only -- a GrainBoundary linked by ANOTHER predicate,
+# a defect whose type is the literal "GrainBoundary" (not the IRI), and a
+# GrainBoundary defect of the sample ITSELF (wrong subject: the sample, not
+# its material).
+ex:sample9 cmso:hasMaterial ex:material9 ;
+    cdco:hasCrystallographicDefect ex:pd9_on_sample .
+ex:material9 ex:hasOtherDefect ex:pd9_other ;
+    cdco:hasCrystallographicDefect ex:pd9_literal .
+ex:pd9_other a pldo:GrainBoundary ; pldo:hasSigmaValue "91"^^xsd:integer .
+ex:pd9_literal rdf:type "http://purls.helmholtz-metadaten.de/cdos/pldo/GrainBoundary" .
+ex:pd9_on_sample a pldo:GrainBoundary ; pldo:hasSigmaValue "92"^^xsd:integer .
+
+# sample10: the material is the empty literal "" (falsy, not None): no
+# triple has a literal subject, so nothing matches -- and it is not a
+# wildcard either.
+ex:sample10 cmso:hasMaterial "" .
+
+# sample11: the material is the literal "0" (falsy-looking string).
+ex:sample11 cmso:hasMaterial "0" .

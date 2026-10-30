@@ -39,5 +39,16 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "driver.py est maintenant un pilote dédié. demo(case=None) reçoit une couture, identique des deux côtés : le TestCase à employer ; l'appel d'origine demo() est gardé. Le pilote passe en plus un TestCase enregistreur, qui journalise chaque assert* de premier niveau : méthode, arguments normalisés (un BNode etk nommé par ordre d'apparition, une URI etk par sa valeur, un terme rdflib ou une str par son type et sa chaîne), passed|failed. Il enveloppe aussi SHACLOntoConverter.__init__ et .cnode, pour journaliser le TYPE et la chaîne de chaque terme que la région leur passe, et le noeud rendu. Le shim est réimporté pour chaque côté, puisque la classe est patchée, et le pilote vérifie que les deux classes sont distinctes. Sont comparés : l'issue (une AssertionError est identifiée par sa position dans le journal, car les assert n'ont pas de message), les avertissements, stdout, stderr et le journal. Le pilote exige enfin six assert réussis côté original.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "c1 et c2 en chaînes nues au lieu des IRI (cité par le trieur, vert avant) : FAIL (type de l'argument de cnode)",
+      "c1 = rdflib.Literal(...) au lieu de l'IRI : FAIL",
+      "IRI de c1 modifiée ; c2 égal à c1 ; assertNotEqual -> assertEqual ; assertIsInstance(cnode3) supprimé ; cnode2 = cnode(c1) au lieu de la chaîne ; {str(c1): …} -> {c1: …} : FAIL sur chacun"
+    ],
+    "remaining": ""
   }
 }

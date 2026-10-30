@@ -9,7 +9,8 @@ from atomrdf_context import get_material, GrainBoundary, pldo:, cdco:
 def from_graph(cls, graph, sample):
     material = get_material(graph, sample)
     @graph graph
-    for plane_defect in m{ {material} cdco:hasCrystallographicDefect ?o }:
+    for triple in graph.triples((material, cdco:hasCrystallographicDefect, None)):
+        plane_defect = triple[2]
         typev = m{ {plane_defect} rdf:type ?t }.first()
         if typev is not None and typev == pldo:GrainBoundary:
             return cls._read_gb(graph, sample, plane_defect)

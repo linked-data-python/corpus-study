@@ -1,0 +1,14 @@
+# Second input graph: a sample with no cmso:hasMaterial in a graph whose
+# only crystallographic defect is a TwistGrainBoundary.  The wildcard read of
+# the original then visits that defect and returns None; a version that
+# reads nothing returns None too, so this graph alone cannot tell them apart
+# -- fixture.ttl's ex:sample-typed-only does.  Its role: the wildcard must not
+# produce a GrainBoundary out of a non-GrainBoundary.
+@prefix ex: <http://example.org/> .
+@prefix cmso: <http://purls.helmholtz-metadaten.de/cmso/> .
+@prefix pldo: <http://purls.helmholtz-metadaten.de/cdos/pldo/> .
+@prefix cdco: <http://purls.helmholtz-metadaten.de/cdos/cdco/> .
+
+ex:lonely a cmso:AtomicScaleSample .
+ex:materialX cdco:hasCrystallographicDefect ex:pdX .
+ex:pdX a pldo:TwistGrainBoundary .

@@ -14,5 +14,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (demo() ne déréférence que QUDT.hasUnit, QUDTU.M, QUDTQK.Length). Dans une copie (mktemp -d, supprimée) j'ai ajouté aux deux côtés la ligne `bindings = {QUDT: \"qudt\", QUDTQK: \"qudtqk\", QUDTU: \"qudtu\"}` (lignes 56-58 du dépôt, qui suivent l'import) : l'original s'exécute, la version traduite lève NameError: name 'QUDT' is not defined. Les notes du traducteur le disent (« the prefix-import form does not bind QUDT… as Python names ») mais en font un détail du harnais plutôt qu'un écart de comportement. Le dépôt n'exporte aucun `__namespaces__` (grep : zéro occurrence ; qudt.py définit des DefinedNamespace) : le shim l'écrit à la main, déjà flaggé mécaniquement. Les classes du shim sont bien des DefinedNamespace réduites (jeu de membres restreint, non pertinent pour une ligne d'import).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote dédié (noms liés, names_only_original, cinq usages du dépôt : bindings, bind_namespaces, find_abbreviation, QUDT.degreeCelsius avec son avertissement ; shim réimporté par côté à cause du lru_cache de DefinedNamespace) : il a fait tomber l'import par préfixes seuls, devenu `from … import QUDT, QUDTU, QUDTQK, qudt:, qudtu:, qudtqk:`, check OK."
 }

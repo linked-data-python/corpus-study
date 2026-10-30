@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK, mais : (1) dans une copie, `original.py` avec `return cls._read_gb(…)` remplacé par `return None` reste OK ; la traduction mutée (`== pldo:TwistGrainBoundary`) reste OK aussi : les deux côtés exécutent la même fonction, la dernière affectée à la classe partagée du shim (la note disant que les classes sont distinctes est fausse). (2) Dans une copie, un script appelant directement `from_graph` de chaque espace de noms avec la classe du shim : sample1 et sample2 identiques ; sample3 (absent du graphe) : original = GrainBoundary(sigma=5, …), traduction = None ; sample4 (deux défauts à deux types) identique. La note du traducteur dit que le joker n'existe pas côté traduction, ce qui est exact, mais l'écart est atteignable (voir `where`). Le crédit `from … import p:` repose sur un `__namespaces__` écrit à la main par atomrdf_context.py (déjà remonté).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Shim désormais isolé par côté (et l'isolation est vérifiée), 16 appels sur deux fixtures et un graphe vide : la boucle m{ {material} … } tombait sur le matériau None (joker de l'original, atteint par le dépôt), elle revient à graph.triples((material, cdco:…, None)) ; check OK, les deux mutants du trieur tués."
 }
