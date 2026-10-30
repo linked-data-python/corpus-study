@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "`@prefix ent: <…> as ns .` suivi de quatre `ns.Terme` conserve l'accès Python par attribut au lieu de `ent:Terme` ; le `as ns` est inutile, et le second @prefix (`prov:`) est mort des deux côtés.",
+  "questions": [
+    {
+      "question": "Les quatre `ns.DerivationActivity` / `ns.TemporalExtent` / `ns.QuantityValue` / `ns.Participation` (lignes 28-31) devraient-ils être écrits `ent:DerivationActivity`, etc., en supprimant `as ns`, puisque le Namespace n'est utilisé nulle part comme objet ?",
+      "where": "translated.ldpy:27-31 et original.py:236-240",
+      "if_yes": "needs-work : réécrire avec des noms préfixés (le crédit « @prefix » est alors réel : 4 usages lexicaux), ou déclasser les constructions.",
+      "if_no": "Approuver tel quel, en acceptant que le gain de notation soit nul (deux lignes pour deux lignes, accès par attribut inchangé)."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutation de l'IRI (`enterprise/` -> `enterprisX/`) : FAIL, prov_chains/temporal_extents/quantity_values/participations tombent à 0, donc l'oracle exerce bien l'espace de noms et ces quatre compteurs. Variante (dans une copie) : `as ns` retiré et les quatre `ns.X` remplacés par `ent:X` : check OK, équivalente, donc la forme plus spécifique passe. Les notes justifient `as ns` par l'accès attribut, ce qui est circulaire ; INSTRUCTIONS.md §1 réserve `as` aux cas où l'objet Namespace est nécessaire (bind, export, registre). Dans le dépôt (ontology_gate.py:236-240) ns n'est utilisé que pour ces quatre accès, il n'échappe pas. `prov_ns` (original.py:235) n'est jamais référencé ; `@prefix prov:` (ligne 26) l'est encore moins et ne compte pas comme usage. Pas de @graph, donc pas de liaison de préfixe ajoutée à un graphe. Shim : comparé par AST aux fonctions du dépôt (scripts/ontology_gate.py) ; le code est identique, seuls des docstrings et commentaires sont retirés (les notes disent « verbatim », ce qui est un peu inexact mais sans effet sur le comportement). Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

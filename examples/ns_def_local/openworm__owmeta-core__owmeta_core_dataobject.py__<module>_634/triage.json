@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote (module-state) ne voit pas l'échappement qui fait tout l'intérêt de la paire : en retirant ` as base_data_namespace` de la traduction, le check reste vert alors que le nom n'existe plus.",
+  "questions": [
+    {
+      "question": "Le dépôt d'origine indexe `base_data_namespace[...]` hors de la région (owmeta_core/mapped_class.py:52) ; acceptez-vous que cette paire reste `final` alors que son pilote ne vérifie ni l'existence du nom, ni qu'il supporte `[...]` ?",
+      "where": "translated.ldpy:29, original.py:14 et driver.py (entry=None, calls=None)",
+      "if_yes": "Approuver : l'équivalence est établie à la main (Namespace('http://data.openworm.org/') des deux côtés, ['Foo'] + '#' identique), sans que le pilote la prouve.",
+      "if_no": "needs-work : donner au pilote un contrôle du nom (par ex. assert que base_data_namespace existe des deux côtés et que base_data_namespace['Foo'] est égal), de sorte que le retrait de `as` fasse échouer le check."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutant 1 (dans une copie) : `f<{BASE_DATA_URL}/>` -> `f<{BASE_DATA_URL}#>` : FAIL (les valeurs diffèrent), donc le pilote voit l'IRI. Mutant 2 : suppression de ` as base_data_namespace` (reste `@prefix basedata: f<{BASE_DATA_URL}/> .`) : check toujours OK, method module-state, alors que `'base_data_namespace' in namespace` vaut False pour la traduction (défaut n°4 : un nom qui disparaît d'un côté n'est pas comparé). Or la raison d'être de la paire est cet échappement (original.py:14 est un attribut de classe de BaseDataObject, indexé dans mapped_class.py:52 : `self.base_data_namespace[self.__name__] + '#'`). Contrôle à la main des deux côtés : même type Namespace, même valeur, ['Foo'] + '#' identique. La traduction écrite est donc correcte ; c'est l'oracle qui ne le prouve pas. Autre remarque : translated.ldpy:10-20 commence encore par « No @prefix appears below… » alors que la ligne 29 en est un (commentaire périmé, sans effet). Le dépôt n'a pas de graphe ici, aucune liaison de préfixe à lire. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
