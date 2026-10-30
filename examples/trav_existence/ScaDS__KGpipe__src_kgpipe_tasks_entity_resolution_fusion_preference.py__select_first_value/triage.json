@@ -14,5 +14,6 @@
     }
   ],
   "evidence": "`rdfeval check` : OK sur la paire telle quelle. Dans une copie, trois appels ajoutés au pilote (source avec une valeur, cible avec `rdfs:label \"\"` ; cible `ex:count \"0\"^^xsd:integer` avec ontologie max_cardinality 1 ; cible `ex:flag \"false\"^^xsd:boolean` idem) : FAIL `call[1].result: graphs not isomorphic (2 vs 1 triples); call[2]… (2 vs 1); call[3]… (2 vs 1)` (l'original ajoute la valeur source, la traduction l'écarte). `bool(Literal(''))`, `bool(Literal(0))`, `bool(Literal(False))` valent False sous rdflib 7.2.1. Un quatrième appel (littéraux avec langue, BNode, xsd:string, voisinage même sujet/autre langue) reste vert : le défaut est bien la véracité, pas le typage. Le pilote ne regarde en outre que le graphe de sortie : les fichiers `.selected.json`/`.discarded.json` (qui changent aussi avec la garde) ne sont jamais comparés, et `ontology_props` est toujours vide, donc aucune propriété de max_cardinality 1 autre que label/type n'est exercée.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (littéraux faux dans la cible, ontologie non vide, voisins à deux termes, fichiers selected/discarded comparés) ; il a fait tomber la garde fusable, corrigée en `not any(m{ {s_can} {p_can} ?o })`, check OK."
 }

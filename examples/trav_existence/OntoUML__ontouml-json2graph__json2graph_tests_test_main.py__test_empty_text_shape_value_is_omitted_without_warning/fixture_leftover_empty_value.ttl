@@ -1,0 +1,12 @@
+# Fifth input graph — the exact decoder bug the upstream test guards
+# against: the empty legacy Text.value leaks as an EMPTY literal
+# (`ontouml:value ""`). `any(g.triples(...))` yields a (s, p, o) tuple,
+# truthy whatever the literal, and `bool(m{ ... [] })` counts solutions:
+# both must report the third assertion failing, an empty literal being
+# present, not absent.
+@prefix ex:       <https://example.org#> .
+@prefix ontouml:  <https://w3id.org/ontouml#> .
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:view-1_shape rdf:type ontouml:Text ;
+    ontouml:value "" .

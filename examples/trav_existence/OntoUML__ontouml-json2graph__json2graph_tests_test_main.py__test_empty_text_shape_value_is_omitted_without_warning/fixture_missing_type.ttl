@@ -5,8 +5,15 @@
 @prefix ex:       <https://example.org#> .
 @prefix ontouml:  <https://w3id.org/ontouml#> .
 @prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
 
-ex:view-1_shape ontouml:isViewOf ex:diagram-1 .
+ex:view-1_shape ontouml:isViewOf ex:diagram-1 ;
+    # neighbours of the first assertion's triple, each sharing two of its
+    # three terms: another rdf:type (an object widened to a variable would
+    # match it) and ontouml:Text under another predicate (a predicate
+    # widened to a variable would match it).
+    rdf:type ontouml:Rectangle ;
+    rdfs:seeAlso ontouml:Text .
 
 ex:view-2_shape rdf:type ontouml:Text ;
     ontouml:text "unrelated label"@en ;

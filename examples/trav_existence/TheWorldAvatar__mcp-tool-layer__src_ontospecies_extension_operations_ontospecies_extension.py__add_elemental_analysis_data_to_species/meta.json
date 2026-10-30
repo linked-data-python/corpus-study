@@ -49,5 +49,19 @@
     "method": "entry:add_elemental_analysis_data_to_species",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "five calls added: NotASpecies (typed os:Element) and SeeAlso (os:Species under rdfs:seeAlso, new in fixture.ttl) must both answer 'not found'; empty data_label; empty optional texts on an existing species; all three optional branches in one call, as the repository's own example (ontospecies_extension.py:694-699).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "existence check class widened to ?c",
+      "existence check predicate widened to ?p",
+      "existence check subject widened to ?s",
+      "existence island replaced by True",
+      "experimental +{ } removed",
+      "molecular-formula +{ } removed"
+    ],
+    "remaining": ""
   }
 }

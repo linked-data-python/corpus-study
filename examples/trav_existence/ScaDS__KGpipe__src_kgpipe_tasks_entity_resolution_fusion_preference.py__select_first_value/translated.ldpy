@@ -61,7 +61,7 @@ def select_first_value(inputs: Dict[str, Data], outputs: Dict[str, Data]):
 
         if is_fusable(p_can):
             # Add exactly one value if none exists yet
-            if not bool(m{ {s_can} {p_can} ?o }):
+            if not any(m{ {s_can} {p_can} ?o }):
                 +{ {s_can} {p_can} {o_can} }
                 selected.append(
                     TrackRecord(subject=s_can,predicate=p_can,object=o,original_subject=s,original_predicate=p,original_object=o))

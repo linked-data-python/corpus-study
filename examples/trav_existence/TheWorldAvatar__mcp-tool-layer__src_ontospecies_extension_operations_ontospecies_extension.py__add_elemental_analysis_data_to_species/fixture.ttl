@@ -8,3 +8,11 @@
 <https://example.org/species/S1> a os:Species .
 <https://example.org/species/S2> a os:Species .
 <https://example.org/species/NotASpecies> a os:Element .
+
+# Neighbours of the existence check's triple (species rdf:type os:Species),
+# each sharing two of its three terms, each queried by driver.py and each
+# required to answer "not found": NotASpecies above has rdf:type with
+# another class (a class widened to a variable would accept it); SeeAlso
+# below names os:Species under another predicate (a predicate widened to a
+# variable would accept it).
+<https://example.org/species/SeeAlso> <http://www.w3.org/2000/01/rdf-schema#seeAlso> os:Species .

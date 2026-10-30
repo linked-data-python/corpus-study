@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "`rdfeval check` : OK. Dans une copie, mutants de la ligne 28 : `{_class(OS, \"Species\")}`→`?c` reste OK, `rdf:type`→`?p` reste OK (élargissement non détecté) ; `exists = True` FAIL, `rdf:type`→`rdf:first` FAIL, suppression du `+{ }` final FAIL, mauvais sujet du `+{ }` ligne 47 FAIL. Avec un sixième cas `NotASpecies` ajouté à CASES dans la copie, la paire reste OK et le mutant `?c` passe à FAIL (« ERROR: target species not found » contre l'IRI minté) : le voisinage du fixture était donc prêt, seul l'appel manquait. Équivalence de la lecture par ailleurs établie : `any(g.triples(…))` porte sur des tuples toujours vrais, pas de piège de véracité. Hors paire : le shim simplifie `_ensure_type_with_label` (sans `_sanitize_label`) et `_list_species_summaries` (chaîne vide au lieu d'une liste de dicts), identique des deux côtés, sans effet sur la traduction. Les trois `g.set` laissés en rdflib sont justifiés (remplace-puis-ajoute).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Les deux voisins du test d'existence (classe et prédicat différents) sont maintenant interrogés par le pilote et tuent les mutants `?c` et `?p` ; traduction inchangée, check OK."
 }

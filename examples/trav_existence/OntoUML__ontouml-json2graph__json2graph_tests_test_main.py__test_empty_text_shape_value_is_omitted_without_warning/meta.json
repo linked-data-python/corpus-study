@@ -51,5 +51,19 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "hand-written driver: besides demo(), compares WHICH assertion of the region fails (its ordinal among the region's asserts, read from the traceback against the code each side executed); fixture_missing_type gains view-1_shape rdf:type ontouml:Rectangle and rdfs:seeAlso ontouml:Text (neighbours sharing two terms of assertion 1); new fixture_leftover_empty_value (an empty literal ontouml:value \"\", the bug the upstream test guards).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "ontouml:text and ontouml:value swapped between assertions 2 and 3",
+      "assertion 1 predicate widened to ?p",
+      "assertion 1 object widened to ?o",
+      "assertions 2 and 3 predicate widened to ?p",
+      "assertions 2 and 3 subject widened to ?s",
+      "assertion 3 replaced by assert True"
+    ],
+    "remaining": "Le shim remplace toujours le décodeur JSON->RDF du dépôt par un copieur de fixture (déjà relevé par le tri) : la paire est prouvée sur ses trois lectures, pas sur ce que produit le vrai décodeur."
   }
 }
