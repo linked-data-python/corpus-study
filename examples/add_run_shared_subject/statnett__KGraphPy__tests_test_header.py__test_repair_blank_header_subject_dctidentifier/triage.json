@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : deux g.add sur le même sujet BNode fusionnés en un +{ } dont les interpolations ({b}, {header_type}) sont des BNode/URIRef qui ne peuvent pas lever ; les assertions du test sont l'oracle et tuent les mutants qui touchent au contenu.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:test_repair_blank_header_subject_dctidentifier, 2 appels MD.FullModel et DCAT.Dataset, soit exactement les deux valeurs de parametrize du dépôt, tests/test_header.py:671-688). Types réels : b = BNode(), header_type = URIRef du dépôt ; aucune levée possible dans le +{ }, donc pas de graphe partiel à craindre. Mutants lancés dans des copies : suppression du triplet dcterms:identifier : FAIL (AssertionError) ; \"1234\" -> \"12345\" : FAIL (AssertionError) ; {header_type} remplacé par dcat:Dataset en dur : reste vert, car MD.FullModel et DCAT.Dataset sont tous deux reconnus par from_graph et le graphe g est local (invisible hors des assertions) -- inoffensif ici, la ligne translated.ldpy:22 lit {header_type} directement. Le sous-ensemble vendored de kgraphpy (header.py, namespaces.py, exceptions.py, __init__.py) n'est pas 'verbatim' au sens littéral : commentaires et docstrings retirés, méthodes inatteignables supprimées (from_manifest, header_type, set_subject...), register() des plugins omis dans __init__ ; comparé par AST au dépôt, le code conservé (from_graph, _collect_header_triples, _repair_blank_header_subject) est identique. Identique des deux côtés, donc sans effet sur l'équivalence. Note : le MD.FullModel du décorateur reste en Python, dcat:Dataset est le seul îlot ajouté hors fonction, correct.",
+  "triaged_by": "sonnet-5.5"
+}

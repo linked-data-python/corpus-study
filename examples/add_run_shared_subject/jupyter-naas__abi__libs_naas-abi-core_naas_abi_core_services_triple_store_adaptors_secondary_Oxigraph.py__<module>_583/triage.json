@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : deux test_graph.add sur le même sujet fusionnés en un seul +{ } à valeurs constantes (aucune levée possible, donc pas de graphe partiel), oracle d'isomorphisme + stdout sensible à chaque triplet, shim sans logique inventée.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (module-state). Dépôt d'origine (corpus/repos/jupyter-naas__abi/.../Oxigraph.py:673-742) : le bloc `if __name__ == \"__main__\"` est identique au code de original.py une fois désindenté ; les trois interpolations/termes du +{ } ({test_subject}, {rdflib.RDF.type}, littéral \"Test Person\") sont des URIRef/IRI/Literal constants, aucune ne peut lever, donc la fusion en un seul +{ } n'altère pas le comportement partiel du dépôt. Pas d'enveloppe inutile ni de garde de vérité. Mutants lancés dans des copies : littéral \"Test Person\" -> \"Test Persan\" : FAIL (graphes non isomorphes) ; suppression du second couple prédicat-objet : FAIL (2 vs 1 triplets, stdout et sous-graphe différents) ; les deux mutants sont tués. Shim oxigraph_shim.py : mêmes signatures que insert/remove/get_subject_graph/query du dépôt (lignes 213, 261, 530, 355), sémantique en mémoire équivalente pour 2 triplets sans BNode (le saut des BNode du dépôt n'est pas reproduit mais aucun BNode ici) ; resolve.py reproduit bien les deux branches atteintes de resolve_local_http_url. `adapter.remove(test_graph, test_subject)` passe un sujet comme nom de graphe : défaut du dépôt, identique des deux côtés. Compte `row.count` = méthode liée tuple.count, adresse filtrée par le pilote : légitime.",
+  "triaged_by": "sonnet-5.5"
+}
