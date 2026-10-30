@@ -47,5 +47,19 @@
     "method": "entry:define_relationships",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deux cas ajoutés à run_pair : une clé URIRef hors de l'espace Brick (rec:includes), un \"range\" en tuple et un \"range\": None ; definitions vide. Seconde phase : le premier cas rejoué sur un graphe portant les 21 liaisons de bind_prefixes du dépôt (bricksrc/namespaces.py:35-56, G sérialisé l.1123/1146/1176), qui exige que chaque liaison de l'original se retrouve dans la traduction.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "les 9 îlots supprimés et leurs termes liés élargis en []",
+      "if prop.startswith(BRICK) forcé à True (deux gardes) et à False",
+      "isinstance(range_defn, (tuple, list)) réduit à list",
+      "elif range_defn is not None forcé à True",
+      "superprop is not None et dtype == NumericValue forcés",
+      "@prefix bsh: renommé (liaison du dépôt perdue)"
+    ],
+    "remaining": "Mutants équivalents, non comptés : `if superprop:` (superprop est une URIRef non vide), `elif range_defn:` (URIRef, liste ou None), `len(definitions) == 0` forcé à False (seule trace : @graph lie des préfixes que G a déjà sous les mêmes noms)."
   }
 }

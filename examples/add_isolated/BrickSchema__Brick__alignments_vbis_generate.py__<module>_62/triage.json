@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (module-state). Original comparé à corpus/repos/BrickSchema__Brick/alignments/vbis/generate.py:60-125 : identique ; helpers de vbis_context.py identiques aux lignes 21-57 du dépôt. Pilote : 8 lignes de CSV couvrant pattern unique, deux patterns (sh:or), deux tags (sh:in), un tag (sh:hasValue), doublon, classe vide, classe sans tag. Mutants sur une copie, tous détectés (FAIL, 35 vs 35 triplets non isomorphes) : sh:in->sh:or (l.91), sh:hasValue->sh:in (l.88), brick:{bc}->brick:Wrong (l.37), sh:path vbis:hasVBISTag->sh:path sh:xx dans la branche à plusieurs patterns (l.74). Vérifié que vbis:{f\"{bc}Shape\"} / brick:{bc} s'instancient comme Namespace[...] (ldpy.runtime.pname == rdflib Namespace[x] pour 'A B', 'A/B', 'A#B', 'a(b)'). grep : rdf:, rdfs:, xsd:, owl: n'apparaissent que dans les lignes @prefix.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : la traduction était fausse dans le contexte du dépôt — `@prefix vbis:` sous `@graph graph` remplaçait la liaison `vbisalign` que generate.py:13 pose avant la région et que l.127 sérialise ; pilote renforcé (seconde exécution avec les graph.bind du dépôt), préfixe renommé vbisalign:, 34 autres mutants tués, un équivalent."
 }

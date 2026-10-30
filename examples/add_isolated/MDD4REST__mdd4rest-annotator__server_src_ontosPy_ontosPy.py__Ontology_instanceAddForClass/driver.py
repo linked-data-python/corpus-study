@@ -35,13 +35,34 @@ Six cases exercise every branch:
     inner `else` raises.
   * F -- empty string instance (edge of the string branch, `ns[""]` -- the
     class's own IRI as the instance).
+
+Cases added by the mutation audit of 2026-10-30, each for a mutant of the
+guards around the two islands that A-F left alive:
+  * G -- `self.sessionNS` is a plain str, as Ontology.setSessionGraphNamespace
+    (ontosPy.py:177-181) leaves it: `ns[anInstance]` raises TypeError, on
+    both sides, before anything is written.
+  * H -- `ns` given but falsy (an empty Namespace): `ns or self.sessionNS`
+    falls back to the session namespace, `ns if ns is not None` would not.
+  * I -- the instance is a Literal: a str subclass, so `type(...) == str`
+    is false and the region raises (`isinstance(..., str)` would not).
+  * J -- the instance is a Genid (rdflib's skolem IRI, a URIRef subclass):
+    `type(...) == URIRef` is false and the region raises
+    (`isinstance(..., URIRef)` would add it).
+
+After each case the prefix bindings of `sessionGraph` are compared too
+(ontosPy.py:186-192 serialises it): every binding of the original's graph
+must be in the translation's (record ldpy/027).
+
+Equivalent mutant, not counted: moving `@graph self.sessionGraph` above
+the `if` -- the file declares no prefix, so the designation binds nothing.
 """
 from __future__ import annotations
 
 import traceback
 from pathlib import Path
 
-from rdflib import Namespace, URIRef
+from rdflib import Literal, Namespace, URIRef
+from rdflib.term import Genid
 
 from rdfeval.harness import _exec_ldpy, _exec_python, _emit, graphs_isomorphic
 
@@ -64,6 +85,16 @@ CASES = [
      dict(allclasses=[CLASS_A]), CLASS_A, 42, None),
     ("F empty string instance",
      dict(allclasses=[CLASS_A]), CLASS_A, "", None),
+    ("G sessionNS is a str (setSessionGraphNamespace)",
+     dict(allclasses=[CLASS_A]), CLASS_A, "widget-3", None,
+     lambda self: setattr(self, "sessionNS", "http://example.org/session/")),
+    ("H falsy ns falls back to sessionNS",
+     dict(allclasses=[CLASS_A]), CLASS_A, "widget-4", Namespace("")),
+    ("I instance is a Literal (str subclass)",
+     dict(allclasses=[CLASS_A]), CLASS_A, Literal("widget-5"), None),
+    ("J instance is a Genid (URIRef subclass)",
+     dict(allclasses=[CLASS_A]), CLASS_A,
+     Genid("http://example.org/.well-known/genid/1"), None),
 ]
 
 verdict = {"example": HERE.name, "equivalent": False,
@@ -84,9 +115,12 @@ try:
         raise RuntimeError("OntologyContext not found in both modules")
 
     diffs: list[str] = []
-    for label, ctx_kwargs, aClass, anInstance, ns in CASES:
+    for label, ctx_kwargs, aClass, anInstance, ns, *setup in CASES:
         self_o = OntologyContext_o(**ctx_kwargs)
         self_t = OntologyContext_t(**ctx_kwargs)
+        for prepare in setup:
+            prepare(self_o)
+            prepare(self_t)
 
         err_o = err_t = None
         ro = rt = None
@@ -108,6 +142,11 @@ try:
         if not graphs_isomorphic(self_o.sessionGraph, self_t.sessionGraph):
             diffs.append(f"case[{label}]: sessionGraph not isomorphic "
                          f"({len(self_o.sessionGraph)} vs {len(self_t.sessionGraph)} triples)")
+        lost = sorted({(p, str(u)) for p, u in self_o.sessionGraph.namespaces()}
+                      - {(p, str(u)) for p, u in self_t.sessionGraph.namespaces()})
+        if lost:
+            diffs.append(f"case[{label}]: prefix bindings of the original lost "
+                         f"in the translation: {lost}")
 
     if out_o != out_t:
         diffs.append(f"stdout differs ({out_o[:200]!r} vs {out_t[:200]!r})")

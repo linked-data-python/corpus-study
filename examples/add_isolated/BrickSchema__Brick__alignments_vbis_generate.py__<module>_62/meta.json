@@ -29,7 +29,8 @@
     "15 .add() call sites on the single module-level `graph`: one @graph graph right after `graph = Graph()` designates it for the rest of the module, and every .add() becomes +{ }. Adjacent, unconditional, same-subject triples were merged with `;` (add_run_shared_subject shape) at each of the four spots where that happens (NodeShape+targetClass; PropertyShape+path[+pattern]); triples that switch subject, or that sit behind a further if/else, stay separate +{ } statements exactly where the original had a separate .add() -- no restructuring.",
     "rdflib.collection.Collection(graph, listNode, items) builds an rdf:Collection (rdf:first/rdf:rest chain) via repeated low-level graph mutation; there is no island for it in the language (only single triple patterns), so it is left as plain Python, unchanged, same as the already-approved BrickSchema__Brick__generate_brick.py__define_relationships pair in this same stratum.",
     "Context shim vbis_context.py restores get_brick_class, get_vbis_tags and rewrite_vbis_pattern verbatim from the source file's lines 21-57 (above the extracted region, which starts at line 62). vbis-brick-v5.csv is a hand-written fixture (the real file has thousands of rows) covering: one pattern, two patterns (SH:or branch), two full tags (SH:in branch), one full tag (SH:hasValue branch), a duplicate class (must be skipped), a blank Brick Class (must be skipped), and a class with zero VBIS tags (must be skipped) -- see driver.py.",
-    "Verified the fixture is not a hollow green: corrupting `brick:{bc}` to `brick:Wrong{bc}` in translated.ldpy flips the check to FAIL (35 vs 35 triples, not isomorphic)."
+    "Verified the fixture is not a hollow green: corrupting `brick:{bc}` to `brick:Wrong{bc}` in translated.ldpy flips the check to FAIL (35 vs 35 triples, not isomorphic).",
+    "Prefix vbis: renamed vbisalign: (2026-10-30 mutation audit): generate.py:13 binds the VBIS namespace as `vbisalign` on `graph` before the region and serialises it at l.127; `@graph graph` with `@prefix vbis:` rebound that IRI to `vbis` (rdflib bind overrides), which the driver's second run, with the repository's three graph.bind lines, reports as a lost binding. With the repository's own prefix name the binding is untouched."
   ],
   "article_candidate": true,
   "draft_sha": "afa8481c378882da",
@@ -54,5 +55,19 @@
       "SH",
       "VBIS"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "seconde exécution ajoutée : les deux artefacts relancés depuis leur texte, la ligne de contexte `graph = Graph()` suivie des trois graph.bind du dépôt (generate.py:11-13 : brick, sh, vbisalign) ; elle exige l'isomorphisme et que chaque liaison du graphe de l'original se retrouve dans la traduction (le graphe est sérialisé l.127). Le verdict de run_pair est capturé puis réémis fusionné.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "@prefix vbis: (liaison vbisalign du dépôt remplacée par vbis) — la traduction d'origine",
+      "chacun des 9 îlots supprimé",
+      "sujet, objet BNode ou littéral de chaque îlot élargi en []",
+      "gardes len(patterns) > 0 / == 1, len(vbtags) == 1 forcées à True et à False, elif len(vbtags) > 0 forcée à False",
+      "gardes de saut (bc None / doublon, aucune étiquette) forcées à False",
+      "Collection supprimée (deux sites)"
+    ],
+    "remaining": "Mutant équivalent, non compté : `elif len(vbtags) > 0` forcé à True (on n'y arrive qu'avec tagsOrPatterns non vide et patterns vide, donc vbtags non vide). La correction renomme le préfixe : l'exemple d'article (question du tri) montre désormais vbisalign: et non vbis:."
   }
 }

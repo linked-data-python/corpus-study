@@ -8,7 +8,7 @@ from rdflib.collection import Collection
 from vbis_context import get_brick_class, get_vbis_tags, rewrite_vbis_pattern
 @prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix vbis: <https://brickschema.org/schema/Brick/alignments/vbis#> .
+@prefix vbisalign: <https://brickschema.org/schema/Brick/alignments/vbis#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -33,7 +33,7 @@ with open("vbis-brick-v5.csv") as f:
         print(f"Defining shapes for {bc}")
         # create a shape for each set of tags
         +{
-            vbis:{f"{bc}Shape"} a sh:NodeShape ;
+            vbisalign:{f"{bc}Shape"} a sh:NodeShape ;
                sh:targetClass brick:{bc}
         }
 
@@ -56,22 +56,22 @@ with open("vbis-brick-v5.csv") as f:
             # or a SH:or of a set of patterns (if there is > 1)
             if len(patterns) == 1:
                 shape = BNode()
-                +{ vbis:{f"{bc}Shape"} sh:property {shape} }
+                +{ vbisalign:{f"{bc}Shape"} sh:property {shape} }
                 +{
                     {shape} a sh:PropertyShape ;
-                       sh:path vbis:hasVBISTag ;
+                       sh:path vbisalign:hasVBISTag ;
                        sh:pattern {Literal(patterns[0])}
                 }
             else:
                 shapeList = BNode()
-                +{ vbis:{f"{bc}Shape"} sh:or {shapeList} }
+                +{ vbisalign:{f"{bc}Shape"} sh:or {shapeList} }
                 patternList = []
                 for vbtag in patterns:
                     pattern = BNode()
                     patternList.append(pattern)
                     +{
                         {pattern} a sh:PropertyShape ;
-                           sh:path vbis:hasVBISTag ;
+                           sh:path vbisalign:hasVBISTag ;
                            sh:pattern {Literal(vbtag)}
                     }
                 Collection(graph, shapeList, patternList)
@@ -79,10 +79,10 @@ with open("vbis-brick-v5.csv") as f:
             # handle fully qualified tags. If there is one, then it is a mandatory
             # value. If there are multiple, then we must have one of them as a value
             shape = BNode()
-            +{ vbis:{f"{bc}Shape"} sh:property {shape} }
+            +{ vbisalign:{f"{bc}Shape"} sh:property {shape} }
             +{
                 {shape} a sh:PropertyShape ;
-                   sh:path vbis:hasVBISTag
+                   sh:path vbisalign:hasVBISTag
             }
             if len(vbtags) == 1:
                 +{ {shape} sh:hasValue {Literal(vbtags[0])} }

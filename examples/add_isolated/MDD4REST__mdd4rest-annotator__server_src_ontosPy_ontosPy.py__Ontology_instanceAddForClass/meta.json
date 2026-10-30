@@ -43,5 +43,20 @@
     "method": "entry:instanceAddForClass (hand-rolled: self.sessionGraph compared by isomorphism, result/error by equality)",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "quatre cas ajoutés : sessionNS en str comme le laisse setSessionGraphNamespace (ontosPy.py:177-181, TypeError des deux côtés), ns fourni mais faux (Namespace vide), instance Literal (sous-classe de str) et Genid (sous-classe d'URIRef), qui lèvent ; liaisons de sessionGraph comparées après chaque cas.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "les deux îlots supprimés, sujet et objet élargis en []",
+      "sujet coercé en littéral",
+      "gardes allclasses / URIRef / str forcées à True",
+      "type(x) == URIRef -> isinstance",
+      "type(x) == str -> isinstance",
+      "ns or sessionNS -> ns if ns is not None",
+      "ns ignoré"
+    ],
+    "remaining": "Mutant équivalent, non compté : `@graph self.sessionGraph` remonté au-dessus du if (le fichier ne déclare aucun préfixe, la désignation ne lie rien)."
   }
 }

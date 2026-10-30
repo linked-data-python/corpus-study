@@ -48,5 +48,23 @@
     "method": "entry:_convert_node",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six cas ajoutés, tous admis par le datamodel du dépôt (Node.type Optional[str]) : type \"\", PROPERTY sans propertyType, type inconnu (levée ValueError comparée), lbl \"\", un nœud avec Meta et un sans, sur un RecordingConverter défini dans le pilote dont _convert_meta enregistre ses appels (self comparé par run_pair) ; seconde phase qui compare les liaisons de target pour chaque cas (dump() le sérialise).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "les 6 îlots supprimés, sujets et littéral élargis en []",
+      "littéral du label en @en",
+      "not source.type -> source.type is None",
+      "garde DATA forcée à True",
+      "garde INDIVIDUAL forcée à True",
+      "raise supprimé",
+      "if source.lbl -> is not None",
+      "if source.meta forcé à False",
+      "@prefix owl: renommé (liaison perdue)",
+      "return None"
+    ],
+    "remaining": "Mutant équivalent, non compté : `if source.meta` -> `is not None` (une Meta est toujours vraie)."
   }
 }

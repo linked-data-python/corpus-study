@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (entry:_convert_node, 6 appels). Original identique au dépôt (src/oaklib/converters/obo_graph_to_rdf_owl_converter.py:92-111, indentation près) ; Node.lbl est une str dans le dépôt, donc `{source.lbl}` = Literal(str) simple ; _uri_ref du dépôt rend un URIRef. Mutants sur copie : suppression de l'îlot owl:Class, NamedIndividual->Class, DatatypeProperty->ObjectProperty : tous détectés (FAIL non isomorphe). Survivants : `if source.lbl` -> `is not None` et suppression du `raise ValueError` : ils portent sur du Python non traduit, recopié à l'identique ; sans conséquence pour l'équivalence des îlots (aucun appel du pilote n'atteint la levée ni un label vide, mais ces lignes ne sont pas dans une notation LD).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 30 mutants, 7 survivants non équivalents (type \"\", PROPERTY sans propertyType, type inconnu, lbl \"\", appel à _convert_meta invisible, renommage de owl:) ; pilote renforcé (six cas, enregistreur de _convert_meta, liaisons comparées), tous tués, la traduction était juste ; 1 équivalent."
 }
