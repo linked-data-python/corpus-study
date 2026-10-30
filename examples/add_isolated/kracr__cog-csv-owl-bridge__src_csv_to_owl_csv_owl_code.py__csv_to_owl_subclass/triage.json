@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction propre, mais la branche `else` (allValuesFrom) du cas « A ⊑ ∃/∀ R.C » n'est jamais prise (la seule ligne à restriction non vide utilise `some`) : l'îlot peut être supprimé sans effet sur le pilote ; la note « verbatim » sur helpers.py est fausse pour _bind_prefixes_to_graph.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au CSV du pilote une ligne `ex:Bird,ex:Wing,ex:has,all` (sous-classe, superclasse, propriété et quantificateur `all` renseignés) pour exercer l'îlot `+{ {restriction} owl:allValuesFrom {superclass_uri} }` ?",
+      "where": "translated.ldpy:105-107 et original.py (même branche) ; driver.py:28-34 (la ligne `ex:Fish,ex:Animal,ex:livesIn,some` est la seule de ce cas)",
+      "if_yes": "needs-work : ajouter la ligne au fixture ; l'îlot est aujourd'hui crédité sans preuve",
+      "if_no": "approuver : le reste est prouvé, un îlot sur quinze n'est pas exécuté"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Région comparée au dépôt (corpus/repos/kracr__cog-csv-owl-bridge, csv_owl_code.py:266-380) : identique. helpers.py : load_prefixes, resolve_uri, ensure_declaration, reconstruct_intersection, normalize_ns_for_join identiques au dépôt ; _bind_prefixes_to_graph NON verbatim (commentaires retirés et `return bound_count` supprimé), sans effet ici car l'appelant ignore la valeur — la note « copied verbatim » est inexacte, à corriger si on la garde. Mutants sur copie : suppression de l'îlot `owl:allValuesFrom` du cas A⊑R : VERT ; échange someValuesFrom -> allValuesFrom du même cas : détecté ; suppression des îlots de build_restriction (some et else), de l'intersection, de chaque subClassOf (textuel, intersection, GCI, simple, lien A->restriction) : tous détectés. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

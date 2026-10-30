@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Les branches containsNumber et check_type (sujet et objet) ne sont jamais prises par la fixture (seul le `else` l'est) : quatre îlots peuvent être supprimés sans que le pilote ne bouge ; de plus Literal(…, lang/datatype) et URIRef(str) gardés en enveloppes là où les îlots de littéral et f<…> passent.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter des entrées à `info` dont le sujet et l'objet résolvent vers une chaîne contenant un chiffre, puis vers une chaîne purement numérique (« 12.5 »), pour exercer les branches `if containsNumber` et `elif check_type` ?",
+      "where": "translated.ldpy:75-80 et 89-93, original.py:85-92 et 109-115 ; fixture dans translated.ldpy:41-42 (les clés « NumKey » et « ObjNum » ne contiennent aucun chiffre)",
+      "if_yes": "needs-work : étendre la fixture (identique des deux côtés) ; quatre îlots sont aujourd'hui crédités sans preuve",
+      "if_no": "approuver : seul le `else` est prouvé, les branches sœurs sont des copies à l'identique"
+    },
+    {
+      "question": "Faut-il écrire les littéraux avec les constructions spécifiques : `f\"{v[0]}\"@en` (language literal), `{val[4]}^^xsd:string` / `{val[3]}^^xsd:integer` (typed literal) et `f<{relation}>`, `f<{sent_id}>` au lieu de `{Literal(…, lang='en')}`, `{Literal(…, datatype=XSD.string)}`, `{URIRef(…)}` ?",
+      "where": "translated.ldpy:48, 55, 66, 69, 71, 74, 77, 81, 83, 88, 90, 93, 95 ; `constructions` (meta.json) ne déclare ni language literal, ni typed literal, ni f<…>",
+      "if_yes": "wrong-construction : réécrire et re-déclarer les constructions (vérifié sur copie : le pilote reste vert avec ces réécritures)",
+      "if_no": "approuver : le gain annoncé ne compte alors que +{ } et prefixed name"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Région comparée à corpus/repos/dice-group__RELD/V1/NYT_New.py:215-306 : identique au blanc près. validate.py : logique des quatre fonctions identique au dépôt (seule la mise en forme change). Mutants sur copie : suppression des îlots de la branche `containsNumber` et de la branche `check_type`, pour le sujet et pour l'objet : restent VERTS (4 survivants) ; échange rdfs:label -> rdfs:comment dans la branche containsNumber : VERT ; suppression des îlots du `else`, hasNamedEntity, type d'entité nommée, `score`, numOfRelation : détectés. Réécriture dans une copie de Literal(lang='en'), Literal(datatype=XSD.string/integer), URIRef(relation/sent_id) par les îlots spécifiques : OK. `prop:{key}` et `dbo:{remove_alphaNumeric(…)}` : essayés avec clé vide, espace, barre oblique, chiffre initial : même IRI que prop+key (pas d'écart). Les clés réelles de sentence.tokenize (V1/sentence.py) sont des noms sûrs. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

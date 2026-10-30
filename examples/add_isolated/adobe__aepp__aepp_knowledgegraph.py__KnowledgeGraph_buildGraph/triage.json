@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "wrong-construction"
+  ],
+  "summary": "Traduction fidèle (région identique au dépôt) mais le pilote n'exerce jamais la branche « le nœud est déjà typé SCHEMA.path » (graphe vide en entrée), qui est pourtant le cas courant du dépôt ; et des enveloppes Literal(…)/URIRef(…) inutiles là où {x} et f<{x}> passent.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un appel de plus au pilote (graphe pré-rempli avec (node, rdf:type, SCHEMA.path), ou deux audiences partageant un chemin) pour exercer la branche `if (node, rdf:type, self.SCHEMA.path) in graph` ?",
+      "where": "translated.ldpy:83-85 et original.py:66-67 (cas atteint par le dépôt : aepp/knowledgegraph.py:213 écrit déjà (chemin, RDF.type, SCHEMA.path) dans le même graphe avant la ligne 323)",
+      "if_yes": "needs-work : ajouter l'appel ; tant qu'il manque, l'îlot `+{ {node} {self.AUDIENCES.usedIn} … }` de cette branche est crédité sans preuve",
+      "if_no": "approuver malgré tout (la branche reste du Python identique des deux côtés ; seul l'îlot à une ligne n'est pas prouvé)"
+    },
+    {
+      "question": "Faut-il remplacer les enveloppes `{Literal(x)}` (row.get('name'), flow.name, audience.get('name'), destination.name, flow.frequency, destination.frequency) par `{x}` et `{URIRef(row['schemaId'])}` par `f<{row['schemaId']}>` ?",
+      "where": "translated.ldpy:26-27, 52, 57, 63, 107-108",
+      "if_yes": "wrong-construction : réécrire (équivalence vérifiée sur la copie : le pilote reste vert) ; `Literal(…, datatype=XSD.integer)` l.28 est à garder (numpy.int64 / NaN)",
+      "if_no": "approuver tel quel ; les enveloppes sont fidèles à l'original mais masquent le gain de la coercition et de f<…>"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Région comparée au dépôt (corpus/repos/adobe__aepp, aepp/knowledgegraph.py:273-360, lignes sans indentation) : identique ; liaisons de context.py identiques à KnowledgeGraph.__init__ (l.96-104). Mutants sur copie : l'îlot de la branche `in graph` supprimé reste VERT, `if False:` à la place de la garde reste VERT (la branche n'est jamais prise, aucune audience ne partage de chemin et le graphe d'entrée est vide) ; `if True:` est détecté. Détectés (FAIL) : Profile-based, Relationship-based, STREAMING, frequency, mandatory, primary, UIS->UPS, `a \"IngestionFlow\"`, audiences de destination, bloc `else` du chemin neuf. Restent verts et équivalents : `{Literal((row.get('name')))}` -> `{row.get('name')}`, `{Literal(flow.name)}` -> `{flow.name}`, `{URIRef(row['schemaId'])}` -> `f<{row['schemaId']}>`. Le chemin only_schema=True (else final) n'est pas appelé mais c'est du Python non traduit. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
