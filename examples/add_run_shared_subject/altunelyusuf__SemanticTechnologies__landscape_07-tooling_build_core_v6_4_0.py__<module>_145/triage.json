@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Trois enveloppes inutiles `{Literal(x, lang=\"en\")}` dans l'îlot +{ } alors que `{x}@en` passe (déjà employé par le jumeau build_core_v5_3_0 de la strate add_in_loop) ; le reste est fidèle (un seul +{ } à 4 prédicats, KeyError de S() inatteignable dans le dépôt).",
+  "questions": [
+    {
+      "question": "Les trois `{Literal(clab, lang=\"en\")}`, `{Literal(cdef, lang=\"en\")}` et `{Literal(S(...), lang=\"en\")}` doivent-ils s'écrire `{clab}@en`, `{cdef}@en`, `{S(\"R-TOGAF\", \"R-DAMA\")}@en` (construction « language literal » avec interpolation) plutôt que d'envelopper un Literal Python ?",
+      "where": "translated.ldpy:24-27 et original.py:13-14",
+      "if_yes": "needs-work : réécrire les trois objets en `{expr}@en` (le crédit « language literal » est aujourd'hui attribué à un îlot qui n'en contient pas vraiment) ; la paire reste équivalente.",
+      "if_no": "approuver tel quel."
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state, g2 comparé par isomorphisme). Copie : remplacé les trois enveloppes par `{clab}@en`, `{cdef}@en`, `{S(\"R-TOGAF\", \"R-DAMA\")}@en` -> rdfeval check OK ; avec `f\"{clab}\"@en` aussi OK. Les trois valeurs sont des str dans le dépôt (clab/cdef littéraux str ; S() renvoie \" | \".join(REG[k][\"cite\"]) avec cite = str, corpus/repos/altunelyusuf__SemanticTechnologies/landscape/07-tooling/build_core_v6_4_0.py:38). Défaut « fusion tout-ou-rien » examiné : l'original fait 4 g2.add, le 4e évalue S(\"R-TOGAF\",\"R-DAMA\") qui lèverait KeyError si une clé manquait ; mais REG (build_core_v6_4_0.py:33) inclut **el.EXT6 et enrichment_l_v5_3_0.py:11 et :16 définissent exactement R-TOGAF et R-DAMA, et le même appel tourne dans les builders v5_3_0 à v6_2_0 : levée inatteignable, pas de drapeau equivalence-doubt. Shim fidèle (S verbatim, REG réduit aux 2 clés copiées du dépôt). Pilote à 3 itérations, sans branche.",
+  "triaged_by": "sonnet-5.5"
+}

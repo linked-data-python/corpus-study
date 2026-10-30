@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Sept @prefix déclarés (rdf, rdfs, owl, skos, dcterms, xsd, prov) pour un seul utilisé (rdfs:label) : inflation de la notation que le jumeau v4_0_0 de la même strate a justement élaguée ; sinon un seul +{ } fidèle.",
+  "questions": [
+    {
+      "question": "Les six @prefix inutilisés (rdf, owl, skos, dcterms, xsd, prov) doivent-ils être retirés de translated.ldpy, comme dans la paire jumelle build_page_v4_0_0 (seul rdfs: gardé) ?",
+      "where": "translated.ldpy:4-10 (une seule utilisation : rdfs:label, ligne 16) et original.py:4",
+      "if_yes": "needs-work : ne déclarer que `@prefix rdfs:` (la mesure compte sinon six déclarations qui ne traduisent rien) ; pas d'impact sur l'équivalence.",
+      "if_no": "approuver : les prefixes sont la contrepartie du `from rdflib.namespace import …` conservé."
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Un seul g.add : le défaut « évaluation avant ajout » ne s'applique pas. Constats : (1) shim.py HERE pointe vers 04-page/semtech_page_abox_v6_6_0.ttl, un stand-in de 3 lignes (ONT a owl:Ontology) alors que le vrai fichier est dans le clone (corpus/repos/altunelyusuf__SemanticTechnologies/landscape/04-page/semtech_page_abox_v6_6_0.ttl) et que la note du traducteur dit « the real ABox was not fetched » : fait faux mais sans conséquence sur l'équivalence (aucune logique, le même Graph().parse des deux côtés, l'oracle est l'isomorphisme du graphe complet). (2) Dans le dépôt le g.add est précédé de g.remove((ONT, RDFS.label, None)) hors région : pas d'incidence sur la paire. (3) Imports Python (Namespace, URIRef, Literal, RDF…) non élagués, contrairement au jumeau v4_0_0 : cosmétique.",
+  "triaged_by": "sonnet-5.5"
+}

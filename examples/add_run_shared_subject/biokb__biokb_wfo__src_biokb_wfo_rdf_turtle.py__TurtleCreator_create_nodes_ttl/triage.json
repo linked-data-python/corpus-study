@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : 5 add sur taxon_uri fusionnés en un +{ }, les deux gardes en îlots séparés (donc toujours conditionnels), ^^xsd:string préservant le datatype ; levée et valeurs None inatteignables ou équivalentes ; oracle solide.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:create_nodes_ttl). Copie du répertoire : ajouté au pilote trois lignes (full_name avec guillemet, antislash, saut de ligne, é, espace insécable, apostrophes ; full_name = \"\" ; full_name = None ; ipni = \"\" ; parent_id = \"0\" chaîne) -> rdfeval check reste OK (même graphe des deux côtés, même pour full_name None). Défaut « évaluation avant ajout » : dans le dépôt (src/biokb_wfo/db/models.py:172-188) full_name, rank et role sont Mapped[str] non optionnels (NOT NULL), rank et role sont des SQLEnum de chaînes, la requête filtre rank.isnot(None) et parent_id.isnot(None) : ni taxon.rank.capitalize() ni un Literal ne peuvent lever, donc pas de graphe partiel atteignable. Le pilote exerce quatre combinaisons des deux gardes ; le graphe produit est comparé par isomorphisme (shim get_empty_graph qui capture le graphe : mécanisme documenté, pas de logique inventée, tqdm identité, Session/Name réduits à ce que la région appelle). Le gain pour l'article est modeste ({ns.REL_NS[\"name\"]} restent des interpolations).",
+  "triaged_by": "sonnet-5.5"
+}
