@@ -166,6 +166,12 @@ def test_a_function_region_compared_as_module_state_is_flagged(study):
     assert "compared as module state" in _labels(_flags(ex), digest.WARN)
 
 
+def test_a_name_the_translation_drops_is_shown(study):
+    flags = _flags(_dir(study), {"validation": {
+        "status": "equivalent", "names_only_original": ["EX", "p"]}})
+    assert "names the translation drops: EX, p" in _labels(flags, digest.WARN)
+
+
 def test_a_translation_without_an_island_is_a_danger(study):
     assert "no island at all" in _labels(
         _flags(_dir(study), row={"ldpy_islands": "0"}), digest.DANGER)

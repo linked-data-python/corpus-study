@@ -112,6 +112,9 @@ def run(config: dict, study: Study = STUDY) -> None:
                               "method": verdict.get("method"),
                               "diffs": verdict.get("diffs", []),
                               "error": verdict.get("error")}
+        if verdict.get("names_only_original"):
+            meta["validation"]["names_only_original"] = \
+                verdict["names_only_original"]
         if meta.get("optimization_status") == "final":
             meta["validation_optimized"] = _validate_optimized(
                 ex_dir, timeout)

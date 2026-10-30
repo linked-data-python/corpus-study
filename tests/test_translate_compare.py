@@ -433,6 +433,8 @@ def test_module_state_mode_compares_computed_values_not_just_graphs(tmp_path):
     assert not verdict["equivalent"], "a wrong read must not pass"
     assert any("value name" in d for d in verdict["diffs"]), verdict["diffs"]
     assert "name" in verdict["values_compared"]
+    assert verdict["names_only_original"] == ["EX"], \
+        "a name only one side defines is reported, not silently skipped"
 
 
 def test_only_judgeable_values_are_compared():

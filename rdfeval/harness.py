@@ -433,6 +433,11 @@ def run_pair(driver_file: str, entry: str | None = None,
             diffs.append("stdout differs")
         verdict["graphs_compared"] = sorted(set(go) & set(gt))
         verdict["values_compared"] = shared
+        # A name the original defines and the translation does not is never
+        # compared.  Not a difference by itself — a Namespace replaced by a
+        # @prefix is the point of ns_def_local — but a reviewer must see it,
+        # since other modules of the repository may import that name.
+        verdict["names_only_original"] = sorted(set(vo) - set(vt))
         if not (go or gt) and not shared and out_o == out_t == "":
             diffs.append("nothing observable to compare")
     verdict["diffs"] = diffs

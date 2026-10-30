@@ -321,6 +321,11 @@ def _flags(ex_dir: Path, meta: dict, row: dict, files: dict) -> list:
     if val.get("status") and val["status"] != "equivalent":
         add(DANGER, "validation: %s" % val["status"],
             val.get("error") or "; ".join(map(str, val.get("diffs", []))))
+    if val.get("names_only_original"):
+        add(WARN, "names the translation drops: %s"
+            % ", ".join(val["names_only_original"]),
+            "defined by the original, absent from the translation, so never "
+            "compared — harmless if nothing imports them, a break otherwise")
 
     if row:
         def num(key):
