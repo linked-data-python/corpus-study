@@ -36,5 +36,18 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Le pilote n'est plus run_pair(entry=None) mais un pilote écrit à la main qui compare le nom que le dépôt importe, base_data_namespace (mapped_class.py:51-52) : définition dans les deux modules, `is not None`, même classe (rdflib Namespace), même chaîne, souscription `[k]` et `[k] + '#'` pour six clés (BaseDataObject, Foo, \"\", a/b, x#y, avec espace), `[0]`, attribut `.Foo`, `.term('Foo')`, `in`, startswith ; plus la comparaison module-state des autres valeurs partagées et `names_only_original` dans le verdict. Le commentaire périmé de translated.ldpy (« No @prefix appears below ») est remplacé par l'explication de la forme `@prefix … as`.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "retrait de ` as base_data_namespace` (le nom n'existe plus)",
+      "`as` renommé (base_schema_namespace)",
+      "IRI `…/` -> `…#`",
+      "IRI sans barre finale",
+      "IRI figée `base_data_namespace = <…/>` (URIRef sans souscription : TypeError, `[0]` rend 'h')"
+    ],
+    "remaining": ""
   }
 }

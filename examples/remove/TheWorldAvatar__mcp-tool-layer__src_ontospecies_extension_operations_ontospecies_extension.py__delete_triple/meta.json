@@ -47,5 +47,29 @@
     "method": "entry:delete_triple",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "seed(holes) devient la grille complète sujets x prédicats x objets (S1/S2, likes/name, six objets dont les littéraux \"Alice\", \"Bob\", \"\", \"0\"), de sorte que chaque terme visé a un voisin partageant les deux autres ; ajout des littéraux qui ressemblent à la cible (\"Alice\"@en, \"Alice\"^^xsd:string, le texte de l'IRI en littéral, URIRef non absolue, \"0\"^^xsd:integer, \"None\"). CASES passe de 4 à 27 cas : objets falsy \"\" et \"0\", chaque opérande de la garde (sujet non absolu, prédicat non absolu, les deux, \"\" pour chacun), absents avec voisins complets (trou dans la grille) ou hors du graphe, second sujet. Le pilote compare les triplets en ensembles et par isomorphisme, et exige au moins 8 retraits observés.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ } -> pass",
+      "-{ } sujet élargi",
+      "-{ } prédicat élargi (vert avant)",
+      "-{ } objet élargi (vert avant)",
+      "m{ } garde sujet élargi",
+      "m{ } garde prédicat élargi (vert avant)",
+      "m{ } garde objet élargi (vert avant)",
+      "garde forcée à True",
+      "garde forcée à False",
+      "`or` -> `and`",
+      "premier opérande de la garde retiré",
+      "second opérande de la garde retiré",
+      "URIRef<->Literal échangés",
+      "Literal(object_value, datatype=xsd:string)",
+      "Literal(object_value or 'None')",
+      "message construit avec le mauvais terme"
+    ],
+    "remaining": "Un mutant reste vert et est équivalent : `_is_abs_iri(object_value) and object_value` (une IRI absolue n'est jamais vide). Les appelants du dépôt passent des str ; aucun cas non-str n'est exercé."
   }
 }

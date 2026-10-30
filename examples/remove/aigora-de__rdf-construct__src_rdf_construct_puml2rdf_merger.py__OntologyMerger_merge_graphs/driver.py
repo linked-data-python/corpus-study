@@ -17,6 +17,26 @@ new graph offers several values for one authoritative predicate AND
 that flag alone: the same conflicts are reported both times, and only the
 first actually removes (two removals, three rdfs:subClassOf collapsing to one).
 
+Neighbours (fixtures): every triple the region tests, reads or removes has a
+neighbour that shares two of its terms.  ex:Sensor rdfs:seeAlso ex:Device,
+ex:Component, ex:Physical (existing) share subject and object with the three
+new rdfs:subClassOf values; ex:Actuator rdfs:seeAlso ex:Device (existing) and
+ex:Actuator rdfs:subClassOf ex:Device (new) likewise; ex:Sensor rdfs:domain
+ex:Env in the new graph is the same predicate under another subject than the
+existing ex:Actuator rdfs:domain ex:System; ex:Sensor rdfs:range "", 0, "0"
+(new) gives falsy existing values (ev) to the conflict loop.  Mutants run in a
+copy (translated.ldpy, one change each), all FAIL, also under two values of
+PYTHONHASHSEED: the removal replaced by `pass`; its subject or its predicate
+widened to a variable; the predicate, subject or object of the `not m{ }`
+existence test widened, or the test forced True; the subject or predicate of
+`m{ ... ?nv }(new_graph)` widened, or that read pointed at `existing`; the
+subject or predicate of `list(m{ ... ?ev })` widened; `if new_values` ->
+`any(new_values)`; `ev != o` -> `ev != o and ev`; the `preserve_existing` test
+inverted.  Two mutants stay green and are equivalent: the removal's object
+widened (at removal time result.graph holds only values of (s, p) that the
+loop removes anyway, as the translation notes say) and `ev != o` forced True
+(the `not in result.graph` test above has already excluded ev == o).
+
 `ordered=True`: `demo` returns a fixed-shape record, and the one list in it
 (the conflict messages) is sorted before comparison.
 """

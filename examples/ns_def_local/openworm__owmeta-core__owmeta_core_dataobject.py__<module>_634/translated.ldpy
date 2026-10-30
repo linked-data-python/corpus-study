@@ -7,20 +7,14 @@
 # outside the owmeta_core package -- same four names, see meta.json /
 # AGENT_BATCH.md "shim de contexte".
 #
-# No @prefix appears below. `base_data_namespace = R.Namespace(BASE_DATA_URL
-# + "/")` is this region's ns_def_local site, but @prefix is purely lexical
-# -- it produces no value -- and this is an ASSIGNMENT: the object must
-# escape this block to survive as a class attribute of BaseDataObject (the
-# real source line, owmeta_core/dataobject.py:634, sits in that class body;
-# the extraction flattened it to module scope, which does not change the
-# conclusion -- see translation_notes). The escape is real, not speculative:
-# owmeta_core/mapped_class.py:52 later dereferences it by subscript,
-# `self.base_data_namespace[self.__name__] + '#'` -- outside this region, in
-# a different file. A `<...>` (bare Namespace-shaped IRI) or a lexical
-# @prefix would not support `[...]` at that call site. So the statement is
-# left exactly as rdflib wrote it; see the sibling case in this batch
-# (JustlyAI__lmss_entity_extractor__..._OntologyClassifier___init__) for the
-# same pattern via `self.LMSS = Namespace(...)`.
+# The region's single statement, `base_data_namespace = R.Namespace(
+# BASE_DATA_URL + "/")`, is written as ONE dynamic @prefix with `as`: the
+# object must escape this block to survive as a class attribute of
+# BaseDataObject (the real source line, owmeta_core/dataobject.py:634, sits
+# in that class body; the extraction flattened it to module scope). The escape
+# is real: owmeta_core/mapped_class.py:52 dereferences it by subscript,
+# `self.base_data_namespace[self.__name__] + '#'`, in a different file. A
+# bare `<...>` IRI would not support `[...]` there.
 import rdflib as R
 from context_shim import BASE_DATA_URL, BASE_SCHEMA_URL, DEF_CTX, RDF_CONTEXT
 

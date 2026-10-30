@@ -55,5 +55,28 @@
     "method": "fixture:fixture.ttl entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Pilote inchangé ; fixtures enrichies de voisins qui partagent deux termes avec les triplets testés : fixture.ttl (ex:Sensor rdfs:seeAlso Device/Component/Physical, ex:Actuator rdfs:seeAlso Device, rdfs:range ex:Value et \"\" sur Sensor/Actuator), fixture_new.ttl (ex:Sensor rdfs:domain ex:Env, rdfs:range \"\", 0, \"0\" ; ex:Actuator rdfs:subClassOf Device et rdfs:range \"0\"). La docstring dit ce que chaque voisin exerce.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ } -> pass",
+      "-{ } sujet élargi",
+      "-{ } prédicat élargi (vert avant)",
+      "not m{ } sujet élargi",
+      "not m{ } prédicat élargi (vert avant)",
+      "not m{ } objet élargi",
+      "not m{ } forcé à True",
+      "m{ ?nv }(new_graph) sujet élargi (vert avant)",
+      "m{ ?nv }(new_graph) prédicat élargi",
+      "m{ ?nv } lu dans existing",
+      "list(m{ ?ev }) sujet élargi",
+      "list(m{ ?ev }) prédicat élargi",
+      "if new_values -> any(new_values)",
+      "ev != o -> ev != o and ev",
+      "preserve_existing inversé"
+    ],
+    "remaining": "Deux mutants restent verts et sont équivalents : l'objet du retrait élargi (`-{ {s} {p} ?q }` : au retrait, result.graph ne tient pour (s, p) que des valeurs que la boucle retire de toute façon) et `ev != o` forcé à True (le test `not in result.graph` a déjà exclu ev == o). Les identifiants de nœuds vides dans les messages de conflit ne sont pas exercés."
   }
 }

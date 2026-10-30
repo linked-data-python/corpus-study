@@ -14,9 +14,20 @@
 
 ex:Sensor a owl:Class ;
     rdfs:subClassOf ex:Device, ex:Component, ex:Physical ;
+    # another subject's rdfs:domain/rdfs:range for the existing ex:Actuator
+    # rdfs:domain: the new graph defines the predicate, but not for ex:Actuator
+    rdfs:domain ex:Env ;
+    # three values of rdfs:range, two of them falsy as Python values ("" and the
+    # integer 0): whatever the iteration order, one of the falsy ones is an
+    # existing value (ev) when a later value conflicts with it
+    rdfs:range "", 0, "0" ;
     rdfs:label "Sensor"@en .
 
 ex:Actuator a owl:Class ;
+    # the existing graph has ex:Actuator rdfs:seeAlso ex:Device: same subject
+    # and object, another predicate (not the same triple)
+    rdfs:subClassOf ex:Device ;
+    rdfs:range "0" ;
     rdfs:label "Actuator"@en .
 
 ex:NewThing a owl:Class ;

@@ -12,6 +12,12 @@
 #     branch;
 #   * MERGEABLE predicates (rdfs:label, rdfs:comment) and a predicate that is
 #     neither (dcterms:description) -- both preserved, by two different paths;
+#   * neighbours that share TWO terms with a triple the region tests or
+#     removes (ex:Sensor rdfs:seeAlso ex:Device, ex:Actuator rdfs:seeAlso
+#     ex:Device against subClassOf; the rdfs:domain of ex:Actuator against the
+#     rdfs:domain of ex:Sensor in the new graph), so that a pattern widened to
+#     a wildcard on subject, predicate or object changes the merge;
+#   * falsy literals ("") on authoritative predicates;
 #   * a subject that exists only here -- preserved wholesale, and a control
 #     that no removal ever reaches it.
 @prefix ex:      <http://example.org/onto#> .
@@ -23,10 +29,20 @@ ex:Sensor a owl:Class ;
     rdfs:subClassOf ex:Device ;
     rdfs:label "Sensor (hand-written)"@en ;
     rdfs:comment "Kept from the existing file."@en ;
-    dcterms:description "Neither authoritative nor mergeable."@en .
+    dcterms:description "Neither authoritative nor mergeable."@en ;
+    # neighbours of the subClassOf triples under test: same subject and same
+    # object, ANOTHER predicate (mergeable, so preserved into the merge)
+    rdfs:seeAlso ex:Device, ex:Component, ex:Physical ;
+    # authoritative, redefined by the new graph with the falsy literal ""
+    rdfs:range ex:Value .
 
 ex:Actuator a owl:Class ;
     rdfs:domain ex:System ;
+    # same subject and object as the new graph's ex:Actuator rdfs:subClassOf
+    rdfs:seeAlso ex:Device ;
+    # falsy literal on an authoritative predicate the new graph gives another
+    # value ("0"): the existing "" is dropped as updated
+    rdfs:range "" ;
     rdfs:label "Actuator"@en .
 
 ex:LegacyThing a owl:Class ;
