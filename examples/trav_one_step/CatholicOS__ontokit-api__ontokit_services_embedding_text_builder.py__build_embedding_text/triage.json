@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : cinq lectures d'un pas fidèles, équivalence vérifiée par mutants et par un fixture élargi ; seul survivant, un filtre Python commun aux deux versions.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Région identique aux lignes 8-53 du dépôt (diff vide) ; le shim _local_name est la fonction du dépôt (lignes 56-60). Appelants réels (embedding_service.py:323 et 458) passent toujours un URIRef (isinstance filtré ou URIRef(entity_iri)) : `{entity_uri}` ne change pas la nature du terme, pas de cas None. Mutants dans une copie, tous ROUGES : labels[0]->labels[-1] ; garde `p != owl:Thing` retirée ; parent_pred figé sur subClassOf ; labels[1:]->labels[2:] ; comment/definition inversés ; altLabel->hiddenLabel ; chacun des îlots comment, definition, label-du-parent remplacé par [] ; sujet libre `?x` dans le îlot des parents ; isinstance(o, RDFLiteral) retiré sur la première lecture. SURVIVANT : retirer isinstance(o, RDFLiteral) de la lecture des labels du *parent* (aucun parent du fixture n'a de rdfs:label non littéral) : c'est du Python identique des deux côtés, sans incidence sur la traduction. Ordre : fixture élargi dans une copie (ex:Multi : 8 labels, 4 commentaires, 5 altLabels, 6 parents dont owl:Thing, deux parents à plusieurs labels, appels class et property) -> check OK, donc labels[0] et desc[0] (qui dépendent de l'ordre de l'itération) sortent identiques de graph.objects et de m{ }. Pas un exemple d'article : m{ {entity_uri} rdfs:label ?o } n'est pas plus court que graph.objects(entity_uri, RDFS.label).",
+  "triaged_by": "sonnet-5.5"
+}

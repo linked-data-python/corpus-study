@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : `g.subjects(op)` -> `m{ ?s {op} [] }(g)`, même multiplicité (doublons conservés), vérifié sur un fixture élargi ; le shim importe rdflib.extras.infixowl mais celui-ci est équivalent à la copie vendue du dépôt.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Région identique au dépôt (lignes 1492-1494). Shim : au lieu de la copie vendue du dépôt, il importe rdflib.extras.infixowl 7.2.1 ; comparaison par AST (docstrings exclus) de BooleanClassExtentHelper.__call__, Individual.__init__, OWLRDFListProxy.__init__/__iter__/__len__ : identiques ; BooleanClass.__init__ ne diffère que par le texte d'un message d'assertion et le nom de variables de boucle. Le shim n'invente donc pas de logique. Expérience dans une copie (les deux côtés rendus `yield c` pour voir les sujets bruts, fixture élargi : sujet à deux owl:unionOf, sujet BNode, objet littéral, objet BNode, sujet portant aussi intersectionOf) : check OK en comparaison de multiensembles, et g.subjects(OWL.unionOf) renvoie bien 2 pour un sujet à deux listes, comme m{ }. Mutants sur la paire réelle : îlot -> [] ROUGE ; `?s ?p []` ROUGE ; owl:intersectionOf ROUGE ; `[:1]` ROUGE. Survivant : `set(...)` autour de l'îlot (OK) -- mutant de cardinalité, équivalence établie à la main par le cas à doublons ci-dessus (la multiplicité est conservée). Pas un exemple d'article : la forme m{ } est plus longue que g.subjects(p).",
+  "triaged_by": "sonnet-5.5"
+}

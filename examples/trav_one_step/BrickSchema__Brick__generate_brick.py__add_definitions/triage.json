@@ -1,0 +1,21 @@
+{
+  "priority": "medium",
+  "flags": ["weak-oracle", "wrong-construction"],
+  "summary": "Équivalence plausible et mutants d'îlot tués, mais le fixture n'a aucune hiérarchie à deux niveaux : le `*` de `rdfs:subClassOf* brick:Limit` (cas réel de Brick) n'est pas prouvé, et le suffixe `(graph)` de `s{ }` est redondant avec `@graph graph`.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au fixture du pilote une sous-classe de second niveau (ex. `brick:Deep_Max_Limit rdfs:subClassOf brick:Max_Limit`), puisque remplacer `rdfs:subClassOf*` par `rdfs:subClassOf` dans le `s{ }` laisse le check vert aujourd'hui ?",
+      "where": "translated.ldpy:69 (s{ SELECT ?param … rdfs:subClassOf* brick:Limit }) et driver.py:HIERARCHY_TTL (Min_Limit, Max_Limit, Alias_Limit sont tous directement sous Limit)",
+      "if_yes": "needs-work léger : ajouter la ligne au fixture (traduction inchangée ; j'ai vérifié dans une copie que le check reste OK avec elle et que le mutant sans `*` devient alors rouge) ; approuver ensuite.",
+      "if_no": "approuver en l'état, en sachant que la fermeture transitive du chemin n'est pas exercée."
+    },
+    {
+      "question": "Le suffixe `(graph)` de `s{ … }(graph)` est-il une enveloppe inutile alors que `@graph graph` est déjà déclaré dans la fonction (le check reste OK sans le suffixe) ?",
+      "where": "translated.ldpy:69 (s{ … }(graph)) et translated.ldpy:49 (@graph graph)",
+      "if_yes": "wrong-construction mineur : retirer `(graph)` ; classification inchangée.",
+      "if_no": "approuver : le suffixe explicite est voulu (s{ } est un objet distinct de graph.query)."
+    }
+  ],
+  "evidence": "rdfeval check OK. Région identique aux lignes 687-764 du clone (diff vide) ; le shim n'ajoute que les Namespace et un brickschema.Graph vide (sous-classe d'rdflib.Graph), rien de logique. Seule altération de la région : le docstring de la traduction écrit « skos:definitions »/« rdfs:seeAlso » au lieu de « SKOS.definitions »/« RDFS.seeAlso » (cosmétique). Mutants dans une copie : is_alias = [] ROUGE ; aliasOf->sameAs ROUGE ; `param != brick:Limit and`->`True and` ROUGE ; `{URIRef(definition[2])}`->`{definition[2]}` ROUGE (l'enveloppe URIRef est nécessaire, sinon Literal) ; `if len(definition[1])`->`if True` ROUGE ; lang en->fr ROUGE ; brick:Limit->brick:Setpoint dans le s{ } ROUGE. SURVIVANT : `rdfs:subClassOf*` -> `rdfs:subClassOf` (OK) ; avec Deep_Max_Limit ajouté au fixture dans la copie, ce mutant devient ROUGE. Suffixe `(graph)` retiré : OK. Le BIND f-string reste en graph.query brut : tenté en s{ } avec `brick:{setpoint}` -> LdpySyntaxError (confirme la note), code Python/SPARQL identique des deux côtés ; son résultat n'alimente qu'un logging.warning non observé par le pilote, sans effet sur l'équivalence de la partie traduite. Non signalé : le cas `{expr}`=None (param vient de ligne de requête, jamais None).",
+  "triaged_by": "sonnet-5.5"
+}

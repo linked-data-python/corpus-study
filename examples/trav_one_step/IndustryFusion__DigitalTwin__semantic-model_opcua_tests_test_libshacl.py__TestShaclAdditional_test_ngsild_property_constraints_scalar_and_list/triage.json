@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : deux lectures `next(g.objects(s, SH.property))` -> `m{ … }(g).first()`, équivalentes ici car chaque forme renvoyée par le shim (verbatim, vérifié) porte exactement un sh:property.",
+  "questions": [],
+  "evidence": "rdfeval check OK. Région = lignes 58-87 du test du dépôt. Shim Shacl : les six méthodes comparées par AST à semantic-model/opcua/lib/shacl.py sont identiques (verbatim confirmé), NGSILD identique à lib/utils.py:85 ; le _Fixture du pilote ne fait que remplacer setUp (même constructeur Shacl) et fournir assertTrue/assertIn. `.first()` vs next() : StopIteration/None ne diffère que si une forme n'a pas de sh:property, ce que get_ngsild_property_constraints ne produit jamais (chaque shape_node reçoit exactement un sh:property, lu dans le code du dépôt) ; un échec de test deviendrait AssertionError au lieu de StopIteration, sans effet sur un test qui passe. Mutants dans une copie : première lecture -> None ROUGE ; sujet joker `?x`, `?z` ou `[]` ROUGE ; lecture dans data_graph au lieu de shaclg ROUGE. Survivants non préoccupants : `{s}` -> `{shapes2[0]}` (OK, car shapes2 n'a qu'un élément pour value_rank=Literal(0) ; le pilote ne peut pas varier les arguments, ils sont écrits en dur dans la région), `break` dans la boucle, `assertTrue(found)` supprimé (found est vrai). Le `in list(g)` et le `in g` restent en rdflib, justifiés par les notes (pas dans les strates visées). Pas un exemple d'article : code de test, gain nul.",
+  "triaged_by": "sonnet-5.5"
+}
