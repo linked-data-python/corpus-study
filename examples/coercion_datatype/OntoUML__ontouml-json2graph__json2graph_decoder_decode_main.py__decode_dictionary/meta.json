@@ -47,5 +47,20 @@
     "method": "entry:decode_dictionary",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six appels de plus ; le logger et le crochet Text.value du shim deviennent, dans le pilote, des enregistreurs identiques des deux côtés (sortie standard comparée) ; language='' (défaut du dépôt, decode.py:68) ; largeur/hauteur à 0, très grand entier, True, False, flottant, flottant entier, chaîne, négatif ; valeurs fausses en littéral simple ('', False, 0, nom vide avec langue) ; Text à value non vide et vide à côté d'un value hors Text ; graphe du dépôt (liaisons ontouml et base, un triplet préalable) avec un dictionnaire sans id et un élément imbriqué sans type (KeyError des deux côtés, graphe partiel comparé).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "dimension_value < 0 -> <= 0",
+      "garde type(dimension_value) is not int retirée",
+      "appel de warn_if_text_value_is_unsupported retiré",
+      "message du LOGGER.error modifié ({dimension_value!r} -> {dimension_value})",
+      "^^xsd:nonNegativeInteger -> ^^xsd:integer (déjà tué)",
+      "continue retiré après l'îlot typé (déjà tué)",
+      "{new_object} -> {dictionary_data[key]} dans l'îlot simple (déjà tué)"
+    ],
+    "remaining": "Deux mutants restent verts et sont équivalents, non comptés : `language != \"\"` -> `True` (rdflib 7.2.1 rend Literal(x, lang='') identique à Literal(x)) et `{dimension_value}` -> `{str(dimension_value)}` dans l'îlot typé (la garde ne laisse passer que des int exacts, dont la forme canonique est str(n))."
   }
 }

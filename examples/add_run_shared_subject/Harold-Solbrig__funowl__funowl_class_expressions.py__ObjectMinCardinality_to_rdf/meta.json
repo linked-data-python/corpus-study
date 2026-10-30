@@ -48,5 +48,19 @@
     "method": "entry:to_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "trois appels de plus : sous-termes calqués sur les to_rdf réels de funowl qui écrivent dans g (ObjectInverseOf, ObjectIntersectionOf via Collection, min 0), chacun journalisant sa visite dans g (ordre et nombre d'appels comparés) ; cas non qualifié dans un graphe qui contient déjà une restriction ; min_.to_rdf qui lève dans la branche non qualifiée (même levée, même graphe partiel).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot 2 : owl:onClass avant owl:minQualifiedCardinality (ordre d'évaluation des sous-to_rdf)",
+      "premier îlot fondu dans chaque branche (écriture tout ou rien sur une levée de min_)",
+      "self.min_.to_rdf(g) évalué deux fois dans l'îlot else",
+      "owl:minCardinality -> owl:minQualifiedCardinality (déjà tué)",
+      "if True (déjà tué)",
+      "sujet {x} -> [] dans l'îlot else (déjà tué)"
+    ],
+    "remaining": "Les deux divergences du tri sont hors d'atteinte du dépôt : aucun to_rdf réel d'ObjectPropertyExpression, ClassExpression ou NonNegativeInteger ne rend None (FunOwlChoice délègue à IRI.to_rdf -> URIRef ou à une expression -> BNode, general_definitions.py:39 -> Literal) ; une levée dans objectPropertyExpression.to_rdf (AbbreviatedIRI à préfixe non déclaré, general_definitions.py:141) laisse un graphe partiel différent (ldpy/014), mais cli.py:42-43 le jette avec l'exception et aucun test ne le lit. Le owl: que @graph g lie dans le graphe de l'appelant est déjà lié dans tous les graphes que funowl crée (Graph() par défaut, bind_namespaces='core', presets de PrefixDeclarations). Rien à juger hors de la question article-example."
   }
 }

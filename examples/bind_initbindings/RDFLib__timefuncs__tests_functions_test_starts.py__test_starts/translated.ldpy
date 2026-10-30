@@ -53,7 +53,7 @@ def test_starts():
 # argument -- entry=/calls= would have nothing to compare on its own (the
 # "nothing observable" guard in rdfeval.harness). `demo` runs it -- an
 # AssertionError on either side already fails the whole check, which is the
-# region's own pass/fail criterion -- and returns a sentinel.
-def demo():
-    test_starts()
-    return "ok"
+# region's own pass/fail criterion -- and returns a sentinel.  `run`
+# lets driver.py observe the query (see there); by default it is that call.
+def demo(run=lambda test: test() or "ok"):
+    return run(test_starts)

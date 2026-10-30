@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. original.py == lignes 27-115 du dépôt (diff vide) ; le shim ne fait que lier args/ontouml_ref/warn/logger, rien d'inventé. Mutants sur copie de translated.ldpy : ROUGES = `{dimension_value}^^xsd:nonNegativeInteger` -> `{dimension_value}` (datatype retiré), `if key in restricted_fields` -> False, `Literal(..., lang=language)` -> `Literal(...)`, prédicat/objet du type échangé, `if type(item) is dict` -> False. VERTS = `dimension_value < 0` -> `<= 0` (la valeur 0 n'est jamais testée), retrait de `type(dimension_value) is not int or` (aucune largeur non entière dans le fixture), `language != \"\"` -> `True` (le fixture n'appelle qu'avec 'en' ; or le défaut du dépôt, decode.py:68, est '' : la branche la plus courante en production n'est pas exercée). Aucun mutant ne supprime un îlot ou n'élargit un terme lié, d'où medium et non high. Les deux appels du pilote sont le même fixture.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (language='' du dépôt, 0, bool, flottants et chaîne en largeur, valeurs fausses, Text.value, journal et crochet observés, graphe du dépôt, levée KeyError) : vert, les mutants restés verts au tri sont tués sauf language != '' -> True, prouvé équivalent (Literal(x, lang='') == Literal(x))."
 }
