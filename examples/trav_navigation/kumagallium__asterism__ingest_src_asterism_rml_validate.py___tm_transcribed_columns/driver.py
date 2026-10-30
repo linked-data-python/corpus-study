@@ -14,10 +14,43 @@ objectMap has neither a reference nor a functionExecution (contributes
 nothing) — so the join over predicateObjectMap/objectMap must not silently
 drop or duplicate any of these independent siblings under the same
 triples-map.
+
+The repository calls the region once per triples map of ONE graph
+(rml_validate.py:1170, ``for tm in _triples_map_subjects(graph)``), so a
+single map in the graph cannot tell ``{tm}`` from a variable.  The later
+calls therefore exercise the scope of every anchor and the predicate tuples:
+
+  call[1]  the inline graph plus a second map ``tm2`` (its own reference
+           "foreign" and its own one-column function "foreign_fn"); called on
+           ``tm``: neither must appear (kills ``{tm}`` -> ``?_t``, the cut
+           ``?pom`` link, and ``{om}`` -> ``?_o`` in the functionExecution
+           island).
+  call[2]  the same graph, called on ``tm2``: what ``tm`` transcribes must
+           not appear in turn.
+  call[3]  ``fixture_mapping.ttl``, a mapping in the shape the repository
+           really parses (IRI triples maps, BLANK-NODE predicate-object and
+           object maps, the legacy ``rml#reference`` and ``fnml#`` namespaces,
+           the w3id ``rml:termType rml:IRI``, a predicate-object map with two
+           object maps, neighbours reached through ``rr:predicateMap``, the
+           subject map, or a predicate other than ``rr:predicateObjectMap``);
+           called on ``ex:SampleMap``.  Every member of
+           ``_TERM_TYPE_PREDS``, ``_REFERENCE_PREDS`` and
+           ``_FUNCTION_EXECUTION_PREDS`` decides the answer, so truncating
+           any tuple changes it.
+  call[4]  the same fixture on ``ex:CurveMap`` (the neighbour map).
+  call[5]  the same fixture on ``ex:EmptyMap``: no predicate-object map, the
+           zero-solution case, an empty set.
+  call[6]  an IRI that is no subject of the graph at all: an empty set too.
+
+Every call gets a freshly built or freshly parsed graph per side, and the
+triples maps are URIRefs, as ``_triples_map_subjects`` yields them for the
+repository's mappings (``<#Map> a rr:TriplesMap``).
 """
 from rdflib import Graph, Literal, URIRef
 
-from rdfeval.harness import run_pair
+from pathlib import Path
+
+from rdfeval.harness import fixture_graph, run_pair
 
 RML = "http://w3id.org/rml/"
 R2RML = "http://www.w3.org/ns/r2rml#"
@@ -83,8 +116,55 @@ def _case():
     return (g, tm), {}
 
 
+TM2 = URIRef("http://example.org/tm2")
+
+
+def _build_two_maps() -> Graph:
+    """The inline graph plus a second triples map that ``tm`` must not read."""
+    g, _tm = _build_graph()
+    pom = URIRef("http://example.org/tm2_pom")
+    om_ref = URIRef("http://example.org/tm2_om_ref")
+    om_fn = URIRef("http://example.org/tm2_om_fn")
+    g.add((TM2, URIRef(R2RML + "predicateObjectMap"), pom))
+    g.add((pom, URIRef(R2RML + "objectMap"), om_ref))
+    g.add((om_ref, URIRef(RML + "reference"), Literal("foreign")))
+    g.add((pom, URIRef(R2RML + "objectMap"), om_fn))
+    fe = URIRef("http://example.org/tm2_fe")
+    g.add((om_fn, URIRef(RML + "functionExecution"), fe))
+    inp = URIRef("http://example.org/tm2_inp")
+    g.add((fe, URIRef(RML + "input"), inp))
+    ivm = URIRef("http://example.org/tm2_ivm")
+    g.add((inp, URIRef(RML + "inputValueMap"), ivm))
+    g.add((ivm, URIRef(RML + "reference"), Literal("foreign_fn")))
+    return g
+
+
+def _case_two_maps_tm():
+    return (_build_two_maps(), URIRef("http://example.org/tm")), {}
+
+
+def _case_two_maps_tm2():
+    return (_build_two_maps(), TM2), {}
+
+
+FIXTURE = Path(__file__).resolve().parent / "fixture_mapping.ttl"
+MAPPING = "http://example.org/mapping#"
+
+
+def _fixture_case(local):
+    return lambda: ((fixture_graph(FIXTURE), URIRef(MAPPING + local)), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry='_tm_transcribed_columns',
-    calls=[_case],
+    calls=[
+        _case,
+        _case_two_maps_tm,
+        _case_two_maps_tm2,
+        _fixture_case("SampleMap"),
+        _fixture_case("CurveMap"),
+        _fixture_case("EmptyMap"),
+        _fixture_case("NotAMap"),
+    ],
 )

@@ -41,5 +41,23 @@
     "method": "entry:_tm_transcribed_columns",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "6 calls added to the existing one: the inline graph plus a second triples map tm2 (own reference and one-column function), called on tm and on tm2; fixture_mapping.ttl, a mapping in the repository's real shape (IRI triples maps, blank-node predicate-object and object maps, legacy rml#/fnml# namespaces, w3id rml:termType rml:IRI, a predicate-object map with two object maps, neighbours through rr:predicateMap, the subject map and a predicate other than rr:predicateObjectMap), called on two maps, on a map without predicate-object map and on an IRI that is no subject (zero solutions).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{tm} -> ?_t",
+      "?pom link cut (?_p r2rml:objectMap ?om)",
+      "{om} -> ?_o in each of the three inner islands",
+      "r2rml:predicateObjectMap -> ?_q",
+      "r2rml:objectMap -> ?_q",
+      "_TERM_TYPE_PREDS[:1]",
+      "_REFERENCE_PREDS[:1] and [1:]",
+      "_FUNCTION_EXECUTION_PREDS[:1] and [1:]",
+      "len(cols) == 1 -> >= 1",
+      "is_iri guard removed"
+    ],
+    "remaining": ""
   }
 }

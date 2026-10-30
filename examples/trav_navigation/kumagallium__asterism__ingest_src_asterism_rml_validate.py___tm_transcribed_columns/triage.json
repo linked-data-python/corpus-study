@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Sur copie, SURVIVENT : ancre {tm} -> ?_t (`for _t, pom, om in m{ ?_t r2rml:predicateObjectMap ?pom . ?pom r2rml:objectMap ?om }`) ; liaison pom coupée (`?_p r2rml:objectMap ?om`) ; {om} -> ?_o dans l'îlot functionExecution ; restreindre à `_TERM_TYPE_PREDS[:1]`, `_REFERENCE_PREDS[:1]`, `_FUNCTION_EXECUTION_PREDS[:1]` (les variantes rml:termType, rml/fnml functionExecution ne sont jamais exercées ; la variante rml#reference l'est). Tués : {om} -> ?_o pour termType et reference, chaque îlot interne remplacé par [], `len(cols) == 1` -> `>= 1`. Copie avec un second tm2 (une objectMap à reference \"foreign\") : le pair est OK, et le mutant ancre élargie ECHOUE -> défaut confirmé comme défaut d'oracle seulement. rml_context.py : _fn_source_columns, _local_name, _INPUT_PREDS, _INPUT_VALUE_MAP_PREDS conformes au dépôt (rml_validate.py:972-999, 211-214, 81-85). Classification minor-restructuring : cohérente.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (second triples-map dans le même graphe, appelé des deux côtés, et fixture_mapping.ttl au format réel du dépôt : nœuds anonymes, espaces rml#/fnml#, termType w3id, voisins, map vide) : la traduction reste verte et l'ancre {tm} élargie comme chaque tuple tronqué sont tués."
 }

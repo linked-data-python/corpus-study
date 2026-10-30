@@ -1,0 +1,71 @@
+# A mapping in the shape the repository really parses (datasets/*/*.rml.ttl,
+# ingest/tests/test_rml_validate.py): triples maps are IRIs, their
+# predicate-object maps and object maps are BLANK NODES, and the legacy RML
+# namespace (http://semweb.mmlab.be/ns/rml#) carries rml:reference.
+#
+# Two triples maps over the same graph, as at the real call site
+# (rml_validate.py:1170, one call per triples map): what one map transcribes
+# must not leak into the other's answer.
+#
+# <#SampleMap> transcribes: "sample_id" (legacy reference), "formula"
+# (w3id reference next to rr:termType rr:Literal, which is not an IRI),
+# "temp" (legacy fnml functionExecution over one column), "pressure" (a
+# predicate-object map carrying two object maps).  It does NOT transcribe:
+# "page" (r2rml termType IRI), "doi" (w3id rml:termType IRI), the two-column
+# function, the reference held by the subject map, anything reached through
+# rr:predicateMap instead of rr:objectMap, nor "draft", whose object map hangs
+# off a neighbour predicate (ex:draftPredicateObjectMap) instead of
+# rr:predicateObjectMap.
+#
+# <#CurveMap> transcribes "curve_x" (reference) and "curve_y" (w3id
+# functionExecution over one column); a sample map that read it would grow.
+#
+# <#EmptyMap> has a logical source and no predicate-object map at all: the
+# zero-solution case, an empty set.
+
+@prefix rr:   <http://www.w3.org/ns/r2rml#> .
+@prefix rml:  <http://semweb.mmlab.be/ns/rml#> .
+@prefix rmlw: <http://w3id.org/rml/> .
+@prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
+@prefix ql:   <http://semweb.mmlab.be/ns/ql#> .
+@prefix ex:   <http://example.org/mapping#> .
+
+ex:SampleMap a rr:TriplesMap ;
+  rml:logicalSource [ rml:source "samples.csv" ; rml:referenceFormulation ql:CSV ] ;
+  rr:subjectMap [ rr:template "http://example.org/sample/{sample_id}" ;
+                  rml:reference "subject_column" ] ;
+  rr:predicateObjectMap [ rr:predicate ex:id ;
+                          rr:objectMap [ rml:reference "sample_id" ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:formula ;
+                          rr:objectMap [ rmlw:reference "formula" ; rr:termType rr:Literal ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:page ;
+                          rr:objectMap [ rml:reference "page" ; rr:termType rr:IRI ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:doi ;
+                          rr:objectMap [ rml:reference "doi" ; rmlw:termType rmlw:IRI ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:temp ;
+                          rr:objectMap [ fnml:functionExecution [
+                              fnml:input [ fnml:inputValueMap [ rml:reference "temp" ] ] ] ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:label ;
+                          rr:objectMap [ rmlw:functionExecution [
+                              rmlw:input [ rmlw:inputValueMap [ rml:reference "first" ] ] ,
+                                         [ rmlw:inputValueMap [ rml:reference "last" ] ] ] ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:pressure ;
+                          rr:objectMap [ rml:reference "pressure" ] ,
+                                       [ rr:constant "unknown" ] ] ;
+  rr:predicateObjectMap [ rr:predicateMap [ rml:reference "predicate_column" ] ;
+                          rr:objectMap [ rr:constant "x" ] ] ;
+  ex:draftPredicateObjectMap [ rr:predicate ex:draft ;
+                               rr:objectMap [ rml:reference "draft" ] ] .
+
+ex:CurveMap a rr:TriplesMap ;
+  rml:logicalSource [ rml:source "samples.csv" ; rml:referenceFormulation ql:CSV ] ;
+  rr:subjectMap [ rr:template "http://example.org/curve/{sample_id}" ] ;
+  rr:predicateObjectMap [ rr:predicate ex:x ;
+                          rr:objectMap [ rml:reference "curve_x" ] ] ;
+  rr:predicateObjectMap [ rr:predicate ex:y ;
+                          rr:objectMap [ rmlw:functionExecution [
+                              rmlw:input [ rmlw:inputValueMap [ rml:reference "curve_y" ] ] ] ] ] .
+
+ex:EmptyMap a rr:TriplesMap ;
+  rml:logicalSource [ rml:source "samples.csv" ; rml:referenceFormulation ql:CSV ] ;
+  rr:subjectMap [ rr:template "http://example.org/empty/{sample_id}" ] .

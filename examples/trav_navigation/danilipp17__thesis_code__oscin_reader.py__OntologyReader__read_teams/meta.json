@@ -41,5 +41,23 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "after the unchanged module-state run, re-executes both artefacts on 5 case graphs (only the context line `self = ReaderSelf(g)` is substituted; team_uri stays a URIRef as in the repository) and compares max_turns, termination_conditions and stdout: a second team with its own conditions and Composite sub-conditions, TurnLimit without maxTurns and with a non-integer maxTurns, EventBased without trigger (top level and sub-condition), Composite without operator, unknown-type conditions that carry maxTurns/trigger and name every class of the elif chain through a neighbour predicate, neighbour predicates off the team and off the Composite, promotion of the first sub TurnLimit only, empty Composite, team with no condition, empty graph.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{team_uri} -> ?_t",
+      "{term_uri} -> ?_t in hasSubCondition",
+      "hasTerminationCondition -> ?_p",
+      "hasSubCondition -> ?_p",
+      "`mt is not None` -> True (both)",
+      "or \"OR\" -> or \"XX\"",
+      "or \"\" -> or \"Z\" (both)",
+      "`max_turns is None` -> True",
+      "each of the 6 type tests widened in subject (?_x) and in predicate (?_q)",
+      "either island replaced by []"
+    ],
+    "remaining": ""
   }
 }

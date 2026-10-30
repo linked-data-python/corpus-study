@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Sur copie, mutants qui SURVIVENT (vert) : `for _t, term_uri in m{ ?_t agentoscin:hasTerminationCondition ?term_uri }` (ancre {team_uri} élargie : une seule équipe dans le graphe) ; `for _t, sub_uri in m{ ?_t agentoscin:hasSubCondition ?sub_uri }` (idem) ; `if mt is not None` -> `if True` aux deux endroits (aucun maxTurns absent) ; `or \"OR\"` -> `or \"XX\"` (opérateur toujours présent) ; `or \"\"` du trigger -> `or \"Z\"` (trigger toujours présent). Mutants qui ECHOUENT : îlot externe ou îlot hasSubCondition remplacé par [] ; type de condition élargi (`?x a …RoutingTermination`, `?x a …EventBasedTermination`) ; `if max_turns is None` -> `if True` ; branche EventBased supprimée. Les îlots ne fusionnent rien, donc pas de défaut de cardinalité de jointure ici ; le problème est la portée des ancres. Les helpers `_int_value`/`_str_value` sont du Python pur sur self.g, hors traduction.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (seconde équipe, TurnLimit sans maxTurns, EventBased sans déclencheur, Composite sans opérateur, voisins par prédicat, équipe sans condition) : la traduction reste verte et tous les mutants cités sont tués."
 }

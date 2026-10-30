@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutant sur copie : `m{ {agent_uri} agentoscin:employsReasoningPattern ?rp_uri . …` -> `m{ [ ] agentoscin:employsReasoningPattern ?rp_uri . …` reste VERT (le graphe ne contient qu'un agent). Reste aussi vert : ajout du conjoint `?rp_uri rdf:type owl:NamedIndividual`. ECHOUENT : prédicat employsReasoningPattern -> rdfs:seeAlso, `?rp_uri` -> `?x` dans le second motif, `if name:` -> `if True:`, itération remplacée par `[]`. Équivalence vérifiée en copie (modification des deux fichiers) sur : deux rp dont le premier n'a que owl:NamedIndividual et le second ChainOfThought -> les deux donnent ChainOfThought ; aucun type reconnu -> chaîne vide des deux côtés ; trois types reconnus sur un même rp -> les deux donnent ReAct (ordre d'insertion identique ici, non garanti). Dépôt (oscin/reader.py:249-262) : la boucle est dans une méthode, `reasoning_pattern = \"\"` est réinitialisé juste avant ; le commentaire du dépôt dit bien « Populator writes exactly one such triple ». Le graphe, `_Self` et `_rp_type_map` sont du contexte reconstruit à la main, `shim_namespaces.py` reprend les constantes de oscin/namespaces.py sans logique ajoutée.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (9 graphes de cas : second agent, motif non reconnu puis reconnu, voisins par rdfs:seeAlso, deux motifs reconnus dans les deux ordres, zéro solution) : la traduction reste verte et les mutants cités (ancre {agent_uri} élargie, conjoint owl:NamedIndividual) sont tués ; reste la classification."
 }

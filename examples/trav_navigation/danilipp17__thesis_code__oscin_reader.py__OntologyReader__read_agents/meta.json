@@ -41,5 +41,20 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "after the unchanged module-state run, re-executes both artefacts on 9 case graphs (only the context line `self = _Self(g)` is substituted to read the case graph; agent_uri stays a URIRef as in the repository) and compares reasoning_pattern and stdout: a second agent whose pattern must not be read, a pattern with no recognised type before a recognised one (outer loop continues), a recognised pattern reachable only through rdfs:seeAlso, a class given through a predicate other than rdf:type, a recognised class without owl:NamedIndividual, two recognised patterns in both insertion orders (makes the break observable), no pattern, empty graph.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{agent_uri} -> [ ] and -> ?_a",
+      "employsReasoningPattern -> ?_p",
+      "rdf:type -> ?_q",
+      "join key cut (?_x . ?rp_uri)",
+      "extra conjunct ?rp_uri rdf:type owl:NamedIndividual",
+      "break removed (last recognised wins)",
+      "island replaced by []"
+    ],
+    "remaining": "Classification (directly-expressible vs minor-restructuring for the two-break loop folded into one join) is Maxime's call. The two-recognised cases show that the fold agrees with the nested loops on the Memory store in both insertion orders, i.e. the equivalence rests on m{ } walking the store in the same nested order as objects(); the repository's populator writes a single recognised pattern, so the case is outside its real inputs."
   }
 }
