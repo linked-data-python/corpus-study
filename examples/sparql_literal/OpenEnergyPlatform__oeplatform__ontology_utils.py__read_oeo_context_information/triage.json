@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "Les trois requêtes dc:/obo:/rdfs: du dépôt n'ont pas de PREFIX et lisent les préfixes déclarés par le fichier parsé ; la traduction les fige en @prefix : sur un fichier qui ne déclare pas obo:, l'original lève « Unknown namespace prefix : obo » et la traduction réussit (cas que le pilote n'exerce pas, son fixture déclarant obo:).",
+  "questions": [
+    {
+      "question": "Les fichiers que le dépôt passe réellement à cette fonction (oeo-full.owl et les ontologies sous ONTOLOGY_ROOT, absents du clone) déclarent-ils tous obo: = <http://purl.obolibrary.org/obo/>, de sorte que figer ce préfixe en @prefix ne change rien en pratique ?",
+      "where": "translated.ldpy:11 (@prefix obo:) et original.py:34,39 (requêtes obo:IAO_0000115 / IAO_0000116 sans PREFIX)",
+      "if_yes": "approuver (écart sans portée réelle ; dc: et rdfs: sont de toute façon liés par défaut par rdflib aux mêmes IRI).",
+      "if_no": "needs-work : documenter l'écart dans les notes, ou ajouter au pilote un fichier qui ne déclare pas obo: pour que la différence soit visible."
+    }
+  ],
+  "evidence": "check : OK (2 appels). Mutants dans une copie, tous FAIL : FILTER(!isBlank) retiré, subClassOf -> subPropertyOf, IAO_0000116 -> IAO_0000115, requête label sur Graph() vide, dc:description -> dc:title, IAO_0000115 -> IAO_0000116 : l'oracle est solide sur les îlots. Expérience du doute : fixture sans la ligne @prefix obo (IRI écrites en entier) et ontology='oeo' -> FAIL « call[0]: outcome differs (raised Exception('Unknown namespace prefix : obo') vs résultat) ». À l'inverse, dc: lié dans le fixture à dcterms reste vert : rdflib lie dc: à elements/1.1 d'office (le fichier ne peut pas le redéfinir, il obtient dc1), et rdfs: aussi ; seul obo: dépend vraiment du fichier. Le gabarit oeo_ext_template_empty.owl du dépôt déclare xmlns:dc elements/1.1 (il ne déclare pas obo), signe que la déclaration dépend des fichiers. q_global est renvoyé tel quel (Result chez l'original, requête paresseuse chez la traduction) mais aucun appelant du dépôt ne l'utilise (ontology/views.py ne lit que la description) : pas de doute là-dessus. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

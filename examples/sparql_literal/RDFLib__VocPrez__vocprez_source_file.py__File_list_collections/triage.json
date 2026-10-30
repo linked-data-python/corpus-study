@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : requête SELECT * reprise telle quelle dans s{ } avec ses deux PREFIX passés en @prefix, glue Python identique, pilote avec zéro solution et voisinage.",
+  "questions": [],
+  "evidence": "check : OK. Dépôt (vocprez/source/file.py:160-169, self.gr issu de load_pickle_graph, donc un Graph ordinaire) : requête et glue identiques à original.py. Mutants dans une copie : motif '?c a skos:Concept' retiré -> FAIL (le voisinage NotAConcept apparaît) ; rdfs:label -> skos:prefLabel -> FAIL ; requête sur un autre graphe -> FAIL. Survivant : permuter les colonnes dans la glue, (x['c'], x['l']) -> (x['l'], x['c']), reste vert parce que le harnais, avec ordered=False, trie aussi l'intérieur des tuples (rdfeval/harness.py, _unordered : sorted() sur list ET tuple) ; sans conséquence ici, la glue étant textuellement identique des deux côtés, mais à connaître pour les paires dont la glue change. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

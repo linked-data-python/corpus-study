@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : la requête CONSTRUCT du dépôt (owl2instances.py:52-72) est reprise telle quelle dans s{ }, le shim ne change aucune logique, et l'oracle tue les mutants d'îlot.",
+  "questions": [],
+  "evidence": "check : OK (module-state, e_graph de 20 triplets). Requête comparée au dépôt (corpus/repos/IndustryFusion__DigitalTwin, owl2instances.py:52-72) : identique, commentaire compris ; elle n'est utilisée qu'à la ligne 856 (appel g.query(query_subclasses)), donc l'inlining n'en perd aucun autre usage. entity_shim.py comparé à lib/entity.py : add_subclasses, add_subclasses_recursive, serialize, get_graph identiques ; seuls __init__ (sans ngsildns, types, bind ngsi-ld) est tronqué, sans effet sur les triplets de e. Mutants dans une copie de translated.ldpy, tous FAIL : branche 2 de l'UNION cassée (20 vs 19 triplets), branche 1 supprimée (20 vs 17), requête lancée sur Graph() vide (20 vs 9), racine BaseObjectType -> BaseDataType (20 vs 14), gabarit CONSTRUCT sans '?superclass a owl:Class' (20 vs 19) : fixture avec voisinage, deux branches de l'UNION exercées (UntypedIntermediateType/OddSubtype). Le dépôt ouvre g avec Graph(store='Oxigraph') : essayé sur une copie avec ce store (et sans l'appel add_subclasses_recursive, dont le initBindings non projeté échoue sous Oxigraph dans le dépôt lui-même, hors région), original et traduction restent isomorphes. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}

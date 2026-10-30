@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : le test du dépôt s'exécute des deux côtés et son propre assert (22 paires attendues) sert d'oracle ; le shim _context.py ne change pas la logique de is_after, seulement ses docstrings et annotations.",
+  "questions": [],
+  "evidence": "check : OK. data/after.ttl identique octet pour octet à tests/functions/data/after.ttl du dépôt. _context.py comparé à timefuncs/funcs.py : _path_exists identique à l'AST près ; is_after identique une fois retirés docstring, annotation de retour, import local de Literal et nom de l'exception (comparaison d'AST unparse -> égalité) ; la note dit 'verbatim' ce qui est imprécis (docstrings et commentaires abrégés) mais aucune logique n'est ajoutée ni retirée. L'enregistrement tfun:isAfter reproduit celui de timefuncs/__init__.py. Mutants dans une copie, tous FAIL (outcome differs, l'assert lève dans la copie) : FILTER nié, motif '?b a time:TemporalEntity' retiré, arguments isAfter(?b, ?a) permutés, requête lancée sur Graph() vide. initNs={time, tfun} équivaut aux @prefix time:/tfun: (TIME = http://www.w3.org/2006/time#). Les 44 after:xxx de la liste expected sont de simples réécritures de str(AFTER.xxx) : le décompte 'prefixed name' est gonflé par cette liste, pas par la requête. Copies supprimées.",
+  "triaged_by": "sonnet-5.5"
+}
