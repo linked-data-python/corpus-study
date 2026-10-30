@@ -27,5 +27,6 @@
     }
   ],
   "evidence": "rdfeval check de la paire : OK. Copie dans mktemp -d, 4 appels ajoutés au pilote (@list non vide ; {'http://e/q':[{'@value':'v'}]} imbriqué ; objet avec @id et @value ; mélange). Résultat : le cas imbriqué à une propriété FAIL : « outcome differs (raised AssertionError('Object {...} must be an rdflib term') vs URIRef('http://e/a')); graphs not isomorphic (0 vs 1 triples); stdout differs » ; la traduction écrit (a, p, Literal(\"{'http://e/q': [{'@value': 'v'}]}\")). Le dépôt d'origine atteint ce cas : jsonld_to_graph (firm/ld/jsonld_utils.py:105-111) appelle _insert_resource sur la sortie de jsonld.expand, où tout nœud imbriqué à une propriété a len(obj)==1 sans @id/@value/@list. @list non vide : les deux lèvent la même exception (vert). Mutants sur la traduction avec le pilote d'origine : type-loop supprimée, prédicat échangé, branches else/continue, garde >0 : tous FAIL ; `raise Exception(\"@list not supported\")` remplacé par pass : reste vert (branche non exercée). Le cas valeur None n'est pas atteint : Literal(obj['@value']) est déjà un Literal avant l'interpolation. Copie supprimée.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote exerce maintenant l'objet imbriqué à une seule propriété (atteint dans le dépôt) : la traduction écrivait Literal(str(dict)) là où l'original lève AssertionError, elle garde donc `g.add` pour l'objet encore dict et +{ } pour le reste ; la @list non vide et la récursion sur @id + propriété sont aussi exercées, et quatre mutants sont rejetés."
 }

@@ -25,12 +25,25 @@ comparison. This region produces no blank nodes at all (every term is a
 equality is exactly as strong as isomorphism would have been here -- no
 bnode abstraction is needed.
 
-registry_root is a single shared Path (not re-randomised per call), so the
-plain-value comparison of call[0].arg[1] does not become a false diff over
-two unrelated temp directories -- only the RDF content is what this
-region's semantics are about; the registry meta.json filesystem side effect
-is exercised (both sides really write it) but not compared.
+The registry meta.json the region writes is compared too: each `_FakeDataset`
+owns its own fresh `registry` directory (created per side, since the call
+factory runs once per side), `_make_call` passes that directory as
+registry_root, and `__eq__` compares, besides the quads, every file under it
+(relative path and exact bytes). A mutated meta.json field (`promoted`,
+`name`, `status`, ...) is therefore a diff, not an unobserved effect.
+
+Calls exercised:
+  1. the real call shape of the repository (`"ds-a"`, one row `("urn:a1",
+     "Bi₂Te₃")`) plus a second, ASCII row -- several solutions, with the
+     neighbouring graph ds-other that must stay intact;
+  2. the degenerate row values the `+{ }` write must not drop or coerce
+     away: the empty string `""`, the integer `0`, the float `1.5`, and a
+     duplicate of an earlier row (a set of quads absorbs it);
+  3. zero rows: the control triple and meta.json are still written, no
+     triple goes into the key graph.
 """
+import atexit
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -39,10 +52,24 @@ import rdflib
 from rdfeval.harness import run_pair, fixture_graph
 
 _HERE = Path(__file__).resolve().parent
-_REGISTRY_ROOT = Path(tempfile.mkdtemp(prefix="rdfeval-seed-promoted-")) / "registry"
+# every registry of this run lives under one temp directory, removed at exit
+_TMP = tempfile.mkdtemp(prefix="rdfeval-seed-promoted-")
+atexit.register(shutil.rmtree, _TMP, True)
 _OTHER_CANONICAL = rdflib.URIRef(
     "https://kumagallium.github.io/asterism/graph/canonical/ds-other"
 )
+
+
+class _RegistryRoot(type(Path())):
+    """A registry directory whose location is not part of the comparison:
+    two sides use two different temp directories, so plain Path equality
+    would be a false diff. Its *content* is compared by `_FakeDataset.__eq__`."""
+
+    def __eq__(self, other):
+        # same name only: Path.mkdir(parents=True) compares a path with its parent
+        return isinstance(other, _RegistryRoot) and self.name == other.name
+
+    __hash__ = type(Path()).__hash__
 
 
 class _FakeDataset:
@@ -51,6 +78,14 @@ class _FakeDataset:
 
     def __init__(self):
         self._ds = rdflib.Dataset()
+        # a fresh registry per instance, hence per side
+        self.registry = _RegistryRoot(tempfile.mkdtemp(dir=_TMP), "registry")
+
+    def _files(self):
+        if not self.registry.exists():
+            return {}
+        return {str(f.relative_to(self.registry)): f.read_bytes()
+                for f in sorted(self.registry.rglob("*")) if f.is_file()}
 
     def graph(self, identifier):
         return self._ds.graph(identifier)
@@ -66,27 +101,37 @@ class _FakeDataset:
     def __eq__(self, other):
         if not isinstance(other, _FakeDataset):
             return NotImplemented
-        return self._quads() == other._quads()
+        return (self._quads() == other._quads()
+                and self._files() == other._files())
 
     def __repr__(self):
-        return f"_FakeDataset({sorted(self._quads())!r})"
+        return (f"_FakeDataset({sorted(self._quads())!r}, "
+                f"files={self._files()!r})")
 
 
-def _make_call():
-    ds = _FakeDataset()
-    neighbour = fixture_graph(_HERE / "fixture.ttl")
-    other_g = ds.graph(_OTHER_CANONICAL)
-    for t in neighbour:
-        other_g.add(t)
-    # several solutions, including a non-ASCII value (as in the real test
-    # suite's own call: _seed_promoted(ds, ..., "ds-a", [("urn:a1", "Bi₂Te₃")]))
-    rows = [("urn:a1", "Bi₂Te₃"), ("urn:a2", "Bi2Te3")]
-    return (ds, _REGISTRY_ROOT, "ds-a", rows), {}
+def _make_call(rows, dataset_id="ds-a"):
+    def call():
+        ds = _FakeDataset()
+        neighbour = fixture_graph(_HERE / "fixture.ttl")
+        other_g = ds.graph(_OTHER_CANONICAL)
+        for t in neighbour:
+            other_g.add(t)
+        return (ds, ds.registry, dataset_id, list(rows)), {}
+    return call
+
+
+# several solutions, including a non-ASCII value (as in the real test
+# suite's own call: _seed_promoted(ds, ..., "ds-a", [("urn:a1", "Bi₂Te₃")]))
+_ROWS = [("urn:a1", "Bi₂Te₃"), ("urn:a2", "Bi2Te3")]
+# empty string, 0, a float, and a duplicate of an earlier row
+_DEGENERATE_ROWS = [("urn:a3", ""), ("urn:a4", 0), ("urn:a6", 1.5),
+                    ("urn:a3", "")]
 
 
 VERDICT = run_pair(
     __file__,
     entry="_seed_promoted",
     fixture="fixture.ttl",
-    calls=[_make_call],
+    calls=[_make_call(_ROWS), _make_call(_DEGENERATE_ROWS, "ds-b"),
+           _make_call([], "ds-c")],
 )

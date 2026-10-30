@@ -26,7 +26,8 @@
     "`for type_ in value: g.add((subject, RDF.type, URIRef(type_)))` -> `for @bindings in ({\"t\": rdflib.URIRef(type_)} for type_ in value): +{ {subject} a ?t }` -- the one loop in this region that is genuinely row-shaped (each iteration writes exactly one triple, no branching on the loop item itself), so it is the clean match for the stratum's target construction. Predicate `a`/rdf:type is fixed; only the object varies per row, carried as `?t`.",
     "the second loop (`for obj in value: ... g.add((subject, URIRef(key), obj))`) is NOT recast with @bindings: `obj` is produced by branching that differs in KIND, not just value -- @list (raise or continue), @id vs @value, and a recursive call to _insert_resource itself that has the side effect of writing into `g` while the binding would be computed. Wrapping that in a bindings-generator would either move side effects out of order or force the branches into a helper function, i.e. restructure control flow to fit the idiom rather than translate it. Kept as +{ } with plain {expr} interpolation, one 1:1 swap for each `g.add`, both branches unmerged as in the source.",
     "`@graph g` designates the existing `g` parameter as current (rather than the mechanical `g += g{ ... }` a first pass produced): this is the more specific construction per INSTRUCTIONS_403 SS2 for a graph passed in as an object, not created locally.",
-    "no context shim needed: the region only imports json, typing.Any and rdflib, all available as-is."
+    "no context shim needed: the region only imports json, typing.Any and rdflib, all available as-is.",
+    "Correction : pour un objet imbriqué à une seule propriété (ni @id, ni @value, ni @list), l'original lève AssertionError (g.add exige un terme rdflib) alors que +{ {subject} {rdflib.URIRef(key)} {obj} } écrivait en silence Literal(str(dict)) ; le pilote renforcé (RESOURCE_4 et RESOURCE_5) l'a fait échouer, et ce cas existe dans le dépôt (jsonld_to_graph appelle _insert_resource sur la sortie de jsonld.expand). La branche len(obj) == 1 garde donc `g.add` pour l'objet encore dict, et +{ } pour le reste ; la région n'est plus entièrement en +{ }."
   ],
   "draft_sha": "ffea6efc0fbf3a29",
   "provenance": {
@@ -44,5 +45,17 @@
     "method": "entry:_insert_resource",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "quatre ressources ajoutées : RESOURCE_3 (@list non vide, la branche raise Exception(\"@list not supported\"), avec un objet écrit avant), RESOURCE_4 (objet imbriqué à une seule propriété {'http://e/q': [{'@value': 'v'}]}, atteint dans le dépôt par jsonld_to_graph), RESOURCE_5 (le même, mêlé à des termes écrits avant et à un @type), RESOURCE_6 (objet à @id + autre propriété = récursion, objet à @id + @value = le @value l'emporte) ; la docstring périmée sur la @list est remplacée.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "raise Exception(\"@list not supported\") -> pass",
+      "message du raise changé",
+      "garde `len(obj[\"@list\"]) > 0` -> `>= 0`",
+      "retrait de la garde isinstance(obj, dict) (la traduction d'origine, rejetée par RESOURCE_4 et RESOURCE_5)"
+    ],
+    "remaining": "Jugements non traités : la classification directly-expressible tient-elle, maintenant que la branche len(obj) == 1 garde un `g.add` en repli ? (classification-doubt) ; la boucle des types en `for @bindings in ({\"t\": …} for …)` au lieu de `for type_ in value: +{ {subject} a {rdflib.URIRef(type_)} }` (classification-doubt)."
   }
 }

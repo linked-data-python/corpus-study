@@ -17,11 +17,23 @@ that recurses into _insert_resource (a fresh BNode subject).
 RESOURCE_2 exercises: no "@id" (BNode subject), a single-valued "@type", the
 same predicate repeated over two distinct "@id" objects (two triples, one
 subject/predicate, from one loop iteration group), and an empty "@list"
-(the "continue" branch -- zero triples, no error). The non-empty "@list"
-branch (`raise Exception("@list not supported")`) is deliberately not
-exercised: it is a real behaviour of the region, but comparing two runs that
-are BOTH expected to raise is not what run_pair's per-call try/except is
-for -- it would abort the whole driver rather than compare anything.
+(the "continue" branch -- zero triples, no error). RESOURCE_3 (non-empty "@list") reaches the branch
+`raise Exception("@list not supported")`: run_pair compares what a call
+raised (type and message), the printed JSON of the except handler, and what
+the call had already written to `g` before raising.
+
+RESOURCE_4 is a nested node with a SINGLE property and neither "@id", "@value"
+nor "@list" (e.g. an address with one field, or a node that only has "@type"
+-- here {"http://example.org/q": [{"@value": "v"}]}). It does reach the
+function in the repository: firm/ld/jsonld_utils.py:jsonld_to_graph calls
+_insert_resource on the output of jsonld.expand, where every nested node with
+one property has len(obj) == 1. The original hands the dict to `g.add`, which
+rejects it (AssertionError "must be an rdflib term"); the translation must
+raise the same, not coerce the dict to a Literal. RESOURCE_5 mixes a nested
+single-property node among terms that are written before it, and
+RESOURCE_6 has a nested node with "@id" plus another property (the
+recursive branch, an "@id" object of len 2) next to an "@id"+"@value" object
+of len 2 (the "@value" wins).
 """
 from rdfeval.harness import run_pair
 
@@ -51,6 +63,36 @@ RESOURCE_2 = {
 }
 
 
+RESOURCE_3 = {
+    "@id": "http://example.org/c",
+    "http://example.org/p": [
+        {"@id": "http://example.org/before"},
+        {"@list": [{"@id": "http://example.org/item"}]},
+    ],
+}
+
+RESOURCE_4 = {
+    "@id": "http://example.org/a",
+    "http://example.org/p": [{"http://example.org/q": [{"@value": "v"}]}],
+}
+
+RESOURCE_5 = {
+    "@id": "http://example.org/m",
+    "@type": ["http://example.org/Thing"],
+    "http://example.org/name": [{"@value": "M"}],
+    "http://example.org/p": [{"@id": "http://example.org/ok"},
+                             {"@type": ["http://example.org/Only"]}],
+}
+
+RESOURCE_6 = {
+    "@id": "http://example.org/n",
+    "http://example.org/p": [
+        {"@id": "http://example.org/n2", "http://example.org/r": [{"@value": "w"}]},
+        {"@id": "http://example.org/ignored", "@value": "both"},
+    ],
+}
+
+
 def _case(resource):
     def make():
         import rdflib
@@ -61,5 +103,6 @@ def _case(resource):
 VERDICT = run_pair(
     __file__,
     entry='_insert_resource',
-    calls=[_case(RESOURCE_1), _case(RESOURCE_2)],
+    calls=[_case(RESOURCE_1), _case(RESOURCE_2), _case(RESOURCE_3),
+           _case(RESOURCE_4), _case(RESOURCE_5), _case(RESOURCE_6)],
 )

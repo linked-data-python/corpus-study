@@ -43,7 +43,12 @@ def _insert_resource(g: rdflib.Graph, resource: dict[str, Any]) -> rdflib.URIRef
                             obj = rdflib.URIRef(obj["@id"])
                         elif "@value" in obj:
                             obj = rdflib.Literal(obj["@value"])
-                        +{ {subject} {rdflib.URIRef(key)} {obj} }
+                        if isinstance(obj, dict):
+                            # nested node with one property: not an RDF term, rdflib's
+                            # own check rejects it; +{ } would coerce it to a Literal
+                            g.add((subject, rdflib.URIRef(key), obj))
+                        else:
+                            +{ {subject} {rdflib.URIRef(key)} {obj} }
                     else:
                         if "@value" in obj:
                             obj = rdflib.Literal(obj["@value"])

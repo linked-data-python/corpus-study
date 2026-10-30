@@ -19,8 +19,7 @@
     "@graph",
     "s{ }",
     "+{ }",
-    "interpolation {expr}",
-    "IRI"
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "Each SELECT ... OPTIONAL ... FILTER(!bound(...)) query becomes s{ }: m{ } has no OPTIONAL/FILTER, so this is the only fit.",
@@ -46,5 +45,26 @@
     "method": "entry:_complete_termtypes",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le graphe du pilote reçoit, pour chaque règle, un voisin qui a déjà un termType (tm2b blank node, tm3b littéral, om4b object map à reference) ; trois object maps portant seulement execution, languageMap ou datatypeMap (aucune reference) ; un predicateMap et un graphMap sans termType (x6) ; la docstring de driver.py dit ce que chaque ajout exerce. Meta.json : « IRI » retiré de constructions (aucun îlot <…> dans translated.ldpy).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`!bound(?termtype)` retiré dans la branche 1 (RDFstarTriple)",
+      "`!bound(?termtype)` retiré dans la branche 2 (blank node)",
+      "`!bound(?termtype)` retiré dans la branche 3 (literal)",
+      "`!bound(?termtype)` retiré dans la branche 4 (object map)",
+      "bound(?execution) retiré",
+      "bound(?language) retiré",
+      "bound(?datatype) retiré",
+      "bound(?reference) retiré",
+      "RML_PREDICATE_MAP retiré de la liste finale",
+      "RML_GRAPH_MAP retiré de la liste finale",
+      "RML_SUBJECT_MAP retiré de la liste finale",
+      "`!bound(?termtype)` retiré dans la boucle finale",
+      "isBlank -> isIRI"
+    ],
+    "remaining": "Jugement non traité (drapeau wrong-construction) : les six +{ } gardent {rdflib.term.URIRef(RML_…)} au lieu de f<{RML_…}> (équivalent selon le triage ; dans les s{ } la forme f<{…}> est refusée par le parseur SPARQL)."
   }
 }

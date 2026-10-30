@@ -47,5 +47,21 @@
     "method": "fixture:fixture.ttl entry:_seed_promoted",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le meta.json écrit par la région est maintenant observé : chaque _FakeDataset possède son propre dossier registry (créé par côté), passé comme registry_root, et __eq__ compare les quads puis le contenu exact de chaque fichier du dossier (le chemin du dossier, lui, ne compte pas, via un Path dont l'égalité ne porte que sur le nom) ; la docstring ne dit plus que le fichier n'est pas comparé. Appels ajoutés : lignes dégénérées '' / 0 / 1.5 / doublon (dataset ds-b) et zéro ligne (dataset ds-c : le triplet de contrôle et meta.json sont écrits, rien dans le graphe clé).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "\"promoted\": True -> False dans meta.json",
+      "\"name\": dataset_id -> \"zz\" dans meta.json",
+      "\"status\": \"active\" -> \"x\" dans meta.json",
+      "\"canonical_graph\": key -> dataset_id dans meta.json",
+      "Literal(raw) -> Literal(raw, lang=\"en\")",
+      "graphe nommé key -> key+\"x\"",
+      "INSERT DATA : \"promoted\" -> \"promotedX\"",
+      "Literal(raw) -> Literal(raw or \"z\") (perd '' et 0)"
+    ],
+    "remaining": "Jugements non traités : la forme de l'îlot (constructeurs rdflib gardés dans +{ } au lieu de f<{entity}> f<{PRED}> {raw}, drapeau wrong-construction) et la classification directly-expressible alors que l'INSERT DATA interpolé reste une f-string (classification-doubt)."
   }
 }
