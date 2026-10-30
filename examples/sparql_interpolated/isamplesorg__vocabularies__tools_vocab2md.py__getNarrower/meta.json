@@ -43,5 +43,19 @@
     "method": "entry:getNarrower",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "seven calls with rdflib.URIRef for r and v, the type the repository passes (r comes from query rows, tools/vocab2md.py:178-189, 242, 256, 309): several solutions in each branch, each scheme deciding (VocabA, VocabB, absent VocabC), the broader term deciding inside the v branch (Plant), zero solutions in each branch (Rock); fixture neighbours Horse (skos:topConceptOf instead of skos:inScheme), Lynx (in both schemes, must come back once), Fish now in VocabA. The three str calls are kept.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "skos:broader -> skos:related, each branch",
+      "skos:inScheme {v} -> skos:inScheme skos:nope",
+      "skos:inScheme -> skos:topConceptOf",
+      "{v} -> ?anyv",
+      "skos:inScheme pattern dropped",
+      "{(r)} -> ?anyr, each branch"
+    ],
+    "remaining": "SELECT DISTINCT in the v branch is an equivalent mutant (every term but ?s is bound, no duplicate possible): not counted. The three original str calls still return [] on both sides; the repository never passes a str, nor r=None (None would leave ?parent unbound in the original and become Literal('None') in the translation, known gap 9) -- not exercised, by design."
   }
 }

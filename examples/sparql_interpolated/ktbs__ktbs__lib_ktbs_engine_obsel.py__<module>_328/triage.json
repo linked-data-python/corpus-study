@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "Copie sous mktemp -d, mutants de translated.ldpy. VERTS (survivent) : retrait de DISTINCT ; `$obs {KTBS.hasTrace} ?trace` -> `$obs ?zz ?trace`. ROUGES : retrait de `$obs` du SELECT, retrait de chaque ligne hasTrace, UNION cassé. Test d'API : `g.query(translated_query, initBindings={'obs': o1})` lève AttributeError: 'PreparedQuery' object has no attribute 'algebra' ; seul `q(g, {'obs': o1})` marche. La note « prepareQuery(...) disappears, the island already IS the prepared-query object » est donc fausse pour l'API rdflib du dépôt. Types : KTBS.hasTrace est un URIRef dans le dépôt (ClosedNamespace) comme dans le shim ; interpolation correcte. Peut illustrer l'article : non en l'état (appel du dépôt incompatible, gain réduit à `%s` -> `{expr}` et à la suppression de l'import prepareQuery).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (doublon pour DISTINCT, voisins des deux hasTrace, obsel en nœud blanc) : les deux mutants survivants du tri meurent, traduction juste, check OK ; la question du site d'appel obsel.py:323 reste à Maxime."
 }

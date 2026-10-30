@@ -16,13 +16,13 @@ def narrower(
     if v is None:
         qres = s{ SELECT ?s
         WHERE {
-            ?s skos:broader {concept} .
+            ?s skos:broader {rdflib.URIRef(concept)} .
         }}
     else:
         v = self.expand_name(v)
         qres = s{ SELECT ?s
         WHERE {
-            ?s skos:inScheme {v} .
-            ?s skos:broader {concept} .
+            ?s skos:inScheme {rdflib.URIRef(v)} .
+            ?s skos:broader {rdflib.URIRef(concept)} .
         }}
     return self._one_res(qres, abbreviate=abbreviate)

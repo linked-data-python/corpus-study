@@ -43,5 +43,18 @@
     "method": "custom:prepared-query-execution",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture: a second predicate between o1 and o2 (DISTINCT acts), o1 alsoIn t2 (neighbour of $obs hasTrace ?trace), o6 related to o1 with alsoIn t1 but trace t3 (neighbour of ?other hasTrace ?trace); a third call with a blank-node obsel _:b1 as $obs (the repository's node is 'uri or blank').",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "DISTINCT removed",
+      "$obs {KTBS.hasTrace} ?trace -> $obs ?zz ?trace",
+      "?other {KTBS.hasTrace} ?trace -> ?other ?zz ?trace",
+      "each UNION branch dropped",
+      "each hasTrace line dropped"
+    ],
+    "remaining": "The repository consumes the value at lib/ktbs/engine/obsel.py:323 as graph.query(_RELATED_OBSELS, initBindings={'obs': node}); with the s{ } value that raises AttributeError: 'PreparedQuery' object has no attribute 'algebra' (re-verified). The driver runs the translated side through the call suffix, i.e. with that call site rewritten outside the region. Is that rewrite acceptable (directly-expressible), a minor-restructuring, or does it make the region not-expressible as written? article_candidate (true) depends on the answer."
   }
 }

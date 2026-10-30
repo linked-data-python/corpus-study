@@ -1,6 +1,8 @@
 {
   "priority": "high",
-  "flags": ["equivalence-doubt"],
+  "flags": [
+    "equivalence-doubt"
+  ],
   "summary": "`expand_name` rend une `str` (pas une URIRef) quand l'entrée est une IRI complète ; l'original la lie telle quelle par initBindings, la traduction l'interpole `{concept}` / `{v}` et la coerce en littéral — et le dépôt appelle bien `narrower` avec une IRI complète sous forme de `str`, chemin que le pilote n'exerce pas.",
   "questions": [
     {
@@ -11,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Les 4 appels du pilote donnent des résultats non vides/vides distincts (3, 2, 0, 3 abrégés) : l'oracle est solide pour les CURIE (`ex:Animal` → URIRef). Chemin non couvert : dans une copie, avec le même `_Store`, `narrower(s, 'http://example.org/Animal')` rend [] des deux côtés (expand_name rend une str), donc ajouter cet appel au pilote resterait vert sans rien prouver (le store du pilote est un Graph mémoire, pas le store SQLAlchemy du dépôt où le test du dépôt obtient 3 avec une str). Divergence de type montrée : sur un graphe où l'objet de skos:broader est le Literal \"http://example.org/Animal\", l'original rend [] et la traduction rend ['http://example.org/X'] ; quand l'objet est l'URIRef, les deux rendent []. Donc la traduction lie un Literal là où l'original lie une str ; dans le store réel (rdflib-sqlalchemy, non installé ici) je n'ai pas pu exécuter l'original, mais le test du dépôt (attend 3 avec une str d'IRI) indique qu'il y apparie des IRI, ce qu'un Literal ne ferait pas. Notes du traducteur : « concept/v already travel safely » est vrai pour les URIRef seulement.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé avec le store réel du dépôt (règle d'appariement par texte de rdflib-sqlalchemy, émulée) et des IRI complètes en str : la traduction tombait (Literal au lieu d'IRI), corrigée en {rdflib.URIRef(concept)} / {rdflib.URIRef(v)}, check OK."
 }

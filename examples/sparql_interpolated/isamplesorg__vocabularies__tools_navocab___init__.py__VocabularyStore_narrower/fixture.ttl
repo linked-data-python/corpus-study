@@ -19,3 +19,14 @@ ex:Wolf a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabB .
 # neighbourhood that must NOT match a narrower(Animal) query
 ex:Fish   a skos:Concept ; skos:broader ex:Plant ; skos:inScheme ex:VocabA .
 ex:Cactus a skos:Concept ; skos:related ex:Plant ; skos:inScheme ex:VocabA .
+
+# Added by the repair of 2026-10-30 (see meta.json "repair"): a neighbour
+# whose objects are LITERALS with the very text of the Animal and VocabA
+# IRIs.  On the in-memory graph neither an IRI nor a str binding reaches it;
+# on the store the repository really uses (rdflib-sqlalchemy, emulated in
+# driver.py) any non-Literal binding is matched by text in the literal
+# partition too, so the original returns Ghost there -- and so must the
+# translation.
+ex:Ghost a skos:Concept ;
+    skos:broader "http://example.org/Animal" ;
+    skos:inScheme "http://example.org/VocabA" .

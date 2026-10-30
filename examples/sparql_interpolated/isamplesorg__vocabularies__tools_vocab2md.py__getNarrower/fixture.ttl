@@ -12,3 +12,14 @@ ex:Rock a skos:Concept .
 # neighbourhood that must NOT match a narrower(Animal) query
 ex:Fish   a skos:Concept ; skos:broader ex:Plant .
 ex:Cactus a skos:Concept ; skos:related ex:Animal .
+
+# Added by the repair of 2026-10-30 (see meta.json "repair"), exercised by the
+# URIRef calls of the driver -- the type the repository really passes:
+# Horse is narrower than Animal but tied to VocabA by skos:topConceptOf, not
+# skos:inScheme (same subject and object as the inScheme pattern, another
+# predicate: must be excluded once v is given); Lynx is in BOTH schemes (must
+# come back exactly once per query); Fish is in VocabA but narrower than Plant
+# (same subject and predicate as the broader pattern, another object).
+ex:Horse a skos:Concept ; skos:broader ex:Animal ; skos:topConceptOf ex:VocabA .
+ex:Lynx  a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabA , ex:VocabB .
+ex:Fish  skos:inScheme ex:VocabA .
