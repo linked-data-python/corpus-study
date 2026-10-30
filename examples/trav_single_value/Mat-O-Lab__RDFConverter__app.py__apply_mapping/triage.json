@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "`tablegroup = next(data_graph[: RDF.type : CSVW.TableGroup])` devient `.one()` : avec deux csvw:TableGroup l'original continue et la traduction leve ValueError (variable morte dans le depot) ; le pilote a une seule fixture et n'exerce pas ce cas.",
+  "questions": [
+    {
+      "question": "`data_graph` provient d'un RDF fourni par l'utilisateur (app.py:1314) et `tablegroup` n'est utilise nulle part ailleurs (app.py:1477) : un graphe de donnees avec plusieurs csvw:TableGroup, que l'original accepte, doit-il aussi etre accepte par la traduction (donc `.one()` est-il un ecart inacceptable) ?",
+      "where": "translated.ldpy:44 et original.py:44 ; depot : corpus/repos/Mat-O-Lab__RDFConverter/app.py:1477",
+      "if_yes": "needs-work : remplacer `.one()` par `.first()` (ou ne garder que l'existence si zero doit lever) et classer en consequence ; ajouter un cas deux TableGroup au pilote",
+      "if_no": "approuver : l'ecart est avoue dans translation_notes, une entree CSVW a un seul TableGroup par construction"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Copies (mktemp, supprimees). Un second `EX.tg2 a csvw:TableGroup` ajoute aux deux cotes -> la traduction leve 'ValueError: m{ }.one() : plusieurs solutions' ; sans TableGroup -> StopIteration (original) vs ValueError. Mutants tues par le pilote : `m{ {data_node} ?pp ?subject }` (9 vs 11 triplets), `[]` pour `m{ {note} ?p ?o }` et `m{ {column} ?p ?o }`, retrait de `if subject:` (9 vs 11 triplets). Variantes equivalentes : propertyUrl litteral, colonne BNode, plusieurs describes, plusieurs objets pour le meme predicat (OK). shim rmlmapper_shim.py : strip_namespace identique a rmlmapper.py:40-49 du depot ; les trois autres fonctions sont des stubs jamais appeles, pas de logique inventee. La fixture est entierement fabriquee (un seul fixture dans original.py, une seule ligne, la branche `else` jamais exercee), mais elle est partagee par les deux versions et la branche else ne contient aucun ilot.",
+  "triaged_by": "sonnet-5.5"
+}

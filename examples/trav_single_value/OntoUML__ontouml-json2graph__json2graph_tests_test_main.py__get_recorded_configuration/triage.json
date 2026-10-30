@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien a signaler : equivalence confirmee par mutants et variantes de fixture, shim verbatim.",
+  "questions": [],
+  "evidence": "rdfeval check : OK. Copies (mktemp, supprimees). Mutants tues : filtre `bool(m{ })` remplace par True, predicat du filtre change (prov:label), `{transformation}` remplace par `?t`, `{configuration_entities[0]}` remplace par `?x`. Variantes de fixture equivalentes (OK) : deux prov:value sur config1, deux entites avec prov:value (AssertionError des deux cotes), zero entite (AssertionError des deux cotes). ontouml_shim.py : get_output_artifact identique a test_main.py:1737-1741 du depot. Cas None de `transformation` inatteignable (get_output_artifact assert qu'un sujet wasGeneratedBy existe). Note mineure sans effet sur le tri : `interpolation {expr}` est employee mais absente de `constructions`.",
+  "triaged_by": "sonnet-5.5"
+}

@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt"
+  ],
+  "summary": "`next(g.subjects(RDF.type, ST.Manager))` devient `m{ ?mgr a st:Manager }.one()` : sur zero manager le harnais voit StopIteration vs ValueError, et sur deux managers l'original continue alors que la traduction leve ; le pilote n'exerce ni l'un ni l'autre.",
+  "questions": [
+    {
+      "question": "La traduction doit-elle lever la meme exception que l'original quand un graphe de manager n'a aucun st:Manager (StopIteration vs ValueError du `.one()`) ou plusieurs (l'original prend le premier, `.one()` leve) : cet ecart de comportement est-il inacceptable pour une paire `directly-expressible` ?",
+      "where": "translated.ldpy:30 et original.py:28 (pilote : driver.py:50-53, un seul appel)",
+      "if_yes": "needs-work : ajouter au pilote les appels graphe vide et deux managers (l'ecart est alors reporte), ou changer de construction (`.first()` avec garde explicite) ; la classification `directly-expressible` est a revoir",
+      "if_no": "approuver en notant que l'ecart (exceptions differentes sur donnees hors-contrat, deja avoue dans translation_notes) est accepte ; les fichiers reels n'ont bien qu'un st:Manager chacun"
+    }
+  ],
+  "evidence": "rdfeval check de la region : OK. Copie (mktemp, supprimee) avec 4 appels ajoutes au pilote : (a) graphe 'person' vide -> FAIL 'call[1]: outcome differs (raised StopIteration('') vs raised ValueError('m{ }.one() : aucune solution'))' ; (b) un second st:Manager dans 'person' -> FAIL 'call[3]: outcome differs (None vs raised ValueError(m{ }.one() : plusieurs solutions))' ; (c) manager sans st:hasAssignment et (d) st:manages retire -> OK (AssertionError identique des deux cotes). Les notes (translation_notes et driver.py) affirment que le harnais abandonne la comparaison au premier cote qui leve : c'est faux, harness.py (~l.384) compare type et message des exceptions des deux cotes ; le cas zero solution etait donc pilotable. Les 4 fichiers reels (corpus/repos/LA3D__cogitarelink-solid/overlays/addressbook/interop/managers/*.shapetree.ttl) ont un seul `<> a st:Manager` : l'ecart ne se produit pas sur les donnees du depot. Le fixture est fidele aux fichiers reels (meme contenu, `<>` remplace par urn:ex:mgr:<slug>), la reconstruction du dict par fermeture de sujet est correcte.",
+  "triaged_by": "sonnet-5.5"
+}

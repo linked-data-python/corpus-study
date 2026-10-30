@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "Le pilote ne fait qu'un appel ou le triplet existe : remplacer l'ilot par `True` ou par un motif elargi reste vert, et sur triplet absent l'original leve StopIteration (`next()`) quand la traduction leve AssertionError.",
+  "questions": [
+    {
+      "question": "Le pilote doit-il etre complete par un graphe ou le triplet (Feature1 a geo:Feature) est absent, puisque sans cela l'assertion `bool(m{ ... })` n'est jamais mise a l'epreuve ?",
+      "where": "driver.py:15-19, fixture.ttl et translated.ldpy:21",
+      "if_yes": "needs-work : ajouter un second appel sans le triplet (le harnais compare bien les levees) ; les notes qui disent le contraire sont fausses",
+      "if_no": "approuver : un test dont tout le corps est une assertion n'a pas besoin de cas negatif"
+    },
+    {
+      "question": "L'ecart d'exception sur triplet absent (original : StopIteration de `next()`, traduction : AssertionError) est-il acceptable pour une paire `directly-expressible` ?",
+      "where": "translated.ldpy:21 et original.py:22",
+      "if_yes": "approuver en notant l'ecart (les deux echouent, type different)",
+      "if_no": "needs-work : exiger `.first()`/`.one()` ou une garde qui leve la meme exception, et revoir la classification"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Copies (mktemp, supprimees). Mutants restes VERTS : `assert True` a la place de `assert bool(m{ })` ; motif elargi `?s rdf:type geo:Feature` ; motif elargi `<Feature1> rdf:type ?t` (le fixture contient Feature2 et Feature1 a dcat:Dataset). Fixture sans le type geo:Feature de Feature1 : FAIL 'call[0]: outcome differs (raised StopIteration('') vs raised AssertionError(''))'. Les notes (translation_notes et le raisonnement du driver) affirment que le harnais ne peut pas comparer deux levees : c'est faux, harness.py (~l.384) compare type et message. Le choix `bool(m{ })` plutot que `.first()` est justifie, mais le triplet etant entierement lie la paire ne montre aucune valeur.",
+  "triaged_by": "sonnet-5.5"
+}
