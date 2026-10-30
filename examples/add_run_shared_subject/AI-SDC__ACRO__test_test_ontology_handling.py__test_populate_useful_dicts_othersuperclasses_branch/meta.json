@@ -49,5 +49,19 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "premier +{ } retiré / vidé",
+      "premier +{ } : sujet [] / objet \"a test class\" -> [] / objet \"Test Class\" -> [] / \"a test class\" -> ^^xsd:string",
+      "second +{ } retiré",
+      "second +{ } : sujet [] / {parent1} -> [] / {parent2} -> [] / {parent2} -> {parent1}",
+      "@graph g -> @graph rdflib.Graph()",
+      "f<{PREFIX}TestClass> -> f<{PREFIX}TestClas>"
+    ],
+    "remaining": ""
   }
 }

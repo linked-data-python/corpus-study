@@ -44,5 +44,22 @@
     "method": "entry:define_classes",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "deux cas ajoutés après run_pair (inchangé) : un graphe lié comme le G du dépôt (bricksrc/namespaces.py:35-56, sérialisé en Brick.ttl par generate_brick.py:1123/1146/1176) et le Graph() nu d'extension_graph (generate_brick.py:1088) ; pour chacun, isomorphisme, conservation de chaque liaison de l'original, et journal logging (les avertissements « Property 'tags' not defined ») identique ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "@prefix bsh: renommé brickshape: (liaison bsh du dépôt perdue ; survivait avant le renforcement)",
+      "logging.warning retiré (journal non observé avant)",
+      "+{ classname a owl:Class ; a sh:NodeShape ; rdfs:subClassOf parent } retiré / sujet [] / {parent} -> [] / a sh:NodeShape retiré",
+      "+{ {classname} a {classname} } retiré / objet [] ; if pun_classes: -> True / False",
+      "+{ {classname} rdfs:subClassOf {_parent} } retiré / objet []",
+      "îlot alias retiré / {alias} -> [] / sujet {alias} -> [] / owl:equivalentClass {classname} -> [] / a sh:NodeShape retiré",
+      "+{ {alias} rdfs:subClassOf {pc} } retiré / objet []",
+      "+{ {alias} brick:aliasOf {classname} } retiré / objet []",
+      "@graph graph -> @graph G"
+    ],
+    "remaining": "Mutant équivalent, non compté : un @prefix brk: ajouté puis brick: re-déclaré (la dernière liaison rétablit brick). La traduction était juste : les 13 préfixes du bloc portent les mêmes noms que bind_prefixes du dépôt."
   }
 }

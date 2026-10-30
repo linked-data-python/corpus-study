@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (entry:demo). Le seul ajout à original.py est demo() (appel de graph_untagged_label.__wrapped__()), identique des deux côtés : harnais pytest>=8, pas de logique. Dépôt : EX = Namespace(\"http://example.org/\") (tests/unit/test_ontology_service.py:13), donc ex: correspond ; Literal(\"Widget\") sans langue dans le dépôt (l. 54). Mutants sur copie mktemp : `\"Widget\"@en` -> FAIL (2 vs 2 triples) ; `owl:Class` -> `rdfs:Class` -> FAIL. Pas de branche, pas de None possible : une seule exécution suffit.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 8 mutants (îlot retiré, chaque terme élargi en [], littéral étiqueté ou typé, @graph détourné) tous tués par le pilote existant ; graphe neuf, consommateur à table de propriétés statique (select_preferred_label), check OK."
 }

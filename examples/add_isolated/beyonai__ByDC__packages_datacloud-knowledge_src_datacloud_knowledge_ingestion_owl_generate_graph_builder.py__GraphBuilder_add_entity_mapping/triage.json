@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : équivalence vérifiée au-delà du pilote (noms de référence avec CJK, '/', '#', '%20', chaîne vide ; bases sans séparateur, relative, vide) ; en revanche pas un bon exemple pour l'article (4 des 6 triplets passent encore par _add_literal, et le gain net est de +2 lignes de déclaration pour 2 .add remplacés).",
   "questions": [],
   "evidence": "rdfeval check OK. Dans une copie : (1) 4e appel au pilote avec ref_id = 'p/q', '', 'x#y', '%20', 'é', '属性_mapping' -> OK ; (2) construction directe de GraphBuilderStub avec les bases 'http://x/ns', 'urn:x:', 'http://x/ns/', 'relative#', '', 'http://x/{a}#' -> triplets identiques des deux côtés ; (3) mutants : objet de ns:mapping remplacé par {uri}, et `if mapping_refs:` inversé -> FAIL tous deux (l'oracle est sensible aux deux branches). Dépôt d'origine : self._ns = Namespace(base) (graph_builder.py:160), un seul site d'appel réel (renderers/ontology.py:593) avec des str construites par f-string et GraphBuilder() sans base : le type réel est bien str, Namespace[str] et ns:{ref_id} coïncident. Shim (_safe_xml_id, _add_literal) conforme au dépôt.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Traduction corrigée : `@graph self._graph` sous `@prefix ns:` écrasait la liaison du préfixe vide que GraphBuilder pose (graph_builder.py:163) et que le dépôt sérialise en RDF/XML (renderers/ontology.py:181) ; préfixe renommé `:`, pilote vérifiant les liaisons ; 12 mutants tués, 1 équivalent, check OK."
 }

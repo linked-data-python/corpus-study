@@ -27,7 +27,8 @@
     "`uri = self._ns[f\"{_safe_xml_id(object_code)}_mapping\"]` and the four `self._add_literal(...)` calls are left as plain Python, unchanged: `_add_literal` is an external helper (like modelprops_to_graph in the acdh pair) that does its own `.add()` internally but is not part of this region's own body -- untouched, called identically by both sides.",
     "Context shim (context_shim.py): _safe_xml_id, _DEFAULT_BASE, GraphBuilderStub.__init__ and ._add_literal transcribed VERBATIM from the local clone (corpus/repos/beyonai__ByDC/.../graph_builder.py, lines 97-99, 55, 143-166, 693-698).",
     "driver.py uses a `demo(object_code, object_name, object_desc, mapping_refs)` harness (identical on both sides, appended to original.py and translated.ldpy), same shape as the acdh pair in this batch: passing the GraphBuilderStub itself as a compared call argument gives a spurious harness `values differ` (identity equality on a plain object with no __eq__), so demo keeps only plain strings/lists as its own arguments and returns the one thing meant to be compared, self._graph.",
-    "Fixture strength checked directly: corrupting one predicate in translated.ldpy (ns:mapping -> ns:relatesTo) flips `rdfeval check` to FAIL (7 vs 7 triples, not isomorphic); reverted afterward, and OK confirmed again."
+    "Fixture strength checked directly: corrupting one predicate in translated.ldpy (ns:mapping -> ns:relatesTo) flips `rdfeval check` to FAIL (7 vs 7 triples, not isomorphic); reverted afterward, and OK confirmed again.",
+    "Repair 2026-10-30: the prefix was renamed from `ns:` to the empty prefix `:`. Under `@graph self._graph`, `@prefix ns: f<{self._ns}>` bound `ns` to the namespace GraphBuilder.__init__ binds to \"\" (graph_builder.py:163), and rdflib's bind REPLACED that binding: the RDF/XML the repository serialises from this graph (renderers/ontology.py:181, after the only call at ontology.py:593) lost its default namespace, against the module's stated requirement (graph_builder.py:9). Proof: the driver now checks that every binding of the original's graph is in the translation's, and failed on all three calls with `prefix bindings lost [('', …ontology#)]` before the fix; with `@prefix :` the binding is re-asserted unchanged and check is OK."
   ],
   "draft_sha": "1a29af94b247e3c6",
   "provenance": {
@@ -46,5 +47,18 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "comparaison des liaisons de préfixes ajoutée aux trois appels (chaque liaison du graphe de l'original doit se retrouver dans celui de la traduction) : le dépôt sérialise ce graphe en RDF/XML (renderers/ontology.py:181) et GraphBuilder lie exprès le préfixe vide (graph_builder.py:9, 163) ; docstring mise à jour, appels inchangés.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "@prefix : -> @prefix ns: (la traduction d'origine : liaison '' perdue sur les 3 appels)",
+      "+{ {uri} a :EntityMapping } retiré / sujet [] / objet []",
+      "+{ {uri} :mapping :{ref_id} } retiré / sujet [] / objet [] / objet :x",
+      "if mapping_refs: -> if True: / if False:",
+      "@graph self._graph -> @graph Graph()"
+    ],
+    "remaining": "Mutant équivalent, non compté : if mapping_refs: -> if mapping_refs is not None: (une liste vide ne fait aucun tour de boucle). La correction repose sur le préfixe vide `:` qui recoupe la liaison du dépôt ; le suffixe d'appel (self._graph) sans @graph serait l'autre forme correcte : à Maxime de dire laquelle il préfère pour la strate add_isolated."
   }
 }
