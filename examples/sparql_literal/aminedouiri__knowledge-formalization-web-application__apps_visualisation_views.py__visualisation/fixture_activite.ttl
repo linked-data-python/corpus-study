@@ -1,0 +1,20 @@
+# Input graph for the `activite_path` parameter of `visualisation` (see driver.py).
+# Holds 3 instance(s) of :Activite, the class the region's query on g_activite selects,
+# and a neighbourhood that this query must not match: instances of the five
+# other tracked classes (so a query wired to the wrong graph, or a file parsed
+# into the wrong graph, changes the result), the class reached by another
+# predicate than rdf:type, and a same-named class in another namespace.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:activite_1 a :Activite .
+:activite_2 a :Activite .
+:activite_3 a :Activite .
+
+:tache_in_activite a :Tache .
+:historique_in_activite a :Generation .
+:phenomene_in_activite a :Phenomene_Metier .
+:domaine_in_activite a :Domaine .
+:strategie_in_activite a :Strategie .
+:activite_seeAlso rdfs:seeAlso :Activite .
+<http://other.example/activite_9> a <http://other.example/Activite> .

@@ -1,0 +1,19 @@
+# Input graph for the `domaine_path` parameter of `visualisation` (see driver.py).
+# Holds 2 instance(s) of :Domaine, the class the region's query on g_domaine selects,
+# and a neighbourhood that this query must not match: instances of the five
+# other tracked classes (so a query wired to the wrong graph, or a file parsed
+# into the wrong graph, changes the result), the class reached by another
+# predicate than rdf:type, and a same-named class in another namespace.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:domaine_1 a :Domaine .
+:domaine_2 a :Domaine .
+
+:tache_in_domaine a :Tache .
+:activite_in_domaine a :Activite .
+:historique_in_domaine a :Generation .
+:phenomene_in_domaine a :Phenomene_Metier .
+:strategie_in_domaine a :Strategie .
+:domaine_seeAlso rdfs:seeAlso :Domaine .
+<http://other.example/domaine_9> a <http://other.example/Domaine> .

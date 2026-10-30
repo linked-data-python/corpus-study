@@ -11,19 +11,14 @@
   "rdf_ops": 0,
   "categories": {},
   "translation_status": "final",
-  "classification": "directly-expressible",
-  "constructions": [
-    "@prefix",
-    "s{ }",
-    "call suffix (g)",
-    "prefixed name",
-    "variable"
-  ],
+  "classification": "not-expressible",
+  "constructions": [],
   "translation_notes": [
     "The canonical sparql_literal case: a static, unparametrised query text with its own PREFIX block, assigned to a module constant and passed whole to g.query(). The module constant QUDT_QUERY9 disappears -- its text becomes the s{ } island directly at the g.query() call site, and the four PREFIX lines (BASF_EC_RaMPO, owl, rdfs, rdf) move out of the query text into @prefix declarations at module scope, inherited into the island's prologue (querying.md). Single island in the function, so the call suffix s{ ... }(g) was used rather than a @graph declaration (same threshold as the acquirium remove/_apply_graph_write precedent: a declaration would cost a line to save a parenthesis).",
     "The query text itself -- two UNION branches, two owl:unionOf/rdf:rest*/rdf:first property paths, an OPTIONAL, five FILTERs -- is copied verbatim into the island with no rewriting: s{ } is all of SPARQL, so nothing here needed simplifying to fit. Its only syntactic risk is the ambiguity between a SPARQL group and an {expr} interpolation, and since none of this query's { ... } blocks are also valid Python expressions, none of them are misread; transpiling this file is itself the demonstrated proof (rdfeval check transpiles before it runs the driver).",
     "Finding worth flagging: rdflib's g.query(TEXT) evaluates the query EAGERLY, so in the original the printed 'query init time' is where the real cost is measured and 'query exec time' after the for-loop is ~0. s{ } is a lazy prepared query (querying.md: 'the island's value is a lazy prepared query'): the translated program measures ~0 for init and the real cost for exec instead -- same total work, different attribution between the two printed numbers. Confirmed empirically (see driver.py's manual run): original prints init=0.028/exec=0.000, translated prints init=0.000/exec=0.028 on the same fixture. Not a defect -- s{ }'s laziness is documented and intended -- but a program that timed only the 'init' half, or asserted on it, would silently start measuring the wrong half of the work after translation. This is exactly the kind of print-only side effect run_pair's entry/calls path does not capture from stdout (see design record 405): the driver instruments a Probe stand-in for the graph to record the actual consumed ?item values instead, which is what proves the two versions agree on results despite disagreeing on where the printed timings land.",
-    "The graph parameter g arrives as a plain, unannotated positional argument (no missing-binding problem here -- unlike the self.graph cases the 163/1196 note in AGENT_BATCH warns about)."
+    "The graph parameter g arrives as a plain, unannotated positional argument (no missing-binding problem here -- unlike the self.graph cases the 163/1196 note in AGENT_BATCH warns about).",
+    "Repair 2026-10-30: the s{ ... }(g) translation described in the notes above was wrong and is withdrawn. The repository calls run_query a second time with a kglab.KnowledgeGraph (scripts/oxrdf.py:55-57), whose query(sparql, *, bindings=None) takes no initBindings (kglab/query/mixin.py:45-71); s{ ... }(g) always calls g.query(prepared, initBindings=...), so the translation raised TypeError where the original prints its items (driver calls 22-23). Neither @graph g nor g.query(s{ ... }) helps: the island's value is not accepted by rdflib's Graph.query (AttributeError: 'PreparedQuery' object has no attribute 'algebra'). Nothing in the language queries a graph-like object whose query() lacks initBindings, so translated.ldpy keeps the original g.query(QUDT_QUERY9). Minimal case: `def run_query(g): for row in g.query(TEXT): ...` called with `kglab.KnowledgeGraph`. An s{ } runtime that omitted initBindings when it is empty would make the region expressible."
   ],
   "article_candidate": true,
   "draft_sha": "a5f9901836b562bb",
@@ -42,5 +37,26 @@
     "method": "entry:run_query",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "22 calls added to the existing two: 20 small graphs in which one item is decided by one part of the query (second UNION branch isolated by pointing the interactsWith owl:onClass at basf:CoatingLayer, list members at index 0 and 2 in both rest* paths, and negatives that change a single term: FILTERs, rdf:type of each restriction, each onProperty, someValuesFrom, unionOf, rdfs:subClassOf links, ?item = ?item_class), and two calls with a stand-in kglab.KnowledgeGraph whose query() is kglab's verbatim, the second argument type the repository passes.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "second UNION branch made impossible",
+      "rdf:rest* -> rdf:rest / rdf:rest? / rdf:rest+ in each of the two paths",
+      "owl:unionOf widened to (owl:intersectionOf|owl:unionOf)",
+      "FILTER(?item != ?item_class) removed",
+      "FILTER(?interfaceClass != CoatingLayer) removed",
+      "FILTER(?interfaceClass != ?base_layer) removed",
+      "rdf:type owl:Restriction removed on restriction1, restriction2 (each branch) and interfaceRestriction",
+      "onProperty basedOn -> interactsWith or widened",
+      "onProperty interactsWith widened (each branch)",
+      "hasEquivalentCoatingLayer -> basedOn or widened",
+      "someValuesFrom -> onClass or widened",
+      "rdfs:subClassOf to restriction1 / restriction2 (each branch) / union member widened",
+      "DISTINCT removed"
+    ],
+    "remaining": "Confirmer que l'appel kglab.KnowledgeGraph de scripts/oxrdf.py:55-57 compte comme atteint (il est dans le __main__ du même fichier) : si oui, la paire est not-expressible et c'est un constat sur le langage (s{ }(g) exige un g.query qui accepte initBindings) ; si non, rétablir la traduction s{ } de git et ne garder que les appels rdflib.Graph du pilote. Et article_candidate (laissé à true) : un cas not-expressible avec son extrait minimal est-il un exemple pour l'article ?"
   }
 }

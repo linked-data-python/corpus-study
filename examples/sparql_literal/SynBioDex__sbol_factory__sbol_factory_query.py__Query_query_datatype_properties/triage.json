@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants de translated.ldpy sur une copie : rdf:rest* -> rdf:rest, -> rdf:rest?, -> rdf:rest+ : TOUS RESTENT VERTS (A est à l'index 1 de la liste, atteint avec exactement un rest). Tués : étoile externe (owl:unionOf/...)* retirée, rdf:type retiré en q1 ou q2, onProperty retiré, q1 ou q2 vidée, rdf:rest* sans rdf:first. Survivant DISTINCT retiré : mutant équivalent (list(set(...)) déduplique), sans conséquence. ordered=False est correct (list(set())). Types réels : class_uri est un str (appels dans sbol_factory.py:133,238 et uml_factory.py:185,273,347, valeurs de CLASS_URI) ; f<{class_uri}> et <{class_uri}> sont refusés par le transpileur dans s{ }, donc {URIRef(class_uri)} est la forme la plus spécifique ; aucun @base. Préfixes rdf/rdfs/owl : bien les pré-liés du graphe réel (query.py:22-27 lie en plus sbol, xsd, om, prov, non utilisés ici). Non commité, pas de bogue de traduction trouvé.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (ex:A en tête, en 3e position et dans une union imbriquée, plus des voisins qui changent un seul terme) : les mutants rdf:rest/rest?/rest+, étoile externe -> ?, et les prédicats élargis sont tués ; check OK, traduction juste."
 }

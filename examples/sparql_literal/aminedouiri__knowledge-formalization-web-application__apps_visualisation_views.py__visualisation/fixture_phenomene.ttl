@@ -1,0 +1,19 @@
+# Input graph for the `phenomene_path` parameter of `visualisation` (see driver.py).
+# Holds 2 instance(s) of :Phenomene_Metier, the class the region's query on g_phenomene selects,
+# and a neighbourhood that this query must not match: instances of the five
+# other tracked classes (so a query wired to the wrong graph, or a file parsed
+# into the wrong graph, changes the result), the class reached by another
+# predicate than rdf:type, and a same-named class in another namespace.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:phenomene_1 a :Phenomene_Metier .
+:phenomene_2 a :Phenomene_Metier .
+
+:tache_in_phenomene a :Tache .
+:activite_in_phenomene a :Activite .
+:historique_in_phenomene a :Generation .
+:domaine_in_phenomene a :Domaine .
+:strategie_in_phenomene a :Strategie .
+:phenomene_seeAlso rdfs:seeAlso :Phenomene_Metier .
+<http://other.example/phenomene_9> a <http://other.example/Phenomene_Metier> .

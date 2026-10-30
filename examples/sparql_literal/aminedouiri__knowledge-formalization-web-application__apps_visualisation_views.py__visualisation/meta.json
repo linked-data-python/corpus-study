@@ -44,5 +44,18 @@
     "method": "entry:visualisation",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Two calls added to the existing one: each *_path pointed at its own fixture_<name>.ttl (own class with at least two instances, Domaine included, plus one instance of each of the five other tracked classes, the class via rdfs:seeAlso, a same-local-name class in another namespace), and all six pointed at fixture_empty.ttl (zero solution for every query).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "each of the five later queries run on g_tache instead of its own graph (call suffix (g) mis-wired)",
+      "g_strategie.parse(tache_path)",
+      "g_domaine.parse(domaine_path) removed",
+      "?tache a :Tache -> ?tache ?p :Tache",
+      "only the first row of qres_generation / qres_domaine consumed"
+    ],
+    "remaining": "Classification minor-restructuring vs directly-expressible (classification-doubt du tri), non traitée. Les requêtes de l'original résolvent ':' par les liaisons du fichier parsé, la traduction par le @prefix lexical : équivalent tant que les viz_*.ttl lient ':' à http://dig.isi.edu/ (c'est le cas des six fichiers du dépôt, que l'application ne fait qu'étendre en mode 'a')."
   }
 }

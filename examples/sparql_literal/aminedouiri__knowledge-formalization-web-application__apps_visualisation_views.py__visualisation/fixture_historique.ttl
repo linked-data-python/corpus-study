@@ -1,0 +1,19 @@
+# Input graph for the `historique_path` parameter of `visualisation` (see driver.py).
+# Holds 2 instance(s) of :Generation, the class the region's query on g_historique selects,
+# and a neighbourhood that this query must not match: instances of the five
+# other tracked classes (so a query wired to the wrong graph, or a file parsed
+# into the wrong graph, changes the result), the class reached by another
+# predicate than rdf:type, and a same-named class in another namespace.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:historique_1 a :Generation .
+:historique_2 a :Generation .
+
+:tache_in_historique a :Tache .
+:activite_in_historique a :Activite .
+:phenomene_in_historique a :Phenomene_Metier .
+:domaine_in_historique a :Domaine .
+:strategie_in_historique a :Strategie .
+:historique_seeAlso rdfs:seeAlso :Generation .
+<http://other.example/historique_9> a <http://other.example/Generation> .

@@ -1,0 +1,19 @@
+# Input graph for the `strategie_path` parameter of `visualisation` (see driver.py).
+# Holds 2 instance(s) of :Strategie, the class the region's query on g_strategie selects,
+# and a neighbourhood that this query must not match: instances of the five
+# other tracked classes (so a query wired to the wrong graph, or a file parsed
+# into the wrong graph, changes the result), the class reached by another
+# predicate than rdf:type, and a same-named class in another namespace.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:strategie_1 a :Strategie .
+:strategie_2 a :Strategie .
+
+:tache_in_strategie a :Tache .
+:activite_in_strategie a :Activite .
+:historique_in_strategie a :Generation .
+:phenomene_in_strategie a :Phenomene_Metier .
+:domaine_in_strategie a :Domaine .
+:strategie_seeAlso rdfs:seeAlso :Strategie .
+<http://other.example/strategie_9> a <http://other.example/Strategie> .

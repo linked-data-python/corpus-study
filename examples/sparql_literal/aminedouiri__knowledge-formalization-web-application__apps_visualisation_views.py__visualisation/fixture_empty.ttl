@@ -1,0 +1,10 @@
+# Input graph for the zero-solution call of `visualisation` (see driver.py):
+# all six path parameters point here, and no subject has any of the six
+# tracked classes as rdf:type. Every query must yield no rows.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:x1 a :NotATrackedClass .
+:x2 rdfs:seeAlso :Tache .
+:x3 rdfs:seeAlso :Strategie .
+<http://other.example/x4> a <http://other.example/Activite> .

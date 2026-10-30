@@ -1,0 +1,19 @@
+# Input graph for the `tache_path` parameter of `visualisation` (see driver.py).
+# Holds 2 instance(s) of :Tache, the class the region's query on g_tache selects,
+# and a neighbourhood that this query must not match: instances of the five
+# other tracked classes (so a query wired to the wrong graph, or a file parsed
+# into the wrong graph, changes the result), the class reached by another
+# predicate than rdf:type, and a same-named class in another namespace.
+@prefix : <http://dig.isi.edu/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:tache_1 a :Tache .
+:tache_2 a :Tache .
+
+:activite_in_tache a :Activite .
+:historique_in_tache a :Generation .
+:phenomene_in_tache a :Phenomene_Metier .
+:domaine_in_tache a :Domaine .
+:strategie_in_tache a :Strategie .
+:tache_seeAlso rdfs:seeAlso :Tache .
+<http://other.example/tache_9> a <http://other.example/Tache> .

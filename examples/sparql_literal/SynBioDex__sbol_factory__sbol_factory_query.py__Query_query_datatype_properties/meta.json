@@ -42,5 +42,22 @@
     "method": "entry:query_datatype_properties",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "Fixture enlarged: ex:A at index 0 and 2 of an owl:unionOf list and inside a union nested in a union (rdf:rest* and the outer * now decided); negative neighbours that keep two terms of a pattern and change the third (rdfs:range instead of rdfs:domain, owl:intersectionOf instead of owl:unionOf, rdfs:seeAlso instead of rdf:type, owl:equivalentClass instead of rdfs:subClassOf, owl:someValuesFrom instead of owl:onProperty). Docstring states class_uri is a str at every real call site and that CUSTOM_EVALS is never registered (custom_eval.py does so only under __main__).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rdf:rest* -> rdf:rest",
+      "rdf:rest* -> rdf:rest?",
+      "rdf:rest* -> rdf:rest+",
+      "(owl:unionOf/rdf:rest*/rdf:first)* -> ?",
+      "rdfs:domain -> rdfs:range",
+      "owl:unionOf -> owl:intersectionOf",
+      "rdf:type widened to ?t (query 1)",
+      "rdfs:subClassOf widened to ?sc (query 2)",
+      "owl:onProperty widened to ?op (query 2)"
+    ],
+    "remaining": ""
   }
 }

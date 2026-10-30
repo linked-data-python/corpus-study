@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Sur une copie : requête activite exécutée sur g_tache -> VERT ; requête strategie sur g_tache -> VERT ; g_strategie.parse(tache_path) -> VERT ; g_domaine.parse(domaine_path) remplacé par pass -> VERT (les six graphes ont le même contenu). Tués : classe changée (Tache->Activite), Domaine->Strategie (le cas zéro solution est bien exercé), ?tache a ?c, sortie 'domaines' permutée, parse tache retiré. Préfixe ':' = http://dig.isi.edu/ vérifié dans les six viz_*.ttl du dépôt (ligne 1) : hoist en @prefix correct. s{ } et non m{ } est conforme à la table de la strate. print(strategies) est bien dans la sortie comparée. Candidate à l'article : non (six fois la même requête triviale, gain nul tant que l'oracle est faible).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (six fixtures distincts, un par graphe, plus un appel zéro solution) : une requête rattachée au mauvais graphe, un parse permuté ou retiré sont désormais tués ; check OK, traduction juste ; la question de classification reste à Maxime."
 }
