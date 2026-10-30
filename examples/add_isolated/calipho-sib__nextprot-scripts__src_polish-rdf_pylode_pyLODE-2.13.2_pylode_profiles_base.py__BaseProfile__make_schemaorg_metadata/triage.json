@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants sur copie : suppression de chacun des îlots dateCreated, description, license, rights, copyrightYear, codeRepository, du type DefinedTermSet : détectés ; suppression de l'îlot `sdo:dateModified` : reste VERT (la garde porte sur METADATA['date_modified'], absent du pilote). Gardes `license is not None`, `rights`, `repository` remplacées par `True` : restent vertes (aucune branche fausse exercée). Copie avec cinq appels supplémentaires (METADATA minimal ; date_modified + licence/dépôt au format md ; adoc ; dates seules + rights vide ; sortie JSON-LD comparée, exceptions comprises) : check OK, donc pas d'écart d'équivalence trouvé, le Literal(…, datatype=xsd:date) gardé en appel est justifié (valeur non constante). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (huit appels aux formes réelles html/md/adoc, gardes fausses, valeurs vides, levées) : l'îlot sdo:dateModified est exécuté et les trois gardes citées par le tri sont tuées ; la traduction était juste."
 }

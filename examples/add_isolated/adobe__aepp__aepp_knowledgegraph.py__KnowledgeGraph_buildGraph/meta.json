@@ -21,8 +21,8 @@
     "@graph",
     "+{ }",
     "prefixed name",
-    "typed literal",
-    "call suffix (g)"
+    "plain literal",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: RDF->rdf, RDFS->rdfs, XSD->xsd, DCAT->dcat, DCTERMS->dcterms",
@@ -50,5 +50,24 @@
     "method": "entry:build_graph_region (custom: isomorphism only)",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "pilote réécrit autour de quatre cas, chacun comparé sur le graphe rendu (et s'il est le graphe reçu), le graphe reçu, self.global_graph, les liaisons de préfixes de l'original, la sortie imprimée, les avertissements et la levée : A le fixture d'origine ; B la branche `(node, rdf:type, SCHEMA.path) in graph`, atteinte comme dans le dépôt (graphe pré-rempli par assign_path_schema, knowledgegraph.py:210-215, et deux audiences partageant un chemin), plus les branches secondaires (extractPaths qui rend None, frequency None, destination sans attributs ni audiences, NaN dans le DataFrame, verbose False) ; C only_schema=True ; D schemaId NaN (URIRef lève TypeError : seule la levée est comparée, le graphe est local à buildGraph dans le dépôt, l.161, et jeté avec l'exception). context.py : extractPaths peut rendre None, comme le vrai (segmentation.py:1148-1159).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot de la branche `in graph` supprimé",
+      "garde `in graph` -> False",
+      "garde `in graph` -> True",
+      "STREAMING / EDGE supprimés",
+      "frequency de destination supprimée",
+      "îlot identity tronqué",
+      "îlot dataset_preview : prédicat changé",
+      "frequency de flux source : prédicat changé",
+      "Event-based : rdf:nil supprimé",
+      "self.global_graph non posé",
+      "only_schema rend un graphe neuf"
+    ],
+    "remaining": "wrong-construction (question 2 du tri) : `{Literal(x)}` -> `{x}` reste vert pour name, flow.name, audience name et destination.frequency, y compris sur NaN et None ; mais `{URIRef(row['schemaId'])}` -> `f<{row['schemaId']}>` n'est PAS équivalent : sur un schemaId NaN, URIRef lève TypeError là où f<…> forge l'IRI « nan » (cas D) — à garder tel quel si ce cas compte. Mutant `if True:` sur la garde Profile-based : équivalent (ajout idempotent), non compté. constructions corrigé : « typed literal » et « call suffix (g) » déclarés sans être employés (aucun ^^ ni (g) dans la traduction), « plain literal » et « interpolation {expr} » employés sans être déclarés."
   }
 }

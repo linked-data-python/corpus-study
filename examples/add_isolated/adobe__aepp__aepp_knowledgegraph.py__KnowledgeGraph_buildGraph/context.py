@@ -20,13 +20,19 @@ SANDBOX_NAME = "prod"
 
 
 class FakeSegmentationAPI:
-    """Returns a fixed path list per audience id instead of parsing PQL."""
+    """Returns a fixed path list per audience id instead of parsing PQL.
+
+    A fixture entry of None stands for what the real extractPaths returns
+    when the audience's expression format is neither 'pql/text' nor
+    'pql/json' (aepp/segmentation.py:1148-1159 falls off the end): None.
+    """
 
     def __init__(self, paths_by_audience_id):
         self._paths_by_audience_id = paths_by_audience_id
 
     def extractPaths(self, audience, recursive=False):
-        return list(self._paths_by_audience_id.get(audience["id"], []))
+        paths = self._paths_by_audience_id.get(audience["id"], [])
+        return None if paths is None else list(paths)
 
 
 class FakeKnowledgeGraph:

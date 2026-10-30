@@ -22,8 +22,9 @@
     "@graph",
     "m{ }",
     ".first()",
-    "suffixe d'appel (g)",
-    "variable"
+    "call suffix (g)",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "Le brouillon annoncait des @prefix rdf:/dcat: : SUPPRIMES. rdf:type est ecrit `a` a l'interieur de m{ } ; DCAT et namespaces['hydra'] restent des objets Namespace Python references par interpolation ({DCAT.Dataset}, {namespaces['hydra'].nextPage}) -- namespaces['hydra'] est un acces dict+attribut, aucune construction plus specifique que l'interpolation ne s'applique. DCAT, importe tel quel depuis converter.dataset_converter, aurait pu devenir `from ... import DCAT as dcat:` (idiome ns_import_project) ; non fait ici pour ne pas cumuler les risques sur une region deja chargee (reseau simule, suffixe d'appel, graphe secondaire) et parce que ce n'est pas la strate assignee.",
@@ -51,5 +52,23 @@
     "method": "fixture:fixture.ttl entry:fetchAndConvertToDCAT",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "trois appels de plus sur des pages générées à la forme réelle de ckanext-dcat (<URL de la page> a hydra:PagedCollection ; hydra:nextPage \"URL suivante\" — un LITTÉRAL) : chaîne de trois pages (la lecture de la ligne 32 a enfin une solution, puis le littéral falsy \"\" arrête la boucle), deux solutions pour chacune des trois lectures (.one() lèverait), aucune PagedCollection mais un hydra:nextPage voisin (cur None) ; dans chaque page, avant le nœud décisif, un voisin partageant deux termes sur trois qui pointe vers une page leurre dont la visite se voit ; couture identique des deux côtés : quality.add_quality_measures (no-op du shim) remplacé par un enregistreur qui écrit (d, probe:qualityMeasured, activity) dans graph, comme le vrai écrit ses mesures DQV pendant la boucle, et les journaux du module imprimés sur la sortie que le harnais compare par appel ('Total pages:N').",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "lecture l.32 : (g) retiré",
+      "lecture l.32 -> None",
+      "lecture l.32 : sujet -> []",
+      "lecture l.32 : prédicat -> hydra:PagedCollection",
+      "lecture l.32 : prédicat -> hydra:previousPage",
+      "lecture l.32 : {next_page} nu au lieu de {URIRef(next_page)}",
+      ".one() à la place de .first() (l.21, l.22, l.32)",
+      "l.21 : objet -> [], prédicat -> ex:kind",
+      "l.22 : sujet -> [], prédicat -> hydra:previousPage",
+      "boucle finale -> [] ; objet -> []"
+    ],
+    "remaining": "wrong-construction (question 2 du tri) : `{URIRef(next_page)}` remplacé par `f<{next_page}>` reste vert, aussi sur la forme réelle (nextPage littéral) ; seul `{next_page}` nu est faux — à juger. La note de translation_notes qui dit que les trois .first() ont chacun une solution était fausse avec l'ancien pilote (le troisième n'en avait aucune) ; elle est vraie avec l'appel 2. article_candidate:true est contesté par le tri : non touché. La forme littérale de hydra:nextPage vient de ckanext-dcat (_add_pagination_triples), absent des clones du corpus : de mémoire, à confirmer si cela compte."
   }
 }

@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Région comparée au dépôt (corpus/repos/adobe__aepp, aepp/knowledgegraph.py:273-360, lignes sans indentation) : identique ; liaisons de context.py identiques à KnowledgeGraph.__init__ (l.96-104). Mutants sur copie : l'îlot de la branche `in graph` supprimé reste VERT, `if False:` à la place de la garde reste VERT (la branche n'est jamais prise, aucune audience ne partage de chemin et le graphe d'entrée est vide) ; `if True:` est détecté. Détectés (FAIL) : Profile-based, Relationship-based, STREAMING, frequency, mandatory, primary, UIS->UPS, `a \"IngestionFlow\"`, audiences de destination, bloc `else` du chemin neuf. Restent verts et équivalents : `{Literal((row.get('name')))}` -> `{row.get('name')}`, `{Literal(flow.name)}` -> `{flow.name}`, `{URIRef(row['schemaId'])}` -> `f<{row['schemaId']}>`. Le chemin only_schema=True (else final) n'est pas appelé mais c'est du Python non traduit. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (quatre cas, dont la branche `in graph` atteinte comme dans le dépôt, only_schema et une levée ; sortie, attributs, liaisons et avertissements comparés) : les deux mutants du tri meurent, la traduction était juste ; constructions corrigé."
 }

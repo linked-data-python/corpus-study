@@ -50,5 +50,18 @@
     "method": "entry:_make_schemaorg_metadata",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "sept appels de plus, aux formes réelles de METADATA (pyLODE ontdoc.py:345-431 : licence et dépôt formatés html/md/adoc par _make_formatted_uri_basic) : METADATA minimal (toutes les gardes fausses), html complet (seul appel où l'îlot sdo:dateModified s'exécute), adoc, md (IndexError de l'original, même levée des deux côtés), date_modified sans modified (UnboundLocalError), description et rights vides (gardes `is not None` : les littéraux vides entrent), licence non http (IndexError). Aucun avertissement émis (vérifié à la main).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot sdo:dateModified supprimé",
+      "prédicat de dateModified changé",
+      "gardes license / rights / repository / description / date_modified -> True",
+      "gardes rights / description en vérité au lieu de `is not None`",
+      "îlots dateCreated / copyrightYear supprimés"
+    ],
+    "remaining": "Pour le crédit : les clés date_created, date_modified et copyright_year qui gardent trois des îlots ne sont jamais posées par le dépôt (seules created/modified le sont) : ces trois îlots sont du code mort en réalité ; le pilote les exerce en posant les clés à la main."
   }
 }
