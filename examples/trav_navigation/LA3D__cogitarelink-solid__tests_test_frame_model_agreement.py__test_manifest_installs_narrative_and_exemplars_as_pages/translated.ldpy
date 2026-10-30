@@ -30,12 +30,12 @@ EXPECTED_PAGES = [
 def test_manifest_installs_narrative_and_exemplars_as_pages():
     g = _g(OVL / "manifest.ttl")
     @graph g
-    # collect (targetResource, body, meta) per installsPage bnode -- the
-    # boucle imbriquee (g.objects then three g.value per item) becomes one
-    # joined m{ }: subject left anonymous ([ ]), pi shared across the four
-    # patterns.
+    # collect (targetResource, body, meta) per installsPage bnode
     entries = []
-    for pi, tr, body, meta in m{ [] overlay:installsPage ?pi . ?pi overlay:targetResource ?tr ; overlay:body ?body ; overlay:meta ?meta }:
+    for pi in m{ [] overlay:installsPage ?pi }:
+        tr = m{ {pi} overlay:targetResource ?tr }.first()
+        body = m{ {pi} overlay:body ?body }.first()
+        meta = m{ {pi} overlay:meta ?meta }.first()
         entries.append((str(tr) if tr else "", str(body) if body else "", str(meta) if meta else ""))
     for tr_suf, body_suf in EXPECTED_PAGES:
         match = [e for e in entries if e[0].endswith(tr_suf)]
@@ -50,9 +50,19 @@ def test_manifest_installs_narrative_and_exemplars_as_pages():
 # AssertionError would abort the driver instead of letting both sides be
 # compared (same convention as the sibling region
 # test_shape_declares_frame in this file).
-def demo():
+# `overlay` (repair of 2026-10-30) names another overlay directory under
+# overlays/ for one call: the region reads the module global OVL, which demo
+# rebinds for the call and restores afterwards. The region itself is
+# untouched; this only lets the driver vary the manifest it reads.
+def demo(overlay=None):
+    global OVL
+    saved = OVL
+    if overlay is not None:
+        OVL = ROOT / "overlays" / overlay
     try:
         test_manifest_installs_narrative_and_exemplars_as_pages()
         return "ok"
     except AssertionError as e:
         return ("assertion-failed", str(e))
+    finally:
+        OVL = saved

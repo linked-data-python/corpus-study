@@ -30,7 +30,8 @@
     "`owl_thing = OWL.Thing` becomes `owl_thing = owl:Thing`: a prefixed name with no variable in it, resolved immediately, exactly the case the reference calls out as needing no bindings at all.",
     "`self._get_label`/`self._get_local_name` are plain method calls, untouched by the translation; `self` is a shared, stateless context_shim.OntologyLinter instance reused for every call on both sides (see driver.py), matching the same pattern already used for a `self`-receiver in this batch's other final region.",
     "`_check_orphan_class` is `async def` with no `await` in its own body (it is declared async only for consistency with its sibling `_check_*` methods, which the real `OntologyLinter.lint()` awaits); `run_check_orphan_class`, added identically to both files and excluded from surface metrics like a context shim, drives the coroutine synchronously since the harness calls its entry point with no event loop.",
-    "fixture.ttl carries three orphans -- a plain one, one with an rdfs:label (exercising `_get_label`'s non-None branch) and one whose only rdfs:subClassOf is owl:Thing (proving the 'excluding owl:Thing' filter on parents actually fires) -- plus owl:Thing itself typed owl:Class (would otherwise qualify as an orphan; proves the identity skip), a class with a real parent, that parent (which is thereby disqualified by having a child), a blank-node-typed owl:Class (proves the isinstance guard), and a resource not typed owl:Class at all (never even a candidate). A second driver call passes an empty graph for the zero-solution case (verified directly: exactly the 3 expected orphans and no more, see driver run)."
+    "fixture.ttl carries three orphans -- a plain one, one with an rdfs:label (exercising `_get_label`'s non-None branch) and one whose only rdfs:subClassOf is owl:Thing (proving the 'excluding owl:Thing' filter on parents actually fires) -- plus owl:Thing itself typed owl:Class (would otherwise qualify as an orphan; proves the identity skip), a class with a real parent, that parent (which is thereby disqualified by having a child), a blank-node-typed owl:Class (proves the isinstance guard), and a resource not typed owl:Class at all (never even a candidate). A second driver call passes an empty graph for the zero-solution case (verified directly: exactly the 3 expected orphans and no more, see driver run).",
+    "repair 2026-10-30: fixture.ttl gained one neighbour per mutant the first fixture left green (ex:Rel ex:seeAlso ex:OrphanB; ex:BnParented with a blank-node owl:Restriction parent; untyped children ex:Kid and _:kidb; ex:Meta ex:relatedTo owl:Class), and fixture_thing.ttl (owl:Thing typed owl:Class with neither parent nor child, so only the `class_uri == owl_thing` skip keeps it out) is a third driver call. The translation passes unchanged."
   ],
   "draft_sha": "30b1c170ee733cf7",
   "provenance": {
@@ -48,5 +49,23 @@
     "method": "fixture:fixture.ttl entry:run_check_orphan_class",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl : une autre relation que rdfs:subClassOf vers une orpheline, un parent BNode (owl:Restriction), deux enfants non typés owl:Class (URIRef et BNode), owl:Class objet d'un autre prédicat que rdf:type ; fixture_thing.ttl en troisième appel, où owl:Thing n'a ni parent ni enfant (dans fixture.ttl il a un enfant, et le saut par identité y était inobservable).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`isinstance(p, URIRef) and p != owl_thing` -> `p != owl_thing`",
+      "enfants restreints aux classes typées (`. ?s a owl:Class`)",
+      "`m{ ?s rdfs:subClassOf {class_uri} }` -> `m{ ?s ?r {class_uri} }`",
+      "`m{ ?class_uri a owl:Class }` -> `m{ ?class_uri ?r owl:Class }`",
+      "`m{ ?class_uri a owl:Class }` -> `m{ ?class_uri a ?t }`",
+      "`m{ {class_uri} rdfs:subClassOf ?p }` -> `m{ {class_uri} ?r ?p }`",
+      "îlots parents / enfants remplacés par `[]`",
+      "garde `isinstance(class_uri, URIRef)` supprimée",
+      "saut `class_uri == owl_thing` supprimé (survivait au fixture du tri enrichi)",
+      "`owl_thing = owl:Thing` -> `owl:Nothing`"
+    ],
+    "remaining": ""
   }
 }

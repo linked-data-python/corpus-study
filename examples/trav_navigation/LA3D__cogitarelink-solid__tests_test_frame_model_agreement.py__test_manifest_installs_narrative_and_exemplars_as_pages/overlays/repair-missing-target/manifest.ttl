@@ -1,0 +1,14 @@
+# Driver input added by the repair of 2026-10-30 (not from the repository).
+# One installsPage entry, with no overlay:targetResource: the original keeps
+# it as ("", body, meta) and fails with "no installsPage ...; entries=[('',
+# ...)]". A pattern that requires overlay:targetResource drops it (entries=[]);
+# a targetResource read widened to any predicate fills the first field.
+@prefix overlay: <https://pod.vardeman.me/vault/ontology/overlay#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+
+<https://pod.vardeman.me/vault/ontology/overlay#wiki-memory>
+    a overlay:Overlay ;
+    overlay:installsPage [
+        overlay:body <concepts/how-wiki-memory-works.md> ;
+        overlay:meta <concepts/how-wiki-memory-works.md.meta.ttl>
+    ] .

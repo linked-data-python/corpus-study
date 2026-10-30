@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants sur la copie de translated.ldpy, avec le fixture d'origine : (1) `m{ ?s2 ?p2 {anon_s} }(g)` -> `[]` : VERT ; (2) -> `m{ ?s2 ?p2 ?o2 }(g)` (terme lié élargi à tout le graphe) : VERT ; (3) `len([m{ }(g)])` -> `len(m{ }(g))` : ROUGE seulement parce que Match n'a pas de len() (TypeError), ce qui ne dit rien de la sémantique de l'îlot. Confirmé dans le dépôt : rdfcompare.py:126-129 identique à original.py, `[g.subject_predicates(anon_s)]` est une liste d'un élément, la garde est donc toujours fausse. Le fixture a bien un BNode avec arête entrante (_:child) et un sans (_:orphanish), mais comme la garde est morte aucun des deux ne peut changer la sortie ; la sortie de la région se réduit à `{URIRef sujets de g}` (et par la restauration g1 := g, `g1.subjects()` est la seule lecture observée). Le traducteur le dit lui-même dans meta.json ; la question est de savoir si cela doit compter dans les chiffres.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Réparation du 2026-10-30 : aucun pilote ne peut observer l'îlot (objet paresseux dans une liste d'un élément jamais itérée, garde toujours fausse) ; pilote et traduction inchangés, check OK, le jugement d'exclusion reste à Maxime."
 }

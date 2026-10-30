@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Mutants VERTS sur la copie (oracle isomorphism, un appel `demo`) : `[] overlay:installsPage ?pi` -> `[] ?pp ?pi` (prédicat élargi, projection ajustée) ; `?pi overlay:targetResource ?tr` -> `?pi ?x ?tr` (idem). Raison : les triplets voisins du fixture (installsContainer, installsShape) n'ont pas de targetResource/body/meta, donc ne produisent aucune ligne parasite, et demo ne renvoie que \"ok\". Divergence confirmée : copie où l'entrée marie-curie perd `overlay:meta` -> original : ('assertion-failed', \"... meta '' should end ...\") ; traduction : ('assertion-failed', \"no installsPage with targetResource ending wiki/people/marie-curie.md; entries=[...]\") : FAIL. Les 6 entrées du manifest réel sont complètes (corpus/repos/LA3D__cogitarelink-solid/overlays/wiki-memory/manifest.ttl), le cas n'est donc pas atteint par le dépôt, mais il l'est par un test dont c'est le rôle de détecter une entrée incomplète. Le traducteur a reconnu le piège dans meta.json sans l'exercer. original.py identique au dépôt (tests/test_frame_model_agreement.py:146-160).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Réparation du 2026-10-30 : demo(overlay) et cinq manifests (entrées incomplètes, autre prédicat, zéro solution) font tomber la jointure fusionnée ; traduction corrigée en un m{ } + trois .first(), check OK, neuf mutants tués."
 }

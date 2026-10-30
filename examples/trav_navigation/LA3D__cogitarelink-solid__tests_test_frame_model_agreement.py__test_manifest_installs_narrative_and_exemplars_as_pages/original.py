@@ -48,9 +48,19 @@ def test_manifest_installs_narrative_and_exemplars_as_pages():
 # AssertionError would abort the driver instead of letting both sides be
 # compared (same convention as the sibling region
 # test_shape_declares_frame in this file).
-def demo():
+# `overlay` (repair of 2026-10-30) names another overlay directory under
+# overlays/ for one call: the region reads the module global OVL, which demo
+# rebinds for the call and restores afterwards. The region itself is
+# untouched; this only lets the driver vary the manifest it reads.
+def demo(overlay=None):
+    global OVL
+    saved = OVL
+    if overlay is not None:
+        OVL = ROOT / "overlays" / overlay
     try:
         test_manifest_installs_narrative_and_exemplars_as_pages()
         return "ok"
     except AssertionError as e:
         return ("assertion-failed", str(e))
+    finally:
+        OVL = saved

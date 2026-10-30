@@ -1,0 +1,12 @@
+# Second input graph for CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_orphan_class
+# (added by the repair of 2026-10-30).
+#
+# In fixture.ttl owl:Thing has a child (ex:OrphanThingOnly), so it is not an
+# orphan whatever the `class_uri == owl_thing` skip does. Here owl:Thing is
+# typed owl:Class and has neither parent nor child: only that skip keeps it
+# out of the result. ex:Alone is the one orphan that must be reported.
+@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+owl:Thing a owl:Class .
+ex:Alone a owl:Class .

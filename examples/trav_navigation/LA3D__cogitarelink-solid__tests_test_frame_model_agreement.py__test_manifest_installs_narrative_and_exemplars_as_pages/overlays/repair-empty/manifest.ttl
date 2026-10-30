@@ -1,0 +1,9 @@
+# Driver input added by the repair of 2026-10-30 (not from the repository).
+# Zero solutions: an overlay with no installsPage at all (only a container).
+# Both versions must fail on the first expected page with entries=[].
+@prefix overlay: <https://pod.vardeman.me/vault/ontology/overlay#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+
+<https://pod.vardeman.me/vault/ontology/overlay#wiki-memory>
+    a overlay:Overlay ;
+    overlay:installsContainer </vault/wiki/> .

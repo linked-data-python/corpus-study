@@ -45,5 +45,12 @@
     "method": "fixture:fixture.ttl entry:run_primary_subjects",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "rien : aucun appel ne peut observer l'îlot. `len([m{ … }(g)]) == 0` met l'objet Match paresseux dans une liste d'un élément, jamais itérée ; la garde vaut False quelle que soit l'entrée, et la construction de l'îlot ne lit pas le graphe (vérifié sur le code transpilé : `_ldpy_.match(...)(g)` n'est qu'un objet). Le fixture exerce déjà la construction de l'îlot sur deux BNode (une levée à la construction serait vue).",
+    "translation_fixed": false,
+    "mutants_killed": [],
+    "remaining": "Inobservable par construction, pas faute de pilote : les mutants `[]` et `?o2` restent verts et resteront verts sous tout pilote, car le bug amont (rdfcompare.py:128, liste d'un générateur) rend l'îlot mort. Reste à Maxime la question 1 du tri (compter ou non cette région dans les crédits de m{ }, call suffix (g), interpolation {expr}) et la question 2 (le wrapper ne modélise que l'appel primary_subjects(g1) ; un second site g1 != g ne lirait que g1.subjects(), identique des deux côtés, et ne prouverait rien de plus sur la traduction)."
   }
 }

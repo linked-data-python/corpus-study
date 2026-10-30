@@ -16,6 +16,7 @@
     "@prefix",
     "@graph",
     "m{ }",
+    ".first()",
     "prefixed name",
     "variable",
     "interpolation {expr}"
@@ -26,7 +27,8 @@
     "Le cas de la strate : `for pi in g.objects(None, overlay:installsPage): tr = g.value(pi, ...); body = g.value(pi, ...); meta = g.value(pi, ...)` -> un seul `m{ [] overlay:installsPage ?pi . ?pi overlay:targetResource ?tr ; overlay:body ?body ; overlay:meta ?meta }` joint, sujet laisse anonyme (`[ ]`, ce qui supprime la variable jetable que g.objects(None, P) exigeait), pi partage entre les quatre motifs.",
     "Piege de cardinalite (cf INSTRUCTIONS_403 SS2) : la fusion n'est sure ici que parce que chaque entree overlay:installsPage de la donnee source porte les trois proprietes targetResource/body/meta. g.value() tolere une propriete absente (rend None, traduit en \"\" par le ternaire de l'original) ; le m{ } joint, lui, ELIMINERAIT silencieusement une entree a qui il manque l'une des trois, au lieu de la garder avec un champ vide -- une vraie difference de comportement pour une entree partielle hypothetique, non exercee par ce fixture car elle serait invisible au retour ok/echec de demo() (l'entree a propriete manquante ne serait de toute facon pas parmi EXPECTED_PAGES) et produirait donc un vert trompeur plutot que demontre. Non reproduit : manifest.ttl garde toutes les entrees installsPage completes.",
     "harnais demo() ajoute a l'identique dans les deux fichiers (exclu des metriques de surface, meme convention que la region soeur test_shape_declares_frame) : la region est un test pytest qui ne fait qu'asserter -- sans lui une AssertionError non rattrapee interromprait le pilote au premier ecart, rendant le resultat invisible a l'oracle. La fonction n'est pas parametree (contrairement a la soeur) donc un seul appel ; plusieurs solutions (4 installsPage attendus) et voisinage qui ne doit pas matcher (2 installsPage non selectionnes + installsContainer/installsShape sur le meme sujet) vivent dans manifest.ttl.",
-    "Zero-solution non exerce : la region est un test a chemin positif (les 4 EXPECTED_PAGES doivent matcher, sinon assertion) -- un manifest sans aucun installsPage ferait echouer l'assertion originale elle-meme (pas un defaut de traduction), et demo() le rendrait comparable ('assertion-failed', ...) mais sans varier le contenu du manifest entre deux appels (la fonction ne prend pas ce chemin en parametre) cela n'ajoute rien a la comparaison. La branche FAUX/zero-solution de m{ } est deja demontree ailleurs dans ce meme fichier source par la region soeur test_shape_declares_frame."
+    "Zero-solution non exerce : la region est un test a chemin positif (les 4 EXPECTED_PAGES doivent matcher, sinon assertion) -- un manifest sans aucun installsPage ferait echouer l'assertion originale elle-meme (pas un defaut de traduction), et demo() le rendrait comparable ('assertion-failed', ...) mais sans varier le contenu du manifest entre deux appels (la fonction ne prend pas ce chemin en parametre) cela n'ajoute rien a la comparaison. La branche FAUX/zero-solution de m{ } est deja demontree ailleurs dans ce meme fichier source par la region soeur test_shape_declares_frame.",
+    "repair 2026-10-30: the fused `m{ [] overlay:installsPage ?pi . ?pi overlay:targetResource ?tr ; overlay:body ?body ; overlay:meta ?meta }` was WRONG: it drops an installsPage entry that lacks one of the three properties, where the original keeps it with an empty field (g.value gives None, the ternary gives \"\"). Proof: with the repair manifests repair-missing-meta, repair-missing-body and repair-missing-target, the original fails on \"meta '' should end ...\" / \"body '' should end ...\" / \"entries=[('', ...)]\" and the fused translation fails with another message (entries without the incomplete entry). The region is a test whose job is to report what is wrong in a manifest, so the message is its behaviour. Fixed by translating each `g.value(pi, P)` as `m{ {pi} P ?x }.first()` inside `for pi in m{ [] overlay:installsPage ?pi }` -- the cardinality trap of INSTRUCTIONS.md section 2, which the earlier note recognised but did not exercise. The note above about the fusion being safe only on complete entries is superseded: no join is left."
   ],
   "draft_sha": "030f406bbf7d530e",
   "provenance": {
@@ -44,5 +46,21 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "`demo(overlay=None)` (harnais identique des deux côtés) rebinde OVL le temps d'un appel ; cinq manifests ajoutés sous overlays/repair-* : entrée sans overlay:meta, sans overlay:body, sans overlay:targetResource, entrée complète atteinte par un autre prédicat qu'overlay:installsPage, aucune entrée (zéro solution). Chacun liste au plus une entrée dans un message, pour que le message ne dépende pas de l'ordre du store.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "la jointure fusionnée d'origine (rouge sur repair-missing-meta, -body, -target)",
+      "`for pi in m{ [] overlay:installsPage ?pi }` -> `for _pp, pi in m{ [] ?pp ?pi }`",
+      "`m{ {pi} overlay:targetResource ?tr }` -> `m{ {pi} ?x ?tr }`",
+      "`m{ {pi} overlay:body ?body }` -> `m{ {pi} ?x ?body }`",
+      "`m{ {pi} overlay:meta ?meta }` -> `m{ {pi} ?x ?meta }`",
+      "`m{ {pi} overlay:meta ?meta }` -> `m{ ?y overlay:meta ?meta }`",
+      "îlot installsPage remplacé par `[]`",
+      "chacun des trois `.first()` remplacé par `None`"
+    ],
+    "remaining": "Classification gardée `directly-expressible` : la traduction est maintenant une transcription ligne à ligne (un m{ } par g.objects/g.value), sans la jointure que la strate trav_navigation attendait ; Maxime peut juger si la jointure, correcte seulement sur des entrées complètes (les 6 du manifest réel le sont), a sa place dans un artefact optimisé. Question 1 du tri tranchée par la preuve (l'entrée incomplète reste, comme dans l'original)."
   }
 }

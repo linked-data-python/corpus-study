@@ -34,3 +34,28 @@ _:bc a owl:Class .
 
 # not typed owl:Class at all -- never even a candidate.
 ex:NotAClass a ex:SomeOtherType .
+
+# --- Neighbourhood added by the repair (2026-10-30), one triple per mutant
+# that the fixture above left green (see triage.json and meta.json repair).
+
+# Another predicate than rdfs:subClassOf pointing AT an orphan: ex:OrphanB
+# must stay an orphan. Kills the children island widened to `?s ?r {class_uri}`.
+ex:Rel ex:seeAlso ex:OrphanB .
+
+# A class whose only parent is a blank node (an OWL restriction, the usual
+# case in real ontologies): the `isinstance(p, URIRef)` guard drops it, so
+# ex:BnParented IS an orphan. Kills the removal of that guard.
+ex:BnParented a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:p ] .
+
+# Children that are NOT typed owl:Class (a URIRef and a blank node): any
+# subject of rdfs:subClassOf counts as a child, so ex:Lonely and ex:LonelyB
+# are NOT orphans. Kills a children island restricted to typed classes.
+ex:Lonely a owl:Class .
+ex:Kid rdfs:subClassOf ex:Lonely .
+ex:LonelyB a owl:Class .
+_:kidb rdfs:subClassOf ex:LonelyB .
+
+# owl:Class as the object of another predicate than rdf:type: ex:Meta is not
+# a candidate. Kills the candidate island widened to `?class_uri ?r owl:Class`.
+ex:Meta ex:relatedTo owl:Class .

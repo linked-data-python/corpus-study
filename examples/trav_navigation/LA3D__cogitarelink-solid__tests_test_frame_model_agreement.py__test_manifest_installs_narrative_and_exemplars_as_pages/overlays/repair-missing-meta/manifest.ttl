@@ -1,0 +1,31 @@
+# Driver input added by the repair of 2026-10-30 (not from the repository).
+# The four expected entries, but marie-curie has no overlay:meta: the
+# original keeps the entry with meta "" and fails on the meta assertion
+# ("meta '' should end ..."); a pattern that requires overlay:meta drops the
+# entry and fails earlier, with another message. A meta read widened to any
+# predicate would pick the targetResource, body or title instead of "".
+@prefix overlay: <https://pod.vardeman.me/vault/ontology/overlay#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+
+<https://pod.vardeman.me/vault/ontology/overlay#wiki-memory>
+    a overlay:Overlay ;
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/how-wiki-memory-works.md> ;
+        overlay:body <concepts/how-wiki-memory-works.md> ;
+        overlay:meta <concepts/how-wiki-memory-works.md.meta.ttl>
+    ] ;
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/photosynthesis.md> ;
+        overlay:body <concepts/photosynthesis.md> ;
+        overlay:meta <concepts/photosynthesis.md.meta.ttl>
+    ] ;
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/biology.md> ;
+        overlay:body <concepts/biology.md> ;
+        overlay:meta <concepts/biology.md.meta.ttl>
+    ] ;
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/people/marie-curie.md> ;
+        overlay:body <people/marie-curie.md> ;
+        dct:title "Marie Curie (thing-frame exemplar)"
+    ] .

@@ -1,0 +1,21 @@
+# Driver input added by the repair of 2026-10-30 (not from the repository).
+# One complete installsPage entry (how-wiki-memory-works), and a complete
+# entry for photosynthesis reached through ANOTHER predicate of the same
+# subject. The original fails on photosynthesis with a one-entry list; a
+# pattern whose overlay:installsPage is widened to a variable picks the
+# second entry up and fails later, on biology, with another message.
+@prefix overlay: <https://pod.vardeman.me/vault/ontology/overlay#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+
+<https://pod.vardeman.me/vault/ontology/overlay#wiki-memory>
+    a overlay:Overlay ;
+    overlay:installsPage [
+        overlay:targetResource </vault/wiki/concepts/how-wiki-memory-works.md> ;
+        overlay:body <concepts/how-wiki-memory-works.md> ;
+        overlay:meta <concepts/how-wiki-memory-works.md.meta.ttl>
+    ] ;
+    overlay:installsDraft [
+        overlay:targetResource </vault/wiki/concepts/photosynthesis.md> ;
+        overlay:body <concepts/photosynthesis.md> ;
+        overlay:meta <concepts/photosynthesis.md.meta.ttl>
+    ] .
