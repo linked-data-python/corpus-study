@@ -2,6 +2,15 @@
 # The region takes three graphs, so the reading oracle needs two input files;
 # see fixture.ttl for what each subject exercises.  obs9 and the blank subject
 # are neighbours with no counterpart in in_first: they must survive untouched.
+# Further neighbours that share a term of a moved triple without being it:
+#   obs2 ex:alt   same subject and same object (2.5) as the moved obs2 pair
+#   obs11         same predicate and same object (2.5) as the moved obs2 pair
+#   obs15         a second object for the (s, p) of a moved pair, read through
+#                 .value(), whose answer is the store's first object,
+#                 so BOTH objects are decimals of equal value (6.0 and 6.00) and
+#                 the filter moves the pair whichever one it reads; the other one
+#                 stays, unless a removal widened the object to a wildcard
+#   obs12, obs13  a decimal facing an integer (see fixture.ttl)
 @prefix ex:  <http://example.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -15,3 +24,11 @@ ex:obs8 ex:value "9.0"^^xsd:decimal .
 ex:obs9 ex:value "10.0"^^xsd:decimal .
 
 [] ex:value "12.0"^^xsd:decimal .
+
+ex:obs2  ex:alt   "2.5"^^xsd:decimal .
+ex:obs11 ex:value "2.5"^^xsd:decimal .
+ex:obs12 ex:value "2.0"^^xsd:decimal .
+ex:obs13 ex:value "3"^^xsd:integer .
+ex:obs14 ex:value "8.00"^^xsd:decimal .
+ex:obs15 ex:value "6.0"^^xsd:decimal .
+ex:obs15 ex:value "6.00"^^xsd:decimal .

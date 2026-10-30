@@ -13,6 +13,14 @@
 #   obs6        plain literal -> must not match
 #   obs7        a URIRef object -> isinstance(o, Literal) must reject it
 #   the bnode   a decimal under a blank subject with no counterpart -> None again
+#   Neighbours that share a TERM of a moved triple but not the whole triple, so a
+#   removal whose bound term was widened to a wildcard would also delete them:
+#   obs1 ex:alt   same subject and same object as the moved obs1 pair, other predicate
+#   obs10         same predicate and same object as the moved obs1 pair, other subject
+#   obs14         same subject and predicate as a moved pair, another object (8.5)
+#   obs15         6.000, facing TWO equal decimals in in_second (see fixture_second.ttl)
+#   obs12, obs13  a decimal facing an integer of equal numeric value
+#                 (Decimal(2) == 2): the datatype tests, not the values, reject them
 @prefix ex:  <http://example.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -26,3 +34,11 @@ ex:obs7 ex:ref   ex:other .
 ex:obs8 ex:value "9.0"^^xsd:decimal .
 
 [] ex:value "11.0"^^xsd:decimal .
+
+ex:obs1  ex:alt   "1.0"^^xsd:decimal .
+ex:obs10 ex:value "1.0"^^xsd:decimal .
+ex:obs12 ex:value "2"^^xsd:integer .
+ex:obs13 ex:value "3.0"^^xsd:decimal .
+ex:obs14 ex:value "8.0"^^xsd:decimal .
+ex:obs14 ex:value "8.5"^^xsd:decimal .
+ex:obs15 ex:value "6.000"^^xsd:decimal .

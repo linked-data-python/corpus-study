@@ -54,5 +54,21 @@
     "method": "fixture:fixture.ttl entry:fhir_decimal_issue_filter",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl et fixture_second.ttl enrichis (le driver.py n'a gagné que sa docstring) : voisins qui partagent un terme d'un triplet déplacé sans en être un (obs1 ex:alt : même sujet et même objet, autre prédicat ; obs10 en in_first et obs11 en in_second : même prédicat et même objet, autre sujet ; obs14 en in_first : même sujet et prédicat, autre objet 8.5 ; obs2 ex:alt en in_second ; obs15 : deux décimaux égaux 6.0 et 6.00 en in_second pour un même couple), et deux paires entier/décimal de même valeur numérique (obs12, obs13 ; Decimal(2) == 2) qui rendent observables les deux tests de datatype.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ {s} {p} {o_2} }(in_second) -> objet élargi `?x`",
+      "-{ {s} {p} {o} }(in_first) -> objet élargi `?x`",
+      "-{ {s} {p} {o} }(in_first) -> prédicat élargi `?q`",
+      "-{ {s} {p} {o} }(in_first) -> sujet élargi `?q`",
+      "-{ {s} {p} {o_2} }(in_second) -> prédicat élargi `?q`",
+      "-{ {s} {p} {o_2} }(in_second) -> sujet élargi `?q`",
+      "test `o.datatype == xsd:decimal` supprimé",
+      "test `o_2.datatype == xsd:decimal` supprimé"
+    ],
+    "remaining": "Le couple (s, p) de obs15 est multi-valué dans in_second, donc `.value()` / `.first()` y rendent l'« premier objet du magasin » (non spécifié) ; les deux objets sont des décimaux de même valeur pour que la région reste déterministe quel que soit celui lu, mais l'ordre du magasin reste une hypothèse commune aux deux côtés. Le jugement sur la région (aucun joker réel dans le `-{ }`, `m{ }` plus long que `list(in_first)`) revient à Maxime."
   }
 }

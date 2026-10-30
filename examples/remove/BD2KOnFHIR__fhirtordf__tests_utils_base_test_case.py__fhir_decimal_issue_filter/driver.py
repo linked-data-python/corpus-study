@@ -14,6 +14,19 @@ The fixtures are part of the translation: several solutions of the pattern
 and neighbours that must not match — another datatype, a plain literal, a
 URIRef object, decimals whose values differ, and triples in in_second with no
 counterpart at all.
+
+The `-{ }` / `+{ }` islands bind s, p, o fully, so what the fixtures must also
+tell apart is a removal whose bound term was widened to a wildcard.  Each term
+therefore has a neighbour that shares it with a moved triple without being that
+triple: same subject and object but another predicate (obs1 ex:alt), same
+predicate and object but another subject (obs10 in in_first, obs11 in
+in_second), same subject and predicate but another object (obs14 in in_first,
+obs15 with two equal decimals in in_second, obs2 ex:alt on the in_second side).
+A decimal facing an integer of equal numeric value (obs12, obs13; Decimal(2) ==
+2) is what makes the two datatype tests observable.  Run against the translation
+with each of these changed in a copy, the check fails: object widened on the
+in_first or in_second removal, predicate widened on either, subject widened on
+either, the datatype test on `o` dropped, the datatype test on `o_2` dropped.
 """
 from rdflib import Graph
 

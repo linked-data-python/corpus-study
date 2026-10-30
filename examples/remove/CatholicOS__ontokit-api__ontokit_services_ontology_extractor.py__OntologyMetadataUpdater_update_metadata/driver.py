@@ -11,9 +11,15 @@ only update_metadata itself is translated.
 
 The five calls cover, in order:
   0. dc:title with a language tag + dcterms:description without one
-     (remove-then-add, both branches of the `if …language` test);
+     (remove-then-add, both branches of the `if …language` test).  A second
+     resource, ex:Thing, carries a dc:title AND a dcterms:description of its
+     own: they must survive, which is what tells the two `-{ }` islands (title,
+     description) apart from a removal whose subject was widened to a wildcard
+     (`-{ ?s <prop> ?old }` would delete them);
   1. rdfs:label appearing **twice** — the point of the (s, p, None) wildcard:
-     one remove must take both triples away;
+     one remove must take both triples away.  ex:Thing again has its own
+     rdfs:label and rdfs:comment, the properties detected here, which must
+     survive;
   2. an ontology with no title and no description property at all
      (the `else` branches: _ensure_dc_prefix + add dc:title / dc:description);
   3. new_title/new_description left None — nothing is removed or added;
@@ -37,6 +43,7 @@ TTL_WITH_LANG = b"""@prefix dc: <http://purl.org/dc/elements/1.1/> .
 
 <http://example.org/onto/Thing> a owl:Class ;
     dc:title "not the ontology - must survive" ;
+    dcterms:description "not the ontology either - must survive" ;
     rdfs:label "Thing" .
 """
 
@@ -46,6 +53,10 @@ TTL_TWO_LABELS = b"""@prefix owl: <http://www.w3.org/2002/07/owl#> .
 <http://example.org/onto> a owl:Ontology ;
     rdfs:label "Titre"@fr, "Title"@en ;
     rdfs:comment "Une description"@fr, "A description"@en .
+
+<http://example.org/onto/Thing> a owl:Class ;
+    rdfs:label "Chose"@fr ;
+    rdfs:comment "Une chose"@fr .
 """
 
 TTL_BARE = b"""@prefix owl: <http://www.w3.org/2002/07/owl#> .

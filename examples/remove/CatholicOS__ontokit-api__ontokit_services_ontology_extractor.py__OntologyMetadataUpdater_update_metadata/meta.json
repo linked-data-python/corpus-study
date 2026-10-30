@@ -55,5 +55,17 @@
     "method": "entry:update_metadata",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "ex:Thing porte maintenant, en plus de son dc:title, une dcterms:description (appel 0) ; dans le Turtle à deux rdfs:label (appel 1), ex:Thing porte un rdfs:label et un rdfs:comment propres. Ces triplets doivent survivre : ils distinguent les deux `-{ }` (titre, description) d'un retrait dont le sujet fuit en joker. Docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "-{ {ontology_iri} {title_prop.property_uri} ?old_title } -> sujet `?s` (appels 0 et 1)",
+      "-{ {ontology_iri} {desc_prop.property_uri} ?old_description } -> sujet `?s` (appels 0 et 1)",
+      "même retrait avec `?s dcterms:description` (prédicat codé en dur)",
+      "même retrait avec le prédicat élargi en `?q` (appels 0 et 1)"
+    ],
+    "remaining": "Rien de nouveau à juger ; la remarque de la strate (sujet et prédicat calculés, le gain de `-{ }` se réduit au joker ?old_*) est déjà dans les notes."
   }
 }

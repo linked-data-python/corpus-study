@@ -51,5 +51,18 @@
     "method": "entry:update_definition",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "dix appels au lieu d'un, chacun avec un graphe frais : graphe sans le littéral attack_id (garde `in graph` fausse, retour 0) ; d3fend:definition déjà présente sur attack_uri (garde `def_property is None` fausse, retour 0) ; voisin Literal('T1055', datatype=xsd:string) et voisin Literal('T1055', lang='en') qui ne doivent pas matcher ; description multi-ligne avec blancs, vide, ressemblant à une IRI, avec guillemets/accolades/antislash ; définition présente sur une autre technique seulement (la lecture est liée au sujet) ; docstring réécrite appel par appel.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if bool(m{ ?s ?p {attack_id} }): -> if True: (appels 1, 3, 4)",
+      "if def_property is None: -> if True: (appel 2)",
+      "m{ {attack_uri} d3fend:definition ?v } -> m{ ?w d3fend:definition ?v } (appel 9)",
+      "{attack_id} -> {attack_id}^^xsd:string dans la garde",
+      "description non réduite à sa première ligne (`.strip().split(\"\\n\")[0].strip()` retiré de +{ })"
+    ],
+    "remaining": "Hors périmètre de la réparation : le shim fournit un _xmlns inventé (src/util/build.py n'en définit aucun à ce commit, l'import du dépôt échouerait) ; identique des deux côtés, sans logique."
   }
 }
