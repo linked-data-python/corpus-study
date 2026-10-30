@@ -61,3 +61,38 @@ ex:synth4 a ontosyn:ChemicalSynthesis ;
     ontosyn:hasChemicalOutput ex:out4 .
 ex:out4 ontosyn:isRepresentedBy ex:mop2 .
 ex:mop2 a ontomops:MetalOrganicPolyhedron .
+
+# --- neighbourhood added to make every guard of the region matter ---
+
+# a selected node that also carries a type that is NOT allowed: the type
+# loop must keep ontospecies:Species and drop ex:ExtraType
+ex:species1 a ex:ExtraType ;
+    ex:note ex:unselected1 .                 # selected -> not selected: not a direct connection
+ex:unselected1 a ex:UnrelatedType .
+ex:other1 ex:pointsAt ex:unselected1 .       # neither end selected
+
+# hasChemicalInput on a node that is NOT a ChemicalSynthesis: the bridging
+# loop only looks at syntheses, so this edge must not be copied
+ex:species1 ontosyn:hasChemicalInput ex:input1 .
+
+# a ChemicalInput without rdf:type and without label (synth4's second input),
+# and one with a label but no rdf:type
+ex:synth4 ontosyn:hasChemicalInput ex:input2 , ex:input3 .
+ex:input3 rdfs:label "Input Three" .
+
+# a bridge to a selected node that is NOT a MOP: `mop in selected` holds,
+# the MOP-type test must refuse it
+ex:synth5 a ontosyn:ChemicalSynthesis ;
+    ontosyn:hasChemicalOutput _:out5 .
+_:out5 ontosyn:isRepresentedBy ex:species1 .
+
+# skolemisation: the digest depends on BOTH the synthesis and the MOP.
+#  synth6 reaches mop1 (also reached by synth1) and mop2 (also reached by synth4),
+#  through two distinct blank nodes
+ex:synth6 a ontosyn:ChemicalSynthesis ;
+    ontosyn:hasChemicalOutput _:out6a , _:out6b .
+_:out6a ontosyn:isRepresentedBy ex:mop1 .
+_:out6b ontosyn:isRepresentedBy ex:mop2 .
+
+# a MOP carrying a second allowed type and no label: type loop with two allowed types
+ex:mop2 a ontomops:ChemicalBuildingUnit .

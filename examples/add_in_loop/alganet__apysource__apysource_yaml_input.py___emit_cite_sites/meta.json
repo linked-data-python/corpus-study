@@ -26,7 +26,8 @@
   "translation_notes": [
     "Validation (type/shape checks, the required-key and required-`file` refusals) stays plain Python per row, so the loop header itself is a plain `for i, site in enumerate(sites, 1):`, not `for @bindings in`: the most specific fit here is `@bindings` (a mapping assigned per row) feeding `+{ }`, rather than forcing the raise-heavy body into the loop-of-mappings form.",
     "The four unconditional triples (rdf:type, sv:citingFile, prov:wasDerivedFrom, sv:citedBy) become one multi-predicate `+{ }` bound from one @bindings mapping; the conditional fifth triple (sv:citingLine) is a second, separate `@bindings`/`+{ }` pair guarded by the same `if line is not None:` as the original, since a variable can't be left 'sometimes present' inside one block without also satisfying the well-formedness the original raises on.",
-    "DCTERMS, RDFS and OA are unused in this region (kept unused in original.py's imports too, matching the source file's module-level context)."
+    "DCTERMS, RDFS and OA are unused in this region (kept unused in original.py's imports too, matching the source file's module-level context).",
+    "Correction (réparation 2026-10-30) : l'original écrit (node, a, sv:CiteSite) avant de calculer `Literal(_text(file, …))`, qui peut lever ; la première traduction calculait le littéral avant tout ajout et n'avait pas le triplet rdf:type au moment de la levée (pilote renforcé : `file: [\"x\"]` en second site, 5 contre 4 triplets). Le type est maintenant ajouté par un `+{ {node} a sv:CiteSite }` à part, avant le dictionnaire de liaisons ; le graphe partiel est identique."
   ],
   "draft_sha": "8e9cf6a4eb7c194d",
   "provenance": {
@@ -44,5 +45,22 @@
     "method": "entry:_emit_cite_sites",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "vingt appels au lieu de deux, avec comparaison du graphe partiel et de l'exception (type et message) : succès (cited_by null/absent/vide, line 0, file entier ou booléen, graphe prérempli, graphe portant une marque sur le noeud blanc du deuxième site pour rendre la numérotation observable) et chaque levée de l'original (cited_by non-liste dont \"\" et 0, site non-dict, une et deux clés inconnues, file absent/\"\"/0, file non textuel en second site, line booléen/str/float) ; docstring qui dit ce que chaque appel exerce.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "traduction d'origine : file non textuel en second site (5 contre 4 triplets)",
+      "if line is not None: -> if line: / if True:",
+      "if not file: -> if file is None:",
+      "if not isinstance(sites, list): -> if not sites: / if sites and not isinstance(...)",
+      "if sites is None: -> if not sites:",
+      "contrôle de type du site et rejet des clés inconnues retirés",
+      "exclusion du booléen pour line retirée ; int élargi à float",
+      "numérotation cite_{i} -> cite_{i-1} / cite_{i+1} ; enumerate(sites, 1) -> enumerate(sites)",
+      "triplet rdf:type retiré ; sv:citedBy inversé ; prov:wasDerivedFrom visant le site ; sv:citingLine sur le fragment ; Literal(str(line)) ; Literal(file) / Literal(str(file)) sans _text"
+    ],
+    "remaining": "Jugement non traité : wrong-construction (le dictionnaire `bindings` + @bindings est-il un habillage superflu face à `+{ {node} … {Literal(…)} }`), que la correction laisse en place pour le bloc des trois triplets et celui de sv:citingLine."
   }
 }

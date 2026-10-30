@@ -21,5 +21,6 @@
     }
   ],
   "evidence": "check OK sur le pilote d'origine. Dans une copie du driver, ajout de quatre appels : `cited_by` = [{file: ok.py}, {file: [\"x\"]}] -> `check` FAIL : « call[2].arg[0]: graphs not isomorphic (5 vs 4 triples) » (l'original garde le rdf:type du second site avant de lever, la traduction non) ; le check s'arrête au premier échec : les trois autres appels ajoutés (line true, cited_by non-liste, liste vide) n'ont pas été jugés séparément. Réécriture en copie avec `+{ {node} a sv:CiteSite ; sv:citingFile {Literal(_text(file, f\"{where}: file\"))} ; prov:wasDerivedFrom {frag_uri} . {frag_uri} sv:citedBy {node} }` et `+{ {node} sv:citingLine {Literal(line)} }` : check OK sur le pilote d'origine (l'écart du chemin d'erreur n'a pas été testé sur cette réécriture). Mutants tués sur le pilote d'origine : retrait de sv:citedBy, prédicat citingLine échangé, prov:wasDerivedFrom ?node, garde `line is not None` -> True. Appelant réel : yaml_input.py:441 seulement.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Le pilote passe de 2 à 20 appels (chemins d'erreur, falsy, graphe partiel comparé) et a fait tomber la traduction sur `file: [\"x\"]` en second site (5 contre 4 triplets) ; translated.ldpy écrit maintenant le triplet rdf:type avant de calculer le littéral, et le pilote renforcé est vert, avec les mutants de gardes, de numérotation et de prédicats rejetés ; wrong-construction non traité."
 }

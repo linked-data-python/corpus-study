@@ -50,5 +50,18 @@
     "method": "fixture:fixture.ttl entry:transform",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl : un noeud cible dans le namespace de sortie (neat_/tgtcode, codeValue \"tgtcode\") et sa source ; pilote : deux appels ajoutés, B avec convert_literal_to_uri=True ET delete_target_node=True sur ex:codeValue (la valeur convertie recrée une arête vers le noeud cible, seul le joker d'objet la retire) et le cas zéro solution avec delete_target_node=True ; docstring mise à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "suppression de -{ ?s ?p {target_node} } (15 vs 16 triplets, appel 4 seulement)",
+      "suppression de -{ {target_node} ?p ?o }",
+      "suppression de -{ {source_node} {old_predicate} {target_node} }",
+      "if self.delete_target_node: -> if True:",
+      "if self.target_property_holding_new_property is not None: -> if True:"
+    ],
+    "remaining": ""
   }
 }

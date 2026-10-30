@@ -48,3 +48,15 @@ ex:Decoy a ex:TargetType ;
     ex:someOtherProperty "ignored" .
 
 ex:Unrelated a ex:Noise .
+
+# A target node that lives INSIDE the output namespace (http://example.org/neat_/)
+# and whose codeValue is its own local name.  With convert_literal_to_uri the
+# region adds `source <new predicate> namespace["tgtcode"]`, an edge that points
+# back at the target node itself and that the per-row removal of the OLD edge
+# does not take away: only the object wildcard removes it.
+<http://example.org/neat_/tgtcode> a ex:TargetType ;
+    ex:codeValue "tgtcode" ;
+    ex:propertyWhichValueWeMightWantAsNameForNewProperty "Self Name" .
+
+ex:SourceOfCode a ex:SourceType ;
+    ex:sourceProperty <http://example.org/neat_/tgtcode> .

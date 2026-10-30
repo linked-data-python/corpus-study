@@ -48,5 +48,21 @@
     "method": "fixture:fixture.ttl entry:build_link_graph",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl complétée (le pilote lit ce fichier, driver.py n'a gagné qu'une docstring) : un noeud sélectionné portant aussi un type non autorisé (ex:ExtraType), une arête sélectionné -> non sélectionné, hasChemicalInput sur un noeud qui n'est pas une synthèse, deux ChemicalInput sans rdf:type (l'un sans libellé, l'autre avec), un pont vers un noeud sélectionné qui n'est pas un MOP (ex:species1), une synthèse (synth6) qui atteint deux MOP par deux noeuds blancs, et un MOP déjà atteint par une autre synthèse (skolémisation à deux arguments).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if t in allowed_types: -> if True:",
+      "(chem_input, rdf:type, ChemicalInput) in g -> True et -> False",
+      "s in selected and o in selected -> s in selected / o in selected / or",
+      "filtre synthèse (n, rdf:type, ChemicalSynthesis) in g -> True",
+      "(mop, rdf:type, MOP) in g retiré (mop in selected seul)",
+      "empreinte sur synth_id seul / sur mop_id seul",
+      "isinstance(chem_out, BNode) -> True / False",
+      "retrait de l'îlot label (nœud sélectionné et ChemicalInput), de l'îlot hasChemicalInput et de l'îlot rdf:type ChemicalInput"
+    ],
+    "remaining": "Reste vert, et équivalent : retirer `mop in selected` en gardant le test de type MOP (tout noeud typé MOP est sélectionné). Jugement non traité : wrong-construction (lectures g.objects/g.subjects et RDF_NS.type laissés en Python alors que trav_one_step est crédité)."
   }
 }

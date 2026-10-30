@@ -18,6 +18,20 @@ Four calls cover the four branches the region has:
              on ex:codeValue, whose values have no space (namespace[value] of
              "Target Value" is a URIRef rdflib refuses to serialise)
 
+Two calls were added to prove the deletions and the empty case:
+  B / convert / delete  convert_literal_to_uri=True AND delete_target_node=True on
+             ex:codeValue.  The fixture holds a target node inside the output
+             namespace (neat_/tgtcode, codeValue "tgtcode"), so the converted
+             object namespace["tgtcode"] is the target node itself: the region
+             adds an edge towards the node it is about to delete, under a
+             predicate different from the old edge.  Only the object wildcard
+             `-{ ?s ?p {target_node} }` removes that edge, so only this call tells
+             it from the other removals (checked on a copy of translated.ldpy:
+             deleting that line makes this call, and only this one, report
+             "graphs not isomorphic (15 vs 16 triples)").
+  zero solutions  delete_target_node=True on a property nothing carries: the query
+             returns no row, nothing is added or removed, the graph stays as it was.
+
 The namespace is `http://example.org/neat_/` and not neat's own
 DEFAULT_NAMESPACE because `as_neat_compliant_uri` calls rdflib's `split_uri`
 with `split_start="#_"`, which only ever splits at an underscore: a namespace
@@ -98,5 +112,9 @@ VERDICT = run_pair(
         call(target_property=EX.codeValue,
              target_property_holding_new_property=EX.propertyWhichValueWeMightWantAsNameForNewProperty,
              convert_literal_to_uri=True),                       # B, convert
+        call(target_property=EX.codeValue,
+             target_property_holding_new_property=EX.propertyWhichValueWeMightWantAsNameForNewProperty,
+             convert_literal_to_uri=True, delete_target_node=True),  # B, convert + delete
+        call(target_property=EX.noSuchProperty, delete_target_node=True),  # zero solutions
     ],
 )

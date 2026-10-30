@@ -63,11 +63,13 @@ def _emit_cite_sites(g: Graph, frag_uri: URIRef, frag_def: dict[str, object],
         # Numbered by position in the list, which `_dedupe`-style callers keep
         # sorted, so a site added in the middle does not relabel the ones after it.
         node = _anon(frag_uri, f"cite_{i}")
+        # The type triple is written first, on its own: `_text` may raise, and
+        # the original has already added it by then.
+        +{ {node} a sv:CiteSite }
         bindings = {"node": node, "file": Literal(_text(file, f"{where}: file")), "frag": frag_uri}
         @bindings bindings
         +{
-            ?node a sv:CiteSite ;
-                  sv:citingFile ?file ;
+            ?node sv:citingFile ?file ;
                   prov:wasDerivedFrom ?frag .
             ?frag sv:citedBy ?node
         }

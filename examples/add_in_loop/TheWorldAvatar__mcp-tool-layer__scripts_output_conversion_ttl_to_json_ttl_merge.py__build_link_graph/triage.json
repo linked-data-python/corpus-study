@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check OK. Mutants dans des copies, restés VERTS : `if (chem_input, rdf:type, ChemicalInput) in g:` -> `if True:` ; retrait de `and (mop, rdf:type, MOP) in g` ; `if t in allowed_types:` -> `if True:` ; filtre `(n, rdf:type, ChemicalSynthesis) in g` -> `if True`. (`if mop in selected` -> `if True` est équivalent : un MOP typé est toujours sélectionné.) Mutants tués : retrait de `o in selected` ou `s in selected`, des îlots label / hasChemicalInput, de la skolémisation, changement de prédicat du pont. Dans une copie, ajout à fixture.ttl de `ex:species1 a ex:ExtraType`, `ex:input2` sans type lié à synth4, `ex:species1 hasChemicalInput ex:input1`, un pont synth5 -> ex:species1 : la paire reste OK et les quatre mutants précédents passent à FAIL. Aucune erreur d'équivalence trouvée dans la traduction elle-même.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "La fixture exerce maintenant chaque garde (type non autorisé sur un noeud sélectionné, ChemicalInput sans rdf:type, hasChemicalInput sur un non-synthèse, pont vers un nœud sélectionné qui n'est pas un MOP, skolémisation à deux arguments) : les quatre mutants cités sont rejetés, ainsi que les variantes de la garde `s in selected and o in selected` et de l'empreinte ; seul reste vert l'équivalent `mop in selected` retiré. La traduction n'a pas changé ; wrong-construction non traité."
 }
