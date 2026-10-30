@@ -1,0 +1,5 @@
+# Stands for the context modules build_validation_graph merges into
+# `merged`: here, the only triple that is in `merged` and not in
+# fixture_edge.ttl is CURATOR's prov:Agent typing.
+@prefix prov: <http://www.w3.org/ns/prov#> .
+<https://example.org/agent/synthetic-curator> a prov:Agent .

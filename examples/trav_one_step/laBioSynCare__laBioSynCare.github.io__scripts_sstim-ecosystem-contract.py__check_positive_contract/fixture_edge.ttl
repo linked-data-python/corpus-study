@@ -1,0 +1,123 @@
+# Negative fixture for check_positive_contract: the project's positive
+# fixture (fixture.ttl) produces no error at all, so it cannot tell a
+# traversal from its removal.  Each activity below makes ONE requirement
+# fail, or sits next to such a case without failing.  Read with
+# context_edge.ttl (CURATOR is a prov:Agent only in `merged`) and without.
+@prefix eco:  <https://w3id.org/sstim/ecosystem#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:   <https://example.org/edge/> .
+@prefix spec: <https://w3id.org/sstim/specialist/> .
+
+# PERSON is NOT a prov:Agent anywhere: a prov:Person (same subject and
+# predicate, other object) and rdfs:seeAlso prov:Agent (same subject and
+# object, other predicate).  CURATOR is a prov:SoftwareAgent in the fixture;
+# its prov:Agent triple is only in the context file.
+spec:synthetic-alex-rivera a prov:Person ; rdfs:seeAlso prov:Agent .
+<https://example.org/agent/synthetic-curator> a prov:SoftwareAgent .
+
+# --- predecessors (prov:wasInformedBy) ------------------------------------
+ex:pEarly prov:endedAtTime "2023-01-01T00:00:00Z"^^xsd:dateTime .
+ex:pLate  prov:endedAtTime "2025-01-01T00:00:00Z"^^xsd:dateTime .
+ex:pLate2 prov:endedAtTime "2026-01-01T00:00:00Z"^^xsd:dateTime .
+ex:pNone  rdfs:label "no timestamp" .
+ex:pTwo   prov:endedAtTime "2023-01-01T00:00:00Z"^^xsd:dateTime ,
+                           "2023-06-01T00:00:00Z"^^xsd:dateTime .
+
+# e1: one earlier predecessor (fine) and one later (error); a later node
+# reached through prov:wasInfluencedBy (same subject, other predicate) must
+# not be visited.
+ex:rel1 eco:hasEngagementActivity ex:e1 .
+ex:e1 a eco:EngagementActivity ; eco:engagementFor ex:rel1 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-01T00:00:00Z"^^xsd:dateTime ;
+    prov:wasInformedBy ex:pEarly , ex:pLate ;
+    prov:wasInfluencedBy ex:pLate2 .
+
+# e2: a predecessor without timestamp and one with two (two errors).
+ex:rel2 eco:hasEngagementActivity ex:e2 .
+ex:e2 a eco:EngagementActivity ; eco:engagementFor ex:rel2 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-02T00:00:00Z"^^xsd:dateTime ;
+    prov:wasInformedBy ex:pNone , ex:pTwo .
+
+# e3: a literal predecessor (no timestamp: error); e4: a blank-node
+# predecessor that is earlier (fine).  pLate2 informs e3 the other way
+# round (e3 is ITS predecessor): visited only if the direction flipped.
+ex:rel3 eco:hasEngagementActivity ex:e3 .
+ex:e3 a eco:EngagementActivity ; eco:engagementFor ex:rel3 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-03T00:00:00Z"^^xsd:dateTime ;
+    prov:wasInformedBy "an earlier session" .
+ex:pLate2 prov:wasInformedBy ex:e3 .
+ex:rel4 eco:hasEngagementActivity ex:e4 .
+ex:e4 a eco:EngagementActivity ; eco:engagementFor ex:rel4 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-04T00:00:00Z"^^xsd:dateTime ;
+    prov:wasInformedBy [ prov:endedAtTime "2023-12-31T00:00:00Z"^^xsd:dateTime ] .
+
+# e5: no timestamp (error), so its late predecessor is never visited;
+# e6: two timestamps (error), likewise; e7: an xsd:date (error), no
+# predecessor.
+ex:rel5 eco:hasEngagementActivity ex:e5 .
+ex:e5 a eco:EngagementActivity ; eco:engagementFor ex:rel5 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:wasInformedBy ex:pLate .
+ex:rel6 eco:hasEngagementActivity ex:e6 .
+ex:e6 a eco:EngagementActivity ; eco:engagementFor ex:rel6 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-06T00:00:00Z"^^xsd:dateTime ,
+                     "2024-01-06T01:00:00Z"^^xsd:dateTime ;
+    prov:wasInformedBy ex:pLate .
+ex:rel7 eco:hasEngagementActivity ex:e7 .
+ex:e7 a eco:EngagementActivity ; eco:engagementFor ex:rel7 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-07"^^xsd:date .
+
+# --- relationship membership (eco:hasEngagementActivity) ------------------
+# e8: no inbound relationship (error); rel8 points at it through another
+# predicate.  e9: two inbound relationships (error).  e10: one inbound that
+# is not the one it is engagementFor (error).
+ex:rel8 eco:hasEcosystemRelationship ex:e8 .
+ex:e8 a eco:EngagementActivity ; eco:engagementFor ex:rel8 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-08T00:00:00Z"^^xsd:dateTime .
+ex:rel9a eco:hasEngagementActivity ex:e9 .
+ex:rel9b eco:hasEngagementActivity ex:e9 .
+ex:e9 a eco:EngagementActivity ; eco:engagementFor ex:rel9a ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-09T00:00:00Z"^^xsd:dateTime .
+ex:rel10 eco:hasEngagementActivity ex:e10 .
+ex:e10 a eco:EngagementActivity ; eco:engagementFor ex:rel10b ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-01-10T00:00:00Z"^^xsd:dateTime .
+
+# --- consent decisions (rdf:type eco:ConsentDecisionActivity) -------------
+# c1: governed by a relationship whose agent is PERSON -> actor PERSON
+# (matches), but PERSON is not a prov:Agent (error).
+ex:relC1 eco:hasEngagementActivity ex:c1 ; eco:relationshipAgent spec:synthetic-alex-rivera .
+ex:c1 a eco:EngagementActivity , eco:ConsentDecisionActivity ;
+    eco:engagementFor ex:relC1 ;
+    prov:wasAssociatedWith spec:synthetic-alex-rivera ;
+    prov:endedAtTime "2024-02-01T00:00:00Z"^^xsd:dateTime .
+# c2: relationship agent is someone else -> CURATOR expected (and given).
+ex:relC2 eco:hasEngagementActivity ex:c2 ; eco:relationshipAgent ex:someoneElse .
+ex:c2 a eco:EngagementActivity , eco:ConsentDecisionActivity ;
+    eco:engagementFor ex:relC2 ;
+    prov:wasAssociatedWith <https://example.org/agent/synthetic-curator> ;
+    prov:endedAtTime "2024-02-02T00:00:00Z"^^xsd:dateTime .
+# c3: no engagementFor -> relationship None -> CURATOR expected, while
+# PERSON is associated (error), and the membership check fails too.
+ex:relC3 eco:hasEngagementActivity ex:c3 ; eco:relationshipAgent spec:synthetic-alex-rivera .
+ex:c3 a eco:EngagementActivity , eco:ConsentDecisionActivity ;
+    prov:wasAssociatedWith spec:synthetic-alex-rivera ;
+    prov:endedAtTime "2024-02-03T00:00:00Z"^^xsd:dateTime .
+# n1: NOT a consent decision (it only points at the class through
+# rdfs:seeAlso), governed by a PERSON relationship, associated with PERSON:
+# CURATOR is expected (error).
+ex:relN1 eco:hasEngagementActivity ex:n1 ; eco:relationshipAgent spec:synthetic-alex-rivera .
+ex:n1 a eco:EngagementActivity ; rdfs:seeAlso eco:ConsentDecisionActivity ;
+    eco:engagementFor ex:relN1 ;
+    prov:wasAssociatedWith spec:synthetic-alex-rivera ;
+    prov:endedAtTime "2024-02-04T00:00:00Z"^^xsd:dateTime .

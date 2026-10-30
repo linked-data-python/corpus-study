@@ -24,7 +24,8 @@
     ".first()",
     "call suffix (g)",
     "prefixed name",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "variable"
   ],
   "translation_notes": [
     "prefixes: TOOLKIT_NS->toolkit, OWL->owl, PROV->prov, RDF->rdf, RDFS->rdfs, XSD->xsd",
@@ -52,5 +53,22 @@
     "method": "entry:explain_triple",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl : énoncés presque correspondants stmtA/stmtB/stmtC (un seul terme diffère, le terme manquant porté par rdfs:seeAlso, une dérivation chacun), énoncé non typé rdf:Statement, dérivation reliée par prov:wasInfluencedBy, deuxième rule/engine/bindings sur deriv1 ; lineage_real.ttl dans la forme qu'écrit _write_lineage (nœuds anonymes, bindings typés xsd:string, objets littéraux typés) avec rule \"\", engine absent derrière prov:wasGeneratedBy, bindings \"0\"^^xsd:integer, JSON invalide, liste JSON, prémisses à objet falsy (0, false, \"\") et une prémisse hors toolkit:premise ; sept appels de plus : (s1,p1,oX), objet en '<IRI>', chemin inexistant, (A,reaches,C), '\"true\"' contre \"true\"^^xsd:boolean (pas de correspondance, comme le test du dépôt), '\"true\"' simple, '\"\"'.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "chacune des trois gardes supprimée",
+      "objet de chaque garde -> joker",
+      "prédicat de chaque garde -> joker (dont rdf:predicate {p} -> ?q {p}, survivant du tri)",
+      "sujet de chaque garde -> joker",
+      "typage rdf:Statement élargi",
+      "prov:wasDerivedFrom, toolkit:premise, toolkit:engine, toolkit:bindings -> prédicat joker (forme gardée)",
+      ".first() -> dernière valeur pour rule, engine, bindings",
+      "gardes de vérité ps/pp/po, rule, bindings -> is not None",
+      "rdf:object de la prémisse -> rdf:predicate"
+    ],
+    "remaining": ""
   }
 }

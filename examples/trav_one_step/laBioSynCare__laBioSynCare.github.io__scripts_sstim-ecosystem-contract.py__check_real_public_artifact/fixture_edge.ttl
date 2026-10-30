@@ -1,0 +1,58 @@
+# Second input graph for check_real_public_artifact: one faulty case per
+# one-step traversal that the first fixture leaves without an error, each
+# with a neighbour that shares two of its three terms and whose visit would
+# show in `errors`.
+#
+# agents: agentA (self-attributed, verified), agentB (also verified).
+# relationship curators:
+#   relGood -> agentA (verified, no error); also prov:used eco:outsiderU
+#     (wrong predicate: picked up only if the predicate were prov:used) and
+#     prov:wasDerivedFrom eco:outsiderD (picked up only if the predicate
+#     were a variable);
+#   relBad  -> eco:outsiderR (NOT an agent: error) ; prov:used eco:agentA ;
+#   relLit  -> the literal "agentA" (a literal is never in `agents`: error);
+# activity actors:
+#   actGood -> agentB (verified) ; prov:wasAttributedTo eco:outsiderW ;
+#     prov:wasInfluencedBy eco:outsiderI ;
+#   actBad  -> eco:outsiderA (NOT an agent: error) ; prov:wasAttributedTo eco:agentA ;
+#   actNone has no actor (zero solutions for the inner loop).
+# neighbours of the three type traversals:
+#   eco:notAnActivity is typed eco:SomeOtherType and carries
+#     prov:wasAssociatedWith eco:outsiderN -- visited only if `activities`
+#     were widened beyond eco:EngagementActivity;
+#   eco:notARelationship is typed eco:SomeOtherType and carries
+#     prov:wasAttributedTo eco:outsiderM -- likewise for `relationships`;
+#   eco:seeAlsoActivity only points at eco:EngagementActivity through
+#     rdfs:seeAlso, and carries prov:wasAssociatedWith eco:outsiderS.
+@prefix eco:  <https://w3id.org/sstim/ecosystem#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+eco:agentA a eco:EcosystemAgent ; prov:wasAttributedTo eco:agentA .
+eco:agentB a eco:EcosystemAgent .
+
+eco:relGood a eco:EcosystemRelationship ;
+    prov:wasAttributedTo eco:agentA ;
+    prov:used eco:outsiderU ;
+    prov:wasDerivedFrom eco:outsiderD .
+eco:relBad a eco:EcosystemRelationship ;
+    prov:wasAttributedTo eco:outsiderR ;
+    prov:used eco:agentA .
+eco:relLit a eco:EcosystemRelationship ;
+    prov:wasAttributedTo "agentA" .
+
+eco:actGood a eco:EngagementActivity ;
+    prov:wasAssociatedWith eco:agentB ;
+    prov:wasAttributedTo eco:outsiderW ;
+    prov:wasInfluencedBy eco:outsiderI .
+eco:actBad a eco:EngagementActivity ;
+    prov:wasAssociatedWith eco:outsiderA ;
+    prov:wasAttributedTo eco:agentA .
+eco:actNone a eco:EngagementActivity .
+
+eco:notAnActivity a eco:SomeOtherType ;
+    prov:wasAssociatedWith eco:outsiderN .
+eco:notARelationship a eco:SomeOtherType ;
+    prov:wasAttributedTo eco:outsiderM .
+eco:seeAlsoActivity rdfs:seeAlso eco:EngagementActivity ;
+    prov:wasAssociatedWith eco:outsiderS .

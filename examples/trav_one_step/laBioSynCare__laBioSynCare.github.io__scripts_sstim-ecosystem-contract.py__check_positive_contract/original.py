@@ -25,15 +25,25 @@ def require(condition: bool, message: str, errors: list[str]) -> None:
         errors.append(message)
 
 
-_FIXTURE_PATH = Path(__file__).parent / "fixture.ttl"
+# Driver seam (identical in both representations): the driver may point
+# the fixture and the context at other files, to exercise the cases the
+# project's positive fixture never produces.  By default: the project's own
+# fixture, and no context file.
+import os
+_FIXTURE_PATH = Path(os.environ.get("RDFEVAL_SSTIM_FIXTURE")
+                     or Path(__file__).parent / "fixture.ttl")
+_CONTEXT_PATH = os.environ.get("RDFEVAL_SSTIM_CONTEXT")
 fixture = Graph().parse(str(_FIXTURE_PATH), format="turtle")
 # The real `merged` is fixture + the ontology/context modules
 # (build_validation_graph); this region only ever tests
 # `(actor, RDF.type, PROV.Agent) in merged`, and every actor it can name
-# (CURATOR, PERSON) already carries that triple directly in the fixture, so
-# a second parse of the same file is a faithful-enough stand-in for this
-# region's purposes.
+# (CURATOR, PERSON) already carries that triple directly in the project's
+# fixture, so a second parse of the same file is a faithful-enough
+# stand-in for this region's purposes.  The optional context file stands for
+# the context modules: what it adds is in `merged` and not in `fixture`.
 merged = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+if _CONTEXT_PATH:
+    merged.parse(_CONTEXT_PATH, format="turtle")
 
 activities = set(fixture.subjects(RDF.type, ECO.EngagementActivity))
 errors: list[str] = []

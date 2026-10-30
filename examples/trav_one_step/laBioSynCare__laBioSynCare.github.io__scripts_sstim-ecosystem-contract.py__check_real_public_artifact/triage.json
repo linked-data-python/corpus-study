@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Région identique aux lignes 827-885 du dépôt (diff vide) ; shim require() identique à la ligne 416. Mutants dans une copie : agents/relationships/activities remplacés par set() et agents/relationships par ?s a [] : FAIL ; boucle curateur d'agent : [] / sujet libre / prov:used : FAIL. SURVIVANTS (check OK) : boucle curateur de relation -> [] ; idem prov:used ; boucle acteur d'activité -> [] ; sujet libre [] ; prédicat prov:wasAttributedTo ; activities = set(m{ ?s a [] }). La note du traducteur (« swap wasAttributedTo -> used a fait échouer ») n'est vraie que pour la boucle des agents. Avec les 2 lignes de fixture ci-dessus : les 5 premiers survivants deviennent FAIL ; activities élargi survit encore (il faudrait un sujet d'un autre type portant prov:wasAssociatedWith). Les 2 lectures laissées en rdflib (subjects(), all_nodes()) sont justifiées. 4 des 6 @prefix déclarés (rdfs, dcterms, owl, xsd) sont inutilisés. Ne peut pas illustrer l'article en l'état.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (fixture négatif à voisins, graphe vide, sonde réelle du dépôt) : les cinq mutants survivants et activities élargi sont tués, traduction juste, check OK."
 }

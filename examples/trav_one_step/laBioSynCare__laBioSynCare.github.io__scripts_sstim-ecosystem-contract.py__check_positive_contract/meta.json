@@ -52,5 +52,20 @@
     "names_only_original": [
       "ECO"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "couture identique des deux côtés dans les lignes de contexte (RDFEVAL_SSTIM_FIXTURE, RDFEVAL_SSTIM_CONTEXT : fixture et fichier de contexte ajouté à `merged`, défaut inchangé) ; pilote réécrit en quatre scénarios module-state repliés en un verdict : le fixture réel du projet (l'appel d'origine), fixture_edge.ttl + context_edge.ttl, fixture_edge.ttl seul, graphe vide. fixture_edge.ttl fait échouer chaque exigence une fois : zéro, deux et mauvais liens hasEngagementActivity ; décisions de consentement gouvernées par PERSON, par un autre, sans relation ; activité qui ne pointe la classe de consentement que par rdfs:seeAlso ; PERSON prov:Person et rdfs:seeAlso prov:Agent mais jamais prov:Agent ; CURATOR prov:Agent seulement dans le contexte (donc dans `merged`, pas dans `fixture`) ; prédécesseurs antérieur, postérieur, sans horodatage, à deux horodatages, littéral, nœud anonyme, atteint par prov:wasInfluencedBy, et dans l'autre sens ; événements sans, à deux, et à un horodatage xsd:date.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "boucle wasInformedBy -> []",
+      "wasInformedBy : prédicat joker (forme gardée), sujet joker, sens inversé",
+      "require(bool(m{ {actor} rdf:type prov:Agent }(merged))) -> require(True)",
+      "îlot prov:Agent : objet joker ?t, prédicat joker, sujet joker",
+      "suffixe (merged) supprimé (requête sur fixture)",
+      "inbound -> set(), prédicat joker (forme gardée), objet joker",
+      "îlot ConsentDecisionActivity : False, True, prédicat joker, objet joker, sujet joker"
+    ],
+    "remaining": "Jugements du tri non traités : `activities = set(fixture.subjects(...))` et les cinq `values(fixture, …)` restent en Python, et le crédit 'IRI' vient des constantes PERSON/CURATOR du contexte restauré, pas des lignes de la région."
   }
 }

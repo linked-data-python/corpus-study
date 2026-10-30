@@ -47,3 +47,54 @@ ex:stmt3 a rdf:Statement ;
     rdf:subject ex:s3 ;
     rdf:predicate ex:p3 ;
     rdf:object ex:o3 .
+
+# Near-miss statements: each differs from (ex:s1, ex:p1, ex:o1) in ONE term
+# only, and carries a derivation, so a guard that is dropped or widened
+# lets it through and the output changes.  Each also holds the missing
+# term under ANOTHER predicate (rdfs:seeAlso), so a guard whose predicate
+# is widened to a variable matches it too.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# same subject and predicate, other object (tests the rdf:object guard)
+ex:stmtA a rdf:Statement ;
+    rdf:subject ex:s1 ;
+    rdf:predicate ex:p1 ;
+    rdf:object ex:oX ;
+    rdfs:seeAlso ex:o1 ;
+    prov:wasDerivedFrom ex:derivA .
+ex:derivA toolkit:rule "ruleNearObject" ; toolkit:engine "engineA" .
+
+# same subject and object, other predicate (tests the rdf:predicate guard)
+ex:stmtB a rdf:Statement ;
+    rdf:subject ex:s1 ;
+    rdf:predicate ex:pX ;
+    rdf:object ex:o1 ;
+    rdfs:seeAlso ex:p1 ;
+    prov:wasDerivedFrom ex:derivB .
+ex:derivB toolkit:rule "ruleNearPredicate" ; toolkit:engine "engineB" .
+
+# same predicate and object, other subject (tests the rdf:subject guard)
+ex:stmtC a rdf:Statement ;
+    rdf:subject ex:sX ;
+    rdf:predicate ex:p1 ;
+    rdf:object ex:o1 ;
+    rdfs:seeAlso ex:s1 ;
+    prov:wasDerivedFrom ex:derivC .
+ex:derivC toolkit:rule "ruleNearSubject" ; toolkit:engine "engineC" .
+
+# Not typed rdf:Statement, yet reifies (s1, p1, o1) with a derivation: the
+# outer rdf:type traversal must not pick it up.
+ex:stmtUntyped rdf:subject ex:s1 ;
+    rdf:predicate ex:p1 ;
+    rdf:object ex:o1 ;
+    prov:wasDerivedFrom ex:derivU .
+ex:derivU toolkit:rule "ruleUntyped" .
+
+# Derivation linked to stmt1 through another predicate: never a derivation.
+ex:stmt1 prov:wasInfluencedBy ex:derivI .
+ex:derivI toolkit:rule "ruleInfluence" .
+
+# A second rule, engine and bindings on deriv1: next(g.objects(...), None)
+# keeps the first in store order, so must .first().
+ex:deriv1 toolkit:rule "ruleA2" ; toolkit:engine "engineA2" ;
+    toolkit:bindings "{\"y\": 2}" .

@@ -1,0 +1,58 @@
+# Lineage file in the shape materializer._write_lineage writes it
+# (synaptixs/ontomesh@f771c8c4ee, src/materializer.py:608-638): every
+# statement, derivation and premise is a BLANK node, bindings are a JSON
+# string typed xsd:string, objects may be typed literals.  Edge values the
+# region decides on:
+#   * a triple whose object is "true"^^xsd:boolean: the API passes '"true"',
+#     which _parse_term turns into a PLAIN literal -- no match (the repo's own
+#     test_shacl_rule_attribution falls back on exactly this);
+#   * a triple whose object is the plain literal "true" and one whose object
+#     is "": both match their '"..."' query;
+#   * falsy values: rule "" (-> None), a missing engine (-> None, although
+#     the derivation has other objects, prov:wasGeneratedBy first), bindings
+#     "0"^^xsd:integer (falsy -> {}), invalid JSON bindings (-> {}), a JSON
+#     list, premises whose object is "0"^^xsd:integer, "false"^^xsd:boolean
+#     or "" (falsy -> premise dropped), and a premise with a literal object
+#     "x" (kept);
+#   * a premise that is NOT linked through toolkit:premise (prov:used).
+@prefix ns: <http://example.org/ns#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix toolkit: <https://ontology.example.com/toolkit/materializer/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+[] a rdf:Statement ;
+    rdf:subject ns:A ; rdf:predicate ns:reaches ; rdf:object ns:C ;
+    prov:wasDerivedFrom
+        [ toolkit:rule "reach-two-hops" ; toolkit:engine "sparql" ;
+          prov:wasGeneratedBy ns:activity1 ;
+          toolkit:bindings "{\"x\": \"A\", \"y\": \"B\", \"z\": \"C\"}"^^xsd:string ;
+          toolkit:premise
+              [ a rdf:Statement ; rdf:subject ns:A ; rdf:predicate ns:partOf ; rdf:object ns:B ] ,
+              [ a rdf:Statement ; rdf:subject ns:B ; rdf:predicate ns:partOf ; rdf:object ns:C ] ;
+          prov:used
+              [ a rdf:Statement ; rdf:subject ns:Z ; rdf:predicate ns:partOf ; rdf:object ns:Y ] ] ,
+        [ toolkit:rule "" ;
+          prov:wasGeneratedBy ns:activity2 ;
+          toolkit:bindings "0"^^xsd:integer ;
+          toolkit:premise
+              [ rdf:subject ns:A ; rdf:predicate ns:count ; rdf:object "0"^^xsd:integer ] ,
+              [ rdf:subject ns:A ; rdf:predicate ns:flag ; rdf:object "false"^^xsd:boolean ] ,
+              [ rdf:subject ns:A ; rdf:predicate ns:label ; rdf:object "" ] ,
+              [ rdf:subject ns:A ; rdf:predicate ns:label ; rdf:object "x" ] ] ,
+        [ toolkit:rule "owl-rl:prp-trp" ; toolkit:engine "owl-rl" ;
+          toolkit:bindings "{oops"^^xsd:string ] ,
+        [ toolkit:rule "list-bindings" ; toolkit:engine "sparql" ;
+          toolkit:bindings "[1, 2]"^^xsd:string ] .
+
+[] a rdf:Statement ;
+    rdf:subject ns:t1 ; rdf:predicate ns:flag ; rdf:object "true"^^xsd:boolean ;
+    prov:wasDerivedFrom [ toolkit:rule "TriggerShape" ; toolkit:engine "shacl" ] .
+
+[] a rdf:Statement ;
+    rdf:subject ns:t2 ; rdf:predicate ns:flag ; rdf:object "true" ;
+    prov:wasDerivedFrom [ toolkit:rule "PlainTrue" ; toolkit:engine "shacl" ] .
+
+[] a rdf:Statement ;
+    rdf:subject ns:t3 ; rdf:predicate ns:label ; rdf:object "" ;
+    prov:wasDerivedFrom [ toolkit:rule "EmptyLabel" ; toolkit:engine "sparql" ] .

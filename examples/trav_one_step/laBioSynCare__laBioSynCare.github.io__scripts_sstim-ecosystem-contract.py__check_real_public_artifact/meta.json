@@ -47,5 +47,18 @@
     "method": "fixture:fixture.ttl entry:check_real_public_artifact",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture_edge.ttl et trois appels : (1) fixture_edge.ttl -- curateur de relation et acteur d'activité NON vérifiés, curateur littéral, activité sans acteur, et pour chaque parcours un voisin qui partage deux termes (bon sujet sous prov:used / prov:wasDerivedFrom / prov:wasAttributedTo / prov:wasInfluencedBy ; bon prédicat sur un sujet d'un autre type : eco:notAnActivity, eco:notARelationship, eco:seeAlsoActivity qui ne pointe la classe que par rdfs:seeAlso) ; (2) graphe vide avec label \"\" ; (3) la sonde du dépôt (check_real_artifact_guard, scripts/sstim-ecosystem-contract.py:963-985) reconstruite à l'identique.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "boucle curateur de relation -> [], prédicat prov:used, prédicat joker (forme gardée), sujet joker",
+      "boucle acteur d'activité -> [], prédicat prov:wasAttributedTo, prédicat joker (forme gardée), sujet joker",
+      "activities = set(m{ ?s a [] }) et prédicat joker sur le typage",
+      "relationships et agents élargis à ?s a []",
+      "boucle curateur d'agent -> [] et prédicat joker (forme gardée)"
+    ],
+    "remaining": "Jugements du tri non traités : 4 des 6 @prefix (rdfs, dcterms, owl, xsd) ne servent pas ; article_candidate reste à confirmer maintenant que le pilote prouve les cinq îlots."
   }
 }
