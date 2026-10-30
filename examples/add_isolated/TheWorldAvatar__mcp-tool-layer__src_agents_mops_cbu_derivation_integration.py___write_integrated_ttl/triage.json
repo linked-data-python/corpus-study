@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "ONTOSYN = Namespace(...) est défini dans la région même (ns_def_local) mais reste du Python au lieu d'un @prefix local, et {Literal(lbl)} enveloppe inutilement une str ({lbl} suffit).",
+  "questions": [
+    {
+      "question": "La région définit `ONTOSYN = Namespace(\"https://www.theworldavatar.com/kg/OntoSyn/\")` dans son propre corps ; la traduction doit-elle la rendre en `@prefix ontosyn: <...> .` et `a ontosyn:ChemicalInput` (construction attendue par INSTRUCTIONS.md §2, ligne ns_def_local), et `{Literal(lbl)}` en `{lbl}` ?",
+      "where": "translated.ldpy:32-33, :23 et :26 ; original.py:30-31, :21 et :24 (dépôt : integration.py:683-684, :674 et :677)",
+      "if_yes": "needs-work : retraduire (@prefix ontosyn: local, a ontosyn:ChemicalInput, {lbl} nu), puis la paire crédite le préfixe local et `rdfs:label {lbl}`",
+      "if_no": "approuver en l'état (le Namespace local reste du Python, comme ONTOMOPS qui est défini hors de la région) ; classification inchangée"
+    }
+  ],
+  "evidence": "rdfeval check : OK (module-state). Dépôt : lbl vient de metal_cbu/organic_cbu.get(\"formula\") après .strip() (integration.py:643-644), donc toujours une str ; mop_subject est un nœud du graphe source. Sur copie : (a) remplacer `ONTOSYN = Namespace(...)` par `@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .` et `{ONTOSYN.ChemicalInput}` par `ontosyn:ChemicalInput`, avec {Literal(lbl)} -> {lbl} : check toujours OK, y compris pour lbl = \"\" (le littéral vide est bien ajouté) ; (b) le seul mutant `{Literal(lbl)}` -> `{lbl}` survit, ce qui confirme l'équivalence. L'oracle est par ailleurs solide : mutants tués = `if lbl:` -> `is not None`, `is not None` -> `if lbl:`, formule supprimée, ChemicalInput supprimé, `if is_generated` -> True, hasChemicalBuildingUnit supprimé, label en @en. Le @prefix rdf: (l.5) est inutilisé (`a` n'en a pas besoin).",
+  "triaged_by": "sonnet-5.5"
+}

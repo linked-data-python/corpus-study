@@ -1,0 +1,8 @@
+{
+  "priority": "low",
+  "flags": [],
+  "summary": "Rien à signaler : seul .add() inconditionnel traduit en +{ }(g), les deux g.set restent de l'API rdflib avec justification ; pilote écrit à la main qui observe bien le graphe.",
+  "questions": [],
+  "evidence": "rdfeval check : OK (entry:add_atomic_weight_to_element ; pilote hors run_pair, 4 cas : float, \"N/A\", valeur invalide, IRI non absolue). Original identique au dépôt (ontospecies_extension.py:566-587). Shim : _class, _safe_parent, _ensure_type_with_label, OS identiques au dépôt ; les deux écarts déclarés (_mint_hash_iri déterministe, locked_graph = `yield Graph()` sans FileLock ni sérialisation) ne touchent que du code hors région, et le graphe cédé est le même objet que celui que le dépôt sérialise. Mutants sur copie, tous tués : prédicat hasAtomicWeight modifié, sujet {aw} au lieu de {parent}, îlot supprimé, datatype xsd:float -> xsd:double (le pilote distingue donc bien les datatypes). xsd:float vaut XSD.float exactement, Literal(float(value), datatype=…) intact. Gain nul en lignes (un .add() remplacé par un +{ }(g) plus long), donc pas article-example.",
+  "triaged_by": "sonnet-5.5"
+}
