@@ -75,6 +75,14 @@ Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
    `graph.query()`. Ne les signalez sur une paire que si le **dépôt
    d'origine** atteint le cas (un appelant réel qui passe `None`, une requête
    préparée passée à `graph.query`), avec le fichier et la ligne du dépôt.
+10. **`+{ }` et `-{ }` évaluent, puis écrivent** (fiche ldpy/014) : si un
+   terme lève, le graphe reste tel qu'il était, là où une suite de `g.add`
+   laisse les triplets déjà ajoutés. C'est la sémantique voulue du langage,
+   pas un défaut de la paire. Ne levez `equivalence-doubt` que si le dépôt
+   **atteint** la levée (un appelant réel, fichier et ligne) **et peut
+   observer** le graphe partiel (il n'est pas jeté avec l'exception). La
+   traduction fidèle garde alors les premiers triplets dans un îlot à part ;
+   la classification ne change pas.
 
 Deux défauts sont désormais **contrôlés mécaniquement** par le digest, ne
 les recherchez pas à la main : l'écart entre les `constructions` déclarées
