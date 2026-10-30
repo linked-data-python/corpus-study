@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "equivalence-doubt",
+    "weak-oracle"
+  ],
+  "summary": "Si `get_name(cls)` lève, l'original a déjà ajouté `a sh:NodeShape` et `sh:targetClass` au graphe, la traduction aucun (get_name hissé avant l'îlot fusionné) ; le pilote n'a jamais de levée, et `shapes_count`, les gardes de dédoublonnage et `self` ne sont pas observés.",
+  "questions": [
+    {
+      "question": "Le graphe partiel laissé par une levée de get_name doit-il compter comme comportement à préserver (auquel cas la paire est needs-work : garder les deux premiers triples dans un îlot séparé avant l'appel) ?",
+      "where": "translated.ldpy:24-33 (name = self.get_name(cls) avant le +{ }) et original.py:19-24 (deux add avant get_name à la ligne 22) ; get_name peut lever : plugin_shapes.py:299-311 du dépôt (raise_for_status, ValueError)",
+      "if_yes": "needs-work : scinder l'îlot du nœud en deux, ou accepter explicitement la restructuration et reclasser minor-restructuring",
+      "if_no": "approuver, en notant que la levée avorte execute() (plugin_shapes.py:712) et que shapes_graph est alors jeté ; ajouter tout de même au pilote un get_name qui lève et un contrôle de shapes_count"
+    },
+    {
+      "question": "Faut-il faire observer `shapes_count` (retourner (graphe, shapes_count)) au pilote, puisqu'il alimente entity_count du rapport d'exécution (plugin_shapes.py:670) ?",
+      "where": "driver.py / original.py:77-91 (demo ne retourne que self.shapes_graph) ; translated.ldpy:24, 40",
+      "if_yes": "ajouter l'observation au pilote ; le code d'incrément est identique des deux côtés, donc approuver si le vert tient",
+      "if_no": "approuver en sachant que le compteur n'est pas comparé"
+    }
+  ],
+  "evidence": "rdfeval check OK. Dépôt : lignes 395-446 identiques à original.py ; get_class_dict renvoie des `str` (binding['class']['value']), get_name une `str` (results['title'], éventuellement privée de son préfixe) : `f<{cls}>` == URIRef(cls) et `{name}@en` == Literal(name, lang='en') — vérifié aussi sur copie avec name='' et name='a \"q\"\\n\\\\ ü' : VERT, ce qui est le bon résultat. Expérience de levée sur copie (get_name lève ValueError pour la classe Organization, create_shapes enveloppé dans try/except identique des deux côtés) : ROUGE, `graphs not isomorphic (21 vs 19 triples)` : l'original garde type+targetClass du nœud, la traduction rien. Mutants sur copie de translated.ldpy : ROUGES = `if prop['inverse']` -> False, retrait du préfixe '← ', nodeKind constant, sh:property pointant le nœud, `\"true\"` sans datatype, @en -> @fr, `f<{cls}>` -> `{cls}` (et pour sh:path), retrait du suffixe 'inverse' de l'uuid. VERTS = `if class_uuid not in class_uuids` -> True, `if prop_uuid not in prop_uuids` -> True (l'ajout est idempotent dans un Graph), `self.shapes_count += 1` -> pass (compteur non observé). Aucun mutant ne supprime un îlot, mais la divergence de levée est montrée par une expérience, d'où high.",
+  "triaged_by": "sonnet-5.5"
+}

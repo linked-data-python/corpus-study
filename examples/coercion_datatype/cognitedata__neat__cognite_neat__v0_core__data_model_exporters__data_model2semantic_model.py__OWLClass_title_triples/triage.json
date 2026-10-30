@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Vert creux : `OWLClass.title_triples = title_triples` affecte la propriété sur la classe du shim, partagée par les deux modules (context_shim importé une seule fois), donc le second chargement écrase le premier et le pilote compare translated.ldpy avec lui-même ; n'importe quel mutant reste vert, y compris sur original.py.",
+  "questions": [
+    {
+      "question": "Faut-il refaire le harnais pour que chaque côté attache sa propre propriété (par exemple une sous-classe `class _C(OWLClass)` définie dans chaque module) avant d'approuver ?",
+      "where": "original.py:26-30 et translated.ldpy:27-31 (OWLClass.title_triples = …, demo), context_shim.py (classe OWLClass unique), driver.py:20-26",
+      "if_yes": "corriger le harnais (par exemple sous-classe locale à chaque module) et relancer ; l'équivalence réelle est évidente à la lecture (seul DCTERMS.title -> dcterms:title change, même IRI http://purl.org/dc/terms/title), mais elle n'est pas prouvée par la machine",
+      "if_no": "approuver en sachant que le vert ne prouve rien sur cette paire : la preuve est la seule lecture"
+    }
+  ],
+  "evidence": "rdfeval check OK. Expériences sur copie : (1) translated.ldpy `dcterms:title` -> `dcterms:creator` : VERT ; (2) original.py `DCTERMS.title` -> `DCTERMS.creator` : VERT ; (3) translated.ldpy `if self.label:` -> `if True:` et `return []` -> `return [1]` : VERT ; (4) littéral ` - ` -> ` ~ ` dans translated.ldpy : VERT, et dans original.py : VERT. Cause : OWLClass vient de context_shim, objet unique dans sys.modules ; _exec_artefact charge original.py puis translated.ldpy, le second `OWLClass.title_triples = …` remplace le premier, et demo() des deux côtés lit donc la propriété traduite. Dépôt : title_triples (data_model2semantic_model.py:202-213) identique à original.py ; remove_namespace_from_uri du shim est une réduction fidèle de rdf_.py:34-87 (branche validation='prefix') ; label est `str | None`. Seule paire de tout examples/ avec ce motif d'affectation sur classe du shim (grep). Pas d'article : le gain est nul (`DCTERMS.title` -> `dcterms:title` plus une ligne @prefix, le Literal reste en rdflib).",
+  "triaged_by": "sonnet-5.5"
+}

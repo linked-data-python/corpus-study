@@ -1,0 +1,17 @@
+{
+  "priority": "low",
+  "flags": [
+    "article-example"
+  ],
+  "summary": "Rien à signaler : quatre `g2.add` par tour fondus en un `+{ }` à sujet partagé, `{x}@en` sur des `str` vérifiées ; la région n'a aucun datatype, elle illustre le sujet partagé et le littéral langué, pas la coercition de datatype.",
+  "questions": [
+    {
+      "question": "Cette paire peut-elle illustrer l'article (en tant qu'exemple de sujet partagé + littéral langué, et non de coercition de datatype) ?",
+      "where": "translated.ldpy:22-28 et original.py:14-15",
+      "if_yes": "la retenir comme candidate, en la présentant sous « sujet partagé / littéral langué » : son strate coercion_datatype est un artefact du tirage",
+      "if_no": "approuver sans la citer"
+    }
+  ],
+  "evidence": "rdfeval check OK (module-state, g2 comparé par isomorphisme + valeurs communes). Dépôt (landscape/07-tooling/build_core_v6_0_0.py:142-149, S() ligne 34, REG ligne 29, g2 ligne 120) : les lignes de la région sont identiques à original.py ; S retourne bien une `str` (\" | \".join) ; les citations R-TOGAF/R-DAMA du shim sont recopiées de enrichment_l_v5_3_0.py:11-20 ; le shim n'ajoute pas de logique (le .ttl de base est un substitut inerte, des deux côtés). Pas de branche, trois tours de boucle codés en dur. Mutants sur copie de translated.ldpy tous ROUGES : label/definition échangés, @en -> @fr, @en retiré, `a owl:Thing`, S(\"R-TOGAF\") seul. Aucun `None` ni valeur non str atteignable (valeurs littérales dans la région).",
+  "triaged_by": "sonnet-5.5"
+}
