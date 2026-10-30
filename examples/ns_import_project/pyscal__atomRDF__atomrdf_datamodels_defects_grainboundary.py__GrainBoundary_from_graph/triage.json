@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "equivalence-doubt"
+  ],
+  "summary": "L'oracle est vide : `demo()` des deux côtés appelle `GrainBoundary.from_graph` sur la classe du shim, partagée par sys.modules, que la traduction (exécutée en second) écrase ; et un sample sans `cmso:hasMaterial` donne un résultat différent (original : joker, traduction : None).",
+  "questions": [
+    {
+      "question": "Faut-il refaire le pilote pour qu'il appelle chaque côté séparément (par exemple `ns_o['from_graph'].__func__(GrainBoundary, g, s)` puis `ns_t[…]`), la paire actuelle comparant `translated.ldpy` à lui-même ?",
+      "where": "driver.py:43-47 et original.py/translated.ldpy:26 (`GrainBoundary.from_graph = classmethod(from_graph.__func__)`, classe importée de atomrdf_context.py:67)",
+      "if_yes": "needs-work : réécrire demo()/driver, la validation `equivalent` actuelle ne prouve rien.",
+      "if_no": "approuver (mais l'expérience montre qu'un original.py cassé reste vert)."
+    },
+    {
+      "question": "Le cas `get_material(graph, sample) is None` (sample absent ou sans `cmso:hasMaterial`) doit-il donner le même résultat des deux côtés ? L'original lit alors `graph.triples((None, hasCrystallographicDefect, None))` (joker sur tout le graphe) et renvoie le premier GrainBoundary du graphe ; la traduction `m{ {material} … }` avec `{material}` = None renvoie None.",
+      "where": "translated.ldpy:12 et original.py:14 ; cas atteignable depuis le dépôt : atomrdf/graph.py:1329 (`get_sample` -> `AtomicScaleSample.from_graph`) puis atomrdf/datamodels/structure.py:862 (`field_type.from_graph(graph, sample)` pour `grain_boundary`).",
+      "if_yes": "needs-work : garder le comportement joker (ex. `if material is None: …` ou `.triples` en Python) ou classer la paire non directement exprimable, et ajouter le cas au pilote.",
+      "if_no": "approuver en documentant l'écart comme un bug de l'original (le joker sur None est accidentel), la paire n'étant alors plus strictement équivalente."
+    }
+  ],
+  "evidence": "rdfeval check : OK, mais : (1) dans une copie, `original.py` avec `return cls._read_gb(…)` remplacé par `return None` reste OK ; la traduction mutée (`== pldo:TwistGrainBoundary`) reste OK aussi : les deux côtés exécutent la même fonction, la dernière affectée à la classe partagée du shim (la note disant que les classes sont distinctes est fausse). (2) Dans une copie, un script appelant directement `from_graph` de chaque espace de noms avec la classe du shim : sample1 et sample2 identiques ; sample3 (absent du graphe) : original = GrainBoundary(sigma=5, …), traduction = None ; sample4 (deux défauts à deux types) identique. La note du traducteur dit que le joker n'existe pas côté traduction, ce qui est exact, mais l'écart est atteignable (voir `where`). Le crédit `from … import p:` repose sur un `__namespaces__` écrit à la main par atomrdf_context.py (déjà remonté).",
+  "triaged_by": "sonnet-5.5"
+}

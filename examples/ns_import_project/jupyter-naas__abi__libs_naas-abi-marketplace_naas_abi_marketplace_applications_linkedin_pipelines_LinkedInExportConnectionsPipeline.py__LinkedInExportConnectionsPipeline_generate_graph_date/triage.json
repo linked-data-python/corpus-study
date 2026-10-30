@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Traduction équivalente et propre, mais « typed literal » est crédité sans qu'aucun `^^` n'existe dans le code (`Literal(date_str, datatype=xsd:dateTime)` reste un appel Python) ; le crédit `from … import p:` repose sur un `__namespaces__` écrit à la main par le shim (déjà remonté).",
+  "questions": [
+    {
+      "question": "Faut-il retirer « typed literal » de `constructions`, la traduction n'employant aucun littéral `^^` (translated.ldpy:21, appel `Literal(…, datatype=xsd:dateTime)`) ?",
+      "where": "meta.json (constructions) et translated.ldpy:21 contre original.py:15",
+      "if_yes": "corriger `constructions` (retirer « typed literal ») puis approuver.",
+      "if_no": "needs-work : exhiber la forme `^^` équivalente (j'ai essayé `\"{date_str}\"^^xsd:dateTime` : le check échoue, à creuser) ou justifier le crédit."
+    }
+  ],
+  "evidence": "rdfeval check : OK. grep `\\^\\^` dans translated.ldpy : 0 occurrence. Dans une copie (supprimée) : pilote étendu avec str à espace/`/`/`#`, str vide, str avec guillemet (les deux côtés produisent la même IRI invalide : seule la comparaison du harnais échoue à sérialiser, pas la paire), datetime naïf, `date_format='%Y'`, datetime avant 1970, entier 5 (les deux lèvent UnboundLocalError) : rien ne diverge. Mutants : prédicat `abi:ISO8601UTCDateTime` mal écrit -> FAIL ; `datatype=xsd:dateTime` retiré -> FAIL (branche datetime) ; les deux branches sont donc tuées. `@graph graph` + un seul `+{ … ; … }` partageant `{date_uri}` : correct. `__namespaces__` du shim naas_abi_context.py : le dépôt n'en exporte aucun (Graph.py:12 définit `ABI = Namespace(…)`).",
+  "triaged_by": "sonnet-5.5"
+}

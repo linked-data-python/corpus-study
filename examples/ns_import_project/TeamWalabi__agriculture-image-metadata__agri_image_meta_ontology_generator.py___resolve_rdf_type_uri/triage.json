@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "wrong-construction"
+  ],
+  "summary": "Équivalence établie, mais le crédit `@prefix` est de la ressaisie d'IRI : `sosa:`/`foaf:` ne sont jamais utilisés comme préfixes (aucun nom préfixé), `@prefix … as SOSA` remplace seulement l'import d'objets Namespace du projet (original.py:11).",
+  "questions": [
+    {
+      "question": "`@prefix sosa: <…> as SOSA .` / `@prefix foaf: <…> as FOAF .` (qui remplacent un import d'objets Namespace du projet et n'introduisent aucun nom préfixé) comptent-ils comme un emploi de la construction `@prefix` ?",
+      "where": "translated.ldpy:20-21 et original.py:11 (`from agri_image_meta_ns import … SOSA …`)",
+      "if_yes": "approuver ; `constructions` reste `@prefix, IRI, f<…>`.",
+      "if_no": "needs-work : garder `from agri_image_meta_ns import SOSA, FOAF` tel quel (ou retirer `@prefix` des `constructions`) ; la paire ne garde alors que IRI + f<…>."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dans une copie (mktemp -d, supprimée) j'ai ajouté six appels au pilote : `sosa:` (local vide), `:x` (préfixe vide), `sosa:a b`, `sosa:a>b`, `sosa:a#b:c`, `None` : check reste OK, donc `f<{ns}{local}>` se comporte comme `URIRef(str(ns)+local)` (aucune validation ni encodage, mêmes valeurs, même `None`/garde de véracité). Les sept appels d'origine couvrent les trois entrées de `ns_map`, un préfixe inconnu, sans ':' et vide. Dépôt d'origine : agri_image_meta/utils/namespaces.py:9-11 donne bien les mêmes IRI (DCAT, FOAF, SOSA), pas de `__namespaces__` (et le crédit `from … import p:` n'est pas déclaré ici). Seul appelant dans le dépôt : generator.py:88 (`rdf_type_default.default`), non examiné en détail. Le `@prefix` ne remplace aucune ligne de la région elle-même : les deux déclarations ajoutent 2 lignes pour remplacer un import hors région.",
+  "triaged_by": "sonnet-5.5"
+}

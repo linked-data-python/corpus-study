@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Le pilote n'observe jamais le type des deux IRI : `cnode()` fait `str(class_)`, donc remplacer `<http://example.org/Person>` par une chaîne nue reste vert ; l'unique crédit « IRI » n'est pas prouvé par l'oracle.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au pilote une observation du type des termes (ex. `assertIsInstance(c1, rdflib.URIRef)` côté demo ou retour de `type(c1)`) pour que le crédit « IRI » repose sur une preuve ?",
+      "where": "translated.ldpy:9-10 (`c1 = <…>`, `c2 = <…>`) contre original.py:9-10 ; etk_context.py `SHACLOntoConverter.cnode` (`class_ = str(class_)`) ; driver.py (un seul appel `demo()`).",
+      "if_yes": "needs-work : compléter demo() pour renvoyer les types de c1/c2.",
+      "if_no": "approuver : l'équivalence découle de la définition d'un terme IRI (URIRef), le test ne dépend que de `str()`."
+    }
+  ],
+  "evidence": "rdfeval check : OK. Dans une copie (supprimée) : `c1 = 'http://example.org/Person'` et `c2 = 'http://example.org/Developer'` (chaînes nues) à la place des IRI -> check reste OK (mutant qui supprime l'îlot vivant). `c1 = <http://example.org/Persons>` (IRI changée) -> FAIL, donc la valeur est contrôlée, pas le type. L'équivalence reste certaine par construction (`<…>` vaut `URIRef('…')`, et les constantes sont identiques) ; shim etk_context.py : `cnode`/`Node`/`URI`/`BNode` identiques à etk/knowledge_graph/shacl.py (cnode vérifié), `TestSHACLOntoConverter` sans setUp. Région sans aucun préfixe ni import de préfixe (constructions = IRI seul), donc rien à signaler sur `__namespaces__`.",
+  "triaged_by": "sonnet-5.5"
+}
