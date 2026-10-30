@@ -45,5 +45,17 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le pilote passe du mode module-state à cinq appels de _replace_query_graph construits dans driver.py (l'état de module de la démo reste comparé, fusionné dans le verdict) : self est le GraphStore du shim avec un chargeur qui enregistre ses appels (méthode, graphe, octets) et une égalité qui compare ces appels et chaque graphe du Dataset (défaut et nommés) par isomorphisme. Appels : les deux scénarios de la démo ; un graphe cible de triplets différant par sujet, prédicat et objet, avec nœud anonyme et littéraux @en / xsd:string, entouré de voisins (graphe par défaut et second graphe nommé) qui partagent deux termes sur trois et un triplet identique ; la même cible avec un remplacement vide ; une cible qui n'existe pas encore.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`-{ ?s ?p ?o }` rétréci à `-{ ?s <ex:p> ?o }`",
+      "rétréci à `-{ <ex:stale> ?p ?o }`",
+      "rétréci à `-{ ?s ?p 1 }`",
+      "`if not len(graph):` -> `if False:` (chargement d'un N-Triples vide désormais visible dans l'enregistreur)"
+    ],
+    "remaining": ""
   }
 }

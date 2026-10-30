@@ -50,5 +50,20 @@
     "method": "entry:_generate_mem_profile_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six appels ajoutés (1 seul auparavant) : page 1 sur 1 sans membre, sans parent ni paramètre de requête (branche other_qsas_str = '') ; page = last_page avec un parent sans label et page/per_page filtrés parmi les paramètres ; la forme ContainerOfContainersRenderer (lignes SPARQL (URIRef, Literal@en) et (URIRef, Literal typé), parent None) ; un tuple à trois éléments, un title int, label None et comment int ; label et comment déjà Literal (@fr re-étiqueté @en, typé) ; un membre chaîne contenant « uri » (TypeError comparée par type et message). Et une comparaison des liaisons de préfixes (le dépôt sérialise ce graphe via _make_rdf_response) : chaque liaison posée par le graphe de l'original doit se retrouver dans celui de la traduction, liaisons en plus tolérées, fusionnée dans le verdict de run_pair.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "préfixe ldp: renommé ldpx: (liaison perdue, triplets identiques)",
+      "préfixe xhv: renommé xhvx:",
+      "garde `if self.page != 1` -> `if True`",
+      "garde `if self.page != self.last_page` -> `if True`",
+      "garde `if self.parent_container_label is not None` -> `if True`",
+      "label du membre tuple `{member[1]}` -> `{str(member[1])}` (Literal typé de la ligne SPARQL perdu)",
+      "`other_qsas_str = ''` -> `'z&'`"
+    ],
+    "remaining": "Les questions de jugement du tri ({URIRef(x)} -> f<…>) restent à Maxime. Un écart hors des entrées documentées : si un label (member[1], member[\"title\"], label, parent_container_label) est un URIRef ou un BNode, Literal(x) en fait un littéral et {x} le garde tel quel ; seul un cofc.ttl dont rdfs:label a une IRI pour valeur l'atteindrait (ContainerOfContainersRenderer, renderer_container.py:393), la docstring du dépôt dit « string elements ». Faut-il le tenir pour hors contrat ?"
   }
 }

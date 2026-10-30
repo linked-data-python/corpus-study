@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Dépôt : SPARQLSource (pyrml_core.py:1912) hérite de AbstractMap -> TermMap -> IdentifiedNode, endpoint/result_format sont des URIRef ou None (lignes 1917-1942) ; `self` n'est donc ni URIRef ni BNode. En copie, avec une classe IdentifiedNode imitant TermMap (id URIRef puis BNode), l'original et la traduction produisent les mêmes triplets : le sujet reste l'objet self (pas de coercion en URIRef) pour les deux ids. Mutants dans une copie : supprimer l'îlot endpoint, supprimer l'îlot type, `if True`, `if not`, IRI du préfixe sd -> FAIL ; permuter les gardes -> OK (survit). Avec un troisième appel (endpoint seul) ajouté au pilote de la copie, la paire reste OK et le mutant de permutation devient FAIL. Écart sans conséquence : @graph g précède @prefix sd, mais le graphe rendu a quand même la liaison sd (g.namespaces() : sd en plus par rapport à l'original) ; to_rdf ne sert dans le dépôt qu'à fusionner des triplets (g += …, graph_add_all) qui ne recopient pas les liaisons. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (6 appels : endpoint seul, result_format seul, sujet de type TermMap réel avec id IRI puis BNode) ; la permutation des gardes et le sujet forcé en IRI tombent, la traduction était juste."
 }

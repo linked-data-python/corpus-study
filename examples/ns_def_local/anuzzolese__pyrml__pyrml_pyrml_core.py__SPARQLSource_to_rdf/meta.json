@@ -46,5 +46,17 @@
     "method": "entry:to_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "quatre appels ajoutés : endpoint seul, result_format seul (chaque garde décide seule), et deux sujets TermMapLike, une IdentifiedNode ni URIRef ni BNode imitant TermMap (__eq__/__hash__ sur _id, id URIRef puis BNode) et SPARQLSource (str -> URIRef, valeur falsy -> None), le type réel de self dans pyrml ; son n3() délègue à _id pour que le harnais puisse canonicaliser le graphe.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "gardes permutées (`if self.endpoint` <-> `if self.result_format`)",
+      "garde du triplet resultFormat remplacée par `if self.endpoint`",
+      "garde du triplet endpoint remplacée par `if self.result_format`",
+      "sujet du triplet de type forcé en IRI (URIRef(self._id)) au lieu de l'objet self"
+    ],
+    "remaining": ""
   }
 }

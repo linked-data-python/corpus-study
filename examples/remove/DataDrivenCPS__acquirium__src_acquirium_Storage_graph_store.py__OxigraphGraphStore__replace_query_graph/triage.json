@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check = OK (module-state). Transpilation vérifiée : `-{ ?s ?p ?o }` se réduit à `graph.remove((None, None, None))` (ldpy/runtime.py:785-811, un seul motif), identique à l'original ; `@graph target` capture `target` une fois, et la région ne le reliait jamais. Mutants sur une copie (mktemp), tous ECHEC : îlot -> `pass`, rétréci à `?s ex:q ?o`, `@graph` pointé sur l'autre graphe nommé (le voisin le détecte). Mutants VERTS : `-{ ?s <ex:p> ?o }`, `-{ <ex:stale> ?p ?o }`, `-{ ?s ?p 1 }`, `-{ ?s ?p ?o . ?s ?p ?o }` (le dernier est équivalent) ; aussi `if not len(graph):` -> `if False:` (équivalent : un `nt` vide se charge sans effet, mais la branche d'arrêt anticipé n'est donc pas distinguée). Ce sont des rétrécissements de jokers, pas un îlot supprimé ni un terme lié élargi : medium plutôt que high. Shim : `timed_debug` est identique mot pour mot à acquirium/internals/_log.py ; `_Inner.load` reproduit le chargement N-Triples dans le graphe nommé, sans logique propre à la région. Le seuil 8 Mo (`bulk_load`) n'est pas exercé mais n'est pas touché par la traduction.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé (cinq appels avec un self comparable et un chargeur enregistreur ; cible à plusieurs triplets différant par chaque terme, voisins à deux termes communs dans le graphe par défaut et un autre graphe nommé) ; les trois rétrécissements de jokers et la garde d'arrêt anticipé tombent, la traduction était juste."
 }
