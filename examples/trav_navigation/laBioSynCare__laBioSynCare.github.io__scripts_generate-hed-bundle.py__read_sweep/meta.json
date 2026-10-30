@@ -17,13 +17,15 @@
   "constructions": [
     "@prefix",
     "m{ }",
+    ".first()",
     "prefixed name",
     "call suffix (g)"
   ],
   "translation_notes": [
-    "track is a genuine join key shared by all three predicates (martigliPeriodInitial/Final/TransitionDuration all hang off the same subject), so this is one conjunctive m{ } rather than three independent next(graph.objects(...)) reads; each predicate is single-valued per track in this data, so the join's implicit missing-value handling matches the original's explicit `next(..., None)` guard",
+    "The loop stays as written: `for track in m{ ?track sstim:martigliPeriodInitial [] }(graph)` for graph.subjects(P, None) (the blank node is the non-projected wildcard), then one `m{ {track} P ?x }(graph).first()` per `next(graph.objects(track, P), None)`. The three reads are NOT fused into one join: the original consumes the first value of each predicate only, a join reaches every combination.",
     "SSTIM and local() are module-level helpers from generate-hed-bundle.py (lines 70, 109-111) not visible in the extracted region: restored directly in original.py/translated.ldpy since they are one-liners, no separate shim file needed",
-    "fixture.ttl keeps exactly one qualifying (sweeping) track so the returned dict does not depend on iteration order across subjects, which no store promises"
+    "Four calls: fixture.ttl (one sweep among neighbours, with other properties of the same subject before the three read), fixture_multivalued.ttl (multi-valued predicates), fixture_order.ttl (two sweeps met in store order, not written order, behind an incomplete track) and an empty graph. Both sides walk graph.triples() in the same order (m{ } is a nested loop over triples, record ldpy/016), so the first sweep returned is the same on both sides.",
+    "Repair 2026-10-30: the first translation fused the three reads into one three-pattern m{ }, which differs when a predicate is multi-valued (fixture_multivalued.ttl: original {'track': 't2', ...} against {'track': 't1', 'mp0': 4.0, 'mp1': 3.0, 'md': 0.5}); retranslated read by read with .first(), which is what INSTRUCTIONS.md §2 requires when the code consumes only the first value."
   ],
   "draft_sha": "d52c6850a38c5ad9",
   "provenance": {
@@ -42,5 +44,19 @@
     "method": "fixture:fixture.ttl entry:read_sweep",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "4 calls instead of 1: fixture.ttl enriched (the sweep carries rdf:type, rdfs:label, isBreathReference, martigliCenterFreq, martigliAmplitude before the three read predicates, as in the repository's test/fixtures/rdf/hed-bundle/modulated-session.ttl; a track without initial period); new fixture_multivalued.ttl (mp0 3.0, 4.0 with mp1 3.0; mp1 and md multi-valued on a second track); new fixture_order.ttl (incomplete track met first, a flat track sharing a value with the returned sweep, two sweeps met in store order); an empty Graph(). Docstring says what each call exercises.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "fused three-pattern m{ } (the first translation)",
+      "predicate of each .first() read widened to ?p (3 mutants)",
+      "subject of each .first() read widened to [] (3 mutants)",
+      "missing-value guard dropped",
+      "each .first() replaced by .one() (3 mutants)",
+      "outer m{ } replaced by []"
+    ],
+    "remaining": "The outer loop's predicate widened to a variable survives about one run in two: it only changes the order of subjects, which the Memory store draws from a hash-ordered set for a full scan, and the mp0 guard skips every subject the predicate would have excluded - an order-only mutant. For Maxime: the fused join is correct whenever the three predicates are functional, which the repository's ontology declares (static/ontology/sstim-patch-studio.ttl:256, sstim-shapes.ttl:522-523) but read_sweep does not check; it could become optimized.ldpy if that constraint is accepted as the region's semantics. Should article_candidate stay true? The line-by-line pair no longer shows a join gain."
   }
 }

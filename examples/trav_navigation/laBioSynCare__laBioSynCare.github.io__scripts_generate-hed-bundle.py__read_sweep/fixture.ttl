@@ -1,13 +1,22 @@
 # Input graph for laBioSynCare__laBioSynCare.github.io__scripts_generate-hed-bundle.py__read_sweep — written during translation.
 # It must cover: several solutions of the pattern the region reads, the
 # zero-solution case, and neighbouring triples that must NOT match.
+# Track shape taken from the repository's own data
+# (test/fixtures/rdf/hed-bundle/modulated-session.ttl:50-59): the Martigli
+# voice carries other sstim:martigli* properties BEFORE the three the region
+# reads, so a read whose predicate is widened to a variable hits them first.
 @prefix sstim: <https://w3id.org/sstim#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ex: <http://example.org/> .
 
-# Qualifying: a genuine sweep (mp0 != mp1), all three predicates present.
-# Kept as the only qualifying track so the return value does not depend on
-# the (unordered) iteration order of subjects/objects.
-ex:trackSweep
+# Qualifying: a genuine sweep (mp0 != mp1), all three predicates present,
+# preceded by neighbouring properties of the same subject (one of them,
+# martigliAmplitude, has the value of mp0, as in the repository's data).
+ex:trackSweep a sstim:MartigliVoice ;
+    rdfs:label "Synthetic Martigli voice"@en ;
+    sstim:isBreathReference true ;
+    sstim:martigliCenterFreq 220.0 ;
+    sstim:martigliAmplitude 1.0 ;
     sstim:martigliPeriodInitial 1.0 ;
     sstim:martigliPeriodFinal 2.0 ;
     sstim:martigliTransitionDuration 0.5 .
@@ -27,3 +36,9 @@ ex:trackIncomplete
 # Neighbour that must NOT match at all: unrelated predicate, same subject shape.
 ex:trackUnrelated
     sstim:reactionTimeMs 42.0 .
+
+# Neighbour that must NOT be visited: final period and duration but no
+# initial period (the outer loop is driven by martigliPeriodInitial only).
+ex:trackNoInitial
+    sstim:martigliPeriodFinal 6.0 ;
+    sstim:martigliTransitionDuration 0.5 .

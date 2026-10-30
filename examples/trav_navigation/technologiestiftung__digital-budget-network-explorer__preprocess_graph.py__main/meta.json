@@ -51,5 +51,19 @@
     "names_only_original": [
       "SCHEMA"
     ]
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture.ttl gains the neighbours of the outer anchor, each with a positive dh:soll and a dh:bereich: kapitel:K1 a skos:Concept and titel:T1 a dh:Haushaltstitel (same predicate, other class; the repository iterates both classes in the same graph, preprocess_graph.py:174-187), p:P6 dcterms:type dh:Haushaltsposten (same object, other predicate), the vocabulary triples of digitalhaushalt.ttl (dh:Haushaltsposten typed, dh:bereich rdfs:domain dh:Haushaltsposten); and P7, a posten shaped as in the repository (typed decimals, xsd:gYear, dh:sollDigitalWeit and dh:kapitel beside the read predicates, a keyword reached by schema:keywords). Driver calls unchanged (module-state), docstring now says what the fixture exercises.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "outer anchor object widened (?s rdf:type [])",
+      "outer anchor predicate widened (?s ?p dh:Haushaltsposten)",
+      "dcterms:subject widened to ?p in the keyword comprehension",
+      "(the three survived with the previous fixture; checked)",
+      "predicate widened, subject widened, and read replaced by None, for each of the eight .first() reads and num(pred) (26 mutants, all killed)",
+      "outer island and keyword island replaced by []"
+    ],
+    "remaining": "Nothing on equivalence. Noted by the triage, not handled here (shim-invents-logic is a judgment): shim.py is not verbatim (BASE, local_name, first_label without schema:name, get_top_level and extract_phrases rewritten); identical on both sides, so without effect on the equivalence."
   }
 }

@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Copie, fixture remplacée par `ex:t1 martigliPeriodInitial 3.0, 4.0 ; martigliPeriodFinal 3.0 ; martigliTransitionDuration 0.5` : FAIL, `values differ (None vs {'track': 't1', 'mp0': 4.0, 'mp1': 3.0, 'md': 0.5})` (l'original prend la première valeur 3.0 == mp1 et passe au suivant ; la jointure atteint la ligne (4.0, 3.0)). Fixture à trois tracks qualifiants, puis 12 tracks aux triples mélangés : OK (aucun écart d'ordre trouvé sur le track renvoyé ; l'original renvoie le premier du parcours de subjects(), la jointure le premier de la jointure, identiques ici). Dépôt : read_sweep n'est appelé que sur des graphes lus de bundles Turtle (generate-hed-bundle.py:439, :667) ; l'ontologie déclare les prédicats fonctionnels, donc le cas multi-valué n'est probablement pas atteint par le dépôt, mais le shim S/local est fidèle (l.70-71, 109-111) et la note « single-valued per track in this data » n'est pas vérifiée par le pilote.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Traduction corrigée : les trois lectures redeviennent des m{ }.first() séparés (la jointure divergeait sur un prédicat multi-valué, prouvé par fixture_multivalued.ttl) ; pilote à 4 appels (voisinage réel, multi-valué, ordre du store, graphe vide), 12 mutants tués, l'élargissement du prédicat de la boucle externe ne change que l'ordre."
 }

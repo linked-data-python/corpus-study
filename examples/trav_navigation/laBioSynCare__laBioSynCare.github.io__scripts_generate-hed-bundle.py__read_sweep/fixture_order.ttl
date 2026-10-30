@@ -1,0 +1,31 @@
+# Two qualifying tracks: read_sweep returns the FIRST one met by
+# graph.subjects(martigliPeriodInitial, None).  rdflib's Memory store yields
+# those subjects grouped by object value, in the order each value was first
+# seen: here 9.5 (ex:incomplete), then 8.0 (ex:flat, ex:sweepB, in no
+# promised order between them), then 7.0 (ex:sweepA) - so ex:sweepB is
+# returned although ex:sweepA is written first.
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix ex: <http://example.org/> .
+
+# Met first, alone under its value, and incomplete: the missing-value guard
+# must skip it (without the guard, float(None) raises).
+ex:incomplete
+    sstim:martigliPeriodInitial 9.5 ;
+    sstim:martigliPeriodFinal 9.0 .
+
+# Shares its initial period with ex:sweepB, but flat: skipped whichever of
+# the two the store yields first.
+ex:flat
+    sstim:martigliPeriodInitial 8.0 ;
+    sstim:martigliPeriodFinal 8.0 ;
+    sstim:martigliTransitionDuration 5.0 .
+
+ex:sweepA
+    sstim:martigliPeriodInitial 7.0 ;
+    sstim:martigliPeriodFinal 1.0 ;
+    sstim:martigliTransitionDuration 10.0 .
+
+ex:sweepB
+    sstim:martigliPeriodInitial 8.0 ;
+    sstim:martigliPeriodFinal 2.0 ;
+    sstim:martigliTransitionDuration 20.0 .

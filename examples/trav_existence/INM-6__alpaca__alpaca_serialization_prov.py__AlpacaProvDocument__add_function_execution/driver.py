@@ -26,6 +26,17 @@ dropped the subject or the object from the pattern without catching it:
      proves the object is part of the match, not just the predicate
   4. same predicate/object, WRONG subject (container) -> called (1):
      proves the subject is part of the match too
+  5. same subject/object, WRONG predicate -> called (1): the container and
+     the agent are linked, but not by prov:wasAttributedTo -- proves the
+     predicate is part of the match (a pattern `{c} ?p {a}` passes 1-4)
+  6. same subject/object linked by ANOTHER predicate AND by
+     prov:wasAttributedTo -> not called (0): `predicates(s, o)` yields
+     several predicates and `in` finds the right one among them
+  7. the container in the neighbourhood the repository writes around it
+     (alpaca/serialization/prov.py:113-126, 229, 297: rdf:type
+     alpaca:DataObjectEntity, prov:hadMember, prov:wasGeneratedBy, an
+     activity prov:wasAssociatedWith the agent) and already attributed ->
+     not called (0)
 """
 from rdflib import Namespace
 
@@ -66,6 +77,32 @@ VERDICT = run_pair(
             f'@prefix prov: <{PROV_NS}> . @prefix ex: <http://example.org/> . '
             'ex:someone_else_container prov:wasAttributedTo ex:agent1 .',
             EX.c4, EX.agent1,
+        ),
+        # 5. c5 and agent1 ARE linked, by another predicate -> called
+        #    (the predicate is part of the pattern)
+        _case(
+            f'@prefix prov: <{PROV_NS}> . @prefix ex: <http://example.org/> . '
+            'ex:c5 prov:wasAssociatedWith ex:agent1 .',
+            EX.c5, EX.agent1,
+        ),
+        # 6. c6 and agent1 linked by another predicate AND attributed
+        #    -> not called
+        _case(
+            f'@prefix prov: <{PROV_NS}> . @prefix ex: <http://example.org/> . '
+            'ex:c6 prov:wasAssociatedWith ex:agent1 ; '
+            'prov:wasAttributedTo ex:agent1 .',
+            EX.c6, EX.agent1,
+        ),
+        # 7. the repository's neighbourhood around an attributed container
+        #    -> not called
+        _case(
+            f'@prefix prov: <{PROV_NS}> . @prefix ex: <http://example.org/> . '
+            '@prefix alpaca: <http://purl.org/alpaca#> . '
+            'ex:c7 a alpaca:DataObjectEntity ; prov:hadMember ex:child7 ; '
+            'prov:wasGeneratedBy ex:exec7 ; prov:wasAttributedTo ex:agent1 . '
+            'ex:exec7 prov:wasAssociatedWith ex:agent1 . '
+            'ex:child7 prov:wasAttributedTo ex:agent2 .',
+            EX.c7, EX.agent1,
         ),
     ],
 )

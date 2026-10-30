@@ -25,17 +25,12 @@ def read_sweep(graph: Graph) -> dict | None:
 
     Returns None when the configuration is fixed.
     """
-    # track is a genuine join key across the three predicates (the region
-    # already treats "no value at this predicate for this track" as absence
-    # via next(..., None), and each predicate is single-valued per track in
-    # this data), so a single conjunctive m{ } replaces the fan-out of
-    # `next(graph.objects(...), None)` calls with an actual missing-value
-    # guard instead of the original's implicit one.
-    for track, mp0, mp1, md in m{
-        ?track sstim:martigliPeriodInitial ?mp0 .
-        ?track sstim:martigliPeriodFinal ?mp1 .
-        ?track sstim:martigliTransitionDuration ?md
-    }(graph):
+    for track in m{ ?track sstim:martigliPeriodInitial [] }(graph):
+        mp0 = m{ {track} sstim:martigliPeriodInitial ?mp0 }(graph).first()
+        mp1 = m{ {track} sstim:martigliPeriodFinal ?mp1 }(graph).first()
+        md = m{ {track} sstim:martigliTransitionDuration ?md }(graph).first()
+        if mp0 is None or mp1 is None or md is None:
+            continue
         if float(mp0) == float(mp1):
             continue  # declared, but not actually sweeping
         return {

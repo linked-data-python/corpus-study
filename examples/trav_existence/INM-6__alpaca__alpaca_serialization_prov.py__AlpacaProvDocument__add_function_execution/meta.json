@@ -44,5 +44,19 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "three calls added (7 in all): (5) container and agent linked by another predicate only (prov:wasAssociatedWith) -> called; (6) linked by that predicate AND by prov:wasAttributedTo -> not called; (7) an attributed container in the neighbourhood the repository writes around it (rdf:type alpaca:DataObjectEntity, prov:hadMember, prov:wasGeneratedBy, the activity prov:wasAssociatedWith the agent, the child attributed to another agent) -> not called. Docstring lists what each call exercises.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "predicate widened to ?p (survived with the previous driver; checked)",
+      "subject widened to ?s",
+      "object widened to ?o",
+      "predicate swapped for prov:wasAssociatedWith",
+      "island replaced by []",
+      "negation dropped"
+    ],
+    "remaining": ""
   }
 }

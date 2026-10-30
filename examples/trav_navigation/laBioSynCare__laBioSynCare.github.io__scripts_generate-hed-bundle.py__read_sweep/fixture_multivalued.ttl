@@ -1,0 +1,21 @@
+# Multi-valued predicates (the ontology declares them functional, but nothing
+# in read_sweep enforces it).  The original reads ONE value per predicate,
+# next(graph.objects(...), None): the first in store order.  A conjunctive
+# m{ } over the three predicates would instead reach every combination.
+@prefix sstim: <https://w3id.org/sstim#> .
+@prefix ex: <http://example.org/> .
+
+# First value of mp0 equals mp1, so the original skips this track (twice:
+# subjects() yields it once per martigliPeriodInitial triple); the combination
+# (4.0, 3.0, 0.5) is a sweep that a three-pattern join would return.
+ex:t1
+    sstim:martigliPeriodInitial 3.0, 4.0 ;
+    sstim:martigliPeriodFinal 3.0 ;
+    sstim:martigliTransitionDuration 0.5 .
+
+# Multi-valued final period and duration: the original returns the FIRST of
+# each, so a read that took another one (or .one()) differs.
+ex:t2
+    sstim:martigliPeriodInitial 5.0 ;
+    sstim:martigliPeriodFinal 6.0, 7.0 ;
+    sstim:martigliTransitionDuration 1.0, 2.0 .

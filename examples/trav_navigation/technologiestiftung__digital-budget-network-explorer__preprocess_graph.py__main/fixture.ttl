@@ -53,3 +53,62 @@ p:P4 a dh:Haushaltsposten ;
 # carries the same predicates.
 p:P5 dh:soll "50" ;
     dh:digiKlasse dh:1 .
+
+# --- Added by the repair of 2026-10-30: neighbours that share two of the
+# three terms of the outer anchor `?s rdf:type dh:Haushaltsposten`, each
+# carrying a positive dh:soll (and a dh:bereich) so that visiting it would
+# show in `posten` and `bereiche`.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix titel: <https://ratsvermerk.example.org/titel/> .
+@prefix kapitel: <https://ratsvermerk.example.org/kapitel/> .
+
+# The vocabulary lives in the same graph in the repository
+# (digitalhaushalt.ttl:20-24, :44-49): dh:Haushaltsposten is the OBJECT of
+# rdfs:domain triples, and is itself typed.
+dh:Haushaltsposten a rdfs:Class, owl:Class ;
+    rdfs:label "Haushaltsposten"@de .
+dh:bereich rdfs:domain dh:Haushaltsposten .
+
+# Same predicate rdf:type, another class: skos:Concept and dh:Haushaltstitel
+# are the classes the repository iterates in the same graph
+# (preprocess_graph.py:174, :178, :187).  Killed: `?s rdf:type []`.
+kapitel:K1 a skos:Concept ;
+    skos:prefLabel "Kapitel Eins" ;
+    dh:bereich dh:ber02 ;
+    dh:soll "77" .
+titel:T1 a dh:Haushaltstitel ;
+    dh:soll "88" .
+
+# Same object dh:Haushaltsposten, another predicate.  Killed: `?s ?p
+# dh:Haushaltsposten`.
+p:P6 dcterms:type dh:Haushaltsposten ;
+    dh:bereich dh:ber03 ;
+    dh:soll "60" .
+
+# P7: a posten shaped as in the repository (digitalhaushalt.ttl:213-233):
+# typed numeric literals, an xsd:gYear, and the predicates the region does
+# NOT read next to those it reads (dh:sollDigitalWeit beside
+# dh:istDigitalWeit, dh:kapitel, schema:identifier, schema:name), plus a
+# keyword reached by another predicate than dcterms:subject.
+p:P7 a dh:Haushaltsposten ;
+    dh:bereich dh:ber01 ;
+    dh:digiKlasse dh:7 ;
+    dh:einzelplan dh:ep10 ;
+    dh:funktion dh:wirtschaft.funktionB ;
+    dh:gruppe dh:soziales.gruppeB ;
+    dh:ist 8051.12869 ;
+    dh:istDigitalEng 0.0 ;
+    dh:istDigitalWeit 1207.6693035 ;
+    dh:jahr "2021"^^xsd:gYear ;
+    dh:kapitel kapitel:K1 ;
+    dh:soll 15280.0 ;
+    dh:sollDigitalEng 1.5 ;
+    dh:sollDigitalWeit 2292.0 ;
+    dcterms:isPartOf titel:T1 ;
+    dcterms:subject kw:energie ;
+    schema:keywords kw:schule ;
+    schema:description "Energie fuer Schulen. Digitale Vernetzung."@de ;
+    schema:identifier "100268405522" ;
+    schema:name "Digitale Vernetzung"@de .

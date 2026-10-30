@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK. Dépôt d'origine (corpus/repos/INM-6__alpaca/alpaca/serialization/prov.py:224,247,136) : _create_entity et _add_ScriptAgent rendent toujours des URIRef, donc {container_entity}/{script_agent} sont des IRI comme dans predicates(s, o) : pas d'écart de type. Mutants dans une copie (mktemp -d) : `prov:wasAttributedTo` -> `?p` : check reste OK (survit, élargit un terme lié) ; objet -> `?o` : FAIL call[2] (attrapé) ; le sujet est protégé par le cas 4. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé de trois appels (conteneur et agent reliés par un autre prédicat, par les deux, voisinage du dépôt) : l'élargissement de prov:wasAttributedTo en ?p, qui survivait, est tué, avec cinq autres mutants ; traduction juste, inchangée."
 }
