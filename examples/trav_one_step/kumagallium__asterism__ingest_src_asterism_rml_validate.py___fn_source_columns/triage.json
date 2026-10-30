@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Dépôt d'origine : l'appelant (rml_validate.py:1034) passe un fe issu de graph.objects, en pratique un BNode (tests Turtle test_substrate.py:259-352 : functionExecution [ ... ]) ; je l'ai reproduit sur copie avec une fixture entièrement en BNode (sauf le fe racine) : OK, résultat {colA, colB} des deux côtés, et la récursion passe déjà des BNode à {fe}. Mutants sur copie : retirer la récursion FAIL, ?p ?o à la place de f<{fe_pred}>/f<{in_pred}>/f<{ivm_pred}>/f<{rp}> FAIL ; `if found:`->`if False:` vert ; f<{fe_pred}> remplacé par le seul prédicat rml: vert ; `break` après cols.add vert (cardinalité). shim.py ne contient que les deux constantes, identique des deux côtés.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé le 2026-10-30 : fixture_cases.ttl à la forme réelle (BNode) exerce `if found: continue`, le prédicat fnml:functionExecution ancien, la référence falsy, le zéro solution avec voisinage et un fe littéral ; les deux mutants verts du tri et dix autres échouent, la traduction était juste."
 }

@@ -1,0 +1,14 @@
+# Several subjects for one (predicate, object), for get_mary_likes_matt_05.
+# The decisive node comes first: ex:w shares the OBJECT but not the
+# predicate, so a lookup that ignored the predicate would return it.
+# ex:dupA and ex:dupB share (ex:certainty, 0.6): g.value returns the first
+# the store yields (any=True), and so must .first() -- not the last, and no
+# error.  ex:z carries 0.5 under another lexical form ("0.50"): g.value
+# matches terms, not values, so a lookup for "0.5" finds nothing here.
+@prefix ex:  <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:w    ex:weight    0.6 .
+ex:dupA ex:certainty 0.6 .
+ex:dupB ex:certainty 0.6 .
+ex:z    ex:certainty "0.50"^^xsd:decimal .

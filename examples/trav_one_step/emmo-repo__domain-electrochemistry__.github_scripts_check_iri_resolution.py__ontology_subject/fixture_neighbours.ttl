@@ -1,0 +1,12 @@
+# Zero-solution input for ontology_subject: only neighbours of the pattern
+# `?s rdf:type owl:Ontology`, each sharing two of its three terms.
+@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# same predicate, other object
+ex:onto3 a ex:Ontology .
+ex:onto4 a owl:Class .
+# same object, other predicate
+ex:onto5 rdfs:subClassOf owl:Ontology .
+ex:describes owl:imports owl:Ontology .

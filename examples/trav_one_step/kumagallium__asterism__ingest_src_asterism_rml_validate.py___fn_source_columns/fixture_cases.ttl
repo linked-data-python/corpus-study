@@ -1,0 +1,42 @@
+# Function executions in the shape the repository really parses
+# (rml_validate.py:1034 passes an `fe` read with graph.objects off an object
+# map; the mappings are blank-node trees, ingest/tests/test_rml_validate.py).
+# Each case hangs off its own IRI ex:caseN; the driver picks the fe there.
+# The cases share one graph: every case is the others' neighbourhood, so a
+# pattern widened to any subject would pull in their columns.
+@prefix rml:  <http://semweb.mmlab.be/ns/rml#> .
+@prefix rmlw: <http://w3id.org/rml/> .
+@prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
+@prefix rr:   <http://www.w3.org/ns/r2rml#> .
+@prefix ex:   <http://example.org/case#> .
+
+# 1. reference AND nested function on one inputValueMap: `if found: continue`
+#    skips the function -> {"colR"}, never "colHidden".
+ex:case1 rmlw:functionExecution [ rmlw:input [ rmlw:inputValueMap [
+    rml:reference "colR" ;
+    rmlw:functionExecution [ rmlw:input [ rmlw:inputValueMap [ rml:reference "colHidden" ] ] ] ] ] ] .
+
+# 2. nested function under the LEGACY predicate fnml:functionExecution (second
+#    item of _FUNCTION_EXECUTION_PREDS), mixed-generation input/inputValueMap.
+ex:case2 rmlw:functionExecution [ rmlw:input [ fnml:inputValueMap [
+    fnml:functionExecution [ fnml:input [ rmlw:inputValueMap [ rmlw:reference "colOld" ] ] ] ] ] ] .
+
+# 3. both reference predicates on one map, two columns under one predicate,
+#    and the same column twice -> {"a", "b", "c"}.
+ex:case3 rmlw:functionExecution [ rmlw:input [ rmlw:inputValueMap [ rml:reference "a", "c" ; rmlw:reference "b" ] ] ,
+                                             [ fnml:inputValueMap [ rml:reference "a" ] ] ] .
+
+# 4. a FALSY reference "" still sets found: the function beside it is skipped -> {""}.
+ex:case4 rmlw:functionExecution [ rmlw:input [ rmlw:inputValueMap [
+    rml:reference "" ;
+    rmlw:functionExecution [ rmlw:input [ rmlw:inputValueMap [ rml:reference "colHidden2" ] ] ] ] ] ] .
+
+# 5. zero solutions: a constant input, an input without inputValueMap, and
+#    neighbours sharing two of three terms (ex:reference, ex:input) -> set().
+ex:case5 rmlw:functionExecution [
+    rmlw:input [ rmlw:inputValueMap [ rr:constant "k" ; ex:reference "notACol" ] ] ,
+               [ ex:inputValueMap [ rml:reference "notACol2" ] ] ;
+    ex:input [ rmlw:inputValueMap [ rml:reference "notACol3" ] ] ] .
+
+# 6. a literal where a node is expected: an input that is a literal -> set().
+ex:case6 rmlw:functionExecution [ rmlw:input "literalInput" ] .

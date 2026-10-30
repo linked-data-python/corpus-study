@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Appelant du dépôt (check_iri_resolution.py:77) : Graph parsé du Turtle, jamais None. À la main : graphe vide -> même RuntimeError et même message des deux côtés ; sujet BNode premier -> même terme ; 6 permutations d'ordre d'insertion de 3 ontologies -> même premier élément. Mutants sur copie : `.first()`->`.one()` FAIL, pattern élargi (?p, ?o) FAIL, subject=None FAIL ; `if True` vert (zéro solution jamais atteint) ; message du raise modifié vert.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé le 2026-10-30 : la branche zéro solution est désormais exercée (le harnais compare les levées), plus le voisinage seul, un sujet BNode et l'IRI falsy <> ; les mutants `if True`, `if subject:`, message, élargissements et `.one()` échouent tous, la traduction était juste."
 }

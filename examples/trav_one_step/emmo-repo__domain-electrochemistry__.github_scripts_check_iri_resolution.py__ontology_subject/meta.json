@@ -43,5 +43,19 @@
     "method": "fixture:fixture.ttl entry:ontology_subject",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "four calls added (the harness now compares a raise by type and message): empty graph and a graph of neighbours only (fixture_neighbours.ttl: rdf:type ex:Ontology / owl:Class, rdfs:subClassOf and owl:imports owl:Ontology) -> RuntimeError on both sides; a single blank-node ontology; the falsy IRI URIRef('') typed owl:Ontology, which a guard `if subject:` would reject.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`if subject is not None:` -> `if True:` (calls 1, 2: None instead of the raise)",
+      "`if subject is not None:` -> `if subject:` (call 4: URIRef('') vs raise)",
+      "message of the raise changed (calls 1, 2)",
+      "`?s a owl:Ontology` -> `?s a []` (call 2 returns ex:onto3)",
+      "`?s ?p owl:Ontology` / `?s a ?o` (call 2)",
+      "`.first()` -> `.one()` (calls 0, 1, 2)"
+    ],
+    "remaining": "the classification-doubt question of triage.json (directly-expressible vs minor-restructuring) is a judgement left to Maxime."
   }
 }

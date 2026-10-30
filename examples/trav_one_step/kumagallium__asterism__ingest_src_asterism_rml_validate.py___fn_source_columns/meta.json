@@ -16,7 +16,8 @@
     "@graph",
     "m{ }",
     "f<...>",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "variable"
   ],
   "translation_notes": [
     "Each graph.objects(subject, uri(pred)) with a fixed predicate string built by string concatenation becomes m{ {subject} f<{pred}> ?o }: the predicate is already a full IRI string, so f<...> (no percent-encoding) is the exact fit, not the bare {expr} coercion which would make it a Literal.",
@@ -39,5 +40,19 @@
     "method": "entry:_fn_source_columns",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "fixture_cases.ttl in the shape the repository parses (blank-node function executions, picked off an IRI root by the driver for both sides) with seven calls: reference AND nested function on one inputValueMap (`if found: continue`), nested function under the legacy fnml:functionExecution, both reference predicates and two columns under one predicate, a falsy reference \"\" beside a function, zero solutions with neighbours sharing two of three terms of each pattern, a literal input, and a Literal passed as fe.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`if found:` -> `if False:` (case1, case4)",
+      "f<{fe_pred}> -> the w3id predicate only (case2)",
+      "f<{rp}> / f<{in_pred}> / f<{ivm_pred}> -> one fixed predicate each",
+      "`break` after cols.add (case3)",
+      "subject of each of the four patterns widened to [] (extra columns or RecursionError)",
+      "m{ {ivm} f<{fe_pred}> ?o } -> [] and m{ {ivm} f<{rp}> ?o } -> []"
+    ],
+    "remaining": ""
   }
 }

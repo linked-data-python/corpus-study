@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Sur le vrai corpus/repos/.../cases/15_4.trig, lu en ConjunctiveGraph et en Dataset, les 4 appels du test (0.5, 0.75, 1, foo/bar) donnent le même résultat que g.value(predicate=, object=) (Dataset non-union : None des deux côtés pour 0.5, 0.75, bar). Avec deux sujets partageant (certainty, 0.5) dans une copie : g.value et m{}.first() rendent le même premier sujet dans Graph, ConjunctiveGraph, Dataset. Mutants : None / ?s {c} ?o / sujet-prédicat inversés / .one() (échec au cas 0.42) : FAIL. ?s ?p {v} : FAIL mais seulement par erreur de comparaison Row (2 variables projetées), pas par le voisinage ex:weight ; la même requête réduite à [0] reste OK (ex:weight vient après le bon sujet dans le fichier). (list(m{...}) or [None])[-1] au lieu de .first() : OK tant que chaque clé est unique (FAIL dès qu'on ajoute un doublon). Peut illustrer le cas miroir (sujet inconnu, prédicat + objet donnés) mais sans gain de concision : 1 ligne rdflib devient @graph + 1 ligne. meta.oracle dit isomorphism pour une région qui lit (valeurs en réalité).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Pilote renforcé le 2026-10-30 : le vrai 15_4.trig en ConjunctiveGraph (quatre appels du test) et fixture_dup.ttl (deux sujets pour un même couple, voisin ex:weight en tête, variante lexicale « 0.50 ») ; les mutants « prédicat ignoré [0] » et « dernière solution » échouent désormais, la traduction était juste."
 }

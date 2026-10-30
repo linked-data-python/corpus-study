@@ -42,5 +42,17 @@
     "method": "fixture:fixture.ttl entry:get_mary_likes_matt_05",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "six calls added: the real tests/data/rdf/cases/15_4.trig (verbatim copy, fixture_15_4.trig) parsed into a ConjunctiveGraph as conftest.py does, with the four lookups of the real test (blank-node subjects in named graphs, Literal(1)); fixture_dup.ttl with two subjects for one (predicate, object) after a same-object ex:weight neighbour placed first, and a lexical variant \"0.50\" that term matching must not find.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`?s ?p {v}` reduced to [0] (dup: ex:w instead of ex:dupA)",
+      "last solution `(list(m{...}) or [None])[-1]` instead of .first() (dup: dupB)",
+      "`.first()` -> `.one()`",
+      "island replaced by None"
+    ],
+    "remaining": "next(iter(m{ ... }), None) stays green: an equivalent mutant, not counted. The harness compares any two blank nodes as equal, so the trig calls prove a blank-node subject is reached, not which one (the choice is proved on IRIs by fixture_dup.ttl). meta.json says oracle: isomorphism for a region read by values (not mine to change)."
   }
 }
