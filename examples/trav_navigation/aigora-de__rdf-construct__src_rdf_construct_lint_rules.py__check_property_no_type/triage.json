@@ -1,0 +1,17 @@
+{
+  "priority": "medium",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "Traduction fidèle (m{ ?subj rdfs:domain [ ] } et m{ {subj} a ?t } équivalents, doublons de sujet conservés), mais le fixture n'exerce qu'un seul des quatre membres de `property_types` : une faute de frappe sur `rdf:Property`, `owl:ObjectProperty` ou `owl:AnnotationProperty` reste verte.",
+  "questions": [
+    {
+      "question": "Faut-il exiger un fixture où chacun des quatre types de `property_types` (rdf:Property, owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty) est exercé, plutôt que de se contenter de la relecture des quatre noms préfixés ?",
+      "where": "translated.ldpy:27-32 et original.py:23-28 ; fixture.ttl (seul ex:hasAge a owl:DatatypeProperty)",
+      "if_yes": "needs-work : ajouter au fixture un sujet typé par chacun des trois autres types (je l'ai fait dans une copie : la traduction passe)",
+      "if_no": "approuver : les quatre noms préfixés sont corrects à la lecture ; les gardes (type, `existing`, is_builtin, BNode) sont, elles, prouvées"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutants sur copies : `if not types.intersection(property_types)` -> `if True` ECHOUE ; `if not existing` -> `if True` ECHOUE ; retrait de `not is_builtin(subj)` ECHOUE ; second `m{ ?subj rdfs:range [ ] }` -> rdfs:domain ECHOUE ; `types = set()` ECHOUE. Mais `owl:ObjectProperty` -> `owl:ObjectPropert`, `rdf:Property` -> `rdf:Propert` et `owl:AnnotationProperty` -> `owl:AnnotationPropert` restent VERTS (seul owl:DatatypeProperty est dans le fixture). Fixture enrichi en copie (sujets typés par chacun des trois autres types, un sujet à deux rdfs:domain, un à deux rdfs:range, un à deux de chaque) : OK, donc les doublons de sujet (graph.subjects renvoie un sujet par triple) sont reproduits à l'identique par m{ }. context_shim.py : fidèle au dépôt (aucune logique ajoutée). Pas article-example : substitution 1-pour-1 sans gain net.",
+  "triaged_by": "sonnet-5.5"
+}

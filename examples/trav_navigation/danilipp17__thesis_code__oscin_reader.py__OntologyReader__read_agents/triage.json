@@ -1,0 +1,24 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle",
+    "classification-doubt"
+  ],
+  "summary": "Une boucle imbriquée à double `break` devient une jointure unique : équivalent sur tous les cas essayés, mais le pilote n'a qu'un agent, un rp, un seul type reconnu, et le motif peut être élargi (`{agent_uri}` -> `[ ]`) sans effet ; la paire n'est pas `directly-expressible`.",
+  "questions": [
+    {
+      "question": "Faut-il ajouter au graphe inline du pilote (original.py:32-34 et translated.ldpy:39-41) un second agent avec son propre employsReasoningPattern, un rp sans type reconnu suivi d'un rp reconnu, et le cas sans aucun rp ?",
+      "where": "translated.ldpy:55 et original.py:45-52 ; graphe construit à original.py:32-34 et translated.ldpy:39-41",
+      "if_yes": "needs-work : étendre le graphe du pilote ; sans second agent, le mutant `[ ] agentoscin:employsReasoningPattern ?rp_uri` reste vert",
+      "if_no": "approuver en acceptant que l'ancrage sur agent_uri et la reprise de la boucle externe ne soient pas prouvés"
+    },
+    {
+      "question": "La fusion de deux boucles imbriquées avec deux `break` en une jointure `m{ a . b }` et un seul `break` est-elle une restructuration (minor-restructuring) plutôt qu'une traduction directe ?",
+      "where": "translated.ldpy:55-59 et original.py:45-52",
+      "if_yes": "passer la classification à minor-restructuring (l'équivalence repose sur l'ordre « première paire reconnue » que ni rdflib ni m{ } ne garantissent, et sur l'unicité du triplet employsReasoningPattern invoquée par les notes)",
+      "if_no": "garder directly-expressible"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutant sur copie : `m{ {agent_uri} agentoscin:employsReasoningPattern ?rp_uri . …` -> `m{ [ ] agentoscin:employsReasoningPattern ?rp_uri . …` reste VERT (le graphe ne contient qu'un agent). Reste aussi vert : ajout du conjoint `?rp_uri rdf:type owl:NamedIndividual`. ECHOUENT : prédicat employsReasoningPattern -> rdfs:seeAlso, `?rp_uri` -> `?x` dans le second motif, `if name:` -> `if True:`, itération remplacée par `[]`. Équivalence vérifiée en copie (modification des deux fichiers) sur : deux rp dont le premier n'a que owl:NamedIndividual et le second ChainOfThought -> les deux donnent ChainOfThought ; aucun type reconnu -> chaîne vide des deux côtés ; trois types reconnus sur un même rp -> les deux donnent ReAct (ordre d'insertion identique ici, non garanti). Dépôt (oscin/reader.py:249-262) : la boucle est dans une méthode, `reasoning_pattern = \"\"` est réinitialisé juste avant ; le commentaire du dépôt dit bien « Populator writes exactly one such triple ». Le graphe, `_Self` et `_rp_type_map` sont du contexte reconstruit à la main, `shim_namespaces.py` reprend les constantes de oscin/namespaces.py sans logique ajoutée.",
+  "triaged_by": "sonnet-5.5"
+}

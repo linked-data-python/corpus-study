@@ -1,0 +1,17 @@
+{
+  "priority": "high",
+  "flags": [
+    "weak-oracle"
+  ],
+  "summary": "La garde `bool(m{ {s} rdf:type sh:NodeShape }(shape))` est remplaçable par `True` sans que le pilote ne bronche : le fixture a bien un `skos:example` sans type NodeShape (ex:NotAShape) mais il n'a aucun sh:property, donc la garde n'a aucun effet observable.",
+  "questions": [
+    {
+      "question": "Faut-il compléter shape.ttl avec une ressource qui a skos:example, n'est PAS un sh:NodeShape et porte un sh:property (avec sh:path et sh:name), afin que la garde de la ligne 32 soit réellement prouvée ?",
+      "where": "translated.ldpy:32 et original.py:18 ; shape.ttl:28 (ex:NotAShape sans sh:property)",
+      "if_yes": "needs-work : ajouter ce cas à shape.ttl (en copie, avec ce cas la traduction passe et le mutant `if True` échoue)",
+      "if_no": "approuver en acceptant que la garde NodeShape ne soit pas prouvée"
+    }
+  ],
+  "evidence": "rdfeval check : OK. Mutant sur copie : `if bool(m{ {s} rdf:type sh:NodeShape }(shape)):` -> `if True:` reste VERT sur le fixture d'origine ; avec en plus `ex:NotAShape2 skos:example ex:e2 ; sh:property ex:np . ex:np sh:path ex:q ; sh:name \"Q\"` la traduction passe (OK) et le mutant ECHOUE. Autres mutants, tous ECHOUENT : skos:example remplacé par `[]`, sh:path -> sh:name, sh:description -> sh:name, sh:defaultValue -> sh:name, `{s} sh:property` -> `?s sh:property`, `(dataGraph)` -> `(shape)`, retrait du `.replace('^^xsd:string','')`. Reste vert aussi `if nodeURL:` -> `if True:` (pas de description vide atteignable). Tests d'équivalence en copie, tous OK : propShapes anonymes (le dépôt, rdf/demo_shape.shacl, n'écrit que des `sh:property [ ... ]`, alors que le fixture n'a que des IRI), propShape sans sh:name ni sh:description (variables résiduelles conservées), sh:defaultValue littéral (\"lit\", 0) et à deux valeurs, plusieurs sh:name/sh:description/sh:path/skos:example. Pas de fusion des quatre lectures : justifié (valeurs résiduelles). Remarque mineure : la garde NodeShape et la boucle externe pourraient fusionner sans changer la cardinalité (un triplet rdf:type est unique) ; classification minor-restructuring discutable (seul `p` inutilisé disparaît) mais non retenue comme drapeau.",
+  "triaged_by": "sonnet-5.5"
+}
