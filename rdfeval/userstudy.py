@@ -110,12 +110,17 @@ def _call_cases(ex_dir, spec):
 def _observables(ex_dir, meta):
     """What the region SHOWS, exercised exactly as the validation exercises it.
 
-    Returns ``(triples, value)``. Which of the two a region offers is decided
+    Returns ``(triples, value, removed)``. Which a region offers is decided
     by what it actually produces, not by its oracle: a region filed under a
     reading stratum may still *return a graph*, and the graph's triples are
     then the answerable fact. A region file defines a function — importing it
     builds nothing — so the entry point is called with the driver's own
     fixture.
+
+    A graph the region is GIVEN counts by what the region changed in it: the
+    triples it added — those already there are the question's input, shown
+    to the participant, not its answer — or, for a region that only deletes,
+    the triples it removed.
     """
     from .harness import materialise, normalise
     ex_dir = Path(ex_dir).resolve()      # chdir below: relative paths break
@@ -130,6 +135,8 @@ def _observables(ex_dir, meta):
                 exec(compile(py_path.read_text(), str(py_path), "exec"), ns)
             graphs: list = []
             returned = None
+            added: list = []
+            removed: list = []
             if entry and callable(ns.get(entry)):
                 cases = _call_cases(ex_dir, spec) or [((), {})]
                 case = cases[0]
@@ -138,28 +145,192 @@ def _observables(ex_dir, meta):
                 # positional argument or, just as often, as `graph=`
                 given = [v for v in list(args) + list(kw.values())
                          if _is_graph(v)]
-                before = {id(g): len(g) for g in given}
+                before = {id(g): set(g) for g in given}
                 with contextlib.redirect_stdout(io.StringIO()):
                     returned = materialise(ns[entry](*args, **kw))
-                if _is_graph(returned):
+                if _is_graph(returned) and id(returned) not in before:
                     graphs.append(returned)
-                # a given graph counts only if the region WROTE to it: the
-                # fixture it merely read is the question's input, not its
-                # answer
-                graphs += [g for g in given if len(g) != before[id(g)]]
+                # a given graph counts only by what the region CHANGED in
+                # it: the fixture it merely read is the question's input,
+                # not its answer
+                for g in given:
+                    now = set(g)
+                    added += [(g, t) for t in now - before[id(g)]]
+                    removed += [(g, t) for t in before[id(g)] - now]
             graphs += [v for v in ns.values() if _is_graph(v)]
         except Exception:
-            return None, None
+            return None, None, None
 
-    triples = _triples_of(graphs)
+    triples = _merge(_triples_of(graphs), _changed(added))
     if triples:
-        return triples, None
+        return triples, None, None
+    if removed:
+        return None, None, _changed(removed)
     if returned is None or _is_graph(returned):
-        return None, None
+        return None, None, None
     try:
-        return None, json.loads(json.dumps(normalise(returned), default=str))
+        return (None, json.loads(json.dumps(normalise(returned), default=str)),
+                None)
     except Exception:
-        return None, None
+        return None, None, None
+
+
+def _changed(pairs) -> list[tuple[str, str, str]] | None:
+    out = {tuple(_n3(x, g.namespace_manager) for x in t) for g, t in pairs}
+    return sorted(out) or None
+
+
+def _merge(a, b):
+    return sorted(set(a or ()) | set(b or ())) or None
+
+
+class _Opaque(Exception):
+    """An argument that cannot be written back as Python source."""
+
+
+def _py(v, indent: int = 0, width: int = 72) -> str:
+    """``v`` as Python source a participant can read, or :class:`_Opaque`."""
+    from types import SimpleNamespace
+    from rdflib import BNode, Literal, URIRef
+    if v is None or isinstance(v, (bool, int, float)):
+        return repr(v)
+    if isinstance(v, URIRef):
+        return f"URIRef({str(v)!r})"
+    if isinstance(v, BNode):
+        return f"BNode({str(v)!r})"
+    if isinstance(v, Literal):
+        parts = [repr(str(v))]
+        if v.language:
+            parts.append(f"lang={v.language!r}")
+        elif v.datatype:
+            parts.append(f"datatype=URIRef({str(v.datatype)!r})")
+        return f"Literal({', '.join(parts)})"
+    if isinstance(v, str):
+        return repr(v)
+    if isinstance(v, SimpleNamespace):
+        items = [f"{k}={_py(x, indent + 4, width)}" for k, x in vars(v).items()]
+        return _wrap("SimpleNamespace(", items, ")", indent, width)
+    if isinstance(v, dict):
+        items = [f"{_py(k)}: {_py(x, indent + 4, width)}" for k, x in v.items()]
+        return _wrap("{", items, "}", indent, width)
+    if isinstance(v, (list, tuple)):
+        items = [_py(x, indent + 4, width) for x in v]
+        if isinstance(v, tuple):
+            return _wrap("(", items, ",)" if len(items) == 1 else ")",
+                         indent, width)
+        return _wrap("[", items, "]", indent, width)
+    if isinstance(v, (set, frozenset)):
+        if not v:
+            return "set()"
+        return _wrap("{", sorted(_py(x, indent + 4, width) for x in v), "}",
+                     indent, width)
+    raise _Opaque(type(v).__name__)
+
+
+def _wrap(open_, items, close, indent, width) -> str:
+    flat = open_ + ", ".join(items) + close
+    if len(flat) + indent <= width and "\n" not in flat:
+        return flat
+    pad = " " * (indent + 4)
+    return (open_ + "\n" + "".join(f"{pad}{x},\n" for x in items)
+            + " " * indent + close)
+
+
+def _shown_graph(text: str) -> str:
+    """A fixture as a participant sees it: without its comment lines, which
+    explain what the test is designed to catch — that is, the answer."""
+    lines = [line for line in text.splitlines()
+             if not line.lstrip().startswith("#")]
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _inputs(ex_dir) -> dict:
+    """What a participant needs besides the code to answer: how the region is
+    called, and the graph it is given — the very call the answers were
+    derived from (the driver's first case).
+
+    Returns ``{"call", "input_graph", "inputs_shown", "inputs_missing"}``.
+    ``inputs_shown`` is ``"complete"`` when every argument could be written
+    back as Python source; otherwise the reason is in ``inputs_missing`` and
+    the reviewer has to describe the input by hand. A region called through
+    its ``demo()`` harness is shown with that harness, which builds the
+    inputs: it is the same text on both sides.
+    """
+    import inspect
+    from .harness import fixture_graph
+    ex_dir = Path(ex_dir).resolve()
+    out = {"call": None, "input_graph": None, "inputs_shown": "none",
+           "inputs_missing": None}
+    spec = _driver_spec(ex_dir) or {}
+    entry = spec.get("entry")
+    cases = _call_cases(ex_dir, spec)
+    if not spec:
+        out["inputs_missing"] = "the driver could not be read back"
+        return out
+    if not entry or not cases:
+        out["inputs_missing"] = "no call case in the driver (module-level " \
+                                "region or custom driver)"
+        return out
+    py_path = ex_dir / "original.py"
+    ns: dict = {"__name__": "__task__", "__file__": str(py_path)}
+    try:
+        with _in_example(ex_dir), contextlib.redirect_stdout(io.StringIO()):
+            exec(compile(py_path.read_text(), str(py_path), "exec"), ns)
+            case = cases[0]
+            args, kw = case() if callable(case) else case
+        fn = ns[entry]
+        try:
+            bound = inspect.signature(fn).bind(*args, **kw).arguments
+            named = [(k, v) for k, v in bound.items()]
+        except (TypeError, ValueError):
+            named = [(None, v) for v in args] + list(kw.items())
+        graphs = [v for _, v in named if _is_graph(v) and len(v)]
+        # a data file of the example passed by path: the participant sees
+        # its name and, for an RDF file, its content as the input graph
+        files = [Path(v) for _, v in named if isinstance(v, str)
+                 and Path(v).is_absolute() and Path(v).is_file()
+                 and Path(v).resolve().is_relative_to(ex_dir)]
+        if len(graphs) + len(files) > 1:
+            raise _Opaque("several input graphs or files")
+        rendered = []
+        for k, v in named:
+            if _is_graph(v):
+                text = "g" if len(v) else "Graph()"
+            elif files and v == str(files[0]):
+                text = repr(files[0].name)
+            else:
+                text = _py(v, 4)
+            rendered.append(f"{k}={text}" if k else text)
+    except _Opaque as exc:
+        out["inputs_missing"] = f"an argument cannot be shown as source: {exc}"
+        return out
+    except Exception as exc:
+        out["inputs_missing"] = f"the call case does not run in-process: " \
+                                f"{type(exc).__name__}"
+        return out
+    call = _wrap(f"{entry}(", rendered, ")", 0, 72)
+    if graphs:
+        fixture = spec.get("fixture")
+        g = graphs[0]
+        if fixture and (ex_dir / fixture).exists() \
+                and len(fixture_graph(ex_dir / fixture)) == len(g):
+            out["input_graph"] = _shown_graph((ex_dir / fixture).read_text())
+        else:
+            out["input_graph"] = g.serialize(format="turtle")
+        call = "# g is the input graph shown above\n" + call
+    if files:
+        out["input_graph"] = _shown_graph(files[0].read_text())
+        call = (f"# {files[0].name} contains the input graph shown above\n"
+                + call)
+    if entry == "demo":
+        text = py_path.read_text()
+        start = text.index("def demo(")
+        call = text[start:].rstrip() + "\n\n\n" + call
+    out["call"] = call + "\n"
+    out["inputs_shown"] = "complete"
+    return out
 
 
 _PROVENANCE_HEADER = ("# Extracted from ", "# region: ",
@@ -213,9 +384,24 @@ def _triples_of(graphs) -> list[tuple[str, str, str]] | None:
     return sorted(set(out)) or None
 
 
-def _draft_questions(triples, value, rng: random.Random) -> list[dict]:
+def _draft_questions(triples, value, rng: random.Random,
+                     removed=None) -> list[dict]:
     """Draft prompts, chosen by what the region actually shows."""
     qs: list[dict] = []
+    if removed and not triples:
+        qs.append({
+            "type": "count",
+            "prompt_draft": "How many RDF triples does this code remove from "
+                            "the input graph?",
+            "answer": len(removed),
+        })
+        s, p, o = rng.choice(removed)
+        qs.append({
+            "type": "triple-membership",
+            "prompt_draft": "Is the triple "
+                            f"{s} {p} {o} still in the graph afterwards?",
+            "answer": False,
+        })
     if triples:
         qs.append({
             "type": "count",
@@ -307,8 +493,9 @@ def run(config: dict, study: Study = STUDY) -> None:
     tasks = []
     for group, (ex_dir, meta) in chosen:
         reads = (meta.get("oracle") == "values")
-        triples, value = _observables(ex_dir, meta)
+        triples, value, removed = _observables(ex_dir, meta)
         fixture = (_driver_spec(ex_dir) or {}).get("fixture")
+        inputs = _inputs(ex_dir)
         task = {
             "task_id": f"task-{meta['region_id']}",
             "region_id": meta["region_id"],
@@ -325,6 +512,7 @@ def run(config: dict, study: Study = STUDY) -> None:
                     (ex_dir / "translated.ldpy").read_text()),
             },
             "derived_triples": triples,
+            "derived_removed": removed,
             "derived_value": value,
             # what could be derived automatically. "none" means the region
             # could not be exercised in-process — it needs context the
@@ -332,14 +520,19 @@ def run(config: dict, study: Study = STUDY) -> None:
             # database, a package of its own repository). Its comprehension
             # questions have to be written by hand before the task is
             # usable; the review step is where that happens.
-            "derivation": ("triples" if triples
+            "derivation": ("triples" if triples else "removed" if removed
                            else "value" if value is not None else "none"),
-            "questions_draft": _draft_questions(triples, value, rng),
+            "questions_draft": _draft_questions(triples, value, rng, removed),
+            # the call the answers were derived from, and the graph it is
+            # given: without them a question about this region's output has
+            # no answer the participant can find
+            **inputs,
             "review_status": "draft",
         }
-        if reads and fixture and (ex_dir / fixture).exists():
+        if reads and fixture and (ex_dir / fixture).exists() \
+                and not task["input_graph"]:
             # a reading task is unanswerable without the graph it reads
-            task["input_graph"] = (ex_dir / fixture).read_text()
+            task["input_graph"] = _shown_graph((ex_dir / fixture).read_text())
         tasks.append(task)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -356,6 +549,10 @@ def run(config: dict, study: Study = STUDY) -> None:
           "over %d %s -> %s"
           % (len(tasks), reading, len(tasks) - reading,
              len({t[group_key] for t in tasks}), plural, OUT_PATH))
+    shown = sum(1 for t in tasks if t["inputs_shown"] == "complete")
+    print("userstudy: %d of %d show the call their answers come from; the "
+          "other %d need their input described by hand at review"
+          % (shown, len(tasks), len(tasks) - shown))
     print("userstudy: %d of %d carry automatically derived facts; the other "
           "%d need their questions written by hand at review"
           % (derived, len(tasks), len(tasks) - derived))
