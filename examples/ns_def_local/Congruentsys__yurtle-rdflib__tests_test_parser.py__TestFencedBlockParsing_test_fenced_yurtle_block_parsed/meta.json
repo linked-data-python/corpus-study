@@ -43,5 +43,18 @@
     "method": "entry:test_fenced_yurtle_block_parsed",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "Deux documents du conftest.py du dépôt ajoutés (sample_yaml_doc et sample_doc_no_frontmatter_with_block, verbatim) : le cas zéro solution par les deux branches du parseur, AssertionError comparée ; et un enregistreur : chaque côté est ré-exécuté avec YurtleParser remplacé, dans ses propres globales, par une sous-classe dont le graphe journalise chaque appel triples() (motif demandé et triplets rendus), identique des deux côtés, fusionné dans le verdict de run_pair. Le compte seul ne distinguait pas kb:statusChange de kb:status ou kb:by (un triplet chacun dans fixture.md).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "prédicat élargi en None (joker)",
+      "IRI de kb: altérée (kanbanx/)",
+      "IRI de kb: sans barre finale",
+      "kb:statusChange -> kb:status (survivait : même compte 1)",
+      "kb:statusChange -> kb:by (survivait : même compte 1)"
+    ],
+    "remaining": ""
   }
 }

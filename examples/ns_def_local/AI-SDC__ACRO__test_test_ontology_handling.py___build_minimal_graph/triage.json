@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Dépôt d'origine : PREFIX = \"https://www.w3id.org/statbarnsdc#\" (acro/ontology_handler.py:18), le shim met \"https://example.org/acro-ontology#\" (valeur différente de la source malgré « Identical bindings », identique des deux côtés donc sans effet sur la paire). Aucun Namespace ne sort de la fonction, et aucun nom de terme ne collisionne avec une méthode de str. Mutation (prefLabel \"Frequencies\" -> \"Frequenciez\" dans une copie) : FAIL, l'oracle voit les littéraux. Transpilé et comparé : g.namespaces() de la traduction a 31 liaisons contre 29 (p et dpv_owl en plus) ; la sérialisation Turtle diffère donc (p:FrequencyTable au lieu de URIRefs complets). Le dépôt ne sérialise ni ne lit les espaces de noms de ce graphe (test_ontology_handling.py et ontology_handler.py : aucun serialize/namespace/qname), donc sans conséquence sur le comportement testé. Pas de {expr} pouvant valoir None (chaînes littérales et URIRef). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 10 mutants (îlots vidés, IRI des préfixes, objet interpolé, @graph détourné) tous tués par l'isomorphisme ; liaisons de l'original conservées, le dépôt ne les lit pas ; pilote inchangé."
 }

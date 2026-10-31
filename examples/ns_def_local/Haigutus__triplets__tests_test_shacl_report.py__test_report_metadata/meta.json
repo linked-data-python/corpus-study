@@ -47,5 +47,23 @@
     "method": "entry:test_report_metadata",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "Ré-exécution de chaque côté avec une ligne de contexte changée : VIOLATIONS remplacé, dans les globales du côté, par une copie portant attrs[\"validation\"] (generated_at fixé, source_shapes) comme le pose validate() (triplets/validation/__init__.py, _report_metadata) ; violations_to_report_graph copie ces CBD de formes AVANT le nœud du rapport (shacl_report.py:199-206). Variante A : CBD de http://example.org/shapes#NameShape (sh:NodeShape typé, une forme de propriété). Variante B : la même forme annotée dcterms:source, dcterms:creator, dcterms:references et prov:generatedAtTime, voisin qui partage prédicat et position avec chacune des quatre lectures. Issue (valeurs, ou type et message de la levée) comparée, fusionnée dans le verdict de run_pair.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rapport : ?s a sh:ValidationReport -> ?s a [] (survivait)",
+      "creator : sujet {report} élargi en [] (survivait)",
+      "sources : sujet {report} élargi en [] (survivait)",
+      "references : sujet {report} élargi en [] (survivait)",
+      "rapport : îlot -> None",
+      "generatedAtTime : îlot -> None",
+      "creator : îlot -> None",
+      "sources : îlot -> []",
+      "references : îlot -> []",
+      "@graph graph -> @graph rdflib.Graph()"
+    ],
+    "remaining": "Six mutants équivalents sur toute entrée que le dépôt peut produire, non comptés : rapport .first() -> .one() et -> next(iter(…)) (violations_to_report_graph pose toujours exactement un sh:ValidationReport, BNode frais, donc ni zéro ni deux : le StopIteration de next(graph.subjects(…)) que .first() ne reproduit pas est inatteignable) ; creator .first() -> .one() (un seul dcterms:creator sur ce BNode) ; prov:generatedAtTime sujet élargi (le rapport en porte toujours un, ajouté sans condition) ; `is not None` -> véracité, et -> bool(m{ }) (un littéral xsd:dateTime est toujours vrai, generated_at vide est remplacé par l'horloge). @graph graph lie prov:, dcterms:, sh: aux mêmes IRI que les bind() du dépôt (shacl_report.py:192-194), et le graphe ne sort pas de la fonction."
   }
 }

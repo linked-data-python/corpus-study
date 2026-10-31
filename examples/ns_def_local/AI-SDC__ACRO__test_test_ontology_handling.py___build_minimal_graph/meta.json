@@ -52,5 +52,20 @@
     "method": "entry:_build_minimal_graph",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "chacun des quatre îlots +{ } vidé (4 mutants)",
+      "objet {barn_uri} -> p:Statbarn",
+      "IRI de dpv_owl: owl# -> owl/",
+      "IRI de p: f<{PREFIX}> -> f<{PREFIX}x/>",
+      "IRI de skos: altérée",
+      "dernier triplet skos:prefLabel retiré",
+      "@graph g remplacé par @graph rdflib.Graph() (écritures perdues)"
+    ],
+    "remaining": "Mutant équivalent, non compté : un préfixe supplémentaire q: (liaison seule). Liaisons comparées : aucune liaison de l'original perdue, p: et dpv_owl: en plus (tolérées, ldpy/027) ; le dépôt ne sérialise ni ne lit les liaisons de ce graphe (test_ontology_handling.py et ontology_handler.py ne lisent que les triplets). Le shim met PREFIX = https://example.org/acro-ontology# alors que le dépôt a https://www.w3id.org/statbarnsdc# (ontology_handler.py:18) : identique des deux côtés, aucune liaison rdflib par défaut sur l'un ou l'autre, sans effet sur la preuve."
   }
 }

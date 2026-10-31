@@ -40,5 +40,21 @@
     "method": "entry:test_is_before_rdflib",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "En plus de l'appel run_pair (gardé), chaque côté est ré-exécuté avec is_before_rdflib remplacé, dans ses propres globales, par un enregistreur qui appelle la vraie fonction du shim et journalise (a, b, résultat), identique des deux côtés ; sont comparés le journal des 15 appels, l'issue, et le graphe de module g après coup (isomorphisme : is_before_rdflib y écrit des time:after). Fusionné dans le verdict de run_pair. Le `return True` seul ne voyait ni les termes des assertions négatives ni une assertion retirée.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "IRI de before: altérée",
+      "positif a05,b05 -> a05,b06",
+      "négatif a01,b02 -> a01,b03 (survivait)",
+      "négatif foo,bar -> foo,foo (survivait)",
+      "négatif b07,a07 -> b07,a08 (survivait)",
+      "négatif b01 -> None (survivait)",
+      "assertion a08 retirée (survivait)",
+      "assertion négative foo/bar retirée (survivait)"
+    ],
+    "remaining": "Mutant équivalent, non compté : before:a01 -> BEFORE.a01 (le `as BEFORE` lie le même Namespace). Aucune liaison de graphe en jeu (pas de @graph)."
   }
 }

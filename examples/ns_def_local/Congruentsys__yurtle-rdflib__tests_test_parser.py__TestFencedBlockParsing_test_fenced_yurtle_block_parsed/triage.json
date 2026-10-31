@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : un seul Namespace local devient un @prefix de même longueur (kb.statusChange -> kb:statusChange), l'oracle voit le prédicat et le voisinage ; pas de gain de lecture, donc pas d'exemple pour l'article.",
   "questions": [],
   "evidence": "rdfeval check : OK. Le dépôt d'origine est cloné (corpus/repos/Congruentsys__yurtle-rdflib) ; le fixture.md reproduit le conftest.py du dépôt (sample_doc_with_fenced_blocks, lignes 130-160) et le shim reprend le code de core.py (_parse_blocks, _looks_like_yaml, motifs, préfixes standard) en retirant seulement les appels de journalisation (logger.debug) et deux branches non atteintes qui lèvent NotImplementedError ; les deux versions importent le même shim, donc aucun écart de comportement entre elles. Mutations dans une copie : URI du préfixe kb: modifiée (kanban/ -> kanbanx/) -> FAIL (1 contre AssertionError) ; kb:statusChange remplacé par un joker None -> FAIL (1 contre 14, le bloc ```turtle distracteur et le bloc YAML comptent). Le kb: n'est jamais lié à autre chose qu'un terme de position prédicat, aucun nom ne collisionne avec une méthode de str, pas de {expr} pouvant valoir None. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 5 mutants, 2 survivaient (kb:status et kb:by à la place de kb:statusChange, même compte) ; pilote renforcé (enregistreur des motifs triples(), deux documents du conftest pour le cas zéro solution), tous tués, traduction juste."
 }
