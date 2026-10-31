@@ -1,0 +1,34 @@
+# Second input graph, added by the mutation audit (2026-10-31). The
+# display-name and description nodes are blank nodes, as the repository
+# writes them (Referable.append_as_rdf, app/models/referable.py:56 and :73,
+# with an `aas:index` literal beside language and text).
+@prefix ex: <http://example.org/> .
+@base <https://admin-shell.io/aas/3/0/> .
+
+# Neighbour stored FIRST, so that a lang/text read whose subject is widened
+# to `[]` picks the neighbour's value ("xx", "yy") and not the right one.
+ex:neighbour <Referable/displayName> _:nd ;
+    <Referable/description> _:nc .
+_:nd <AbstractLangString/language> "xx" ; <AbstractLangString/text> "neighbour" .
+_:nc <AbstractLangString/language> "yy" ; <AbstractLangString/text> "neighbour description" .
+
+# ex:audit: falsy literals for category and idShort (the `if ref:` guards
+# turn "" into None), no displayName at all (the `len(...) == 0` guard), and
+# three descriptions: a full one, one with "" language and text, one with
+# neither language nor text (zero solution for both inner reads, and the
+# only other triple on that node is aas:index, which a widened predicate
+# would pick up).
+ex:audit <Referable/category> "" ;
+    <Referable/idShort> "" ;
+    <Referable/description> _:c1, _:c2, _:c3 .
+_:c1 <index> 0 ; <AbstractLangString/language> "ja" ; <AbstractLangString/text> "説明" .
+_:c2 <index> 1 ; <AbstractLangString/language> "" ; <AbstractLangString/text> "" .
+_:c3 <index> 2 .
+
+# ex:audit2: three display names: one with no language, one with "" language
+# and text, one with two languages (next(objects, None) and .first() both
+# take one of them; .one() would raise).
+ex:audit2 <Referable/displayName> _:d1, _:d2, _:d3 .
+_:d1 <index> 0 ; <AbstractLangString/text> "no language" .
+_:d2 <index> 1 ; <AbstractLangString/language> "" ; <AbstractLangString/text> "" .
+_:d3 <index> 2 ; <AbstractLangString/language> "en", "en-GB" ; <AbstractLangString/text> "two languages" .

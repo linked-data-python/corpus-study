@@ -45,5 +45,20 @@
     "method": "entry:test_curves_aggregates",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : sept CSV variantes dérivées de celui du dépôt, chacune modifiée en un point : une courbe voisine à agrégats (le test passe), cinq lignes qui frappent la même IRI c79 avec un seul agrégat différent (une seule assertion décide ; la bonne valeur vient la première dans le store), une courbe absente (zéro solution).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet {c79} élargi à [] (x5, survivaient)",
+      "list(m{ … })[:1] (x5, 3 survivaient)",
+      "[m{ … }.first()] (x5, survivaient)",
+      "assert de valeur forcé à True (x3, survivaient)",
+      "îlot -> [] (x5)",
+      "prédicat élargi à ?p (x5)",
+      "@graph retiré"
+    ],
+    "remaining": ""
   }
 }

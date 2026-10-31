@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : les cinq g.objects deviennent list(m{ {c79} {SD.x} ?o }), assertions reprises verbatim, shim = simple redirection de chemin, fixture CSV identique à celle du dépôt.",
   "questions": [],
   "evidence": "rdfeval check : OK (le shim asterism/__init__.py résout parents[4] vers le dépôt, donc les mutants ont été lancés sur copie avec ce chemin rendu absolu). Mutants sur copie, tous détectés (AssertionError ou TypeError côté traduit seulement) : un îlot remplacé par [], yMax->yMin, sujet élargi ?s, datatype xsd:double->xsd:integer, motif doublé ; seul `assert ... == xsd:integer`->`True` reste vert, ce qui est un mutant d'assertion équivalent puisque le test passe. Fixture `curves_csv` comparée au dépôt (test_samples_curves.py:169-214) : verbatim. `{SD.xMin}` est un URIRef, donc non coercé en littéral.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-31 : 29 mutants, 18 survivants avant (sujet élargi, troncature à une solution, assert forcé), tués par sept CSV variantes ; forcer à True les deux assertions de datatype est équivalent (l'ingesteur réel type toujours xsd:double / xsd:integer, starrydata.py:435-442). Traduction juste."
 }

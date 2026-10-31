@@ -43,5 +43,20 @@
     "method": "entry:from_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : trois appels sur fixture_audit.ttl (nœuds BNode avec aas:index comme dans Referable.append_as_rdf) : littéraux \"\" pour category, idShort, language, text ; pas de displayName ; description et display name sans language ni text ; display name à deux langues ; voisin stocké en premier.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      ".first() -> .one() et next(iter(…)) sur les lectures internes language/text (6, survivaient)",
+      "lecture language des descriptions élargie au sujet [] (survivait)",
+      "lectures language élargies au prédicat ?p (2, survivaient)",
+      "boucle description tronquée [:1] (survivait)",
+      "if ref: -> if ref is not None: (6, survivaient)",
+      "garde len(display_name_value) == 0 forcée à False (survivait)",
+      "les 32 autres mutants îlot/sujet/prédicat/cardinalité, déjà tués"
+    ],
+    "remaining": ""
   }
 }

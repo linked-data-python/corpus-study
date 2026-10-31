@@ -1,0 +1,9 @@
+@prefix : <https://ontology.example.com/tmf/> .
+# Added by the mutation audit (2026-10-31): `owl:` is never declared, so
+# rdflib's parse raises and the region falls back to its line scan
+# (the `except Exception` branch), which keeps the names of the lines
+# that start with ":".
+:Alarm a owl:Class .
+:Customer
+  a owl:Class ;
+  rdfs:label "Customer" .

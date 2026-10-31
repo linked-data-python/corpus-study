@@ -1,0 +1,24 @@
+# Added by the mutation audit (2026-10-31): the shapes of the files the
+# repository really reads (output/ontology/tmf-sid-hierarchy.ttl, the input
+# of src/alignment_generator.py:290): a default `:` prefix, an ontology IRI
+# ending in "/" (its local name is ""), annotation properties, and a subject
+# that carries NO rdf:type -- without it, a translation whose pattern was
+# narrowed to `?s a ?o` stayed green.
+@prefix :       <https://ontology.example.com/tmf/> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://ontology.example.com/tmf/sid/>
+  a owl:Ontology ;
+  rdfs:label "TM Forum SID-Aligned Ontology" .
+
+:sidDomain a owl:AnnotationProperty ;
+  rdfs:label "SID Domain" .
+
+:Alarm
+  a owl:Class ;
+  rdfs:subClassOf :DomainEvent ;
+  :sidDomain "Resource" .
+
+# no rdf:type at all: only an annotation
+:Untyped rdfs:comment "declared without a type" .

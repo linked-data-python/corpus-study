@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK. Région identique au dépôt (app/models/referable.py:88-158, à l'indentation près). Mutants sur translated.ldpy, tous tués : sujet joker (catégorie, displayName, description), prédicat joker ou échangé (idShort, language, text), boucles displayName/description remplacées par [], text_ref/lang_ref forcés à None pour displayName et description. Copie avec un fixture en blank nodes (_:en, _:de, _:d1) comme ceux que le dépôt crée (rdflib.BNode() à referable.py:56 et :73, donc {display_ref} interpole bien un BNode dans le dépôt) : check reste OK. Les appels couvrent le cas zéro solution (ex:noCategory), un voisin qui ne doit pas matcher (ex:otherSubject) et un displayName sans texte. Le shim remplace Extension.from_rdf par str(extension_ref) dans HasExtensions.from_rdf (contexte hors région, le fixture n'a aucune extension) : sans effet sur la paire. Ordre des display names : la liste de modèles est comparée en multiset, un seul .first() par propriété et le fixture a une valeur par propriété, donc l'ordre arbitraire de next/.first() n'intervient pas.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-31 : 49 mutants, 17 survivants avant, tués par fixture_audit.ttl ; set() autour des deux boucles ne change que l'ordre (variable d'une exécution à l'autre, aucun doublon possible dans un graphe), équivalent. Traduction juste."
 }

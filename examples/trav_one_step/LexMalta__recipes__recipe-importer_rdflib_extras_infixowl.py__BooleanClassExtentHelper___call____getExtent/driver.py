@@ -41,6 +41,12 @@ VERDICT = run_pair(
     calls=[
         _call("fixture.ttl"),  # two solutions (c1, c2), one non-matching neighbour (c3)
         _call(None),           # zero solutions: an empty graph
+        # Added by the mutation audit (2026-10-31): a blank-node subject (the
+        # anonymous `[ owl:unionOf (...) ]` form) and a subject with two
+        # owl:unionOf lists, which g.subjects(p) yields twice. Without it, a
+        # translation that dropped BNode subjects or deduplicated them
+        # (`set(m{ ... })`) stayed green.
+        _call("fixture_shapes.ttl"),
     ],
     # ordered=True only if the region imposes an order (sorted, ORDER BY):
     # no store promises one, so results are compared as multisets (the

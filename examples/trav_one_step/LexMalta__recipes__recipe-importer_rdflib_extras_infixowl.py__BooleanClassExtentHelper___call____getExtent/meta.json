@@ -41,5 +41,20 @@
     "method": "fixture:fixture.ttl entry:_getExtent",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : troisième appel sur fixture_shapes.ttl, avec un sujet BNode (la forme anonyme `[ owl:unionOf (...) ]`) et un sujet portant deux owl:unionOf, que g.subjects(p) rend deux fois ; voisin owl:intersectionOf.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot -> []",
+      "prédicat élargi à ?p (forme gardée)",
+      "prédicat owl:intersectionOf",
+      "[:1]",
+      "[.first()]",
+      "set(m{ … }) (survivait : aucun sujet à deux listes)",
+      "filtre des sujets BNode (survivait : aucun sujet BNode)"
+    ],
+    "remaining": ""
   }
 }

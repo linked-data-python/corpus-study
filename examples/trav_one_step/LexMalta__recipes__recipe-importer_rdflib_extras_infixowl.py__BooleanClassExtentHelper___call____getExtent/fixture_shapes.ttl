@@ -1,0 +1,23 @@
+# Second input graph for LexMalta__recipes__recipe-importer_rdflib_extras_infixowl.py__BooleanClassExtentHelper___call____getExtent
+# -- added by the mutation audit (2026-10-31). Assigned to
+# Individual.factoryGraph by driver.py, like fixture.ttl.
+#
+# Covers the two shapes fixture.ttl lacks, both of which the real infixowl
+# callers meet:
+#   - a blank-node subject: an anonymous class expression
+#     `[ owl:unionOf (...) ]`, the usual form of a union in OWL, where the
+#     BooleanClass identifier is a BNode (kills a mutant that keeps only
+#     IRI subjects);
+#   - one subject carrying owl:unionOf twice: `g.subjects(p)` yields it once
+#     per triple (rdflib 7.2.1, unique=False), so the region yields two
+#     BooleanClass for ex:c5 (kills a mutant that deduplicates the subjects).
+# ex:c6 is a neighbour that must not match (owl:intersectionOf).
+@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:c4 rdfs:subClassOf [ owl:unionOf ( ex:m5 ex:m6 ) ] .
+ex:c5 owl:unionOf ( ex:m7 ) , ( ex:m8 ex:m9 ) .
+
+# neighbour that must NOT match: different predicate
+ex:c6 owl:intersectionOf ( ex:m4 ) .

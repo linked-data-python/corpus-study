@@ -41,5 +41,21 @@
     "method": "entry:_declared_local_names",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : appel sur fixture_shapes.ttl (forme de output/ontology/tmf-sid-hierarchy.ttl, que lit alignment_generator.py:290 : sujet URI sans rdf:type, IRI d'ontologie finissant par « / ») et sur fixture_malformed.ttl (refusé par rdflib : branche de repli par balayage des lignes).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "motif restreint à ?s a ?o (survivait : tous les sujets URI étaient typés)",
+      "corps du repli except -> return set() (survivait : branche jamais atteinte)",
+      "îlot -> []",
+      "[:1]",
+      "isinstance forcé à True",
+      "garde isfile forcée à True",
+      "@graph retiré",
+      "rsplit('#') retiré"
+    ],
+    "remaining": ""
   }
 }
