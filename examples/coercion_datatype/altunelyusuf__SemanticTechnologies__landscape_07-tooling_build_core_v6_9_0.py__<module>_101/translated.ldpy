@@ -4,7 +4,7 @@
 # Executability: BASEDIR and load() -- defined earlier in the same source
 # file, just outside this region -- restored via context_predecl.py (context
 # shim, see meta.json).
-@prefix srns: <http://example.org/semtech/research#> .
+@prefix sr: <http://example.org/semtech/research#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -15,11 +15,11 @@ from context_predecl import BASEDIR, load
 eo = load("enrichment_o", "v6_1_0")
 g1 = Graph().parse(f"{BASEDIR}/01-research/semtech_research_v6_8_0.ttl")
 RO_PUB = <http://example.org/rdodi/research-ontology#Publication>
-corpus = srns:ResearchCorpus
+corpus = sr:ResearchCorpus
 
 @graph g1
 for key, e in eo.EXT8.items():
-    pub = srns:{f"Pub_{key.replace(chr(45), chr(95))}"}
+    pub = sr:{f"Pub_{key.replace(chr(45), chr(95))}"}
     +{ {corpus} rdfs:member {pub} }
     +{ {pub} a {RO_PUB} ;
              a owl:NamedIndividual ;

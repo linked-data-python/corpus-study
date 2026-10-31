@@ -35,6 +35,13 @@
     "`BASEDIR` also gates `g2 = Graph().parse(f\"{BASEDIR}/.../semtech_tbox_v5_4_0.ttl\")`: the real file (1329 lines) is irrelevant to what this region is measured on (both sides parse the exact same file, then add the exact same triples, so any valid base graph proves the same isomorphism). BASEDIR resolves to the shim's own directory, which holds a minimal stand-in `02-ontology/semtech_tbox_v5_4_0.ttl` instead of vendoring the full file.",
     "anti-hollow-green: broke `dcterms:source {S(\"R-TOGAF\", \"R-DAMA\")}@en` to `{S(\"R-TOGAF\")}@en` (drops one citation) -- `rdfeval check` correctly failed (graphs not isomorphic, 14 vs 14 triples: same count, different content), then restored -- confirmed OK again."
   ],
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": ["îlot +{ } supprimé", "sujet {c} élargi en ?x", "rdfs:label élargi en ?x", "skos:definition élargi en ?x", "dcterms:source élargi en ?x", "@en retiré du label", "@graph g2 retiré (refusé au transpilage)"],
+    "remaining": "Liaisons vérifiées hors pilote, dans une copie où le vrai semtech_tbox_v5_4_0.ttl (1329 lignes) remplace le substitut : le fichier lie déjà rdfs/owl/skos/dcterms aux mêmes IRI que les @prefix du bloc, donc @graph g2 n'en remplace aucune ; aucune liaison perdue ni ajoutée, sérialisations turtle identiques au caractère près. Valeurs : trois tuples de str écrits dans la région et S() qui rend une str, aucun autre type atteignable."
+  },
   "draft_sha": "f9baeb9e6677da01",
   "provenance": {
     "generated_at": "2026-08-28T17:55:03.530235+00:00",

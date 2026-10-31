@@ -1,10 +1,23 @@
 # Context shim (see meta.json): NOT the real (1208-line)
 # altunelyusuf/SemanticTechnologies@bad0fa7c46
 # landscape/01-research/semtech_research_v6_8_0.ttl -- a minimal stand-in.
-# This region never reads g1's pre-existing content, only adds to it, so the
-# base graph's actual content does not affect its behaviour; a few
-# placeholder triples are enough to make the Graph().parse(...) call in the
-# captured context real. Identical for both representations.
-@prefix ex: <http://example.org/semtech/research#> .
-ex:ResearchCorpus a ex:Corpus ;
-    ex:placeholder "pre-existing content, unrelated to this region" .
+# This region never reads g1's pre-existing triples, only adds to it, so a
+# few placeholder triples are enough to make the Graph().parse(...) call in
+# the captured context real. The prefix declarations, however, ARE the real
+# file's (its lines 1-10, verbatim): g1 keeps them as bindings, the
+# repository serialises g1 (build_core_v6_9_0.py:120), and `@graph g1` adds
+# the block's own prefixes to it -- the driver checks that none of these is
+# lost. Identical for both representations.
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix res: <http://example.org/rdodi/research-ontology#> .
+@prefix schema: <https://schema.org/> .
+@prefix semtech: <http://example.org/semtech#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sr: <http://example.org/semtech/research#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sr:ResearchCorpus a sr:Corpus ;
+    sr:placeholder "pre-existing content, unrelated to this region" .

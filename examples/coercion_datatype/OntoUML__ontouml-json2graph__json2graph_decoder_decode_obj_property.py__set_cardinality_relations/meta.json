@@ -32,6 +32,13 @@
     "Executability: the real source uses relative imports (from ..modules import ...) two packages up, which cannot resolve under rdfeval.harness's exec()-based execution (no __package__ set). Rewritten in original.py and translated.ldpy alike to absolute imports against a local modules/ context shim: modules/arguments.py (ARGUMENTS defaults matching the project's own library/test-mode initialisation), modules/utils_graph.py (ontouml_ref + METADATA[\"conformsTo\"], copied verbatim), modules/cardinalities.py (resolve_cardinality and its helpers, copied verbatim in full), and modules/decode_obj_property_predecl.py (determine_cardinality_bounds, copied verbatim from the same source file's lines 194-211, just above this region). No logic invented; all shim content is copied from OntoUML/ontouml-json2graph@982f12b9c4.",
     "Driver exercises three cases: a normal numeric range (typed lowerBound), a '*' upper bound (lower_bound='0' still typed, upper_bound='*' stays plain), and an unparsable/unrepairable cardinality under the 'preserve' policy (bounds stay None on both sides, verifying the guarded lowerBound/upperBound block is skipped identically). Sabotage-tested: dropping ^^xsd:nonNegativeInteger from the lowerBound triple makes rdfeval check fail (graphs not isomorphic), confirming the pilot actually discriminates this construction."
   ],
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé: driver écrit à la main (les trois appels d'origine gardés) qui compare levées, graphe par isomorphisme, liaisons de préfixes (graphe à la forme de decode_main.py:131-133, ontouml: et :), avertissements et stdout ; politique de cardinalité (contexte ARGUMENTS) posée par cas ; cas ajoutés : clé cardinality absente (réelle après clean_null_data), '1', '0..0', '' en preserve, '1,,*' et 'x..y' en repair, 'x..y' en error (levée), '2..1'.",
+    "translation_fixed": false,
+    "mutants_killed": ["îlot rdf:type supprimé", "îlot ontouml:cardinality supprimé", "îlot cardinalityValue supprimé", "îlot des bornes supprimé", "garde des bornes forcée à True", "garde des bornes forcée à False", "garde externe 'cardinality' in property_dict forcée à True (tué par le nouveau cas sans clé)", "{full_cardinality} élargi en ?x", "{lower_bound}^^xsd:nonNegativeInteger élargi en ?x", "{upper_bound} élargi en ?x", "^^xsd:nonNegativeInteger retiré", "^^xsd:nonNegativeInteger ajouté à upperBound", "@prefix ont: rebindant l'espace ontouml (liaison ontouml perdue)"],
+    "remaining": ""
+  },
   "article_candidate": true,
   "draft_sha": "6d5007dfb1e168dc",
   "provenance": {

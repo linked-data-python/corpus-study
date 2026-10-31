@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Dépôt (corpus/repos/OntoUML__ontouml-json2graph) : determine_cardinality_bounds et set_cardinality_relations identiques à original.py ; cardinalities.py du shim identique octet pour octet (diff) ; lower_bound/upper_bound sont toujours des str (groupes de regex) ou None, jamais d'int. Transpilation (-t) : {lower_bound}^^xsd:nonNegativeInteger donne Literal((lower_bound), datatype=URIRef(...nonNegativeInteger)), donc identique à l'original pour TOUT type de valeur (la restriction « parce que str » des notes est inutile ici ; le piège 1 ne concerne pas la position de terme). {full_cardinality} -> node(str) -> Literal(str) sans datatype, comme l'original. Mutants sur la copie : ^^nonNegativeInteger retiré, remplacé par xsd:integer, prédicat lower/upper échangé -> FAIL. Garde 'and' remplacée par 'or' ou par lower seul -> reste vert, mais ces mutants sont équivalents (resolve_cardinality rend les deux bornes None ou les deux non None) : pas une faiblesse. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Traduction juste ; pilote renforcé (cas sans clé cardinality, politiques repair/error, chaîne vide, liaisons du graphe de l'appelant, avertissements) qui tue la garde externe forcée à True, seul mutant survivant ; check OK."
 }
