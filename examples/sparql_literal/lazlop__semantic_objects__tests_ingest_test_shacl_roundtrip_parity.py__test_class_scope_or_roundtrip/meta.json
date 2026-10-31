@@ -40,5 +40,26 @@
     "method": "entry:test_class_scope_or_roundtrip",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "deux appels en plus, qui posent `_context._BATTERY_SHAPE_TTL` avant l'appel (même module des deux côtés) : le graphe du shim + une branche leurre par terme lié du SELECT (sh:xone, autre forme, sh:property/sh:path/sh:qualifiedValueShape/sh:class/sh:node/propriété imbriquée/chemin imbriqué/s223:hasMedium/sh:class du medium remplacés, sh:qualifiedMinCount absent) ; le graphe du shim + un sh:property direct sur s223:Battery (ASK vrai, AssertionError comparée).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "ASK vidé (bool([]))",
+      "ASK sur prédicat inexistant",
+      "sujet s223:Battery élargi",
+      "sh:or élargi",
+      "sh:property de branche élargi",
+      "sh:path externe élargi",
+      "sh:qualifiedMinCount retiré",
+      "sh:qualifiedValueShape élargi",
+      "sh:node élargi",
+      "sh:property imbriqué élargi",
+      "sh:path imbriqué élargi",
+      "s223:hasMedium élargi",
+      "sh:class du medium élargi"
+    ],
+    "remaining": "Mutants déjà tués avant : ASK forcé à True, sujet et prédicat de l'ASK élargis, SELECT vidé, rdf:rest* retiré, chemin s223:hasConnectionPoint élargi, sh:class de la cible élargi, classe du medium élargie, pin imbriqué retiré. Aucun mutant équivalent."
   }
 }

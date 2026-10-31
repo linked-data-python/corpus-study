@@ -6,10 +6,27 @@ The region is a method (``self.graph``, ``self.entities``, ``self.relations``,
 ``self._uri_to_name``); the fixture is a tiny stand-in ``self`` built here
 (reading-oracle style, but the "input" is an object rather than a Turtle
 file, so it is constructed directly instead of via ``fixture=``).
+
+Repair 2026-10-31 (mutation audit):
+
+  - ``_uri_to_name`` is now the repository's own body
+    (ontology_manager.py:306-313), not an approximation.
+  - the graph gains ``ex:ns#`` (a DatatypeProperty whose local name is
+    empty: ``_uri_to_name`` gives "", the region's ``if name:`` drops it)
+    and ``ex:emptyRange`` (``rdfs:range ""``: the region's ``if row.range``
+    treats the falsy literal as absent and falls back to xsd:string). Each
+    kills a mutant that stayed green: ``if name`` forced to True, and
+    ``if row.range`` read as ``is not None``.
+  - a second call with ``self.graph = None``, the repository's own initial
+    state (``self.graph: Optional[Graph] = None``, line 68, until an
+    ontology is loaded): the region skips the query and keeps only the
+    entity/relation fallback. It kills the mutant forcing
+    ``if self.graph is not None`` to True (s{ }(None) raises).
 """
 from types import SimpleNamespace
 
-from rdflib import Graph, Namespace, RDF, RDFS
+from rdflib import Graph, Namespace, RDF, RDFS, URIRef
+from rdflib import Literal as RdfLiteral
 
 from rdfeval.harness import run_pair
 
@@ -18,10 +35,16 @@ EX = Namespace("http://example.org/")
 
 
 def _uri_to_name(uri):
-    return str(uri).rsplit("#", 1)[-1].rsplit("/", 1)[-1].upper()
+    # verbatim body of OntologyManager._uri_to_name (ontology_manager.py:306)
+    if uri is None:
+        return None
+    uri_str = str(uri)
+    # Extract local name from URI (after # or /)
+    name = uri_str.split('#')[-1].split('/')[-1]
+    return name.upper()
 
 
-def _make_self():
+def _make_self(with_graph=True):
     # A fixed identifier so the two SimpleNamespace fixtures — one built per
     # side, per the harness's "fresh mutable argument" contract — compare
     # equal on the input side; the function only reads this graph.
@@ -37,6 +60,12 @@ def _make_self():
     # Neighbourhood that must NOT match: an object property, not a datatype one.
     graph.add((EX.worksFor, RDF.type, OWL.ObjectProperty))
     graph.add((EX.worksFor, RDFS.range, EX.Organization))
+    # Datatype property with an empty local name: `if name:` must drop it.
+    graph.add((URIRef("http://example.org/ns#"), RDF.type, OWL.DatatypeProperty))
+    graph.add((URIRef("http://example.org/ns#"), RDFS.range, EX.Ignored))
+    # Falsy range literal: `if row.range` falls back to xsd:string.
+    graph.add((EX.emptyRange, RDF.type, OWL.DatatypeProperty))
+    graph.add((EX.emptyRange, RDFS.range, RdfLiteral("")))
 
     # "age" is a fallback-only key (int -> xsd:integer); "salary" is already
     # set by the query above, so the fallback must NOT override it; "note"
@@ -45,7 +74,7 @@ def _make_self():
     entity = SimpleNamespace(properties={"age": "int", "salary": "string", "note": "custom"})
     relation = SimpleNamespace(properties={"assignment_percentage": "float"})
     return SimpleNamespace(
-        graph=graph,
+        graph=graph if with_graph else None,
         entities={"Person": entity},
         relations={"Assignment": relation},
         _uri_to_name=_uri_to_name,
@@ -58,5 +87,6 @@ def _make_self():
 VERDICT = run_pair(
     __file__,
     entry='get_xsd_type_map',
-    calls=[lambda: ((_make_self(),), {})],
+    calls=[lambda: ((_make_self(),), {}),
+           lambda: ((_make_self(with_graph=False),), {})],
 )

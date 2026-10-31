@@ -10,3 +10,9 @@
 
 ex:attribute-1 rdf:type ex:Property ;
     ex:cardinality "0..1" .
+
+# Neighbour added by the repair of 2026-10-31: prov:Entity as the OBJECT of
+# another predicate. The region reads rdf:type only; a mutant widening the
+# predicate to ?p would see this triple and fail the assertion.
+@prefix prov: <http://www.w3.org/ns/prov#> .
+ex:attribute-1 ex:mentions prov:Entity .

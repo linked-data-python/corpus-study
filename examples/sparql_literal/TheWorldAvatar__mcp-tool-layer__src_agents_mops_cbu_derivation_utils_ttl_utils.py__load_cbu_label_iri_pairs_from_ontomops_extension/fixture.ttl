@@ -26,3 +26,9 @@ ex:cbu4 a ontomops:ChemicalBuildingUnit .
 # ontomops:ChemicalBuildingUnit.
 ex:notACbu a ontomops:MetalOrganicPolyhedron ;
     rdfs:label "Should not appear" .
+
+# Falsy label (repair 2026-10-31): right type, label "" -- the region's
+# `if lbl and iri` / `if lbl` guards drop it; a guard forced to True would
+# let ("", iri) through.
+ex:cbu5 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "" .

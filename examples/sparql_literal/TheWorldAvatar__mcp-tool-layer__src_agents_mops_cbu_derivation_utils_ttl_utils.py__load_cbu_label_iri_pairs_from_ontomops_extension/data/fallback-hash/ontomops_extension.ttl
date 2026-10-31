@@ -1,0 +1,29 @@
+# Input of the "fallback-hash" call in driver.py (repair 2026-10-31): the
+# same individuals as ../../fixture.ttl, plus the sentinel triple
+# ex:forceFallback ex:marker ex:yes. driver.py makes Graph.query raise on a
+# graph holding that sentinel -- and only there -- so both sides run the
+# region's `except Exception:` branch (g.subjects / g.objects), which the
+# other calls never reach. The sentinel is not a ChemicalBuildingUnit and
+# never appears in the result.
+@prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:       <http://example.org/> .
+
+ex:cbu1 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "Benzene ring" .
+
+ex:cbu2 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "Benzene ring" .
+
+ex:cbu3 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "Amine linker" .
+
+ex:cbu4 a ontomops:ChemicalBuildingUnit .
+
+ex:notACbu a ontomops:MetalOrganicPolyhedron ;
+    rdfs:label "Should not appear" .
+
+ex:cbu5 a ontomops:ChemicalBuildingUnit ;
+    rdfs:label "" .
+
+ex:forceFallback ex:marker ex:yes .

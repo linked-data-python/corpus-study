@@ -15,6 +15,15 @@ the region is a pytest test that only ever asserts, so `demo` turns a
 failed assertion into a comparable value instead of letting it abort the
 driver -- otherwise the FALSE side of `bool(m{ })` (the only one the real
 upstream test exercises) would be all the oracle could ever see.
+
+Repair 2026-10-31 (mutation audit):
+
+  - fixture.ttl gained `ex:attribute-1 ex:mentions prov:Entity`: the
+    mutant widening `rdf:type` to `?p` in the island stayed green before.
+  - a third case pre-creates `cardinality.provenance.ttl` in tmp_path (no
+    prov:Entity in the graph): the region's last assert, the sidecar check,
+    now fails on both sides and is compared. Before, no call reached it, and
+    forcing that assert to True stayed green.
 """
 import tempfile
 from pathlib import Path
@@ -22,7 +31,7 @@ from pathlib import Path
 from rdfeval.harness import run_pair
 
 
-def _case(with_prov: bool):
+def _case(with_prov: bool, with_sidecar: bool = False):
     # tmp_path is created ONCE per case, shared by both the original and the
     # translated call: both write the identical content to it (the shim is
     # deterministic given the marker file), so nothing leaks meaningfully,
@@ -31,6 +40,8 @@ def _case(with_prov: bool):
     tmp_path = Path(tempfile.mkdtemp())
     if with_prov:
         (tmp_path / "_use_prov_fixture").touch()
+    if with_sidecar:
+        (tmp_path / "cardinality.provenance.ttl").touch()
 
     def make():
         return (tmp_path,), {}
@@ -43,5 +54,6 @@ VERDICT = run_pair(
     calls=[
         _case(with_prov=False),  # metadata-free output -> assertion passes ("ok")
         _case(with_prov=True),   # prov:Entity present -> assertion fails
+        _case(with_prov=False, with_sidecar=True),  # sidecar present -> last assert fails
     ],
 )

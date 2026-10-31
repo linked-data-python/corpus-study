@@ -29,11 +29,40 @@ uses a hash_value for which no file was ever written: `load_graph_from_file`
 's own `os.path.exists` guard then returns an empty graph, the
 zero-solution case, without needing a second fixture file. No `ORDER BY`
 and no `sorted()` anywhere in the region: `ordered=False`.
+
+Repair 2026-10-31 (mutation audit):
+
+  - fixture.ttl (and its copy) gained ex:cbu5, a ChemicalBuildingUnit
+    labelled "": it kills the mutant that forces `if lbl and iri` to True.
+  - a third call, "fallback-hash", runs the region's `except Exception:`
+    branch on both sides. Its input (data/fallback-hash/) holds the same
+    individuals plus a sentinel triple, and `_query_raising_on_sentinel`
+    below makes `Graph.query` raise on a graph holding that sentinel ONLY:
+    the other calls, and s{ }'s own engine (`prepared(...)(g)` calls
+    `g.query`), are untouched. Without it, emptying the fallback or swapping
+    its rdf:type / rdfs:label stayed green. Same patch for both sides.
 """
+from rdflib import Graph, URIRef
+
 from rdfeval.harness import run_pair
 
 _HASH_WITH_DATA = "sample-hash"
 _HASH_WITHOUT_DATA = "missing-hash"
+_HASH_FALLBACK = "fallback-hash"
+
+_SENTINEL = (URIRef("http://example.org/forceFallback"),
+             URIRef("http://example.org/marker"),
+             URIRef("http://example.org/yes"))
+_real_query = Graph.query
+
+
+def _query_raising_on_sentinel(self, *args, **kwargs):
+    if _SENTINEL in self:
+        raise RuntimeError("forced: exercise the except-fallback branch")
+    return _real_query(self, *args, **kwargs)
+
+
+Graph.query = _query_raising_on_sentinel
 
 
 VERDICT = run_pair(
@@ -43,6 +72,7 @@ VERDICT = run_pair(
     calls=[
         ((_HASH_WITH_DATA,), {}),
         ((_HASH_WITHOUT_DATA,), {}),
+        ((_HASH_FALLBACK,), {}),
     ],
     ordered=False,
 )

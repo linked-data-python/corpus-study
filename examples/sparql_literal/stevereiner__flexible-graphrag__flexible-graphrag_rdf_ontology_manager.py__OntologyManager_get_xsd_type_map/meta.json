@@ -38,5 +38,16 @@
     "method": "entry:get_xsd_type_map",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "_uri_to_name repris du dépôt (ontology_manager.py:306) ; graphe enrichi de `ex:ns#` (nom local vide) et de ex:emptyRange (rdfs:range \"\") ; second appel avec self.graph = None, l'état initial réel (ligne 68).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`if self.graph is not None` forcé à True",
+      "`if name` forcé à True",
+      "`if row.range` -> `is not None`"
+    ],
+    "remaining": "Mutants déjà tués avant : îlot vidé, OPTIONAL retiré, classe élargie, rdfs:range élargi, garde forcée à False. Équivalents : DISTINCT retiré (dict réécrit par clé), `is not None` -> truthiness (un Graph vide ne donne aucune ligne)."
   }
 }

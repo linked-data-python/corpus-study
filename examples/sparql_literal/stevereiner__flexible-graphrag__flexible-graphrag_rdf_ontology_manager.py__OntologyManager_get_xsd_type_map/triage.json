@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : requête littérale reprise telle quelle dans s{ }(self.graph), self.graph est un rdflib Graph dans le dépôt, oracle sensible sur les parties de la requête.",
   "questions": [],
   "evidence": "rdfeval check OK. Requête identique à ontology_manager.py:418-432 du dépôt (PREFIX owl:/rdfs: devenus @prefix dans le bloc if, mêmes IRI) ; self.graph = Graph() aux lignes 86/110/160 du dépôt, donc rdflib. Mutants sur copies de translated.ldpy TUÉS : retrait de l'OPTIONAL, owl:DatatypeProperty -> owl:ObjectProperty, ?prop a ?t, rdfs:range -> rdfs:domain. Survivants sans conséquence : retrait de DISTINCT (le résultat est un dict réécrit par clé, donc inobservable) et `if True` à la place de la garde `self.graph is not None` (garde non touchée par la traduction, texte identique des deux côtés, le pilote n'a pas de cas graph=None). Le fixture couvre plage déclarée, plage absente (repli xsd:string), voisinage ObjectProperty et repli par type Python. Pas candidate à l'article (gain = deux lignes PREFIX et le suffixe (g)). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 10 mutants (2 équivalents), 3 survivants (cas graph=None, nom local vide, plage \"\") tués par un second appel et deux triplets ; traduction juste."
 }

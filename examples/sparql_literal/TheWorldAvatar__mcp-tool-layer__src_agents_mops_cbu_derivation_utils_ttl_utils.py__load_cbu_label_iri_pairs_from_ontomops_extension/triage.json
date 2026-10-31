@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : fonction identique au dépôt aux constantes de préfixes près, shims fidèles, branche de repli vérifiée équivalente par une expérience.",
   "questions": [],
   "evidence": "check : OK. original.py identique à ttl_utils.py:78-113 du dépôt (corpus/repos/TheWorldAvatar__mcp-tool-layer) ; ttl_utils_shim.load_graph_from_file identique à ttl_utils.py:7-11 ; models/locations.py ne fixe que DATA_DIR (valeur lue à l'appel), sans logique. Appelant du dépôt : aucun pour cette fonction dans le clone. Mutants dans des copies : FILTER(1 = 2) -> FAIL, déduplication retirée -> FAIL, SELECT DISTINCT -> SELECT reste vert (équivalent : les doublons (s, label) identiques sont de toute façon retirés par la déduplication par libellé), `if lbl and iri` -> `if iri` reste vert (garde non modifiée par la traduction, fixture sans libellé vide), repli vidé reste vert. Pour le repli, expérience : `str(row[0])` -> `str(row[9])` des deux côtés force l'exception, donc le repli ; check reste OK ; en vidant ensuite la boucle des libellés côté traduit seulement -> FAIL : le repli est exercé et équivalent (rdf:type/rdfs:label = RDF.type/RDFS.label). `@prefix ontomops: … as ONTOMOPS` justifié par g.bind et le repli. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 11 mutants, 5 survivants (garde du libellé vide, branche de repli jamais exécutée) tués par un libellé \"\" et un troisième appel qui force le repli ; traduction juste."
 }

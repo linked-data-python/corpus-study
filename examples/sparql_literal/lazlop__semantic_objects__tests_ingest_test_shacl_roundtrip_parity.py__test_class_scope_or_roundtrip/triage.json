@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : ASK et SELECT repris tels quels dans s{ }(g), préfixes hoistés vers les mêmes IRI que bind_prefixes du dépôt, oracle sensible (fixture avec deux leurres et une forme Pump).",
   "questions": [],
   "evidence": "rdfeval check OK. _context.py : le shim ne fait que remplacer generate_rdf_class_definition() par une sortie Turtle écrite à la main (aucune logique ajoutée) ; les liaisons s223:/sh: correspondent à bind_prefixes du dépôt (src/semantic_objects/namespaces.py:85,99, S223 = http://data.ashrae.org/standard223#) ; seul `return targets` est ajouté dans original.py/translated.ldpy, sans effet RDF. Texte des requêtes identique à tests/ingest/test_shacl_roundtrip_parity.py:162-190 du dépôt. Mutants sur copies de translated.ldpy, tous TUÉS : ASK sur s223:Pump, ASK avec sujet ?x, retrait du pin hasMedium imbriqué, sh:path ?pp, retrait de rdf:rest*, sh:class du medium -> ?m. Survivants sans gravité : ASK avec prédicat inexistant (reste faux, comme l'original) et retrait de sh:qualifiedMinCount (présent partout dans le fixture). Seule la branche ASK=faux est exercée par l'original, ce qui est la seule branche que le test atteint. Pas candidate à l'article (gain = enveloppe s{ } + 3 @prefix). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 22 mutants, 13 survivants (branche ASK vraie jamais atteinte, aucun leurre par terme du SELECT) tués par deux appels sur des graphes enrichis ; traduction juste."
 }
