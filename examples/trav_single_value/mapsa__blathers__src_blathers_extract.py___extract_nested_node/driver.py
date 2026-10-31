@@ -19,7 +19,15 @@ Two calls exercise the pattern the stratum (trav_single_value) is about:
   * without_comment -- _:n2 (anchored by ex:ClassB) has no rdfs:comment: the
                        ZERO-solution case, where g.value() and m{ }.first()
                        must both answer None.
-Neither call ever reads _:n3's or ex:Other's rdfs:comment/ex:label (the
+  * two_comments    -- _:n4 (anchored by ex:ClassD) has TWO rdfs:comment
+                       values (added at repair, 2026-10-31): the two-solution
+                       case, where g.value() (any=True) and m{ }.first() must
+                       return the same one, and where .one() would raise.  It
+                       also carries falsy values (ex:label "" and ex:weight 0)
+                       that the predicate_objects loop must keep as "" and "0".
+                       So the comment site is exercised with zero (n2), one
+                       (n1) and two (n4) solutions.
+No call ever reads _:n3's or ex:Other's rdfs:comment/ex:label (the
 neighbourhood in fixture.ttl).
 """
 from rdflib import Namespace
@@ -42,11 +50,17 @@ def without_comment():
     return ((g, node), {})
 
 
+def two_comments():
+    g = fixture_graph(FIXTURE)
+    node = g.value(EX.ClassD, EX.hasNested)
+    return ((g, node), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry='_extract_nested_node',
     fixture=FIXTURE,
-    calls=[with_comment, without_comment],
+    calls=[with_comment, without_comment, two_comments],
     # ordered=True only if the region imposes an order (sorted, ORDER BY):
     # no store promises one, so results are compared as multisets. (Here the
     # region's own dict grouping is order-preserving and both m{ }/rdflib

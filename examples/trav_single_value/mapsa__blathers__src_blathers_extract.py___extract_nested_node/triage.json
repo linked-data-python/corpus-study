@@ -4,5 +4,6 @@
   "summary": "Rien a signaler : g.value -> m{ {node} rdfs:comment ?v }.first() et predicate_objects -> m{ {node} ?pred ?value } sont equivalents, y compris avec plusieurs rdfs:comment ; le pilote tue les mutants de cardinalite et de motif.",
   "questions": [],
   "evidence": "rdfeval check : OK. Copie dans un dossier mktemp (supprimee). (1) Fixture modifie dans la copie : _:n1 recoit 4 rdfs:comment : check OK avec PYTHONHASHSEED=1..4, donc .first() rend la meme solution que g.value(any=True) et l'ordre des lignes de la boucle est stable. (2) Mutant .first() -> .one() : FAIL ('plusieurs solutions' sur n1, 'aucune solution' sur n2) ; le zero solution de n2 du pilote livre le tue deja. (3) Mutant {node} -> ?x dans le motif rdfs:comment : FAIL. Le commentaire de driver.py dit 'several rdfs:comment triples' alors que chaque noeud du fixture livre n'en a qu'un (cas multi-valeur non exerce par le pilote, mais verifie equivalent). blathers_context.py : _str_or_none et _term_label conformes au clone (extract.py:27, :154), _term_label hors region et inchange. SH restaure comme dit.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 10 mutants, tous tues par le pilote livre ; pilote renforce d'un cas a deux rdfs:comment et valeurs falsy (\"\", 0), check OK, traduction juste."
 }

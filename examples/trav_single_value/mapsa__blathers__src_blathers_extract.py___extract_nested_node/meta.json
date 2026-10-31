@@ -47,5 +47,23 @@
     "method": "fixture:fixture.ttl entry:_extract_nested_node",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "audit par mutation, 10 mutants tues par le pilote livre ; ajout de l'appel two_comments (_:n4, ancre ex:ClassD, deux rdfs:comment, ex:label \"\" et ex:weight 0) pour que le site g.value -> .first() soit exerce a zero (n2), une (n1) et deux (n4) solutions, et que la boucle garde les valeurs falsy ; check OK sous PYTHONHASHSEED 0,1,2,3,7",
+    "translation_fixed": false,
+    "mutants_killed": [
+      ".first() -> .one()",
+      ".first() -> next(iter(m{ }))",
+      "sujet {node} -> [] dans le motif rdfs:comment",
+      "ilot rdfs:comment remplace par None",
+      "rdfs:comment -> rdfs:label",
+      "sujet {node} -> [] dans la boucle m{ {node} ?pred ?value }",
+      "ilot de la boucle vide ([])",
+      "garde _STRUCTURAL_NS forcee a True",
+      "garde _STRUCTURAL_NS forcee a False",
+      "boucle reduite a la premiere solution"
+    ],
+    "remaining": ""
   }
 }

@@ -26,6 +26,10 @@
 #     not merely on the predicate -- and ex:Other, a NAMED (non-blank)
 #     resource with the same predicates, proving the read is scoped to a
 #     blank node and not just "whatever has these predicates".
+#   * TWO solutions for rdfs:comment (repair 2026-10-31): _:n4 (anchored by
+#     ex:ClassD) has two rdfs:comment values, so g.value() (any=True) and
+#     m{ }.first() must pick the same one; it also carries falsy values
+#     (ex:label "" and ex:weight 0) that the loop must keep as "" and "0".
 @prefix ex:   <http://example.org/> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -48,3 +52,9 @@ _:n3 rdfs:comment "Must never be read" ;
 
 ex:Other rdfs:comment "Also must never be read" ;
          ex:label "Also unrelated" .
+
+ex:ClassD ex:hasNested _:n4 .
+_:n4 rdfs:comment "Second-listed comment" ;
+     rdfs:comment "First-listed comment" ;
+     ex:label "" ;
+     ex:weight 0 .
