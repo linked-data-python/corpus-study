@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check OK. Dépôt (c065eff) : addToRdfGraph est appelée par produceCSVtoRDF avec des cellules csv.reader, donc toutes des str (termEN str ou None) ; aucune coercition de type non chaîne en jeu. Pilote étendu à 10 appels dans mktemp -d (termLV vide, termEN '' et '  ', descLV None/'  '/'NA ', conceptID unicode, '-', guillemets/antislash/accolades/retour-ligne dans les termes, termEN commençant par http://, termLV ressemblant à une IRI) : check OK. Concept IDs avec espace, '/', '#', '>' : ensembles de triplets égaux entre original et traduction (eliozo:{} concatène comme l'original, sans encoder). Garde de véracité : `if not termEN` et `if descLV and …` sont conservées telles quelles. Pas de shim. L'oracle est fort : le traducteur a vérifié qu'échanger @lv/@en fait échouer le check.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 14 mutants, 2 survivants (termEN is None, alias de préfixe sur l'espace eliozo#) tués par un appel termEN=\"\" et une comparaison des liaisons sur le graphe réel du dépôt (bind skos, eliozo) ; traduction juste, check OK."
 }

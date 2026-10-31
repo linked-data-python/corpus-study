@@ -4,5 +4,6 @@
   "summary": "Rien à signaler pour l'équivalence ; en revanche pas utilisable pour l'article : `Literal(iri)` -> `{iri}` est le cas trivial et la traduction fait deux instructions plus un @prefix contre une seule ligne en Python.",
   "questions": [],
   "evidence": "check OK. Dépôt (f0977d4) : _add_version est appelée avec substrate.versioned_graph_iri(...), une str ; pas de non-chaîne. Dans une copie (mktemp -d), pilote étendu à 7 IRI (http, urn:, https avec chemin, '', 'a b', '<x>', '1') : check OK. Mutants : `{iri}` -> `f<{iri}>` : FAIL (le pilote distingue IRI et littéral) ; `<{iri}>` : erreur de transpilation. Le pilote enveloppe le Dataset dans un _DatasetHolder comparé par graphe nommé, donc le bon graphe nommé est bien contrôlé. Avis article : non (la paire d'origine tient en une ligne, la traduction n'est pas plus courte ; seule `@graph ds.graph(...)` est intéressante, et elle relève de la strate add_isolated, pas de coercion_datatype). `rdflib.URIRef(iri)` dans l'expression de `@graph` n'est pas dans un îlot : pas de wrong-construction.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 9 mutants, 1 survivant (graphe nommé fixe à la place de ds.graph(URIRef(iri))) tué par des appels à la forme du dépôt sur un Dataset qui tient déjà d'autres versions ; traduction juste, check OK."
 }

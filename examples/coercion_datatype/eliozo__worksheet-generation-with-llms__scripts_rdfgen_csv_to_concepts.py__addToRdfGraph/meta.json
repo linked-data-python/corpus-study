@@ -49,5 +49,20 @@
     "method": "entry:addToRdfGraph",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "audit par mutation (14 mutants, 2 survivants) : appel termEN=\"\" (cellule TitleEn vide, falsy non None) ; appel sur le graphe réel de produceCSVtoRDF (bind skos, eliozo) ; seconde phase qui rejoue chaque appel et exige que toute liaison de préfixe du graphe de l'original se retrouve dans la traduction (le dépôt sérialise g) ; le verdict de run_pair est tu pour que check lise celui qui inclut la seconde phase.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "if not termEN -> if termEN is None (survivait : termEN=\"\" absent du pilote)",
+      "@prefix el: ajouté sur le même espace que eliozo: (survivait : liaisons non comparées ; @graph g rebascule l'espace eliozo# sur el:)",
+      "îlot rdf:type supprimé ; objet élargi en []",
+      "îlot à sujet partagé supprimé ; @en retiré de termEN ; conceptID @en -> @lv",
+      "îlot descLV supprimé ; garde descLV forcée True / False ; garde descLV -> is not None",
+      "garde termEN forcée True / False",
+      "eliozo:{\"TRM-\" + conceptID} -> eliozo:{conceptID}"
+    ],
+    "remaining": ""
   }
 }

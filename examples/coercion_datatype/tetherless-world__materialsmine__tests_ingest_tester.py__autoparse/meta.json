@@ -38,5 +38,17 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "audit par mutation (8 mutants, 2 survivants) : seconde phase qui ré-exécute les deux artefacts depuis des copies temporaires où le bloc de construction de l'arbre (identique des deux côtés, hors région) porte des textes None, \"\", \"  \" et non ASCII -- les deux valeurs réelles de Element.text ; Literal(None) et f{None} rendent tous deux Literal('None'), la traduction reste verte ; verdict de run_pair tu pour que check lise celui qui inclut la seconde phase.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "f{elem.text} -> f{elem.text or \"\"} (survivait : aucun texte None)",
+      "compréhension filtrée par `if elem.text` (survivait : aucun texte falsy)",
+      "îlot supprimé (str nue) ; f\"{elem.text}\"^^xsd:string ; f\"{elem.text}\"@en ; f<{elem.text}>",
+      "itération vidée ; première correspondance seulement"
+    ],
+    "remaining": ""
   }
 }

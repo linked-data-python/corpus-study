@@ -46,5 +46,17 @@
     "method": "entry:_add_version",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "audit par mutation (9 mutants, 1 survivant) : trois appels à la forme du dépôt (IRI versioned_graph_iri https://kumagallium.github.io/asterism/graph/canonical/<id>/v<n>, Dataset qui tient déjà une autre version et, pour l'un, le pointeur du graphe de contrôle ; même IRI réécrite) ; _DatasetHolder délègue désormais l'interface du Dataset (hors dunders), si bien que la région voit un vrai Dataset. Liaisons non comparées : le dépôt ne sérialise jamais ce Dataset en RDF (réponses SELECT en JSON).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "@graph ds.graph(URIRef(iri)) -> graphe nommé fixe (survivait : un seul appel, dont l'IRI était celle du mutant)",
+      "@graph -> ds.default_context ; -> Graph() frais",
+      "îlot supprimé ; sujet élargi en [] ; objet élargi en []",
+      "{iri} -> f<{iri}> ; {iri}^^xsd:string ; {iri}@en"
+    ],
+    "remaining": ""
   }
 }

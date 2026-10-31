@@ -46,5 +46,20 @@
     "method": "entry:to_rdf",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "audit par mutation (15 mutants, 5 survivants ; la note « driver.py covers » de translation_notes ne décrit plus que les 4 premiers appels) : 10 appels à la forme de ValidatedGraphSet.to_rdf (Graph() par défaut, Namespace(\"alti:\"), NodeCache(), sujet BNode portant déjà un triplet) sur chaque type de SCALAR_TYPES : bool True/False, int 0, 2147483647 (borne), 2147483648, float 1.5 et 5e9, str \"\", datetime naïf et avec fuseau ; seconde phase qui rejoue chaque appel et exige que toute liaison de préfixe du graphe de l'original se retrouve dans la traduction (le dépôt sérialise le graphe en RDF/XML, writer.py:133) ; verdict de run_pair tu pour que check lise celui qui inclut la seconde phase.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet {subj} élargi en [] (survivait : sujet BNode seul dans un graphe d'un triplet, isomorphe à un BNode frais)",
+      "isinstance(self.obj, int) -> isinstance(self.obj, (int, float)) (survivait : aucun float)",
+      "> 2147483647 -> >= 2147483647 (survivait : borne absente)",
+      "@prefix xs: ajouté sur l'espace XSD ; @prefix r: ajouté sur l'espace RDF (survivaient : liaisons non comparées ; @graph graph rebascule l'espace sur le nouveau préfixe)",
+      "îlot supprimé ; objet élargi en [] ; {literal} -> {self.obj} ; prédicat fixe",
+      "garde isinstance forcée True / False ; garde de seuil forcée True / False",
+      "datatype xsd:nonNegativeInteger -> xsd:integer ; datatype retiré de Literal(...)"
+    ],
+    "remaining": ""
   }
 }
