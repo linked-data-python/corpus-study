@@ -37,6 +37,23 @@
     "sparql_literal"
   ],
   "oracle": "values",
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture.ttl gagne ex:mention1 (rdfs:seeAlso agimage:Platform + platformName, deux termes communs avec le motif de type, ne doit pas sortir) et ex:platform4 à deux noms dont le \"\" falsy (deux lignes rendues, deux lignes imprimées) ; appels inchangés. Vérifié à la main : s{ }(g) ne lie aucun préfixe sur g (create_ontology.py sérialise g juste après) ; les appelants du dépôt passent un Graph ordinaire et n'utilisent pas la valeur rendue.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "?platform a agimage:Platform -> ?platform ?p agimage:Platform (survivant avant, tué par ex:mention1)",
+      "?platform a agimage:Platform -> ?platform a ?t",
+      "platformName -> ?pn",
+      "sujet du motif platformName découplé (?other)",
+      "motif de type supprimé",
+      "motif platformName supprimé",
+      "îlot vidé (FILTER(1 = 2))",
+      "résultat de l'îlot remplacé par []",
+      "boucle d'affichage vidée"
+    ],
+    "remaining": "Mutant équivalent non compté : SELECT DISTINCT (un Graph est un ensemble de triplets, chaque ligne de la jointure est unique)."
+  },
   "validation": {
     "status": "equivalent",
     "method": "entry:query_find_platforms",

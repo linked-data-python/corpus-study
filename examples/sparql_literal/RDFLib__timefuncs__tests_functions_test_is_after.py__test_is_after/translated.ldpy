@@ -64,3 +64,9 @@ def test_is_after():
     # and prints nothing is "nothing observable to compare"). Identical on
     # both sides; changes nothing about the RDF behaviour under test.
     return actual
+
+
+# Demo seam (identical on both sides, see meta.json): `run` lets driver.py
+# observe the query's candidate rows (see there); by default it is the call.
+def demo(run=lambda test: test()):
+    return run(test_is_after)

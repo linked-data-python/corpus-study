@@ -8,6 +8,17 @@ ex:Concept1 a skos:Concept ;
 ex:Concept2 a skos:Concept ;
     rdfs:label "Beta" .
 
+# Neighbourhood that must NOT match: shares two terms with `?c a
+# skos:Concept` (subject variable and object) but through another
+# predicate -- kills `?c ?p skos:Concept`.
+ex:Mention rdfs:seeAlso skos:Concept ;
+    rdfs:label "Epsilon" .
+
+# Several labels on one concept, among them a language-tagged pair and the
+# falsy empty literal: one row per label, "" kept.
+ex:Concept6 a skos:Concept ;
+    rdfs:label "Zeta"@en , "Zeta"@fr , "" .
+
 # Neighbourhood that must NOT match: a skos:Concept with no rdfs:label at
 # all (only a skos:prefLabel) -- the join with the second pattern drops it.
 ex:Concept3 a skos:Concept ;

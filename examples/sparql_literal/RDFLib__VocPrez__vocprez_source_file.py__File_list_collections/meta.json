@@ -35,6 +35,23 @@
     "sparql_literal"
   ],
   "oracle": "values",
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture.ttl gagne ex:Mention (rdfs:seeAlso skos:Concept + rdfs:label, deux termes communs avec le motif de type, ne doit pas sortir) et ex:Concept6 à trois étiquettes (\"Zeta\"@en, \"Zeta\"@fr, \"\" falsy : une ligne chacune) ; appels inchangés ; self.gr vérifié dans le dépôt : Graph ordinaire parsé puis picklé (file.py:40, 55, 560-569).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "?c a skos:Concept -> ?c ?p skos:Concept (survivant avant, tué par ex:Mention)",
+      "?c a skos:Concept -> ?c a ?t",
+      "rdfs:label -> ?p",
+      "?c rdfs:label ?l -> ?d rdfs:label ?l",
+      "motif de type supprimé",
+      "motif rdfs:label supprimé",
+      "îlot vidé (FILTER(1 = 2))",
+      "résultat de l'îlot remplacé par []",
+      "colonnes de la glue permutées (tué, contrairement à ce que craignait le tri)"
+    ],
+    "remaining": "Mutant équivalent non compté : SELECT DISTINCT * (un Graph est un ensemble de triplets, chaque (c, l) de la jointure est unique)."
+  },
   "article_candidate": false,
   "validation": {
     "status": "equivalent",

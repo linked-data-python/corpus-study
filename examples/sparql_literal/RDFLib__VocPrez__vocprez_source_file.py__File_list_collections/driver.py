@@ -25,6 +25,15 @@ identical Turtle do not compare equal). `list_collections` never mutates
 `Graph()` objects' random identifiers, never on the region itself; `_Self`
 below says so explicitly (`__eq__` always agrees) instead of leaving an
 accidental, unexplained bnode mismatch for a reviewer to chase.
+
+Repair of 2026-10-31 (mutation audit).  `?c ?p skos:Concept` (the rdf:type
+predicate widened) stayed green: no resource reached skos:Concept through
+another predicate.  fixture.ttl now holds `ex:Mention rdfs:seeAlso
+skos:Concept ; rdfs:label "Epsilon"`, which shares two terms with the type
+pattern and must not appear, and `ex:Concept6` with three labels ("Zeta"@en,
+"Zeta"@fr and the falsy "") -- one row each.  The repository's `self.gr` is
+a plain `Graph` parsed from a vocabulary file and pickled (file.py:40, 55,
+560-569), which is what `fixture_graph` gives.
 """
 from pathlib import Path
 

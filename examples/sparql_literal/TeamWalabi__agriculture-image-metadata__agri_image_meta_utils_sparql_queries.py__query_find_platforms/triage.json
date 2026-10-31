@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check : OK. original.py identique au dépôt (agri_image_meta/utils/sparql_queries.py:37-50). Appelants du dépôt : tests/test_utils.py:284, `query_find_platforms(g)` sur un Graph() vide, couvert par le second appel du pilote ; le retour n'est pas utilisé par l'appelant. Mutants dans des copies, tous FAIL : classe agimage:Plat, prédicat platformName altéré, FILTER(1 = 2) ajouté, boucle d'affichage vidée (stdout diffère), `return []`. Le retour du côté traduit est le résultat paresseux de s{ } et non un rdflib Result, mais seules les lignes sont comparées et utilisées. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation (2026-10-31) : 9 mutants, 1 survivant (?platform ?p agimage:Platform) tué par un voisin rdfs:seeAlso agimage:Platform ajouté au fixture, avec une plateforme à deux noms dont \"\" ; s{ }(g) vérifié sans effet sur les liaisons de g ; traduction juste, check OK."
 }

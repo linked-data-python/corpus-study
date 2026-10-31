@@ -30,7 +30,8 @@
     "initNs={\"time\": TIME, \"tfun\": TFUN} disappears entirely: the prologue is built from @prefix time:/tfun: declared at file scope (querying.md 'The prologue is the block's'), a single vocabulary declaration instead of a dict rebuilt at every call site -- and ID, used only in Python code (never in the query text), becomes an ordinary @prefix too, so `str(ID.a01)` reads `str(id:a01)`.",
     "The original test only asserts and returns nothing (same situation as lazlop/semantic_objects's test_class_scope_or_roundtrip and the sibling test_is_after in this stratum): `return actual` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff; it changes nothing about the RDF behaviour under test.",
     "Anti-hollow-green check performed: dropped the `FILTER tfun:isDuring(?a, ?b)` clause from translated.ldpy's query (leaving only the two `a time:Interval` patterns, which match every declared interval pairwise). rdfeval check FAILED with an AssertionError (actual no longer equals the 9-pair expected list). Reverted; check is green again.",
-    "id: as a prefix label shadows the Python builtin `id`; only ever used as `id:aNN`/`id:bNN` prefixed names, never as a bare Python identifier, so no collision observed -- noted per INSTRUCTIONS.md 2bis's warning about a declared prefix matching a Python name."
+    "id: as a prefix label shadows the Python builtin `id`; only ever used as `id:aNN`/`id:bNN` prefixed names, never as a bare Python identifier, so no collision observed -- noted per INSTRUCTIONS.md 2bis's warning about a declared prefix matching a Python name.",
+    "Repair of 2026-10-31: a seam `demo(run=lambda test: test())`, identical on both sides and outside the region, now is the driver's entry point (`demo()` is the former call); the translation itself is unchanged."
   ],
   "draft_sha": "78aeadea94fc6639",
   "provenance": {
@@ -44,6 +45,24 @@
     "bind_initbindings"
   ],
   "oracle": "values",
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : couture demo(run=...) identique des deux côtés (le défaut garde l'appel d'origine) ; trois appels qui enregistrent chaque appel du moteur SPARQL à tfun:isDuring (arguments et verdict, multi-ensemble trié) et l'issue du test : données amont (les 324 lignes candidates), données voisines dans un tests_dir temporaire (time:Instant et nœud rdfs:seeAlso time:Interval liés par time:intervalDuring, qui ne doivent pas être candidats ; :b1 typé Interval et ProperInterval), et zéro solution (deux time:ProperInterval seulement).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "?a a time:Interval -> ?a a ?ta (survivant avant)",
+      "?b a time:Interval -> ?b a ?tb (survivant avant)",
+      "?a a time:Interval -> ?a ?pa time:Interval (survivant avant)",
+      "?b a time:Interval -> ?b ?pb time:Interval (survivant avant)",
+      "motif ?a supprimé",
+      "motif ?b supprimé",
+      "FILTER supprimé",
+      "FILTER tfun:isDuring(?b, ?a)",
+      "îlot vidé (FILTER(... && 1 = 2))",
+      "requête lancée sur Graph() vide"
+    ],
+    "remaining": "Mutant équivalent non compté : SELECT DISTINCT (chaque (a, b) de la jointure est unique)."
+  },
   "validation": {
     "status": "equivalent",
     "method": "entry:test_is_during",

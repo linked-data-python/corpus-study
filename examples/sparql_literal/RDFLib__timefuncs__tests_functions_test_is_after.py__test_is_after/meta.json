@@ -28,7 +28,8 @@
     "Context restored (see original.py/translated.ldpy headers): `from pathlib import Path`, elided by line-range extraction (used one context line down by `tests_dir = Path(__file__).parent`, which WAS captured). The real input graph, `tests/functions/data/after.ttl`, is restored verbatim at data/after.ttl since `test_is_after` builds its own graph from that fixed relative path rather than taking one as an argument -- so there is no fixture.ttl for this region (see driver.py); the real file already covers several solutions (11 a/b pairs), a neighbourhood that must not match (a11-a13/b11-b13, deliberately excluded by the assert's `expected` list, kept as-is), and is the actual regression fixture the real project checks tfun:isAfter against.",
     "The query itself is a plain two-variable SELECT with one FILTER calling the custom function -- no UNION/OPTIONAL/paths/aggregates, but FILTER alone already puts it outside m{ }'s coverage (querying.md: 'No FILTER, OPTIONAL, UNION, property paths or aggregates'), so s{ } is the correct, not just the sampled, construction here.",
     "initNs={\"time\": TIME, \"tfun\": TFUN} disappears entirely: the prologue is built from @prefix time:/tfun: declared at file scope (querying.md 'The prologue is the block's'), a single vocabulary declaration instead of a dict rebuilt at every call site -- and AFTER, used only in Python code (never in the query text), becomes an ordinary @prefix too, so `str(AFTER.a01)` reads `str(after:a01)`.",
-    "The original test only asserts and returns nothing (same situation as lazlop/semantic_objects's test_class_scope_or_roundtrip in this stratum): `return actual` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff; it changes nothing about the RDF behaviour under test."
+    "The original test only asserts and returns nothing (same situation as lazlop/semantic_objects's test_class_scope_or_roundtrip in this stratum): `return actual` was appended identically to both original.py and translated.ldpy purely so run_pair has a value to diff; it changes nothing about the RDF behaviour under test.",
+    "Repair of 2026-10-31: a seam `demo(run=lambda test: test())`, identical on both sides and outside the region, now is the driver's entry point (`demo()` is the former call); the translation itself is unchanged. Correction of the note above: the upstream neighbours a11, a13, b12, b13 carry no rdf:type, so the type patterns exclude them and they never reach tfun:isAfter (the recorder of driver.py call 2 shows it) -- they are not excluded by the FILTER."
   ],
   "draft_sha": "c4fc2090188ba46c",
   "provenance": {
@@ -41,6 +42,24 @@
     "sparql_literal"
   ],
   "oracle": "values",
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : couture demo(run=...) identique des deux côtés (le défaut garde l'appel d'origine) ; trois appels qui enregistrent chaque appel du moteur SPARQL à tfun:isAfter (arguments et verdict, multi-ensemble trié) et l'issue du test : données amont (les 400 lignes candidates), données voisines dans un tests_dir temporaire (time:Instant et nœud rdfs:seeAlso time:TemporalEntity liés par time:after, qui ne doivent pas être candidats ; :b1 doublement typé), et zéro solution.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "?a a time:TemporalEntity -> ?a a ?ta (survivant avant)",
+      "?b a time:TemporalEntity -> ?b a ?tb (survivant avant)",
+      "?a a time:TemporalEntity -> ?a ?pa time:TemporalEntity (survivant avant)",
+      "?b a time:TemporalEntity -> ?b ?pb time:TemporalEntity (survivant avant)",
+      "motif ?a supprimé",
+      "motif ?b supprimé",
+      "FILTER supprimé",
+      "FILTER tfun:isAfter(?b, ?a)",
+      "îlot vidé (FILTER(... && 1 = 2))",
+      "requête lancée sur Graph() vide"
+    ],
+    "remaining": "Mutant équivalent non compté : SELECT DISTINCT (chaque (a, b) de la jointure est unique)."
+  },
   "validation": {
     "status": "equivalent",
     "method": "entry:test_is_after",
