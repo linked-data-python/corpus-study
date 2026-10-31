@@ -1,13 +1,27 @@
 # Stand-in for landscape/04-page/semtech_page_abox_v6_8_0.ttl (see context_shim.py).
 # Not the upstream ABox: a minimal graph holding the statements the region
 # redefines, plus neighbouring triples that must survive the removals.
-@prefix owl:     <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+#
+# The ten @prefix lines are the real file's header, verbatim (at
+# bad0fa7c46): the script serialises g after the region
+# (build_page_v6_9_0.py:106), so the bindings the parse gives g are part of
+# what the region must leave alone, and the driver compares them.  The
+# subjects the shim's replay() passes live in the shim's own namespace,
+# written in full below because the real header binds `semtech:` elsewhere;
+# sp:Page, sp:ReferencesRegion and sp:Doc are the three subjects the real
+# calls pass (build_page_v6_9_0.py:66-73), exercised by the driver.
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix semtech: <https://altunelyusuf.github.io/SemanticTechnologies/07-tooling#> .
+@prefix ipo: <http://example.org/rdodi/interactive-page-ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sd: <http://example.org/semtech/document#> .
+@prefix semtech: <http://example.org/semtech#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sp: <http://example.org/semtech/page#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-semtech:Protege a owl:NamedIndividual ;
+<https://altunelyusuf.github.io/SemanticTechnologies/07-tooling#Protege> a owl:NamedIndividual ;
     rdfs:label "Protege"@en, "Protege (fr)"@fr ;
     skos:definition "A stale definition."@en ;
     skos:note "A stale note."@en ;
@@ -15,12 +29,27 @@ semtech:Protege a owl:NamedIndividual ;
     rdfs:comment "neighbour: another predicate on the same subject"@en ;
     dcterms:source <https://protege.stanford.edu/> .
 
-semtech:GraphDB a owl:NamedIndividual ;
+<https://altunelyusuf.github.io/SemanticTechnologies/07-tooling#GraphDB> a owl:NamedIndividual ;
     rdfs:label "GraphDB"@en ;
     rdfs:comment "no skos:definition here"@en .
 
-semtech:Untouched a owl:NamedIndividual ;
+<https://altunelyusuf.github.io/SemanticTechnologies/07-tooling#Untouched> a owl:NamedIndividual ;
     rdfs:label "Untouched"@en ;
     skos:definition "neighbour: never passed to redefine"@en ;
     skos:note "neighbour: never passed to redefine"@en ;
     skos:scopeNote "neighbour: never passed to redefine"@en .
+
+# the subjects of the real calls, with the predicates they carry upstream
+sp:Page a ipo:InteractiveLearningPage, owl:NamedIndividual ;
+    rdfs:label "Taxonomies of Semantic Technologies — conversational interactive landscape page v6.8.0"@en ;
+    skos:definition "This page is the Stage-4 conversational rendering of the v4.0.0 landscape."@en ;
+    ipo:hasSourceDocument sp:Doc .
+
+sp:ReferencesRegion a ipo:SemanticRegion, owl:NamedIndividual ;
+    rdfs:label "References"@en ;
+    skos:definition "The references region lists all ninety-eight verified or flagged registry entries with levels."@en .
+
+sp:Doc a ipo:SourceDocument, owl:NamedIndividual ;
+    rdfs:label "Semantic technology landscape report (Stage-3 document, v6.8.0)"@en ;
+    skos:definition "This source document is the deepened Stage-3 report."@en ;
+    skos:note "A stale note on the source document."@en .

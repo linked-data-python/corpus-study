@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "check = OK (module-state, g1 14 triplets en sortie). Mutants sur une copie : remplacer l'ilot par pass -> ECHEC ; sujet en joker (-{ ?c skos:note ?o }) -> ECHEC (14 vs 12) ; objet lie a un litteral -> ECHEC ; predicat en joker -> ECHEC ; autre predicat -> ECHEC. Les skos:note des publications voisines sont donc bien proteges. Depot : l'instruction est bien seule a la ligne 101 de build_core_v4_4_0.py, corpus/SRNS definis aux lignes 90-92 (la note de meta.json et le commentaire de research_context.py disent « ligne 96 » : c'est 90 ; sans consequence). Le shim ne fait que restaurer import/BASEDIR/SRNS, le Namespace est verbatim. Pas de cas « corpus sans aucun skos:note » dans le fixture, mais l'ilot est une suppression unique sans branche : sans consequence.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-31 : 7 mutants tués (1 équivalent : -{ }(g1) sans @graph) ; le seul survivant, @prefix sk: qui écrase la liaison skos: du fichier, est tué par le contrôle des liaisons ajouté au pilote, avec l'en-tête @prefix réel dans le fixture ; traduction juste, check OK."
 }

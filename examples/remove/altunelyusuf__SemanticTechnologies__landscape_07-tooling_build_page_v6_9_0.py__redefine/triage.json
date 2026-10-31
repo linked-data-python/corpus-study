@@ -4,5 +4,6 @@
   "summary": "Rien a signaler d'equivalence : les 28 mutants testes sur les quatre paires -{ }/+{ } echouent tous ; reserve de mesure seulement, 5 des 7 @prefix et les imports rdflib sont inutilises cote ldpy.",
   "questions": [],
   "evidence": "check = OK. Mutants sur une copie (mktemp), pour chacun des quatre predicats : sujet du -{ } elargi, predicat du -{ } elargi, -{ } supprime, objet lie a un litteral, predicat echange, sujet du +{ } elargi, +{ } supprime : les 28 ECHOUENT (le replay de la cale appelle les quatre annotations sur un sujet qui les porte toutes). `{label}@en` equivaut a Literal(label, lang=\"en\") pour les str que le depot passe (build_page_v6_9_0.py:66-77, uniquement label=/defn= en str). Reserve de mesure, sans drapeau : les @prefix rdf, owl, dcterms, xsd, prov et les imports `from rdflib.namespace import ...` restent alors que seuls rdfs et skos sont employes ; la paire soeur v6_4_0 les retire, celle-ci les garde par choix « ligne de contexte » (meta.json) : si la mesure compte les lignes @prefix, elle gonfle la surface ldpy de 5 lignes.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-31 : 30 mutants tués (1 équivalent : (g) sans @graph) ; survivaient les quatre gardes affaiblies en vérité (aucun appel avec \"\") et @prefix sk:/rs: (liaisons non comparées) — tués par les appels réels + chaînes vides et le contrôle des liaisons ajoutés au pilote ; traduction juste, check OK."
 }

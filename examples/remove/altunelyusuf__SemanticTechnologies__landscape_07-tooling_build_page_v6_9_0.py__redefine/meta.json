@@ -24,7 +24,8 @@
     "-{ }",
     "nom préfixé",
     "littéral avec langue",
-    "variable"
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov (the `from rdflib.namespace import ...` line is a context line of the file, kept verbatim: other regions of build_page_v6_9_0.py use those constants, and removing it would be cleaning)",
@@ -33,7 +34,8 @@
     "the module-level `@graph g` is declared once and reaches inside redefine() (block scope), which is what lets the four rewritten pairs drop the `g.` receiver entirely",
     "`Literal(label, lang=\"en\")` -> `{label}@en` (interpolation with a glued language tag), not `\"label\"@en`: the value is computed",
     "context shim (identical for both sides, excluded from the surface metrics): the preamble parses `f\"{HERE}/04-page/semtech_page_abox_v6_8_0.ttl\"`, and neither HERE nor that ABox is in the extract. context_shim.py binds HERE to the example directory and 04-page/semtech_page_abox_v6_8_0.ttl is a minimal stand-in (two labels on one subject, a subject without skos:definition, and neighbouring predicates/subjects that must survive). context_shim.replay() holds the calls the module makes to redefine() further down the file -- also outside the region -- so the mutation of the module-level `g` is observable by the isomorphism oracle; the pair itself gains one identical line, `replay(redefine)`",
-    "oracle: entry=None (module state). redefine() returns None and takes no graph argument, so an entry=... driver would compare nothing; the graph it mutates is a module global"
+    "oracle: entry=None (module state). redefine() returns None and takes no graph argument, so an entry=... driver would compare nothing; the graph it mutates is a module global",
+    "Audit du 2026-10-31 (traduction juste) : les quatre gardes `is not None` n'étaient exercées qu'avec None ou des chaînes non vides, si bien qu'une garde affaiblie en `if label:` restait verte ; le pilote rejoue maintenant, après le replay du shim, les trois appels réels du dépôt (sp:Page, sp:ReferencesRegion, sp:Doc, build_page_v6_9_0.py:66-73) puis des chaînes vides (note=\"\", scope=\"\", label=\"\", defn=\"\"), qui retirent l'ancienne valeur et écrivent un littéral vide @en : les quatre affaiblissements tombent, la traduction passe. Le fixture porte l'en-tête @prefix réel (les sujets du shim, dans un espace inventé que le vrai en-tête lie à un autre semtech:, sont écrits en IRI complètes) et le pilote compare les liaisons de g, que le dépôt sérialise (ligne 106) : les sept @prefix de la traduction portent les noms que le fichier lie déjà, un @prefix sk: ou rs: écraserait. Les deux versions, exécutées contre le vrai semtech_page_abox_v6_8_0.ttl du dépôt, sont équivalentes. 'interpolation {expr}' ({iri}, {label}@en…) ajouté aux constructions, où il manquait."
   ],
   "draft_sha": "288ba374cf8cfd0e",
   "provenance": {
@@ -52,5 +54,22 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : seconde exécution de chaque côté qui rejoue les trois appels réels du dépôt puis des chaînes vides sur les quatre paramètres, compare g par isomorphisme et exige les liaisons de préfixe de l'original dans la traduction ; fixture avec l'en-tête @prefix réel et les trois sujets des appels réels",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "garde forcée à True (x4)",
+      "garde forcée à False (x4)",
+      "garde affaiblie en vérité (`if label:` etc., x4) -- tuée par les seules chaînes vides",
+      "-{ } supprimé (x4)",
+      "sujet du -{ } élargi (x4)",
+      "+{ } supprimé (x4)",
+      "@en retiré (x4)",
+      "@prefix sk: au lieu de skos: -- tué par la seule vérification des liaisons",
+      "@prefix rs: au lieu de rdfs: -- tué par la seule vérification des liaisons"
+    ],
+    "remaining": "Le shim invente l'espace https://altunelyusuf.github.io/SemanticTechnologies/07-tooling# pour les sujets de replay(), absent du dépôt (les vrais appels passent SP.*) ; le pilote couvre désormais les vrais sujets à part, mais le shim reste à juger (shim-invents-logic)."
   }
 }

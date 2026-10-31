@@ -82,3 +82,18 @@
     rdfs:subClassOf :Annotation ;
     rdfs:label "expression information" ;
     rdfs:comment "no goo file mentions this one" .
+
+# audit 2026-10-31 -- the empty suggestion: both entities are changed, and
+# each has one suggestion empty in its goo-file row, so the region removes the
+# old value and writes nothing back (the `len(...) > 0` guard).  :Located_in
+# is a real row of the named-individuals file (empty suggested comment);
+# :absorptionNote is the real predicates row with its suggested label emptied.
+:Located_in a owl:NamedIndividual, :GoQualifier ;
+    rdfs:label "Located in" ;
+    rdfs:comment "a stale comment that the empty suggestion must remove" .
+
+:absorptionNote a owl:ObjectProperty ;
+    rdfs:label "absorption note" ;
+    rdfs:comment "Links an isoform to an annotation" ;
+    rdfs:domain :Isoform ;
+    rdfs:range :Annotation .

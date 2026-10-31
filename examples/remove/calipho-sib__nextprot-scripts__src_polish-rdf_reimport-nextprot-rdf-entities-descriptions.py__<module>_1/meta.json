@@ -29,7 +29,8 @@
     "f<…>",
     "littéral typé",
     "nom préfixé",
-    "variable"
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "strate remove : les quatre formes de la région y passent. g.remove((URIRef(k), None, None)) -> -{ f<{k}> ?p ?o } et g.remove((None, None, URIRef(k))) -> -{ ?s ?p f<{k}> } (jokers sur deux positions, pas la même) ; g.remove((URIRef(k), URIRef(...#label), None)) -> -{ f<{k}> rdfs:label ?old_label }. Les deux premiers sont, ensemble, l'effacement d'une entité — et le pilote montre que la 3e position, prédicat, N'EST PAS couverte : :antibodiesAcc est « caché » mais le triplet qui l'emploie comme prédicat survit, dans les deux versions.",
@@ -40,7 +41,8 @@
     "URIRef, Literal et XSD ne sont plus référencés une fois les îlots en place : leurs imports disparaissent. Namespace et sys étaient déjà morts dans l'original, ils restent (aucune refactorisation).",
     "fixture : schema.ttl est engendré par la chaîne neXtProt et absent du dépôt ; fixture.ttl le reconstitue d'après la forme que le script voisin retrieve-schema-labels-comments.py interroge. Les trois TSV de goofiles_fixture/ sont des lignes COPIÉES VERBATIM des vrais fichiers du dépôt (en-tête + statuts Private / private / Public / NEW / vide + une ligne « ### ... » non-http qui doit être sautée), sous leurs noms exacts (espaces compris).",
     "couverture du fixture : 50 -> 35 triplets ; 4 entités Private effacées en sujet ET en objet ; une URI du goo file absente du graphe (le cas zéro solution de la requête COUNT) ; un label inchangé avec commentaire ajouté ; un :antibodiesAcc conservé en position de prédicat (voisinage qui ne doit pas matcher).",
-    "l'oracle est double : isomorphisme du graphe g ET égalité de la sortie standard, que le script emploie abondamment (compte de triplets après chaque étape, journal des changements)."
+    "l'oracle est double : isomorphisme du graphe g ET égalité de la sortie standard, que le script emploie abondamment (compte de triplets après chaque étape, journal des changements).",
+    "Audit du 2026-10-31 (traduction juste) : aucune entité modifiée n'avait de suggestion vide, si bien que les gardes `len(new_label)>0` / `len(new_comment)>0` forcées à True restaient vertes ; le fixture gagne :Located_in (ligne réelle des named-individuals, commentaire suggéré vide) et :absorptionNote (ligne réelle des prédicats, libellé suggéré vidé, signalé dans le TSV par une ligne que la région saute) — 57 -> 42 triplets — et les deux gardes tombent. Le pilote compare aussi les cinq fichiers que le script écrit (schema-tmp.0 à 3, schema-new.ttl : isomorphisme et préfixes déclarés), chaque côté dans son répertoire. Liaisons : @graph g lie rdfs: et xsd: avant g.parse(ttlfile), aux noms par défaut de rdflib, et le parse rétablit ceux du schéma ; même un @prefix rs: n'atteint pas les fichiers écrits (vérifié) — pas de défaut de liaison possible ici. 'interpolation {expr}' ({f<{uri}>}, {new_label}^^xsd:string) ajouté aux constructions, où il manquait."
   ],
   "draft_sha": "39bcd36ee79c473a",
   "provenance": {
@@ -60,5 +62,25 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : deux suggestions vides dans le fixture (une ligne réelle, une ligne réelle au libellé vidé, et les deux entités dans schema.ttl) ; seconde exécution de chaque côté dans son propre répertoire, qui compare les cinq fichiers sérialisés (ensemble, isomorphisme, préfixes déclarés de l'original présents dans la traduction)",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "chacun des quatre -{ } supprimé",
+      "sujet de l'entité cachée élargi",
+      "sujet du retrait de libellé coercé depuis str",
+      "garde len(new_label)>0 forcée à True -- tuée par la seule suggestion vide",
+      "garde len(new_comment)>0 forcée à True -- tuée par la seule suggestion vide",
+      "garde de libellé forcée à False",
+      "garde de commentaire forcée à False",
+      "sujet du COUNT élargi",
+      "sujet du COUNT coercé depuis str",
+      "BGP du COUNT vidé (FILTER(1 = 2))",
+      "^^xsd:string retiré du libellé",
+      "^^xsd:string retiré du commentaire"
+    ],
+    "remaining": ""
   }
 }

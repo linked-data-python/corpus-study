@@ -4,5 +4,6 @@
   "summary": "Rien a signaler : fixture bien ecrite contre la region, tous les mutants testes (sujet ou predicat elargi, suppression, objet lie, tuple raccourci, sujet change) echouent.",
   "questions": [],
   "evidence": "check = OK. Mutants sur une copie (mktemp) : `-{ ?q {p} ?o }`, `-{ {ONT} ?q ?o }`, suppression du -{ }, objet lie a \"6.3.0\", chacun des trois predicats retire du tuple, ONT change vers un voisin, dcterms:modified remplace par dcterms:created : tous ECHOUENT. Le fixture donne deux valeurs par predicat, un voisin ontologie portant les memes predicats et un sujet du meme jeu de predicats. URIRef(...) -> <...> sans @base : identite. Pas d'article-example : la paire passe d'une ligne a deux (gain de notation annule, note du traducteur exacte).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-31 : 10 mutants tués (1 équivalent : -{ }(g) sans @graph) ; les deux survivants, @prefix dct: / ow: qui écrasent les liaisons du fichier, sont tués par le contrôle des liaisons ajouté au pilote, avec l'en-tête @prefix réel dans le fixture ; traduction juste, check OK."
 }

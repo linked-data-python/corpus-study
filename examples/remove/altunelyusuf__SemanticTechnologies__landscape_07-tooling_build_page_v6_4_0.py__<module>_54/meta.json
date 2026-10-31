@@ -21,7 +21,8 @@
     "-{ }",
     "IRI",
     "nom préfixé",
-    "variable"
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "la région est le cas canonique de la strate : g.remove((ONT, p, None)) devient -{ {ONT} {p} ?o }, où ?o non liée est le joker qui remplace le None de rdflib ; le prédicat reste une variable Python interpolée {p} puisque la boucle le fait varier",
@@ -30,7 +31,8 @@
     "from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV disparaît côté ldpy : la région n'en tirait que OWL et DCTERMS, absorbés par deux @prefix. Le bilan de lignes est neutre (1 import -> 2 déclarations) parce que l'extraction ne montre qu'une région ; dans le fichier complet le même import sert 40 autres lignes",
     "constat confirmé : from rdflib.namespace import owl: ne marche pas — l'import de préfixes exige que le module exporte __namespaces__, donc un module ldpy ; les vocabulaires standard passent obligatoirement par @prefix (ImportError: cannot import name '__namespaces__' from 'rdflib.namespace')",
     "shim de contexte page_context.py : l'import rdflib (ligne 9) et HERE (ligne 12) que les lignes de contexte extraites ne portent pas ; HERE pointe sur le répertoire de l'exemple, où 04-page/semtech_page_abox_v6_3_0.ttl est un fixture (l'artefact de build n'est pas dans le dépôt)",
-    "fixture écrit contre la région : les trois prédicats portent plusieurs valeurs (le joker en retire 6 d'un coup), le même sujet porte d'autres prédicats et deux autres sujets portent les mêmes prédicats (un motif trop large se verrait) ; 17 triplets en entrée, 11 en sortie des deux côtés"
+    "fixture écrit contre la région : les trois prédicats portent plusieurs valeurs (le joker en retire 6 d'un coup), le même sujet porte d'autres prédicats et deux autres sujets portent les mêmes prédicats (un motif trop large se verrait) ; 17 triplets en entrée, 11 en sortie des deux côtés",
+    "Audit du 2026-10-31 (traduction juste) : le fixture 04-page/semtech_page_abox_v6_3_0.ttl porte désormais les dix lignes @prefix du vrai fichier (semtech:, sp:, ipo:… ; sem: devenait semtech: — même IRI), et le pilote compare les liaisons de g, que le dépôt sérialise après la région (build_page_v6_4_0.py:106). @prefix owl: et dcterms: sont les noms que le fichier lie déjà aux mêmes espaces : @graph g ne déplace rien ; un @prefix dct: ou ow: écraserait la liaison du fichier, et seul ce contrôle le voit. Le fichier d'entrée est en fait dans le dépôt (landscape/04-page/) : les deux versions, exécutées contre lui, sont équivalentes. 'interpolation {expr}' ({ONT}, {p}) ajouté aux constructions, où il manquait."
   ],
   "draft_sha": "14b32ee14bf3e8d5",
   "provenance": {
@@ -49,5 +51,23 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture avec l'en-tête @prefix réel du fichier parsé ; après le verdict module-state de run_pair inchangé, le pilote exige que chaque liaison de préfixe du g de l'original se retrouve dans celui de la traduction (le dépôt sérialise g à la ligne 106)",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot supprimé",
+      "sujet élargi ?s",
+      "prédicat élargi ?q",
+      "objet lié à \"6.3.0\"",
+      "owl:versionInfo retiré du tuple",
+      "owl:versionIRI retiré du tuple",
+      "dcterms:modified retiré du tuple",
+      "ONT déplacé sur l'ontologie voisine",
+      "@prefix dct: au lieu de dcterms: -- tué par la seule vérification des liaisons",
+      "@prefix ow: au lieu de owl: -- tué par la seule vérification des liaisons"
+    ],
+    "remaining": ""
   }
 }

@@ -20,7 +20,8 @@
     "@graph",
     "-{ }",
     "nom préfixé",
-    "variable"
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "cas le plus pur de la strate : g1.remove((corpus, SKOS.note, None)) devient -{ {corpus} skos:note ?o } — une ligne pour une ligne, le sentinelle None de rdflib devenant un joker nommé ?o",
@@ -29,7 +30,8 @@
     "from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV disparaît côté ldpy : la région n'en tirait que SKOS, absorbé par @prefix skos: — 1 ligne pour 1 ligne",
     "corpus = SRNS.ResearchCorpus reste inchangé des deux côtés : SRNS est défini à la ligne 96 du fichier d'origine, que l'extraction ne porte pas ; il est donc dans le shim, hors surface mesurée, et le traduire en @prefix srns: aurait fait payer au seul côté ldpy une déclaration que l'original a hors région",
     "shim de contexte research_context.py : import rdflib (ligne 8), BASEDIR (ligne 11), SRNS (ligne 96) ; BASEDIR pointe sur le répertoire de l'exemple, où 01-research/semtech_research_v4_3_0.ttl est un fixture (l'artefact de build n'est pas dans le dépôt)",
-    "fixture écrit contre la région : le corpus porte deux skos:note (le joker prend les deux) et d'autres prédicats qui restent ; surtout, chaque publication porte elle aussi un skos:note — un motif qui oublierait d'épingler le sujet viderait tout. 16 triplets en entrée, 14 en sortie, 2 notes de publication conservées, des deux côtés"
+    "fixture écrit contre la région : le corpus porte deux skos:note (le joker prend les deux) et d'autres prédicats qui restent ; surtout, chaque publication porte elle aussi un skos:note — un motif qui oublierait d'épingler le sujet viderait tout. 16 triplets en entrée, 14 en sortie, 2 notes de publication conservées, des deux côtés",
+    "Audit du 2026-10-31 (traduction juste) : le fixture 01-research/semtech_research_v4_3_0.ttl porte désormais les dix lignes @prefix du vrai fichier (res:, sr:… au lieu de ro:, srns: — mêmes IRI, triplets inchangés), et le pilote compare les liaisons de g1, que le dépôt sérialise juste après la région (build_core_v4_4_0.py:113). @prefix skos: est le nom que le fichier lie déjà au même espace : @graph g1 ne déplace rien ; un @prefix sk: l'écraserait, et seul ce contrôle le voit. Correction de fait : contrairement à ce que disent la note du shim et celle ci-dessus, semtech_research_v4_3_0.ttl est dans le dépôt (landscape/01-research/) ; les deux versions, exécutées contre ce vrai fichier, sont équivalentes (triplets et liaisons). 'interpolation {expr}' ({corpus}) ajouté aux constructions, où il manquait."
   ],
   "draft_sha": "79dd354bd3e613db",
   "provenance": {
@@ -48,5 +50,20 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture avec l'en-tête @prefix réel du fichier parsé ; après le verdict module-state de run_pair inchangé, le pilote exige que chaque liaison de préfixe du g1 de l'original se retrouve dans celui de la traduction (le dépôt sérialise g1 à la ligne 113)",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot supprimé",
+      "îlot sur un prédicat absent",
+      "sujet élargi ?c",
+      "prédicat élargi ?p",
+      "objet lié à un littéral",
+      "sujet coercé depuis str",
+      "@prefix sk: au lieu de skos: (liaison skos: écrasée par @graph) -- tué par la seule vérification des liaisons"
+    ],
+    "remaining": ""
   }
 }
