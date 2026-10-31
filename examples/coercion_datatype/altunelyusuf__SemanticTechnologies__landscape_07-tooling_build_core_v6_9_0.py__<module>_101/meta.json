@@ -40,7 +40,19 @@
     "date": "2026-10-31",
     "driver": "renforcé: driver écrit à la main (même comparaison module-state que run_pair: graphes, valeurs communes, stdout) qui exige en plus que chaque liaison de préfixe du g1 de l'original subsiste dans la traduction ; fixture de remplacement semtech_research_v6_8_0.ttl doté des dix lignes @prefix réelles du dépôt.",
     "translation_fixed": true,
-    "mutants_killed": ["îlot +{ corpus rdfs:member pub } supprimé", "îlot à sujet partagé supprimé", "objet de rdfs:member élargi en ?x", "sujet pub élargi en ?x", "rdfs:label élargi en ?x", "dcterms:source élargi en ?x", "skos:note élargi en ?x", "rdfs:seeAlso élargi en ?x", "f<{url}> remplacé par {url} (littéral)", "replace('-', '_') retiré de la partie locale", "@prefix srns: rajouté à côté de sr: (liaison sr perdue)"],
+    "mutants_killed": [
+      "îlot +{ corpus rdfs:member pub } supprimé",
+      "îlot à sujet partagé supprimé",
+      "objet de rdfs:member élargi en ?x",
+      "sujet pub élargi en ?x",
+      "rdfs:label élargi en ?x",
+      "dcterms:source élargi en ?x",
+      "skos:note élargi en ?x",
+      "rdfs:seeAlso élargi en ?x",
+      "f<{url}> remplacé par {url} (littéral)",
+      "replace('-', '_') retiré de la partie locale",
+      "@prefix srns: rajouté à côté de sr: (liaison sr perdue)"
+    ],
     "remaining": "Le préfixe `sr:` est choisi parce que c'est la liaison que le fichier Turtle lu par le dépôt pose déjà ; le suffixe d'appel `(g1)` à la place de `@graph g1` éviterait aussi la réécriture de liaison. Ce choix vous convient-il ? Mutant équivalent non compté : `[:180]` retiré du label (aucune citation des données du dépôt ne dépasse 149 caractères)."
   },
   "article_candidate": true,
@@ -57,7 +69,7 @@
   "oracle": "isomorphism",
   "validation": {
     "status": "equivalent",
-    "method": "module-state",
+    "method": "module-state (custom: graphs, shared values, stdout, prefix bindings of g1)",
     "diffs": [],
     "error": null,
     "names_only_original": [

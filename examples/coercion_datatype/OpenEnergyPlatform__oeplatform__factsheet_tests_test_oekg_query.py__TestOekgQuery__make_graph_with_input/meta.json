@@ -37,7 +37,16 @@
     "date": "2026-10-31",
     "driver": "inchangé",
     "translation_fixed": false,
-    "mutants_killed": ["îlot à sujet partagé (bundle) supprimé", "îlot scenario supprimé", "îlot input_ds supprimé", "{table_iri_literal} élargi en ?x", "sujet {input_ds} élargi en ?x", "objet {scenario} élargi en ?x", "{table_iri_literal} remplacé par f<{table_iri_literal}> (IRI)", "^^xsd:string ajouté"],
+    "mutants_killed": [
+      "îlot à sujet partagé (bundle) supprimé",
+      "îlot scenario supprimé",
+      "îlot input_ds supprimé",
+      "{table_iri_literal} élargi en ?x",
+      "sujet {input_ds} élargi en ?x",
+      "objet {scenario} élargi en ?x",
+      "{table_iri_literal} remplacé par f<{table_iri_literal}> (IRI)",
+      "^^xsd:string ajouté"
+    ],
     "remaining": "Mutant équivalent non compté : @graph g remplacé par le suffixe (g) (seules les liaisons oeo:/obo: ajoutées changent ; le dépôt ne lit que des triplets, filters.py). Sondage par type dans une copie : int, float, bool, Decimal, None et datetime en table_iri_literal restent verts (node(x) == Literal(x)) ; seule une URIRef diverge (node la garde, Literal en fait un littéral), et aucun appelant du dépôt n'en passe (test_oekg_query.py:46,54,80 : des str)."
   },
   "article_candidate": true,

@@ -36,7 +36,21 @@
     "date": "2026-10-31",
     "driver": "renforcé: driver écrit à la main (les trois appels d'origine gardés) qui compare levées, graphe par isomorphisme, liaisons de préfixes (graphe à la forme de decode_main.py:131-133, ontouml: et :), avertissements et stdout ; politique de cardinalité (contexte ARGUMENTS) posée par cas ; cas ajoutés : clé cardinality absente (réelle après clean_null_data), '1', '0..0', '' en preserve, '1,,*' et 'x..y' en repair, 'x..y' en error (levée), '2..1'.",
     "translation_fixed": false,
-    "mutants_killed": ["îlot rdf:type supprimé", "îlot ontouml:cardinality supprimé", "îlot cardinalityValue supprimé", "îlot des bornes supprimé", "garde des bornes forcée à True", "garde des bornes forcée à False", "garde externe 'cardinality' in property_dict forcée à True (tué par le nouveau cas sans clé)", "{full_cardinality} élargi en ?x", "{lower_bound}^^xsd:nonNegativeInteger élargi en ?x", "{upper_bound} élargi en ?x", "^^xsd:nonNegativeInteger retiré", "^^xsd:nonNegativeInteger ajouté à upperBound", "@prefix ont: rebindant l'espace ontouml (liaison ontouml perdue)"],
+    "mutants_killed": [
+      "îlot rdf:type supprimé",
+      "îlot ontouml:cardinality supprimé",
+      "îlot cardinalityValue supprimé",
+      "îlot des bornes supprimé",
+      "garde des bornes forcée à True",
+      "garde des bornes forcée à False",
+      "garde externe 'cardinality' in property_dict forcée à True (tué par le nouveau cas sans clé)",
+      "{full_cardinality} élargi en ?x",
+      "{lower_bound}^^xsd:nonNegativeInteger élargi en ?x",
+      "{upper_bound} élargi en ?x",
+      "^^xsd:nonNegativeInteger retiré",
+      "^^xsd:nonNegativeInteger ajouté à upperBound",
+      "@prefix ont: rebindant l'espace ontouml (liaison ontouml perdue)"
+    ],
     "remaining": ""
   },
   "article_candidate": true,
@@ -53,7 +67,7 @@
   "oracle": "isomorphism",
   "validation": {
     "status": "equivalent",
-    "method": "entry:set_cardinality_relations",
+    "method": "entry:set_cardinality_relations (custom: isomorphism, bindings, warnings, raises, stdout)",
     "diffs": [],
     "error": null
   }
