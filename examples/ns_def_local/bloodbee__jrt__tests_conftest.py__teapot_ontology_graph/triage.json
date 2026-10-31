@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. Fonction sans branche ni entrée, un seul appel suffit (demo atteint le corps par __wrapped__). Le dépôt sérialise ce graphe (tests/conftest.py:116 `teapot_ontology_graph.serialize(destination=path, format=\"turtle\")`), donc j'ai vérifié les liaisons que l'isomorphisme ne voit pas : sur une copie, transpilé puis comparé, `sorted(g.namespaces())` est identique des deux côtés (stuff, owl, rdfs déjà liés par défaut dans rdflib 7) et la sérialisation turtle est octet pour octet identique (`stuff:TeaPot a owl:Class`). Pas de `{expr}` pouvant valoir None (aucune interpolation). Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation (6 mutants, 2 survivants : préfixe renommé, suffixe d'appel sans liaison) ; pilote renforcé sur les liaisons et l'aller-retour Turtle du dépôt, les 6 meurent, traduction juste."
 }

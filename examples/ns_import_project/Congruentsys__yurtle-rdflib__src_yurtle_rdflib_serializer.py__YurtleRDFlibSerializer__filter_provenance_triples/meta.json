@@ -46,5 +46,22 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : appel direct sur des stores aux liaisons réelles du dépôt (prov/yurtle/pm/being de store.py:133-136, en-tête Turtle parsé, store vide), comparaison du graphe filtré, de ses liaisons de préfixes (sérialisé par serializer.py:105-108), de l'identité du résultat, du store, de stdout et des levées ; triplets BNode, littéraux langue/typés/xsd:string, Literal \"file://…\" gardé, URIRef file:// en sujet gardée.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot +{ }(filtered) remplacé par pass",
+      "garde definedIn forcée à False",
+      "garde definedIn forcée à True",
+      "provenance:definedIn -> provenance:definedin",
+      "{s} élargi en ?s",
+      "garde file:// forcée à False",
+      "@graph filtered + +{ } au lieu du suffixe d'appel (g) — survivait (rebinde l'espace prov en provenance)",
+      "@graph filtered avec îlot provenance: inerte — survivait",
+      "boucle de copie des liaisons retirée — survivait"
+    ],
+    "remaining": ""
   }
 }

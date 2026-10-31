@@ -43,5 +43,19 @@
     "method": "custom:class-attributes",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : en plus de str(), le type de AAS/CD_TYPE/ID, les noms d'attributs propres de la classe, et les usages du dépôt (AAS[\"Identifiable/id\"], AAS.idShort, graph.bind(\"aas\", AASNameSpace.AAS) comme app/models/key.py:49) ; côtés pris de RDFEVAL_SIDES.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "CD_TYPE = str(aas:ConceptDescription) — survivait",
+      "ID = Literal(aas:{\"Identifiable/id\"}) — survivait",
+      "AAS stocké comme str — survivait",
+      "` as AAS` retiré",
+      "partie locale Identifiable/id -> Identifiable_id",
+      "attribut de classe en plus — survivait"
+    ],
+    "remaining": "La première translation_note (« as AAS inutilisé, gardé pour la lisibilité ») est fausse : le dépôt indexe AASNameSpace.AAS[...] quelque 300 fois et le lie par graph.bind ; le `as AAS` est nécessaire, et le pilote le vérifie désormais."
   }
 }

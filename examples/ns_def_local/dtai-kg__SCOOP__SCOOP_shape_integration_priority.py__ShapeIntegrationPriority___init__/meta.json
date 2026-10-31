@@ -40,5 +40,21 @@
     "method": "entry:__init__",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : appel direct de chaque côté, comparaison des noms d'attributs, du TYPE de chaque attribut et de chaque élément des listes de termes (Namespace == str et URIRef == Namespace sont vrais en valeur), de self.random_number sous random.seed(1234) identique, des liaisons de self.SHACL (sérialisé en :433), et de l'identité de self.shapes/self.output ; cas à la forme réelle de main.py:84-99 (liste de couples (Graph, chemin)).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "self.shaclNS = str(SHACL_NS) — survivait",
+      "self.rdfSyntax = URIRef(RDF_SYNTAX_NS) — survivait",
+      "shacl:targetObjectsOf retiré",
+      "[shacl:path] -> []",
+      "[shacl:path] -> [str(shacl:path)]",
+      "IRI de @prefix shacl: changée",
+      "self.SHACL = None",
+      "range(1000) -> range(999) dans random_number — survivait"
+    ],
+    "remaining": ""
   }
 }

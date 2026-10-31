@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : les deux Namespace stockés sur `self` deviennent `@prefix … as`, les 5 accès `self.shaclNS.x` des listes deviennent des noms préfixés ; les mutants de contenu sont tués. Le gain est modeste (la notation n'économise presque rien).",
   "questions": [],
   "evidence": "rdfeval check : OK. Transpilé : `SHACL_NS` et `RDF_SYNTAX_NS` sont des `rdflib.Namespace`, les éléments des listes des `URIRef`. Les usages du dépôt (SCOOP/shape_integration_priority.py, autres méthodes) lisent `self.shaclNS.<terme>` et `self.rdfSyntax.first/rest/nil` : aucun terme n'entre en collision avec une méthode de `str`, et c'est bien l'objet Namespace qui est stocké. Mutants sur une copie : suppression de `shacl:targetObjectsOf`, `propertyPathNS = []`, `shacl:path` -> `shacl:targetNode`, `rdfSyntax = SHACL_NS`, `SHACL = None` : tous FAIL. Seul survivant : `self.shaclNS = \"http://…#\"` (une `str`) car `Namespace == str` dans `_Self.__eq__`, mais la traduction ne produit pas ce cas (type Namespace vérifié) : sans conséquence pour la paire. Pas de graphe écrit, donc pas de liaison de préfixe à observer. `random_number` exclu de l'égalité par le pilote, code identique des deux côtés. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation (8 mutants, 3 survivants : Namespace stocké en str ou URIRef, random_number exclu) ; pilote renforcé (types, graine fixe, liaisons, entrées réelles), les 8 meurent, traduction juste."
 }

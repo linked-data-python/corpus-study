@@ -43,5 +43,19 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : liaisons de préfixes du graphe rendu comparées (toute liaison de l'original doit être dans la traduction), et aller-retour Turtle du fixture teapot_ontology (tests/conftest.py:113-118 : sérialisation, re-lecture, isomorphisme et préfixes déclarés).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot +{ } remplacé par pass",
+      "second sujet stuff:stuffs retiré",
+      "\"TeaPot\" -> \"TeaPot\"@en",
+      "IRI de @prefix stuff: changée",
+      "@prefix stuff: renommé st: (même IRI) — survivait",
+      "@graph g retiré, +{ }(g) en suffixe d'appel qui ne lie rien — survivait"
+    ],
+    "remaining": ""
   }
 }
