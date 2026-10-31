@@ -45,5 +45,25 @@
     "method": "entry:testUpdateWithInitNs",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "@prefix ns: <urn:> -> <urn:x:>",
+      "GRAPH ns:graph -> ns:other",
+      "GRAPH retiré (insertion dans le graphe par défaut)",
+      "îlot supprimé (pass)",
+      "îlot vidé (INSERT DATA { })",
+      ".execute() retiré",
+      "ns:pizza -> ns:cheese",
+      "triplet en plus dans urn:graph",
+      "triplet en plus dans le graphe par défaut",
+      "@graph graph -> @graph Dataset() frais",
+      "DELETE WHERE { ?s ?p ?o } ajouté avant l'INSERT DATA",
+      "graphuri -> <urn:other>"
+    ],
+    "remaining": "Écart non observable dans le dépôt, noté pour Maxime : `@graph graph` lie ns: -> urn: sur le graphe de l'appelant ; une sonde montre que si ce graphe liait déjà urn: à un autre préfixe (foo:), la liaison foo: est remplacée par ns: (bind override), ce que graph.update(..., initNs=...) ne fait pas. Le dépôt ouvre un ConjunctiveGraph(store='LevelDB') frais (test/test_functionality.py:46-65) où urn: n'est lié à rien, et rien n'y relit les liaisons ; `s{ … }(graph).execute()` sans @graph éviterait l'effet."
   }
 }

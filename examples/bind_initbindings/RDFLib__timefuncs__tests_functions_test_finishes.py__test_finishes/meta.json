@@ -46,5 +46,25 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "couture demo(run=...) identique des deux côtés (le défaut garde l'appel d'origine), comme pour test_starts ; trois appels qui enregistrent chaque appel du moteur SPARQL à tfun:finishes (arguments et verdict, multi-ensemble trié), la liste que le test passe à sorted() (son `actual`, avec sa multiplicité, par un `sorted` posé le temps de l'appel dans les globales du module) et l'issue du test : données amont, données voisines dans un tests_dir temporaire (paire ProperInterval liée par intervalFinishes, nœud typé Interval et ProperInterval -> lignes doublées, time:Instant et time:DateTimeInterval liés qui ne doivent pas être candidats), et zéro solution.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "time:ProperInterval -> time:Nothing dans VALUES ?b_type seul (survivait)",
+      "time:ProperInterval doublé dans VALUES ?b_type (multiplicité, survivait)",
+      "SELECT DISTINCT (survivait)",
+      "time:ProperInterval -> time:Nothing dans les deux VALUES (déjà tué)",
+      "time:ProperInterval -> time:Nothing dans VALUES ?a_type seul (déjà tué)",
+      "time:Interval retiré de VALUES ?a_type (déjà tué)",
+      "?b a time:Interval à la place de ?b a ?b_type (déjà tué)",
+      "motif ?b a ?b_type supprimé (déjà tué)",
+      "FILTER tfun:finishes(?b, ?a) (déjà tué)",
+      "FILTER supprimé (déjà tué)",
+      "SELECT ?b ?a (déjà tué)",
+      "îlot vidé (déjà tué)"
+    ],
+    "remaining": ""
   }
 }

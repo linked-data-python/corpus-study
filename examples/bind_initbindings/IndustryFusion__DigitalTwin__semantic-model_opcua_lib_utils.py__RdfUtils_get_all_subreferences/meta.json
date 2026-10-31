@@ -42,5 +42,25 @@
     "method": "entry:get_all_subreferences",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "troisième appel _call_deep_hierarchy, à la forme de la hiérarchie OPC UA que parcourt le dépôt (owl2instances.py:262-268) : chaînes de deux et trois sauts, losange (d sous a et b, eux-mêmes sous super : une seule ligne), sous-propriété réflexive, cycle qui n'atteint pas super, cibles littéral \"\" et nœud blanc, nœud de départ en objet et en sujet d'un rdfs:subPropertyOf (ne doivent pas sortir). Mutants équivalents, non comptés : garde `if len(result) > 0` forcée à True (results = result de toute façon) ; SELECT DISTINCT (le chemin * de rdflib rend chaque nœud une fois, les triplets d'un Graph sont uniques).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rdfs:subPropertyOf* -> rdfs:subPropertyOf? (survivait)",
+      "{node} -> [] (déjà tué)",
+      "{reference} -> [] (déjà tué)",
+      "{node} -> ?node (déjà tué)",
+      "{reference} -> ?superclass (déjà tué)",
+      "{node} <-> {reference} (déjà tué)",
+      "subPropertyOf* -> + (déjà tué)",
+      "subPropertyOf* -> sans étoile (déjà tué)",
+      "motif subPropertyOf supprimé (déjà tué)",
+      "îlot vidé, result = [] (déjà tué)",
+      "garde forcée à False (déjà tué)",
+      "select ?target ?reference (déjà tué)"
+    ],
+    "remaining": "Le graphe réel du dépôt est Graph(store='Oxigraph') (owl2instances.py:732 ; requirements.txt : rdflib==6.3.2, oxrdflib==0.3.7). s{ }(graph) passe à graph.query un Query déjà préparé, qu'oxrdflib refuse (NotImplementedError, store.py:145) : rdflib évalue alors la requête avec son propre moteur au-dessus du store Oxigraph, là où l'original la confie au moteur d'Oxigraph. Mêmes lignes sur une sonde (losange, chaîne, littéral, nœud blanc), mais le moteur change sur un appel que le dépôt juge déjà coûteux (owlbuilder.py:173-180). Dans le venv de l'étude (oxrdflib 0.5.11), c'est l'original qui lève sur ce store (RuntimeError : ?superclass absent de la projection, les substitutions d'Oxigraph refusant une variable non projetée), pas la traduction ; le pilote n'a donc pas d'appel sur Oxigraph. À juger : cet écart de moteur sur store tiers compte-t-il contre la paire ou contre le langage (fiche sur s{ } et les stores qui exécutent eux-mêmes leurs requêtes) ?"
   }
 }

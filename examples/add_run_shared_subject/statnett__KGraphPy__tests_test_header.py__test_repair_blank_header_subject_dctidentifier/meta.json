@@ -23,7 +23,8 @@
     "+{ }",
     "prefixed name",
     "plain literal",
-    "IRI"
+    "IRI",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: DCAT->dcat, DCTERMS->dcterms, RDF->rdf",
@@ -31,7 +32,8 @@
     "DCAT.Dataset as a decorator argument (@pytest.mark.parametrize list, module scope, outside any function body) translates to dcat:Dataset with no special-casing: the island rule is purely lexical adjacency, not statement context.",
     "URIRef(\"urn:uuid:1234\") is a constant IRI compared with ==, so it becomes <urn:uuid:1234> directly.",
     "context shim: vendored a subset of the kgraphpy package (kgraphpy/header.py, kgraphpy/namespaces.py, kgraphpy/exceptions.py, kgraphpy/__init__.py) verbatim from statnett/KGraphPy@38859be62f, since the package is not on PyPI and this test exercises real logic in CIMMetadataHeader.from_graph/_repair_blank_header_subject (the blank-node-to-urn:uuid repair and the logger.error call the test's own assertions check) that no context shim could fake without inventing it.",
-    "the region's caplog parameter (a pytest fixture, not a real argument) has no equivalent when run_pair calls the entry point directly outside pytest; driver.py supplies a _FakeCaplog whose .messages mirrors caplog.messages closely enough for the region's own len(records)==1 / 'blank node' in records[0] assertions -- which remain the real oracle here, unmodified -- to run as written."
+    "the region's caplog parameter (a pytest fixture, not a real argument) has no equivalent when run_pair calls the entry point directly outside pytest; driver.py supplies a _FakeCaplog whose .messages mirrors caplog.messages closely enough for the region's own len(records)==1 / 'blank node' in records[0] assertions -- which remain the real oracle here, unmodified -- to run as written.",
+    "2026-10-30 repair: `constructions` gains `interpolation {expr}`, employed by `{b}` and `{header_type}` in the +{ } island but not declared (material error; the translation itself is unchanged)."
   ],
   "draft_sha": "2ddcecc4e91198e0",
   "provenance": {
@@ -49,5 +51,24 @@
     "method": "entry:test_repair_blank_header_subject_dctidentifier",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-30",
+    "driver": "le _FakeCaplog n'est plus égal à toute instance : il garde ce que le test a lu (messages du journal, étiquette du BNode frais normalisée) plus, identiques des deux côtés, les enregistrements d'un enregistreur posé sur CIMMetadataHeader.from_graph (corps réel vendored inchangé) — triplets et liaisons du graphe g construit par +{ }, sujet, triplets et liaisons du graphe d'en-tête — et les marques parametrize de la fonction de test (lues par la frame appelante) ; run_pair compare le kwarg caplog après l'appel. Les deux appels restent les deux valeurs de parametrize du dépôt. Mutant équivalent, non compté : {b} -> [] (b est un BNode() frais lu nulle part ailleurs).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{header_type} -> dcat:Dataset (survivait)",
+      "\"1234\" -> 1234 entier (survivait)",
+      "\"1234\" -> \"1234\"^^xsd:string (survivait)",
+      "\"1234\" -> \"1234\"@en (survivait)",
+      "dcterms:title \"1234\" ajouté (survivait)",
+      "triplet en plus sur b (survivait)",
+      "@prefix dct: lié au même espace que dcterms: (survivait)",
+      "parametrize [MD.FullModel, dcat:Dataset] -> [MD.FullModel, MD.FullModel] (survivait)",
+      "{header_type} -> [] (déjà tué)",
+      "triplet dcterms:identifier supprimé (déjà tué)",
+      "îlot +{ } supprimé (déjà tué)"
+    ],
+    "remaining": ""
   }
 }

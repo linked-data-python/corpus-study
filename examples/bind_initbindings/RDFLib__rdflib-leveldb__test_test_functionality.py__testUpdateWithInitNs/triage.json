@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : `initNs` devient `@prefix ns: <urn:>`, la mise à jour est la même, l'oracle compare les quads du Dataset après l'appel.",
   "questions": [],
   "evidence": "rdfeval check : OK. Mutants dans des copies (mktemp -d), tous ROUGES : `GRAPH ns:graph` -> `ns:other` ; `@prefix ns: <urn:>` -> `<urn:x:>` ; mise à jour remplacée par `pass` ; `.execute()` retiré (la mise à jour paresseuse n'est alors jamais lancée) ; un triplet en plus dans le graphe nommé ; une seconde mise à jour insérant dans le graphe par défaut (le proxy compare tous les quads, donc une fuite hors de `urn:graph` serait vue). Le test d'origine se vérifie lui-même (assert sur `urn:graph`), exécuté des deux côtés. Réserve sans conséquence pour la paire : le pilote utilise un rdflib.Dataset et non le ConjunctiveGraph(store=\"LevelDB\") de la fixture du dépôt (test/test_functionality.py:46-65), ce que meta.json explique ; `@graph graph` + `s{ }.execute()` est la forme idiomatique d'un update prologué par les @prefix.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation du 2026-10-30 : 12 mutants, tous tués par le pilote existant (quads du Dataset et assertion du test), paire prouvée, pilote inchangé ; noté pour Maxime que `@graph graph` remplacerait une liaison de préfixe préexistante de urn:, cas que le dépôt n'atteint pas."
 }
