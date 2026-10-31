@@ -71,5 +71,19 @@
       "diffs": [],
       "error": null
     }
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "inchangé",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "second sub-select ?label2 -> ?label",
+      "second sub-select rdfs:label -> rdfs:comment",
+      "first sub-select rdfs:label -> ?p (projected by SELECT *)",
+      "FILTER(1 = 2) in the second sub-select",
+      "second sub-select dropped",
+      "receiver (_graph_with_label) -> (Graph())"
+    ],
+    "remaining": "Equivalent mutants, not counted: the first sub-select widened with its shape kept (SELECT ?label { [] ?p ?label }), and [] -> <http://example.com/something>. The region reads a constant module graph of one triple, defined in the same repository file (test_subselect.py:3-6), so no input exists on which they differ. In the repository this vendored rdflib test runs on purrdf's rdflib shadow (rdflib_suite/runner.py), not on rdflib: there the s{ } path would go through the compat prepareQuery, which returns a str, then Graph.query(str, initBindings={}), which the compat accepts -- read, not executed (purrdf's native extension is not installed)."
   }
 }

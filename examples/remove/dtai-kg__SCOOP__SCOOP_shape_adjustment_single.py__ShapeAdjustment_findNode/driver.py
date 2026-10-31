@@ -12,6 +12,12 @@ list of shapes it collects, so the comparison covers both.  It is spelled as an
 rdflib Resource or a class on its own.  The two calls exercise a shape with
 children (and a child of a child: the region recurses) and a shape with none,
 which is the zero-solution case.
+
+Audit of 2026-10-31: the fixture now gives the root and the unreached shape a
+sh:targetObjectsOf and a sh:targetSubjectsOf of their own (a remove widened
+to `-{ ?y sh:targetObjectsOf ?x }` used to stay green: every such triple sat
+on a reached shape), a reached shape with two sh:targetClass, and a child
+reached through two parents (collected twice in adjusted_shape).
 """
 import sys
 from pathlib import Path

@@ -17,3 +17,13 @@ ex:Rock   a skos:Concept ; skos:inScheme ex:VocabA .
 # neighbourhood that must NOT match a broader(Dog) query
 ex:Cat    a skos:Concept ; skos:broader ex:Animal ; skos:inScheme ex:VocabA .
 ex:Fish   a skos:Concept ; skos:related ex:Animal ; skos:inScheme ex:VocabA .
+
+# Added by the audit of 2026-10-31 (see meta.json "repair"): a third broader
+# concept of Dog whose skos:inScheme is a LITERAL carrying the VocabA IRI's
+# text.  On the in-memory graph an IRI binding of ?vocabulary never reaches
+# it; on the store the repository really uses (rdflib-sqlalchemy, emulated in
+# driver.py) a non-Literal binding is matched by text in the literal
+# partition too, so the original returns Canid there -- and so must the
+# translation.  A Literal binding would match Canid ONLY, and lose Animal.
+ex:Dog    skos:broader ex:Canid .
+ex:Canid  a skos:Concept ; skos:inScheme "http://example.org/VocabA" .

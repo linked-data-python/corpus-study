@@ -30,6 +30,12 @@
 opcua:BaseObjectType a owl:Class .
 opcua:BaseNodeClass a owl:Class .
 
+# Added by the audit of 2026-10-31 (see meta.json "repair"), NOT in base.ttl:
+# a superclass of the root itself.  It is reached only through the
+# zero-length step of `rdfs:subClassOf*` (?subclass = BaseObjectType), so a
+# query whose `*` became `+` used to stay green.
+opcua:BaseObjectType rdfs:subClassOf owl:Thing .
+
 # --- subclasses of BaseObjectType: direct + one transitive hop (subClassOf*) ---
 opcua:BaseInterfaceType a owl:Class ;
     rdfs:subClassOf opcua:BaseObjectType .

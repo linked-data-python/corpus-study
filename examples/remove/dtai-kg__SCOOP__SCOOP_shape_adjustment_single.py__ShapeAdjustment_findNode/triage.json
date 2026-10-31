@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Neuf mutants de translated.ldpy tous FAIL : prédicat échangé dans chacun des 4 remove, remove devenu `pass`, joker `?p` trop large, `{node}` remplacé par `?s` (le voisinage <Untouched> est donc bien surveillé), récursion supprimée, `.first()`. Expérience hors pilote sur une copie : des enfants sh:node BNode (récursion à travers des BNode) -> les deux versions élaguent les mêmes triples, graphes isomorphes (le FAIL du pilote ainsi étendu n'est que str(BNode) comparé dans adjusted_shape, artefact du harnais). Cycle sh:node (o == node) -> RecursionError des deux côtés (le harnais ne compare pas les levées, sans conséquence ici). findNode n'est appelé dans le dépôt qu'avec URIRef(shape_identifier) puis des objets du graphe : node ne vaut jamais None (le cas Literal(\"None\") est donc inatteignable). Remarque : la note dit « l'attribut initial_graph n'est jamais réaffecté », faux dans le dépôt (shape_adjustment_single.py:88 et :605) mais sans effet, @graph est capturé à chaque appel de findNode. shaclNS est constant (ligne 17), donc @prefix sh: est exact.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : deux mutants survivaient (joker {o} -> ?y dans les -{ } de sh:targetObjectsOf et sh:targetSubjectsOf, tous portés par des formes atteintes) ; fixture renforcé (cibles sur la racine et la forme non atteinte, valeurs multiples, enfant à deux parents), 16 mutants tués, traduction juste, check OK."
 }

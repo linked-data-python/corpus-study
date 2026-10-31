@@ -26,7 +26,8 @@
     "`?child` and `?vocabulary` are NOT projected (only `?s` is in SELECT), so per the bind_initbindings cross-reference they become direct term interpolations: `{concept}` in subject position of `?child skos:broader ?s`, `{v}` in place of `?vocabulary`. This drops the need for `VocabularyStore._PFX` in translated.ldpy: the prologue is inherited from a single `@prefix skos:` instead of the concatenated 4-line PREFIX header (rdf:/rdfs:/owl: were unused by these two queries anyway).",
     "classified minor-restructuring rather than directly-expressible for the same reason as narrower: correctness depends on recognising which variables are unprojected before inlining them as terms, and on retiring the _PFX concatenation in favour of @prefix.",
     "s{ } iteration yields rdflib ResultRow objects supporting r[0] indexing exactly like g.query() (confirmed empirically), so `self._one_res(qres, ...)` needed no change.",
-    "driver: `_Store` stand-in reproduces the three upstream methods the region reads (expand_name, compact_name, _one_res, verbatim from tools/navocab/__init__.py:214-238); navocab_shim.py (copied from the narrower region) supplies only `VocabularyStore._PFX` for original.py -- translated.ldpy does not import it. Fixture: Dog has two broader concepts (several solutions), Mammal is in a different skos:inScheme and must be excluded once v is given, Rock has none (zero solutions), Cat/Fish are broader-than-Animal/skos:related distractors that must not leak into Dog's result."
+    "driver: `_Store` stand-in reproduces the three upstream methods the region reads (expand_name, compact_name, _one_res, verbatim from tools/navocab/__init__.py:214-238); navocab_shim.py (copied from the narrower region) supplies only `VocabularyStore._PFX` for original.py -- translated.ldpy does not import it. Fixture: Dog has two broader concepts (several solutions), Mammal is in a different skos:inScheme and must be excluded once v is given, Rock has none (zero solutions), Cat/Fish are broader-than-Animal/skos:related distractors that must not leak into Dog's result.",
+    "repair 2026-10-31: `{v}` was wrong for the input the repository really passes. A full IRI as a `str` (tools/tests/test_navocab.py:70-77; the CLI's `vocabulary` argument, tools/vocab.py:230-247) comes out of expand_name unchanged; the original binds that `str` through initBindings, which the repository's store (rdflib-sqlalchemy, ConjunctiveGraph(\"SQLAlchemy\"), tools/navocab/__init__.py:97) matches by text in the IRI and literal partitions alike, while `{v}` coerces it into a Literal, which that store matches against literals only. Proof: on the driver's emulation of that store, broader(\"http://example.org/Dog\", \"http://example.org/VocabA\") gives Animal + Canid for the original and Canid only for the old translation. Fixed to `{rdflib.URIRef(v)}` (f<...> does not transpile inside s{ }, as found on the sibling narrower). `{concept}` is left bare: in SUBJECT position the store matches by text whatever the term type (base.py build_subject_clause), so the bare form is equivalent there, and on an in-memory graph it stays closer to the original (both [] for a str IRI) than a URIRef wrap would."
   ],
   "draft_sha": "aa2ac307afc93c75",
   "provenance": {
@@ -44,5 +45,23 @@
     "method": "entry:broader",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "_SQLTextStore, rdflib-sqlalchemy 0.5.4's matching rule (text match, STRONGLY_TYPED_TERMS = False; read from the wheel's base.py / store.py) on a Memory store, and _SQLStore on it, as on the sibling narrower; seven calls with the repository's input types: full IRI as str (v=None, str scheme, abbreviate=True), CURIE concept with str scheme, CURIE, zero-solution Rock as str, empty-str scheme; fixture neighbour Canid, a broader concept of Dog whose skos:inScheme is a literal carrying VocabA's text. The four in-memory calls are kept.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "bare {v} (the pre-repair text)",
+      "{v} -> ?anyv",
+      "skos:inScheme pattern dropped",
+      "skos:inScheme -> skos:nope",
+      "{concept} -> ?anyc, each branch",
+      "skos:broader -> skos:related / skos:narrower, each branch",
+      "FILTER(1 = 2) in each island",
+      "if v is None -> True / False",
+      "if v is None -> if not v (killed by the empty-str scheme call)",
+      "abbreviate=abbreviate -> False"
+    ],
+    "remaining": "Equivalent mutant, not counted: {concept} -> {rdflib.URIRef(concept)} (subject matched by text on the repository's store). As for narrower, the oracle is a driver emulation of rdflib-sqlalchemy (the package is not installed in the study's venv); with the URIRef wrap on v, on an in-memory Graph (never used by the repository) the translation and the original diverge for a str scheme. Is that emulation acceptable as the oracle, and does minor-restructuring still hold with {rdflib.URIRef(v)} forced?"
   }
 }

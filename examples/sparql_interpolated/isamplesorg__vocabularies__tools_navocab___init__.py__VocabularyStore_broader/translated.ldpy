@@ -20,7 +20,7 @@ def broader(self, concept: str, v: typing.Optional[str] = None, abbreviate: bool
         v = self.expand_name(v)
         qres = s{ SELECT ?s
         WHERE {
-            ?s skos:inScheme {v} .
+            ?s skos:inScheme {rdflib.URIRef(v)} .
             {concept} skos:broader ?s .
         }}
     res = []

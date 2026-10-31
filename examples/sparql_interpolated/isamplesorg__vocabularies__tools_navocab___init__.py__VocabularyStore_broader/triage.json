@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Mutants sur translated.ldpy (copie), tous détectés : `?s skos:inScheme {v}` -> `?vv` ou supprimé (FAIL call[1]), `{concept}` -> `?c` dans l'une ou l'autre branche (FAIL), `skos:broader` -> `skos:narrower` (FAIL), `{v}` -> `?vv` (FAIL). Appels ajoutés au pilote dans une copie, tous équivalents : IRI complète en str (expand_name la laisse str : les deux côtés renvoient []), nom nu `Dog`, v en IRI complète str, v vide, `ex:Mammal` avec scheme, `ex:Cat`, abbreviate. Seul écart : `concept=None` (original lève AlreadyBound, traduction renvoie [] via Literal('None')) ; non atteint par le dépôt (vocab.py:234 et navocab/__init__.py:437 passent un concept non None). Les récursions du dépôt passent des URIRef (lignes de résultat) : l'interpolation est bien un URIRef. Le retour de s{ } est un PreparedQuery paresseux mais `_one_res` ne fait qu'itérer, comme dans le dépôt. _PFX ne contribue que skos: aux deux requêtes (rdf/rdfs/owl inutilisés), donc @prefix skos suffit.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : pilote renforcé avec le store réel du dépôt (appariement par texte de rdflib-sqlalchemy, émulé comme sur narrower) et des IRI complètes en str ; la traduction tombait sur le schéma (`{v}` devenait un Literal, Animal perdu), corrigée en {rdflib.URIRef(v)}, {concept} en sujet laissé nu (équivalent sur ce store), check OK."
 }

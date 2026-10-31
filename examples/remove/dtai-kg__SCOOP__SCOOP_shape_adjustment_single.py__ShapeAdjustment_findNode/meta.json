@@ -49,5 +49,22 @@
     "method": "fixture:fixture.ttl entry:findNode",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "fixture only (calls unchanged): the root Person and the unreached Untouched now carry a sh:targetObjectsOf and a sh:targetSubjectsOf that must stay (before, every such triple sat on a reached shape, so widening {o} in those two removes stayed green); a reached shape (Address) with two sh:targetClass; a child (Employer) reached through two parents, collected twice in adjusted_shape.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{o} -> ?y in -{ {o} sh:targetObjectsOf ?x } (survived before)",
+      "{o} -> ?y in -{ {o} sh:targetSubjectsOf ?x } (survived before)",
+      "{o} -> ?y in the sh:targetClass and sh:targetNode removes",
+      "sh:targetClass -> ?q",
+      "each of the four -{ } dropped",
+      "the four -{ } joined into one",
+      "m{ {node} sh:node ?o }: {node} -> ?s, sh:node -> ?p, island -> []",
+      "loop over [m{ }.first()] only",
+      "recursion dropped, append dropped"
+    ],
+    "remaining": "Not observable, so not compared: @graph self.initial_graph binds sh: on the caller's graph; in the repository that graph comes from XSDtoSHACL, which already binds sh: to the same namespace (XSDtoSHACL.py:745), and adjust() copies only its triples into the serialised adjusted_graph (shape_adjustment_single.py:603-611)."
   }
 }

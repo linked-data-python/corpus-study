@@ -42,3 +42,15 @@
 
 <AlsoUntouched> a sh:NodeShape ;
     sh:targetNode <http://example.com/data/x9> .
+
+# Added by the audit of 2026-10-31 (see meta.json "repair").  Before it, every
+# sh:targetObjectsOf / sh:targetSubjectsOf of the fixture sat on a shape the
+# walk reaches, so a remove widened to `?y sh:targetObjectsOf ?x` stayed
+# green.  The root and the unreached shape now carry both, and must keep them.
+<Person>    sh:targetObjectsOf schema:knows ; sh:targetSubjectsOf schema:knows .
+<Untouched> sh:targetObjectsOf schema:containedIn ;
+            sh:targetSubjectsOf schema:containedIn .
+# Several objects for one target predicate on a reached shape (all go), and a
+# child reached through two parents (Employer is also a sh:node of Address):
+# it is collected twice in adjusted_shape, on both sides.
+<Address>   sh:targetClass schema:Place ; sh:node <Employer> .

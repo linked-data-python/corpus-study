@@ -45,5 +45,25 @@
     "names_only_original": [
       "query_subclasses"
     ]
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "fixture: the root opcua:BaseObjectType gets a superclass (owl:Thing, not in base.ttl), reached only through the zero-length step of rdfs:subClassOf* (`*` -> `+` stayed green before); driver: Entity.serialize wrapped (same wrapper both sides, one shim module) to record the destination and the text written as module value `serialized_entities`, seeded to None by a wrapped Entity.__init__ so a side that never writes differs (both sides write the same path, the file on disk proved nothing).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "rdfs:subClassOf* -> rdfs:subClassOf+ (survived before)",
+      "e.serialize(...) dropped (survived before)",
+      "root IRI widened to ?root (unprojected, shape kept)",
+      "root IRI -> opcua:BaseDataType",
+      "rdfs:subClassOf* -> rdfs:subClassOf",
+      "second WHERE pattern predicate widened to ?p",
+      "each UNION branch broken, second branch dropped",
+      "each CONSTRUCT template triple dropped",
+      "FILTER(1 = 2) in WHERE",
+      "receiver (g) -> (Graph())",
+      "guard entitiesname is not None -> False",
+      "e.add_subclasses(result) dropped"
+    ],
+    "remaining": "Engine: the repository opens g with Graph(store='Oxigraph') (owl2instances.py:732). There the original's text query runs on Oxigraph, while oxrdflib refuses the prepared query of s{ }(g) (NotImplementedError: already parsed Queries are not supported) and rdflib silently evaluates it with its own engine over the Oxigraph store. Checked on a copy with both sides on Oxigraph (oxrdflib 0.5.0; the repository pins 0.3.7), engine calls recorded: same CONSTRUCT result (e_graph isomorphic, 13 triples); the run had to drop add_subclasses_recursive, which raises the same RuntimeError on both sides (?c not projected) under this oxrdflib. Same RDF result, different engine: is that acceptable for directly-expressible?"
   }
 }
