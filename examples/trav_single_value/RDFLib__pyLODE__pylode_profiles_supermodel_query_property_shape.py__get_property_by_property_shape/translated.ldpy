@@ -18,10 +18,9 @@ from pylode_context import get_name
 
 
 def compute_name(kwargs, profile_graph, property_shape, sh_path, db):
-    @graph profile_graph
     name = (
         kwargs.get("name")
-        or m{ {property_shape} sh:name ?v }.first()
+        or m{ {property_shape} sh:name ?v }(profile_graph).first()
         or get_name(sh_path, profile_graph, db)
     )
     return name

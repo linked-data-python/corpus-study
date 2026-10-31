@@ -43,3 +43,40 @@ ex:SparqlDecoy sh:select "SELECT ?this WHERE { ?this ex:decoy ex:d }" .
 ex:SparqlDecoy sh:prefixes ex:OntoDecoy .
 ex:OntoDecoy sh:declare ex:DeclDecoy .
 ex:DeclDecoy sh:prefix "decoy" ; sh:namespace "http://decoy.example/" .
+
+# --- Added by the mutation audit of 2026-10-31 -------------------------------
+# Shape3: a NODE shape (no sh:path at all, as _node_expansion passes it,
+# shacl_ir.py:96) -- the zero-solution case of the `path` read, which kills
+# `.one()` / `next(iter(...))` there; a decoy-first store order means a
+# widened `[] sh:path ?o` would pick Shape1's path instead of None.  Its one
+# sh:sparql child carries an EMPTY sh:select (falsy but not None: the row
+# must be kept, `if not select` would drop it) and an EMPTY sh:message (the
+# row must carry message "").  Its declarations: one with TWO sh:prefix and
+# TWO sh:namespace values (rdflib's value() takes the first, `.one()` would
+# raise) and one with no sh:namespace at all ("<None>" in the header).
+ex:Shape3 sh:sparql ex:SparqlEdge .
+ex:SparqlEdge sh:select "" ;
+    sh:message "" ;
+    sh:prefixes ex:Onto3 .
+ex:Onto3 sh:declare ex:DeclTwo, ex:DeclNoNs .
+ex:DeclTwo sh:prefix "a", "b" ;
+    sh:namespace "http://a.example/", "http://b.example/" .
+ex:DeclNoNs sh:prefix "nons" .
+
+# Shape4: TWO sh:path IRIs (value() takes the first, `.one()` would raise),
+# one sh:sparql child with TWO sh:select and TWO sh:message values.
+ex:Shape4 sh:path ex:pathA, ex:pathB ;
+    sh:sparql ex:SparqlTwo .
+ex:SparqlTwo sh:select "SELECT ?this WHERE { ?this ex:a ex:b }",
+                       "SELECT ?this WHERE { ?this ex:c ex:d }" ;
+    sh:message "first message", "second message" .
+
+# A BLANK-NODE property shape (the usual form of a sh:property, which
+# _shape_rows hands to _sparql_rows, shacl_ir.py:53): the call fetches it
+# with graph.value(ex:Holder, sh:property), so the region's subject is a
+# BNode, as in the repository.
+ex:Holder sh:property [
+    sh:path ex:bnPath ;
+    sh:sparql ex:SparqlBn
+] .
+ex:SparqlBn sh:select "SELECT ?this WHERE { ?this ex:bn ex:x }" .

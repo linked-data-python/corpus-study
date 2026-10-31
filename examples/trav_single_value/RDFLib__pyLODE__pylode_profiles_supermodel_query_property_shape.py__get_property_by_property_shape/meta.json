@@ -16,18 +16,20 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "@graph",
     "m{ }",
     ".first()",
-    "nom préfixé",
-    "variable"
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
   ],
   "translation_notes": [
     "prefixes: RDF->rdf, SH->sh. RDF is unused in this fragment (it was only imported by the enclosing real function), so the `@prefix rdf:` from the earlier draft is dropped: nothing in the translated lines resolves through it.",
     "the region is a bare STATEMENT (kind: statement), not a function: kwargs, profile_graph, property_shape, sh_path, db are parameters of the much larger enclosing function get_property_by_property_shape, none of them visible to the extracted lines. Restored as parameters of a small wrapper `compute_name` in both original.py and translated.ldpy -- exactly the 'paramètre annoté' remedy AGENT_BATCH.md prescribes for a graph bound outside the extracted lines.",
     "the wrapper is not just for executability: it is what makes `name` provable at all. run_pair's module-state path (entry=None) only compares rdflib Graphs and stdout (see rdfeval/harness.py); profile_graph here is read-only, so comparing it would pass vacuously regardless of whether `.value()`/`m{}.first()` was translated correctly. entry='compute_name' compares the actual return value instead. This looks like a genuine gap for the 163 'no visible graph' regions when the missing binding is itself a bare statement (not a function): worth flagging upward, it is not one of the already-known constats.",
     "`profile_graph.value(property_shape, SH.name)` -> `m{ {property_shape} sh:name ?v }.first()`: textbook case of the stratum, subject given by interpolation, single projected variable so `.first()` yields the term itself, None on the fixture's zero-solution branch (ex:noName) exactly like rdflib's `.value()`.",
-    "get_name(sh_path, profile_graph, db) is the project's own helper (pylode.profiles.supermodel.query.common.get_name); it is NOT part of this region and stays a plain Python call, restored from a context shim (pylode_context.py) rather than transpiled, since pylode itself is not installed in the evaluation venv."
+    "get_name(sh_path, profile_graph, db) is the project's own helper (pylode.profiles.supermodel.query.common.get_name); it is NOT part of this region and stays a plain Python call, restored from a context shim (pylode_context.py) rather than transpiled, since pylode itself is not installed in the evaluation venv.",
+    "2026-10-31, audit par mutation : `@graph profile_graph` + `@prefix sh:` était faux. Dans le dépôt, profile_graph est db.graph(profile_iri) (property_shape.py:278), dont le NamespaceManager est celui du ProfilesDataset entier, sur lequel Supermodel.__init__ recopie les préfixes du fichier d'entrée avec override=True (query/__init__.py:428-429) ; get_name lit ensuite ces liaisons par graph.qname (common.py:43). Pour une entrée qui lie SHACL sous `shacl:`, la désignation relie l'espace de noms à `sh:` pour tout le dataset : le pilote renforcé rendait 'shacl:targetClass' contre 'sh:targetClass' et perdait la liaison shacl: dans les cinq appels sur dataset, y compris quand kwargs['name'] court-circuite la lecture. Corrigé par le suffixe d'appel `m{ {property_shape} sh:name ?v }(profile_graph).first()`, qui ne lie rien : `rdfeval check` OK."
   ],
   "draft_sha": "b8887fc6d0445c88",
   "provenance": {
@@ -46,5 +48,19 @@
     "method": "fixture:fixture.ttl entry:compute_name",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : cinq appels sur la forme réelle de l'entrée -- profile_graph nommé dans un Dataset(default_union=True), triplets ajoutés par +=, liaison shacl: posée avec override=True sur le graphe racine comme le fait Supermodel.__init__ -- comparant le nom rendu, profile_graph par isomorphisme et les liaisons du dataset (chaque liaison de l'original doit se retrouver dans la traduction) : sh_path IRI SHACL sans étiquette (repli graph.qname), kwargs['name'] donné, deux sh:name, sh:name \"\", forme de propriété en nœud blanc. Ces appels sont pilotés à la main et fusionnés dans le verdict unique de run_pair (son _emit est enveloppé) : run_pair compare chaque argument, et rdflib 7.2.1 ne sait pas calculer to_isomorphic sur un Dataset.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "@graph profile_graph + m{ } sans suffixe (la traduction d'origine) -- tué par le repli qname et par la vérification des liaisons",
+      ".first() -> .one() (zéro et deux sh:name)",
+      ".first() -> next(iter(...))",
+      "sujet élargi en []",
+      "îlot remplacé par None",
+      "prédicat échangé (sh:description)"
+    ],
+    "remaining": "constructions corrigées (@graph retiré, call suffix (g) et interpolation {expr} ajoutés, « nom préfixé » écrit « prefixed name »). Le dépôt ne contient aucune entrée qui lie SHACL sous un autre préfixe que sh: : l'écart est atteint par une entrée utilisateur que le code du dépôt traite explicitement (recopie des préfixes de l'entrée), pas par ses données de test. Le shim pylode_context.get_name omet le logger.warning du dépôt (common.py:45), sans effet ici (aucun appel n'atteint le ValueError de qname)."
   }
 }

@@ -42,5 +42,21 @@
     "method": "entry:_sparql_rows",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : trois appels ajoutés -- ex:Shape3, une forme de nœud sans sh:path (comme _node_expansion la passe, shacl_ir.py:96) dont l'unique sh:sparql porte sh:select \"\" et sh:message \"\", et des déclarations à deux sh:prefix / deux sh:namespace et sans sh:namespace ; ex:Shape4 à deux sh:path et un sh:sparql à deux sh:select / deux sh:message ; une forme de propriété en nœud blanc (la forme usuelle de ce que _shape_rows passe, shacl_ir.py:53). Le @graph graph ne lie aucun préfixe (le fichier n'en déclare pas) : rien à comparer côté liaisons.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "path : .first() -> .one() (zéro et deux sh:path)",
+      "path : .first() -> next(iter(...)) (forme de nœud sans sh:path)",
+      "path : sujet élargi en [] (prend le sh:path de Shape1)",
+      "select : `is None` -> `not select` (sh:select \"\")",
+      "prefix : .first() -> .one() (deux sh:prefix)",
+      "namespace : .first() -> .one() (deux sh:namespace, et aucun)",
+      "message : `is not None` -> véracité (sh:message \"\")",
+      "déjà tués et revérifiés : path / select / prefix / namespace / message -> None, .one() sur select et message, sujets {shape_uri} {sparql} {ontology} {declaration} élargis en [], les deux boucles vidées, garde select forcée à False"
+    ],
+    "remaining": ""
   }
 }

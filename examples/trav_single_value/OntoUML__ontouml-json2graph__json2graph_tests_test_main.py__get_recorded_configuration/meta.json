@@ -20,7 +20,9 @@
     "@graph",
     "m{ }",
     ".first()",
-    "prefixed name"
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "only `prov:` was needed: rdf:/rdfs:/xsd: (the draft note) are never used as prefixed names in this function's body -- dropped.",
@@ -47,5 +49,19 @@
     "method": "fixture:fixture.ttl entry:get_recorded_configuration",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture.ttl gagne une seconde activité qui utilise une entité munie d'un prov:value, placée AVANT ex:config1 dans le store ; deux appels ajoutés -- fixture_two_values.ttl (deux prov:wasGeneratedBy, deux prov:value par entité : value() prend le premier, ne lève pas) et fixture_empty_value.ttl (une entité utilisée dont le prov:value est \"\" : le filtre d'existence la garde, l'assert de la région échoue des deux côtés). Mutants équivalents notés sans être comptés : next(iter(...)) et sujet élargi sur la première lecture (get_output_artifact assure un et un seul sujet prov:wasGeneratedBy). La liaison prov: de @graph est un no-op (json2graph lie déjà prov:, transformation_metadata.py:122, et rdflib aussi par défaut). constructions : `variable` et `interpolation {expr}`, employées, manquaient.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "transformation : .first() -> .one() (deux prov:wasGeneratedBy)",
+      "prov:used : sujet élargi en [] (seconde activité)",
+      "filtre : bool(m{ }) -> bool(m{ }.first()) (prov:value \"\")",
+      "dernière lecture : .first() -> .one() (deux prov:value)",
+      "dernière lecture : sujet élargi en [] (voisin placé avant dans le store)",
+      "déjà tués et revérifiés : boucle prov:used vidée, filtre forcé à True, sujet du filtre élargi en []"
+    ],
+    "remaining": ""
   }
 }

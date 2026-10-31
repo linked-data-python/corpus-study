@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check: OK. 9 mutants sur la copie, tous FAIL : forClass -> None / mauvais prédicat / sujet élargi (?r), instanceContainer sujet élargi, has_instance = True / sujet élargi / mauvais prédicat, motif de boucle élargi (?t) ou vidé. Fixtures étendus (copie) : registrations à sujet BNode (l'interpolation {reg} d'un BNode matche), forClass et instanceContainer littéraux vides \"\", multi-valués (littéraux langués + IRI, 3 conteneurs, 2 solid:instance), solid:instance \"\" seul : tous OK (les gardes sont `is None`, pas de véracité). Une erreur de répr de BNode dans un message (forClass BNode) fait diverger les deux parses mais c'est un artefact du harnais, pas de la traduction. Shim finding/rewrite identiques au dépôt; original.py identique aux lignes 337-409 hors indentation de la fonction enveloppe.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 14 mutants, 3 survivaient (les trois réécritures de garde en véracité) ; pilote renforcé par des littéraux vides et un enregistrement à deux valeurs, tous tués, traduction juste."
 }

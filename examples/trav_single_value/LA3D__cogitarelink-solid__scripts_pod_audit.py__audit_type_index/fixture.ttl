@@ -66,3 +66,32 @@ ex:RegSameOriginOutsideRoot a solid:TypeRegistration ;
 ex:NotARegistration a ex:SomeOtherType ;
     solid:forClass ex:ShouldNeverAppear ;
     solid:instanceContainer <https://canon.example/vault/typeindex/noise/> .
+
+# --- Added by the mutation audit of 2026-10-31 -------------------------------
+# Falsy-but-present values: every guard of the region is `is None`, so an
+# EMPTY literal is present, not missing.  Each registration below kills one
+# truthiness rewrite (`not cls_node`, `not ctr_node`,
+# `bool(m{ }.first())` for has_instance) that the first ten left alive.
+# 11. forClass "" -- WARN forClass-literal, not missing-forClass.
+ex:RegEmptyForClass a solid:TypeRegistration ;
+    solid:forClass "" ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/empty-class/> .
+
+# 12. instanceContainer "" -- WARN instanceContainer-literal, not
+#     missing-instanceContainer.
+ex:RegEmptyContainer a solid:TypeRegistration ;
+    solid:forClass ex:Doc6 ;
+    solid:instanceContainer "" .
+
+# 13. no instanceContainer, solid:instance "" -- has_instance is True
+#     (value() is not None), so NO warning at all.
+ex:RegEmptyInstance a solid:TypeRegistration ;
+    solid:forClass ex:Doc7 ;
+    solid:instance "" .
+
+# 14. TWO forClass IRIs and TWO instanceContainers: value() takes the first
+#     of each, never raises -- the two-solution case of both reads.
+ex:RegTwoValues a solid:TypeRegistration ;
+    solid:forClass ex:Gamma, ex:Delta ;
+    solid:instanceContainer <https://canon.example/vault/typeindex/two-a/>,
+                            <https://canon.example/vault/typeindex/two-b/> .

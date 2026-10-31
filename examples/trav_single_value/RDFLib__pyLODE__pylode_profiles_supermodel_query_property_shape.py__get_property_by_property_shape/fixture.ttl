@@ -24,3 +24,13 @@ ex:noName sh:description "no sh:name predicate here" .
 ex:pathNode rdfs:label "Path Label" .
 
 ex:unrelated sh:name "Should never be read" .
+
+# Added by the mutation audit of 2026-10-31.
+# ex:twoNames: the two-solution case (value() takes the first, `.one()`
+# would raise).  ex:emptyName: sh:name "" is present but falsy, so the `or`
+# chain falls through to get_name on both sides.  ex:holder's blank-node
+# sh:property: the region's property_shape is annotated URIRef | BNode
+# (property_shape.py:56), and most property shapes are blank nodes.
+ex:twoNames sh:name "First Name", "Second Name" .
+ex:emptyName sh:name "" .
+ex:holder sh:property [ sh:name "Blank Name" ] .

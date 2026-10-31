@@ -15,6 +15,15 @@ compares alongside the (here, isomorphic-by-construction) `ti_g` graph.
 and `heads` are compared as multisets; the lists nested inside
 `container_classes` (per-container accumulated classes) get the same
 treatment since `ordered=False` normalises recursively.
+
+Mutation audit of 2026-10-31: fixture.ttl gained registrations 11-14 --
+forClass "", instanceContainer "", solid:instance "" alone (each guard of
+the region is `is None`, so an empty literal is present, not missing: they
+kill `not cls_node`, `not ctr_node` and `bool(m{ }.first())`), and one
+registration with two forClass and two instanceContainer values (value()
+takes the first, never raises).  The prefix bindings `@graph ti_g` adds are
+not compared: `ti_g` is a local of audit_type_index (pod_audit.py:331),
+never serialised nor read for its bindings after the region.
 """
 from pathlib import Path
 
