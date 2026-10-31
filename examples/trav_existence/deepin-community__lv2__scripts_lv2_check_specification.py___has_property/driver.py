@@ -10,6 +10,17 @@ produce from the same input graph (design record corpus/405).
 default `fixture=` calling convention (entry called with just the parsed
 graph) does not fit: `calls` is given explicitly, one call per
 (subject, predicate) pair in fixture.ttl, each re-parsing the fixture fresh.
+
+Repair of 2026-10-31: three calls on a single FALSY value -- "", 0, false.
+The repository asks this of every rdfs:label / rdfs:comment of a spec it
+checks (lv2_check_specification.py:164, :183), and `is not None` is True
+for an empty label.  Without these calls, the mutant
+`bool(m{ ... }.first())` (truth of the value instead of its existence)
+stayed green.  Mutants killed: island emptied, subject or predicate
+widened, forced True / False, `.one()` or `next(iter())` in place of the
+existence test, the Match returned without `bool()`, and (by the three new
+calls only) the truth of `.first()`.  Equivalent, not counted:
+`m{ }.first() is not None`.
 """
 from pathlib import Path
 
@@ -36,5 +47,8 @@ VERDICT = run_pair(
         _case("s1", "p3"),  # predicate never on this subject -> False
         _case("s2", "p2"),  # predicate exists, but not on this subject -> False
         _case("s3", "p1"),  # subject absent from the graph entirely -> False
+        _case("s4", "p1"),  # one value, the empty string "" -> True
+        _case("s5", "p1"),  # one value, the integer 0 -> True
+        _case("s6", "p1"),  # one value, the boolean false -> True
     ],
 )

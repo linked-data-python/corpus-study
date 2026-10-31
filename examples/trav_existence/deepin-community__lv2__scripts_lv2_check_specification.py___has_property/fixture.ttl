@@ -11,3 +11,14 @@ ex:s1 ex:p1 "v1" .
 ex:s1 ex:p1 "v2" .
 ex:s1 ex:p2 "other" .
 ex:s2 ex:p1 "v3" .
+
+# Repair of 2026-10-31 -- falsy values.  The repository asks
+# `_has_property(model, subject, rdfs.label)` of every typed subject of an
+# LV2 spec (lv2_check_specification.py:164, :183), precisely to catch a
+# spec that gets its labels wrong: an empty label is a value, and
+# `value(...) is not None` says True for it.  A rewrite through the truth of
+# the value (`bool(m{ ... }.first())`, `not value(...)`) says False for "",
+# 0 and false -- these three subjects are what tells them apart.
+ex:s4 ex:p1 "" .
+ex:s5 ex:p1 0 .
+ex:s6 ex:p1 false .

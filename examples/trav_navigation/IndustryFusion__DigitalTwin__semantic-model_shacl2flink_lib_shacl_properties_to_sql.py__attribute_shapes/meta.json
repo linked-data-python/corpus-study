@@ -42,6 +42,16 @@
     "trav_navigation"
   ],
   "oracle": "values",
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "audit par mutation (low) : fixture.ttl reçoit ex:SensorShape (deux sh:targetClass, propriétés en blank node dont une à chemin de valeur NGSI-LD) et ex:LeakShape (typée sh:PropertyShape, avec cible et propriété) ; docstring du pilote à jour, appels inchangés.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "garde sh:targetClass absorbée dans la jointure externe `?nodeshape a sh:NodeShape ; sh:targetClass []` (deux cibles : forme parcourue deux fois)",
+      "type externe élargi `?nodeshape a []`"
+    ],
+    "remaining": "Pour information, non observable : `@graph g` relie rdf: et sh: sur le graphe de translate() ; le module ne lit jamais ses liaisons (aucun serialize/qname/namespace_manager, toutes les g.query passent initNs=prefixes)."
+  },
   "article_candidate": true,
   "validation": {
     "status": "equivalent",

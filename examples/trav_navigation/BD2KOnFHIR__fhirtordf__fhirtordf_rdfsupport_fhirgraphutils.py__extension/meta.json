@@ -40,6 +40,16 @@
     "trav_navigation"
   ],
   "oracle": "values",
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "audit par mutation (low) : fixture.ttl reçoit la forme réelle de FHIR RDF (tests/data/patient-example.ttl:83-94 : nœud BNode objet de Patient.birthDate, extensions BNode avec fhir:index, Extension.url et Extension.valueDateTime en BNode portant fhir:value, une extension voisine d'une autre url), une extension à deux Extension.url (UniquenessError) et une sans url ; cinq appels ajoutés, dont asLiteral=True comme dans test_fhirgraphutils.py:34-45.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "asLiteral retiré de l'appel value(g, ext, p, asLiteral) rendu",
+      "return o if asLiteral else value(g, ext, p)"
+    ],
+    "remaining": "Pour information, non observable dans le dépôt : `@graph g` + `@prefix fhir:` relie fhir: sur le graphe de l'appelant (vérifié : un graphe qui liait l'espace FHIR sous `f` le voit renommé `fhir` après l'appel, alors que l'original ne touche pas aux liaisons) ; le dépôt lie toujours cet espace sous `fhir` (rdfsupport/namespaces.py:19, fhirresourceloader.py:115), c'est donc sans effet ici. Un suffixe d'appel `m{ … }(g)` sans `@graph` l'éviterait si Maxime le juge préférable pour une fonction utilitaire publique."
+  },
   "validation": {
     "status": "equivalent",
     "method": "fixture:fixture.ttl entry:extension",

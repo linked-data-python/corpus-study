@@ -25,3 +25,43 @@ ex:extC fhir:Extension.url "http://example.org/ext/target" ;
 ex:patient2 fhir:Element.extension ex:extD .
 ex:extD fhir:Extension.url "http://example.org/ext/target" ;
     fhir:Extension.id "d-only-id" .
+
+# Repair of 2026-10-31 -- the shape the repository really reads.  In FHIR
+# RDF (tests/data/patient-example.ttl:83-94, the graph of the repository's
+# own test of `extension`, test_fhirgraphutils.py:34-45) the node is a
+# BLANK node (the object of fhir:Patient.birthDate), each extension is a
+# blank node with an fhir:index, and both Extension.url and
+# Extension.value* are blank nodes carrying fhir:value: the shim's `value`
+# then resolves through fhir:value, and `asLiteral` decides between the
+# Python value and the Literal.  A second extension with another url is the
+# neighbour.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:patient3 fhir:Patient.birthDate [
+    fhir:Element.extension [
+        fhir:index "1"^^xsd:integer ;
+        fhir:Extension.url [ fhir:value "http://example.org/ext/other" ] ;
+        fhir:Extension.valueString [ fhir:value "neighbour" ]
+    ] , [
+        fhir:index "0"^^xsd:integer ;
+        fhir:Extension.url [
+            fhir:value "http://hl7.org/fhir/StructureDefinition/patient-birthTime"
+        ] ;
+        fhir:Extension.valueDateTime [
+            fhir:value "1974-12-25T14:35:45-05:00"^^xsd:dateTime
+        ]
+    ] ;
+    fhir:value "1974-12-25"^^xsd:date
+] .
+
+# Two values on the predicate the region reads through `value()`: an
+# extension with two Extension.url -- `value` raises UniquenessError, and the
+# translation must raise the same, at the same extension.
+ex:patient4 fhir:Element.extension ex:extE .
+ex:extE fhir:Extension.url "http://example.org/ext/target" ,
+        "http://example.org/ext/target2" ;
+    fhir:Extension.valueString "ambiguous" .
+
+# Zero values on it: an Extension.value* but no Extension.url at all.
+ex:patient5 fhir:Element.extension ex:extF .
+ex:extF fhir:Extension.valueString "no url" .

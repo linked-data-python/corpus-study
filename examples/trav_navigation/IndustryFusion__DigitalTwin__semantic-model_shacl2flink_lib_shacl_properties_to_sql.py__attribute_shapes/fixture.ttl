@@ -51,3 +51,21 @@ ex:BatteryPropertyShape sh:path ex:batteryLevel .
 ex:UntargetedShape a sh:NodeShape ;
     sh:property ex:OrphanPropertyShape .
 ex:OrphanPropertyShape sh:path ex:orphanAttribute .
+
+# ---- repair of 2026-10-31 (mutation audit) ----
+# A node shape with TWO sh:targetClass values, and property shapes written as
+# blank nodes (the usual SHACL form).  The region tests targetClass for
+# existence only, so the shape is walked once: a translation that absorbs
+# the test into the outer join (`?nodeshape a sh:NodeShape ;
+# sh:targetClass [] `) yields its attribute shapes twice.
+ex:SensorShape a sh:NodeShape ;
+    sh:targetClass ex:Sensor , ex:Actuator ;
+    sh:property [ sh:path ex:serialNumber ] ,
+        [ sh:path ngsi-ld:hasObject ] .
+
+# A shape that carries a target and a property but is typed sh:PropertyShape,
+# not sh:NodeShape: `g.subjects(RDF.type, SH.NodeShape)` never enters it, so
+# a widened type in the outer pattern shows up here.
+ex:LeakShape a sh:PropertyShape ;
+    sh:targetClass ex:Device ;
+    sh:property [ sh:path ex:leakRate ] .

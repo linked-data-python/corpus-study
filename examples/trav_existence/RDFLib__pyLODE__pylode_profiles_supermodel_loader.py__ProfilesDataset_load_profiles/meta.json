@@ -52,6 +52,19 @@
   ],
   "oracle": "values",
   "article_candidate": true,
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "audit par mutation (low) : fixture.ttl reçoit ex:profileD (trois descripteurs dans un même profile_graph : un lode:config, un sans prof:hasRole, un application/pdf) et ex:profileE (descripteur sans format ni artefact) ; driver.py ajoute le graphe de configuration au jeu de graphes rendu (comme ProfilesDataset.__init__, loader.py:165) avec un artefact de configuration en conserve (lode:Module, supermodel.md:95-106), et compare le journal logging DEBUG des deux côtés (multi-ensemble), fusionné dans l'unique verdict.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "role -> None (branche role == LODE.config jamais prise avant)",
+      "hasRole .first() -> .one() et -> next(iter(...)) (descripteur sans rôle)",
+      "dcterms:format .first() -> .one(), hasArtifact .first() -> .one() (ex:profileE)",
+      "sujet {prof_resource_descriptor} -> [] dans chacun des trois .first() (ex:profileD)",
+      "message logging modifié (journal)"
+    ],
+    "remaining": ""
+  },
   "validation": {
     "status": "equivalent",
     "method": "fixture:fixture.ttl entry:demo",

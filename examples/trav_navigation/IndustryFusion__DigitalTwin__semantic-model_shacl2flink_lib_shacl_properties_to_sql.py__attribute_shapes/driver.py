@@ -19,6 +19,17 @@ an sh:not branch -- plus neighbours that must NOT match: an NGSI-LD value
 path, an rdf:type path, a property shape with two sh:path values, and a
 whole node shape with no sh:targetClass), and one call against an empty
 graph for the zero-solution case.
+
+Repair of 2026-10-31 (mutation audit), in fixture.ttl only: a node shape
+with TWO sh:targetClass values and blank-node property shapes (the usual
+SHACL form), and a shape typed sh:PropertyShape that carries a target and a
+property.  Before them, two mutants stayed green: the targetClass test
+absorbed into the outer join (`?nodeshape a sh:NodeShape ;
+sh:targetClass []`, which walks a doubly-targeted shape twice) and the
+outer type widened to `[]`.  Also killed: either loop island emptied, the
+guard widened, removed or forced True / False, the subject of the
+sh:property or sh:path read widened, `paths` emptied or cut to `.first()`,
+the rdf:type test forced.
 """
 from pathlib import Path
 

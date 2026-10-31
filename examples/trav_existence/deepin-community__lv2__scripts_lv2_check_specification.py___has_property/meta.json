@@ -25,6 +25,15 @@
     "fixture.ttl / driver.py: `_has_property` takes three arguments (model, subject, predicate), so the default fixture= calling convention doesn't fit; calls= is explicit, one (subject, predicate) pair per case. Two solutions for ex:s1/ex:p1, one for ex:s1/ex:p2 (both True); zero solutions three ways -- a predicate never used on the subject (ex:s1/ex:p3), the predicate present but on a different subject (ex:s2/ex:p2), and a subject entirely absent from the graph (ex:s3/ex:p1) -- proving the read is scoped to the exact pair, not the subject or predicate alone."
   ],
   "article_candidate": true,
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "audit par mutation (low) : trois sujets à valeur unique falsy dans fixture.ttl (\"\", 0, false) et trois appels au pilote, parce que le dépôt pose la question de chaque rdfs:label / rdfs:comment d'une spécification (lv2_check_specification.py:164, :183) et qu'un label vide existe ; docstring à jour.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "bool(m{ … }) -> bool(m{ … }.first()) (vérité de la valeur au lieu de l'existence)"
+    ],
+    "remaining": ""
+  },
   "draft_sha": "1ab37f86a1dee6a2",
   "provenance": {
     "generated_at": "2026-08-28T17:55:02.501976+00:00",

@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "rdfeval check OK. Copie avec `ex:s4 ex:p1 \"\"`, `ex:s5 ex:p1 0` et `ex:s6 ex:p1 ex:s6` (trois appels ajoutés) : OK, True des deux côtés, car `is not None` ne dépend pas de la véracité (contraste avec la région has_label). Appels du dépôt (lv2_check_specification.py:164, :183) : `subject` vient de `typed_subjects` sans BNode (URIRef), `rdfs.label`/`rdfs.comment` sont des URIRef : aucune coercition de str. Le shim se limite à l'annotation `model: Graph` ; meta.json garde oracle=isomorphism / rdf_ops=0, simple provenance du tirage.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 1 mutant sur 9 survivait (vérité de `.first()` au lieu de l'existence) ; les trois valeurs falsy que le trieur avait essayées en copie sont entrées dans le fixture et le pilote, tout est tué, traduction juste."
 }

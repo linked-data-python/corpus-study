@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : l'existence `value(None, RDF.type, PROF.Profile)` -> `bool(m{ ?s … }(new_graph))` est exercée vrai (profileB) et faux (profileA), le joker est une variable non liée et les mutants sont tués.",
   "questions": [],
   "evidence": "rdfeval check OK. Mutants sur translated.ldpy, tous tués (FAIL) : existence élargie `?s rdf:type ?t`, existence lue sur `profile_graph` au lieu de `new_graph`, boucle externe `?profile rdf:type ?t`. Variante de shim où l'artefact non-Profile contient des `prof:hasResource` ajoutés pendant l'itération (mutation de profile_graph sous le générateur) : les deux versions restent égales. Seule différence de véracité : le sujet de `value(None, …)` serait faux si c'était `URIRef(\"\")`, négligeable. Branche `role == LODE.config` jamais prise par le pilote, mais texte identique dans les deux versions (hors îlots). Les `m{ }(profile_graph).first()` remplacent `value` avec cardinalité 'première ou aucune' identique. Le shim (fetch canned, Loader) ne fait que restaurer des liaisons. Pas article-example : 46 lignes, 5 îlots dont `.first()` et `(g)`, shim volumineux, `cbd` laissé en rdflib.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 8 mutants sur 20 survivaient (branche lode:config jamais prise, cardinalités et sujets élargis des trois .first()) ; fixture et pilote renforcés (profileD, profileE, graphe de config, journal logging), tous tués, traduction juste."
 }

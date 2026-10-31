@@ -55,3 +55,47 @@ ex:notAProfile a ex:SomethingElse ;
         dcterms:format "text/turtle" ;
         prof:hasArtifact <http://example.org/artifacts/other.ttl>
     ] .
+
+# Repair of 2026-10-31 -- ex:profileD carries three descriptors in ONE
+# profile_graph, so a widened subject in any of the three `.first()` reads
+# hands every descriptor the same value, and at least one goes wrong:
+#   - a lode:config descriptor (the real pattern of supermodel.md:81-92):
+#     the `role == LODE.config` branch, never taken before; its artifact
+#     (canned in driver.py) declares a lode:Module profile, so the
+#     `self.load_profiles(_config_graph, graph)` recursion fires too;
+#   - a descriptor with NO prof:hasRole: `value()` gives None, so a
+#     `.one()` or `next(iter(...))` raises where the original goes on;
+#   - a descriptor whose format is not fetchable (application/pdf).
+@prefix lode: <https://w3id.org/lode/ns/pylode/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:profileD a prof:Profile ;
+    dcterms:title "Profile D" ;
+    prof:hasResource [
+        a prof:ResourceDescriptor ;
+        rdfs:label "pylode config" ;
+        dcterms:format "text/turtle" ;
+        prof:hasRole lode:config ;
+        prof:hasArtifact <http://example.org/artifacts/pylode.ttl>
+    ] , [
+        a prof:ResourceDescriptor ;
+        dcterms:format "text/turtle" ;
+        prof:hasArtifact <http://example.org/artifacts/other.ttl>
+    ] , [
+        a prof:ResourceDescriptor ;
+        dcterms:format "application/pdf" ;
+        prof:hasRole ex:role-other ;
+        prof:hasArtifact <http://example.org/artifacts/unused.pdf>
+    ] .
+
+# ...and ex:profileE, a descriptor with neither dcterms:format nor
+# prof:hasArtifact (a role and a label only): both value() reads give None,
+# str(None) is not a media type, nothing is fetched -- where a `.one()` on
+# either read raises.
+ex:profileE a prof:Profile ;
+    dcterms:title "Profile E" ;
+    prof:hasResource [
+        a prof:ResourceDescriptor ;
+        rdfs:label "documentation, no artifact yet" ;
+        prof:hasRole ex:role-other
+    ] .
