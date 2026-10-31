@@ -25,6 +25,7 @@ import io
 import json
 import os
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -161,6 +162,42 @@ def _observables(ex_dir, meta):
         return None, None
 
 
+_PROVENANCE_HEADER = ("# Extracted from ", "# region: ",
+                      "# licence of the source repository")
+_SHIM_COMMENT = re.compile(r"\s*#\s*context shim\b.*$")
+
+
+def display_source(text: str) -> str:
+    """What a participant is shown of one artefact: the region, not the study.
+
+    Both files of a pair carry scaffolding that belongs to the validation,
+    not to the code under study: a provenance header, a `# context shim`
+    remark on the imports the extraction had to restore, and, for 61 of the
+    350 pairs, a `demo()` harness appended identically to both sides. A
+    reader timed on the program should not read them. The cut is the same
+    on both sides, so it cannot favour either notation: the header lines at
+    the top, the shim remarks, and everything from the comment block that
+    introduces a top-level `def demo(` to the end of the file.
+    """
+    lines = text.splitlines()
+    while lines and lines[0].startswith(_PROVENANCE_HEADER):
+        lines.pop(0)
+    demo = next((i for i, line in enumerate(lines)
+                 if line.startswith("def demo(")), None)
+    if demo is not None:
+        cut = demo
+        while cut > 0 and (lines[cut - 1].startswith("#")
+                           or not lines[cut - 1].strip()):
+            cut -= 1
+        lines = lines[:cut]
+    lines = [_SHIM_COMMENT.sub("", line) for line in lines]
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines) + "\n"
+
+
 def _is_graph(v) -> bool:
     from rdflib import Graph
     return isinstance(v, Graph)
@@ -283,8 +320,9 @@ def run(config: dict, study: Study = STUDY) -> None:
             "oracle": meta.get("oracle", "isomorphism"),
             "constructions": meta.get("constructions", []),
             "representations": {
-                "rdflib": (ex_dir / "original.py").read_text(),
-                "ldpy": (ex_dir / "translated.ldpy").read_text(),
+                "rdflib": display_source((ex_dir / "original.py").read_text()),
+                "ldpy": display_source(
+                    (ex_dir / "translated.ldpy").read_text()),
             },
             "derived_triples": triples,
             "derived_value": value,
