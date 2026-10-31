@@ -1,0 +1,100 @@
+# Second input graph for _parse_atom (repair audit, 2026-10-31): zero and
+# two solutions of the reads in every branch, a decoy atom carrying every
+# SWRL predicate stored FIRST (a subject widened to `[]` is seen even
+# through `.first()`), an atom with two rdf:types, and atoms that are blank
+# nodes inside an rdf:List, the shape rules_from_graph actually walks.
+# The @prefix header is part of the case: rdflib binds it on parse, and the
+# driver checks that _parse_atom leaves those bindings as it found them
+# (rules_from_graph reads them through PrefixMap.from_graph).
+@prefix ex: <http://example.org/> .
+@prefix fam: <http://example.org/family#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:decoy a ex:Decoy ;
+    swrl:classPredicate fam:Decoy ;
+    swrl:propertyPredicate fam:decoyProp ;
+    swrl:argument1 ex:decoyArg1 ;
+    swrl:argument2 ex:decoyArg2 ;
+    swrl:builtin swrlb:decoy ;
+    swrl:arguments ( ex:decoyArg1 ) .
+
+# e1: two rdf:types, the SWRL one second.
+ex:e1 a ex:Tagged, swrl:ClassAtom ;
+    swrl:classPredicate fam:Person ;
+    swrl:argument1 ex:v1 .
+ex:v1 a swrl:Variable .
+
+# e2: ClassAtom with no argument1 (_term_from_node(None) raises ValueError).
+ex:e2 a swrl:ClassAtom ;
+    swrl:classPredicate fam:Person .
+
+# e3: ClassAtom with TWO classPredicates and TWO argument1.
+ex:e3 a swrl:ClassAtom ;
+    swrl:classPredicate fam:Parent, fam:Child ;
+    swrl:argument1 ex:indA, ex:indB .
+
+# e4: IndividualPropertyAtom with no propertyPredicate (renders "").
+ex:e4 a swrl:IndividualPropertyAtom ;
+    swrl:argument1 ex:v1 ;
+    swrl:argument2 ex:indA .
+
+# e5: IndividualPropertyAtom with TWO of each of its three properties.
+ex:e5 a swrl:IndividualPropertyAtom ;
+    swrl:propertyPredicate fam:hasParent, fam:hasChild ;
+    swrl:argument1 ex:v1, ex:indC ;
+    swrl:argument2 ex:indA, ex:indB .
+
+# e10 / e11: IndividualPropertyAtom with no argument1 / no argument2
+# (_term_from_node(None) raises its own ValueError).
+ex:e10 a swrl:IndividualPropertyAtom ;
+    swrl:propertyPredicate fam:hasParent ;
+    swrl:argument2 ex:indA .
+ex:e11 a swrl:IndividualPropertyAtom ;
+    swrl:propertyPredicate fam:hasParent ;
+    swrl:argument1 ex:v1 .
+
+# e12: DatavaluedPropertyAtom with no argument1; e13 with TWO of each of
+# its three properties; e14 with no propertyPredicate (renders "").
+ex:e12 a swrl:DatavaluedPropertyAtom ;
+    swrl:propertyPredicate fam:age ;
+    swrl:argument2 3 .
+ex:e13 a swrl:DatavaluedPropertyAtom ;
+    swrl:propertyPredicate fam:age, fam:height ;
+    swrl:argument1 ex:v1, ex:indA ;
+    swrl:argument2 4, 5 .
+ex:e14 a swrl:DatavaluedPropertyAtom ;
+    swrl:argument1 ex:v1 ;
+    swrl:argument2 6 .
+
+# e6: DatavaluedPropertyAtom with no argument2 (raises) ...
+ex:e6 a swrl:DatavaluedPropertyAtom ;
+    swrl:propertyPredicate fam:age ;
+    swrl:argument1 ex:v1 .
+
+# e7: ... and one with falsy literals "" and 0 as argument2 (one atom each).
+ex:e7 a swrl:DatavaluedPropertyAtom ;
+    swrl:propertyPredicate fam:name ;
+    swrl:argument1 ex:v1 ;
+    swrl:argument2 "" .
+ex:e7b a swrl:DatavaluedPropertyAtom ;
+    swrl:propertyPredicate fam:age ;
+    swrl:argument1 ex:v1 ;
+    swrl:argument2 0 .
+
+# e8: BuiltinAtom with no builtin and no arguments (zero solutions of both).
+ex:e8 a swrl:BuiltinAtom .
+
+# e9: BuiltinAtom with TWO builtins and TWO argument lists.
+ex:e9 a swrl:BuiltinAtom ;
+    swrl:builtin swrlb:add, swrlb:subtract ;
+    swrl:arguments ( ex:v1 1 ), ( ex:v1 2 ) .
+
+# Blank-node atoms in an rdf:List, as in a real swrl:Imp body.
+ex:body ex:atoms (
+    [ a swrl:ClassAtom ; swrl:classPredicate fam:Person ; swrl:argument1 ex:v1 ]
+    [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate fam:hasParent ;
+      swrl:argument1 ex:v1 ; swrl:argument2 [ a swrl:Variable ] ]
+) .

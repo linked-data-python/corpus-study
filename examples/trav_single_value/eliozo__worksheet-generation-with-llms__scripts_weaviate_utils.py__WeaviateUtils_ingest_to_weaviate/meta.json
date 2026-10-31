@@ -48,5 +48,21 @@
     "method": "entry:ingest_to_weaviate",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture_edge.ttl et deux appels de plus — zéro et deux solutions de chacune des quatre lectures g.value (problemID, olympiadType, problemYear absents ou doubles), leurres (non-Problem porteur d'olympiadType / problemYear / problemSolution, solution orpheline à texte @lv) stockés avant les bonnes solutions, problemText @en puis deux @lv, solution à deux solutionText @lv (branche de concaténation), grade/année typés xsd:integer ; puis un appel skipping_mode=True",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "problemID / olympiadType / problemYear .first() -> .one() et -> next(iter())",
+      "sujet élargi sur olympiadType et problemYear",
+      "boucle problemText réduite à .first()",
+      "sujet élargi sur problemSolution et solutionText",
+      "boucle solutionText réduite à .first()",
+      "garde de concaténation forcée à False",
+      "garde skipping_mode forcée à True",
+      "déjà tués par le pilote livré : îlot rdf:type vidé ou objet élargi, sujet élargi sur problemID / problemGrade / problemText, problemGrade .one() / next(iter()), chaque lecture remplacée par None, boucles vidées, garde de langue forcée"
+    ],
+    "remaining": ""
   }
 }

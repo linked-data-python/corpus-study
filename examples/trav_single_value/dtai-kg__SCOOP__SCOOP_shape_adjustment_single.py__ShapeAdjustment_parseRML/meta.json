@@ -50,5 +50,16 @@
     "method": "entry:parseRML (hand-rolled: self.rml_parsed compared by value, self has no useful __eq__)",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture_edge.ttl (triples map sans rr:subjectMap = zéro solution du second g.value ; triples map à deux rml:logicalSource et deux rr:subjectMap = deux solutions ; sources à rml:iterator) et comparaison de tous les attributs que parseRML affecte (iterator, findNS, findPS, adjusted_shape en plus de rml_parsed), levées comparées, sur les deux fixtures",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "subjectMap .first() -> .one() (tm3 sans subjectMap, tm4 à deux)",
+      "garde `if iterator == None` forcée à True (self.iterator n'était pas observé)",
+      "déjà tués par le pilote livré : îlot subjects vidé ou objet élargi, sujet élargi sur logicalSource / subjectMap / predicateObjectMap, logicalSource .first() -> .one() / next(iter()), lectures remplacées par None, boucle POM vidée ou réduite à .first(), garde rdf:type forcée True/False ou changée"
+    ],
+    "remaining": "Équivalents ou non applicables, non comptés : prédicat élargi (`[]` refusé en position de prédicat par le transpileur, `?p` change la forme du résultat). @graph self.rml_graph + @prefix rdf: ne touche aucune liaison observable : rdf: est déjà lié à cet IRI par rdflib et par les 48 en-têtes RML du dépôt, et rml_graph n'est jamais sérialisé."
   }
 }

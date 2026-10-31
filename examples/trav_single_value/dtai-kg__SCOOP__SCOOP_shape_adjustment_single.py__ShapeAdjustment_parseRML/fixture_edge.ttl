@@ -1,0 +1,28 @@
+# Second input graph for parseRML (repair audit, 2026-10-31): the zero and
+# two-solution cases of the two g.value() reads, and a non-None iterator.
+#
+# ex:tm3 has NO rr:subjectMap (zero solutions: g.value returns None,
+# getSubjectMap(None) returns empty lists -- `.one()` would raise) and its
+# logical source carries an rml:iterator, as do both of tm4's, so
+# self.iterator ends on the non-None branch.  ex:tm4 has TWO logical sources and TWO subject maps
+# (g.value keeps one, `.one()` would raise).
+@prefix ex: <http://example.org/> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+
+ex:tm3 a rr:TriplesMap ;
+    rml:logicalSource ex:src3 .
+
+ex:src3 rml:source "data3.json" ;
+    rml:referenceFormulation ql:JSONPath ;
+    rml:iterator "$.items[*]" .
+
+ex:tm4 a rr:TriplesMap ;
+    rml:logicalSource ex:src4a, ex:src4b ;
+    rr:subjectMap ex:sm4a, ex:sm4b .
+
+ex:src4a rml:source "a.csv" ; rml:iterator "$.a" .
+ex:src4b rml:source "b.csv" ; rml:iterator "$.b" .
+ex:sm4a rr:template "http://example.org/a/{x}" .
+ex:sm4b rr:template "http://example.org/b/{y}" .

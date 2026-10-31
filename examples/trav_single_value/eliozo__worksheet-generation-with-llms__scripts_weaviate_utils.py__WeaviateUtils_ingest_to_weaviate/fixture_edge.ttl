@@ -1,0 +1,54 @@
+# Second input graph for ingest_to_weaviate (repair audit, 2026-10-31):
+# zero / two solutions of each of the four graph.value() reads, and
+# neighbours that come BEFORE the right solutions in the store, so that a
+# widened subject (or a .first() on a loop) is seen even through `.first()`.
+#
+# Decoys first: a non-Problem carrying olympiadType / problemYear /
+# problemSolution, and a solution attached to nothing, carrying an @lv text.
+@prefix eliozo: <http://www.dudajevagatve.lv/eliozo#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+eliozo:decoy a eliozo:OtherType ;
+    eliozo:olympiadType "decoy-type" ;
+    eliozo:problemYear "1999" ;
+    eliozo:problemSolution eliozo:decoySolution .
+eliozo:decoySolution eliozo:solutionText "decoy solution"@lv .
+eliozo:orphanSolution eliozo:solutionText "orphan solution"@lv .
+
+# p3: complete; its first problemText is @en, then two @lv texts (the loop
+# keeps the last @lv one); one solution with TWO @lv texts and one @en
+# (the concatenation branch), integer-typed grade/year as in the repository.
+eliozo:p3 a eliozo:Problem ;
+    eliozo:problemID "P003" ;
+    eliozo:olympiadType "math" ;
+    eliozo:problemGrade 10 ;
+    eliozo:problemYear 2022 ;
+    eliozo:problemText "English first"@en, "Pirmais"@lv, "Otrais"@lv ;
+    eliozo:problemSolution eliozo:sol3 .
+eliozo:sol3 eliozo:solutionText "a = 1"@lv, "b = 2"@lv, "c = 3"@en .
+
+# p4: NO problemID and NO olympiadType (zero solutions: str(None) gives
+# "None", `.one()` / next(iter()) would raise and be caught -> continue).
+eliozo:p4 a eliozo:Problem ;
+    eliozo:problemGrade "7" ;
+    eliozo:problemYear "2021" .
+
+# p5: no problemYear (zero solutions: int(None) raises, caught -> continue).
+eliozo:p5 a eliozo:Problem ;
+    eliozo:problemID "P005" ;
+    eliozo:olympiadType "chem" ;
+    eliozo:problemGrade "8" .
+
+# p6: TWO problemIDs (g.value keeps one, `.one()` raises).
+eliozo:p6 a eliozo:Problem ;
+    eliozo:problemID "P006a", "P006b" ;
+    eliozo:olympiadType "bio" ;
+    eliozo:problemGrade "6" ;
+    eliozo:problemYear "2020" .
+
+# p7: TWO olympiadTypes and TWO problemYears.
+eliozo:p7 a eliozo:Problem ;
+    eliozo:problemID "P007" ;
+    eliozo:olympiadType "t1", "t2" ;
+    eliozo:problemGrade "5" ;
+    eliozo:problemYear "2019", "2018" .

@@ -49,5 +49,19 @@
     "method": "fixture:fixture.ttl entry:_parse_atom",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : fixture_edge.ttl à en-tête @prefix réel (dont fam: et swrl:) et 17 appels de plus — zéro et deux solutions de chaque lecture de chaque branche (Class, IndividualProperty, DatavaluedProperty, Builtin), atome à deux rdf:type, leurre porteur de tous les prédicats SWRL stocké en tête, arguments littéraux falsy \"\" et 0, atomes nœuds blancs d'une rdf:List comme les parcourt rules_from_graph ; prefix_map construit par PrefixMap.from_graph comme dans le dépôt ; les liaisons de préfixes que chaque côté laisse sur le graphe sont comparées et fusionnées dans le verdict unique (_emit capturé)",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "types réduit à [.first()] (atome à deux rdf:type)",
+      "argument1 / argument2 / propertyPredicate .first() -> .one() et -> next(iter()) dans les branches IndividualProperty et DatavaluedProperty, argument1 de ClassAtom",
+      "sujet élargi sur propertyPredicate et argument2 (IndividualProperty), builtin, arguments",
+      "builtin / arguments .first() -> .one() et -> next(iter())",
+      "@prefix renommé (fm: ou sw:) faisant relier par @graph graph un espace déjà lié par l'en-tête du fichier",
+      "déjà tués par le pilote livré : types vidé ou sujet élargi, chaque lecture remplacée par None, sujet élargi sur classPredicate / argument1, classPredicate .one() / next(iter()), branche ClassAtom forcée à False"
+    ],
+    "remaining": "Équivalents, non comptés : `if args_node is not None` -> `if args_node` ou `if True` (Graph.items s'arrête sur un nœud falsy ou None, terms reste []), `@prefix fam:` vers un autre IRI (rdflib lie le nouvel IRI sous un préfixe dérivé, la liaison du fichier reste). Le `@graph graph` de la traduction ne lie rien (__namespaces__ vide) : les liaisons du graphe appelant sont intactes, vérifié par le pilote."
   }
 }

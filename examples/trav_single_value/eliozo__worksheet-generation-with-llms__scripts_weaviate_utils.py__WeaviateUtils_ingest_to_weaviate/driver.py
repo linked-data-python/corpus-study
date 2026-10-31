@@ -25,8 +25,26 @@ def _case():
     return ((make_self(), str(FIXTURE)), {})
 
 
+EDGE = Path(__file__).resolve().parent / "fixture_edge.ttl"
+
+
+def _case_edge():
+    # Repair audit (2026-10-31): zero and two solutions of each of the four
+    # graph.value() reads (a `.one()` or next(iter()) raises inside the
+    # region's try and turns into a printed error + continue), decoys
+    # stored BEFORE the right solutions (a widened subject is caught even
+    # through `.first()`), several @lv problemTexts after an @en one, and a
+    # solution with two @lv texts (the concatenation branch).
+    return ((make_self(), str(EDGE)), {})
+
+
+def _case_skipping():
+    # skipping_mode=True: the branch that inserts nothing.
+    return ((make_self(skipping_mode=True), str(EDGE)), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry='ingest_to_weaviate',
-    calls=[_case],
+    calls=[_case, _case_edge, _case_skipping],
 )

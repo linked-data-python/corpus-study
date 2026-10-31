@@ -50,12 +50,37 @@ try:
         diffs.append(f"rml_parsed differs ({self_o.rml_parsed!r} vs "
                      f"{self_t.rml_parsed!r})")
 
+    # Repair audit (2026-10-31): every attribute parseRML assigns is
+    # observed, not only rml_parsed -- self.iterator ("" or the last
+    # source's iterator) is a decision of the region too.  A raise (a
+    # `.one()` on zero or two solutions) is compared by type and message.
+    ATTRS = ("rml_parsed", "iterator", "findNS", "findPS", "adjusted_shape")
+
+    def outcome(fn, stub_cls, fixture):
+        self_ = stub_cls()
+        try:
+            fn(self_, fixture_graph(fixture))
+        except Exception as e:                    # noqa: BLE001 - compared
+            return ("raised", type(e).__name__, str(e))
+        return {a: normalise(getattr(self_, a, "<unset>")) for a in ATTRS}
+
+    # Call 1 again, all attributes.  Call 2: fixture_edge.ttl -- a triples
+    # map with NO subject map (zero solutions of the second g.value), one
+    # with TWO logical sources and TWO subject maps (two solutions: g.value
+    # keeps one, `.one()` raises), and a source with an rml:iterator (the
+    # non-None branch of self.iterator).
+    for fx in (FIXTURE, HERE / "fixture_edge.ttl"):
+        ro = outcome(fo, Stub_o, fx)
+        rt = outcome(ft, Stub_t, fx)
+        if ro != rt:
+            diffs.append(f"{fx.name}: outcome differs ({ro!r} vs {rt!r})")
+
     if out_o != out_t:
         diffs.append(f"stdout differs ({out_o[:200]!r} vs {out_t[:200]!r})")
 
     verdict["diffs"] = diffs
     verdict["equivalent"] = not diffs
-    verdict["calls"] = 1
+    verdict["calls"] = 2
 except Exception:
     verdict["error"] = traceback.format_exc(limit=8)
 

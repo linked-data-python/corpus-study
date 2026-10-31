@@ -44,5 +44,17 @@
     "method": "entry:_decode_tt_hash",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : six appels de plus — nœud tt:HASH leurre stocké avant le bon (sujet élargi), rdf:subject absent, rdf:predicate absent (zéro solution de chaque lecture), deux valeurs de chacune des trois lectures, objet littéral falsy \"\" puis 0 (garde `is None`)",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet élargi sur rdf:subject, rdf:predicate, rdf:object",
+      "rdf:subject et rdf:predicate .first() -> .one() et -> next(iter())",
+      "garde `is None` remplacée par la véracité",
+      "déjà tués par le pilote livré : rdf:object .one() / next(iter()), chaque lecture remplacée par None, garde forcée à False ou sans o, garde TT_NS forcée"
+    ],
+    "remaining": "m{ }(graph) passe par graph.triples() comme g.value : aucun moteur de requête du store n'est sollicité d'un côté seulement."
   }
 }
