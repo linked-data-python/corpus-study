@@ -34,3 +34,29 @@ _:pSeqLongRest2 rdf:first ex:stepC ;
 # sh:alternativePath or rdf:first is present at all.  Carries an unrelated
 # predicate as neighbourhood noise that a too-broad pattern could pick up.
 _:pNothing sh:path ex:decoy .
+
+# ===== added by the mutation audit of 2026-10-31 ==========================
+# All below are stored AFTER the original cases, so the neighbours that kill
+# the islands widened to `m{ [] pred ?o }` stay _:pInverse (first
+# sh:inversePath) and _:pAlt (first sh:alternativePath).
+
+# --- TWO solutions: two sh:inversePath values, and two sh:alternativePath
+# lists, whose IRIs share their local name, so `_local` gives the same
+# answer whichever one `.first()` / `graph.value` takes; `.one()` raises.
+@prefix ex2: <http://example.org/other#> .
+_:pTwoInv sh:inversePath ex:prop9 , ex2:prop9 .
+_:pTwoAlt sh:alternativePath ( _:twoAltA ) , ( _:twoAltB ) .
+_:twoAltA sh:inversePath ex:prop8 .
+_:twoAltB sh:inversePath ex2:prop8 .
+
+# --- falsy literals where the region tests `is not None`: an inverse ""
+# is a hit, a nested inverse 0 is a hit -- `if inverse:` would skip them.
+_:pEmptyInv sh:inversePath "" .
+_:pZeroAlt sh:alternativePath ( _:zeroItem ) .
+_:zeroItem sh:inversePath 0 .
+
+# --- a node with rdf:rest but NO rdf:first, whose rest is the two-step
+# ( ex:assocProp rdf:type ) list: the existence test answers no, so the
+# result is (None, False, False); dropping or widening that test would let
+# Graph.items() follow rdf:rest and answer ("assocProp", False, True).
+_:pRestOnly rdf:rest _:pSeq2 .

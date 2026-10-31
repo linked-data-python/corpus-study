@@ -20,6 +20,7 @@
     "m{ }",
     ".first()",
     "prefixed name",
+    "variable",
     "interpolation {expr}",
     "call suffix (g)"
   ],
@@ -48,5 +49,22 @@
     "method": "fixture:fixture.ttl entry:is_xsd_primitive",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "fixture.ttl : ex:Neighbour, rangé en tête du store (onProperty fhir:value, allValuesFrom ex:NotXsd, someValuesFrom -> onDatatype ex:NotXsdDt), qui tue les quatre lectures .first() élargies en `[]` ; ex:TwoAll (deux allValuesFrom, deux solutions), ex:EmptyAll (allValuesFrom \"\" falsy -> repli), ex:NoBase et ex:NoDatatype (zéro solution pour someValuesFrom et onDatatype, jamais exercé avant), ex:IriSome (someValuesFrom IRI portant elle-même un onDatatype), ex:NonXsdSome (repli vers un type non xsd), ex:BothAll (allValuesFrom vrai + someValuesFrom non xsd), owl:onProperty fhir:value sur la classe NOMMÉE ex:SomeNamedClass. driver.py : sept appels sur ces nœuds, plus un appel par primitive FHIR du fhir.ttl du dépôt (fhir_primitives.ttl, 21 sujets de rdfs:subClassOf fhir:Primitive et leur fermeture BNode extraits de tests/data/fhir_metadata_vocabulary/fhir.ttl), les entrées réelles de test_primitives. La note de traduction qui dit chaque `.first()` -> `.one()` vérifié en échec était fausse pour someValuesFrom et onDatatype avant l'audit. meta.json : `variable` ajouté à constructions (erreur matérielle : `?o` employé dans chaque m{ }, non déclaré).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "onProperty / allValuesFrom / someValuesFrom / onDatatype .first() -> .one() (les deux derniers survivaient)",
+      "les quatre .first() -> next(iter(...)) (someValuesFrom, onDatatype survivaient)",
+      "les quatre sujets {node}/{base_node} -> [] (forme gardée ; someValuesFrom, onDatatype survivaient)",
+      "boucle {prim} -> [] et boucle -> []",
+      "les quatre îlots -> None",
+      "`if not base_type` -> `is None` / True / False (deux survivaient)",
+      "garde isinstance(base_node, BNode) -> True / `is not None` (survivaient)",
+      "garde isinstance(node, BNode) supprimée (survivait)",
+      "garde integer64 -> False"
+    ],
+    "remaining": ""
   }
 }

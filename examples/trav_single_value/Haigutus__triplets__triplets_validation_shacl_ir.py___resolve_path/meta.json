@@ -42,5 +42,19 @@
     "method": "entry:_resolve_path",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "fixture.ttl (section finale) : _:pTwoInv et _:pTwoAlt (deux inversePath, deux listes alternativePath, IRI de même nom local : deux solutions, résultat indépendant de l'ordre, `.one()` lève) ; _:pEmptyInv (inversePath \"\") et _:zeroItem (inversePath 0 dans une alternative) : succès falsy là où la région teste `is not None` ; _:pRestOnly (rdf:rest sans rdf:first vers la liste ( ex:assocProp rdf:type )) : le test d'existence doit répondre non alors que Graph.items() suivrait le rdf:rest. driver.py : six appels sur ces nœuds et un path_node Literal (graph.value(shape, SH.path) peut en rendre un chez les appelants, shacl_ir.py:87, 262, 287) ; la recherche de _:pAlt passe désormais par son premier élément, le fixture ayant plusieurs sujets sh:alternativePath.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "les trois .first() -> .one() et -> next(iter(...))",
+      "les trois sujets -> [] (forme gardée)",
+      "existence bool(m{ {path_node} rdf:first ?o }) : sujet -> [] et -> True (survivaient : non équivalents, _:pRestOnly) ; -> False",
+      "les trois îlots -> None",
+      "`inverse is not None` et `nested_inverse is not None` -> véracité (survivaient)",
+      "@graph graph supprimé"
+    ],
+    "remaining": ""
   }
 }

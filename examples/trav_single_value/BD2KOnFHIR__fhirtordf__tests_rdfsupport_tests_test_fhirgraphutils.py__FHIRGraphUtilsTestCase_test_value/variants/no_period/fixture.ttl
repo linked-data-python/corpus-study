@@ -1,0 +1,25 @@
+# Variant of ../../fixture.ttl (mutation audit 2026-10-31): ZERO solutions
+# for the first site.  <Account/example> has no fhir:Account.servicePeriod;
+# only the neighbour <Patient/example> has one.  `g.value` and `.first()`
+# answer None and assertIsNotNone(period) fails the same way on both sides;
+# `.one()` / `next(iter(...))` raise instead, and a widened subject finds
+# the neighbour's period.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/Patient/example> a fhir:Patient ;
+    fhir:Account.servicePeriod [
+        fhir:Period.start [ fhir:value "2016-01-01"^^xsd:date ] ;
+        fhir:Period.end   [ fhir:value "2016-06-30"^^xsd:date ]
+    ] .
+
+<http://hl7.org/fhir/Account/example> a fhir:Account ;
+    fhir:nodeRole fhir:treeRoot ;
+    fhir:Resource.id [ fhir:value "example" ] ;
+    fhir:Account.type [
+        fhir:CodeableConcept.coding [
+            fhir:Coding.system [ fhir:value "http://terminology.hl7.org/CodeSystem/v3-ActCode" ] ;
+            fhir:Coding.code [ fhir:value "PBILLACCT" ]
+        ] ;
+        fhir:CodeableConcept.text [ fhir:value "patient" ]
+    ] .

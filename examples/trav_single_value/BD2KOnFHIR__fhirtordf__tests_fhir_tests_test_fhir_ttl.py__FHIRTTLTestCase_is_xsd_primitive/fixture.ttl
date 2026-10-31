@@ -30,11 +30,79 @@
 #   * ex:Other -- neighbourhood with its own fhir:value restriction and
 #     xsd:string allValuesFrom, never read because no call passes it as
 #     `prim`.
+#
+# Added by the mutation audit of 2026-10-31:
+#   * _:nbRestr / _:nbSome (ex:Neighbour) come FIRST in the store, so that
+#     every single-value island widened to `m{ [] pred ?o }` reads them
+#     instead of the right node: owl:onProperty fhir:value (kills the
+#     widened onProperty on ex:NoRestriction), owl:allValuesFrom ex:NotXsd
+#     (kills the widened allValuesFrom on ex:StringPrimitive),
+#     owl:someValuesFrom _:nbSome and owl:onDatatype ex:NotXsdDt (kill the
+#     widened someValuesFrom / onDatatype on ex:CodePrimitive).  A neighbour
+#     stored after the right solution would be masked by `.first()`.
+#   * ex:TwoAll -- TWO owl:allValuesFrom values (the two-solution case),
+#     both xsd:, so the answer does not depend on order; `.one()` raises.
+#   * ex:EmptyAll -- owl:allValuesFrom "" (a falsy literal): `not base_type`
+#     falls back to someValuesFrom, where `is None` would not.
+#   * ex:NoBase -- neither allValuesFrom nor someValuesFrom: zero solutions
+#     for the someValuesFrom read, base_type stays None -> False.
+#   * ex:NoDatatype -- someValuesFrom blank node without owl:onDatatype:
+#     zero solutions for the onDatatype read -> False.
+#   * ex:IriSome -- someValuesFrom is an IRI, not a blank node: the
+#     isinstance guard keeps base_type None -> False, although that IRI
+#     carries an owl:onDatatype xsd:string the guard must not read.
+#   * ex:BothAll -- allValuesFrom xsd:string AND a someValuesFrom with a
+#     non-xsd datatype: a truthy allValuesFrom must skip the fallback -> True.
+#   * ex:SomeNamedClass (under ex:NoRestriction) now carries owl:onProperty
+#     fhir:value: a named class, not a blank node, so the isinstance test
+#     must still skip it.
+#   * ex:NonXsdSome -- the someValuesFrom fallback reaching a non-xsd
+#     datatype -> False (the fallback's own "type failure" branch).
 @prefix ex:   <http://example.org/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix fhir: <http://hl7.org/fhir/> .
+
+ex:Neighbour rdfs:subClassOf _:nbRestr .
+_:nbRestr owl:onProperty fhir:value ;
+          owl:allValuesFrom ex:NotXsd ;
+          owl:someValuesFrom _:nbSome .
+_:nbSome owl:onDatatype ex:NotXsdDt .
+
+ex:TwoAll rdfs:subClassOf _:twoRestr .
+_:twoRestr owl:onProperty fhir:value ;
+           owl:allValuesFrom xsd:string , xsd:int .
+
+ex:EmptyAll rdfs:subClassOf _:emptyRestr .
+_:emptyRestr owl:onProperty fhir:value ;
+             owl:allValuesFrom "" ;
+             owl:someValuesFrom _:emptySome .
+_:emptySome owl:onDatatype xsd:string .
+
+ex:NoBase rdfs:subClassOf _:noBaseRestr .
+_:noBaseRestr owl:onProperty fhir:value .
+
+ex:NoDatatype rdfs:subClassOf _:noDtRestr .
+_:noDtRestr owl:onProperty fhir:value ;
+            owl:someValuesFrom _:noDtSome .
+_:noDtSome owl:cardinality 1 .
+
+ex:IriSome rdfs:subClassOf _:iriRestr .
+_:iriRestr owl:onProperty fhir:value ;
+           owl:someValuesFrom ex:NamedDatatype .
+ex:NamedDatatype owl:onDatatype xsd:string .
+
+ex:BothAll rdfs:subClassOf _:bothRestr .
+_:bothRestr owl:onProperty fhir:value ;
+            owl:allValuesFrom xsd:string ;
+            owl:someValuesFrom _:bothSome .
+_:bothSome owl:onDatatype ex:NotXsdDt3 .
+
+ex:NonXsdSome rdfs:subClassOf _:nonXsdRestr .
+_:nonXsdRestr owl:onProperty fhir:value ;
+              owl:someValuesFrom _:nonXsdSome .
+_:nonXsdSome owl:onDatatype ex:NotXsdDt2 .
 
 ex:StringPrimitive rdfs:subClassOf _:strRestr , _:idRestr .
 _:strRestr owl:onProperty fhir:value ;
@@ -59,6 +127,8 @@ ex:NoRestriction rdfs:subClassOf ex:SomeNamedClass , _:otherPropRestr , _:noProp
 _:otherPropRestr owl:onProperty fhir:id ;
                   owl:allValuesFrom xsd:string .
 _:noPropRestr owl:allValuesFrom xsd:string .
+ex:SomeNamedClass owl:onProperty fhir:value ;
+                  owl:allValuesFrom xsd:string .
 
 ex:Other rdfs:subClassOf _:otherRestr .
 _:otherRestr owl:onProperty fhir:value ;

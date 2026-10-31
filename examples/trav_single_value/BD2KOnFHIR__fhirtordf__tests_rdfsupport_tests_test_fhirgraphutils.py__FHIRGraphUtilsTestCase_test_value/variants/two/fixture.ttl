@@ -1,0 +1,27 @@
+# Variant of ../../fixture.ttl (mutation audit 2026-10-31): the TWO-solution
+# case for both m{ }.first() sites.  <Account/example> has two
+# fhir:Account.servicePeriod blank nodes, each with two fhir:Period.end blank
+# nodes, all with the same dates: `g.value` and `.first()` take one and the
+# assertions hold whichever comes first, while `.one()` raises.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/Account/example> a fhir:Account ;
+    fhir:nodeRole fhir:treeRoot ;
+    fhir:Resource.id [ fhir:value "example" ] ;
+    fhir:Account.type [
+        fhir:CodeableConcept.coding [
+            fhir:Coding.system [ fhir:value "http://terminology.hl7.org/CodeSystem/v3-ActCode" ] ;
+            fhir:Coding.code [ fhir:value "PBILLACCT" ]
+        ] ;
+        fhir:CodeableConcept.text [ fhir:value "patient" ]
+    ] ;
+    fhir:Account.servicePeriod [
+        fhir:Period.start [ fhir:value "2016-01-01"^^xsd:date ] ;
+        fhir:Period.end   [ fhir:value "2016-06-30"^^xsd:date ] ,
+                          [ fhir:value "2016-06-30"^^xsd:date ]
+    ] , [
+        fhir:Period.start [ fhir:value "2016-01-01"^^xsd:date ] ;
+        fhir:Period.end   [ fhir:value "2016-06-30"^^xsd:date ] ,
+                          [ fhir:value "2016-06-30"^^xsd:date ]
+    ] .

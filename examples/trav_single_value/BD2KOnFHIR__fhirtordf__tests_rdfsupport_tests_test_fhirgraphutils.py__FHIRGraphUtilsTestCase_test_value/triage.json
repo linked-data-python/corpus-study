@@ -11,5 +11,6 @@
     }
   ],
   "evidence": "rdfeval check: OK. Mutants sur la copie, tous FAIL sauf l'équivalent: premier/second îlot -> None, prédicat échangé (end->start), sujet élargi en ?x (les deux îlots), {s}/{period} -> ?p ?o. .one() à la place de .first() reste OK, normal (fixture mono-valuée; g.value a any=True par défaut, donc pas d'UniquenessError, et .first() = premier comme lui). Pilote rejoué avec le vrai tests/data/account-example.ttl du clone: OK; avec un fixture sans Account.servicePeriod: OK (les deux côtés tombent sur le même assertIsNotNone). Shim: value() et DottedNamespace identiques au dépôt (annotations de type retirées seulement); original.py identique aux lignes 17-32 du dépôt aux deux renommages documentés (load->parse, nom du fixture). Pas d'enveloppe inutile, pas de {expr} douteux: s est une URIRef, period un BNode, et {period} BNode interpolé matche bien (testé par le pilote).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation (10 mutants, 6 survivants avant : ni zéro ni deux solutions, voisin rangé après) : variantes de fixture via self.base_dir (deux solutions, zéro pour chaque site, fichier réel du dépôt) et voisin rangé avant ; traduction juste, check OK ; @graph g sans risque de liaison (le fixture lie déjà fhir: au même IRI, la région ne lit pas les liaisons)."
 }

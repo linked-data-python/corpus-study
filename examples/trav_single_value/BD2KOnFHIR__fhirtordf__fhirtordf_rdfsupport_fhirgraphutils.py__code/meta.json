@@ -19,6 +19,7 @@
     "m{ }",
     ".first()",
     "prefixed name",
+    "variable",
     "interpolation {expr}",
     "call suffix (g)"
   ],
@@ -46,5 +47,23 @@
     "method": "fixture:fixture.ttl entry:code",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "fixture.ttl : ex:Obs0, voisin rangé AVANT ex:Obs1 dans le store (tue le second îlot élargi en `m{ [] fhir:CodeableConcept.coding ?o }`, que `.first()`/le retour anticipé masquaient) ; ex:Obs3 reçoit un ex:hasOther vers un concept codé ; ex:Obs5 a deux ex:hasCode (cas deux solutions, même code des deux côtés, `.one()` lève). driver.py : appel two_values, et trois appels à la forme du dépôt (test_fhirgraphutils.py:52-54) sur account-example.ttl copié tel quel du clone : sujet FHIR['Account/example'], prédicat DottedURIRef FHIR.Account.type, system absent / juste / faux (branche BNode de value()). meta.json : `variable` ajouté à constructions (erreur matérielle : `?o` employé dans chaque m{ }, non déclaré).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "îlot 1 .first() -> .one() (zéro et deux solutions)",
+      "îlot 1 .first() -> next(iter(...)) (zéro solution)",
+      "îlot 1 sujet {subject} -> [] (forme gardée)",
+      "îlot 1 prédicat {predicate} -> ?p",
+      "îlot 1 -> None",
+      "garde `if c:` -> False",
+      "îlot 2 sujet {c} -> [] (forme gardée) — survivant avant l'audit",
+      "îlot 2 -> []",
+      "îlot 2 prédicat -> fhir:Coding.system",
+      "garde system -> True"
+    ],
+    "remaining": ""
   }
 }

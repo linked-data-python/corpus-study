@@ -17,8 +17,37 @@
 #     subject), and a coding with no fhir:Coding.code at all on _:cc2's
 #     sibling _:coding2c (never reached because it fails the system test
 #     before the code lookup would matter for the "no system" call).
+#   * (repair 2026-10-31) ex:Obs0 comes FIRST in the store: its coding is
+#     the first fhir:CodeableConcept.coding triple, so a second island
+#     widened to `m{ [] fhir:CodeableConcept.coding ?o }` answers
+#     "CODE-NEIGHBOUR" for ex:Obs1 instead of "CODE-A".  A neighbour placed
+#     after the right solution would be masked by the early return.
+#   * ex:Obs3 has no ex:hasCode but an ex:hasOther pointing to a coded
+#     concept: a predicate widened in the first island would reach it.
+#   * ex:Obs5 has TWO ex:hasCode values (the two-solution case of
+#     g.value / .first()), both leading to the same code, so the result
+#     does not depend on which one the store yields first, while `.one()`
+#     would raise.
 @prefix ex:   <http://example.org/> .
 @prefix fhir: <http://hl7.org/fhir/> .
+
+ex:Obs0 ex:hasCode _:cc0 .
+_:cc0 fhir:CodeableConcept.coding _:coding0 .
+_:coding0 fhir:Coding.system "sys-a" ;
+          fhir:Coding.code "CODE-NEIGHBOUR" .
+
+ex:Obs3 ex:hasOther _:cc3 .
+_:cc3 fhir:CodeableConcept.coding _:coding3 .
+_:coding3 fhir:Coding.system "sys-a" ;
+          fhir:Coding.code "CODE-OTHER-PREDICATE" .
+
+ex:Obs5 ex:hasCode _:cc5a , _:cc5b .
+_:cc5a fhir:CodeableConcept.coding _:coding5a .
+_:coding5a fhir:Coding.system "sys-a" ;
+           fhir:Coding.code "CODE-DUP" .
+_:cc5b fhir:CodeableConcept.coding _:coding5b .
+_:coding5b fhir:Coding.system "sys-a" ;
+           fhir:Coding.code "CODE-DUP" .
 
 ex:Obs1 ex:hasCode _:cc1 .
 _:cc1 fhir:CodeableConcept.coding _:coding1 .
@@ -32,7 +61,8 @@ _:coding2a fhir:Coding.system "sys-x" ;
 _:coding2b fhir:Coding.system "sys-y" ;
            fhir:Coding.code "CODE-Y" .
 
-# ex:Obs3 intentionally has no ex:hasCode triple: the zero-solution case.
+# ex:Obs3 intentionally has no ex:hasCode triple: the zero-solution case
+# (its ex:hasOther neighbour is declared at the top).
 
 ex:Obs4 ex:hasCode _:cc4 .
 _:cc4 fhir:CodeableConcept.coding _:coding4 .

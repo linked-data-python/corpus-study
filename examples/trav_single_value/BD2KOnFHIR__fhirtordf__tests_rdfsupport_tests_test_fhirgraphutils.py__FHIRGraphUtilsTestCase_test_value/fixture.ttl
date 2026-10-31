@@ -17,9 +17,19 @@
 # NEIGHBOURHOOD that must not match: <Patient/example> has ITS OWN,
 # differently-valued fhir:Account.servicePeriod -- proves the m{ }.first()
 # reads are scoped to the exact subject given (Account/example, then its
-# own servicePeriod bnode), not merely to the predicate.
+# own servicePeriod bnode), not merely to the predicate.  It is stored
+# BEFORE <Account/example> (mutation audit 2026-10-31): a subject widened to
+# `m{ [] fhir:Account.servicePeriod ?o }` / `m{ [] fhir:Period.end ?o }`
+# then answers the Patient's period first; placed after, `.first()` would
+# have masked it.
 @prefix fhir: <http://hl7.org/fhir/> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/Patient/example> a fhir:Patient ;
+    fhir:Account.servicePeriod [
+        fhir:Period.start [ fhir:value "1900-01-01"^^xsd:date ] ;
+        fhir:Period.end   [ fhir:value "1900-12-31"^^xsd:date ]
+    ] .
 
 <http://hl7.org/fhir/Account/example> a fhir:Account ;
     fhir:nodeRole fhir:treeRoot ;
@@ -34,10 +44,4 @@
     fhir:Account.servicePeriod [
         fhir:Period.start [ fhir:value "2016-01-01"^^xsd:date ] ;
         fhir:Period.end   [ fhir:value "2016-06-30"^^xsd:date ]
-    ] .
-
-<http://hl7.org/fhir/Patient/example> a fhir:Patient ;
-    fhir:Account.servicePeriod [
-        fhir:Period.start [ fhir:value "1900-01-01"^^xsd:date ] ;
-        fhir:Period.end   [ fhir:value "1900-12-31"^^xsd:date ]
     ] .

@@ -52,5 +52,19 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "fixture.ttl : le voisin <Patient/example> est rangé AVANT <Account/example> (placé après, `.first()` masquait un sujet élargi en `[]`). driver.py : la région lit « fixture.ttl » sous self.base_dir ; quatre appels de plus la ré-exécutent avec base_dir = variants/<nom>/ : two (deux servicePeriod à deux Period.end chacun, mêmes dates : `.one()` lève), no_period et no_end (zéro solution pour chacun des deux sites, un voisin en a une), repo (tests/data/account-example.ttl du clone, tel quel). L'élargissement « vérifié » des notes de traduction était `?x`, qui change la forme du résultat et meurt trivialement.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "les deux .first() -> .one() (survivaient)",
+      "les deux .first() -> next(iter(...)) (survivaient)",
+      "les deux sujets {s}/{period} -> [] (forme gardée, survivaient)",
+      "les deux îlots -> None",
+      "Period.end -> Period.start",
+      "@graph g supprimé"
+    ],
+    "remaining": ""
   }
 }

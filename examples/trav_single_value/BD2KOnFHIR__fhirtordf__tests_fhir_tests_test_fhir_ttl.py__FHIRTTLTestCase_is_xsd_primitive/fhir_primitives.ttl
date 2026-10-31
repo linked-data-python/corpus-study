@@ -1,0 +1,160 @@
+# Repository-shape input (mutation audit 2026-10-31): the 21 subjects of
+# `rdfs:subClassOf fhir:Primitive` in BD2KOnFHIR/fhirtordf@05b23ba1df
+# tests/data/fhir_metadata_vocabulary/fhir.ttl (the FHIR metadata
+# vocabulary FHIRGraph loads for test_primitives), with every
+# rdfs:subClassOf of theirs and the blank-node closure below it, extracted
+# by rdflib and re-serialised unchanged (5 MB source, 168 triples kept).
+# All use the someValuesFrom/onDatatype shape; fhir:integer64 is the
+# FHIRCat #35 case reached through that fallback.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+fhir:base64Binary rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:base64Binary ] ],
+        fhir:Primitive .
+
+fhir:boolean rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:boolean ] ],
+        fhir:Primitive .
+
+fhir:canonical rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:anyURI ] ],
+        fhir:Primitive .
+
+fhir:code rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:string ] ],
+        fhir:Primitive .
+
+fhir:date rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:dateTime ] ],
+        fhir:Primitive .
+
+fhir:dateTime rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:dateTime ] ],
+        fhir:Primitive .
+
+fhir:decimal rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:decimal ] ],
+        fhir:Primitive .
+
+fhir:id rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:string ] ],
+        fhir:Primitive .
+
+fhir:instant rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:dateTime ] ],
+        fhir:Primitive .
+
+fhir:integer rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:integer ] ],
+        fhir:Primitive .
+
+fhir:markdown rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:string ] ],
+        fhir:Primitive .
+
+fhir:oid rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:anyURI ] ],
+        fhir:Primitive .
+
+fhir:positiveInt rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:positiveInteger ] ],
+        fhir:Primitive .
+
+fhir:string rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:string ] ],
+        fhir:Primitive .
+
+fhir:time rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:string ] ],
+        fhir:Primitive .
+
+fhir:unsignedInt rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:nonNegativeInteger ] ],
+        fhir:Primitive .
+
+fhir:uri rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:anyURI ] ],
+        fhir:Primitive .
+
+fhir:url rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:anyURI ] ],
+        fhir:Primitive .
+
+fhir:uuid rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:anyURI ] ],
+        fhir:Primitive .
+
+fhir:xhtml rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:string ] ],
+        fhir:Primitive .
+
+fhir:integer64 rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality 1 ;
+            owl:onProperty fhir:value ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype fhir:integer64 ] ],
+        fhir:Primitive .
+
