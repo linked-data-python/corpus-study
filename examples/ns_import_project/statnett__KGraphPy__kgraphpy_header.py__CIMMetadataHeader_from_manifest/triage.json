@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : copie `for @bindings in m{ {graph_uri} ?p ?o }(manifest_graph): +{ … }(header_graph)` équivalente ; la région n'emploie aucun préfixe ni import de préfixe (aucun crédit `from … import p:`), seul gain notation faible.",
   "questions": [],
   "evidence": "rdfeval check : OK. Dans une copie (supprimée) : fixture étendue d'un sujet avec BNode, littéral @fr, `xsd:integer`, `xsd:string`, liste RDF, triplet auto-référent ; appel direct des deux `from_manifest` : graphes isomorphes, mêmes préfixes liés (`namespaces()` identiques), pour graph-1, graph-3, un URI avec espace et une chaîne vide (les deux lèvent le même ValueError). Mutants : motif `?s ?p ?o` -> FAIL ; ajout dans `manifest_graph` -> FAIL ; prédicat figé `rdf:type` -> FAIL. Le shim `collect_specific_namespaces` est identique au dépôt (seuls les commentaires et une ligne de docstring diffèrent). Réserve : le driver compare `set(graph)`, ce qui ferait échouer (pas passer) une fixture à BNode ; sans conséquence ici.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation : 12 mutants, 3 survivants (liaisons du graphe d'en-tête non comparées, lecture sur l'union du store), tués par la comparaison des liaisons, une fixture TriG au format par défaut et les cas des tests du dépôt ; traduction juste."
 }

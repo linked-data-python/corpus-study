@@ -22,7 +22,8 @@
     "@graph",
     "+{ }",
     "-{ }",
-    "nom préfixé"
+    "prefixed name",
+    "interpolation {expr}"
   ],
   "translation_notes": [
     "prefixes: CSVW->csvw. Le brouillon annoncait aussi RDF->rdf : ce @prefix a ete SUPPRIME, la seule occurrence de RDF.type s'ecrivant `a` dans l'ilot.",
@@ -33,7 +34,8 @@
     "le shim s'arrete franchement ou la region cesse d'etre concernee : la branche par-cellule de _parse_row_data et la branche colonne-virtuelle de parse_virtual_columns tirent six modules utilitaires de plus ; les fixtures donnent a chaque ligne un `cells` vide et aucune colonne virtuelle, et les stand-ins LEVENT une exception au lieu de repondre, pour qu'une fixture future qui y entrerait echoue bruyamment plutot que de diverger en silence. RDFGraphUtils (liaisons de prefixes) est omis : il ne change pas les triplets.",
     "harnais `demo` ajoute a l'identique dans les deux fichiers : la region est un corps de methode extrait de sa classe ; `demo` reconstruit le convertisseur et rend le graphe ecrit, compare par isomorphisme.",
     "la fixture est un VOISINAGE, pas une entree : en mode minimal une table ne produit que le triplet csvw:describes que la region retire aussitot, donc le graphe final serait vide et un retrait trop large serait indetectable. fixture.ttl est semee dans le graphe du convertisseur avant l'appel et porte DEUX triplets csvw:describes sur d'autres sujets. Verifie discriminant : supprimer le `-{ }` donne 10 triplets contre 8, l'elargir en `-{ ?s csvw:describes ?o }` en donne 6 contre 8.",
-    "3 appels : mode minimal (le retrait), mode standard (l'entete a trois ajouts), et mode standard sur une table sans '@id' (table_node devient un noeud vide)."
+    "3 appels : mode minimal (le retrait), mode standard (l'entete a trois ajouts), et mode standard sur une table sans '@id' (table_node devient un noeud vide).",
+    "Correction matérielle du 2026-10-31 : `interpolation {expr}` ajouté à `constructions` (`{main_node}`, `{table_node}`, `{dummy}`, `{row_node}`, `{URIRef(...)}` employés, non déclarés) et `nom préfixé` écrit `prefixed name` ; la traduction n'a pas changé."
   ],
   "draft_sha": "a4dd7ec95f27a451",
   "provenance": {
@@ -52,5 +54,17 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "liaisons du constructeur réel rétablies (RDFGraphUtils.add_default_bindings : Namespaces.all() transcrit, csvw: compris ; add_bindings_from_metadata : '' pour une table) en enveloppant le constructeur du shim dans driver.py, à l'identique des deux côtés, et liaisons du graphe rendu comparées à chaque appel (convert() sérialise) ; quatrième appel en mode minimal sur une table dont toutes les colonnes ont un aboutUrl (retrait sans objet, voisinage intact).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`@prefix cs:` au lieu de `csvw:` (le `@graph self.graph` relie l'espace csvw à `cs`, écrasant la liaison du dépôt ; survivait)",
+      "`-{ }` supprimé ; `-{ ?s csvw:describes ?o }`",
+      "`+{ }` d'en-tête vidé ; `{URIRef(table_metadata['url'])}` -> `{table_metadata['url']}` ; `{table_node}` -> `?t`",
+      "garde de mode forcée à True / à False"
+    ],
+    "remaining": ""
   }
 }

@@ -24,7 +24,8 @@
     "+{ }",
     "call suffix (g)",
     "for @bindings in",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "variable"
   ],
   "translation_notes": [
     "REVISION of the draft: the draft added \"@prefix rdf:\"/\"@prefix dcterms:\" for RDF/DCTERMS, but neither is ever used as a TERM in the extracted lines (no RDF.x, no DCTERMS.x, no MD.x in the body) -- grep confirms it. Per the batch reminder, an imported namespace never used as a term in the extracted lines stays an ordinary import, uncredited: reverted, RDF/DCTERMS/MD/Node/BNode/Literal are all left as plain rdflib imports (matching the source, which does not use them here either -- the sampled lines just happen to sit in a file that imports more than they need).",
@@ -32,7 +33,8 @@
     "the copy loop `for triple in manifest_graph.triples((graph_uri, None, None)): header_graph.add(triple)` is the region's only real RDF operation: translated as `for @bindings in m{ {graph_uri} ?p ?o }(manifest_graph): +{ {graph_uri} ?p ?o }(header_graph)` -- a CONSTRUCT with no query engine, matching bindings.md's documented pattern exactly. Safe to fold into a join here because the original already iterates every match (not `.value`/`next`, so no cardinality change).",
     "binding restoration: the extracted classmethod has no enclosing class (`cls` was free), so original.py/translated.ldpy both add a minimal CIMMetadataHeader (subject, graph only -- the other four __init__ parameters of the real class are never reached) plus `from_manifest = CIMMetadataHeader.from_manifest` at module level, identical on both sides. A duck-typed __eq__ (not isinstance-based: the two sides exec in separate namespaces, so \"the same class\" is two distinct objects) is scaffolding for comparability only, not business logic.",
     "the zero-solution case (meta/oracle=values requires it) makes from_manifest RAISE ValueError, which the generic run_pair(entry=..., calls=[...]) cannot express -- any exception inside its call loop aborts the whole verdict as a driver error rather than a per-case outcome. driver.py is therefore custom (as edmondchuc__rdflib-orm's is, elsewhere in this same stratum): it calls from_manifest itself for a matching graph_uri and for a non-matching one, and compares outcome (returned vs raised, and the exception type) plus the returned object's subject/graph for the matching case.",
-    "context shim kgraphpy/ is a real two-level package (kgraphpy/namespaces.py) rather than a flat module, because the source does `from kgraphpy.namespaces import ...` -- a dotted import a flat shim module cannot satisfy. It works because rdfeval/check.py runs driver.py as a script with cwd=ex_dir, so Python puts ex_dir on sys.path[0] the way it does for any script's own directory."
+    "context shim kgraphpy/ is a real two-level package (kgraphpy/namespaces.py) rather than a flat module, because the source does `from kgraphpy.namespaces import ...` -- a dotted import a flat shim module cannot satisfy. It works because rdfeval/check.py runs driver.py as a script with cwd=ex_dir, so Python puts ex_dir on sys.path[0] the way it does for any script's own directory.",
+    "Correction matérielle du 2026-10-31 : `variable` ajouté à `constructions` (`?p ?o` employés dans `m{ }` et `+{ }`, non déclarés) ; la traduction n'a pas changé."
   ],
   "draft_sha": "0a9025141439041e",
   "provenance": {
@@ -50,5 +52,19 @@
     "method": "custom:from_manifest-outcomes",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "comparaison des liaisons de préfixes du graphe d'en-tête et du message des levées ; fixture.trig lu au format par défaut (en-têtes dans le graphe par défaut, triplets de même sujet dans des graphes nommés), identifiant en str et en URIRef, identifiant absent ; dix cas de tests/test_header.py (paramétrés et test_from_manifest_namespaces) avec la couture du dépôt, `Graph.parse` remplacé par fake_parse_factory à l'identique des deux côtés : identifiants relatifs, fragment, littéral et nœud anonyme en sujet qui ne doivent pas matcher, préfixes partiellement employés.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "`header_graph.namespace_manager = nm` supprimé (survivait)",
+      "boucle `nm.bind` vidée (survivait)",
+      "`m{ }` sur l'union du store (Dataset default_union=True) au lieu du graphe (survivait : la fixture Turtle n'avait pas de graphe nommé)",
+      "sujet élargi en `?s` dans `m{ }` et dans `+{ }` ; objet figé dans `+{ }` ; receveur de `+{ }` échangé",
+      "boucle supprimée ; `m{ }` remplacé par `[]` ; `[m{ }.first()]`",
+      "garde `len(header_graph) == 0` forcée à True / à False ; `URIRef(graph_uri)` retiré"
+    ],
+    "remaining": ""
   }
 }

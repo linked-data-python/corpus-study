@@ -44,5 +44,18 @@
     "method": "entry:_apply_graph_write",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "cinq appels où la cible est, comme dans le dépôt (graph_store.py:669, 897, 965), un graphe nommé d'un Dataset default_union=False tenant aussi un graphe par défaut et un autre graphe source avec des voisins à deux termes communs et un triplet identique ; store en mémoire enregistreur des `remove` (motif et contexte) ; égalité sur tous les graphes du Dataset, le journal du store, les liaisons du Dataset source (où tombe `target.bind`) et du Dataset de requête ; description à nœuds anonymes imbriqués dans la cible ; replace faux, entrant vide, cible inexistante, conflit de préfixe et d'espace (`exo:`/`ex:`) pour `override=False` ; journal `acquirium.graph_store` capturé et comparé.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "receveur élargi au store entier (Dataset default_union=True) (survivait)",
+      "vidage triplet par triplet au lieu d'un seul `remove((None, None, None))` (survivait ; même effet RDF, tué par le journal du store)",
+      "`target.bind` supprimé (survivait)",
+      "`override=True` sur `target.bind` et sur la liaison du Dataset de requête (survivaient)",
+      "îlot -> `pass` ; `-{ ?s a ?o }` ; garde forcée à True / à False ; receveur = graphe par défaut du store"
+    ],
+    "remaining": ""
   }
 }

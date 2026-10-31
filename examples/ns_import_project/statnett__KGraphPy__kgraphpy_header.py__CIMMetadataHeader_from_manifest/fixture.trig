@@ -1,0 +1,35 @@
+# A manifest in the format `from_manifest` reads by default (TriG).
+#
+# The headers sit in the default graph; each model's data sits in a named
+# graph of the same name, and that data ALSO has the header subject in
+# subject position.  `Graph().parse(format="trig")` keeps the named graphs in
+# the store but `manifest_graph.triples(...)` sees only the default graph, so
+# a reading that went through the store or a union (SPARQL over the dataset,
+# `store.triples(..., None)`) would copy the named-graph triples too.
+#
+# Several prefixes are declared, only some of which the graph-1 header uses:
+# `collect_specific_namespaces` keeps the used ones, and the header graph's
+# bindings are part of the result.
+@prefix md: <http://iec.ch/TC57/61970-552/ModelDescription/1#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix eu: <http://iec.ch/TC57/CIM100-European#> .
+@prefix unused: <http://example.org/unused#> .
+
+<urn:uuid:graph-1> a md:FullModel ;
+    dcterms:title "Graph one" ;
+    md:Model.version "1" ;
+    md:Model.profile <http://iec.ch/TC57/ns/CIM/CoreEquipment-EU/3.0> .
+
+<urn:uuid:graph-2> a md:FullModel ;
+    dcterms:title "Graph two" ;
+    md:Model.version "7" .
+
+<urn:uuid:graph-1> {
+    <urn:uuid:graph-1> cim:IdentifiedObject.name "not a header triple" .
+    <urn:uuid:eq-1> a cim:ACLineSegment ; eu:IdentifiedObject.shortName "L1" .
+}
+
+<urn:uuid:graph-2> {
+    <urn:uuid:graph-2> cim:IdentifiedObject.name "not a header triple either" .
+}

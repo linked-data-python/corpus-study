@@ -42,5 +42,17 @@
     "method": "entry:set_profile",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "deux appels sans `use_fdof`, à la forme des appelants du dépôt (fdo_record.py:34, 59, 69 : `self.set_profile(str(o))`, `self.set_profile(profile_uri)`) : une str sur `tuples` vide, une URIRef sur `tuples` tenant déjà les deux prédicats (écrasement d'une seule clé) ; docstring qui dit pourquoi.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "valeur par défaut `use_fdof: bool = True` (seul survivant du pilote d'origine)",
+      "branches échangées ; garde forcée à True / à False",
+      "`URIRef(uri)` -> `uri`",
+      "IRI de `@prefix dcterms:` changée ; IRI de FDOC changée dans nanopub_ns_shim.py (l'original importe le vrai nanopub.namespaces) ; `fdoc:hasFdoProfile` -> `fdoc:profile`"
+    ],
+    "remaining": ""
   }
 }
