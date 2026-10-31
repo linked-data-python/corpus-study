@@ -26,3 +26,16 @@ ex:site_other sv:citingFile "other.py" ;
 # ex:doc_no_sites is a valid subject with no sv:citedBy at all: the
 # zero-solution case for a urn that IS in the graph but has nothing citing it.
 ex:doc_no_sites a ex:SomeType .
+
+# Added by the 2026-10-31 mutation audit. ex:doc_falsy is cited from blank
+# nodes, as the repository mints its cite sites (yaml_input.py `_anon`), and
+# carries the falsy values a truthiness test would drop: `line: 0` is accepted
+# by yaml_input.py (an int, not None) and becomes Literal(0); a parsed Turtle
+# source can hold an empty sv:citingFile "". The third site has TWO
+# sv:citingLine values and the fourth TWO sv:citingFile values: g.value() keeps
+# only one, so a join that absorbed either read would yield two CiteSites.
+ex:doc_falsy sv:citedBy
+    [ sv:citingFile "" ; sv:citingLine 0 ] ,
+    [ sv:citingFile "src/zero.py" ; sv:citingLine 0 ] ,
+    [ sv:citingFile "src/two.py" ; sv:citingLine 7 , 5 ] ,
+    [ sv:citingFile "src/dup_a.py" , "src/dup_b.py" ; sv:citingLine 3 ] .

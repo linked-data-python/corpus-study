@@ -8,11 +8,19 @@
 @prefix ex: <http://example.org/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 
 ex:concept1 a skos:Concept ;
     skos:prefLabel "Concept One"@en ;
     skos:broader ex:concept2 ;
-    skos:related _:b1 .
+    skos:related _:b1 ;
+    # Added by the 2026-10-31 audit: the repository reads schema.org under
+    # http:// (skos/__init__.py SCHEMAORG), which rdflib's default `schema:`
+    # binding (https://) does not cover, so the rendered graph has to name a
+    # prefix for it. driver.py compares those prefixes.
+    schema:jobTitle "Ecologist" ;
+    dcterms:source <http://example.org/source> .
 
 _:b1 a skos:Concept ;
     skos:prefLabel "Anonymous related concept"@en ;

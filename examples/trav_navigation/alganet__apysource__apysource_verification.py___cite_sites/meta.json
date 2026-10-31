@@ -48,5 +48,30 @@
     "method": "fixture:fixture.ttl entry:_cite_sites",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : appel ajouté sur ex:doc_falsy (sites en nœuds anonymes comme yaml_input.py `_anon`, citingFile \"\" avec citingLine 0, citingLine 0, deux citingLine sur un site, deux citingFile sur un site).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "{URIRef(urn)} -> []",
+      "{node} -> [] (citingFile)",
+      "{node} -> [] (citingLine)",
+      "îlot citedBy vidé",
+      "îlot citingFile supprimé",
+      "îlot citingLine supprimé",
+      "citingFile .first() -> .one()",
+      "citingLine .first() -> .one()",
+      "citingFile .first() -> next(iter())",
+      "citingLine .first() -> next(iter())",
+      "if file is None -> True",
+      "if file is None -> False",
+      "if file is None -> if not file (survivant avant)",
+      "line is not None -> truthiness (survivant avant)",
+      "line is not None -> True",
+      "citingFile <-> citingLine",
+      "jointure qui absorbe le g.value(citingFile) dans la boucle citedBy (survivant avant)"
+    ],
+    "remaining": ""
   }
 }

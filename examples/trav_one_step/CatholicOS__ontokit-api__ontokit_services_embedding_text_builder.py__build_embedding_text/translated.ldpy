@@ -15,20 +15,19 @@ def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> 
 
     Format: "{type}: {label}. {comment}. Parents: {parents}. Also known as: {alt_labels}"
     """
-    @graph graph
     parts: list[str] = []
 
     # Primary label
-    labels = [str(o) for o in m{ {entity_uri} rdfs:label ?o } if isinstance(o, RDFLiteral)]
+    labels = [str(o) for o in m{ {entity_uri} rdfs:label ?o }(graph) if isinstance(o, RDFLiteral)]
     primary_label = labels[0] if labels else _local_name(str(entity_uri))
     parts.append(f"{entity_type}: {primary_label}")
 
     # Comments/definitions
     comments = [
-        str(o) for o in m{ {entity_uri} rdfs:comment ?o } if isinstance(o, RDFLiteral)
+        str(o) for o in m{ {entity_uri} rdfs:comment ?o }(graph) if isinstance(o, RDFLiteral)
     ]
     definitions = [
-        str(o) for o in m{ {entity_uri} skos:definition ?o } if isinstance(o, RDFLiteral)
+        str(o) for o in m{ {entity_uri} skos:definition ?o }(graph) if isinstance(o, RDFLiteral)
     ]
     desc = comments or definitions
     if desc:
@@ -37,10 +36,10 @@ def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> 
     # Parents (use subPropertyOf for properties, subClassOf for classes)
     parent_pred = rdfs:subPropertyOf if entity_type == "property" else rdfs:subClassOf
     parent_labels = []
-    for p in m{ {entity_uri} {parent_pred} ?p }:
+    for p in m{ {entity_uri} {parent_pred} ?p }(graph):
         if isinstance(p, URIRef) and p != owl:Thing:
             plabel = next(
-                (str(o) for o in m{ {p} rdfs:label ?o } if isinstance(o, RDFLiteral)),
+                (str(o) for o in m{ {p} rdfs:label ?o }(graph) if isinstance(o, RDFLiteral)),
                 _local_name(str(p)),
             )
             parent_labels.append(plabel)
@@ -49,7 +48,7 @@ def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> 
 
     # Alternative labels
     alt_labels = [
-        str(o) for o in m{ {entity_uri} skos:altLabel ?o } if isinstance(o, RDFLiteral)
+        str(o) for o in m{ {entity_uri} skos:altLabel ?o }(graph) if isinstance(o, RDFLiteral)
     ]
     extra_labels = [lbl for lbl in labels[1:] if lbl != primary_label]
     all_alt = alt_labels + extra_labels

@@ -17,8 +17,8 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "@graph",
     "m{ }",
+    "call suffix (g)",
     "prefixed name",
     "variable",
     "interpolation {expr}"
@@ -29,7 +29,8 @@
     "@graph graph designates the function's own graph parameter as current for the whole body, so every m{ } stays bare (no (graph) call suffix needed) -- matches current-graph.md's 'designate the existing Python variable as current' form.",
     "_local_name (called for the primary label and for a parent with no rdfs:label of its own) is not defined in the extracted region: it is a private helper further down in the same source file (ontokit/services/embedding_text_builder.py, lines 56-60 at commit 23680a4d04). Restored via a context shim (embedding_text_context.py), reproduced verbatim from the published source, imported identically by both original.py and translated.ldpy.",
     "isinstance(o, RDFLiteral) after each m{ } read is preserved as-is: it is ordinary Python filtering a term island already returns (a URIRef, Literal or BNode), not something m{ } itself needs to express -- the fixture's non-literal rdfs:label object on ex:Animal exercises this filter on both sides.",
-    "fixture calls exercise: (1) ex:Animal/class -- two labels (labels[1:] extra-label path), comment-over-definition priority, one owl:Thing parent dropped and one kept parent with its own label, one alt label, and a non-literal rdfs:label object dropped by the isinstance filter; (2) ex:WorksAt/property -- the subPropertyOf branch and the 'no comment, fall back to definition' branch; (3) ex:Empty/class -- the zero-solution case across every field (label, comment/definition, parents, alt labels all empty), falling back to _local_name."
+    "fixture calls exercise: (1) ex:Animal/class -- two labels (labels[1:] extra-label path), comment-over-definition priority, one owl:Thing parent dropped and one kept parent with its own label, one alt label, and a non-literal rdfs:label object dropped by the isinstance filter; (2) ex:WorksAt/property -- the subPropertyOf branch and the 'no comment, fall back to definition' branch; (3) ex:Empty/class -- the zero-solution case across every field (label, comment/definition, parents, alt labels all empty), falling back to _local_name.",
+    "Correction du 2026-10-31 (audit par mutation) : `@graph graph` liait les `@prefix owl:/rdfs:/skos:` du bloc dans le graphe de l'appelant, que le dépôt a parsé depuis le fichier d'ontologie du projet, met en cache (ontology.py load_from_git/load_from_storage) puis resert (OntologyService.serialize, linter.py lit graph.namespaces()) : un fichier qui nomme SKOS `sk:` ou OWL `ow:` voyait ces préfixes renommés en `skos:`/`owl:`. Preuve : sur fixture_prefixes.ttl le pilote renforcé rend FAIL pour l'ancienne traduction (('ow', OWL) et ('sk', SKOS) disparaissent). Corrigé en retirant `@graph graph` et en suffixant chaque `m{ }` de `(graph)`, qui ne lie rien ; `constructions` suit (@graph -> call suffix (g))."
   ],
   "draft_sha": "e3fbc98c29b34cf3",
   "provenance": {
@@ -47,5 +48,29 @@
     "method": "fixture:fixture.ttl entry:build_embedding_text",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : appel ex:Restricted (parent owl:Restriction en nœud anonyme, parent sans label, parent dont le premier rdfs:label est une IRI, subPropertyOf ignoré par la branche classe, deux labels de même chaîne) ; contrôle des liaisons fusionné dans le verdict unique : la région tourne sur fixture_prefixes.ttl (SKOS en sk:, OWL en ow:) et chaque liaison du graphe de l'original après l'appel doit rester dans celui de la traduction.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "sujet {entity_uri} -> [] dans chacune des cinq lectures",
+      "prédicat {parent_pred} -> []",
+      "sujet {p} -> [] dans la lecture du label du parent",
+      "chacun des six îlots vidé",
+      "parent_pred figé sur subClassOf / subPropertyOf",
+      "garde isinstance(p, URIRef) retirée (survivant avant)",
+      "garde p != owl:Thing retirée",
+      "garde des parents -> False",
+      "isinstance retiré de la lecture du label du parent (survivant avant)",
+      "next(…, défaut) -> .first() or défaut sur le label du parent (survivant avant)",
+      "isinstance retiré de la lecture des labels",
+      "altLabel -> hiddenLabel",
+      "comments/definitions inversés",
+      "garde labels -> len(labels) > 1",
+      "owl:Thing -> owl:Nothing",
+      "@graph graph rétabli (défaut de liaisons, tué par le contrôle des liaisons)"
+    ],
+    "remaining": ""
   }
 }

@@ -48,5 +48,27 @@
     "method": "entry:render",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : rendu de concept1 dans les quatre types de média RDF que sert le dépôt (RDF_MEDIATYPES de pyldapi) ; comparaison, fusionnée dans le verdict unique, du mimetype et des liaisons de préfixes que déclare le corps sérialisé (celles de l'original doivent se retrouver dans la traduction) ; fixture : un triplet schema.org en http:// (SCHEMAORG du dépôt, que le `schema:` https par défaut de rdflib ne couvre pas) et un dcterms.",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "sujet de la lecture externe -> []",
+      "sujet de la lecture interne -> []",
+      "îlot externe vidé",
+      "îlot interne vidé",
+      "+{ } externe supprimé",
+      "+{ } interne supprimé",
+      "garde BNode -> True",
+      "garde BNode -> False",
+      "garde BNode -> truthiness",
+      "sujet écrit interne -> subj",
+      "suffixe (Config.g) retiré de la lecture externe",
+      "suffixe (Config.g) retiré de la lecture interne",
+      "@graph Config.g au lieu de g",
+      "@prefix schema: <http://schema.org/> ajouté au bloc du @graph (survivant avant : le pilote ne voyait pas les liaisons)"
+    ],
+    "remaining": ""
   }
 }

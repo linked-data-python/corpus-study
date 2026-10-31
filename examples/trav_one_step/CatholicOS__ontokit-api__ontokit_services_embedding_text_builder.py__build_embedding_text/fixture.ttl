@@ -41,3 +41,21 @@ ex:Other
     rdfs:label "Should not appear" ;
     rdfs:comment "Should not appear either" ;
     skos:altLabel "NeitherShouldThis" .
+
+# Added by the 2026-10-31 mutation audit. ex:Restricted ("class") has the
+# parents a real OWL file gives a class: an owl:Restriction blank node (the
+# isinstance(p, URIRef) filter must drop it), a parent with no rdfs:label
+# (falls back to _local_name), and a parent whose first rdfs:label is an IRI
+# (the parent-label read must skip it, not stop on it). It also carries an
+# rdfs:subPropertyOf, which the "class" branch must not read, and two labels
+# that are the same string ("Restricted"@en and "Restricted"), the second of
+# which the `lbl != primary_label` filter drops from the extra labels.
+ex:Restricted
+    rdfs:label "Restricted"@en, "Restricted" ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:WorksAt ;
+                      owl:someValuesFrom ex:LivingBeing ] ,
+        ex:Unlabelled , ex:IriLabelled ;
+    rdfs:subPropertyOf ex:relatedTo .
+
+ex:Unlabelled a owl:Class .
+ex:IriLabelled rdfs:label <http://example.org/iri-as-label> , "IRI-labelled parent" .

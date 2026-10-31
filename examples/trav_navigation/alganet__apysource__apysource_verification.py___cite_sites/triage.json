@@ -4,5 +4,6 @@
   "summary": "Rien à signaler : les deux `g.value` deviennent `.first()` sans fusion (cardinalité préservée), et l'équivalence tient aussi sur les nœuds anonymes que le dépôt crée réellement.",
   "questions": [],
   "evidence": "rdfeval check : OK. Le fixture n'emploie que des IRI comme nœuds de citation, alors que le dépôt les crée avec `_anon(...)` (yaml_input.py:282, BNode) : j'ai remplacé le fixture en copie par des BNode (sites complet, fichier seul, sans fichier, voisin d'un autre urn) -> OK. Copie enrichie (citingFile \"\" avec ligne 0, deux citingLine sur un même site, deux sites) -> OK. Mutants sur copie, tous ECHOUENT : lecture de citingLine remplacée par None, `if file is None` -> `if False`, citingFile -> citingLine, sujet `{URIRef(urn)}` -> `?x`. Appel réel (verification.py:176) : `record.urn` est une chaîne, la garde `if not urn` couvre le vide ; `{URIRef(urn)}` est correct (pas de @base). context_shim.py : SV, CiteSite conformes à namespaces.py/results.py du dépôt.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Audit par mutation (17+1 mutants) : trois survivaient (truthiness sur file et line, jointure absorbant citingFile) ; tués par l'appel ex:doc_falsy ajouté au pilote, traduction juste ; `if not urn -> False` est équivalent (URIRef('') ne matche rien)."
 }

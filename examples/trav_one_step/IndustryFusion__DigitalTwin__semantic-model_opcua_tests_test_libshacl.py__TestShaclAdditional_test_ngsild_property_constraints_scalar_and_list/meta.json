@@ -21,7 +21,6 @@
   "constructions": [
     "@prefix",
     "m{ }",
-    ".first()",
     "call suffix (g)",
     "prefixed name",
     "variable",
@@ -32,7 +31,8 @@
     "the two reads are `next(self.sh.shaclg.objects(s, SH.property))`, matched by strata trav_one_step/trav_single_value at once: each becomes `m{ {s} sh:property ?prop }(self.sh.shaclg).first()`. `self.sh.shaclg` is not the file's single current graph (it is reassigned mid-function, `self.sh.shaclg = Graph()`, twice) so the call suffix `(self.sh.shaclg)` supplies it explicitly rather than `@graph`.",
     "`.first()` differs from `next()` on the empty case (None vs StopIteration) -- the canonical rewrite in how-to/migrate-from-rdflib.md accepts this; here it is moot, since get_ngsild_property_constraints (context_shim.py) always leaves shapes[0]/s with exactly one sh:property triple for the value_rank/datatype combinations this test drives.",
     "left untranslated on purpose: `(inner, SH.path, ...) in list(self.sh.shaclg)` uses `list(g)`, an unfiltered full-graph scan explicitly kept as `list(g)` by querying.md (#keep-listg-for-a-full-scan); the second `(inner, SH.path, ...) in self.sh.shaclg` is plain Graph.__contains__, not part of the strata this region was drawn for (trav_existence is a different stratum) and not degrading anything m{ } would express here, so left as ordinary rdflib.",
-    "context_shim.py restores `Shacl` (lib/shacl.py) trimmed to exactly the methods this region's two calls reach -- the pipeline's context window captures the test method body but not sibling classes the test file imports. driver.py restores the missing `TestShaclAdditional.setUp()` fixture as a small stand-in with its own __eq__ (RDF isomorphism on .sh.shaclg/.data_graph), needed because the region mutates its `self` argument so the two sides cannot share one instance to sidestep object comparison, unlike the swrl2rdf trav_single_value precedent."
+    "context_shim.py restores `Shacl` (lib/shacl.py) trimmed to exactly the methods this region's two calls reach -- the pipeline's context window captures the test method body but not sibling classes the test file imports. driver.py restores the missing `TestShaclAdditional.setUp()` fixture as a small stand-in with its own __eq__ (RDF isomorphism on .sh.shaclg/.data_graph), needed because the region mutates its `self` argument so the two sides cannot share one instance to sidestep object comparison, unlike the swrl2rdf trav_single_value precedent.",
+    "Correction du 2026-10-31 (audit par mutation) : les deux `next(self.sh.shaclg.objects(s, SH.property))` traduits par `.first()` n'étaient pas fidèles. Sur une bibliothèque régressée (forme sans sh:property), l'original lève StopIteration ; `.first()` rendait None, et `(None, sh:path, hasValueList) in self.sh.shaclg` est un joker : le test passait en silence sur une bibliothèque cassée. Preuve : appels no_list_property et no_scalar_property du pilote renforcé, FAIL avec `.first()`. Corrigé en `next(iter(m{ … }(self.sh.shaclg)))`, la seule forme fidèle à un `next()` sans défaut ; `.first()` retiré de `constructions`. La note précédente qui jugeait l'écart « moot » ne valait que pour la bibliothèque intacte."
   ],
   "draft_sha": "75054f9dd626ad6f",
   "provenance": {
@@ -51,5 +51,28 @@
     "method": "entry:test_ngsild_property_constraints_scalar_and_list",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-10-31",
+    "driver": "renforcé : journal des assert* (méthode, membres à nœuds anonymes masqués, issue) comparé par __eq__, messages d'échec masqués de même ; quatre appels contre une bibliothèque régressée, sous-classes de Shacl identiques des deux côtés : forme de liste sans sh:property, forme scalaire sans sh:property, sh:path hasValue au lieu de hasValueList, sh:property d'un nœud auxiliaire émis avant celui de la forme.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "sujet de la lecture 1 -> [] (survivant avant)",
+      "sujet de la lecture 2 -> []",
+      "lecture 1 -> None",
+      "lecture 2 -> None (survivant avant)",
+      "next(iter()) -> .one() sur chaque lecture (survivants avant)",
+      "next(iter()) -> .first() sur chaque lecture (survivants avant : c'était la traduction)",
+      "next(iter(), None) sur la lecture 1",
+      "source data_graph au lieu de shaclg, lecture 1 et lecture 2 (survivant avant pour la 2)",
+      "garde du `found` -> True (survivant avant)",
+      "garde du `found` -> False",
+      "assertTrue(found) retiré (survivant avant)",
+      "assertTrue(len(shapes) >= 1) retiré (survivant avant)",
+      "assertIn retiré (survivant avant)",
+      "sh:path -> sh:name dans assertIn",
+      "hasValueList -> hasValue"
+    ],
+    "remaining": "Les appels qui prouvent l'écart font tourner la région (un test unitaire) contre une bibliothèque Shacl régressée, définie dans driver.py : à confirmer que le comportement d'un test sur une bibliothèque cassée fait partie de ce que la traduction doit préserver (sinon `.first()` était équivalent sur la bibliothèque intacte). Mutant équivalent non compté : `{s}` -> `{shapes2[0]}`, la liste n'a qu'une forme pour les arguments écrits en dur dans la région."
   }
 }

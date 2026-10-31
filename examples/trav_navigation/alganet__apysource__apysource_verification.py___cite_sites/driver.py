@@ -12,6 +12,14 @@ plus neighbouring data under a different urn that must not leak in), a urn
 present in the graph but with no citing sites at all (the zero-solution
 case), and the empty-string urn, which the region's own `if not urn: return
 []` must short-circuit before ever touching the graph.
+
+Added by the 2026-10-31 mutation audit: `ex:doc_falsy`, cited from blank
+nodes (as yaml_input.py mints them), with a site whose file is "" and line 0,
+a site with line 0, a site with two sv:citingLine values and one with two
+sv:citingFile values.  It kills the truthiness rewrites `if not file` (drops
+the "" site) and `if line` (turns line 0 into None), and the join that absorbs
+the citingFile `g.value()` into the citedBy loop (two CiteSites instead of
+one), all of which the first three calls left alive.
 """
 from pathlib import Path
 
@@ -32,6 +40,7 @@ VERDICT = run_pair(
         _case("http://example.org/doc1"),
         _case("http://example.org/doc_no_sites"),
         _case(""),
+        _case("http://example.org/doc_falsy"),
     ],
     ordered=True,  # the region itself does `sorted(sites, key=...)`
 )

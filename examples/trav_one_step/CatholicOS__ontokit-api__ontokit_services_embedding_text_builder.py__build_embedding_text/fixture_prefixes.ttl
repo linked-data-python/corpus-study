@@ -1,0 +1,18 @@
+# Input graph for the bindings check of driver.py (2026-10-31 audit).
+# The repository passes the graph it parsed from the project's own ontology
+# file (ontology.py load_from_git / load_from_storage), caches it, and serves
+# it again through OntologyService.serialize and the linter, which read its
+# prefix bindings. An ontology file is free to name SKOS and OWL with
+# prefixes of its own: the region must not rename them.
+@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sk: <http://www.w3.org/2004/02/skos/core#> .
+@prefix ow: <http://www.w3.org/2002/07/owl#> .
+
+ex:Animal
+    rdfs:label "Animal" ;
+    sk:definition "A living organism." ;
+    rdfs:subClassOf ow:Thing, ex:LivingBeing ;
+    sk:altLabel "Fauna" .
+
+ex:LivingBeing rdfs:label "Living being" .
