@@ -33,12 +33,12 @@ SKIP = {"for-bindings-close"}
 
 # The order a translator meets them, not the alphabetical order.
 ORDER = [
-    ("Déclarations", ["prefix", "base", "import", "graph-decl",
+    ("Declarations", ["prefix", "base", "import", "graph-decl",
                       "bindings-decl", "for-bindings"]),
-    ("Termes", ["iri", "pname", "literal", "var", "firi", "fnode", "bnode"]),
-    ("Graphes et graphe courant", ["graph", "addto", "removefrom"]),
-    ("Lecture", ["match", "sparql"]),
-    ("Évaluation différée", ["enode", "eiri"]),
+    ("Terms", ["iri", "pname", "literal", "var", "firi", "fnode", "bnode"]),
+    ("Graphs and the current graph", ["graph", "addto", "removefrom"]),
+    ("Reading", ["match", "sparql"]),
+    ("Deferred evaluation", ["enode", "eiri"]),
 ]
 
 
@@ -53,7 +53,7 @@ def render() -> str:
     for title, kinds in ORDER:
         out.append("**%s**" % title)
         out.append("")
-        out.append("| forme | ce que c'est |")
+        out.append("| form | what it is |")
         out.append("|---|---|")
         for kind in kinds:
             doc = ISLANDS[kind]
@@ -66,12 +66,12 @@ def render() -> str:
     missing = sorted(set(ISLANDS) - covered)
     if missing:                                    # pragma: no cover
         raise SystemExit("island kinds absent from ORDER: %s" % missing)
-    out.append("*(Engendré depuis `ldpy/lsp/islanddoc.py` — la table que le "
-               "survol de l'éditeur affiche, en anglais comme tout le code. "
-               "`ldpy/tests/test_islanddoc.py` garantit qu'elle décrit "
-               "**toutes** les sortes d'îlot et que chacun de ses liens tombe "
-               "sur une ancre vivante de la documentation. Ne l'éditez pas à "
-               "la main : `python scripts/sync_language_reference.py`.)*")
+    out.append("*(Generated from `ldpy/lsp/islanddoc.py` — the table the "
+               "editor's hover shows. `ldpy/tests/test_islanddoc.py` "
+               "guarantees that it describes **every** kind of island and "
+               "that each of its links lands on a live anchor of the "
+               "documentation. Do not edit it by hand: "
+               "`python scripts/sync_language_reference.py`.)*")
     out.append("")
     out.append(END)
     return "\n".join(out)

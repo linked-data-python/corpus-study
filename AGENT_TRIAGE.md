@@ -1,136 +1,135 @@
-# Protocole d'un lot de tri avant revue (étude du corpus)
+# Protocol for a pre-review triage batch (corpus study)
 
-Ce fichier est le contrat d'un agent **trieur**. Vous ne traduisez rien et
-ne corrigez rien : vous lisez des paires déjà prouvées par la machine, et
-vous dites à Maxime **lesquelles il doit regarder en premier, et quoi y
-regarder**. Il ne peut pas relire 300 paires ; il relira celles que vous
-mettez en tête, et approuvera les autres par sondage.
+This file is the contract of a **triager** agent. You translate nothing and
+fix nothing: you read pairs already proved by the machine, and you tell
+Maxime **which ones he must look at first, and what to look at in them**. He
+cannot reread 300 pairs; he will reread those you put at the top, and
+approve the others by sampling.
 
-Un tri utile est **sévère et précis** : une paire mise en `high` sans raison
-vérifiable lui fait perdre du temps, une paire douteuse laissée en `low`
-entre dans les chiffres de l'article. Les notes du traducteur
-(`translation_notes`, `optimization_notes`) sont des **affirmations à
-vérifier**, pas des preuves : c'est souvent le même genre d'agent que vous
-qui les a écrites.
+A useful triage is **severe and precise**: a pair put at `high` without a
+verifiable reason makes him lose time, a doubtful pair left at `low` enters
+the figures of the article. The translator's notes (`translation_notes`,
+`optimization_notes`) are **claims to verify**, not proofs: it is often the
+same kind of agent as you who wrote them.
 
-Python : `~/.venvs/ldpy/bin/python`. Le langage : [INSTRUCTIONS.md](INSTRUCTIONS.md)
-§1 (référence), §2 (constructions attendues et pièges), §3 (oracles, et
-« Ce qu'un verdict vert ne prouve pas »). Les artefacts optimisés et leur
-doctrine : [AGENT_OPTIMIZE.md](AGENT_OPTIMIZE.md), si la région en a.
+Python: `~/.venvs/ldpy/bin/python`. The language:
+[INSTRUCTIONS.md](INSTRUCTIONS.md) §1 (reference), §2 (expected
+constructions and pitfalls), §3 (oracles, and "What a green verdict does not
+prove"). The optimized artefacts and their doctrine:
+[AGENT_OPTIMIZE.md](AGENT_OPTIMIZE.md), if the region has any.
 
-## Ce que vous lisez, par région
+## What you read, per region
 
-`meta.json`, `original.py`, `translated.ldpy`, `driver.py`, les fixtures
-(`*.ttl`), les shims (tout autre `.py`), et s'ils existent `optimized.py` et
-`optimized.ldpy`. Lancez `~/.venvs/ldpy/bin/python -m rdfeval check "<dir>"`
-une fois : tout doit être `OK` ; sinon c'est `high` d'office.
+`meta.json`, `original.py`, `translated.ldpy`, `driver.py`, the fixtures
+(`*.ttl`), the shims (any other `.py`), and, if they exist, `optimized.py`
+and `optimized.ldpy`. Run `~/.venvs/ldpy/bin/python -m rdfeval check "<dir>"`
+once: everything must be `OK`; otherwise it is `high` by default.
 
-## Ce que vous cherchez — le vocabulaire fermé des drapeaux
+## What you look for — the closed vocabulary of flags
 
-| drapeau | quand le lever |
+| flag | when to raise it |
 |---|---|
-| `equivalence-doubt` | un cas que le pilote n'exerce pas où les deux versions se comporteraient différemment (branche, valeur `None`, graphe vide, littéral typé, ordre, cardinalité d'une jointure, BNode…) — **dites lequel** |
-| `weak-oracle` | le pilote prouve peu : un seul appel pour une région à branches, fixture qui ne contient pas le cas zéro solution ni de voisinage qui ne doit pas matcher, état de module qui ne dépend pas de la région, effets non observés |
-| `shim-invents-logic` | un shim ou une modification de `original.py` fait plus que restaurer des liaisons : il ajoute un comportement qui n'est pas dans le dépôt d'origine, ou retire du code de la région |
-| `wrong-construction` | la traduction n'emploie pas la construction la plus spécifique (INSTRUCTIONS.md §2), ou `constructions` déclare un îlot que le code n'emploie pas (crédit indu) |
-| `classification-doubt` | la classification (`directly-expressible`, `minor-restructuring`, `awkward`) ne correspond pas à ce que montre la paire |
-| `optimization-asymmetry` | `optimized.ldpy` est compressé plus durement que `optimized.py` : une restructuration écrite en LD Python qui s'écrirait aussi en Python pur, et qui n'est pas dans `optimized.py` |
-| `optimization-doctrine` | un artefact optimisé enfreint la doctrine : gestion d'erreur retirée, noms raccourcis, golf, interface changée |
-| `article-example` | drapeau **positif** : le gain se lit en trois lignes et la paire est propre — candidate pour l'article |
+| `equivalence-doubt` | a case that the driver does not exercise where the two versions would behave differently (branch, `None` value, empty graph, typed literal, order, cardinality of a join, BNode…) — **say which** |
+| `weak-oracle` | the driver proves little: a single call for a region with branches, a fixture that contains neither the zero-solution case nor any neighbourhood that must not match, module state that does not depend on the region, unobserved effects |
+| `shim-invents-logic` | a shim or a modification of `original.py` does more than restore bindings: it adds a behaviour that is not in the original repository, or removes code from the region |
+| `wrong-construction` | the translation does not use the most specific construction (INSTRUCTIONS.md §2), or `constructions` declares an island that the code does not use (undue credit) |
+| `classification-doubt` | the classification (`directly-expressible`, `minor-restructuring`, `awkward`) does not match what the pair shows |
+| `optimization-asymmetry` | `optimized.ldpy` is compressed harder than `optimized.py`: a restructuring written in LD Python that could also be written in pure Python, and that is not in `optimized.py` |
+| `optimization-doctrine` | an optimized artefact breaks the doctrine: error handling removed, names shortened, golf, interface changed |
+| `article-example` | **positive** flag: the gain reads in three lines and the pair is clean — candidate for the article |
 
-### Les défauts déjà trouvés — cherchez-les d'abord
+### The defects already found — look for them first
 
-Le pilote du 2026-10-27 a trouvé, sur 14 paires toutes `final` et vertes :
+The pilot run of 2026-10-27 found, on 14 pairs all `final` and green:
 
-1. **Le type réel de l'entrée.** Une interpolation `{expr}` coerce une `str`
-   en littéral là où l'original en faisait une IRI (`<{0}>`.format) :
-   regardez ce que le **dépôt d'origine** passe vraiment (le clone est sous
-   `corpus/repos/<owner>__<repo>/`), pas ce que disent les notes.
-2. **La véracité d'un littéral.** `not g.value(…)` traite `""` et `0` comme
-   absents ; `not bool(m{ … })` et `.first() is None` non. Toute garde de
-   vérité réécrite est suspecte.
-3. **Le cas zéro solution et les branches secondaires** absents du pilote :
-   un mutant (îlot remplacé par `[]`, prédicat échangé dans une branche)
-   qui reste vert prouve que l'oracle est faible.
-4. **Un nom qui disparaît d'un côté** n'est pas comparé en mode
-   « module-state » (seuls les noms communs le sont).
-5. **Les exceptions** : le harnais compare deux levées (même type, même
-   message), mais seulement sur les appels que le pilote fait : une
-   réécriture qui déplace un calcul pouvant lever passe inaperçue si aucun
-   appel n'atteint la levée.
-6. **Les notes du traducteur** affirmaient des faits faux sur le dépôt
-   (« real call sites », « verbatim », « the mirror has no source ») : un
-   shim dit verbatim qui ne l'est pas, un `__namespaces__` écrit à la main
-   que le dépôt n'a pas (`from … import p:` crédité indûment).
-7. **Une refactorisation cachée dans la traduction fidèle** : table de
-   dispatch, conditions repliées en dictionnaires, affectations hissées —
-   faisables en Python pur, donc un gain que la mesure attribue à tort à la
-   notation. C'est `classification-doubt` (la paire n'est pas
-   `directly-expressible`), et dites-le dans la question.
-8. **Des enveloppes inutiles** : `{URIRef(x)}` ou `{Literal(x)}` là où
-   `f<…>` ou `{x}` passent (`wrong-construction`, vérifiez l'équivalence).
-9. **Deux écarts du langage sont connus et remontés à Maxime** : `{expr}`
-   valant `None` donne `Literal("None")` (rdflib lève dans un ajout, fait un
-   joker dans un motif) ; l'objet de `s{ }` ne passe pas dans
-   `graph.query()`. Ne les signalez sur une paire que si le **dépôt
-   d'origine** atteint le cas (un appelant réel qui passe `None`, une requête
-   préparée passée à `graph.query`), avec le fichier et la ligne du dépôt.
-10. **`+{ }` et `-{ }` évaluent, puis écrivent** (fiche ldpy/014) : si un
-   terme lève, le graphe reste tel qu'il était, là où une suite de `g.add`
-   laisse les triplets déjà ajoutés. C'est la sémantique voulue du langage,
-   pas un défaut de la paire. Ne levez `equivalence-doubt` que si le dépôt
-   **atteint** la levée (un appelant réel, fichier et ligne) **et peut
-   observer** le graphe partiel (il n'est pas jeté avec l'exception). La
-   traduction fidèle garde alors les premiers triplets dans un îlot à part ;
-   la classification ne change pas.
-11. **Les liaisons de préfixes** : `@graph g` ajoute au graphe les préfixes du
-   bloc (fiche ldpy/027), donc la traduction peut sérialiser `so:Dataset` là
-   où l'original écrit `<http://schema.org/Dataset>`. Ce n'est **pas** une
-   différence de sens : l'équivalence porte sur les triplets, plus les
-   liaisons que l'original pose, qui doivent être conservées ; des liaisons
-   en plus sont tolérées. Ne le signalez que si le dépôt compare le **texte**
-   sérialisé (un fichier attendu, une chaîne exacte), avec le fichier et la
-   ligne.
+1. **The real type of the input.** An `{expr}` interpolation coerces a `str`
+   into a literal where the original made an IRI of it (`<{0}>`.format):
+   look at what the **original repository** really passes (the clone is
+   under `corpus/repos/<owner>__<repo>/`), not at what the notes say.
+2. **The truthiness of a literal.** `not g.value(…)` treats `""` and `0` as
+   absent; `not bool(m{ … })` and `.first() is None` do not. Any rewritten
+   truth guard is suspect.
+3. **The zero-solution case and the secondary branches** absent from the
+   driver: a mutant (island replaced by `[]`, predicate swapped in a
+   branch) that stays green proves that the oracle is weak.
+4. **A name that disappears on one side** is not compared in "module-state"
+   mode (only common names are).
+5. **Exceptions**: the harness compares two raises (same type, same
+   message), but only on the calls the driver makes: a rewrite that moves a
+   computation that can raise goes unnoticed if no call reaches the raise.
+6. **The translator's notes** asserted false facts about the repository
+   ("real call sites", "verbatim", "the mirror has no source"): a shim said
+   to be verbatim that is not, a hand-written `__namespaces__` that the
+   repository does not have (`from … import p:` unduly credited).
+7. **A refactoring hidden in the faithful translation**: dispatch table,
+   conditions folded into dictionaries, hoisted assignments — doable in pure
+   Python, hence a gain that the measurement wrongly attributes to the
+   notation. This is `classification-doubt` (the pair is not
+   `directly-expressible`), and say so in the question.
+8. **Needless wrappers**: `{URIRef(x)}` or `{Literal(x)}` where `f<…>` or
+   `{x}` would do (`wrong-construction`, verify the equivalence).
+9. **Two language deviations are known and have been escalated to Maxime**:
+   `{expr}` evaluating to `None` gives `Literal("None")` (rdflib raises in
+   an add, acts as a wildcard in a pattern); the object that `s{ }` yields
+   does not go through `graph.query()`. Do not report them on a pair unless
+   the **original repository** reaches the case (a real caller that passes
+   `None`, a prepared query passed to `graph.query`), with the file and
+   line in the repository.
+10. **`+{ }` and `-{ }` evaluate, then write** (design record ldpy/014): if a
+   term raises, the graph stays as it was, whereas a sequence of `g.add`
+   leaves the triples already added. This is the intended semantics of the
+   language, not a defect of the pair. Raise `equivalence-doubt` only if the
+   repository **reaches** the raise (a real caller, file and line) **and can
+   observe** the partial graph (it is not discarded along with the
+   exception). The faithful translation then keeps the first triples in a
+   separate island; the classification does not change.
+11. **Prefix bindings**: `@graph g` adds the prefixes of the block to the
+   graph (design record ldpy/027), so the translation may serialize
+   `so:Dataset` where the original writes `<http://schema.org/Dataset>`.
+   This is **not** a difference in meaning: the equivalence covers the
+   triples, plus the bindings that the original sets, which must be kept;
+   extra bindings are tolerated. Report it only if the repository compares
+   the serialized **text** (an expected file, an exact string), with the
+   file and line.
 
-Deux défauts sont désormais **contrôlés mécaniquement** par le digest, ne
-les recherchez pas à la main : l'écart entre les `constructions` déclarées
-et les îlots du code, et un `__namespaces__` qu'un shim écrit alors que le
-dépôt d'origine n'en exporte aucun (les 21 crédits de `from … import p:`
-du corpus sont dans ce cas).
+Two defects are now **checked mechanically** by the digest, do not look for
+them by hand: the gap between the declared `constructions` and the islands
+of the code, and a `__namespaces__` that a shim writes while the original
+repository exports none (the 21 `from … import p:` credits of the corpus are
+in this case).
 
-**Un mutant qui ne mute rien ne prouve rien** : dans rdflib 7.2.1,
-`FILTER(false)` ne filtre rien (`FILTER(1 = 2)` si). Pour tuer une
-branche, écrivez `FILTER(1 = 2)` ou un prédicat inexistant, et vérifiez
-que le mutant change bien le résultat sur un cas simple.
+**A mutant that mutates nothing proves nothing**: in rdflib 7.2.1,
+`FILTER(false)` filters nothing (`FILTER(1 = 2)` does). To kill a branch,
+write `FILTER(1 = 2)` or a nonexistent predicate, and check that the mutant
+does change the result on a simple case.
 
-Vérifiez au lieu de supposer. Vous pouvez **expérimenter dans une copie** :
-`work=$(mktemp -d)` puis `cp -r "<dir>" "$work/"` — toujours un dossier
-créé par `mktemp -d`, jamais un nom fixe : d'autres trieurs travaillent en
-même temps dans le même répertoire temporaire. Corrompez une ligne de la traduction ou ajouter
-un appel au pilote dans la copie, et lancer `rdfeval check` sur la copie
-(commande avec le chemin de la copie). Un doute confirmé par une expérience
-vaut plus que dix doutes plausibles ; dites dans la question ce que
-l'expérience a montré. Supprimez vos copies à la fin.
+Verify instead of assuming. You may **experiment in a copy**:
+`work=$(mktemp -d)` then `cp -r "<dir>" "$work/"` — always a folder created
+by `mktemp -d`, never a fixed name: other triagers work at the same time in
+the same temporary directory. Corrupt a line of the translation or add a
+call to the driver in the copy, and run `rdfeval check` on the copy
+(command with the path of the copy). A doubt confirmed by an experiment is
+worth more than ten plausible doubts; say in the question what the
+experiment showed. Delete your copies at the end.
 
-## La priorité
+## The priority
 
-- **`high`** : un drapeau `equivalence-doubt`, `weak-oracle`,
-  `shim-invents-logic` ou `optimization-asymmetry` que vous avez vérifié ou
-  que vous pouvez montrer par une ligne précise ; ou un `check` en échec.
-  Ce sont les paires qui peuvent fausser un chiffre.
-  Pour `weak-oracle`, `high` exige qu'un mutant qui **supprime un îlot ou
-  élargit un terme lié** reste vert. Si seuls des mutants de cardinalité
-  survivent (`.first()` → `.one()`, `[:1]`) et que vous avez établi
-  l'équivalence par des cas à la main, c'est `medium`.
-- **`medium`** : `wrong-construction`, `classification-doubt`,
-  `optimization-doctrine`, ou un drapeau `high` resté plausible sans
-  preuve.
-- **`low`** : rien de ce qui précède. Une paire `low` peut porter
-  `article-example`.
+- **`high`**: an `equivalence-doubt`, `weak-oracle`, `shim-invents-logic` or
+  `optimization-asymmetry` flag that you have verified or that you can show
+  by a precise line; or a failing `check`. These are the pairs that can skew
+  a figure.
+  For `weak-oracle`, `high` requires that a mutant that **removes an island
+  or widens a bound term** stays green. If only cardinality mutants survive
+  (`.first()` → `.one()`, `[:1]`) and you have established the equivalence
+  by hand-made cases, it is `medium`.
+- **`medium`**: `wrong-construction`, `classification-doubt`,
+  `optimization-doctrine`, or a `high` flag that remained plausible without
+  proof.
+- **`low`**: none of the above. A `low` pair may carry `article-example`.
 
-## Ce que vous écrivez — `triage.json`, et rien d'autre
+## What you write — `triage.json`, and nothing else
 
-Dans le répertoire de chaque région, un seul fichier, `triage.json` :
+In the directory of each region, a single file, `triage.json`:
 
 ```json
 {
@@ -150,20 +149,20 @@ Dans le répertoire de chaque région, un seul fichier, `triage.json` :
 }
 ```
 
-Une question par drapeau au plus, aucune pour `low` sauf `article-example`
-(« Cette paire peut-elle illustrer l'article ? »). `where` cite des fichiers
-et des numéros de ligne réels.
+At most one question per flag, none for `low` except `article-example`
+("Can this pair illustrate the article?"). `where` cites real files and
+line numbers.
 
-**N'éditez rien d'autre** : ni la paire, ni `meta.json`, ni `review.json`,
-ni `rdfeval/`. Ne commitez pas.
+**Edit nothing else**: neither the pair, nor `meta.json`, nor `review.json`,
+nor `rdfeval/`. Do not commit.
 
-## Ce que vous rendez
+## What you return
 
-Une ligne par région :
+One line per region:
 
 ```
 <region_id> — <priority> — <flags> — <summary>
 ```
 
-Puis, en deux lignes au plus, un défaut qui revient d'une région à l'autre
-dans ce lot, s'il y en a un.
+Then, in two lines at most, a defect that recurs from one region to another
+in this batch, if there is one.

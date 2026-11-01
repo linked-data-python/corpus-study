@@ -1,134 +1,134 @@
-# Protocole d'un lot d'optimisation (étude du corpus)
+# Protocol for an optimization batch (corpus study)
 
-Ce fichier est le contrat d'un agent qui écrit les **deux artefacts
-optimisés** d'une région déjà traduite (fiche pilotage `corpus/403`). La
-référence du langage est dans [INSTRUCTIONS.md](INSTRUCTIONS.md) §1 : lisez
-cette section, les pièges de §2 et §3 « Ce qu'un verdict vert ne prouve
-pas ». Le reste de INSTRUCTIONS.md concerne la traduction fidèle, déjà faite.
+This file is the contract of an agent that writes the **two optimized
+artefacts** of an already translated region (pilotage design record
+`corpus/403`). The language reference is in [INSTRUCTIONS.md](INSTRUCTIONS.md)
+§1: read that section, the pitfalls of §2, and §3 "What a green verdict does
+not prove". The rest of INSTRUCTIONS.md concerns the faithful translation,
+which is already done.
 
-## Pourquoi
+## Why
 
-La traduction fidèle (`translated.ldpy`) interdit toute refactorisation :
-elle mesure la notation seule, sur le même programme. Mais un lecteur
-objectera qu'une relecture soignée du Python aurait gagné autant. Les deux
-artefacts optimisés séparent les deux effets :
+The faithful translation (`translated.ldpy`) forbids any refactoring: it
+measures the notation alone, on the same program. But a reader will object
+that a careful rereading of the Python would have gained as much. The two
+optimized artefacts separate the two effects:
 
-| fichier | ce qu'il est | ce qu'on en mesure |
+| file | what it is | what it measures |
 |---|---|---|
-| `optimized.py` | le Python **le plus compact** équivalent à `original.py`, sans îlot | `original.py → optimized.py` : ce que vaut la relecture soignée |
-| `optimized.ldpy` | le LD Python **le plus compact** équivalent à `original.py` | `optimized.py → optimized.ldpy` : ce que vaut la notation en plus |
+| `optimized.py` | the **most compact** Python equivalent to `original.py`, with no island | `original.py → optimized.py`: what a careful rereading is worth |
+| `optimized.ldpy` | the **most compact** LD Python equivalent to `original.py` | `optimized.py → optimized.ldpy`: what the notation is worth on top |
 
-## La doctrine, la même des deux côtés (Maxime, 2026-08-29)
+## The doctrine, the same on both sides (Maxime, 2026-08-29)
 
-- **Changement d'algorithme autorisé** : fusionner des boucles, supprimer
-  des variables intermédiaires, une compréhension à la place d'une boucle,
-  `dict.get` à la place d'un `if … in`, etc.
-- **Gestion d'erreur conservée** : chaque `try`/`except`, `raise`, garde
-  `if x is None: return` de l'original survit, avec le même effet.
-- **Noms porteurs de sens conservés** : pas de renommage en `a`, `x2`, pas
-  de raccourcissement d'un nom de fonction, de paramètre ou de variable
-  publique.
-- **Pas de golf** : pas de `;` entre instructions, pas de ligne de plus de
-  100 caractères qui serait une boucle repliée, pas de lambda ou d'opérateur
-  morse qui ne servent qu'à gagner une ligne. Le code doit rester celui
-  qu'un relecteur exigeant accepterait dans le dépôt.
-- **Commentaires et docstrings** : gardez ceux de l'original, retirez ceux
-  qui décrivent du code supprimé, n'en ajoutez pas.
-- **L'en-tête extrait ne s'optimise pas** (décision du 2026-10-27).
-  L'en-tête, c'est tout ce qui précède la première ligne de la région, que
-  le commentaire `# region: … (lines a-b, …)` délimite : la provenance et
-  les imports du **fichier entier** d'où la région a été tirée, plus les
-  imports des shims. Il n'appartient pas à la région : retirer un import
-  inutilisé y gonflerait le gain de la relecture sans rien dire de la
-  région. `optimized.py` reprend l'en-tête de `original.py` **octet pour
-  octet**, `optimized.ldpy` celui de `translated.ldpy`. Seules les lignes de
-  la région s'optimisent.
-- **Interface inchangée** : même signature de la fonction d'entrée, même
-  valeur rendue, mêmes noms au niveau du module que le pilote compare, même
-  sortie imprimée. Le pilote (`driver.py`) est le même pour les trois
-  artefacts ; vous n'y touchez pas.
+- **Algorithm changes allowed**: merge loops, remove intermediate
+  variables, use a comprehension in place of a loop, `dict.get` in place of
+  an `if … in`, etc.
+- **Error handling kept**: every `try`/`except`, `raise`, and
+  `if x is None: return` guard of the original survives, with the same
+  effect.
+- **Meaningful names kept**: no renaming to `a`, `x2`; no shortening of a
+  function name, a parameter name or a public variable name.
+- **No golf**: no `;` between statements, no line longer than 100
+  characters that would be a folded loop, no lambda or walrus operator whose
+  only purpose is to save a line. The code must remain what a demanding
+  reviewer would accept in the repository.
+- **Comments and docstrings**: keep those of the original, remove those that
+  describe deleted code, add none.
+- **The extracted header is not optimized** (decision of 2026-10-27). The
+  header is everything that precedes the first line of the region, which the
+  comment `# region: … (lines a-b, …)` delimits: the provenance and the
+  imports of the **whole file** from which the region was drawn, plus the
+  imports of the shims. It does not belong to the region: removing an unused
+  import there would inflate the gain of the rereading without saying
+  anything about the region. `optimized.py` takes over the header of
+  `original.py` **byte for byte**, `optimized.ldpy` that of
+  `translated.ldpy`. Only the lines of the region are optimized.
+- **Interface unchanged**: same signature of the entry function, same
+  returned value, same module-level names that the driver compares, same
+  printed output. The driver (`driver.py`) is the same for the three
+  artefacts; you do not touch it.
 
-## La règle de symétrie — c'est elle qui rend la mesure honnête
+## The symmetry rule — it is what makes the measurement honest
 
-Le risque de l'étude : optimiser le LD Python plus durement que le Python,
-et reconstruire ainsi un biais invisible. Donc :
+The risk of the study: optimizing LD Python harder than Python, and thereby
+rebuilding an invisible bias. Therefore:
 
-1. **Écrivez `optimized.py` d'abord**, en cherchant vraiment le plus
-   compact. C'est le point de comparaison : s'il est mou, tout le gain
-   attribué à la notation est faux.
-2. **Écrivez `optimized.ldpy` à partir de `optimized.py`**, pas à partir de
-   `translated.ldpy` : remplacez le code rdflib par les îlots les plus
-   spécifiques (INSTRUCTIONS.md §2, table), le reste à l'identique.
-3. **Toute restructuration de `optimized.ldpy` qui s'écrit aussi en Python
-   pur doit être reportée dans `optimized.py`.** Revenez-y et refaites-le.
-   Seule exception : une restructuration que **seul un îlot** permet (deux
-   boucles de sélecteurs fondues en un `m{ }` multi-motifs, par exemple).
-   Elle reste dans `optimized.ldpy` seulement, et vous l'écrivez dans
+1. **Write `optimized.py` first**, really looking for the most compact form.
+   It is the point of comparison: if it is soft, all the gain attributed to
+   the notation is false.
+2. **Write `optimized.ldpy` from `optimized.py`**, not from
+   `translated.ldpy`: replace the rdflib code with the most specific islands
+   (INSTRUCTIONS.md §2, table), the rest identical.
+3. **Any restructuring of `optimized.ldpy` that can also be written in pure
+   Python must be carried back into `optimized.py`.** Go back and redo it.
+   The only exception: a restructuring that **only an island** allows (two
+   selector loops merged into one multi-pattern `m{ }`, for example). It
+   stays in `optimized.ldpy` only, and you write it in
    `optimization_notes`.
-4. Vérifiez en lisant les deux fichiers côte à côte : hors des lignes RDF,
-   ils doivent être identiques ligne à ligne, aux exceptions du point 3
-   près.
+4. Check by reading the two files side by side: outside the RDF lines, they
+   must be identical line for line, except for the exceptions of point 3.
 
-## Ce que vous éditez — et rien d'autre
+## What you edit — and nothing else
 
-Dans les répertoires de **vos** régions seulement :
+In the directories of **your** regions only:
 
-| fichier | rôle |
+| file | role |
 |---|---|
-| `optimized.py` | à créer |
-| `optimized.ldpy` | à créer |
-| `meta.json` | les trois clés ci-dessous, rien d'autre |
+| `optimized.py` | to create |
+| `optimized.ldpy` | to create |
+| `meta.json` | the three keys below, nothing else |
 
-**Ne touchez pas** à `original.py`, `translated.ldpy`, `driver.py`, aux
-fixtures, aux shims, à `review.json`, ni à `rdfeval/`, `config/`, `../ldpy/`.
-Ne lancez ni `git commit` ni `rdfeval validate`/`compare`.
+**Do not touch** `original.py`, `translated.ldpy`, `driver.py`, the
+fixtures, the shims, `review.json`, nor `rdfeval/`, `config/`, `../ldpy/`.
+Run neither `git commit` nor `rdfeval validate`/`compare`.
 
-Si l'original porte un harnais commun aux deux versions (une fonction
-`demo` ajoutée en fin de fichier, voir `meta.json`), recopiez-le **tel
-quel** dans les deux artefacts optimisés : il fait partie du pilote, pas de
-la région, et vous ne l'optimisez pas. Les shims s'importent de la même
-façon que dans `original.py`.
+If the original carries a harness common to both versions (a `demo`
+function added at the end of the file, see `meta.json`), copy it **as is**
+into both optimized artefacts: it is part of the driver, not of the region,
+and you do not optimize it. The shims are imported the same way as in
+`original.py`.
 
-## La boucle, par région
+## The loop, per region
 
-1. Lire `meta.json` (notes de traduction : elles disent les pièges déjà
-   rencontrés), `original.py`, `translated.ldpy`, `driver.py`.
-2. Écrire `optimized.py`, puis `optimized.ldpy` (règle de symétrie).
-3. Vérifier :
+1. Read `meta.json` (translation notes: they tell you the pitfalls already
+   met), `original.py`, `translated.ldpy`, `driver.py`.
+2. Write `optimized.py`, then `optimized.ldpy` (symmetry rule).
+3. Check:
    ```
-   ~/.venvs/ldpy/bin/python -m rdfeval check examples/<strate>/<region_id>
+   ~/.venvs/ldpy/bin/python -m rdfeval check examples/<stratum>/<region_id>
    ```
-   Trois lignes `OK` attendues — `[translated.ldpy]`, `[optimized.py]`,
-   `[optimized.ldpy]` — chacun prouvé contre `original.py` par le même
-   pilote, puis une ligne `tokens: care … notation … total …`.
-4. Renseigner dans `meta.json` :
-   - `optimization_status` : `"final"` seulement si les trois lignes sont
-     `OK`, sinon `"draft"` ;
-   - `optimization_notes` : liste de phrases — ce qui a été compressé de
-     chaque côté, chaque exception à la règle de symétrie avec sa raison,
-     et ce qui n'a pas pu l'être ;
-   - `optimized_constructions` : les îlots de `optimized.ldpy`, dans le
-     vocabulaire de INSTRUCTIONS.md §4.
+   Three `OK` lines expected — `[translated.ldpy]`, `[optimized.py]`,
+   `[optimized.ldpy]` — each proved against `original.py` by the same
+   driver, then a `tokens: care … notation … total …` line.
+4. Fill in `meta.json`:
+   - `optimization_status`: `"final"` only if the three lines are `OK`,
+     otherwise `"draft"`;
+   - `optimization_notes`: a list of sentences — what was compressed on each
+     side, each exception to the symmetry rule with its reason, and what
+     could not be compressed;
+   - `optimized_constructions`: the islands of `optimized.ldpy`, in the
+     vocabulary of INSTRUCTIONS.md §4.
 
-## Quand ça ne passe pas
+## When it does not pass
 
-- **Rien à compresser** (la région est déjà minimale) : c'est un résultat.
-  Les deux artefacts peuvent être identiques à `original.py` et
-  `translated.ldpy` ; dites-le dans les notes, statut `final`.
-- **Le pilote ne peut pas prouver l'artefact** sans être modifié (il
-  appelle une fonction intermédiaire que la compression supprime) : gardez
-  cette fonction, ou à défaut statut `"draft"` et la raison en note. Ne
-  modifiez jamais le pilote.
-- **Un `FAIL`** : corrigez l'artefact, jamais le pilote ni le fixture.
+- **Nothing to compress** (the region is already minimal): that is a
+  result. The two artefacts may be identical to `original.py` and
+  `translated.ldpy`; say so in the notes, status `final`.
+- **The driver cannot prove the artefact** without being modified (it calls
+  an intermediate function that the compression removes): keep that
+  function, or failing that status `"draft"` and the reason in a note. Never
+  modify the driver.
+- **A `FAIL`**: fix the artefact, never the driver nor the fixture.
 
-## Ce que vous rendez
+## What you return
 
-Une ligne par région :
+One line per region:
 
 ```
 <region_id> — opt: final|draft — check: OK|FAIL ×3 — tokens: care … notation … total …
   note: <la compression principale, et toute exception à la symétrie>
 ```
 
-Puis, en deux lignes maximum, ce que ce lot apprend sur la part de la
-relecture et la part de la notation.
+Then, in two lines at most, what this batch teaches about the share of the
+rereading and the share of the notation.

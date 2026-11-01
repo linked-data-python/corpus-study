@@ -1,42 +1,42 @@
-# Protocole d'un lot de traduction (étude du corpus)
+# Protocol of a translation batch (corpus study)
 
-Ce fichier est le contrat opérationnel d'un agent traducteur. Les règles de
-*traduction* sont dans [INSTRUCTIONS.md](INSTRUCTIONS.md) — lisez-le
-en entier avant de commencer. Ici : ce que vous éditez, comment vous
-vérifiez, et ce que vous rendez.
+This file is the operational contract of a translator agent. The
+*translation* rules are in [INSTRUCTIONS.md](INSTRUCTIONS.md) — read it
+in full before starting. Here: what you edit, how you verify, and what you
+return.
 
-## Environnement
+## Environment
 
-- Répertoire de travail : `corpus-study/` (chemins relatifs à lui).
-- Python : `~/.venvs/ldpy/bin/python` — **toujours celui-là**, jamais `python3`.
-- La référence du langage : `../ldpy/docs/reference/language/*.md`
-  (transpilée et exécutée par la suite de tests : elle est vraie).
+- Working directory: `corpus-study/` (paths are relative to it).
+- Python: `~/.venvs/ldpy/bin/python` — **always that one**, never `python3`.
+- The language reference: `../ldpy/docs/reference/language/*.md`
+  (transpiled and executed by the test suite: it is true).
 
-## Ce que vous éditez — et rien d'autre
+## What you edit — and nothing else
 
-Uniquement les fichiers **à l'intérieur des répertoires de vos régions** :
+Only the files **inside your regions' directories**:
 
-| fichier | rôle |
+| file | role |
 |---|---|
-| `translated.ldpy` | la traduction (part d'un brouillon mécanique) |
-| `driver.py` | le pilote qui prouve l'équivalence |
-| `fixture.ttl` | le graphe d'entrée, si la région lit |
-| `original.py` | **seulement** pour rendre la région exécutable (voir plus bas) |
-| `meta.json` | statut, classification, constructions employées, notes |
-| `<shim>.py` | un module de contexte, si les liaisons manquent |
+| `translated.ldpy` | the translation (starts from a mechanical draft) |
+| `driver.py` | the driver that proves equivalence |
+| `fixture.ttl` | the input graph, if the region reads |
+| `original.py` | **only** to make the region executable (see below) |
+| `meta.json` | status, classification, constructions used, notes |
+| `<shim>.py` | a context module, if bindings are missing |
 
-**N'éditez jamais** `rdfeval/`, `config/`, `../ldpy/`, ni une région qui ne
-vous est pas assignée. Ne lancez ni `git commit` ni `rdfeval strata`.
+**Never edit** `rdfeval/`, `config/`, `../ldpy/`, nor a region that is not
+assigned to you. Run neither `git commit` nor `rdfeval strata`.
 
-## Rendre la région exécutable — le shim de contexte
+## Making the region executable — the context shim
 
-Une région extraite d'un projet ne tourne pas seule : il lui manque des
-imports du projet, une classe, une constante. **163 régions sur 1 196 n'ont
-même pas de graphe visible** (il était lié par `self.graph` ou par un
-paramètre non annoté).
+A region extracted from a project does not run on its own: it lacks project
+imports, a class, a constant. **163 regions out of 1 196 do not even have a
+visible graph** (it was bound through `self.graph` or an unannotated
+parameter).
 
-Le remède est un **module de contexte** à côté de la
-paire, importé par `original.py`, avec un en-tête qui dit d'où il vient.
+The remedy is a **context module** next to the pair, imported by
+`original.py`, with a header saying where it comes from.
 
 ```python
 # Context shim (see meta.json): subset of projet/namespaces.py from
@@ -46,65 +46,66 @@ from rdflib import Namespace
 BRICK = Namespace("https://brickschema.org/schema/Brick#")
 ```
 
-Pourquoi un module séparé et pas des lignes ajoutées dans `original.py` : les
-métriques de surface comparent `original.py` à `translated.ldpy`. Du
-échafaudage que vous auriez inventé fausserait la mesure des deux côtés. Le
-shim en est exclu (il ne sert qu'à résoudre les liaisons).
+Why a separate module and not lines added to `original.py`: the surface
+metrics compare `original.py` with `translated.ldpy`. Any scaffolding you
+invented would skew the measurement on both sides. The shim is excluded
+from it (it only serves to resolve bindings).
 
-Reproduisez le contexte **le plus fidèlement possible** au dépôt d'origine
-(les vrais IRI, les vraies classes), en minimal. N'inventez pas de logique.
+Reproduce the context **as faithfully as possible** to the original
+repository (the real IRIs, the real classes), keeping it minimal. Do not
+invent logic.
 
-## La boucle, par région
+## The loop, per region
 
-1. **Lire** `meta.json` (provenance, strates, oracle), `original.py`, puis le
-   brouillon `translated.ldpy`.
-2. **Traduire** en suivant INSTRUCTIONS.md — la construction la plus
-   spécifique, aucune refactorisation.
-3. **Écrire le pilote.** Si `meta.oracle == "values"`, la région lit :
-   remplissez `fixture.ttl` (plusieurs solutions, le cas zéro solution, du
-   voisinage qui ne doit pas matcher) et gardez `fixture="fixture.ttl"`.
-   Sinon, l'oracle est l'isomorphisme ; fournissez les arguments d'appel si
-   la région est une fonction.
-4. **Vérifier** :
+1. **Read** `meta.json` (provenance, strata, oracle), `original.py`, then
+   the draft `translated.ldpy`.
+2. **Translate** following INSTRUCTIONS.md — the most specific
+   construction, no refactoring.
+3. **Write the driver.** If `meta.oracle == "values"`, the region reads:
+   fill in `fixture.ttl` (several solutions, the zero-solution case,
+   neighbouring data that must not match) and keep
+   `fixture="fixture.ttl"`. Otherwise, the oracle is isomorphism; supply
+   the call arguments if the region is a function.
+4. **Verify**:
    ```
-   ~/.venvs/ldpy/bin/python -m rdfeval check examples/<strate>/<region_id>
+   ~/.venvs/ldpy/bin/python -m rdfeval check examples/<stratum>/<region_id>
    ```
-   Transpilation puis pilote. Itérez jusqu'à `OK`.
-5. **Renseigner `meta.json`** :
-   - `translation_status`: `"final"` (seulement si l'étape 4 est verte) ou
-     `"draft"` si vous n'y arrivez pas ;
+   Transpilation, then driver. Iterate until `OK`.
+5. **Fill in `meta.json`**:
+   - `translation_status`: `"final"` (only if step 4 is green) or
+     `"draft"` if you cannot manage it;
    - `classification`: `directly-expressible` | `minor-restructuring` |
-     `awkward` | `not-expressible` | `excluded` ;
-   - `constructions`: la liste des îlots employés, dans le vocabulaire de
-     INSTRUCTIONS.md §4 ;
-   - `translation_notes`: ce qui a demandé un choix, et **ce qui manque** si
-     une construction ne couvre pas le cas ;
-   - `article_candidate`: `true` si le gain se voit en trois lignes.
-   Ne touchez pas à `review.json` : la revue est humaine.
+     `awkward` | `not-expressible` | `excluded`;
+   - `constructions`: the list of islands used, in the vocabulary of
+     INSTRUCTIONS.md §4;
+   - `translation_notes`: what required a choice, and **what is missing**
+     if a construction does not cover the case;
+   - `article_candidate`: `true` if the gain is visible in three lines.
+   Do not touch `review.json`: the review is human.
 
-## Quand ça ne passe pas
+## When it does not pass
 
-**Ne forcez pas.** Une région que le langage ne couvre pas est un résultat de
-l'étude. Dans l'ordre :
+**Do not force it.** A region that the language does not cover is a result
+of the study. In order:
 
-1. si la traduction est juste mais le *pilote* ne parvient pas à l'exécuter
-   (dépendance externe, réseau, base de données) → `translation_status:
-   "draft"`, `classification: "excluded"`, et la raison en note ;
-2. si la construction existe mais rend le code plus lourd → `awkward`, avec
-   le pourquoi ;
-3. si rien ne couvre → `not-expressible`, avec l'extrait minimal qui le
-   montre. C'est une sortie de l'étude, pas un échec.
+1. if the translation is correct but the *driver* cannot run it (external
+   dependency, network, database) → `translation_status:
+   "draft"`, `classification: "excluded"`, and the reason in a note;
+2. if the construction exists but makes the code heavier → `awkward`, with
+   the reason why;
+3. if nothing covers it → `not-expressible`, with the minimal excerpt that
+   shows it. This is an output of the study, not a failure.
 
-Ne passez jamais une région en `final` sans que `rdfeval check` soit vert.
+Never set a region to `final` unless `rdfeval check` is green.
 
-## Ce que vous rendez
+## What you return
 
-Un compte rendu court, une ligne par région :
+A short report, one line per region:
 
 ```
 <region_id> — <classification> — check: OK|FAIL — constructions: …
-  note: <ce qui a demandé un choix, ou ce qui manque>
+  note: <what required a choice, or what is missing>
 ```
 
-Puis, en trois lignes maximum : ce que ce lot apprend sur la construction que
-la strate devait exercer.
+Then, in three lines at most: what this batch teaches about the
+construction the stratum was meant to exercise.

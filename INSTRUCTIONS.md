@@ -1,31 +1,33 @@
-# Instructions du traducteur — l'étude du corpus
+# Translator instructions — the corpus study
 
-Vous traduisez en **linked-data-python** (ldpy) des régions de code rdflib
-réel, tirées d'un échantillon stratifié par *type d'usage*.
+You translate regions of real rdflib code, drawn from a sample stratified
+by *kind of use*, into **linked-data-python** (ldpy).
 
-**Ce qu'on cherche à savoir** — pour chaque construction du langage : sert-elle
-sur du code réel, où, combien de fois, et avec quel gain ? Une région que rien
-ne couvre est un **résultat**, pas un échec. Ne contournez jamais : signalez.
+**What we want to find out** — for each construction of the language: does
+it serve on real code, where, how many times, and with what gain? A region
+that nothing covers is a **result**, not a failure. Never work around it:
+report it.
 
-Fiches de référence : [`corpus/403`](../corpus/403-evaluation-absorption-complete.md)
-(le protocole), [`404`](../corpus/404-outillage-tirage-stratifie.md)
-(le tirage), [`405`](../corpus/405-oracle-de-lecture.md) (l'oracle
-de lecture). Vous n'avez pas à les lire pour traduire : tout ce qui vous est
-nécessaire est ci-dessous.
+Reference design records: [`corpus/403`](../corpus/403-evaluation-absorption-complete.md)
+(the protocol), [`404`](../corpus/404-outillage-tirage-stratifie.md)
+(the draw), [`405`](../corpus/405-oracle-de-lecture.md) (the reading
+oracle). You do not have to read them to translate: everything you need is
+below.
 
 ---
 
-## 1. Le langage, en entier, ici
+## 1. The whole language, right here
 
-Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
-(~8 500 mots) que ces instructions imposaient autrefois. Elle est
-**engendrée**, pas recopiée : elle ne peut pas dériver du langage réel.
+This section replaces the reading of the nine pages of
+`../ldpy/docs/reference/` (~8 500 words) that these instructions used to
+require. It is **generated**, not copied: it cannot drift from the real
+language.
 
 <!-- BEGIN island-reference (generated: sync_language_reference.py) -->
 
-**Déclarations**
+**Declarations**
 
-| forme | ce que c'est |
+| form | what it is |
 |---|---|
 | `@prefix ex: <IRI> [as EX] .` | Binds `ex:` to a namespace IRI for the rest of the enclosing block. A prefix is lexical: `ex:` on its own is never a value. When the code needs the Namespace as an OBJECT — to `bind()` it on a graph, to export it, to put it in a registry — `as EX` binds that object to a Python name too. Declaring the prefix again in a deeper block shadows it, the way a Python name would. |
 | `@base <IRI> .` | Sets the base against which relative IRIs are resolved for the rest of the block, so that `<sensor/1>` means `<IRI>sensor/1`. |
@@ -34,9 +36,9 @@ Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
 | `@bindings EXPR \| @bindings as NAME -> Bindings` | Designates the current bindings: the mapping that gives `?name` its value in the enclosing block. Any mapping will do, and `as NAME` creates an empty one. |
 | `for @bindings [as NAME] in ITER:` | Loops over an iterable of mappings, making each row the current bindings for the body. A `csv.DictReader` and the solutions of `m{ }` are both iterables of mappings, so both drive this loop. |
 
-**Termes**
+**Terms**
 
-| forme | ce que c'est |
+| form | what it is |
 |---|---|
 | `<IRI> -> URIRef` | An absolute IRI, or a relative one resolved against the `@base` in scope. |
 | `ex:local -> URIRef` | A prefixed name: the local part is appended to the IRI bound to `ex:`. Turtle's character set applies inside an island, so `o-pizza:topping` and `ex:café` are names here although neither is a legal Python expression. `ex:{expr}` computes the local part. |
@@ -46,219 +48,212 @@ Cette section remplace la lecture des neuf pages de `../ldpy/docs/reference/`
 | `f{expr} \| ?{expr} -> Node` | Coerces any Python value into an RDF term, by the coercion policy in scope. Two spellings of one operation: `?{ }` reads better in term position, `f{ }` beside `f<...>`. |
 | `_:{expr} -> BNode` | A blank node whose identity is its data: the same value gives the same node anywhere in the program, so two rows that share a key join without inventing an IRI for them. |
 
-**Graphes et graphe courant**
+**Graphs and the current graph**
 
-| forme | ce que c'est |
+| form | what it is |
 |---|---|
 | `g{ ... } -> Graph` | Builds an RDF graph from Turtle written in place. `{expr}` interpolates a Python value in term position, and each occurrence is evaluated once. The braces are an expression, so a `g{ }` goes anywhere a value goes — a default argument, a comprehension, a return. |
 | `+{ ... } [ (GRAPH) ]` | Adds the triples to the current graph. `?name` takes its value from the current bindings, and a triple with an unbound variable is dropped rather than written half-way. A trailing `(g)` names another receiver. |
 | `-{ ... } [ (GRAPH) ]` | Removes from the current graph every triple matching the pattern. An unbound variable is a wildcard here, not a hole: this is a SPARQL `DELETE WHERE`, not a list of triples to subtract. |
 
-**Lecture**
+**Reading**
 
-| forme | ce que c'est |
+| form | what it is |
 |---|---|
 | `m{ ... } -> Solutions` | Matches a basic graph pattern against the current graph, lazily. Iterating yields a bare term when one variable is projected and a tuple otherwise; `.one()`, `.first()`, `.count()` and `bool()` are the usual reductions. A `(graph)` suffix names another source. |
 | `s{ ... } -> Query` | A SPARQL query or update, parsed when the file is transpiled rather than at run time. `{expr}` in term position becomes an initial binding — never string pasting, so nothing here can be injected. Calling it on a graph gives a LAZY query; `.execute()` is what forces it — for an update, and for any query whose rdflib `Result` you then call a method on. |
 
-**Évaluation différée**
+**Deferred evaluation**
 
-| forme | ce que c'est |
+| form | what it is |
 |---|---|
 | `e{ ... } -> Expr` | A deferred SPARQL expression. It is not evaluated where it is written, but against the bindings in force when the island holding it is instantiated — once per row of a `for @bindings` loop. `{python}` holes are evaluated where they are written. |
 | `e<...{?var}...> -> Expr` | A deferred IRI: `f<...>`'s interpolation, except that the holes are SPARQL expressions re-evaluated for each set of bindings — and that it percent-encodes what it interpolates. This is the form for minting an IRI from a data column. |
 
-*(Engendré depuis `ldpy/lsp/islanddoc.py` — la table que le survol de l'éditeur affiche, en anglais comme tout le code. `ldpy/tests/test_islanddoc.py` garantit qu'elle décrit **toutes** les sortes d'îlot et que chacun de ses liens tombe sur une ancre vivante de la documentation. Ne l'éditez pas à la main : `python scripts/sync_language_reference.py`.)*
+*(Generated from `ldpy/lsp/islanddoc.py` — the table the editor's hover shows. `ldpy/tests/test_islanddoc.py` guarantees that it describes **every** kind of island and that each of its links lands on a live anchor of the documentation. Do not edit it by hand: `python scripts/sync_language_reference.py`.)*
 
 <!-- END island-reference -->
 
-Trois choses que le tableau ne dit pas et qui décident de la plupart des
-traductions :
+Three things the table does not say, and which decide most translations:
 
-- **la règle d'adjacence.** Un îlot n'ouvre que si le sigil touche
-  l'accolade : `e{` ouvre, `e {` non ; `euler + 1` reste du Python. De même
-  `{ex:b2}` est un ensemble contenant une IRI, alors que `{ex : b2}` est un
-  dictionnaire. En cas de doute, écrivez la forme dans un fichier et
-  transpilez-la.
-- **un îlot est une expression.** `g{ … }` va partout où une valeur va :
-  argument par défaut, compréhension, `return`, lambda. `+{ }` et `-{ }`
-  sont des *instructions*, y compris en suite d'un `if` d'une ligne.
-- **le transpileur est l'arbitre.** `python -m ldpy fichier.ldpy` tranche
-  toute question de forme, et il tranche plus vite que la documentation. Ce
-  que vous croyez savoir par analogie avec Turtle ou SPARQL n'est pas fiable.
+- **the adjacency rule.** An island opens only if the sigil touches the
+  brace: `e{` opens one, `e {` does not; `euler + 1` remains Python.
+  Likewise `{ex:b2}` is a set containing an IRI, whereas `{ex : b2}` is a
+  dictionary. When in doubt, write the form in a file and transpile it.
+- **an island is an expression.** `g{ … }` goes anywhere a value goes:
+  default argument, comprehension, `return`, lambda. `+{ }` and `-{ }` are
+  *statements*, including as the suite of a one-line `if`.
+- **the transpiler is the arbiter.** `python -m ldpy fichier.ldpy` settles
+  any question of form, and settles it faster than the documentation. What
+  you believe you know by analogy with Turtle or SPARQL is not reliable.
 
-Pour aller plus loin sur un point précis — et seulement alors — la
-documentation est à `../ldpy/docs/` : `reference/language/lexical.md` pour les
-trois règles de désambiguïsation et les limites connues,
-`how-to/migrate-from-rdflib.md` pour le tableau des réécritures mécaniques
-avec leurs pièges. Toute la documentation est transpilée, exécutée et ses
-assertions vérifiées par la suite de tests : ce qu'elle montre est vrai
-aujourd'hui.
+To go further on a specific point — and only then — the documentation is at
+`../ldpy/docs/`: `reference/language/lexical.md` for the three
+disambiguation rules and the known limits, `how-to/migrate-from-rdflib.md`
+for the table of mechanical rewrites with their pitfalls. All the
+documentation is transpiled, executed, and its assertions checked by the
+test suite: what it shows is true today.
 
 ---
 
-## 2. Toujours la construction la plus spécifique — ne dégradez jamais
+## 2. Always the most specific construction — never degrade
 
-Le but de l'étude est de créditer ou débiter **chaque îlot séparément**. Une
-traduction qui écrit tout en `s{ SELECT … }` ne mesure rien.
+The aim of the study is to credit or debit **each island separately**. A
+translation that writes everything as `s{ SELECT … }` measures nothing.
 
-Correspondance idiome rdflib → construction attendue, par strate du tirage :
+Mapping from rdflib idiom to expected construction, by stratum of the draw:
 
-| strate | idiome rdflib | construction attendue |
+| stratum | rdflib idiom | expected construction |
 |---|---|---|
 | `ns_import_project` | `from projet.ns import BRICK, SH` | `from projet.ns import brick:, sh:` |
-| `ns_def_local` | `NS = Namespace("…")` dans une fonction | `@prefix ns: <…> .` dans le bloc |
-| `add_isolated` | un `g.add((s, p, o))` isolé | `@graph g` + `+{ … }` |
-| `add_run_shared_subject` | plusieurs `.add` sur un même sujet | **un seul** `+{ s p1 o1 ; p2 o2 }` |
-| `add_in_loop` | `.add` dans une boucle sur des lignes | `for @bindings in …:` + `+{ }` avec `?var` |
-| `remove` | `g.remove((s, p, None))` | `-{ s p ?o }` (variable non liée = joker) |
+| `ns_def_local` | `NS = Namespace("…")` in a function | `@prefix ns: <…> .` in the block |
+| `add_isolated` | an isolated `g.add((s, p, o))` | `@graph g` + `+{ … }` |
+| `add_run_shared_subject` | several `.add` calls on the same subject | **a single** `+{ s p1 o1 ; p2 o2 }` |
+| `add_in_loop` | `.add` in a loop over rows | `for @bindings in …:` + `+{ }` with `?var` |
+| `remove` | `g.remove((s, p, None))` | `-{ s p ?o }` (unbound variable = wildcard) |
 | `trav_one_step` | `for o in g.objects(s, p)` | `for o in m{ {s} p ?o }` |
-| `trav_navigation` | boucles imbriquées de sélecteurs | **un seul** `m{ }` multi-motifs (jointure) |
+| `trav_navigation` | nested loops of selectors | **a single** multi-pattern `m{ }` (join) |
 | `trav_single_value` | `g.value(s, p)`, `next(g.subjects(…))` | `m{ … }.first()` / `.one()` |
 | `trav_existence` | `(s, p, o) in g`, `any(g.objects(…))` | `bool(m{ … })` |
 | `sparql_literal` | `g.query("SELECT …")` | `s{ SELECT … }` |
-| `sparql_interpolated` | requête assemblée par f-string/`+` | `s{ … {expr} … }`, interpolation en position de terme |
-| `bind_initbindings` | `initBindings=`, `initNs=` | terme interpolé dans `s{ }` **si la variable n'est pas projetée** ; sinon `s{ … }(bindings=…)` ; prologue hérité des `@prefix` |
-| `coercion_datatype` | `Literal(x, datatype=…)` sur une valeur calculée | la coercition du langage, ou `"…"^^xsd:…` si la valeur est constante |
+| `sparql_interpolated` | query assembled by f-string/`+` | `s{ … {expr} … }`, interpolation in term position |
+| `bind_initbindings` | `initBindings=`, `initNs=` | interpolated term in `s{ }` **if the variable is not projected**; otherwise `s{ … }(bindings=…)`; prologue inherited from the `@prefix` declarations |
+| `coercion_datatype` | `Literal(x, datatype=…)` on a computed value | the language's coercion, or `"…"^^xsd:…` if the value is constant |
 
-Interdits explicites :
+Explicit prohibitions:
 
-- **pas de `s{ }` là où `m{ }` passe.** Un `g.value` devient `m{ }.first()`,
-  jamais une requête SELECT.
-- **pas de `.add()` conservé** quand `+{ }` couvre le cas.
-- **pas de chaîne de requête assemblée** : l'interpolation de `s{ }` est en
-  position de terme et devient un `initBindings`, jamais une substitution
-  textuelle.
-- **pas de refactorisation.** La comparaison doit être *même programme, même
-  comportement RDF, notation différente* — pas *ancienne implémentation contre
-  implémentation redessinée*. Ne réordonnez pas, ne fusionnez pas des
-  fonctions, ne « nettoyez » rien.
+- **no `s{ }` where `m{ }` will do.** A `g.value` becomes `m{ }.first()`,
+  never a SELECT query.
+- **no `.add()` kept** when `+{ }` covers the case.
+- **no assembled query string**: the interpolation of `s{ }` is in term
+  position and becomes an `initBindings`, never a textual substitution.
+- **no refactoring.** The comparison must be *same program, same RDF
+  behaviour, different notation* — not *old implementation against
+  redesigned implementation*. Do not reorder, do not merge functions, do
+  not "clean up" anything.
 
-Pièges connus, à ne pas reproduire :
+Known pitfalls, not to be reproduced:
 
-- **Un motif reçu en DONNÉE est hors d'atteinte, et l'échec est silencieux.**
-  `-{ }` et `m{ }` prennent un motif ÉCRIT ; le joker y est lexical (une
-  variable non liée), pas une valeur. Un `(s, p, o)` avec des `None` reçu en
-  argument — API `Store`, helper `delete(pattern)` — interpolé en
-  `-{ {s} {p} {o} }` donne `Literal('None')` et ne retire **rien, sans
-  erreur**. Gardez `.remove()` et signalez.
-- **`-{ }` multi-motifs JOINT.** Des `remove` indépendants sur un même sujet
-  ne se factorisent pas avec `;` : `-{ ?s a ex:C ; ex:p ?o }` est un
-  `DELETE WHERE`, il n'efface rien si un des motifs manque. Un `remove` par
-  îlot.
-- **Fondre une lecture « une seule valeur » dans une jointure change la
-  cardinalité.** `m{ }` multi-motifs est un produit : si le motif ajouté peut
-  matcher plusieurs fois là où l'original ne consommait que la première
-  valeur (`g.value`, `next`), la jointure produit plus de solutions que la
-  boucle d'origine. Ne fondez que si le code traite déjà « la première ou
-  aucune » comme sa sémantique.
-- **`ex:{?v}` concatène sans encoder** (il s'instancie depuis 0.4.0, voir
-  §2 bis). Pour forger une IRI depuis une colonne qui peut contenir une
-  espace ou une barre oblique, c'est `e<http://…/{?id}>` qui encode.
-- **`_:label` n'est pas `BNode("label")`.** Si le *label* atteint une
-  sérialisation ou un hachage (signature, code d'artefact), gardez
-  `{BNode(...)}`.
-- **`Literal(n, datatype=…)` n'est pas `"n"^^dt`** quand `n` n'est pas une
-  chaîne : lisez `how-to/migrate-from-rdflib.md`, piège 1.
-- **`URIRef(x)` n'est pas `f<{x}>`** si un `@base` est en portée : piège 2 de
-  la même page.
+- **A pattern received as DATA is out of reach, and the failure is
+  silent.** `-{ }` and `m{ }` take a WRITTEN pattern; the wildcard there is
+  lexical (an unbound variable), not a value. An `(s, p, o)` with `None`s
+  received as an argument — `Store` API, `delete(pattern)` helper —
+  interpolated as `-{ {s} {p} {o} }` gives `Literal('None')` and removes
+  **nothing, without any error**. Keep `.remove()` and report it.
+- **A multi-pattern `-{ }` JOINS.** Independent `remove` calls on the same
+  subject cannot be factored with `;`: `-{ ?s a ex:C ; ex:p ?o }` is a
+  `DELETE WHERE`, and it deletes nothing if one of the patterns is missing.
+  One `remove` per island.
+- **Folding a "single value" read into a join changes the cardinality.** A
+  multi-pattern `m{ }` is a product: if the added pattern can match several
+  times where the original consumed only the first value (`g.value`,
+  `next`), the join produces more solutions than the original loop. Fold
+  only if the code already treats "the first or none" as its semantics.
+- **`ex:{?v}` concatenates without encoding** (it is instantiated as of
+  0.4.0, see §2 bis). To mint an IRI from a column that may contain a space
+  or a slash, `e<http://…/{?id}>` is the form that encodes.
+- **`_:label` is not `BNode("label")`.** If the *label* reaches a
+  serialisation or a hash (signature, artefact code), keep `{BNode(...)}`.
+- **`Literal(n, datatype=…)` is not `"n"^^dt`** when `n` is not a string:
+  read `how-to/migrate-from-rdflib.md`, pitfall 1.
+- **`URIRef(x)` is not `f<{x}>`** if a `@base` is in scope: pitfall 2 of the
+  same page.
 
 ---
 
-## 2 bis. Ce que le langage a gagné en 0.4.0
+## 2 bis. What the language gained in 0.4.0
 
-Quatre changements, tous implémentés et testés. Ils rendent caduques
-certaines habitudes prises avant cette version.
+Four changes, all implemented and tested. They make some habits acquired
+before this version obsolete.
 
-- **`ex:{?id}` s'instancie.** La partie locale d'un nom préfixé était la
-  seule position de terme où une variable ne s'instanciait pas : elle rendait
-  `ex:id`, la même IRI à chaque ligne, sans erreur. Elle se résout désormais
-  contre les liaisons courantes. Attention : `ex:{…}` **concatène sans
-  encoder** ; c'est `e<…{?id}>` qui encode en pour-cent. Choisissez selon que
-  la valeur peut contenir une espace ou une barre oblique, et dites-le en
-  note. Sur une valeur ordinaire, `ex:{expr}` reste immédiat et ne demande
-  aucune liaison.
-- **`+{ }` et `-{ }` en suite d'instruction composée.** `if cond: +{ … }`
-  sur une seule ligne est accepté. Inutile donc d'ouvrir un bloc pour un `if`
-  d'une ligne — c'est précisément ce qui allongeait les traductions.
-- **`b.raw`.** Sur `for @bindings as b in rows:`, `b[key]` est le terme RDF
-  et `b.raw[key]` la valeur telle qu'elle est arrivée. C'est ce qu'il faut
-  quand l'original teste `if row[col] != "":`, car `Literal("") != ""`.
-- **Avertissement « préfixe déclaré = nom Python »** : le transpileur le
-  signale désormais. S'il apparaît, c'est un vrai piège du fichier, pas un
-  bruit.
+- **`ex:{?id}` is instantiated.** The local part of a prefixed name was the
+  only term position where a variable was not instantiated: it produced
+  `ex:id`, the same IRI on every row, without any error. It now resolves
+  against the current bindings. Beware: `ex:{…}` **concatenates without
+  encoding**; it is `e<…{?id}>` that percent-encodes. Choose according to
+  whether the value may contain a space or a slash, and say so in a note.
+  On an ordinary value, `ex:{expr}` remains immediate and requires no
+  bindings.
+- **`+{ }` and `-{ }` as the suite of a compound statement.**
+  `if cond: +{ … }` on a single line is accepted. There is thus no need to
+  open a block for a one-line `if` — which is precisely what made
+  translations longer.
+- **`b.raw`.** On `for @bindings as b in rows:`, `b[key]` is the RDF term
+  and `b.raw[key]` the value as it arrived. This is what you need when the
+  original tests `if row[col] != "":`, because `Literal("") != ""`.
+- **"Declared prefix = Python name" warning**: the transpiler now reports
+  it. If it appears, it is a real pitfall of the file, not noise.
 
-Deux pièges de fidélité, vérifiés sur rdflib 7.2.1, qui ont déjà produit des
-traductions fausses :
+Two fidelity pitfalls, verified on rdflib 7.2.1, that have already produced
+wrong translations:
 
-- `Literal('x')` et `Literal('x', datatype=xsd:string)` **ne sont pas
-  égaux** : le premier a un `datatype` nul. Traduire `Literal(v, XSD.string)`
-  par une interpolation nue `{v}` change donc le graphe. Il faut
+- `Literal('x')` and `Literal('x', datatype=xsd:string)` **are not equal**:
+  the first has a null `datatype`. Translating `Literal(v, XSD.string)` as
+  a bare interpolation `{v}` therefore changes the graph. You need
   `{v}^^xsd:string`.
-- `Literal(True, datatype=XSD.boolean)` vaut `"true"` quand `f"{True}"` vaut
-  `"True"` : rdflib normalise la forme lexicale d'un littéral typé construit
-  depuis une valeur Python. La réécriture mécanique n'est sûre que si la
-  valeur est déjà une chaîne.
+- `Literal(True, datatype=XSD.boolean)` is `"true"` whereas `f"{True}"` is
+  `"True"`: rdflib normalises the lexical form of a typed literal built
+  from a Python value. The mechanical rewrite is safe only if the value is
+  already a string.
 
-Un appel qui n'existe plus en 7.2.1 : **`Graph.load` a été retiré** (alias
-déprécié de `Graph.parse`). Une région qui l'appelle ne s'exécute d'aucun
-côté ; remplacer par `.parse(...)` des deux côtés, à l'identique, et le
-dire dans `translation_notes` — le changement ne touche aucun sens RDF.
+A call that no longer exists in 7.2.1: **`Graph.load` has been removed**
+(a deprecated alias of `Graph.parse`). A region that calls it runs on
+neither side; replace it with `.parse(...)` on both sides, identically,
+and say so in `translation_notes` — the change affects no RDF meaning.
 
-Et une subtilité de portée, à connaître avant de désigner un graphe :
-**`@graph g` capture la VALEUR de `g` à sa ligne, pas le nom.** Si le code
-réaffecte `g` plus loin (`g = g + autre`), il faut une nouvelle déclaration
-`@graph g` après la réaffectation, sans quoi les écritures partent dans le
-graphe devenu inatteignable — en silence.
+And a scoping subtlety, to know before designating a graph: **`@graph g`
+captures the VALUE of `g` at its line, not the name.** If the code
+reassigns `g` later (`g = g + autre`), a new `@graph g` declaration is
+needed after the reassignment, otherwise writes go to the graph that has
+become unreachable — silently.
 
 ---
 
-## 3. La sémantique exacte, prouvée — deux oracles
+## 3. Exact semantics, proved — two oracles
 
-Chaque paire doit être **prouvée équivalente par exécution**, pas jugée à
-l'œil. Le pilote (`driver.py`) exécute les deux versions et imprime son
-verdict.
+Every pair must be **proved equivalent by execution**, not judged by eye.
+The driver (`driver.py`) runs both versions and prints its verdict.
 
-### Région qui CONSTRUIT un graphe → isomorphisme RDF
+### Region that BUILDS a graph → RDF isomorphism
 
 ```python
 from rdfeval.harness import run_pair
-VERDICT = run_pair(__file__)                     # compare les graphes du module
+VERDICT = run_pair(__file__)                     # compares the module's graphs
 ```
 
-### Région qui LIT un graphe → égalité des valeurs produites
+### Region that READS a graph → equality of the values produced
 
-Écrivez un **graphe d'entrée** `fixture.ttl` à côté
-de la paire ; il est parsé en un graphe frais pour chaque version.
+Write an **input graph** `fixture.ttl` next to the pair; it is parsed into
+a fresh graph for each version.
 
 ```python
 from rdfeval.harness import run_pair
 VERDICT = run_pair(__file__, entry="ma_fonction", fixture="fixture.ttl")
 ```
 
-Le fixture est un acte de traduction à part entière. Il doit couvrir :
+The fixture is a translation act in its own right. It must cover:
 
-1. le motif que la région lit, avec **plusieurs** solutions ;
-2. le cas **zéro solution** (ce que `g.value` rend `None`, ce que `.first()`
-   doit rendre `None` aussi) ;
-3. du **voisinage qui ne doit pas matcher** — sinon un motif trop large passe
-   inaperçu.
+1. the pattern the region reads, with **several** solutions;
+2. the **zero-solution** case (where `g.value` returns `None`, `.first()`
+   must return `None` too);
+3. **neighbouring data that must not match** — otherwise a pattern that is
+   too broad goes unnoticed.
 
-Les résultats sont comparés comme des **multi-ensembles** : aucun store ne
-promet un ordre. Si la région impose un ordre (`sorted(...)`, `ORDER BY`),
-dites-le : `run_pair(..., ordered=True)`.
+Results are compared as **multisets**: no store guarantees an order. If the
+region imposes an order (`sorted(...)`, `ORDER BY`), say so:
+`run_pair(..., ordered=True)`.
 
-### Ce qu'un verdict vert ne prouve pas
+### What a green verdict does not prove
 
-Que les deux versions coïncident **sur ce fixture**. Un fixture pauvre rend
-un vert sans valeur. Écrivez-le contre la région, pas contre la traduction.
+That the two versions coincide **on this fixture**. A poor fixture makes a
+green worthless. Write it against the region, not against the translation.
 
 ---
 
-## 4. Étiquetez les constructions employées
+## 4. Label the constructions used
 
-Chaque région traduite déclare, dans son `meta.json`, les constructions
-qu'elle emploie — c'est ce qui permet de créditer chaque îlot séparément :
+Each translated region declares, in its `meta.json`, the constructions it
+uses — this is what allows each island to be credited separately:
 
 ```json
 {
@@ -270,11 +265,11 @@ qu'elle emploie — c'est ce qui permet de créditer chaque îlot séparément :
 }
 ```
 
-**Vocabulaire des constructions — liste fermée.** Ces chaînes exactes, et
-aucune autre : elles sont la mesure principale de l'étude, et une même
-construction écrite de deux façons devient deux constructions dans le
-tableau. La liste vit dans `rdfeval/constructions.py` (elle normalise les
-variantes courantes, et signale ce qu'elle ne sait pas placer).
+**Construction vocabulary — closed list.** These exact strings, and no
+others: they are the study's main measure, and one construction written in
+two ways becomes two constructions in the table. The list lives in
+`rdfeval/constructions.py` (it normalises the common variants, and flags
+what it cannot place).
 
 ```
 @prefix   @base   from … import p:   @graph   @bindings   for @bindings in
@@ -286,77 +281,77 @@ variable   interpolation {expr}
 call suffix (g)   global/nonlocal modifier
 ```
 
-Une construction qui manque à cette liste est un signalement, pas une
-licence d'inventer : mettez-la en `translation_notes`.
+A construction missing from this list is something to report, not a
+licence to invent: put it in `translation_notes`.
 
-**Ce n'est pas une consigne de forme, et la campagne du 2026-08-29 l'a montré.**
-Elle a écrit `nom préfixé`, `nom prefixe` et `prefixed name` pour une seule
-et même construction ; `suffixe d'appel (g)` à côté de `call suffix (g)` ;
-`littéral typé`, `litteral type` et `typed literal` ; `f<...>` à côté de
-`f<…>`. Sept constructions apparentes là où il y en avait trois.
-`constructions.normalise` les a rabattues — les comptes publiés sont
-justes — mais elle ne peut rabattre que ce qu'elle a déjà vu. Écrivez les
-libellés **en anglais, sans accent, tels que ci-dessus**, en copiant depuis
-cette liste plutôt qu'en les retapant de mémoire.
+**This is not a mere formatting rule, and the 2026-08-29 campaign showed
+it.** It wrote `nom préfixé`, `nom prefixe` and `prefixed name` for one and
+the same construction; `suffixe d'appel (g)` next to `call suffix (g)`;
+`littéral typé`, `litteral type` and `typed literal`; `f<...>` next to
+`f<…>`. Seven apparent constructions where there were three.
+`constructions.normalise` collapsed them — the published counts are
+correct — but it can only collapse what it has already seen. Write the
+labels **in English, without accents, exactly as above**, copying them
+from this list rather than retyping them from memory.
 
-Classification de la traduction :
+Translation classification:
 `directly-expressible` · `minor-restructuring` · `awkward` ·
 `not-expressible` · `excluded`.
 
 ---
 
-## 5. Signalez au lieu de contourner
+## 5. Report instead of working around
 
-Si une construction ne couvre pas la région :
+If a construction does not cover the region:
 
-1. **ne la déformez pas** pour qu'elle rentre ;
-2. classez `awkward` ou `not-expressible` ;
-3. écrivez dans `translation_notes` **ce qui manque exactement**, avec
-   l'extrait minimal qui le montre ;
-4. si c'est un défaut du langage et non une limite assumée, c'est un constat
-   du type de ceux de la fiche `ldpy/012` — il remonte tel quel.
+1. **do not bend the region** to make it fit;
+2. classify it `awkward` or `not-expressible`;
+3. write in `translation_notes` **exactly what is missing**, with the
+   minimal excerpt that shows it;
+4. if it is a defect of the language and not an accepted limit, it is a
+   finding of the kind recorded in design record `ldpy/012` — it is passed
+   up as is.
 
-Sont des constats déjà connus (ne les redécouvrez pas, mais confirmez-les
-si vous les croisez) : lectures sans îlot dédié avant `m{ }`, `@graph` sur une
-propriété en lecture seule, dérive de numéros de ligne sur les îlots
-multi-lignes.
+Findings already known (do not rediscover them, but confirm them if you
+come across them): reads with no dedicated island prior to `m{ }`, `@graph`
+on a read-only property, line-number drift on multi-line islands.
 
 ---
 
-## 6. Le déroulé, par lot
+## 6. The procedure, per batch
 
 ```
-python -m rdfeval strata          # le tirage (déjà fait : results/raw/strata.json)
-#   -- traduction par lot : voir ci-dessous --
-python -m rdfeval validate        # exécute les pilotes -> results/raw/validation.jsonl
-python -m rdfeval compare         # métriques de paire
-python -m rdfeval aggregate       # agrégats et figures
+python -m rdfeval strata          # the draw (already done: results/raw/strata.json)
+#   -- translation by batch: see below --
+python -m rdfeval validate        # runs the drivers -> results/raw/validation.jsonl
+python -m rdfeval compare         # pair metrics
+python -m rdfeval aggregate       # aggregates and figures
 ```
 
-Un lot = un ensemble de régions d'une même strate. Pour chacune :
+A batch = a set of regions of the same stratum. For each one:
 
-1. lisez la région (`source`) **et son contexte** (`context`) dans
-   `results/raw/strata.json` ;
-2. écrivez `original.py` (en-tête de provenance + contexte + source),
-   `translated.ldpy`, `driver.py`, `fixture.ttl` si la région lit,
-   `meta.json` ;
-3. **transpilez** : `python -m ldpy translated.ldpy` doit passer ;
-4. **exécutez le pilote** : le verdict doit être `equivalent: true` ;
-5. seulement alors, `translation_status: "final"`.
+1. read the region (`source`) **and its context** (`context`) in
+   `results/raw/strata.json`;
+2. write `original.py` (provenance header + context + source),
+   `translated.ldpy`, `driver.py`, `fixture.ttl` if the region reads,
+   `meta.json`;
+3. **transpile**: `python -m ldpy translated.ldpy` must pass;
+4. **run the driver**: the verdict must be `equivalent: true`;
+5. only then, `translation_status: "final"`.
 
-Une paire qui n'a pas passé 3 et 4 **n'entre pas en revue humaine** : les
-vérifications machinales sont des pré-conditions, pas un filtre a posteriori.
+A pair that has not passed 3 and 4 **does not enter human review**: the
+machine checks are pre-conditions, not an after-the-fact filter.
 
-163 des 1 196 régions ne portent aucune opération RDF une fois extraites : le
-graphe y est lié par un attribut (`self.graph`) ou un paramètre non annoté que
-les lignes de contexte ne peuvent pas porter. **Restaurez la liaison** dans
-`original.py` (un paramètre annoté, une affectation dans le contexte) — c'est
-prévu, ce n'est pas une région à écarter.
+163 of the 1 196 regions carry no RDF operation once extracted: the graph
+is bound there through an attribute (`self.graph`) or an unannotated
+parameter that the context lines cannot carry. **Restore the binding** in
+`original.py` (an annotated parameter, an assignment in the context) — this
+is expected, it is not a region to discard.
 
-## 7. Un exemple publiable par strate
+## 7. One publishable example per stratum
 
-Chaque strate doit fournir **au moins une paire avant/après publiable** pour
-l'article, choisie parmi les régions approuvées, avec sa provenance (dépôt,
-fichier, commit). Si une région que vous traduisez est particulièrement
-parlante — le gain se voit en trois lignes —, notez-le :
-`"article_candidate": true` dans `meta.json`.
+Each stratum must provide **at least one publishable before/after pair**
+for the article, chosen among the approved regions, with its provenance
+(repository, file, commit). If a region you translate is particularly
+telling — the gain is visible in three lines — note it:
+`"article_candidate": true` in `meta.json`.

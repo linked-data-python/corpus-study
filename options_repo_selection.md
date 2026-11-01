@@ -1,188 +1,192 @@
-# Options de sélection des dépôts : 15 combinaisons chiffrées
+# Repository selection options: 15 quantified combinations
 
-`funnel.md` explique pourquoi le corpus tient en 60 dépôts : un plafond
-(`max_repos = 60`) atteint à l'intérieur du groupe « trouvé par ≥ 2 canaux ».
-Ce fichier-ci répond à la question suivante — *si on relève le plafond, sur
-quel critère arrête-t-on la liste ?* Quinze combinaisons sont évaluées sur les
-**1 187 candidats distincts** de `manifest/discovery.jsonl`, avec les
-métadonnées GitHub complètes (`manifest/repo_stats.jsonl`).
+`funnel.md` explains why the corpus fits in 60 repositories: a cap
+(`max_repos = 60`) reached inside the "found by ≥ 2 channels" group. This
+file answers the next question — *if the cap is raised, on what criterion is
+the list cut?* Fifteen combinations are evaluated on the **1,187 distinct
+candidates** of `manifest/discovery.jsonl`, with the full GitHub metadata
+(`manifest/repo_stats.jsonl`).
 
-Reproduire : `python scripts/fetch_repo_stats.py` puis
+To reproduce: `python scripts/fetch_repo_stats.py` then
 `python scripts/selection_options.py [--markdown]`.
 
-## Les critères testés
+## The criteria tested
 
-Tous sont évaluables **avant clonage**. Ils se lisent comme une échelle :
-chaque ligne `B`*n* ajoute un critère à la précédente ; `A1`–`A3` sont des
-formes alternatives, pas des durcissements de l'échelle.
+All can be evaluated **before cloning**. They read as a ladder: each
+`B`*n* row adds a criterion to the previous one; `A1`–`A3` are alternative
+forms, not tightenings of the ladder.
 
-- **vivant** : accessible (11 candidats renvoient 404), non *fork*, non
-  archivé, ni miroir, ni gabarit, ni vide ;
-- **Python présent / substantiel / majoritaire** : ≥ 1 octet, ≥ 10 ko (≈ 250
-  lignes), ≥ 50 % des octets du dépôt. Ce seul critère écarte sans clonage les
-  faux positifs du type `gnames/gnverifier`, projet Go arrivé par la liste de
-  graines ;
-- **dépôt suivi / établi** : ≥ 10 puis ≥ 50 commits sur la branche par défaut ;
-- **taille raisonnable** : 50 ko ≤ `diskUsage` ≤ 200 Mo — en dessous c'est un
-  jouet, au-dessus c'est un entrepôt de données (le plus gros dépôt actuel,
-  `biopragmatics/bioregistry`, pèse 1,6 Go à lui seul) ;
-- **ni cours ni bibliothèque recopiée** : le nom, la description ou les
-  *topics* contiennent `curso`, `course`, `tutorial`, `exercise`, `homework`,
-  `práctica`, `workshop`… ; ou le dépôt s'appelle comme la bibliothèque
-  (`rdflib`, `rdfextras`, `sparqlwrapper`, `isodate`) ;
-- **licence déclarée / extractible** : une licence SPDX explicite, puis une
-  licence figurant dans `snippet_licences` — c'est elle qui décide si un
-  extrait peut entrer dans les exemples publiés ;
-- **activité** : dernier commit ≥ 2020, puis ≥ 2023 ;
-- **visibilité** : ≥ 1 étoile ;
-- **attestation** : trouvé par ≥ 2 canaux de découverte, ou publié sur PyPI
-  avec une dépendance déclarée à rdflib (canal Wheelodex), ou se décrivant
-  lui-même comme un projet RDF (`rdf`, `sparql`, `ontolog*`, `shacl`, `skos`,
-  `knowledge graph`… dans le nom, la description ou les *topics*) ;
-- **plafond par organisation** : au plus *k* dépôts d'un même compte GitHub —
-  c'est ce qui aurait évité que cinq dépôts d'un même cours pèsent 65 % du
-  recensement.
+- **alive**: accessible (11 candidates return 404), not a *fork*, not
+  archived, neither mirror, nor template, nor empty;
+- **Python present / substantial / majority**: ≥ 1 byte, ≥ 10 kB (≈ 250
+  lines), ≥ 50% of the repository's bytes. This criterion alone rules out,
+  without cloning, false positives such as `gnames/gnverifier`, a Go project
+  that came in through the seed list;
+- **tracked / established repository**: ≥ 10 then ≥ 50 commits on the
+  default branch;
+- **reasonable size**: 50 kB ≤ `diskUsage` ≤ 200 MB — below that it is a
+  toy, above it is a data warehouse (the biggest current repository,
+  `biopragmatics/bioregistry`, weighs 1.6 GB by itself);
+- **neither course nor vendored library**: the name, description or
+  *topics* contain `curso`, `course`, `tutorial`, `exercise`, `homework`,
+  `práctica`, `workshop`…; or the repository is named like the library
+  (`rdflib`, `rdfextras`, `sparqlwrapper`, `isodate`);
+- **declared / extractable licence**: an explicit SPDX licence, then a
+  licence listed in `snippet_licences` — it is what decides whether an
+  excerpt can enter the published examples;
+- **activity**: last commit ≥ 2020, then ≥ 2023;
+- **visibility**: ≥ 1 star;
+- **attestation**: found by ≥ 2 discovery channels, or published on PyPI
+  with a declared dependency on rdflib (Wheelodex channel), or describing
+  itself as an RDF project (`rdf`, `sparql`, `ontolog*`, `shacl`, `skos`,
+  `knowledge graph`… in the name, the description or the *topics*);
+- **cap per organisation**: at most *k* repositories from a single GitHub
+  account — this is what would have prevented five repositories of a single
+  course from weighing 65% of the census.
 
-## Résultats, par nombre décroissant de dépôts
+## Results, by decreasing number of repositories
 
-| option | critères | dépôts | extractibles | se disent RDF | ★ méd. | commits méd. | actif ≥ 2023 | orgs (max) | disque | des 60 |
+| option | criteria | repositories | extractable | self-described RDF | ★ med. | commits med. | active ≥ 2023 | orgs (max) | disk | of the 60 |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| **B0 socle** | accessible, non fork, non archivé/miroir/gabarit/vide, ≥ 1 octet de Python | **1130** | 591 | 537 | 2 | 56 | 69 % | 936 (27) | 98.9 Go | 59/60 |
-| **B1 Python substantiel** | B0 + ≥ 10 ko de Python (≈ 250 lignes) | **1021** | 548 | 472 | 3 | 70 | 72 % | 856 (23) | 98.1 Go | 52/60 |
-| **B2 dépôt suivi** | B1 + ≥ 10 commits | **847** | 497 | 408 | 4 | 109 | 71 % | 704 (23) | 86.2 Go | 50/60 |
-| **B3 taille raisonnable** | B2 + 50 ko ≤ taille ≤ 200 Mo (ni jouet, ni entrepôt de données) | **744** | 450 | 371 | 4 | 109 | 70 % | 624 (23) | 18.3 Go | 44/60 |
-| **B4 ni cours ni bibliothèque recopiée** | B3 + exclusion du matériel pédagogique et des dépôts nommés comme la bibliothèque | **723** | 445 | 358 | 5 | 108 | 71 % | 613 (20) | 17.1 Go | 40/60 |
-| **B5 licence déclarée** | B4 + une licence SPDX explicite | **449** | 445 | 243 | 7 | 129 | 75 % | 383 (8) | 8.6 Go | 29/60 |
-| **B6 licence extractible** | B4 + licence autorisant la republication d'extraits (`snippet_licences`) | **445** | 445 | 243 | 7 | 129 | 75 % | 379 (8) | 8.6 Go | 28/60 |
-| **B7 vivant depuis 2020** | B6 + dernier commit ≥ 2020-01-01 | **401** | 401 | 225 | 6 | 129 | 83 % | 338 (8) | 7.9 Go | 24/60 |
-| **B8 Python majoritaire** | B7 + Python ≥ 50 % des octets du dépôt | **337** | 337 | 196 | 7 | 121 | 83 % | 287 (8) | 6.1 Go | 23/60 |
-| **B9 projet établi** | B8 + ≥ 50 commits | **249** | 249 | 144 | 10 | 232 | 86 % | 217 (5) | 5.3 Go | 22/60 |
-| **A3 RDF assumé, 2 par organisation** | B4 + licence extractible + le projet se décrit comme RDF + plafond de 2 dépôts par organisation | **232** | 232 | 232 | 10 | 115 | 80 % | 209 (2) | 4.3 Go | 19/60 |
-| **B10 vu par quelqu'un** | B9 + ≥ 1 étoile | **216** | 216 | 134 | 14 | 238 | 85 % | 191 (5) | 4.3 Go | 22/60 |
-| **B11 actif depuis 2023** | B10 + dernier commit ≥ 2023-01-01 | **184** | 184 | 117 | 16 | 266 | 100 % | 163 (4) | 4.0 Go | 20/60 |
-| **A2 dépendance rdflib déclarée** | B4 + distribution PyPI déclarant rdflib (canal Wheelodex) | **87** | 69 | 29 | 2 | 122 | 92 % | 80 (4) | 1.1 Go | 7/60 |
-| **A1 attesté par 2 canaux** | B4 + trouvé par ≥ 2 canaux de découverte indépendants | **52** | 35 | 36 | 23 | 218 | 71 % | 43 (9) | 0.9 Go | 34/60 |
+| **B0 baseline** | accessible, not fork, not archived/mirror/template/empty, ≥ 1 byte of Python | **1130** | 591 | 537 | 2 | 56 | 69% | 936 (27) | 98.9 GB | 59/60 |
+| **B1 substantial Python** | B0 + ≥ 10 kB of Python (≈ 250 lines) | **1021** | 548 | 472 | 3 | 70 | 72% | 856 (23) | 98.1 GB | 52/60 |
+| **B2 tracked repository** | B1 + ≥ 10 commits | **847** | 497 | 408 | 4 | 109 | 71% | 704 (23) | 86.2 GB | 50/60 |
+| **B3 reasonable size** | B2 + 50 kB ≤ size ≤ 200 MB (neither toy nor data warehouse) | **744** | 450 | 371 | 4 | 109 | 70% | 624 (23) | 18.3 GB | 44/60 |
+| **B4 neither course nor vendored library** | B3 + exclusion of teaching material and of repositories named like the library | **723** | 445 | 358 | 5 | 108 | 71% | 613 (20) | 17.1 GB | 40/60 |
+| **B5 declared licence** | B4 + an explicit SPDX licence | **449** | 445 | 243 | 7 | 129 | 75% | 383 (8) | 8.6 GB | 29/60 |
+| **B6 extractable licence** | B4 + licence allowing the republication of excerpts (`snippet_licences`) | **445** | 445 | 243 | 7 | 129 | 75% | 379 (8) | 8.6 GB | 28/60 |
+| **B7 alive since 2020** | B6 + last commit ≥ 2020-01-01 | **401** | 401 | 225 | 6 | 129 | 83% | 338 (8) | 7.9 GB | 24/60 |
+| **B8 majority Python** | B7 + Python ≥ 50% of the repository's bytes | **337** | 337 | 196 | 7 | 121 | 83% | 287 (8) | 6.1 GB | 23/60 |
+| **B9 established project** | B8 + ≥ 50 commits | **249** | 249 | 144 | 10 | 232 | 86% | 217 (5) | 5.3 GB | 22/60 |
+| **A3 avowed RDF, 2 per organisation** | B4 + extractable licence + the project describes itself as RDF + cap of 2 repositories per organisation | **232** | 232 | 232 | 10 | 115 | 80% | 209 (2) | 4.3 GB | 19/60 |
+| **B10 seen by someone** | B9 + ≥ 1 star | **216** | 216 | 134 | 14 | 238 | 85% | 191 (5) | 4.3 GB | 22/60 |
+| **B11 active since 2023** | B10 + last commit ≥ 2023-01-01 | **184** | 184 | 117 | 16 | 266 | 100% | 163 (4) | 4.0 GB | 20/60 |
+| **A2 declared rdflib dependency** | B4 + PyPI distribution declaring rdflib (Wheelodex channel) | **87** | 69 | 29 | 2 | 122 | 92% | 80 (4) | 1.1 GB | 7/60 |
+| **A1 attested by 2 channels** | B4 + found by ≥ 2 independent discovery channels | **52** | 35 | 36 | 23 | 218 | 71% | 43 (9) | 0.9 GB | 34/60 |
 
-Colonnes : *extractibles* = licence permettant de republier un extrait ;
-*se disent RDF* = le projet se décrit lui-même comme un projet RDF ;
-*orgs (max)* = nombre de comptes GitHub distincts, et nombre de dépôts du
-compte le plus représenté ; *disque* = somme des `diskUsage` GitHub ;
-*des 60* = combien des 60 dépôts actuels le critère garderait.
+Columns: *extractable* = licence allowing an excerpt to be republished;
+*self-described RDF* = the project describes itself as an RDF project;
+*orgs (max)* = number of distinct GitHub accounts, and number of
+repositories of the most represented account; *disk* = sum of GitHub
+`diskUsage`; *of the 60* = how many of the 60 current repositories the
+criterion would keep.
 
-Le disque réel vaut environ **1,6 fois** cette estimation : les 60 dépôts
-actuels totalisent 5,7 Go de `diskUsage` pour 9,0 Go sur disque (clone
-superficiel + copie de travail). Compter ≈ 45 Go pour B3, ≈ 8,5 Go pour B9.
-À raison de 97 fichiers Python par dépôt en moyenne (médiane 45), B9 donnerait
-de l'ordre de **24 000 fichiers analysés** contre 5 812 aujourd'hui.
+The real disk usage is about **1.6 times** this estimate: the 60 current
+repositories total 5.7 GB of `diskUsage` for 9.0 GB on disk (shallow clone +
+working copy). Count ≈ 45 GB for B3, ≈ 8.5 GB for B9. At 97 Python files per
+repository on average (median 45), B9 would give of the order of **24,000
+analysed files** against 5,812 today.
 
-## Ce que les chiffres disent
+## What the figures say
 
-**Le vivier existe.** 1 130 candidats sur 1 187 passent le socle. Le corpus à
-60 n'est pas une contrainte de disponibilité : c'est un plafond arbitraire,
-et la seule contrainte physique — le disque — est réglée par le critère de
-taille (98,9 Go → 18,3 Go en excluant les entrepôts de données, sans perdre un
-dépôt sur six).
+**The pool exists.** 1,130 candidates out of 1,187 pass the baseline. The
+60-repository corpus is not an availability constraint: it is an arbitrary
+cap, and the only physical constraint — disk — is settled by the size
+criterion (98.9 GB → 18.3 GB when excluding data warehouses, without losing
+one repository in six).
 
-**La licence est le vrai goulot, et elle coûte 38 %.** Passer de B4 (723) à B5
-(449) élimine 274 dépôts sans licence explicite. Aujourd'hui la conséquence est
-lourde : 698 des 1 557 fichiers RDF du corpus (45 %) sont inéligibles à
-l'échantillon pour cette raison. Sélectionner d'emblée sur la licence donne un
-corpus dont **100 % des fichiers sont échantillonnables** — 249 dépôts en B9,
-tous extractibles, contre 37 sur 60 aujourd'hui.
+**Licence is the real bottleneck, and it costs 38%.** Going from B4 (723) to
+B5 (449) eliminates 274 repositories with no explicit licence. Today the
+consequence is heavy: 698 of the corpus's 1,557 RDF files (45%) are
+ineligible for the sample for this reason. Selecting on licence from the
+outset gives a corpus of which **100% of the files can be sampled** — 249
+repositories in B9, all extractable, against 37 out of 60 today.
 
-**Le corpus actuel ≈ « attesté par 2 canaux » (A1, 52 dépôts).** C'est
-exactement ce que le classement de `select` a produit, et cela explique le
-profil : 23 étoiles de médiane, mais seulement 35 dépôts extractibles sur 52 et
-une concentration forte (jusqu'à 9 dépôts d'un même compte). L'attestation
-croisée est un bon signal de pertinence, un mauvais critère de volume.
+**The current corpus ≈ "attested by 2 channels" (A1, 52 repositories).**
+This is exactly what the ranking of `select` produced, and it explains the
+profile: a median of 23 stars, but only 35 extractable repositories out of
+52 and a strong concentration (up to 9 repositories from a single account).
+Cross-attestation is a good signal of relevance, a bad criterion of volume.
 
-**PyPI (A2, 87) est le critère le plus pur mais le plus étroit** : une
-dépendance déclarée à rdflib dans une distribution publiée est une preuve
-d'usage, pas une heuristique. Mais 87 dépôts, et une médiane de 2 étoiles —
-beaucoup de petites distributions. À garder comme *strate*, pas comme filtre.
+**PyPI (A2, 87) is the purest criterion but the narrowest**: a declared
+dependency on rdflib in a published distribution is proof of use, not a
+heuristic. But 87 repositories, and a median of 2 stars — many small
+distributions. To be kept as a *stratum*, not as a filter.
 
-**Le plafond par organisation coûte peu et protège beaucoup** : A3 garde 232
-dépôts avec au plus 2 par compte, contre 20 pour un même compte en B4. C'est
-la garantie structurelle que réclame une étude statistique — les fichiers d'un
-même projet ne sont pas des observations indépendantes.
+**The per-organisation cap costs little and protects a lot**: A3 keeps 232
+repositories with at most 2 per account, against 20 for a single account in
+B4. It is the structural guarantee that a statistical study demands — the
+files of a single project are not independent observations.
 
-## Décision, et ce qu'elle a donné
+## Decision, and what it gave
 
-**Maxime a retenu B7, le 2026-08-28.** Les critères exacts et le second étage
-post-analyse sont consignés dans `funnel.md` § 3.
+**Maxime chose B7, on 2026-08-28.** The exact criteria and the second,
+post-analysis stage are recorded in `funnel.md` § 3.
 
-Chiffres réalisés, à comparer aux 401 dépôts prévus par le tableau ci-dessus :
-**444 dépôts au manifeste** (les 60 de la vague 1 sont conservés, 384 ajoutés),
-dont **407 satisfont les critères** et **376 survivent à l'élagage
-post-analyse**. L'écart avec la prévision vient de trois ajustements faits en
-implémentant les critères : les dépôts archivés restent admis
-(`exclude_archived = false`, hérité de la vague 1), le marqueur pédagogique se
-cherche en début de mot et non en sous-chaîne (« course » est dans
-« discourse »), et la liste des « copies de la bibliothèque » a été ramenée à
-rdflib et ses forks — pySHACL et OWL-RL sont des *clients* de rdflib, donc
-exactement le code que l'étude vise.
+Realised figures, to compare with the 401 repositories forecast by the table
+above: **444 repositories in the manifest** (the 60 of wave 1 are kept, 384
+added), of which **407 satisfy the criteria** and **376 survive the
+post-analysis pruning**. The gap with the forecast comes from three
+adjustments made when implementing the criteria: archived repositories
+remain admitted (`exclude_archived = false`, inherited from wave 1), the
+teaching marker is searched at the start of a word and not as a substring
+("course" is in "discourse"), and the list of "copies of the library" was
+reduced to rdflib and its forks — pySHACL and OWL-RL are *clients* of
+rdflib, hence exactly the code that the study targets.
 
-Résultat mesuré : 38 845 fichiers Python analysés, 6 095 RDF-pertinents,
-182 664 opérations RDF, 22 Go sur disque. La prévision annonçait ≈ 32 000
-fichiers et ≈ 12,5 Go ; le dépassement vient des dépôts de la vague 1 conservés
-et de quelques projets volumineux sous le plafond de 200 Mo.
+Measured result: 38,845 Python files analysed, 6,095 RDF-relevant, 182,664
+RDF operations, 22 GB on disk. The forecast announced ≈ 32,000 files and
+≈ 12.5 GB; the overshoot comes from the wave-1 repositories kept and from a
+few voluminous projects under the 200 MB cap.
 
-La recommandation qui suit est celle qui avait été formulée avant la décision ;
-elle est conservée telle quelle.
+The recommendation that follows is the one that was formulated before the
+decision; it is kept as it was.
 
-## Recommandation (avant décision)
+## Recommendation (before the decision)
 
-**B9 (249 dépôts)**, avec un plafond de 3 dépôts par organisation appliqué
-ensuite. Justification : tous extractibles (donc tout le corpus est
-échantillonnable, ce qui n'est pas le cas aujourd'hui), médiane de 232 commits
-et 10 étoiles (des projets réels, pas des dépôts d'essai), 86 % actifs depuis
-2023, ≈ 8,5 Go sur disque et ≈ 24 000 fichiers à analyser — l'analyseur passe
-5 812 fichiers en quelques minutes, le facteur 4 est indolore.
+**B9 (249 repositories)**, with a cap of 3 repositories per organisation
+applied afterwards. Rationale: all extractable (so the whole corpus can be
+sampled, which is not the case today), a median of 232 commits and 10 stars
+(real projects, not trial repositories), 86% active since 2023, ≈ 8.5 GB on
+disk and ≈ 24,000 files to analyse — the analyser processes 5,812 files in a
+few minutes, the factor of 4 is painless.
 
-Si l'on veut viser plus large sans perdre la qualité, **B7 (401)** est le
-meilleur compromis : mêmes garanties de licence et d'activité, sans les seuils
-de popularité et de proportion de Python qui, eux, sont des choix de goût
-plutôt que des critères de validité.
+If one wants to aim wider without losing quality, **B7 (401)** is the best
+compromise: the same licence and activity guarantees, without the popularity
+and Python-proportion thresholds which are choices of taste rather than
+validity criteria.
 
-Si l'on veut au contraire une strate défendable pour un argument de
-généralisation, **A3 (232)** est la seule option où *chaque* dépôt se déclare
-lui-même comme un projet RDF et où aucun compte ne pèse plus de deux dépôts.
+If, on the contrary, one wants a stratum that is defensible for a
+generalisation argument, **A3 (232)** is the only option where *every*
+repository declares itself an RDF project and where no account weighs more
+than two repositories.
 
-## Ce que ces critères ne peuvent pas faire
+## What these criteria cannot do
 
-Deux exclusions décisives ne s'évaluent qu'**après** clonage et analyse, et
-doivent former un second étage :
+Two decisive exclusions can only be evaluated **after** cloning and
+analysis, and must form a second stage:
 
-1. **Aucun fichier Python pertinent** — `min_rdf_files`. Sur le corpus actuel,
-   53 dépôts sur 60 (88 %) ont au moins un fichier RDF, mais ce corpus est
-   biaisé par la liste de graines ; sur un vivier large, tabler plutôt sur
-   70–85 %. B9 (249) donnerait donc de l'ordre de **175 à 210 dépôts** utiles.
-2. **Bibliothèque tierce recopiée dans l'arbre** — le cas
-   `MKLab-ITI/prophet`, qui a fourni 44 des 141 paires validées sans qu'aucune
-   ne soit du code applicatif (voir `funnel.md` § 5.1). Aucun métadonné GitHub
-   ne le signale : seule l'arborescence le révèle.
+1. **No relevant Python file** — `min_rdf_files`. On the current corpus, 53
+   repositories out of 60 (88%) have at least one RDF file, but this corpus
+   is biased by the seed list; on a broad pool, count rather on 70–85%. B9
+   (249) would therefore give of the order of **175 to 210 useful
+   repositories**.
+2. **Third-party library vendored in the tree** — the case of
+   `MKLab-ITI/prophet`, which supplied 44 of the 141 validated pairs without
+   any of them being application code (see `funnel.md` § 5.1). No GitHub
+   metadata flags it: only the directory tree reveals it.
 
-## L'objection à ne pas contourner
+## The objection not to be sidestepped
 
-Élargir le corpus n'augmente pas mécaniquement la puissance statistique de
-l'étude. **L'unité d'analyse n'est pas le dépôt, c'est la paire validée**, et
-le goulot n'est ni la découverte ni le clonage : c'est la revue humaine des
-traductions — 151 régions revues, à la main, ont consommé une session entière
-et le quota d'un modèle. Passer de 60 à 249 dépôts sans toucher aux quotas
-d'échantillonnage (12/16/24 fichiers par bande) produirait exactement le même
-nombre de paires, tirées d'un vivier plus divers : **un meilleur corpus, pas
-une meilleure statistique**.
+Widening the corpus does not mechanically increase the study's statistical
+power. **The unit of analysis is not the repository, it is the validated
+pair**, and the bottleneck is neither discovery nor cloning: it is the human
+review of the translations — 151 regions reviewed by hand consumed an entire
+session and a model's quota. Going from 60 to 249 repositories without
+touching the sampling quotas (12/16/24 files per band) would produce exactly
+the same number of pairs, drawn from a more diverse pool: **a better corpus,
+not better statistics**.
 
-Ce qui améliorerait la statistique, dans l'ordre :
+What would improve the statistics, in order:
 
-1. **relever les quotas d'échantillonnage** et industrialiser la revue — c'est
-   là que se gagne le *n* ;
-2. **plafonner par dépôt et par organisation** dans l'échantillon, pour que les
-   paires soient à peu près indépendantes : aujourd'hui 141 paires viennent de
-   16 dépôts, dont trois en fournissent 103 (prophet 44, nanopub-py 34,
-   pyLODE 25) — et les 44 de prophet sont du rdflib recopié ;
-3. **puis seulement** élargir le corpus, qui sert alors à alimenter des quotas
-   plus élevés sans re-tirer les mêmes projets.
+1. **raise the sampling quotas** and industrialise the review — that is where
+   the *n* is gained;
+2. **cap per repository and per organisation** in the sample, so that the
+   pairs are roughly independent: today 141 pairs come from 16 repositories,
+   three of which supply 103 (prophet 44, nanopub-py 34, pyLODE 25) — and
+   prophet's 44 are vendored rdflib;
+3. **only then** widen the corpus, which then serves to feed higher quotas
+   without re-drawing the same projects.
 
-Autrement dit, B9 est le bon corpus *à condition* d'être accompagné d'une
-hausse des quotas ; sinon il ne change que la phrase de méthode.
+In other words, B9 is the right corpus *provided that* it comes with a rise
+in quotas; otherwise it only changes the method sentence.
