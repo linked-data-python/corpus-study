@@ -512,3 +512,115 @@ def test_a_raise_on_one_side_only_is_a_difference(tmp_path):
 def test_a_different_message_is_a_difference(tmp_path):
     verdict = _raising_pair(tmp_path, RAISING.replace("empty subject", "no subject"))
     assert verdict["equivalent"] is False
+
+
+def _run_driver(tmp_path, original, translated, driver, fixture=None,
+                name="ex"):
+    import json
+    ex = tmp_path / name
+    ex.mkdir()
+    (ex / "original.py").write_text(original)
+    (ex / "translated.ldpy").write_text(translated)
+    (ex / "driver.py").write_text(driver)
+    if fixture is not None:
+        (ex / "fixture.ttl").write_text(fixture)
+    proc = subprocess.run([sys.executable, str(ex / "driver.py")],
+                          capture_output=True, text=True, cwd=ex, timeout=60)
+    return json.loads(proc.stderr.split("RDFEVAL-VERDICT ", 1)[1].splitlines()[0])
+
+
+METHOD = """\
+from rdflib import URIRef
+
+def tag(self, s):
+    self.g.add((URIRef(s), URIRef("http://e/p"), URIRef("http://e/o")))
+"""
+
+STUB_DRIVER = """\
+from rdflib import Graph
+from rdfeval.harness import run_pair
+
+class Stub:
+    def __init__(self):
+        self.g = Graph()
+
+run_pair(__file__, entry="tag", calls=[lambda: ((Stub(), "http://e/s"), {})])
+"""
+
+
+def test_a_stub_self_is_compared_by_its_graph_not_its_identity(tmp_path):
+    """One stub per side: by identity they always differed, and drivers grew
+    a `demo()` harness on both sides to get around it."""
+    verdict = _run_driver(tmp_path, METHOD, METHOD, STUB_DRIVER)
+    assert verdict["equivalent"] is True, verdict
+
+
+def test_a_stub_self_still_shows_what_the_region_wrote(tmp_path):
+    wrong = METHOD.replace("http://e/o", "http://e/other")
+    verdict = _run_driver(tmp_path, METHOD, wrong, STUB_DRIVER)
+    assert verdict["equivalent"] is False
+    assert any("arg[0]" in d for d in verdict["diffs"])
+
+
+NAMES = """\
+from rdflib import URIRef
+
+def names(g):
+    return {b: str(n) for b, n in g.subject_objects(URIRef("http://e/name"))}
+"""
+
+TWO_BNODES = """\
+@prefix e: <http://e/> .
+e:a e:knows [ e:name "x" ], [ e:name "y" ; e:age 3 ] .
+"""
+
+FIXTURE_DRIVER = """\
+from rdfeval.harness import run_pair
+run_pair(__file__, entry="names", fixture="fixture.ttl")
+"""
+
+
+def test_a_result_keyed_by_blank_nodes_compares(tmp_path):
+    """Each side parses its own fixture, so the keys had fresh identifiers
+    on each and the dicts never matched."""
+    verdict = _run_driver(tmp_path, NAMES, NAMES, FIXTURE_DRIVER, TWO_BNODES)
+    assert verdict["equivalent"] is True, verdict
+
+
+def test_two_blank_nodes_in_different_places_are_not_equal(tmp_path):
+    swapped = NAMES.replace("str(n)", "('y' if str(n) == 'x' else 'x')")
+    verdict = _run_driver(tmp_path, NAMES, swapped, FIXTURE_DRIVER, TWO_BNODES)
+    assert verdict["equivalent"] is False
+
+
+def test_blank_node_labels_come_from_the_graph_not_the_identifiers():
+    from rdflib import Graph
+    from rdfeval.harness import bnode_labels, normalise
+    g1 = Graph().parse(data=TWO_BNODES, format="turtle")
+    g2 = Graph().parse(data=TWO_BNODES, format="turtle")
+    l1, l2 = bnode_labels(g1), bnode_labels(g2)
+    assert len(set(l1.values())) == 2
+    assert sorted(l1.values()) == sorted(l2.values())
+    b1 = sorted(normalise(b, l1) for b in l1)
+    b2 = sorted(normalise(b, l2) for b in l2)
+    assert b1 == b2
+    # without labels, any two blank nodes are equal, as before
+    assert len({normalise(b) for b in l1}) == 1
+
+
+PICK = """\
+from rdflib import Literal, URIRef
+
+def pick(g):
+    return g.value(predicate=URIRef("http://e/name"), object=Literal("x"))
+"""
+
+
+def test_returning_the_wrong_blank_node_is_a_difference(tmp_path):
+    """Labels dropped, any two blank nodes were equal: this pair was green."""
+    wrong = PICK.replace('Literal("x")', 'Literal("y")')
+    driver = FIXTURE_DRIVER.replace('"names"', '"pick"')
+    assert _run_driver(tmp_path, PICK, PICK, driver, TWO_BNODES)["equivalent"]
+    verdict = _run_driver(tmp_path, PICK, wrong, driver, TWO_BNODES,
+                          name="wrong")
+    assert verdict["equivalent"] is False

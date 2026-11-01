@@ -12,7 +12,9 @@ A driver calls :func:`run_pair`, which
      ``calls`` and compares the results;
   3. graph comparison is rdflib graph isomorphism (``rdflib.compare``),
      never raw serialisation; other values are normalised
-     (term-by-term for lists/tuples/sets/dicts) then compared for equality.
+     (term-by-term for lists/tuples/sets/dicts, attribute by attribute for
+     an instance without ``__eq__``, a blank node by its place in the
+     graphs of its side) then compared for equality.
 
 **Reading regions** (the oracle of design record ``corpus/403``) are not
 covered by graph isomorphism: they produce *values*, so the oracle is the
@@ -170,7 +172,7 @@ def _filtered(text: str, stdout_filter) -> str:
     return stdout_filter(text) if stdout_filter is not None else text
 
 
-def _unordered(value):
+def _unordered(value, bnodes: dict | None = None):
     """A comparison key that ignores order — at EVERY depth — not multiplicity.
 
     "No store promises an order" is not a property of the top-level value: a
@@ -184,7 +186,7 @@ def _unordered(value):
     region returning ``(concept, label)`` is not one returning ``(label,
     concept)``), so only its elements are made order-free, never the tuple.
     """
-    value = normalise(value)
+    value = normalise(value, bnodes)
     if isinstance(value, dict):
         return {k: _unordered(v) for k, v in sorted(value.items(), key=repr)}
     if isinstance(value, tuple):
@@ -241,27 +243,136 @@ def graphs_isomorphic(g1, g2) -> bool:
     return to_isomorphic(g1) == to_isomorphic(g2)
 
 
-def normalise(value):
-    """Make values comparable across the two runs (BNode ids differ)."""
+_MAX_DEPTH = 4
+
+
+def _structural(value) -> bool:
+    """An instance compared by its attributes rather than by identity.
+
+    A driver that restores a missing ``self`` builds one stub per side; a
+    class without ``__eq__`` compares them by identity, and the pair failed
+    for a reason that has nothing to do with the translation.  Classes,
+    modules and functions keep their identity: two functions are not equal
+    because both have an empty ``__dict__``.
+    """
+    import inspect
+    return (hasattr(value, "__dict__")
+            and type(value).__eq__ is object.__eq__
+            and not (inspect.isclass(value) or inspect.ismodule(value)
+                     or inspect.isroutine(value)))
+
+
+def _walk_graphs(value, found: list, seen: set, depth: int = 0) -> None:
+    from rdflib import Graph
+    if depth > _MAX_DEPTH or id(value) in seen:
+        return
+    seen.add(id(value))
+    if isinstance(value, Graph):
+        found.append(value)
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            _walk_graphs(k, found, seen, depth + 1)
+            _walk_graphs(v, found, seen, depth + 1)
+    elif isinstance(value, (list, tuple, set, frozenset)):
+        for v in value:
+            _walk_graphs(v, found, seen, depth + 1)
+    elif _structural(value):
+        _walk_graphs(vars(value), found, seen, depth + 1)
+
+
+def bnode_labels(*values) -> dict:
+    """A label for each blank node of the graphs found in ``values``, read
+    from its place in them, never from its identifier.
+
+    Each side parses its own fixture, so the same blank node has a fresh
+    identifier on each: a result that holds one — a dict keyed by it, a row
+    that returns it — was either incomparable or, labels dropped, always
+    equal.  Colour refinement (each node's label from its triples, the
+    blank neighbours' labels included, until the partition stops growing)
+    gives the same label on both sides to nodes in the same place.  Two
+    nodes only an automorphism tells apart share a label, which is right:
+    nothing the region could observe separates them either.
+    """
+    import hashlib
+    from rdflib import BNode, ConjunctiveGraph
+    graphs: list = []
+    _walk_graphs(values, graphs, set())
+    triples = []
+    for g in graphs:
+        quads = g.quads((None, None, None)) if isinstance(g, ConjunctiveGraph) \
+            else g.triples((None, None, None))
+        triples.extend(t[:3] for t in quads)
+    nodes = {n for t in triples for n in t if isinstance(n, BNode)}
+    colour = dict.fromkeys(nodes, "")
+    classes = 1
+    for _ in range(8):
+        def key(n):
+            return colour[n] if n in colour else n.n3()
+        sig: dict = {b: [] for b in nodes}
+        for s, p, o in triples:
+            if s in sig:
+                sig[s].append(("out", key(p), key(o)))
+            if o in sig:
+                sig[o].append(("in", key(s), key(p)))
+        colour = {b: hashlib.sha1(repr((colour[b], sorted(sig[b])))
+                                  .encode()).hexdigest()[:16]
+                  for b in nodes}
+        if len(set(colour.values())) == classes:
+            break
+        classes = len(set(colour.values()))
+    return colour
+
+
+def _key(k, bnodes):
+    """A dict key, normalised and still hashable."""
+    k = normalise(k, bnodes)
+    try:
+        hash(k)
+    except TypeError:
+        return repr(k)
+    return k
+
+
+def normalise(value, bnodes: dict | None = None, _depth: int = 0):
+    """Make values comparable across the two runs (BNode ids differ).
+
+    ``bnodes`` (:func:`bnode_labels`) names each blank node by its place in
+    the graphs of its side; without it, or for a blank node in none of them,
+    any two blank nodes are equal.
+    """
     from rdflib import BNode, Graph
     if isinstance(value, Graph):
         from rdflib.compare import to_isomorphic
         return ("graph", to_isomorphic(value).graph_digest())
     if isinstance(value, BNode):
-        return ("bnode",)
+        if bnodes is None:
+            return ("bnode",)
+        return ("bnode", bnodes.get(value))
     if isinstance(value, dict):
-        return {k: normalise(v) for k, v in value.items()}
+        out = {_key(k, bnodes): normalise(v, bnodes, _depth)
+               for k, v in value.items()}
+        if len(out) < len(value):
+            # two keys only their identifiers told apart: keep both entries
+            return ("dict", sorted((repr(_key(k, bnodes)),
+                                    repr(normalise(v, bnodes, _depth)))
+                                   for k, v in value.items()))
+        return out
     if isinstance(value, tuple):
-        return tuple(normalise(v) for v in value)
+        return tuple(normalise(v, bnodes, _depth) for v in value)
     if isinstance(value, list):
-        return [normalise(v) for v in value]
+        return [normalise(v, bnodes, _depth) for v in value]
     if isinstance(value, set):
-        return sorted(map(repr, (normalise(v) for v in value)))
+        return sorted(map(repr, (normalise(v, bnodes, _depth) for v in value)))
+    if _structural(value) and _depth < _MAX_DEPTH:
+        # depth counts objects only: attributes can point back up
+        return ("object", type(value).__qualname__,
+                normalise(dict(vars(value)), bnodes, _depth + 1))
     return value
 
 
 def _compare_value(a, b, label: str, diffs: list[str],
-                   ordered: bool = True) -> None:
+                   ordered: bool = True, bnodes=(None, None)) -> None:
+    """``bnodes``: the blank-node labels of each side (:func:`bnode_labels`)."""
     from rdflib import Graph
     if isinstance(a, Graph) and isinstance(b, Graph):
         if not graphs_isomorphic(a, b):
@@ -271,9 +382,9 @@ def _compare_value(a, b, label: str, diffs: list[str],
     try:
         a, b = materialise(a), materialise(b)
         if not ordered:
-            equal = _unordered(a) == _unordered(b)
+            equal = _unordered(a, bnodes[0]) == _unordered(b, bnodes[1])
         else:
-            equal = normalise(a) == normalise(b)
+            equal = normalise(a, bnodes[0]) == normalise(b, bnodes[1])
     except Exception as e:
         diffs.append(f"{label}: comparison error {e}")
         return
@@ -386,6 +497,10 @@ def run_pair(driver_file: str, entry: str | None = None,
                 verdict["error"] = traceback.format_exc(limit=8)
                 _emit(verdict)
                 return verdict
+            # blank nodes are named by their place in what each side holds
+            # after the call: its arguments (mutated) and its result
+            bnodes = (bnode_labels(ro, args_o, kw_o),
+                      bnode_labels(rt, args_t, kw_t))
             if isinstance(ro, Raised) or isinstance(rt, Raised):
                 # A raise is an outcome like a value: same exception type and
                 # message on both sides, or a difference.  What the call
@@ -394,12 +509,14 @@ def run_pair(driver_file: str, entry: str | None = None,
                     diffs.append(f"call[{i}]: outcome differs ({ro!r} vs {rt!r})")
                 observed = True
             else:
-                _compare_value(ro, rt, f"call[{i}].result", diffs, ordered)
+                _compare_value(ro, rt, f"call[{i}].result", diffs, ordered,
+                               bnodes)
             for j, (ao, at) in enumerate(zip(args_o, args_t)):
-                _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs, ordered)
+                _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs, ordered,
+                               bnodes)
             for k in kw_o:
                 _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]",
-                               diffs, ordered)
+                               diffs, ordered, bnodes)
             so, st_ = _filtered(buf_o.getvalue(), stdout_filter), \
                 _filtered(buf_t.getvalue(), stdout_filter)
             if so != st_:
@@ -427,8 +544,10 @@ def run_pair(driver_file: str, entry: str | None = None,
             _compare_value(go[name], gt[name], f"graph {name}", diffs)
         vo, vt = _values(ns_o), _values(ns_t)
         shared = sorted(set(vo) & set(vt))
+        bnodes = (bnode_labels(go, vo), bnode_labels(gt, vt))
         for name in shared:
-            _compare_value(vo[name], vt[name], f"value {name}", diffs, ordered)
+            _compare_value(vo[name], vt[name], f"value {name}", diffs, ordered,
+                           bnodes)
         if _filtered(out_o, stdout_filter) != _filtered(out_t, stdout_filter):
             diffs.append("stdout differs")
         verdict["graphs_compared"] = sorted(set(go) & set(gt))
