@@ -676,3 +676,21 @@ def test_a_binding_the_original_poses_must_survive():
     diffs: list = []
     _compare_value(original, moved, "graph g", diffs)
     assert diffs and "xs: <http://www.w3.org/2001/XMLSchema#>" in diffs[0]
+
+
+def test_the_demo_harness_is_not_measured():
+    """corpus/403: `demo()` is scaffolding of the study, on neither side."""
+    from rdfeval.compare import measure_pair, strip_demo
+    body = ("from rdflib import Graph, URIRef\n"
+            "def f(g):\n"
+            "    g.add((URIRef('http://e/a'), URIRef('http://e/p'),"
+            " URIRef('http://e/b')))\n")
+    demo = ("\n\ndef demo():\n    g = Graph()\n    f(g)\n"
+            "    # a comment inside\n\n    return g\n")
+    assert strip_demo(body + demo) == body
+    assert strip_demo(body) == body
+    assert strip_demo(body + demo + "X = 1\n") == body + "X = 1\n"
+    bare = measure_pair(body, body)
+    with_demo = measure_pair(body + demo, body + demo)
+    assert with_demo["python"]["loc"] == bare["python"]["loc"]
+    assert with_demo["ldpy"]["loc"] == bare["ldpy"]["loc"]

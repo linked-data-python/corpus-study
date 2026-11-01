@@ -262,13 +262,38 @@ def size_ratios(before: dict, after: dict) -> dict:
             for k in SIZE_METRICS}
 
 
+def strip_demo(source: str) -> str:
+    """``source`` without its top-level ``def demo(...)`` harness.
+
+    A region extracted from a class gets a ``demo()`` appended on both sides
+    so that its driver has something to call. It is scaffolding of the
+    study, not code of the repository, and it does not belong in the size
+    metrics (record corpus/403, 2026-11-01): counted on both sides, it moved
+    the ratios by one to two per cent where the repair had added seams.
+    Top-level code after the harness, if any, is kept."""
+    lines = source.split("\n")
+    start = next((i for i, line in enumerate(lines)
+                  if line.startswith("def demo(")), None)
+    if start is None:
+        return source
+    end = start + 1
+    while end < len(lines) and (not lines[end].strip()
+                                or lines[end][0] in " \t#"):
+        end += 1
+    head = lines[:start]
+    while head and not head[-1].strip():
+        head.pop()
+    return "\n".join(head + lines[end:]).rstrip("\n") + "\n"
+
+
 def measure_pair(py_source: str, ldpy_source: str,
                  preamble: str | None = None) -> dict:
     """``preamble``: bindings-only source of the example's context shim
     modules, so terms imported from a shim are recognised (analysis only —
-    the shim's surface counts on neither side)."""
-    py = python_side(py_source, preamble)
-    ld = ldpy_side(ldpy_source, preamble)
+    the shim's surface counts on neither side). The ``demo()`` harness is
+    measured on neither side (:func:`strip_demo`)."""
+    py = python_side(strip_demo(py_source), preamble)
+    ld = ldpy_side(strip_demo(ldpy_source), preamble)
     return {
         "python": py, "ldpy": ld,
         "subgroup": subgroup_of(py, ld),
@@ -286,8 +311,8 @@ def measure_optimized(py: dict, opt_py_source: str, opt_ldpy_source: str,
     on top of it; ``total`` (original.py → optimized.ldpy) is both.  ``py``
     is the original's side, already measured by :func:`measure_pair`.
     """
-    opy = python_side(opt_py_source, preamble)
-    old = ldpy_side(opt_ldpy_source, preamble)
+    opy = python_side(strip_demo(opt_py_source), preamble)
+    old = ldpy_side(strip_demo(opt_ldpy_source), preamble)
     return {
         "optimized_python": opy, "optimized_ldpy": old,
         "ratios_care": size_ratios(py, opy),
