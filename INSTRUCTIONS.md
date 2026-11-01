@@ -200,6 +200,11 @@ traductions fausses :
   depuis une valeur Python. La réécriture mécanique n'est sûre que si la
   valeur est déjà une chaîne.
 
+Un appel qui n'existe plus en 7.2.1 : **`Graph.load` a été retiré** (alias
+déprécié de `Graph.parse`). Une région qui l'appelle ne s'exécute d'aucun
+côté ; remplacer par `.parse(...)` des deux côtés, à l'identique, et le
+dire dans `translation_notes` — le changement ne touche aucun sens RDF.
+
 Et une subtilité de portée, à connaître avant de désigner un graphe :
 **`@graph g` capture la VALEUR de `g` à sa ligne, pas le nom.** Si le code
 réaffecte `g` plus loin (`g = g + autre`), il faut une nouvelle déclaration
