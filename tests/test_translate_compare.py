@@ -624,3 +624,36 @@ def test_returning_the_wrong_blank_node_is_a_difference(tmp_path):
     verdict = _run_driver(tmp_path, PICK, wrong, driver, TWO_BNODES,
                           name="wrong")
     assert verdict["equivalent"] is False
+
+
+# The hollow-green screen, calibrated on pairs whose emptiness is known.
+
+def test_a_fixture_without_solutions_is_hollow(tmp_path):
+    nothing = "@prefix e: <http://e/> .\ne:a e:knows e:b .\n"
+    verdict = _run_driver(tmp_path, NAMES, NAMES, FIXTURE_DRIVER, nothing)
+    assert verdict["equivalent"] is True and verdict["hollow"] is True
+
+
+def test_a_fixture_with_solutions_is_not_hollow(tmp_path):
+    verdict = _run_driver(tmp_path, NAMES, NAMES, FIXTURE_DRIVER, TWO_BNODES)
+    assert verdict["hollow"] is False
+
+
+def test_a_call_that_only_writes_into_its_self_is_not_hollow(tmp_path):
+    verdict = _run_driver(tmp_path, METHOD, METHOD, STUB_DRIVER)
+    assert verdict["hollow"] is False
+
+
+def test_a_raise_is_a_demonstration(tmp_path):
+    driver = ("from rdflib import Graph\nfrom rdfeval.harness import run_pair\n"
+              "run_pair(__file__, entry='add', calls=[lambda: ((Graph(), ''), {})])\n")
+    verdict = _run_driver(tmp_path, RAISING, RAISING, driver)
+    assert verdict["hollow"] is False
+
+
+def test_a_lazy_result_is_read_once_for_both_checks(tmp_path):
+    lazy = NAMES.replace("return {b: str(n) for b, n in",
+                         "return (str(n) for b, n in").replace(
+        'URIRef("http://e/name"))}', 'URIRef("http://e/name")))')
+    verdict = _run_driver(tmp_path, lazy, lazy, FIXTURE_DRIVER, TWO_BNODES)
+    assert verdict["equivalent"] is True and verdict["hollow"] is False

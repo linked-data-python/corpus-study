@@ -407,6 +407,58 @@ class Raised:
         return f"raised {self.type}({self.message!r})"
 
 
+def _is_empty(value) -> bool:
+    """Empty in the sense that matters: the region found nothing."""
+    from rdflib import Graph
+    if value is None or value is False:
+        return True
+    if isinstance(value, Graph):
+        return len(value) == 0
+    if isinstance(value, (list, tuple, set, frozenset, dict, str)):
+        return len(value) == 0
+    return False
+
+
+def _state(value, depth: int = 0):
+    """Everything a call can change in a value, graphs by digest — whatever
+    the value's ``__eq__``: a stub whose ``__eq__`` looks at its URI only
+    has still been written into if its graph grew."""
+    import inspect
+    from rdflib import ConjunctiveGraph, Graph
+    if isinstance(value, ConjunctiveGraph):
+        # rdflib.compare reads triples, a dataset yields quads; within one
+        # side the terms are the same objects, so the quads themselves do
+        return ("dataset", len(value), hash(frozenset(value.quads())))
+    if isinstance(value, Graph):
+        from rdflib.compare import to_isomorphic
+        return ("graph", to_isomorphic(value).graph_digest())
+    if depth > _MAX_DEPTH:
+        return repr(value)
+    if isinstance(value, dict):
+        return sorted(((repr(k), _state(v, depth + 1))
+                       for k, v in value.items()), key=lambda kv: kv[0])
+    if isinstance(value, (list, tuple)):
+        return [_state(v, depth + 1) for v in value]
+    if isinstance(value, (set, frozenset)):
+        return sorted(repr(_state(v, depth + 1)) for v in value)
+    if hasattr(value, "__dict__") and not (
+            inspect.isclass(value) or inspect.ismodule(value)
+            or inspect.isroutine(value)):
+        return (type(value).__qualname__, _state(dict(vars(value)), depth + 1))
+    return repr(value)
+
+
+def _fingerprint(values) -> list:
+    """What the call can change in what it was given."""
+    out = []
+    for v in values:
+        try:
+            out.append(_state(v))
+        except Exception:                         # noqa: BLE001 - opaque
+            out.append(None)
+    return out
+
+
 def _outcome(fn, args, kwargs):
     """The call's return value, or a :class:`Raised` for an Exception."""
     try:
@@ -467,6 +519,7 @@ def run_pair(driver_file: str, entry: str | None = None,
 
     diffs: list[str] = []
     observed = False
+    shown = 0
     if entry:
         verdict["method"] = (f"fixture:{fixture} entry:{entry}"
                              if fixture else f"entry:{entry}")
@@ -489,14 +542,24 @@ def run_pair(driver_file: str, entry: str | None = None,
                 # A region whose whole effect is printing has nothing else to
                 # compare: capture what each side writes while it runs.
                 buf_o, buf_t = io.StringIO(), io.StringIO()
+                given = list(args_o) + list(kw_o.values())
+                before = _fingerprint(given)
                 with contextlib.redirect_stdout(buf_o):
                     ro = _outcome(fo, args_o, kw_o)
+                after = _fingerprint(given)
                 with contextlib.redirect_stdout(buf_t):
                     rt = _outcome(ft, args_t, kw_t)
             except Exception:
                 verdict["error"] = traceback.format_exc(limit=8)
                 _emit(verdict)
                 return verdict
+            # a lazy result is read once, here: both the comparison and the
+            # hollow-green screen below look at it
+            try:
+                ro, rt = materialise(ro), materialise(rt)
+            except Exception as e:                # noqa: BLE001 - reported
+                diffs.append(f"call[{i}].result: comparison error {e}")
+                ro = rt = Raised(e)
             # blank nodes are named by their place in what each side holds
             # after the call: its arguments (mutated) and its result
             bnodes = (bnode_labels(ro, args_o, kw_o),
@@ -524,8 +587,14 @@ def run_pair(driver_file: str, entry: str | None = None,
                              f"({so[:120]!r} vs {st_[:120]!r})")
             if ro is not None or rt is not None or args_o or kw_o or so:
                 observed = True
+            # what the ORIGINAL demonstrated on this call: a value, a raise,
+            # a change to what it was given, or output
+            if (isinstance(ro, Raised) or not _is_empty(ro)
+                    or before != after or so):
+                shown += 1
         verdict["calls"] = len(calls)
         verdict["observed"] = observed
+        verdict["hollow"] = shown == 0
         if not observed:
             # The call returned nothing, took nothing to mutate and printed
             # nothing: a green here says only "it did not crash".  A region
@@ -552,6 +621,9 @@ def run_pair(driver_file: str, entry: str | None = None,
             diffs.append("stdout differs")
         verdict["graphs_compared"] = sorted(set(go) & set(gt))
         verdict["values_compared"] = shared
+        verdict["hollow"] = (all(len(g) == 0 for g in go.values())
+                             and all(_is_empty(vo[n]) for n in shared)
+                             and not _filtered(out_o, stdout_filter))
         # A name the original defines and the translation does not is never
         # compared.  Not a difference by itself — a Namespace replaced by a
         # @prefix is the point of ns_def_local — but a reviewer must see it,
