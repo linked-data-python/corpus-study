@@ -22,9 +22,9 @@
     "@graph",
     "-{ }",
     "+{ }",
-    "nom préfixé",
+    "prefixed name",
     "variable",
-    "littéral avec langue"
+    "language literal"
   ],
   "translation_notes": [
     "quatre paires remove/add « efface puis repose » : g.remove((iri, RDFS.label, None)) devient -{ {iri} rdfs:label ?o } et g.add((iri, RDFS.label, Literal(label, lang=\"en\"))) devient +{ {iri} rdfs:label f\"{label}\"@en }. Le sujet et la valeur restent des expressions Python interpolées, le prédicat devient un nom préfixé, le littéral étiqueté devient f\"…\"@en",

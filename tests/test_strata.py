@@ -334,6 +334,22 @@ def test_construction_vocabulary_folds_the_ways_people_write_it():
     assert unknown == []
 
 
+def test_every_pair_names_its_constructions_canonically():
+    """Folding is for what agents write next, not an excuse to keep the
+    French labels of the first wave in the data: the review pages and the
+    user-study material show `meta.json` as it is."""
+    from rdfeval.constructions import normalise
+    from rdfeval.study import STUDY
+    from rdfeval.validate import iter_examples
+    off = []
+    for ex_dir, meta in iter_examples(STUDY):
+        labels = meta.get("constructions") or []
+        named, unknown = normalise(labels)
+        if unknown or named != list(labels):
+            off.append((ex_dir.name, labels))
+    assert off == []
+
+
 def test_an_unplaceable_label_is_reported_not_dropped():
     """A label outside the vocabulary is a typo to fix or a construction the
     vocabulary lacks — both must be visible."""
