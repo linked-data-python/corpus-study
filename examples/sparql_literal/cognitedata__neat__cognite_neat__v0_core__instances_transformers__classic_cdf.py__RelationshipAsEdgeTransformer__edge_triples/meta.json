@@ -14,12 +14,17 @@
   },
   "translation_status": "draft",
   "classification": "excluded",
-  "constructions": ["s{ }", "call suffix (g)", "interpolation {expr}"],
+  "constructions": [
+    "s{ }",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
     "self._namespace is a runtime instance attribute (a Namespace built from CLASSIC_CDF_NAMESPACE elsewhere in the class), not a value known at transpile time, so `@prefix classic: <{self._namespace}> .` is rejected: 'prefixe non declare' (checked interactively: @prefix only accepts a literal IRI, never an expression). Every classic: term (Relationship, sourceType, targetType, and the source_type/target_type values) had to be interpolated instead of written under a prefix -- a real limitation for any query built against a namespace that is only known at run time, worth confirming against ldpy/012 if not already listed there.",
     "The query text itself (self._instances, a class attribute built with str.format placeholders) is defined OUTSIDE this extracted region/context; it was recovered from upstream (cognitedata/neat@4042d3e96) to translate faithfully rather than invented.",
     "Cannot be driven to a verdict: `python -m ldpy` on translated.ldpy fails at the first external import (ModuleNotFoundError: No module named 'cognite'), and original.py fails identically. Even with cognite.neat installed, _edge_triples calls self._relationship_as_edge (a DESCRIBE query + _create_edge, not part of the extracted region) and remove_instance_ids_in_batch (graph.commit()) plus a lookup_entity_with_external_id closure built by a sibling static method -- reconstructing all of that as a shim would mean re-authoring most of the RelationshipAsEdgeTransformer class rather than a minimal context shim, and risks exactly the 'verdict prouve seulement la transpilation' pitfall the batch was warned about.",
-    "Per AGENT_BATCH.md 'quand ca ne passe pas' #1: classified excluded (external dependency + surrounding-class reconstruction) rather than forced green."
+    "Per AGENT_BATCH.md 'quand ca ne passe pas' #1: classified excluded (external dependency + surrounding-class reconstruction) rather than forced green.",
+    "Correction (2026-11-01, record corpus/403, defect 6): `@prefix` does take a computed IRI — `@prefix p: f<{expr}> .` transpiles (checked) — so what this note says of `@prefix` is not true; the classification is to be revisited when the region is translated again."
   ],
   "draft_sha": "d506d2acf6dccd0f",
   "provenance": {
