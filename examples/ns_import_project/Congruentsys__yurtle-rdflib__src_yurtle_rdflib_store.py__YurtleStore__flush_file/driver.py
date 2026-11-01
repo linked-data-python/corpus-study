@@ -6,10 +6,16 @@ writer, _compute_file_hash) and calls `_flush_file(self, path)`, then
 reads back the file the region actually wrote (its only RDF-observable
 effect) plus the two non-wall-clock state fields it updates.
 """
+import re
+
 from rdfeval.harness import run_pair
 
+# Each side's demo() works in a temporary directory of its own, and the
+# region logs the path it flushes: the directory's name is not the
+# program's meaning.
 VERDICT = run_pair(
     __file__,
     entry='demo',
     calls=[((), {})],
+    stdout_filter=lambda text: re.sub(r"/tmp/tmp\w+", "<tmp>", text),
 )

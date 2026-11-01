@@ -2,6 +2,7 @@
 # region: getNarrower (lines 191-208, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
 import rdflib
+import rdflib.plugins.sparql  # what `import navocab` (vocab2md.py:10) brings in: navocab/__init__.py:11
 PFX = """
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>

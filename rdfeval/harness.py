@@ -3,15 +3,23 @@
 A driver calls :func:`run_pair`, which
 
   1. executes ``original.py`` and ``translated.ldpy`` (through the ldpy
-     transpiler) in two fresh module namespaces, capturing stdout;
+     transpiler), each in a process of its own forked from the driver, so
+     that nothing one side leaves behind — a patched shim, a cache, an
+     imported submodule — is seen by the other; each side reduces what it
+     observed to canonical data (see "what one side does, observed"
+     below), which the driver compares;
   2. either compares *module state* — every rdflib Graph in the globals,
      paired by variable name, PLUS every other module-level value both
      modules define (without which a region that only reads a graph gets a
      hollow green: its graphs are equal because nothing touched them) —
      or — when ``entry`` names a function — calls it with each fixture in
      ``calls`` and compares the results;
-  3. graph comparison is rdflib graph isomorphism (``rdflib.compare``),
-     never raw serialisation; other values are normalised
+  3. besides values and mutations, it compares what each side writes to
+     stdout and stderr, the region's own log records, and the files it
+     writes in the example directory;
+  4. graph comparison is rdflib graph isomorphism (``rdflib.compare``),
+     never raw serialisation — a dataset graph by graph; other values are
+     normalised
      (term-by-term for lists/tuples/sets/dicts, attribute by attribute for
      an instance without ``__eq__``, a blank node by its place in the
      graphs of its side) then compared for equality.
@@ -159,8 +167,13 @@ def materialise(value):
         return value
     if isinstance(value, dict):
         return {k: materialise(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        return type(value)(materialise(v) for v in value)
+    # a subclass is rebuilt as its base: `type(value)(gen)` fails on a
+    # tuple whose __new__ wants more (ldpy's Row, a namedtuple), and a row
+    # nested in a dict or a list never reached the comparison
+    if isinstance(value, tuple):
+        return tuple(materialise(v) for v in value)
+    if isinstance(value, list):
+        return [materialise(v) for v in value]
     if isinstance(value, (set, frozenset)):
         return {materialise(v) for v in value}
     if hasattr(value, "__iter__") and not isinstance(value, _ATOMIC):
@@ -238,8 +251,31 @@ def _values(ns: dict) -> dict[str, object]:
             and _comparable(v)}
 
 
-def graphs_isomorphic(g1, g2) -> bool:
+def dataset_key(ds) -> tuple:
+    """A dataset compared graph by graph: each named graph by its name (a
+    blank node name by nothing) and its isomorphism digest.
+    ``rdflib.compare`` reads triples and a dataset yields quads, so a
+    dataset could not be compared at all."""
+    from rdflib import BNode, Graph
     from rdflib.compare import to_isomorphic
+    parts = []
+    for ctx in ds.contexts():
+        g = Graph()
+        for triple in ctx.triples((None, None, None)):
+            g.add(triple)
+        name = "bnode" if isinstance(ctx.identifier, BNode) \
+            else str(ctx.identifier)
+        parts.append((name, to_isomorphic(g).graph_digest()))
+    return ("dataset", tuple(sorted(parts)))
+
+
+def graphs_isomorphic(g1, g2) -> bool:
+    from rdflib import ConjunctiveGraph
+    from rdflib.compare import to_isomorphic
+    if isinstance(g1, ConjunctiveGraph) or isinstance(g2, ConjunctiveGraph):
+        return (isinstance(g1, ConjunctiveGraph)
+                and isinstance(g2, ConjunctiveGraph)
+                and dataset_key(g1) == dataset_key(g2))
     return to_isomorphic(g1) == to_isomorphic(g2)
 
 
@@ -256,6 +292,9 @@ def _structural(value) -> bool:
     because both have an empty ``__dict__``.
     """
     import inspect
+    import types
+    if isinstance(value, types.SimpleNamespace):
+        return True                     # its __eq__ is exactly that
     return (hasattr(value, "__dict__")
             and type(value).__eq__ is object.__eq__
             and not (inspect.isclass(value) or inspect.ismodule(value)
@@ -356,7 +395,9 @@ def normalise(value, bnodes: dict | None = None, _depth: int = 0):
     the graphs of its side; without it, or for a blank node in none of them,
     any two blank nodes are equal.
     """
-    from rdflib import BNode, Graph
+    from rdflib import BNode, ConjunctiveGraph, Graph
+    if isinstance(value, ConjunctiveGraph):
+        return dataset_key(value)
     if isinstance(value, Graph):
         from rdflib.compare import to_isomorphic
         return ("graph", to_isomorphic(value).graph_digest())
@@ -487,16 +528,399 @@ def _outcome(fn, args, kwargs):
         return Raised(e)
 
 
+# --- what one side does, observed --------------------------------------------
+#
+# Each side runs in a process of its own, forked from the driver (record
+# corpus/403, défaut 3): run one after the other in a single process, the
+# second side saw what the first had left — a shim it had patched, a cache,
+# a submodule it had imported. A value cannot cross a process boundary as
+# itself, so each side reduces what it observed to a CANONICAL form, plain
+# data the driver compares: a graph by its isomorphism digest, a blank node
+# by its place, an object compared by identity by the role it plays — the
+# argument, the driver global, the shim attribute it IS — and an object of
+# the region's own module by its attributes.
+
+ISOLATE_ENV = "RDFEVAL_ISOLATE"
+_SIDE_MODULES = ("__original__", "__translated__")
+_RDF_SUFFIXES = {".ttl": "turtle", ".nt": "nt", ".n3": "n3", ".rdf": "xml",
+                 ".owl": "xml", ".xml": "xml", ".jsonld": "json-ld",
+                 ".trig": "trig", ".nq": "nquads"}
+
+
+def _refs(roots: dict) -> dict[int, str]:
+    """``id(obj) -> path`` for every object reachable from ``roots``: what a
+    value compared by identity can be named by, the same way on both
+    sides."""
+    import inspect
+    out: dict[int, str] = {}
+
+    def walk(value, path, depth):
+        if depth > 3 or id(value) in out or isinstance(
+                value, (str, bytes, int, float, bool, type(None))):
+            return
+        if inspect.ismodule(value):
+            return
+        out[id(value)] = path
+        if isinstance(value, dict):
+            for k, v in list(value.items())[:200]:
+                walk(v, f"{path}[{k!r}]", depth + 1)
+        elif isinstance(value, (list, tuple)):
+            for i, v in enumerate(value[:200]):
+                walk(v, f"{path}[{i}]", depth + 1)
+        elif _structural(value):
+            for k, v in list(vars(value).items())[:200]:
+                walk(v, f"{path}.{k}", depth + 1)
+
+    for name, value in roots.items():
+        walk(value, name, 0)
+    return out
+
+
+def _plain(value) -> bool:
+    from rdflib.term import Node
+    return value is None or isinstance(value, (str, bytes, bool, int, float,
+                                               complex, Node, Raised))
+
+
+def _deidentify(value, refs: dict, depth: int = 0):
+    """Replace what only identity tells apart by its role (:func:`_refs`).
+
+    Done before :func:`normalise`, which sorts sets by ``repr`` — and the
+    repr of an identity object carries its address."""
+    import inspect
+    if _plain(value) or depth > _MAX_DEPTH + 2:
+        return value
+    from rdflib import Graph
+    if isinstance(value, Graph):
+        return value
+    if isinstance(value, dict):
+        return {(_deidentify(k, refs, depth + 1) if not _plain(k) else k):
+                _deidentify(v, refs, depth + 1) for k, v in value.items()}
+    if isinstance(value, tuple):
+        return tuple(_deidentify(v, refs, depth + 1) for v in value)
+    if isinstance(value, list):
+        return [_deidentify(v, refs, depth + 1) for v in value]
+    if isinstance(value, (set, frozenset)):
+        return {_deidentify(v, refs, depth + 1) for v in value}
+    if inspect.ismodule(value):
+        return ("module", value.__name__)
+    if inspect.isclass(value) or inspect.isroutine(value):
+        if id(value) in refs:
+            return ("ref", refs[id(value)])
+        return ("callable", getattr(value, "__qualname__", repr(value)))
+    if _structural(value):
+        return value                    # normalise compares its attributes
+    if type(value).__eq__ is object.__eq__:
+        return ("ref", refs[id(value)]) if id(value) in refs else \
+            ("opaque", type(value).__qualname__)
+    return value                        # its own __eq__: see _portable
+
+
+def _portable(value, depth: int = 0):
+    """``value`` as data the driver process can receive and compare.
+
+    An object with its own ``__eq__`` travels as itself when its class can
+    be found again on the other side; a class of the region's own module
+    cannot (each side has its module), so it travels by its attributes."""
+    import pickle
+    from rdflib import Graph
+    if isinstance(value, float) and value != value:
+        return ("nan",)                 # nan != nan: equal only by identity
+    if _plain(value) or depth > _MAX_DEPTH + 2:
+        return value
+    if isinstance(value, Graph):
+        return _canon_graph(value)[:3]
+    if isinstance(value, dict):
+        return {_portable(k, depth + 1): _portable(v, depth + 1)
+                for k, v in value.items()}
+    if isinstance(value, tuple):
+        return tuple(_portable(v, depth + 1) for v in value)
+    if isinstance(value, list):
+        return [_portable(v, depth + 1) for v in value]
+    if isinstance(value, (set, frozenset)):
+        return frozenset(_portable(v, depth + 1) for v in value)
+    if type(value).__module__ not in _SIDE_MODULES:
+        try:
+            pickle.loads(pickle.dumps(value))
+            return value
+        except Exception:                         # noqa: BLE001 - fallback
+            pass
+    if hasattr(value, "__dict__"):
+        return ("object", type(value).__qualname__,
+                _portable(normalise(dict(vars(value))), depth + 1))
+    return ("repr", type(value).__qualname__, repr(value))
+
+
+def _canon_graph(g) -> tuple:
+    """A graph as compared: its digest, and the prefix bindings it carries
+    (record ldpy/027: a binding of the original lost is a difference)."""
+    from rdflib import ConjunctiveGraph
+    from rdflib.compare import to_isomorphic
+    key = dataset_key(g) if isinstance(g, ConjunctiveGraph) else \
+        ("graph", to_isomorphic(g).graph_digest())
+    return ("rdf-graph", key, len(g),
+            frozenset((p, str(n)) for p, n in g.namespaces()),
+            type(g).__name__)
+
+
+def _canon(value, ordered: bool, bnodes, refs: dict):
+    """What :func:`_compare_value` compares, as plain data."""
+    from rdflib import Graph
+    if isinstance(value, Graph):
+        return _canon_graph(value)
+    if isinstance(value, Raised):
+        return value
+    try:
+        value = _deidentify(materialise(value), refs)
+        value = _unordered(value, bnodes) if not ordered else \
+            normalise(value, bnodes)
+        return _portable(value)
+    except Exception as e:                        # noqa: BLE001 - reported
+        return ("comparison-error", f"{type(e).__name__}: {e}")
+
+
+class _LogRecords:
+    """Records the region itself logged — its own files, not a library's."""
+
+    def __init__(self, ex_dir: Path):
+        import logging
+        self.ex_dir = ex_dir
+        self.records: list[tuple[str, str, str]] = []
+        outer = self
+
+        class Handler(logging.Handler):
+            def emit(self, record):
+                if Path(record.pathname).parent == outer.ex_dir:
+                    name = record.name
+                    for side in _SIDE_MODULES:
+                        name = name.replace(side, "__region__")
+                    outer.records.append((record.levelname, name,
+                                          record.getMessage()))
+        self.handler = Handler(logging.DEBUG)
+
+
+def _files(ex_dir: Path) -> dict[str, tuple]:
+    out = {}
+    for p in ex_dir.rglob("*"):
+        if "__pycache__" in p.parts or not p.is_file():
+            continue
+        st = p.stat()
+        out[str(p.relative_to(ex_dir))] = (st.st_mtime_ns, st.st_size)
+    return out
+
+
+def _file_content(path: Path, stdout_filter):
+    """A written file as compared: an RDF document by its graph, a text by
+    its (filtered) text, anything else by its bytes."""
+    data = path.read_bytes()
+    fmt = _RDF_SUFFIXES.get(path.suffix.lower())
+    if fmt:
+        try:
+            from rdflib import Graph
+            return _canon_graph(Graph().parse(data=data, format=fmt))[:3]
+        except Exception:                         # noqa: BLE001 - as text
+            pass
+    try:
+        return ("text", _filtered(data.decode("utf-8"), stdout_filter))
+    except UnicodeDecodeError:
+        return ("bytes", data)
+
+
+@contextlib.contextmanager
+def _observed(ex_dir: Path, stdout_filter):
+    """Run a block and collect what it shows besides its value: stdout,
+    stderr, the region's log records, the files it writes in the example
+    directory — which are then removed or restored, so that nothing of one
+    side is left for the other."""
+    import logging
+    import warnings
+    seen: dict = {}
+    before = _files(ex_dir)
+    backup = {rel: (ex_dir / rel).read_bytes() for rel in before}
+    out, err = io.StringIO(), io.StringIO()
+    logs = _LogRecords(ex_dir)
+    root = logging.getLogger()
+    level = root.level
+    root.addHandler(logs.handler)
+    root.setLevel(logging.DEBUG)
+    try:
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err), \
+                warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            yield seen
+    finally:
+        root.removeHandler(logs.handler)
+        root.setLevel(level)
+        after = _files(ex_dir)
+        written = {}
+        for rel, sig in after.items():
+            if before.get(rel) != sig:
+                written[rel] = _file_content(ex_dir / rel, stdout_filter)
+                if rel in backup:
+                    (ex_dir / rel).write_bytes(backup[rel])
+                else:
+                    (ex_dir / rel).unlink()
+        # log records as a multiset: a region that logs once per solution
+        # logs in the order of the store, which no store promises
+        seen.update(stdout=_filtered(out.getvalue(), stdout_filter),
+                    stderr=_filtered(err.getvalue(), stdout_filter),
+                    logs=sorted((lv, n, _filtered(m, stdout_filter))
+                                for lv, n, m in logs.records),
+                    files=written)
+
+
+def _side(ex_dir: Path, artefact: str, name: str, entry: str | None,
+          calls: list | None, ordered: bool, stdout_filter) -> dict:
+    """Run one artefact and return, canonical, all it showed."""
+    driver = sys.modules.get("__main__")
+    driver_globals = {k: v for k, v in vars(driver).items()
+                      if not k.startswith("__")} if driver else {}
+    side: dict = {}
+    with _observed(ex_dir, stdout_filter) as module_seen:
+        ns, out = _exec_artefact(ex_dir / artefact, name)
+    module_seen["stdout"] = _filtered(out, stdout_filter)
+    side["module"] = module_seen
+    if entry:
+        fn = ns.get(entry)
+        if not callable(fn):
+            side["missing_entry"] = True
+            return side
+        results = []
+        for case in calls:
+            args, kw = case() if callable(case) else case
+            refs = _refs({"driver": driver_globals, "arg": list(args),
+                          "kwarg": dict(kw), "module": {
+                              k: v for k, v in ns.items()
+                              if not k.startswith("__")}})
+            given = list(args) + list(kw.values())
+            before = _fingerprint(given)
+            with _observed(ex_dir, stdout_filter) as seen:
+                r = _outcome(fn, args, kw)
+            after = _fingerprint(given)
+            try:
+                r = materialise(r)
+            except Exception as e:                # noqa: BLE001 - reported
+                r = Raised(e)
+            bnodes = bnode_labels(r, args, kw)
+            results.append({
+                "result": _canon(r, ordered, bnodes, refs),
+                "raised": isinstance(r, Raised),
+                "empty": not isinstance(r, Raised) and _is_empty(r),
+                "none": r is None,
+                "args": [_canon(a, ordered, bnodes, refs) for a in args],
+                "kwargs": {k: _canon(v, ordered, bnodes, refs)
+                           for k, v in kw.items()},
+                "inputs": bool(args or kw),
+                "mutated": before != after,
+                **seen,
+            })
+        side["calls"] = results
+    else:
+        refs = _refs({"driver": driver_globals})
+        graphs = _graphs(ns)
+        values = _values(ns)
+        bnodes = bnode_labels(graphs, values)
+        side["graphs"] = {k: _canon_graph(g) for k, g in graphs.items()}
+        side["values"] = {k: _canon(v, ordered, bnodes, refs)
+                          for k, v in values.items()}
+        side["graphs_empty"] = all(len(g) == 0 for g in graphs.values())
+        side["values_empty"] = {k: _is_empty(v) for k, v in values.items()}
+    return side
+
+
+def _in_child(fn, *args):
+    """``fn(*args)`` in a forked process; its canonical result comes back
+    through a pipe. A side that hangs ends itself before the driver's
+    timeout."""
+    import pickle
+    import signal
+    sys.stdout.flush()
+    sys.stderr.flush()
+    r, w = os.pipe()
+    pid = os.fork()
+    if pid == 0:                                  # pragma: no cover - child
+        os.close(r)
+        signal.alarm(115)
+        try:
+            data = pickle.dumps(("ok", fn(*args)))
+        except BaseException:                     # noqa: BLE001 - reported
+            data = pickle.dumps(("error", traceback.format_exc(limit=8)))
+        with os.fdopen(w, "wb") as f:
+            f.write(data)
+        os._exit(0)
+    os.close(w)
+    with os.fdopen(r, "rb") as f:
+        data = f.read()
+    os.waitpid(pid, 0)
+    if not data:
+        return ("error", "the side's process died without a result")
+    return pickle.loads(data)
+
+
+def _in_process(fn, *args):
+    try:
+        return ("ok", fn(*args))
+    except Exception:                             # noqa: BLE001 - reported
+        return ("error", traceback.format_exc(limit=8))
+
+
+def _compare_canon(a, b, label: str, diffs: list[str]) -> None:
+    """Two canonical values (:func:`_canon`), the original's first."""
+    if isinstance(a, tuple) and a[:1] == ("rdf-graph",) and \
+            isinstance(b, tuple) and b[:1] == ("rdf-graph",):
+        if a[1] != b[1]:
+            diffs.append(f"{label}: graphs not isomorphic "
+                         f"({a[2]} vs {b[2]} triples)")
+        from rdflib import Graph
+        defaults = set((p, str(n)) for p, n in Graph().namespaces())
+        lost = sorted((a[3] - defaults) - b[3])
+        if lost:
+            diffs.append(f"{label}: prefix bindings of the original lost "
+                         f"({', '.join(f'{p}: <{n}>' for p, n in lost)})")
+        return
+    for v in (a, b):
+        if isinstance(v, tuple) and v[:1] == ("comparison-error",):
+            diffs.append(f"{label}: comparison error {v[1]}")
+            return
+    try:
+        equal = a == b
+    except Exception as e:                        # noqa: BLE001 - reported
+        diffs.append(f"{label}: comparison error {e}")
+        return
+    if not equal:
+        diffs.append(f"{label}: values differ ({a!r} vs {b!r})")
+
+
+def _compare_seen(o: dict, t: dict, label: str, diffs: list[str]) -> None:
+    """What the two sides printed, logged and wrote."""
+    for key, what in (("stdout", "stdout"), ("stderr", "stderr"),
+                      ("logs", "log records"), ("files", "files written")):
+        vo, vt = o.get(key), t.get(key)
+        if vo == vt:
+            continue
+        if isinstance(vo, list) and isinstance(vt, list):
+            # the first record that differs, not a prefix both share
+            i = next((i for i, (x, y) in enumerate(zip(vo, vt)) if x != y),
+                     min(len(vo), len(vt)))
+            vo, vt = vo[i:i + 1] or "<end>", vt[i:i + 1] or "<end>"
+            what = f"{what} (from #{i})"
+        a, b = repr(vo)[:200], repr(vt)[:200]
+        diffs.append(f"{label}{what} differ{'s' if key[-1] != 's' else ''}"
+                     f" ({a} vs {b})")
+
+
 def run_pair(driver_file: str, entry: str | None = None,
              calls: list | None = None, fixture: str | None = None,
-             ordered: bool | None = None, stdout_filter=None) -> dict:
+             ordered: bool | None = None, stdout_filter=None,
+             isolate: bool | None = None) -> dict:
     """Establish that ``original.py`` and ``translated.ldpy`` agree.
 
     ``entry``/``calls``   compare what a function returns and what it mutates
     ``fixture``           a Turtle file, parsed fresh for each side and passed
                           to ``entry`` as its single argument — the reading
                           oracle: same input graph, same values out
-    ``stdout_filter``     a ``str -> str`` applied to BOTH sides' output
+    ``stdout_filter``     a ``str -> str`` applied to BOTH sides' output —
+                          stdout, stderr, log messages, written text files —
                           before comparing.  Printed output can carry things
                           that are not the program's meaning — a fresh
                           ``Graph()`` identifier, a wall-clock duration.  The
@@ -508,12 +932,22 @@ def run_pair(driver_file: str, entry: str | None = None,
                           for a fixture run: no RDF store promises an order,
                           so a region that wants one must sort or ``ORDER BY``
                           — and then the driver says ``ordered=True``.
+    ``isolate``           each side in a process of its own (the default;
+                          ``RDFEVAL_ISOLATE=0`` turns it off for debugging).
+
+    Besides values and mutations, each call is compared on what it writes to
+    stdout and stderr, what the region logs, and the files it writes in the
+    example directory.  A raise is an outcome like a value: same exception
+    type and message on both sides, or a difference.
     """
     ex_dir = Path(driver_file).resolve().parent
     if ordered is None:
         ordered = fixture is None
+    if isolate is None:
+        isolate = os.environ.get(ISOLATE_ENV, "1") != "0"
     verdict: dict = {"example": ex_dir.name, "equivalent": False,
-                     "method": None, "diffs": [], "error": None}
+                     "method": None, "diffs": [], "error": None,
+                     "isolated": isolate}
     try:
         left, right = sides_from_env()
     except ValueError as e:
@@ -529,127 +963,91 @@ def run_pair(driver_file: str, entry: str | None = None,
         path = ex_dir / fixture
         if calls is None:
             calls = [lambda: ((fixture_graph(path),), {})]
-    try:
-        ns_o, out_o = _exec_artefact(ex_dir / left, "__original__")
-        ns_t, out_t = _exec_artefact(ex_dir / right, "__translated__")
-    except Exception:
-        verdict["error"] = traceback.format_exc(limit=8)
+    if entry and not calls:
+        verdict["error"] = "no fixtures: provide calls=[(args, kwargs), …]"
         _emit(verdict)
         return verdict
 
+    run = _in_child if isolate else _in_process
+    status_o, so = run(_side, ex_dir, left, "__original__", entry, calls,
+                       ordered, stdout_filter)
+    status_t, st = run(_side, ex_dir, right, "__translated__", entry, calls,
+                       ordered, stdout_filter)
+    for status, payload in ((status_o, so), (status_t, st)):
+        if status != "ok":
+            verdict["error"] = payload
+            _emit(verdict)
+            return verdict
+
     diffs: list[str] = []
-    observed = False
-    shown = 0
+    _compare_seen(so["module"], st["module"], "module-level ", diffs)
     if entry:
         verdict["method"] = (f"fixture:{fixture} entry:{entry}"
                              if fixture else f"entry:{entry}")
         verdict["ordered"] = ordered
-        fo, ft = ns_o.get(entry), ns_t.get(entry)
-        if not callable(fo) or not callable(ft):
+        if so.get("missing_entry") or st.get("missing_entry"):
             verdict["error"] = f"entry {entry!r} not found in both modules"
             _emit(verdict)
             return verdict
-        if not calls:
-            verdict["error"] = "no fixtures: provide calls=[(args, kwargs), …]"
-            _emit(verdict)
-            return verdict
-        for i, case in enumerate(calls):
-            # a case is (args, kwargs) — or a callable returning that pair,
-            # invoked once per side so mutable arguments (graphs!) stay fresh
-            try:
-                args_o, kw_o = case() if callable(case) else case
-                args_t, kw_t = case() if callable(case) else case
-                # A region whose whole effect is printing has nothing else to
-                # compare: capture what each side writes while it runs.
-                buf_o, buf_t = io.StringIO(), io.StringIO()
-                given = list(args_o) + list(kw_o.values())
-                before = _fingerprint(given)
-                with contextlib.redirect_stdout(buf_o):
-                    ro = _outcome(fo, args_o, kw_o)
-                after = _fingerprint(given)
-                with contextlib.redirect_stdout(buf_t):
-                    rt = _outcome(ft, args_t, kw_t)
-            except Exception:
-                verdict["error"] = traceback.format_exc(limit=8)
-                _emit(verdict)
-                return verdict
-            # a lazy result is read once, here: both the comparison and the
-            # hollow-green screen below look at it
-            try:
-                ro, rt = materialise(ro), materialise(rt)
-            except Exception as e:                # noqa: BLE001 - reported
-                diffs.append(f"call[{i}].result: comparison error {e}")
-                ro = rt = Raised(e)
-            # blank nodes are named by their place in what each side holds
-            # after the call: its arguments (mutated) and its result
-            bnodes = (bnode_labels(ro, args_o, kw_o),
-                      bnode_labels(rt, args_t, kw_t))
-            if isinstance(ro, Raised) or isinstance(rt, Raised):
-                # A raise is an outcome like a value: same exception type and
-                # message on both sides, or a difference.  What the call
-                # mutated before raising is still compared below.
-                if ro != rt:
-                    diffs.append(f"call[{i}]: outcome differs ({ro!r} vs {rt!r})")
+        observed = False
+        shown = 0
+        for i, (co, ct) in enumerate(zip(so["calls"], st["calls"])):
+            if co["raised"] or ct["raised"]:
+                if co["result"] != ct["result"]:
+                    diffs.append(f"call[{i}]: outcome differs "
+                                 f"({co['result']!r} vs {ct['result']!r})")
                 observed = True
             else:
-                _compare_value(ro, rt, f"call[{i}].result", diffs, ordered,
-                               bnodes)
-            for j, (ao, at) in enumerate(zip(args_o, args_t)):
-                _compare_value(ao, at, f"call[{i}].arg[{j}]", diffs, ordered,
-                               bnodes)
-            for k in kw_o:
-                _compare_value(kw_o[k], kw_t.get(k), f"call[{i}].kwarg[{k}]",
-                               diffs, ordered, bnodes)
-            so, st_ = _filtered(buf_o.getvalue(), stdout_filter), \
-                _filtered(buf_t.getvalue(), stdout_filter)
-            if so != st_:
-                diffs.append(f"call[{i}]: stdout differs "
-                             f"({so[:120]!r} vs {st_[:120]!r})")
-            if ro is not None or rt is not None or args_o or kw_o or so:
+                _compare_canon(co["result"], ct["result"],
+                               f"call[{i}].result", diffs)
+            for j, (ao, at) in enumerate(zip(co["args"], ct["args"])):
+                _compare_canon(ao, at, f"call[{i}].arg[{j}]", diffs)
+            for k, vo in co["kwargs"].items():
+                _compare_canon(vo, ct["kwargs"].get(k),
+                               f"call[{i}].kwarg[{k}]", diffs)
+            _compare_seen(co, ct, f"call[{i}]: ", diffs)
+            said = co["stdout"] or co["stderr"] or co["logs"] or co["files"]
+            if not co["none"] or not ct["none"] or co["inputs"] or said:
                 observed = True
             # what the ORIGINAL demonstrated on this call: a value, a raise,
-            # a change to what it was given, or output
-            if (isinstance(ro, Raised) or not _is_empty(ro)
-                    or before != after or so):
+            # a change to what it was given, or output of any kind
+            if co["raised"] or not co["empty"] or co["mutated"] or said:
                 shown += 1
-        verdict["calls"] = len(calls)
+        verdict["calls"] = len(so["calls"])
         verdict["observed"] = observed
         verdict["hollow"] = shown == 0
         if not observed:
-            # The call returned nothing, took nothing to mutate and printed
-            # nothing: a green here says only "it did not crash".  A region
-            # whose whole effect is a file write lands exactly here.
+            # The call returned nothing, took nothing to mutate, printed,
+            # logged and wrote nothing: a green here says only "it did not
+            # crash".
             diffs.append("nothing observable to compare: the entry point "
-                         "returns None, takes no argument to mutate and "
-                         "prints nothing")
-        if _filtered(out_o, stdout_filter) != _filtered(out_t, stdout_filter):
-            diffs.append("stdout differs at module level")
+                         "returns None, takes no argument to mutate, prints, "
+                         "logs and writes nothing")
     else:
         verdict["method"] = "module-state"
-        go, gt = _graphs(ns_o), _graphs(ns_t)
+        go, gt = so["graphs"], st["graphs"]
         if set(go) != set(gt):
             diffs.append(f"graph variables differ: {sorted(go)} vs {sorted(gt)}")
         for name in sorted(set(go) & set(gt)):
-            _compare_value(go[name], gt[name], f"graph {name}", diffs)
-        vo, vt = _values(ns_o), _values(ns_t)
+            _compare_canon(go[name], gt[name], f"graph {name}", diffs)
+        vo, vt = so["values"], st["values"]
         shared = sorted(set(vo) & set(vt))
-        bnodes = (bnode_labels(go, vo), bnode_labels(gt, vt))
         for name in shared:
-            _compare_value(vo[name], vt[name], f"value {name}", diffs, ordered,
-                           bnodes)
-        if _filtered(out_o, stdout_filter) != _filtered(out_t, stdout_filter):
-            diffs.append("stdout differs")
+            _compare_canon(vo[name], vt[name], f"value {name}", diffs)
         verdict["graphs_compared"] = sorted(set(go) & set(gt))
         verdict["values_compared"] = shared
-        verdict["hollow"] = (all(len(g) == 0 for g in go.values())
-                             and all(_is_empty(vo[n]) for n in shared)
-                             and not _filtered(out_o, stdout_filter))
+        m = so["module"]
+        verdict["hollow"] = (so["graphs_empty"]
+                             and all(so["values_empty"][n] for n in shared)
+                             and not (m["stdout"] or m["stderr"] or m["logs"]
+                                      or m["files"]))
         # A name the original defines and the translation does not is never
         # compared.  Not a difference by itself — a Namespace replaced by a
         # @prefix is the point of ns_def_local — but a reviewer must see it,
         # since other modules of the repository may import that name.
         verdict["names_only_original"] = sorted(set(vo) - set(vt))
-        if not (go or gt) and not shared and out_o == out_t == "":
+        if not (go or gt) and not shared and not any(
+                m[k] for k in ("stdout", "stderr", "logs", "files")):
             diffs.append("nothing observable to compare")
     verdict["diffs"] = diffs
     verdict["equivalent"] = not diffs

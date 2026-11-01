@@ -451,25 +451,78 @@ def test_only_judgeable_values_are_compared():
     assert not _comparable([object()])
 
 
-def test_a_call_that_observes_nothing_is_not_a_green(tmp_path):
-    """A region whose only effect is a file write returns None, mutates no
-    argument and prints nothing: a green would say only "it did not crash"."""
-    for name in ("original.py", "translated.ldpy"):
-        (tmp_path / name).write_text(
-            "def main():\n"
-            "    open('out.txt', 'w').write('x')\n")
+def _verdict_of(tmp_path, original, translated, driver):
+    import json
+    (tmp_path / "original.py").write_text(original)
+    (tmp_path / "translated.ldpy").write_text(translated)
     (tmp_path / "driver.py").write_text(
-        "from rdfeval.harness import run_pair\n"
-        "VERDICT = run_pair(__file__, entry='main', calls=[((), {})])\n")
+        "from rdfeval.harness import run_pair\n" + driver)
     proc = subprocess.run([sys.executable, "driver.py"], cwd=tmp_path,
                           capture_output=True, text=True, timeout=120)
-    import json
-    verdict = next(json.loads(line[len("RDFEVAL-VERDICT "):])
-                   for line in proc.stderr.splitlines()
-                   if line.startswith("RDFEVAL-VERDICT "))
+    return next(json.loads(line[len("RDFEVAL-VERDICT "):])
+                for line in proc.stderr.splitlines()
+                if line.startswith("RDFEVAL-VERDICT "))
+
+
+def test_a_call_that_observes_nothing_is_not_a_green(tmp_path):
+    """A region that returns None, mutates no argument, prints, logs and
+    writes nothing: a green would say only "it did not crash"."""
+    body = "def main():\n    x = 1\n"
+    verdict = _verdict_of(tmp_path, body, body,
+                          "run_pair(__file__, entry='main', calls=[((), {})])\n")
     assert not verdict["equivalent"]
     assert verdict["observed"] is False
     assert any("nothing observable" in d for d in verdict["diffs"])
+
+
+def test_what_a_region_writes_logs_and_says_on_stderr_is_compared(tmp_path):
+    """corpus/403, défaut 2: a file written in the example directory, a log
+    record of the region, a line on stderr are observed — and the file is
+    gone afterwards, so the other side does not find it."""
+    def region(text):
+        return ("import logging, sys\n"
+                "def main():\n"
+                f"    open('out.txt', 'w').write({text!r})\n"
+                "    logging.getLogger(__name__).info('wrote')\n"
+                "    print('done', file=sys.stderr)\n")
+    call = "run_pair(__file__, entry='main', calls=[((), {})])\n"
+    same = _verdict_of(tmp_path, region("x"), region("x"), call)
+    assert same["equivalent"] and same["observed"], same
+    assert not (tmp_path / "out.txt").exists()
+    other = _verdict_of(tmp_path, region("x"), region("y"), call)
+    assert not other["equivalent"]
+    assert any("files written" in d for d in other["diffs"])
+
+
+def test_each_side_runs_in_its_own_process(tmp_path):
+    """corpus/403, défaut 3: what one side imports or patches, the other
+    does not see. Here the original passes only if a submodule was
+    imported before it — by the translated side, in a shared process."""
+    original = ("import xml\n"
+                "def main():\n"
+                "    return xml.dom.minidom.parseString('<a/>').documentElement.tagName\n")
+    translated = ("import xml.dom.minidom\n"
+                  "def main():\n"
+                  "    return xml.dom.minidom.parseString('<a/>').documentElement.tagName\n")
+    verdict = _verdict_of(tmp_path, original, translated,
+                          "run_pair(__file__, entry='main', calls=[((), {})])\n")
+    assert verdict["isolated"]
+    assert not verdict["equivalent"]
+    assert any("outcome differs" in d for d in verdict["diffs"])
+
+
+def test_an_object_compared_by_identity_is_named_by_its_role(tmp_path):
+    """A sentinel the driver passes in cannot cross a process boundary as
+    itself: it is compared as the argument it is."""
+    region = ("def main(marker, other):\n"
+              "    return [marker, other]\n")
+    swapped = ("def main(marker, other):\n"
+               "    return [other, marker]\n")
+    driver = ("SENTINEL, OTHER = object(), object()\n"
+              "run_pair(__file__, entry='main',"
+              " calls=[((SENTINEL, OTHER), {})])\n")
+    assert _verdict_of(tmp_path, region, region, driver)["equivalent"]
+    assert not _verdict_of(tmp_path, region, swapped, driver)["equivalent"]
 
 
 RAISING = """\

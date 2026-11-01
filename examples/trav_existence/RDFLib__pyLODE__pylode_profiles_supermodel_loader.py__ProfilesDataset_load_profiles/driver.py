@@ -36,10 +36,7 @@ Two seams added here, identical for both sides (repair of 2026-10-31):
     shaped as in supermodel.md:95-106) is added to the shim's lookup here.
   * the `logging` journal.  The repository logs at DEBUG
     (loader.py:11) a message carrying each `remote_resource` the region
-    fetches; the driver records the records of each side's module logger
-    (`__original__` / `__translated__`) and compares them as multisets.
-    That comparison is folded into run_pair's verdict, and only one
-    RDFEVAL-VERDICT line is emitted.
+    fetches; run_pair compares the region's log records itself.
 
 `ordered=True`: that sort, not the store, is what fixes the order of what
 `demo` returns.
@@ -90,49 +87,16 @@ def _init_with_config(self):
 context_shim.Loader.__init__ = _init_with_config
 
 
-class _Journal(logging.Handler):
-    def __init__(self):
-        super().__init__(logging.DEBUG)
-        self.records = {}
-
-    def emit(self, record):
-        self.records.setdefault(record.name, []).append(
-            (record.levelname, record.getMessage()))
-
-
-JOURNAL = _Journal()
-for _name in ("__original__", "__translated__"):
-    _lg = logging.getLogger(_name)
-    _lg.setLevel(logging.DEBUG)
-    _lg.addHandler(JOURNAL)
-    _lg.propagate = False
-
-
 def case():
     graph = fixture_graph(FIXTURE)
     prev_graph = _Graph()  # unused by the region; only its signature needs it
     return (graph, prev_graph), {}
 
 
-with contextlib.redirect_stderr(io.StringIO()):
-    VERDICT = run_pair(
-        __file__,
-        entry="demo",
-        fixture="fixture.ttl",
-        ordered=True,
-        calls=[case],
-    )
-
-if VERDICT.get("error") is None:
-    lo = Counter(JOURNAL.records.get("__original__", []))
-    lt = Counter(JOURNAL.records.get("__translated__", []))
-    if not lo:
-        VERDICT["diffs"].append("logging journal: the original logged nothing")
-    if lo != lt:
-        VERDICT["diffs"].append(
-            f"logging journal differs: only original {sorted(lo - lt)}, "
-            f"only translation {sorted(lt - lo)}")
-    VERDICT["extra_runs"] = ["logging journal"]
-    VERDICT["equivalent"] = not VERDICT["diffs"]
-
-harness._emit(VERDICT)
+VERDICT = run_pair(
+    __file__,
+    entry="demo",
+    fixture="fixture.ttl",
+    ordered=True,
+    calls=[case],
+)

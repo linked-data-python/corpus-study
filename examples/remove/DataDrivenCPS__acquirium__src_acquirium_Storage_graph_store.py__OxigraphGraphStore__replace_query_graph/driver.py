@@ -158,8 +158,19 @@ def _emit_with_demo(verdict):
 
 harness._emit = _emit_with_demo
 
+# The region logs each store operation with its wall-clock duration
+# ("(0.1 ms)"): a duration is not the program's meaning, the rest of the
+# record is.
+import re as _re
+
+
+def _no_durations(text):
+    return _re.sub(r"\(\d+(?:\.\d+)? ms\)", "(… ms)", text)
+
+
 VERDICT = run_pair(
     __file__,
     entry="_replace_query_graph",
     calls=CALLS,
+    stdout_filter=_no_durations,
 )
