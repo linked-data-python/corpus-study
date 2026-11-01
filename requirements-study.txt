@@ -1,0 +1,64 @@
+# The study venv (~/.venvs/ldpy): what the drivers need beyond ldpy and
+# corpus-study themselves, pinned so the pairs stay reproducible
+# (record corpus/403). rdflib is pinned for every study of the workspace.
+#
+#   pip install -c <(echo rdflib==7.2.1) -r requirements-study.txt
+#
+rdflib==7.2.1
+
+# Four regions that were `excluded` only because their package was not
+# installed (results/summary/excluded_causes.csv, category `pip`).
+apysource==0.10.0
+plastron-models==4.8.3
+semantikon==1.4.4
+# 3.6.0, the latest, requires rdflib>=7.6
+pylode==3.2.3
+
+# The fifth, cognite-neat (1.0.68 and 1.1.0, extra `legacy`), is NOT here:
+# its legacy extra requires pandas<3 and rich<14, which would downgrade the
+# shared venv, and without them `cognite.neat._v0.core._instances` fails on
+# a circular import in a fresh interpreter. Its region stays `excluded`.
+
+# Resolved alongside the four, under rdflib==7.2.1 (2026-11-01):
+# anyio==4.16.0
+# bagofholding==0.1.16
+# bcrypt==5.0.0
+# beautifulsoup4==4.15.0
+# bidict==0.24.1
+# cssselect==1.6.0
+# DateTime==6.0
+# dominate==2.9.1
+# edtf-validate==2.0.0
+# flexcache==0.3
+# flexparser==0.4
+# flowrep==0.6.7
+# graphviz==0.21
+# h11==0.16.0
+# h5py==3.16.0
+# html5lib==1.1
+# httpcore==1.0.9
+# httpx==0.28.1
+# invoke==3.0.3
+# jwcrypto==1.6.1
+# paramiko==5.1.0
+# Pint==0.25.3
+# plastron-client==4.8.3
+# plastron-rdf==4.8.3
+# plastron-utils==4.8.3
+# pygtrie==2.6.2
+# pyiron_snippets==1.5.1
+# PyNaCl==1.6.2
+# python-iso639==2026.7.23
+# pytz==2026.6
+# requests-jwtauth==1.0.1
+# soupsieve==3.0.4
+# typeguard==4.6.0
+# types-html5lib==1.1.11.20260518
+# types-lxml==2026.2.16
+# types-webencodings==0.6.0.20260907
+# typing-inspection==0.4.4
+# URLObject==3.0.0
+# webencodings==0.6.1
+# zope.interface==8.7
+# pydantic==2.12.5
+# pydantic_core==2.41.5
