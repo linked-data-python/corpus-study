@@ -408,11 +408,15 @@ the claims of the first draw, and on a much better population:
 the 141 pairs, and the first — 44 pairs, 31% — is **vendored rdflib** that
 has no longer been analysed since wave 2 (§ 4, open point).
 
-The 401 tree therefore remains **frozen, not obsolete**: it alone carries the
-article's quantitative section as long as nothing is approved in 403, where
-`aggregate_403` publishes `null`s by construction. It becomes removable the
-day enough 403 pairs are approved to carry the same claims — **human review
-is the lock**, not the tooling.
+The 401 tree remains **frozen** and **leaves the article** (decided on
+2026-11-01): the quantitative section it still carries is replaced by the
+corpus study's figures once those rest on approved pairs and on the
+resumed draw (the analyser and three strata criteria were corrected on
+2026-11-01, which moved every population; the resumption is proposed in
+the steering records). **Human review is the lock**, not the tooling.
+
+The 1,196 regions and the per-stratum table of § 5.2 describe the draw
+before that correction: 36,081 sites now stand where 29,231 stood.
 
 ## 6. What remains to be done
 
