@@ -135,16 +135,16 @@ In the directory of each region, a single file, `triage.json`:
 {
   "priority": "high",
   "flags": ["equivalence-doubt"],
-  "summary": "Une phrase : ce qui ne va pas, ou « rien à signaler ».",
+  "summary": "One sentence: what is wrong, or \"nothing to report\".",
   "questions": [
     {
-      "question": "Une question FERMÉE adressée à Maxime, à laquelle il répond par oui ou non.",
-      "where": "translated.ldpy:14 et original.py:12",
-      "if_yes": "ce que ça implique pour la paire (ex. : approuver)",
-      "if_no": "ce que ça implique (ex. : needs-work, ajouter un appel au pilote avec graphe vide)"
+      "question": "A CLOSED question for Maxime, answered by yes or no.",
+      "where": "translated.ldpy:14 and original.py:12",
+      "if_yes": "what it implies for the pair (e.g. approve)",
+      "if_no": "what it implies (e.g. needs-work, add a driver call with an empty graph)"
     }
   ],
-  "evidence": "Ce que vous avez exécuté pour le vérifier, et le résultat. Vide si rien.",
+  "evidence": "What you ran to check it, and the result. Empty if nothing.",
   "triaged_by": "sonnet-5.5"
 }
 ```

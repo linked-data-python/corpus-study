@@ -66,11 +66,11 @@ In the directories of **your** regions only: `driver.py`, the fixtures,
 
 - `translation_notes`: add one sentence per fix of the translation (what
   was wrong, the proof);
-- `repair`: an object `{"date": "AAAA-MM-JJ", "driver": "ce qui a été
-  ajouté au pilote", "translation_fixed": true|false, "mutants_killed":
-  ["…"], "remaining": "ce qui reste à juger pour Maxime, ou vide"}`.
+- `repair`: an object `{"date": "YYYY-MM-DD", "driver": "what was added
+  to the driver", "translation_fixed": true|false, "mutants_killed":
+  ["…"], "remaining": "what is left for Maxime to judge, or empty"}`.
 
-In `triage.json`, add only one key: `"repaired": "<une phrase>"`. Do not
+In `triage.json`, add only one key: `"repaired": "<one sentence>"`. Do not
 change the priority nor the questions: the triage remains the triage,
 Maxime will read the repair alongside it.
 
@@ -81,7 +81,7 @@ AGENT_BATCH.md), the shims except to supply a real input type,
 ## What you return
 
 ```
-<region_id> — driver: renforcé|inchangé — translation: corrigée|juste — check: OK|FAIL — reste: …
+<region_id> — driver: strengthened|unchanged — translation: fixed|correct — check: OK|FAIL — remaining: …
 ```
 
 Then, in two lines at most, what these repairs teach about the drivers of

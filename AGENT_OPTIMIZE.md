@@ -127,7 +127,7 @@ One line per region:
 
 ```
 <region_id> — opt: final|draft — check: OK|FAIL ×3 — tokens: care … notation … total …
-  note: <la compression principale, et toute exception à la symétrie>
+  note: <the main compression, and any exception to the symmetry>
 ```
 
 Then, in two lines at most, what this batch teaches about the share of the
