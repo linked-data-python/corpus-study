@@ -147,7 +147,8 @@ def _region_ops(region: dict) -> list:
     from .analyze import analyze_source
     try:
         fa = analyze_source(textwrap.dedent(region["source"]),
-                            preamble="\n".join(region["context"]) or None)
+                            preamble="\n".join(region["context"]) or None,
+                            assume_rdflib=True)
     except (SyntaxError, ValueError, RecursionError):
         return []
     return fa.ops

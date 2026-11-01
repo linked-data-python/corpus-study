@@ -57,6 +57,7 @@ from .analyze import (
     GRAPH_READ_METHODS,
     _Analyzer,
     FileAnalysis,
+    alias_attribute,
 )
 from .config import RESULTS_RAW, RESULTS_SUMMARY, load_config, provenance
 from .select import load_manifest
@@ -225,6 +226,15 @@ STRATA = {
     "bind_initbindings":    "@bindings, inherited prologue (017)",
     "coercion_datatype":    "Coercion (020)",
 }
+
+
+def _literal_typed(node: ast.Call) -> bool:
+    """`Literal(v, datatype=…)`, `Literal(v, lang=…)` or the positional
+    forms `Literal(v, lang)`, `Literal(v, lang, datatype)`."""
+    if any(k.arg in ("datatype", "lang") for k in node.keywords):
+        return True
+    return any(not (isinstance(a, ast.Constant) and a.value is None)
+               for a in node.args[1:3])
 
 
 class _Span:
@@ -634,14 +644,17 @@ class _SurfaceVisitor(ast.NodeVisitor):
                     self._example("graph_named", node)
         if callee == "Literal" and node.args:
             value = node.args[0]
-            typed = any(k.arg in ("datatype", "lang") for k in node.keywords)
+            typed = _literal_typed(node)
             if not isinstance(value, ast.Constant):
                 # A *computed* value entering RDF: the conversion the language
-                # spells `Coercion` (020).  A constant is a plain term.
+                # spells `Coercion` (020).  A constant is a plain term.  Only
+                # a TYPED one is a site of the stratum (record corpus/403,
+                # 2026-11-01): an untyped `Literal(x)` is a bare
+                # interpolation, which every stratum already exercises.
                 self.s.counts["literal_computed_value"] += 1
                 if typed:
                     self.s.counts["literal_computed_typed"] += 1
-                self._site("coercion_datatype", node)
+                    self._site("coercion_datatype", node)
             elif typed:
                 self.s.counts["literal_constant_typed"] += 1
         if callee in ("prepareQuery", "prepareUpdate"):
@@ -649,6 +662,19 @@ class _SurfaceVisitor(ast.NodeVisitor):
             self._query_call(node, prepared=True)
         if isinstance(node.func, ast.Attribute):
             self._method_call(node, node.func)
+        elif isinstance(node.func, ast.Name) and \
+                node.func.id in self.b.method_aliases:
+            # `value = self.state.value` ... `value(s, p)`
+            self._method_call(node, alias_attribute(self.b, node.func))
+        self.generic_visit(node)
+
+    def visit_Compare(self, node: ast.Compare) -> None:
+        """`(s, p, o) in g`: the existence test the stratum is named after."""
+        if len(node.ops) == 1 and isinstance(node.ops[0], (ast.In, ast.NotIn)) \
+                and isinstance(node.left, ast.Tuple) \
+                and len(node.left.elts) in (3, 4) \
+                and self._is_graph(node.comparators[0]):
+            self._site("trav_existence", node)
         self.generic_visit(node)
 
     def _method_call(self, node: ast.Call, func: ast.Attribute) -> None:
@@ -745,8 +771,9 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 self._example("bind_initbindings", node)
                 self._site("bind_initbindings", node)
             elif kw.arg == "initNs":
+                # prefixes, not values: counted, but not a site of the
+                # stratum (record corpus/403, 2026-11-01)
                 self.s.counts["bind_initns"] += 1
-                self._site("bind_initbindings", node)
 
     def _query_consumption(self, node: ast.Call) -> None:
         parent = self.parents.get(id(node))
@@ -777,7 +804,7 @@ class _SurfaceVisitor(ast.NodeVisitor):
                 if parent.func.id == "next":
                     self.s.counts["trav_single_value"] += 1
                     self._site("trav_single_value", parent)
-                elif parent.func.id in ("any", "all"):
+                elif parent.func.id == "any":
                     self._site("trav_existence", parent)
             elif isinstance(parent.func, ast.Attribute) and \
                     parent.func.attr in SELECTORS:
@@ -786,10 +813,39 @@ class _SurfaceVisitor(ast.NodeVisitor):
             ctx = "assign"
         elif isinstance(parent, (ast.Compare, ast.If, ast.IfExp)):
             ctx = "test"
-            self._site("trav_existence", parent)
         elif isinstance(parent, ast.Return):
             ctx = "return"
         self.s.selector_contexts[ctx] += 1
+        if ctx in ("test", "other") and self._tests_existence(node):
+            self._site("trav_existence", parent)
+
+    def _tests_existence(self, node: ast.Call) -> bool:
+        """Is only the existence of a solution tested (corpus/403)?
+
+        `x in g.objects(s, p)`, `g.value(s, p) is None`, `if g.value(s, p):`
+        (through `not`, `and`, `or`) are; `g.value(s, p) == x` compares a
+        value, and `y = g.value(s, p) if c else d` does not test it at all.
+        """
+        parent = self.parents.get(id(node))
+        if isinstance(parent, ast.Compare):
+            if len(parent.ops) != 1:
+                return False
+            op = parent.ops[0]
+            if isinstance(op, (ast.In, ast.NotIn)):
+                return parent.comparators[0] is node
+            if isinstance(op, (ast.Is, ast.IsNot)):
+                other = parent.comparators[0] if parent.left is node \
+                    else parent.left
+                return isinstance(other, ast.Constant) and other.value is None
+            return False
+        child = node
+        while isinstance(parent, (ast.BoolOp, ast.UnaryOp)) and (
+                isinstance(parent, ast.BoolOp)
+                or isinstance(parent.op, ast.Not)):
+            child, parent = parent, self.parents.get(id(parent))
+        if isinstance(parent, (ast.If, ast.IfExp, ast.While, ast.Assert)):
+            return parent.test is child
+        return False
 
     def _selector_navigation(self, node: ast.Call) -> bool:
         """Does this selector continue a traversal started by an enclosing one?

@@ -547,3 +547,53 @@ def test_a_defined_namespace_base_class_is_not_a_namespace():
             "    thing: str\n")
     assert _exported_namespaces(machinery) == {}
     assert _exported_namespaces(real) == {"PSDO": ""}
+
+
+# --- the corrected criteria (corpus/403, 2026-11-01) -----------------------
+
+def _kinds(body):
+    from collections import Counter
+    from rdfeval.surface import surface_source
+    src = ("from rdflib import Graph, Literal, Namespace, XSD\n"
+           "EX = Namespace('http://example.org/')\n"
+           "g = Graph()\n" + body)
+    return Counter(s["kind"] for s in surface_source(src, "t.py", "r/r").sites)
+
+
+def test_only_a_typed_computed_literal_is_a_coercion_site():
+    k = _kinds("a = Literal(x)\n"
+               "b = Literal(x, datatype=XSD.integer)\n"
+               "c = Literal(x, lang='en')\n"
+               "d = Literal(x, None, XSD.integer)\n"
+               "e = Literal(x, None, None)\n")
+    assert k["coercion_datatype"] == 3
+
+
+def test_init_ns_alone_is_not_a_binding_site():
+    k = _kinds("g.query('ASK { ?s ?p ?o }', initNs={'ex': EX})\n"
+               "g.query('ASK { ?s ?p ?o }', initBindings={'s': EX.a})\n")
+    assert k["bind_initbindings"] == 1
+
+
+def test_existence_is_a_test_of_a_solution_only():
+    k = _kinds("if (EX.a, EX.p, None) in g:\n    pass\n"           # yes
+               "if EX.b in g.objects(EX.a, EX.p):\n    pass\n"     # yes
+               "if g.value(EX.a, EX.p) is None:\n    pass\n"       # yes
+               "if not g.value(EX.a, EX.p):\n    pass\n"           # yes
+               "ok = any(g.objects(EX.a, EX.p))\n"                 # yes
+               "if g.value(EX.a, EX.p) == EX.b:\n    pass\n"       # no
+               "y = g.value(EX.a, EX.p) if c else None\n"          # no
+               "ok = all(g.objects(EX.a, EX.p))\n"                 # no
+               "if EX.a in things:\n    pass\n")                   # no
+    assert k["trav_existence"] == 5
+
+
+def test_a_graph_parameter_without_annotation_yields_sites():
+    from collections import Counter
+    from rdfeval.surface import surface_source
+    src = ("from rdflib import Namespace\n"
+           "EX = Namespace('http://example.org/')\n"
+           "def read(graph):\n"
+           "    return graph.value(EX.a, EX.name)\n")
+    k = Counter(s["kind"] for s in surface_source(src, "t.py", "r/r").sites)
+    assert k["trav_single_value"] == 1

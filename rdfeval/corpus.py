@@ -64,12 +64,15 @@ def _python_files(root: Path, full_name: str,
     return files, vendored
 
 
-def _reuse(path: Path, commit: str) -> list[dict] | None:
+def _reuse(path: Path, commit: str,
+           metrics_version: str | None = None) -> list[dict] | None:
     """Rows of a previous analysis of the same commit, or None to re-analyse.
 
     Analysing several hundred checkouts takes long enough that the stage must
     survive an interruption: per-repository results are written as they are
-    produced and reused on the next run when the pinned commit has not moved.
+    produced and reused on the next run when the pinned commit has not moved
+    — and when the analyser has not changed what it counts, which the
+    ``metrics_version`` of the configuration says.
     """
     if not path.exists():
         return None
@@ -79,6 +82,9 @@ def _reuse(path: Path, commit: str) -> list[dict] | None:
     except (OSError, json.JSONDecodeError):
         return None
     if rows and rows[0].get("commit") != commit:
+        return None
+    if rows and rows[0].get("metrics_version", "1.0.0") != (
+            metrics_version or rows[0].get("metrics_version", "1.0.0")):
         return None
     return rows
 
@@ -106,13 +112,14 @@ def run(config: dict) -> None:
 
     all_rows: list[dict] = []
     reuse = acfg.get("reuse_existing", True)
+    metrics_version = config["meta"]["metrics_version"]
     for rec in manifest:
         root = repo_dir(config, rec["full_name"])
         if not (root / ".git").exists():
             print(f"  ! {rec['full_name']}: not acquired, skipped")
             continue
         out = ANALYSIS_DIR / (rec["full_name"].replace("/", "__") + ".jsonl")
-        rows = _reuse(out, rec["commit"]) if reuse else None
+        rows = _reuse(out, rec["commit"], metrics_version) if reuse else None
         if rows is not None:
             all_rows.extend(rows)
             print(f"  {rec['full_name']}: {len(rows)} py files (reused)")
@@ -126,6 +133,7 @@ def run(config: dict) -> None:
             row["path"] = rel
             row["repository"] = rec["full_name"]
             row["commit"] = rec["commit"]
+            row["metrics_version"] = metrics_version
             rows.append(row)
             if fa.error:
                 n_err += 1

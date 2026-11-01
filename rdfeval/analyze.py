@@ -108,6 +108,25 @@ GRAPH_IO_METHODS = {"parse", "serialize", "load"}
 GRAPH_SPARQL_METHODS = {"query", "update"}
 GRAPH_RETURNING_METHODS = {"get_context", "graph", "skolemize", "de_skolemize"}
 
+# Call shapes only an rdflib graph has (record corpus/403, défaut 1). A
+# receiver called this way is a graph even when nothing names it one: an
+# unannotated parameter, the return value of a helper, `self.state`. Without
+# this, `def f(graph): graph.value(s, p)` scored zero operations, its sites
+# were missing from the surface populations, and its region was drafted with
+# the oracle of a construction.
+GRAPH_ONLY_METHODS = {
+    "subject_objects", "subject_predicates", "predicate_objects",
+    "transitive_objects", "transitive_subjects",
+}
+GRAPH_TUPLE_METHODS = {"triples", "quads", "triples_choices"}
+GRAPH_TERM_SELECTORS = {"objects", "subjects", "predicates"}
+SELECTOR_KEYWORDS = {"subject", "predicate", "object", "unique", "default",
+                     "any"}
+# Methods worth following through an alias: `value = self.state.value`.
+ALIASABLE_METHODS = (GRAPH_ONLY_METHODS | GRAPH_TUPLE_METHODS
+                     | GRAPH_TERM_SELECTORS
+                     | {"value", "add", "set", "addN", "remove"})
+
 
 @dataclass
 class RdfOp:
@@ -247,6 +266,10 @@ class _Bindings:
         # quad space is a second space, and record ldpy/028 asks how much of
         # the plain reading actually happens there (`m{ }` reads a Graph).
         self.dataset_vars: set[str] = set()
+        # `alias = <receiver>.<method>`: alias -> (receiver, method). Whether
+        # the receiver is a graph is decided at the call, not here — the
+        # binding pass may learn it later in the file.
+        self.method_aliases: dict[str, tuple[ast.expr, str]] = {}
 
     def rdflib_callee(self, node: ast.expr) -> str | None:
         """Return the rdflib entity name a call target resolves to, or None."""
@@ -283,10 +306,14 @@ def _count_nodes(node: ast.AST) -> int:
 
 
 class _Analyzer(ast.NodeVisitor):
-    def __init__(self, analysis: FileAnalysis) -> None:
+    def __init__(self, analysis: FileAnalysis,
+                 assume_rdflib: bool = False) -> None:
         self.a = analysis
         self.b = _Bindings()
         self.marked: set[int] = set()   # ids of nodes already in an RDF subtree
+        # A region lifted from an rdflib file is RDF context even when its
+        # own preamble imports nothing from rdflib.
+        self.assume_rdflib = assume_rdflib
 
     # --- imports -----------------------------------------------------------
 
@@ -354,6 +381,13 @@ class _Analyzer(ast.NodeVisitor):
         return False
 
     def visit_Assign(self, node: ast.Assign) -> None:
+        value = node.value
+        if (isinstance(value, ast.Attribute)
+                and value.attr in ALIASABLE_METHODS
+                and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)):
+            self.b.method_aliases[node.targets[0].id] = (value.value,
+                                                         value.attr)
         kind = self._classify_value(node.value)
         if kind == "namespace":
             self.b.namespace_vars.update(self._targets(node))
@@ -446,6 +480,46 @@ class _Analyzer(ast.NodeVisitor):
             return expr.attr in self.b.namespace_vars
         return False
 
+    def _graph_shaped(self, node: ast.Call, func: ast.Attribute) -> bool:
+        """Is this a call only an rdflib graph answers (GRAPH_ONLY_METHODS)?"""
+        if not (self.a.imports_rdflib or self.b.module_aliases
+                or self.assume_rdflib):
+            return False
+        m, args = func.attr, node.args
+        kws = {k.arg for k in node.keywords if k.arg}
+        first = args[0] if args else None
+
+        def term_or_none(e: ast.expr) -> bool:
+            return self._is_rdf_term_expr(e) or (
+                isinstance(e, ast.Constant) and e.value is None)
+
+        if m in GRAPH_TUPLE_METHODS:
+            return isinstance(first, ast.Tuple) and len(first.elts) in (3, 4)
+        if m in GRAPH_ONLY_METHODS:
+            return True
+        if m in GRAPH_TERM_SELECTORS:
+            return bool(args) or (bool(kws) and kws <= SELECTOR_KEYWORDS)
+        if m == "value":
+            return (len(args) >= 2 or bool(kws & {"subject", "predicate",
+                                                  "object"})
+                    or any(term_or_none(a) for a in args))
+        if m in ("add", "set"):
+            return (isinstance(first, ast.Tuple)
+                    and len(first.elts) in (3, 4)
+                    and any(self._is_rdf_term_expr(e) for e in first.elts))
+        if m == "remove":
+            return (isinstance(first, ast.Tuple) and len(first.elts) == 3
+                    and any(term_or_none(e) for e in first.elts))
+        if m in ("serialize", "parse"):
+            return "format" in kws
+        return False
+
+    def _learn_graph(self, expr: ast.expr) -> None:
+        if isinstance(expr, ast.Name) and expr.id != "self":
+            self.b.graph_vars.add(expr.id)
+        elif isinstance(expr, ast.Attribute):
+            self.b.graph_vars.add(expr.attr)
+
     def _is_rdf_term_expr(self, expr: ast.expr) -> bool:
         """Heuristic: does this expression construct/denote an RDF term?"""
         if isinstance(expr, ast.Call):
@@ -491,11 +565,17 @@ class _Analyzer(ast.NodeVisitor):
             self._record("graph_write", callee, node, certain=True)
         elif isinstance(node.func, ast.Attribute):
             self._method_call(node, node.func)
+        elif isinstance(node.func, ast.Name) and \
+                node.func.id in self.b.method_aliases:
+            self._method_call(node, alias_attribute(self.b, node.func))
         self.generic_visit(node)
 
     def _method_call(self, node: ast.Call, func: ast.Attribute) -> None:
         method = func.attr
         recv_graph = self._is_graph(func.value)
+        if not recv_graph and self._graph_shaped(node, func):
+            self._learn_graph(func.value)
+            recv_graph = self._is_graph(func.value)
         # ---- add/set: triple or quad ---------------------------------------
         if method in ("add", "set"):
             arg = node.args[0] if node.args else None
@@ -556,13 +636,23 @@ class _Analyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
 
+def alias_attribute(b: _Bindings, name: ast.Name) -> ast.Attribute:
+    """`alias(...)` read as the method call it stands for."""
+    receiver, method = b.method_aliases[name.id]
+    return ast.copy_location(
+        ast.Attribute(value=receiver, attr=method, ctx=ast.Load()), name)
+
+
 def analyze_source(source: str, path: str = "<string>",
-                   preamble: str | None = None) -> FileAnalysis:
+                   preamble: str | None = None,
+                   assume_rdflib: bool = False) -> FileAnalysis:
     """Analyse one Python source text.
 
     ``preamble``: optional bindings-only source (e.g. a context shim module
     the file imports from) whose namespace/graph bindings seed the analysis;
     its own operations and surface do NOT count.
+    ``assume_rdflib``: infer graph receivers from their call shapes even
+    without an rdflib import — a region lifted out of an rdflib file.
     """
     a = FileAnalysis(path=path)
     _surface_metrics(source, a)
@@ -577,7 +667,7 @@ def analyze_source(source: str, path: str = "<string>",
     # every binding (imports, NS = Namespace(...), g = Graph()), and a second
     # pass — with those bindings pre-seeded — records the operations.  This
     # catches uses that lexically precede the binding site.
-    first = _Analyzer(a)
+    first = _Analyzer(a, assume_rdflib)
     if preamble:
         try:
             first.visit(ast.parse(preamble))
@@ -585,7 +675,7 @@ def analyze_source(source: str, path: str = "<string>",
             pass
     first.visit(tree)
     a.ops, a.category_counts = [], {}
-    visitor = _Analyzer(a)
+    visitor = _Analyzer(a, assume_rdflib)
     visitor.b = first.b
     visitor.visit(tree)
     a.rdf_ast_nodes = len(visitor.marked)

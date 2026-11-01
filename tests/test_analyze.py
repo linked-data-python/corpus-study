@@ -249,3 +249,47 @@ def test_annotated_variable_assignment():
     )
     a = analyze_source(src)
     assert a.category_counts["serialize_parse"] == 1
+
+
+# --- receivers known only by how they are called (corpus/403, défaut 1) ----
+
+def test_an_unannotated_graph_parameter_is_learnt_from_its_calls():
+    src = ("from rdflib import Namespace\n"
+           "EX = Namespace('http://e/')\n"
+           "def f(graph, s):\n"
+           "    v = graph.value(s, EX.p)\n"
+           "    for o in graph.objects(s, None):\n"
+           "        print(o)\n"
+           "    return graph.query('SELECT * WHERE { ?s ?p ?o }')\n")
+    fa = analyze_source(src)
+    cats = [o.category for o in fa.ops]
+    assert cats.count("graph_read") == 2
+    assert "sparql" in cats
+
+
+def test_a_bound_method_alias_is_followed():
+    src = ("from rdflib import Namespace\n"
+           "EX = Namespace('http://e/')\n"
+           "def f(self, s):\n"
+           "    self.state.triples((s, None, None))\n"
+           "    value = self.state.value\n"
+           "    return value(s, EX.p)\n")
+    fa = analyze_source(src)
+    assert [o.detail for o in fa.ops if o.category == "graph_read"] == \
+        ["triples", "value"]
+
+
+def test_no_inference_outside_an_rdflib_file():
+    src = ("def f(manager, s):\n"
+           "    return manager.objects(s)\n")
+    assert analyze_source(src).rdf_ops == 0
+    assert analyze_source(src, assume_rdflib=True).rdf_ops == 1
+
+
+def test_a_generic_method_name_needs_a_graph_shape():
+    """`.value()` alone and `.parse()` without `format=` stay unknown."""
+    src = ("import rdflib\n"
+           "def f(widget, parser, text):\n"
+           "    widget.value()\n"
+           "    parser.parse(text)\n")
+    assert analyze_source(src).rdf_ops == 0
