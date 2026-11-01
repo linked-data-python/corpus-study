@@ -54,14 +54,14 @@ language.
 |---|---|
 | `g{ ... } -> Graph` | Builds an RDF graph from Turtle written in place. `{expr}` interpolates a Python value in term position, and each occurrence is evaluated once. The braces are an expression, so a `g{ }` goes anywhere a value goes — a default argument, a comprehension, a return. |
 | `+{ ... } [ (GRAPH) ]` | Adds the triples to the current graph. `?name` takes its value from the current bindings, and a triple with an unbound variable is dropped rather than written half-way. A trailing `(g)` names another receiver. |
-| `-{ ... } [ (GRAPH) ]` | Removes from the current graph every triple matching the pattern. An unbound variable is a wildcard here, not a hole: this is a SPARQL `DELETE WHERE`, not a list of triples to subtract. |
+| `-{ ... } [ (GRAPH) ]` | Removes from the current graph every triple matching the pattern. An unbound variable is a wildcard here, not a hole: this is a SPARQL `DELETE WHERE`, not a list of triples to subtract. An interpolated `None` raises; a wildcard that arrives as data is `ldpy.ANY`. |
 
 **Reading**
 
 | form | what it is |
 |---|---|
 | `m{ ... } -> Solutions` | Matches a basic graph pattern against the current graph, lazily. Iterating yields a bare term when one variable is projected and a tuple otherwise; `.one()`, `.first()`, `.count()` and `bool()` are the usual reductions. A `(graph)` suffix names another source. |
-| `s{ ... } -> Query` | A SPARQL query or update, parsed when the file is transpiled rather than at run time. `{expr}` in term position becomes an initial binding — never string pasting, so nothing here can be injected. Calling it on a graph gives a LAZY query; `.execute()` is what forces it — for an update, and for any query whose rdflib `Result` you then call a method on. |
+| `s{ ... } -> Query` | A SPARQL query or update, parsed when the file is transpiled rather than at run time. `{expr}` or `f<…{expr}…>` in term position becomes an initial binding — never string pasting, so nothing here can be injected. rdflib's `graph.query()` accepts it. Calling it on a graph gives a LAZY query; `.execute()` is what forces it — for an update, and for any query whose rdflib `Result` you then call a method on. |
 
 **Deferred evaluation**
 
@@ -117,7 +117,7 @@ Mapping from rdflib idiom to expected construction, by stratum of the draw:
 | `trav_existence` | `(s, p, o) in g`, `any(g.objects(…))` | `bool(m{ … })` |
 | `sparql_literal` | `g.query("SELECT …")` | `s{ SELECT … }` |
 | `sparql_interpolated` | query assembled by f-string/`+` | `s{ … {expr} … }`, interpolation in term position |
-| `bind_initbindings` | `initBindings=`, `initNs=` | interpolated term in `s{ }` **if the variable is not projected**; otherwise `s{ … }(bindings=…)`; prologue inherited from the `@prefix` declarations |
+| `bind_initbindings` | `g.query(…, initBindings=…)` | **`m{ }` whenever the query is a basic graph pattern** — the bound value interpolated as `{expr}`, the result read with the usual reductions; otherwise `s{ }`, with the value interpolated in term position **if the variable is not projected**, and `s{ … }(bindings=…)` if it is; the prologue is inherited from the `@prefix` declarations |
 | `coercion_datatype` | `Literal(x, datatype=…)` on a computed value | the language's coercion, or `"…"^^xsd:…` if the value is constant |
 
 Explicit prohibitions:
