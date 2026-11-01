@@ -14,13 +14,24 @@
     "term_constructor": 7,
     "triple_add": 11
   },
-  "translation_status": "draft",
-  "classification": "excluded",
-  "constructions": ["@prefix", "prefixed name", "g{ }", "m{ }", ".first()", "interpolation {expr}"],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
-    "translated the .add() calls into grouped g{ } literals unioned with `g +=` (kept the g{ }/+= idiom already used natively by the original for _to_owl_restriction/_translate_triples results, so `g` is never reassigned under a stale @graph designation), and `g.value(data_node, SNS.has_value) is None` into `m{ {data_node} {SNS.has_value} ?v }(g).first() is None`.",
-    "excluded per AGENT_BATCH.md rule 1: `semantikon.flowrep_to_networkx` does not exist as an installable package here (ModuleNotFoundError), and the region additionally calls _get_bound_graph, _to_owl_restriction, _translate_triples and references SNS and G.t_ns/a_ns/a_ns_short/_get_data_node — none defined in the extracted context. Reconstructing them in a shim would mean inventing their logic (forbidden by AGENT_BATCH.md's shim policy: 'n'inventez pas de logique'), not just restoring bindings, so the pilot cannot be built without fabricating the semantics it is supposed to verify."
+    "prefixes: RDFS->rdfs (OWL and RDF are imported but only RDF.type is used, written `a`).",
+    "Runs on the REAL semantikon 1.4.4: original.py gains one import line (`from semantikon.ontology import SNS, _get_bound_graph, _to_owl_restriction, _translate_triples`) for the names the region's own file defines; the driver builds a real SemantikonDiGraph with real Node/Input/Output. No shim, nothing re-implemented.",
+    "Ten `g.add` calls become four `+{ }` after `@graph g` (written once `g = _get_bound_graph()` is assigned; `g += ...` is in place, so g is never rebound). Subjects are shared within each block (`;`). Python str values (port, labels) are interpolated bare; `Literal(data[\"value\"])` and `Literal(data[\"hash\"])` are kept inside the interpolation because `value` is any runtime value and the coercion policy is not Literal(x) for every type.",
+    "The existence test `g.value(data_node, SNS.has_value) is None` becomes `not m{ {data_node} {SNS.has_value} ?v }` (receiver-less, current graph g): the code only asks 'is there a value?', so bool, not .first(). The three `g += _to_owl_restriction(...)`/`_translate_triples(...)` stay as they are (they return Graphs).",
+    "Property of the original worth knowing: `g` is fresh in this function, so the guard is true unless the region itself has just written (data_node, has_value, _) through the caller's `has_specified_io` argument. Real callers pass SNS.has_participant / has_output-like predicates, so the guard is effectively always true there; the driver reaches the false branch with has_specified_io=SNS.has_value and node == data_node.",
+    "Proof: 8 calls (a-box with value+hash; guard-false case; neighbour (node has_value data_node) with node != data_node; no value; triples + derived_from with the append to data['triples']; t-box with and without hash; a flat triple). The original returns graphs of 5-12 triples and its has_value triple is present or absent depending on the guard. Mutants all FAIL: guard inverted (4 calls), subject unbound (call 2), object bound instead of subject (call 2), predicate unbound (3 calls); restored OK."
   ],
   "draft_sha": "49b57264eb2b9f75",
   "provenance": {

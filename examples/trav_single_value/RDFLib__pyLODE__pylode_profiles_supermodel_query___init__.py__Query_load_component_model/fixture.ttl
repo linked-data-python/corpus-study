@@ -1,4 +1,46 @@
-# Input graph for RDFLib__pyLODE__pylode_profiles_supermodel_query___init__.py__Query_load_component_model — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input for Query.load_component_model: the content of the named graph of
+# profile ex:profile/a (the region does db.get_graph(iri) on it).
+#
+# The pattern the region reads through the dataset is `<iri> sh:order ?o`.
+#   - ex:profile/a has one sh:order (2): the solution.
+#   - ex:profile/b has another (9) and ex:profile/a's own work example
+#     (a blank node) has sh:order 0: neighbours on OTHER subjects, which
+#     must not be taken for ex:profile/a's order, nor for the order of a
+#     profile that has none.
+#   - ex:profile/a also has sh:name and ex:order (a different predicate in
+#     another namespace with the same local name): they must not match.
 @prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix lode: <https://w3id.org/lode/ns/pylode/> .
+
+<http://example.org/profile/a>
+    rdfs:label "Profile A" ;
+    skos:definition "The first profile" ;
+    sh:order 2 ;
+    sh:name "profile-a" ;
+    ex:order 99 ;
+    lode:ignoreClass ex:Hidden ;
+    sdo:workExample [
+        a sdo:TextObject ;
+        sdo:name "Example" ;
+        sdo:description "An example" ;
+        sdo:encodingFormat "text/turtle" ;
+        sdo:text "ex:a ex:b ex:c ." ;
+        sh:order 0
+    ] .
+
+<http://example.org/profile/b>
+    rdfs:label "Profile B" ;
+    sh:order 9 .
+
+ex:Person a owl:Class ; rdfs:label "Person" .
+ex:Student a owl:Class ; rdfs:label "Student" ; rdfs:subClassOf ex:Person .
+ex:Hidden a owl:Class ; rdfs:label "Hidden" .
+
+ex:name a owl:DatatypeProperty ; rdfs:label "name" .
+ex:knows a owl:ObjectProperty ; rdfs:label "knows" .
+ex:remark a owl:AnnotationProperty ; rdfs:label "remark" .

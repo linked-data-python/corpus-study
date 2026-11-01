@@ -11,6 +11,9 @@ from semantikon.flowrep_to_networkx import (
     _get_graph_hash,
     serialize_and_convert_to_networkx,
 )
+# Context: the helpers the region calls and the SNS vocabulary, from the real
+# package (semantikon 1.4.4), where the region's own file defines them.
+from semantikon.ontology import SNS, _get_bound_graph, _to_owl_restriction, _translate_triples
 BASE: Namespace = Namespace("http://pyiron.org/ontology/")
 
 def _wf_io_to_graph(

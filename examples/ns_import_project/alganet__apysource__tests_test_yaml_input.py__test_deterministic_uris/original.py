@@ -2,13 +2,9 @@
 # region: test_deterministic_uris (lines 192-199, stratum ns_import_project)
 # licence of the source repository: see meta.json
 #
-# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
-# `_write_yaml`, a module-level test helper the region's own body calls
-# (test_yaml_input.py, defined at line 82), transcribed verbatim -- it
-# only writes `content` to `tmp_path / "sources.yaml"`, unrelated to this
-# stratum's construction. `apysource.namespaces`/`apysource.yaml_input`
-# are left UNMODIFIED (the real project import, not a shim): see meta.json
-# for why this pair stays `excluded` rather than restored.
+# `_write_yaml`, a module-level test helper the region's body calls
+# (test_yaml_input.py line 82), transcribed verbatim. `apysource` itself is
+# the real installed package (0.10.0), unmodified.
 from pathlib import Path
 from rdflib.namespace import DCTERMS, RDF, RDFS
 from apysource.namespaces import OA, SCHEMA, SV

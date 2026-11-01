@@ -43,6 +43,14 @@ from pylode.profiles.supermodel.query.common import (
     get_subclasses,
     get_values,
 )
+# Context: module-level helpers the region calls, defined next to it in the
+# same module (query/__init__.py); from the real package (pylode 3.2.3).
+from pylode.profiles.supermodel.query import (
+    get_component_model_ignored_classes,
+    get_examples,
+    get_rdf_properties,
+    get_top_level_component_classes,
+)
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
@@ -67,7 +75,7 @@ def load_component_model(self, iri: URIRef, db: Dataset) -> ComponentModel:
     classes = self.get_component_model_classes(profile_graph, ignored_classes)
     top_level_classes = get_top_level_component_classes(classes)
     examples = get_examples(iri, db)
-    order = db.value(iri, sh:order)
+    order = m{ {iri} sh:order ?o }(db).first()
     annotation_properties = get_rdf_properties(
         owl:AnnotationProperty, profile_graph, db
     )

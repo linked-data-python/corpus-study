@@ -1,48 +1,82 @@
-"""Validation driver for alganet__apysource__tests_test_yaml_input.py__test_deterministic_uris.
+"""Driver for test_deterministic_uris (apysource).
 
-EXCLUDED (see meta.json): `apysource` is a real, clean PyPI dependency
-(0.10.0; only rdflib>=7.0/requests/pyyaml/beautifulsoup4, all satisfiable)
-but installing it into ~/.venvs/ldpy was denied by the auto-mode
-permission classifier in this session. Faithfully reproducing
-`apysource.yaml_input.load_yaml` as a context shim would mean transcribing
-its whole import-time dependency chain -- `apysource.schema` (126 lines,
-itself importing `apysource.formats`, 921 lines of HTML/Markdown/Wikitext
-parsing that additionally needs BeautifulSoup, not installed either) and
-`apysource.patterns` (267 lines, importing six `apysource.repos.*`
-fetcher classes) -- none of which has anything to do with the
-ns_import_project construction this region was sampled for. Writing a
-slimmed-down stand-in for ~1400 real lines is exactly what AGENT_BATCH's
-shim rule warns against ("n'inventez pas de logique"); it is also
-unnecessary, because Python imports the whole chain at module level
-regardless of which functions a caller actually uses (`apysource.schema`
-does `from apysource.formats import normalize_mime_type` unconditionally),
-so a partial shim would not even avoid the blocker.
+The region loads the same YAML twice and asserts that the sorted
+`sv:Source` subjects coincide. Its only observable outcome is that
+assertion, so the driver makes it observable on three inputs, using a
+`tmp_path` whose `write_text` writes a content of the driver's choosing:
 
-`_case()` supplies a real writable temp directory (`tempfile.mkdtemp()`,
-matching pytest's own `tmp_path` fixture, bypassed here since the region
-is called directly) so that a future run WITH `apysource` installed
-exercises the real thing unmodified. Today, `_exec_python` on original.py
-fails first, at its top-level `from apysource.namespaces import OA,
-SCHEMA, SV` (line 14), with `ModuleNotFoundError: No module named
-'apysource'` -- confirmed directly (`rdfeval check`, see meta.json's
-`validation` -- or the lack of one, since this pair stays draft) -- before
-the translated side is ever reached. That IS the excluded verdict, not a
-translation defect: the same import fails identically whether or not
-`translated.ldpy`'s own `from apysource.namespaces import oa:, schema:,
-sv:` is ever exercised.
+  * identical YAML twice             -> passes (returns None)
+  * YAML differing only in a fragment -> passes: the sources are equal, but
+    a pattern widened beyond `sv:Source` (any typed subject) would see the
+    different fragment URI and raise
+  * YAML with a second source         -> AssertionError: a pattern that
+    matches no source (or the wrong class) would see two empty lists and
+    pass
 """
 from pathlib import Path
 import tempfile
 
 from rdfeval.harness import run_pair
 
+BASE = """\
+sources:
+  - label: "UN Charter"
+    url: "https://www.un.org/en/about-us/un-charter/full-text"
+    type: html
+    language: en
+    fragments:
+      - label: "Preamble"
+        selector: "p"
+        snippet: "to save succeeding generations"
+"""
+OTHER_FRAGMENT = BASE.replace("Preamble", "Article 1")
+TWO_SOURCES = BASE + """\
+  - label: "Other Charter"
+    url: "https://example.org/other"
+    type: html
+    language: en
+"""
 
-def _case():
-    return ((Path(tempfile.mkdtemp()),), {})
+
+class _File:
+    """What `tmp_path / "sources.yaml"` gives: write_text stores the next content."""
+
+    def __init__(self, path, contents):
+        self._path, self._contents = Path(path), contents
+
+    def write_text(self, content, *a, **k):
+        return self._path.write_text(self._contents.pop(0), *a, **k)
+
+    def __fspath__(self):
+        return str(self._path)
+
+    __str__ = __fspath__
+
+
+class _Dir:
+    """A tmp_path whose successive writes of sources.yaml store the given contents."""
+
+    def __init__(self, root, contents):
+        self._root, self._contents = Path(root), list(contents)
+
+    def __truediv__(self, name):
+        return _File(self._root / name, self._contents)
+
+
+def _case(name, *contents):
+    # a fixed, per-case directory: the argument is compared across the two
+    # sides, so its path must not differ between them
+    root = Path(tempfile.gettempdir()) / "rdfeval_apysource" / name
+    root.mkdir(parents=True, exist_ok=True)
+    return lambda: ((_Dir(root, contents),), {})
 
 
 VERDICT = run_pair(
     __file__,
-    entry='test_deterministic_uris',
-    calls=[_case],
+    entry="test_deterministic_uris",
+    calls=[
+        _case("same", BASE, BASE),
+        _case("fragment", BASE, OTHER_FRAGMENT),
+        _case("sources", BASE, TWO_SOURCES),
+    ],
 )

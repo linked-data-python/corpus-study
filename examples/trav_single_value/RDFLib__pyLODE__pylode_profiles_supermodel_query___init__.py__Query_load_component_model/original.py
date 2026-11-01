@@ -43,6 +43,14 @@ from pylode.profiles.supermodel.query.common import (
     get_subclasses,
     get_values,
 )
+# Context: module-level helpers the region calls, defined next to it in the
+# same module (query/__init__.py); from the real package (pylode 3.2.3).
+from pylode.profiles.supermodel.query import (
+    get_component_model_ignored_classes,
+    get_examples,
+    get_rdf_properties,
+    get_top_level_component_classes,
+)
 
 def load_component_model(self, iri: URIRef, db: Dataset) -> ComponentModel:
     name = get_name(iri, db)

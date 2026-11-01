@@ -13,14 +13,23 @@
     "graph_read": 1,
     "namespace_term": 5
   },
-  "translation_status": "draft",
-  "classification": "excluded",
-  "constructions": ["@prefix"],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "prefixed name",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann",
-    "The stratum's target line is `order = db.value(iri, SH.order)`, but db is a rdflib Dataset, not a Graph: per ldpy/docs/how-to/migrate-from-rdflib.md ('What not to rewrite'), a Dataset/ConjunctiveGraph's named-graph API has no m{ }/@graph counterpart -- @graph designates ONE graph. The correct translation keeps the native .value() call and only substitutes the term (SH.order -> sh:order), which is what translated.ldpy already does; this is not a degraded translation, it is the language's documented boundary.",
-    "Left translation_status=draft/classification=excluded (not final) because making the region executable would require reconstructing most of pylode.profiles.supermodel.query.__init__.Query beyond the extracted lines: self.get_component_model_classes calls self.get_component_model_class, which itself calls get_svg_images, get_is_defined_by, get_examples, get_notes, RDFS.subClassOf superclass-property merging, and builds Class/Property/RDFProperty/CodedProperty model objects -- none of it exercising a new construction beyond the one already noted, all of it far outside this region's scope. Not forced; excluded per AGENT_BATCH.md rule 1 (translation is right, the driver cannot reasonably be made to run it).",
-    "fixture.ttl left as a stub (see driver.py) since no driver run was attempted: building it would be wasted effort without the dependency chain above."
+    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann (only owl and sh are used in the body).",
+    "Target line: `order = db.value(iri, SH.order)` -> `order = m{ {iri} sh:order ?o }(db).first()`; the five `OWL.X` / `SH.order` terms become prefixed names. The earlier draft kept `db.value` because `db` is a Dataset; that boundary does not apply to a plain read: `m{ }(db)` accepts a Dataset and reads what `Dataset.value` reads (the union of the named graphs when default_union=True, the default graph only otherwise); verified in both modes (cases C and F of the driver).",
+    "Runs on the REAL pylode 3.2.3: original.py gains one import (`from pylode.profiles.supermodel.query import get_component_model_ignored_classes, get_examples, get_rdf_properties, get_top_level_component_classes`) for the module-level helpers the region calls from its own module. `self` is a real `Query` built with `Query.__new__` and the four attributes the callees read (db, class_index, profiles_order, root_profile_iri), because `Query.__init__` fetches profiles over HTTP; `db` is pylode's own `Dataset(default_union=True)`. No shim file.",
+    "Reading semantics: `Graph.value` is `any=True` (first of several, None if none) and `.first()` the same; a profile with TWO sh:order is left out of the fixture, since neither rdflib nor SPARQL promises which one comes first.",
+    "Proof: six calls on a fixture whose profile has sh:order 2 and whose neighbours (profile B's order 9, a work example's order 0, sh:name, ex:order 99) must not match: A) own graph; B) profile with no sh:order in a dataset where others have one -> default order 999999; C) its sh:order in ANOTHER named graph (union read) -> 5; D) typed integer 7; E) non-numeric order -> int() raises ValueError, same message both sides; F) Dataset without default_union -> None. Returned values are ComponentModel dataclasses (classes, properties, examples included). Mutants all FAIL: subject unbound (call 0), predicate unbound (call 0), source narrowed to db.get_graph(iri) (call 2); restored OK."
   ],
   "article_candidate": false,
   "draft_sha": "5f888a674db8b2a5",

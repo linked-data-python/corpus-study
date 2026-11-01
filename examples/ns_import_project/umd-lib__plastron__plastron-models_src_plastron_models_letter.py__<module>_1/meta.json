@@ -12,15 +12,19 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": "excluded",
+  "translation_status": "final",
+  "classification": "minor-restructuring",
   "constructions": [
+    "from … import p:",
+    "prefixed name",
     "IRI"
   ],
   "translation_notes": [
-    "the single raw URIRef (`URIRef('http://id.loc.gov/datatypes/edtf')`, a datatype argument, not a triple term) is directly-expressible as `<IRI>` -- already the state of translated.ldpy, correct as drafted.",
-    "the region's namespace import (`from plastron.namespaces import bibo, dc, dcmitype, edm, geo, rel, skos, ore, owl, umd, schema, pcdm, dcterms`) is exactly the case the stratum is sampling for -- 18+ genuine term uses (owl.sameAs, edm.Agent, bibo.Letter, dcterms.title, ...), all real, none decorative. But it CANNOT become `from plastron.namespaces import bibo:, dc:, ...`: fetched plastron-utils/src/plastron/namespaces/__init__.py at umd-lib/plastron@4a7f08cc19 (real source, via GitHub) -- it is plain `NAME = Namespace('...')` module attributes, no `__namespaces__` dict anywhere. Unlike the edmondchuc__rdflib-orm region in this same stratum, this module is a real, heavily-used third-party dependency (plastron-utils, its own package) we cannot patch the way a same-repo test shim can add one line -- so the import stays ordinary Python for every one of these dozen namespaces, uncredited. This is the strongest instance yet of the finding the batch reminder anticipated: a project namespace module lacking `__namespaces__` blocks the construction regardless of how heavily its terms are actually used.",
-    "excluded from execution: `check` fails at original.py's own imports (`plastron.handles`, `plastron.models`, `plastron.models.authorities`, `plastron.models.fedora`, `plastron.models.pcdm`, `plastron.models.page`, `plastron.rdfmapping.decorators/descriptors/resources`, `plastron.validation.rules/vocabularies`) -- an entire application framework (ObjectProperty/DataProperty descriptors, @rdf_type class decorator, RDFResource base, ContentModeledResource, PCDMObject, HandleBearingResource, FedoraResource), not a namespace-only dependency. Reproducing enough of it to execute the class bodies would mean re-implementing the framework's descriptor/decorator machinery, which is business logic, not context glue."
+    "Runs against the REAL installed plastron-models 4.8.3 / plastron-utils (handles, models.*, rdfmapping.*, validation.*); original.py is unchanged. Nothing of the framework is re-implemented.",
+    "The 13 namespaces (`bibo dc dcmitype dcterms edm geo rel skos ore owl umd schema pcdm`) come in as prefixes: `from plastron_ns_shim import bibo:, dc:, ...` and every `ns.term` (28 uses) becomes `ns:term` (`owl:sameAs`, `edm:Agent`, `dcterms:title`, ...). The raw `URIRef('http://id.loc.gov/datatypes/edtf')` datatype argument becomes `<http://id.loc.gov/datatypes/edtf>`.",
+    "Finding: `plastron.namespaces` is plain `NAME = Namespace('...')` attributes with no `__namespaces__` registry, which `from m import p:` reads at run time (ImportError: cannot import name '__namespaces__' otherwise). plastron_ns_shim.py re-exports the package's own Namespace objects and adds the registry, so the translation needs one extra module the original does not: classification minor-restructuring. The prefix import works only on modules written for it, not on an existing project's namespace module.",
+    "`from rdflib import URIRef` is kept as is; it is no longer used in the translation (only the datatype argument used it).",
+    "Proof: the module defines classes and prints nothing, so run_pair(entry=None) finds nothing observable. driver.py is custom: it executes both artefacts and compares, for the six classes, the property table (attribute -> predicate, required, repeatable, datatype, embed, target class), the default rdf:type values, model_name/is_top_level/HEADER_MAP, and instances built through the descriptors (empty / complete / coerced-date / malformed-date Letter, Agent, Concept, Place, Collection, an embedded author): their graphs by isomorphism, and validate()/is_valid per property. The original shows a 20-triple letter graph, validation failures for the empty letter and for the malformed date. Break checks: `dcterms:title` -> `dc:title` FAIL; datatype IRI changed FAIL; `@rdf_type(edm:Agent)` -> `edm:Place` FAIL; restored OK."
   ],
   "draft_sha": "821ddfc8438a0580",
   "provenance": {
