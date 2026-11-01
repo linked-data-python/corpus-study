@@ -333,6 +333,22 @@ def _key(k, bnodes):
     return k
 
 
+def bindings_lost(original, translated) -> list[tuple[str, str]]:
+    """The prefix bindings the original's graph carries and the
+    translation's does not, rdflib's own defaults left out.
+
+    The study's rule (design record ldpy/027): equivalence covers the
+    triples AND the bindings the original poses; a binding the translation
+    adds is tolerated.  ``@graph g`` binds the block's prefixes on ``g``,
+    and rdflib's ``bind`` moves a namespace to the new prefix: a repository
+    that bound ``xs:`` serialises ``xsd:`` after translation, and no
+    isomorphism sees it."""
+    defaults = set(type(original)().namespaces())
+    posed = set(original.namespaces()) - defaults
+    kept = set(translated.namespaces())
+    return sorted((p, str(n)) for p, n in posed - kept)
+
+
 def normalise(value, bnodes: dict | None = None, _depth: int = 0):
     """Make values comparable across the two runs (BNode ids differ).
 
@@ -378,6 +394,10 @@ def _compare_value(a, b, label: str, diffs: list[str],
         if not graphs_isomorphic(a, b):
             diffs.append(f"{label}: graphs not isomorphic "
                          f"({len(a)} vs {len(b)} triples)")
+        lost = bindings_lost(a, b)
+        if lost:
+            diffs.append(f"{label}: prefix bindings of the original lost "
+                         f"({', '.join(f'{p}: <{n}>' for p, n in lost)})")
         return
     try:
         a, b = materialise(a), materialise(b)

@@ -657,3 +657,22 @@ def test_a_lazy_result_is_read_once_for_both_checks(tmp_path):
         'URIRef("http://e/name"))}', 'URIRef("http://e/name")))')
     verdict = _run_driver(tmp_path, lazy, lazy, FIXTURE_DRIVER, TWO_BNODES)
     assert verdict["equivalent"] is True and verdict["hollow"] is False
+
+
+def test_a_binding_the_original_poses_must_survive():
+    """Design record ldpy/027: equivalence covers the triples and the
+    bindings the original poses; an added binding is tolerated."""
+    from rdflib import Graph, Namespace
+    from rdfeval.harness import _compare_value, bindings_lost
+    XS = Namespace("http://www.w3.org/2001/XMLSchema#")
+    original, moved, extra = Graph(), Graph(), Graph()
+    original.bind("xs", XS)
+    moved.bind("xs", XS)
+    moved.bind("xsd", XS)              # what `@graph` + `@prefix xsd:` does
+    extra.bind("xs", XS)
+    extra.bind("ex", Namespace("http://example.org/"))
+    assert bindings_lost(original, moved) == [("xs", str(XS))]
+    assert bindings_lost(original, extra) == []
+    diffs: list = []
+    _compare_value(original, moved, "graph g", diffs)
+    assert diffs and "xs: <http://www.w3.org/2001/XMLSchema#>" in diffs[0]
