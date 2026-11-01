@@ -9,6 +9,11 @@ interrupted by a quota reset resumes exactly where it stopped, and a later
 wave never re-assigns a region already done.
 
 Regions already marked ``final`` are skipped: the plan is what is LEFT.
+So are drafts already classified ``excluded`` or ``not-expressible``: they
+have no translation to write.  They are dropped AFTER the shuffle, not
+before, so the generator draws exactly what it drew before they were
+classified and the plan of every later stratum stays the one the campaigns
+followed (``funnel.md`` § 5.3 relies on that order).
 
 Two ways to size a wave, and they are not the same:
 
@@ -34,6 +39,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "results" / "summary" / "batch_plan.json"
+
+# A draft with one of these classifications is settled without a translation.
+SETTLED = ("excluded", "not-expressible")
+
+
+def pick(todo: list[str], settled: set[str], rng: random.Random,
+         want: int) -> list[str]:
+    """The first `want` of `todo` in seeded order, settled drafts skipped.
+
+    `todo` is shuffled whole, settled drafts included: filtering first would
+    change what the shared generator hands to the next stratum."""
+    todo = list(todo)
+    rng.shuffle(todo)
+    return sorted([name for name in todo if name not in settled][:want])
 
 
 def _budget() -> int:
@@ -70,20 +89,22 @@ def main() -> int:
     for stratum_dir in sorted(examples.iterdir()):
         if not stratum_dir.is_dir():
             continue
-        todo, done = [], 0
+        todo, settled, done = [], set(), 0
         for ex in sorted(stratum_dir.iterdir()):
             meta = ex / "meta.json"
             if not meta.exists():
                 continue
-            if json.loads(meta.read_text()).get("translation_status") == "final":
+            meta = json.loads(meta.read_text())
+            if meta.get("translation_status") == "final":
                 done += 1
                 continue
             todo.append(ex.name)
+            if meta.get("classification") in SETTLED:
+                settled.add(ex.name)
         done_total += done
-        rng.shuffle(todo)
         want = (args.per_stratum if args.target is None
                 else max(0, args.target - done))
-        picked = sorted(todo[:want])
+        picked = pick(todo, settled, rng, want)
         todo_total += len(picked)
         plan[stratum_dir.name] = [
             picked[i:i + args.batch_size]
