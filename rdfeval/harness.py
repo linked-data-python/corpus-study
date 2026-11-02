@@ -53,11 +53,14 @@ stage can collect it from a subprocess.
 
 from __future__ import annotations
 
+import atexit
 import contextlib
 import io
 import json
 import os
+import shutil
 import sys
+import tempfile
 import traceback
 from pathlib import Path
 
@@ -945,6 +948,17 @@ def run_pair(driver_file: str, entry: str | None = None,
         ordered = fixture is None
     if isolate is None:
         isolate = os.environ.get(ISOLATE_ENV, "1") != "0"
+    # Every module compiled from source, by both sides: a set literal of
+    # constants is compiled to a frozenset constant, and the set it builds
+    # iterates in one order when just compiled and in another when its
+    # .pyc is loaded — same hash seed, other insertion history.  The first
+    # side compiled a shim and wrote its .pyc, the second loaded it, and a
+    # loop over the set ended on different items (record corpus/403).  An
+    # empty cache that nothing is written to leaves no .pyc to load.
+    if sys.pycache_prefix is None:
+        sys.pycache_prefix = tempfile.mkdtemp(prefix="rdfeval-pyc-")
+        atexit.register(shutil.rmtree, sys.pycache_prefix, True)
+    sys.dont_write_bytecode = True
     verdict: dict = {"example": ex_dir.name, "equivalent": False,
                      "method": None, "diffs": [], "error": None,
                      "isolated": isolate}
