@@ -221,6 +221,7 @@ def test_an_unattested_construction_is_counted_apart_not_credited(
                      "syntax_nodes": 30, "rdf_ops": 3, "islands": 1},
             "ratios": {}}
     monkeypatch.setattr(aggregate, "load_pairs", lambda study: [meta])
+    monkeypatch.setattr(aggregate, "_reprise_selection", lambda study: None)
     monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
     aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
                   STUDY)
@@ -265,6 +266,7 @@ def test_a_prefix_import_from_a_python_module_is_credited(
                      "syntax_nodes": 30, "rdf_ops": 3, "islands": 1},
             "ratios": {}}
     monkeypatch.setattr(aggregate, "load_pairs", lambda study: [meta])
+    monkeypatch.setattr(aggregate, "_reprise_selection", lambda study: None)
     monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
     aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
                   STUDY)

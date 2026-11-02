@@ -76,3 +76,35 @@ def test_a_not_expressible_region_lowers_the_rate_though_never_measured():
                               "not_expressible": 1}
     assert st["weighted"]["expressible_rate"] == 0.5
     assert st["weighted"]["tokens_reduction_median"] == 20.0
+
+
+def test_a_final_pair_left_out_of_the_selection_is_not_published(
+        tmp_path, monkeypatch):
+    import json
+    from rdfeval import aggregate
+    from rdfeval.study import STUDY
+
+    def pair(rid):
+        return {"region_id": rid, "repository": "o/r", "path": "m.py",
+                "stratum": "remove", "strata": ["remove"],
+                "constructions": ["-{ }"], "oracle": "isomorphism",
+                "review_status": "approved", "validation_status": "equivalent",
+                "classification": "directly-expressible",
+                "subgroup": "inline-construction",
+                "python": {"code_loc": 10, "tokens": 100, "chars": 200,
+                           "syntax_nodes": 50, "rdf_ops": 3, "islands": 0},
+                "ldpy": {"code_loc": 6, "tokens": 60, "chars": 120,
+                         "syntax_nodes": 30, "rdf_ops": 3, "islands": 1},
+                "ratios": {}}
+    monkeypatch.setattr(aggregate, "load_pairs",
+                        lambda study: [pair("kept"), pair("left")])
+    monkeypatch.setattr(aggregate, "_reprise_selection",
+                        lambda study: {"remove": (0.0, {"kept": "both"})})
+    monkeypatch.setattr(aggregate, "_outcomes", lambda study, force: [])
+    monkeypatch.setattr(aggregate, "_figures", lambda ok, agg, study: None)
+    monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
+    aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
+                  STUDY)
+    agg = json.loads((tmp_path / "aggregate.json").read_text())
+    assert agg["pairs_total"] == 1
+    assert agg["pairs_outside_selection"] == ["left"]

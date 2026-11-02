@@ -61,6 +61,16 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
     the console — so a forced run can never be mistaken for a reviewed one.
     """
     pairs = load_pairs(study)
+    reprise = _reprise_selection(study) if study.incremental_review else None
+    outside = []
+    if reprise is not None:
+        # the sample is the resumed selection (record corpus/404): a final
+        # pair left out of it — its region lost every stratum it was drawn
+        # for when the analyser was corrected — is measured, not published
+        selected = {r for _, sel in reprise.values() for r in sel}
+        outside = [p["region_id"] for p in pairs
+                   if p["region_id"] not in selected]
+        pairs = [p for p in pairs if p["region_id"] in selected]
     translated = len(pairs)
     approved = [p for p in pairs if p.get("review_status") == "approved"]
     if study.incremental_review and not force:
@@ -84,6 +94,7 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
                      else "approved" if study.incremental_review
                      else "all final"),
                  "pairs_approved": len(approved),
+                 "pairs_outside_selection": sorted(outside),
                  "pairs_total": len(pairs),
                  "pairs_equivalent": len(ok),
                  "pairs_other": [
@@ -161,8 +172,7 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
         for p in ok]
 
     if study.incremental_review:
-        agg["by_stratum"] = _by_stratum(ok, _reprise_selection(study),
-                                        _outcomes(study, force))
+        agg["by_stratum"] = _by_stratum(ok, reprise, _outcomes(study, force))
         agg["by_construction"] = _by_construction(ok)
         agg["unattested_constructions"] = _unattested(ok)
         agg["by_oracle"] = {
