@@ -161,7 +161,8 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
         for p in ok]
 
     if study.incremental_review:
-        agg["by_stratum"] = _by_stratum(ok, _reprise_selection(study))
+        agg["by_stratum"] = _by_stratum(ok, _reprise_selection(study),
+                                        _outcomes(study, force))
         agg["by_construction"] = _by_construction(ok)
         agg["unattested_constructions"] = _unattested(ok)
         agg["by_oracle"] = {
@@ -184,7 +185,40 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
           f"medians tokens {agg['by_metric']['tokens']['reduction_pct']}")
 
 
-def _by_stratum(ok: list[dict], reprise: dict | None = None) -> dict:
+EXPRESSIBLE = ("directly-expressible", "minor-restructuring")
+
+
+def _outcomes(study: Study = STUDY, force: bool = False) -> list[dict]:
+    """Every proved outcome of a region, measured or not.
+
+    A ``not-expressible`` region is a result, not a pair: ``compare`` does
+    not measure it, so the measured pairs alone would make every stratum
+    look expressible.  The rate of expressibility is read here — over the
+    finals whose equivalence is proved, and the ``not-expressible`` ones —
+    under the same review gate as the pairs."""
+    from .compare import _review_status
+    from .validate import iter_examples
+    out = []
+    for ex_dir, meta in iter_examples(study):
+        if meta.get("translation_status") != "final" or meta.get("disabled"):
+            continue
+        cls = meta.get("classification")
+        if cls == "excluded":
+            continue
+        proved = (meta.get("validation") or {}).get("status") == "equivalent"
+        if cls != "not-expressible" and not proved:
+            continue
+        if study.incremental_review and not force \
+                and _review_status(ex_dir) != "approved":
+            continue
+        out.append({"region_id": meta["region_id"],
+                    "strata": meta.get("strata", []),
+                    "classification": cls})
+    return out
+
+
+def _by_stratum(ok: list[dict], reprise: dict | None = None,
+                outcomes: list[dict] | None = None) -> dict:
     """Coverage and benefit per stratum of use (fiche 403).
 
     A pair drawn for several strata counts in each: the question is whether
@@ -220,8 +254,8 @@ def _by_stratum(ok: list[dict], reprise: dict | None = None) -> dict:
             "n_surface_comparable": len(comparable),
             "n_string_embedded": len(embedded),
             "classification": dict(sorted(classes.items())),
-            "expressible": sum(1 for p in sub if p.get("classification") in
-                               ("directly-expressible", "minor-restructuring")),
+            "expressible": sum(1 for p in sub
+                               if p.get("classification") in EXPRESSIBLE),
             "by_subgroup": {sg: len([p for p in sub if p.get("subgroup") == sg])
                             for sg in sorted({p.get("subgroup") for p in sub})},
             **{m: _dist([_reduction(p, m) for p in comparable])
@@ -230,10 +264,20 @@ def _by_stratum(ok: list[dict], reprise: dict | None = None) -> dict:
                 m: _dist([_reduction(p, m) for p in embedded]) for m in METRICS
             } if embedded else None,
         }
+        if outcomes is not None:
+            decided = [o for o in outcomes if stratum in o["strata"]
+                       and (reprise is None or o["region_id"] in selected)]
+            out[stratum]["coverage"] = {
+                "finals": len(decided),
+                "expressible": sum(1 for o in decided
+                                   if o["classification"] in EXPRESSIBLE),
+                "not_expressible": sum(1 for o in decided if
+                                       o["classification"] == "not-expressible"),
+            }
         if reprise is not None:
-            out[stratum]["weighted"] = _weighted(sub, comparable,
-                                                 *reprise.get(stratum,
-                                                              (0.0, {})))
+            out[stratum]["weighted"] = _weighted(
+                sub, comparable, *reprise.get(stratum, (0.0, {})),
+                decided if outcomes is not None else sub)
     return out
 
 
@@ -266,18 +310,23 @@ def _weighted_median(values_weights: list[tuple[float, float]]):
 
 
 def _weighted(sub: list[dict], comparable: list[dict], share: float,
-              subpop: dict) -> dict:
+              subpop: dict, decided: list[dict]) -> dict:
     """Step 4 of the resumed draw: the part of the stratum the first
     analyser saw and the part only the new one sees weigh ``1 − f`` and
-    ``f``, each estimated on its own pairs."""
+    ``f``, each estimated on its own regions — the reduction on the measured
+    pairs, the rate of expressibility on every ``decided`` outcome."""
     from .reprise import weighted_rate
-    parts = {"both": [p for p in sub if subpop.get(p["region_id"]) != "new"],
-             "new": [p for p in sub if subpop.get(p["region_id"]) == "new"]}
+
+    def split(rows):
+        return {"both": [p for p in rows
+                         if subpop.get(p["region_id"]) != "new"],
+                "new": [p for p in rows
+                        if subpop.get(p["region_id"]) == "new"]}
+    parts, outcome_parts = split(sub), split(decided)
 
     def rate(ps):
-        return (sum(1 for p in ps if p.get("classification") in
-                    ("directly-expressible", "minor-restructuring")) / len(ps)
-                if ps else None)
+        return (sum(1 for p in ps if p.get("classification") in EXPRESSIBLE)
+                / len(ps) if ps else None)
     weight = {"both": (1 - share), "new": share}
     vw = []
     for name, ps in parts.items():
@@ -287,8 +336,8 @@ def _weighted(sub: list[dict], comparable: list[dict], share: float,
     return {
         "share_new": share,
         "n_both": len(parts["both"]), "n_new": len(parts["new"]),
-        "expressible_rate": weighted_rate(rate(parts["both"]),
-                                          rate(parts["new"]), share),
+        "expressible_rate": weighted_rate(rate(outcome_parts["both"]),
+                                          rate(outcome_parts["new"]), share),
         "tokens_reduction_median": _weighted_median(vw),
     }
 
