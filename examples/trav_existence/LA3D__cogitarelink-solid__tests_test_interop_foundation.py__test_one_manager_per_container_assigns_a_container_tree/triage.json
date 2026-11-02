@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "check : OK. Mutants dans une copie : `bool(m{ {a} st:manages ?x })` -> `True` : check reste OK (îlot supprimé) ; -> `bool(m{ ?s st:manages ?x })` (sujet élargi, le leurre ex:decoyAssignment est écarté par le sujet mais la fixture contient aussi assign1) : OK ; -> `m{ {a} ?p ?x }` : OK ; en revanche retirer `a st:Manager` : FAIL call[0] et élargir le sujet de st:hasAssignment : FAIL call[0]. Les notes du traducteur reconnaissent que la branche fausse est inexercable (harnais abandonne au premier lève). En plus, le cas zéro manager lève StopIteration dans l'original (next sans défaut) mais, traduit, `.first()` rend None puis `{mgr}` donnerait Literal(\"None\") et un AssertionError : types d'exception différents, jamais comparés. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Hollow green repaired: nine edited graphs falsify each read; this exposed StopIteration vs TypeError, fixed with next(iter(m{ })); 5 mutants FAIL."
 }

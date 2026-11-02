@@ -13,5 +13,6 @@
     }
   ],
   "evidence": "`rdfeval check` : OK. Six mutants dans une copie, tous tués (FAIL) : sujet de la ligne 28 remplacé par `?x`, sujet de la ligne 23, de la ligne 21 (`{OWNER}`→`?x`), de la ligne 35, de `REG_NS[\"id-schemes\"]` (l. 41) et de `REG_NS[\"contacts-person\"]` (l. 37). Le harnais compare bien les levées (« outcome differs (None vs raised AssertionError…) »), contrairement à ce que dit la note du traducteur ; tous les `assert` de la région jouent le rôle d'oracle, donc l'oracle est solide sur le chemin nominal. Le fixture est monovalué (un seul `registeredShapeTree` par registration), donc `.first()` vs `g.value(any=True)` n'est pas distingué en cas multivalué ; équivalent par construction (`value` rend la première valeur), non signalé. Aucune garde de véracité (les valeurs sont des IRI).",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Hollow green repaired: fourteen edited graphs falsify each assertion in turn; 5 mutants FAIL."
 }

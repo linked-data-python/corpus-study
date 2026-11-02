@@ -31,7 +31,8 @@
     "consolidated each run of g.add(...) sharing a subject into one +{ s p1 o1 ; p2 o2 } (migrate-from-rdflib.md); left the conditional prev/next and parent-label adds as separate +{ } since they are not on the same control-flow path as the block they'd otherwise join.",
     "dropped the explicit Literal(...) wrapper where the default coercion already produces the same term (plain string -> plain literal); kept Literal(self.comment, lang='en') as {self.comment}@en, the interpolation + glued suffix form, rather than wrapping the whole Literal(...) call opaquely in {}.",
     "RDF.Bag is used as a PREDICATE in the source (`g.add((parent_uri, RDF.Bag, u))`), not a typo I fixed: kept verbatim as `rdf:Bag` in predicate position, no refactor.",
-    "fixture self is a types.SimpleNamespace, not a plain class: the harness compares call arguments after the call too (mutation check), and SimpleNamespace's structural __eq__ is what makes two separately-constructed fixtures (one per side) compare equal."
+    "fixture self is a types.SimpleNamespace, not a plain class: the harness compares call arguments after the call too (mutation check), and SimpleNamespace's structural __eq__ is what makes two separately-constructed fixtures (one per side) compare equal.",
+    "Repair 2026-11-02 (ldpy 0.7.1): an interpolated None now raises, and call[4] hands the region label=None. The original `Literal(self.label)` writes the literal \"None\" (a probable upstream bug, kept as is), so the faithful translation writes `rdfs:label {Literal(self.label)}`, and only there; the notation is kept for the other terms (a None comment or member title is not exercised and still raises in the island, unlike the original). Proof: check OK; the bare `{self.label}` makes call[4] FAIL (TypeError vs graph)."
   ],
   "draft_sha": "9190cbc831f83db6",
   "provenance": {
@@ -52,18 +53,27 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "six appels ajoutés (1 seul auparavant) : page 1 sur 1 sans membre, sans parent ni paramètre de requête (branche other_qsas_str = '') ; page = last_page avec un parent sans label et page/per_page filtrés parmi les paramètres ; la forme ContainerOfContainersRenderer (lignes SPARQL (URIRef, Literal@en) et (URIRef, Literal typé), parent None) ; un tuple à trois éléments, un title int, label None et comment int ; label et comment déjà Literal (@fr re-étiqueté @en, typé) ; un membre chaîne contenant « uri » (TypeError comparée par type et message). Et une comparaison des liaisons de préfixes (le dépôt sérialise ce graphe via _make_rdf_response) : chaque liaison posée par le graphe de l'original doit se retrouver dans celui de la traduction, liaisons en plus tolérées, fusionnée dans le verdict de run_pair.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "unchanged (call[4] with label=None already existed).",
+    "translation_fixed": true,
     "mutants_killed": [
-      "préfixe ldp: renommé ldpx: (liaison perdue, triplets identiques)",
-      "préfixe xhv: renommé xhvx:",
-      "garde `if self.page != 1` -> `if True`",
-      "garde `if self.page != self.last_page` -> `if True`",
-      "garde `if self.parent_container_label is not None` -> `if True`",
-      "label du membre tuple `{member[1]}` -> `{str(member[1])}` (Literal typé de la ligne SPARQL perdu)",
-      "`other_qsas_str = ''` -> `'z&'`"
+      "`{Literal(self.label)}` -> `{self.label}` (call[4]: TypeError vs graph with the literal \"None\")"
     ],
-    "remaining": "Les questions de jugement du tri ({URIRef(x)} -> f<…>) restent à Maxime. Un écart hors des entrées documentées : si un label (member[1], member[\"title\"], label, parent_container_label) est un URIRef ou un BNode, Literal(x) en fait un littéral et {x} le garde tel quel ; seul un cofc.ttl dont rdfs:label a une IRI pour valeur l'atteindrait (ContainerOfContainersRenderer, renderer_container.py:393), la docstring du dépôt dit « string elements ». Faut-il le tenir pour hors contrat ?"
+    "remaining": "The original writes the literal \"None\" for a None label (upstream bug kept as is); a None comment or member title would also write \"None\" in the original and raise in the translation, but no driver call nor repository path produces one.",
+    "previous": {
+      "date": "2026-10-30",
+      "driver": "six appels ajoutés (1 seul auparavant) : page 1 sur 1 sans membre, sans parent ni paramètre de requête (branche other_qsas_str = '') ; page = last_page avec un parent sans label et page/per_page filtrés parmi les paramètres ; la forme ContainerOfContainersRenderer (lignes SPARQL (URIRef, Literal@en) et (URIRef, Literal typé), parent None) ; un tuple à trois éléments, un title int, label None et comment int ; label et comment déjà Literal (@fr re-étiqueté @en, typé) ; un membre chaîne contenant « uri » (TypeError comparée par type et message). Et une comparaison des liaisons de préfixes (le dépôt sérialise ce graphe via _make_rdf_response) : chaque liaison posée par le graphe de l'original doit se retrouver dans celui de la traduction, liaisons en plus tolérées, fusionnée dans le verdict de run_pair.",
+      "translation_fixed": false,
+      "mutants_killed": [
+        "préfixe ldp: renommé ldpx: (liaison perdue, triplets identiques)",
+        "préfixe xhv: renommé xhvx:",
+        "garde `if self.page != 1` -> `if True`",
+        "garde `if self.page != self.last_page` -> `if True`",
+        "garde `if self.parent_container_label is not None` -> `if True`",
+        "label du membre tuple `{member[1]}` -> `{str(member[1])}` (Literal typé de la ligne SPARQL perdu)",
+        "`other_qsas_str = ''` -> `'z&'`"
+      ],
+      "remaining": "Les questions de jugement du tri ({URIRef(x)} -> f<…>) restent à Maxime. Un écart hors des entrées documentées : si un label (member[1], member[\"title\"], label, parent_container_label) est un URIRef ou un BNode, Literal(x) en fait un littéral et {x} le garde tel quel ; seul un cofc.ttl dont rdfs:label a une IRI pour valeur l'atteindrait (ContainerOfContainersRenderer, renderer_container.py:393), la docstring du dépôt dit « string elements ». Faut-il le tenir pour hors contrat ?"
+    }
   }
 }

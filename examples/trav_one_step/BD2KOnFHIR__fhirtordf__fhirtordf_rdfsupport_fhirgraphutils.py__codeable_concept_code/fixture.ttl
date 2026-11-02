@@ -42,3 +42,16 @@ ex:patient1 ex:otherStatus [
 # ex:patientX carries no ex:maritalStatus triple at all: the zero-solution
 # case for the top-level g.value(subject, predicate, any=False) traversal —
 # both versions must return coded_entry = None, hence rval = [].
+
+# patient3: codings the region must skip (system without code, code without
+# system, a coding with neither), next to one complete coding with a
+# rdf:type -- the `coding_system and coding_code` guard.
+ex:patient3 ex:maritalStatus [
+    fhir:CodeableConcept.coding
+      [ fhir:Coding.system [ fhir:value "http://snomed.info/sct" ] ] ,
+      [ fhir:Coding.code [ fhir:value "NOSYSTEM" ] ] ,
+      [ fhir:index 2 ] ,
+      [ a sct:87915002 ;
+        fhir:Coding.system [ fhir:value "http://snomed.info/sct" ] ;
+        fhir:Coding.code [ fhir:value "87915002" ] ]
+  ] .

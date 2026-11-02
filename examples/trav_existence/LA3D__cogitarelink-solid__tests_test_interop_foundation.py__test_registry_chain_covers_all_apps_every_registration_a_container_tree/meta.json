@@ -37,7 +37,8 @@
     "`list(g.objects(dreg, INTEROP.hasDataRegistration))` -> `list(m{ {dreg} interop:hasDataRegistration ?r })`: arity 1, bare terms, same shape as `for o in m{ {s} ex:p ?o }` but materialised eagerly like the original.",
     "`REG_NS = rdflib.Namespace(...)` (a SECOND, function-local namespace, for hyphenated slugs like 'contacts-person') was left as a plain rdflib.Namespace and interpolated as `{REG_NS[\"contacts-person\"]}` rather than promoted to its own `@prefix` -- `registry:contacts-person` would be syntactically valid (Turtle PN_LOCAL allows '-'), but converting a namespace that exists only to hold 5 already-known constants is not what this stratum targets, and interpolating the existing Python expression keeps the diff against original.py minimal. Noted as a choice, not a language limitation.",
     "zero-solution branch cannot be exercised through this driver, same reason as the sibling LA3D region of this batch: every read here feeds a bare `assert`, and run_pair aborts the comparison on the first side that raises rather than checking whether both sides raise alike (see rdfeval/harness.py). Hardened the fixture instead with a fully disjoint neighbour owner/registry-set/data-registry chain whose registration must not leak into the exact counts (12, then 7) the region asserts.",
-    "Correction (2026-11-01, record corpus/403, defect 2): what this note says of run_pair is not true. run_pair compares a raise like a value — the same exception type and message on both sides, or a difference — and goes on with the next call; it never aborts the comparison on the first side that raises. A workaround described above stays valid, but is not needed."
+    "Correction (2026-11-01, record corpus/403, defect 2): what this note says of run_pair is not true. run_pair compares a raise like a value — the same exception type and message on both sides, or a difference — and goes on with the next call; it never aborts the comparison on the first side that raises. A workaround described above stays valid, but is not needed.",
+    "Repair 2026-11-02 (hollow green): the test passes on the single fixture, so the driver gives fourteen graphs (the fixture, and edits falsifying each assertion in turn: no registry set, no data registry, 11 and 13 registrations, a tree not ending in ContainerTree, a missing tree, 8 wiki registrations, a wiki registration outside its tree, and each of the five named registrations on another tree); the original raises on thirteen, with messages quoting the registration read. Translation unchanged; mutants (len >= 12, len(wiki) >= 7, startswith widened, `==` flipped, registration subject widened) each FAIL; hollow_green.py no longer lists the pair."
   ],
   "draft_sha": "3942c39169269158",
   "provenance": {
@@ -55,5 +56,18 @@
     "method": "fixture:fixture.ttl entry:test_registry_chain_covers_all_apps_every_registration_a_container_tree",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "fourteen graphs instead of one, built from fixture.ttl by edits that falsify each assertion in turn (raise compared by type and message).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "len(regs) == 12 -> >= 12",
+      "len(wiki) == 7 -> >= 7",
+      "startswith(TREE_NS) widened",
+      "contacts-group == flipped to !=",
+      "{dreg} -> ?d in the registration read"
+    ],
+    "remaining": "A registration with two trees is not tried (g.value picks one in an unspecified order, so `.first()` and g.value may differ without it being a translation error)."
   }
 }

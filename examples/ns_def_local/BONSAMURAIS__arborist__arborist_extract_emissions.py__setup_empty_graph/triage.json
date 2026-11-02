@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK (demo compare liaisons du graphe, globals et triplets). Dépôt : les 19 noms (BONT, BRDFFAT, BRDFLO, BRDFFO, OM2, PROV…) sont lus dans emissions() lignes 140-181 de extract_emissions.py, donc l'export global est réel, pas décoratif; shim = graph_common.py quasi verbatim (seule modification documentée : DC en Namespace simple, car DC de rdflib 7.2.1 est un DefinedNamespace qui lève sur DC.modified). Runtime : designate() fait graph.bind(prefix, str(ns)) dans l'ordre de déclaration, mêmes arguments que g.bind d'origine. Mutants sur copie, tous FAIL : @graph g remplacé par pass; schema en https://schema.org/; échange des lignes cc et ns1 (l'ordre relatif des deux préfixes de même IRI compte et est préservé). Test `extent2011node = brdftime:2011` : SyntaxError ; `t:{\"2011\"}` fonctionne. meta.json translation_notes mélange la note finale et l'ancienne note « NOT-EXPRESSIBLE… translation_status stays draft… » devenue fausse. Copies supprimées.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "0.7.1 repair: explicit `g.bind` calls restored (`@graph` no longer overwrites bindings), `@graph g` dropped; check OK, a deleted bind FAILs."
 }

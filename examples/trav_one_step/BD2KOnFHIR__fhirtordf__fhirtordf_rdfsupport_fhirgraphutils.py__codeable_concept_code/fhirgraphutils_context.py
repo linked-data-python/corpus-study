@@ -15,14 +15,31 @@ from rdflib.exceptions import UniquenessError
 # fhirtordf/rdfsupport/dottednamespace.py, unmodified: FHIR RDF spells
 # properties with a literal dot in the local name (fhir:Coding.system), which
 # this namespace produces through attribute chaining.
+# (Repair 2026-11-02: a first transcription omitted the repository's
+# `__getattribute__`/`__eq__`/`__hash__` overrides.  Without DottedURIRef.__eq__,
+# rdflib 7.2.1 compares a DottedURIRef to the stored URIRef as different
+# (Identifier.__eq__ tests the types), so `g.objects(s, FHIR.X.y)` found nothing
+# and the original returned [] on every input: a hollow green.)
 class DottedNamespace(Namespace):
     """An RDF namespace that supports the FHIR dotted notation (e.g. fhir:Patient.status)."""
 
     def __new__(cls, value):
         return Namespace.__new__(cls, value)
 
+    def __getattribute__(self, item: str) -> "DottedURIRef":
+        if item == 'index':
+            return DottedURIRef(str(self) + item)
+        else:
+            return super().__getattribute__(item)
+
     def __getattr__(self, item: str) -> "DottedURIRef":
         return DottedURIRef(str(self) + item)
+
+    def __eq__(self, other):
+        return super().__eq__(other)
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 class DottedURIRef(URIRef):
@@ -33,6 +50,15 @@ class DottedURIRef(URIRef):
 
     def __getattr__(self, item: str) -> "DottedURIRef":
         return DottedURIRef(str(self) + '.' + item)
+
+    def __eq__(self, other):
+        if isinstance(self, URIRef) and isinstance(other, URIRef):
+            return str(self) == str(other)
+        else:
+            return False
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 # fhirtordf/rdfsupport/namespaces.py, unmodified (this region only needs FHIR).

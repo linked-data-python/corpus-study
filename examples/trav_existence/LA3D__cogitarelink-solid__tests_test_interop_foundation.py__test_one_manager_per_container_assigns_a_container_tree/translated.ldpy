@@ -17,7 +17,7 @@ CONTAINER_SLUGS = ["concepts", "people", "places", "events", "organizations", "p
 def test_one_manager_per_container_assigns_a_container_tree(graph):
     @graph graph
     for slug in CONTAINER_SLUGS:
-        mgr = m{ ?mgr a st:Manager }.first()
+        mgr = next(iter(m{ ?mgr a st:Manager }))
         a = m{ {mgr} st:hasAssignment ?a }.first()
         assert a is not None, f"{slug}: no st:hasAssignment"
         assigned = m{ {a} st:assigns ?assigned }.first()

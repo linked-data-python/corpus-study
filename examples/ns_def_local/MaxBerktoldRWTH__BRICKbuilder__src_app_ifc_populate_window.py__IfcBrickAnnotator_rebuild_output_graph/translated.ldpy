@@ -26,10 +26,13 @@ def rebuild_output_graph(self):
     @prefix bldg:      f<{base_inst}bldg:> as bldg_ns .
     @prefix ifc:       f<{self.settings.value("ns_ifc", "http://standards.buildingsmart.org/IFC/RELEASE/IFC4/Ontology#")}> as ifc_core_ns .
 
-    # The seven `self.output_graph.bind(...)` calls of the original are gone:
-    # a graph DESIGNATED by `@graph` inherits the prefixes in scope at that
-    # point (record ldpy/027), which is why the designation now follows the
-    # declarations instead of preceding them.
+    # `@graph` only ADDS the block's prefixes to the graph (record ldpy/027):
+    # it does not overwrite a binding the graph already carries, and rdflib's
+    # `Graph()` already binds `brick` to the default Brick IRI.  The original's
+    # `bind("brick", self.BRICK)` rebinds it to the runtime value, so that one
+    # call stays; the six other prefixes are new to the graph and need no bind.
+    self.output_graph.bind("brick", _brick)
+
     @graph self.output_graph
 
     # 2. Sequential structural iteration over individual items

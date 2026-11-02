@@ -19,7 +19,7 @@ def fetchAndConvertToDCAT(self, graph, portal_ref, portal_api, snapshot, activit
     with no_ssl_verification():
         graph.parse(portal_api, format=format)
         cur = m{ ?s a {namespaces['hydra'].PagedCollection} }.first()
-        next_page = m{ {cur} {namespaces['hydra'].nextPage} ?v }.first()
+        next_page = m{ {cur} {namespaces['hydra'].nextPage} ?v }.first() if cur is not None else None
         page = 0
         while next_page:
             page += 1

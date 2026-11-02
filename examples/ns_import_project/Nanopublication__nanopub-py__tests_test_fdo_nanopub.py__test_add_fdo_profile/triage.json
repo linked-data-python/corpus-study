@@ -20,5 +20,6 @@
     }
   ],
   "evidence": "rdfeval check : OK. grep '__namespaces__' sur corpus/repos/Nanopublication__nanopub-py : aucune occurrence (nanopub/namespaces.py définit HDL, FDOF, NPX sans export de ce type). Valeurs des IRI du shim conformes à namespaces.py. Types réels : fdo_uri est une URIRef (fdo_nanopub.py:54-56), to_hdl_uri rend toujours une URIRef ou lève, donc les interpolations {fdo.fdo_uri}, {uri} ne tombent pas dans le piège str->Literal. `\"FdoProfile\"` == rdflib.Literal(\"FdoProfile\") (datatype nul des deux côtés). Le pilote appelle la fonction directement avec URIRef : le décorateur parametrize (`hdl:{FAKE_HANDLE}`) est évalué au chargement mais sa valeur n'est pas comparée à `HDL[FAKE_HANDLE]` ; équivalence vérifiée à la main (même URIRef). Les assertions sont l'oracle ; pas d'appel avec graphe où elles échoueraient côté original seul.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Hollow green repaired: the driver patches add_fdo_profile to falsify each assertion in turn (10 raising calls); 4 mutants FAIL, no longer listed by hollow_green.py."
 }

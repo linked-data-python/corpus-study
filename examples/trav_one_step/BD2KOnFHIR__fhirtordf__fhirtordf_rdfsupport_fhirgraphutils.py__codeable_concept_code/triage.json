@@ -27,5 +27,6 @@
     }
   ],
   "evidence": "check : OK (mais voir ci-dessous). Exécuté original.codeable_concept_code sur fixture.ttl avec le shim livré : [] ; g.triples((None, FHIR.CodeableConcept.coding, None)) = [] car DottedURIRef != URIRef (le shim n'a ni __eq__ ni __hash__). Mutants sur translated.ldpy avec le shim LIVRÉ : boucle→[], {coded_entry}→?s, prédicat→?p, sujet de {subject}→?s, rdf:type→?p/?s, tous VERTS (m1-m8). Copie avec le shim corrigé (__eq__/__hash__ du dépôt) : original rend [(http://snomed.info/sct, 36629006, http://snomed.info/id/36629006), (…MaritalStatus, M, None)], la paire est verte, et les 9 mutants (boucle→[], joker sur sujet/prédicat de chaque îlot, premier .first()→None, second .first()→None) sont tous tués. Même copie avec un sujet portant deux ex:maritalStatus : original lève UniquenessError, la traduction rend [] sans lever (le pilote ne compare pas deux levées, et n'a pas d'appel de ce type). Région et shim par ailleurs identiques au dépôt (diff du texte de la région : identique). Article : meta.json porte article_candidate=true — à retirer tant que le shim n’est pas corrigé ; même corrigée, la paire mêle trav_one_step et deux g.value(any=False) non équivalents, donc pas un bon exemple.",
-  "triaged_by": "sonnet-5.5"
+  "triaged_by": "sonnet-5.5",
+  "repaired": "Hollow green repaired: the shim lacked the repository's DottedURIRef.__eq__ so the original returned []; shim fixed, driver extended to eight calls; 4 mutants FAIL."
 }

@@ -38,9 +38,28 @@ def setup_empty_graph():
         author="BONSAI Team",
     )
 
-    # The nineteen `g.bind(...)` calls of the original are gone: a graph
-    # DESIGNATED by `@graph` inherits the block's prefixes (record ldpy/027).
-    @graph g
+    # The explicit bind calls stay: they REBIND prefixes the graph already
+    # carries (cc, schema, ns0...), and `@graph g` adds the block's prefixes
+    # without overwriting existing bindings (record ldpy/027).
+    g.bind("bont", BONT)
+    g.bind("brdffo", BRDFFO)
+    g.bind("brdflo", BRDFLO)
+    g.bind("brdftime", BRDFTIME)
+    g.bind("brdffat", BRDFFAT)
+    g.bind("brdfdat", BRDFDAT)
+    g.bind("brdfprov", BRDFPROV)
+    g.bind("bfoaf", BRDFFOAF)
+    g.bind("cc", CC)
+    g.bind("dc", DC)
+    g.bind("dtype", DTYPE)
+    g.bind("ns0", NS0)
+    g.bind("ns1", NS1)
+    g.bind("om2", OM2)
+    g.bind("ot", OT)
+    g.bind("schema", SCHEMA)
+    g.bind("time", TIME)
+    g.bind("xml", XML)
+    g.bind("prov", PROV)
 
     return g
 

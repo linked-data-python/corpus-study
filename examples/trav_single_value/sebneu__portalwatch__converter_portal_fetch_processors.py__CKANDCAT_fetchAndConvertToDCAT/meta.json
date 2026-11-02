@@ -33,7 +33,8 @@
     "shim de contexte : deux fichiers. context_shim.py transcrit namespaces['hydra'] et DCAT (converter/dataset_converter.py, les 2 clefs/noms que la region lit -- les 10 autres clefs du vrai dict `namespaces` ne sont jamais touchees et ne sont pas reproduites) ; no_ssl_verification est un no-op (les fixtures sont des fichiers locaux, jamais une vraie requete HTTPS) ; convert_socrata/graph_from_opendatasoft/graph_from_data_gouv_fr/CKANConverter sont des talons qui levent (jamais atteints par le chemin CKAN-via-endpoint-RDF que ce fetchAndConvertToDCAT implemente). quality.py (module top-level separe, car l'original fait `import quality` et non `from converter... import quality`) stub add_quality_measures en no-op : sa vraie logique lit d'autres proprietes DCAT/DCT et ecrit des triplets DQV, sans rapport avec les sites trav_single_value de cette region, et appelee IDENTIQUEMENT des deux cotes -- un no-op ne biaise donc pas la comparaison. import logging restaure directement dans original.py/translated.ldpy (ligne manquante a la fenetre de contexte du tirage, `logger = logging.getLogger(__name__)` etait deja la sans son import).",
     "le 'reseau' de la region est simule par des fichiers locaux : graph.parse(portal_api, format=format) et g.parse(p, format=format) fonctionnent sans modification avec un chemin de fichier local passe directement (verifie a la main), donc AUCUNE des deux versions n'a besoin d'etre mockee -- portal_api pointe vers fixture_ckan_page1.ttl (ou sa variante _nopagination), et le lien hydra:nextPage d'une page vers l'autre est une IRI Turtle RELATIVE (<fixture_ckan_page2.ttl>) que rdflib resout tout seul contre l'emplacement reel du fichier au moment du parse -- aucun chemin absolu code en dur dans les fixtures.",
     "driver.py : 2 calls. with_pagination (fixture_ckan_page1.ttl -> fixture_ckan_page2.ttl, un saut de pagination, 2 dcat:Dataset au total) exerce les 3 `.first()` avec chacun une solution. no_pagination (fixture_ckan_page1_nopagination.ttl, un hydra:PagedCollection SANS triplet hydra:nextPage) est le cas zero solution du deuxieme `.first()` -- celui qui decide si la boucle while s'execute -- et de la boucle finale (aucun dcat:Dataset). fixture.ttl (le contenu de `graph` avant l'appel) porte un voisin sans rapport (ex:existing a ex:Note) pour prouver qu'il survit intact et n'interfere pas ; fixture_ckan_page2.ttl porte de meme un ex:noise d'un type sans rapport.",
-    "argument prefix_map-like : ici c'est `graph` lui-meme (arg[1]) qui est mute et compare par isomorphisme (rdfeval.harness._compare_value traite tout argument rdflib.Graph ainsi, pas seulement le graphe designe par entry=) -- portal_ref/snapshot/activity sont des chaines opaques a la region, batties UNE fois par appel et partagees entre les deux cotes comme prefix_map dans la region swrl2rdf voisine (meme categorie de piege potentiel, ici sans consequence puisque ce sont des str comparables par valeur, mais garde la meme forme par coherence)."
+    "argument prefix_map-like : ici c'est `graph` lui-meme (arg[1]) qui est mute et compare par isomorphisme (rdfeval.harness._compare_value traite tout argument rdflib.Graph ainsi, pas seulement le graphe designe par entry=) -- portal_ref/snapshot/activity sont des chaines opaques a la region, batties UNE fois par appel et partagees entre les deux cotes comme prefix_map dans la region swrl2rdf voisine (meme categorie de piege potentiel, ici sans consequence puisque ce sont des str comparables par valeur, mais garde la meme forme par coherence).",
+    "Repair 2026-11-02 (ldpy 0.7.1): when no hydra:PagedCollection exists, `cur` is None; the original `graph.value(subject=None, predicate=P)` returns None (rdflib returns None when subject and object are both None; it is not a wildcard read), whereas an interpolated None now raises in `m{ }`. The translation guards the read: `m{ {cur} … ?v }.first() if cur is not None else None`. Not `{Literal(cur)}`: cur is a URIRef when present and Literal(URIRef) would turn it into a plain literal. Proof: check OK; replacing the guard by `if True` FAILs on call[4] (TypeError vs None)."
   ],
   "article_candidate": true,
   "draft_sha": "b8b163cbdce931b0",
@@ -54,21 +55,30 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "trois appels de plus sur des pages générées à la forme réelle de ckanext-dcat (<URL de la page> a hydra:PagedCollection ; hydra:nextPage \"URL suivante\" — un LITTÉRAL) : chaîne de trois pages (la lecture de la ligne 32 a enfin une solution, puis le littéral falsy \"\" arrête la boucle), deux solutions pour chacune des trois lectures (.one() lèverait), aucune PagedCollection mais un hydra:nextPage voisin (cur None) ; dans chaque page, avant le nœud décisif, un voisin partageant deux termes sur trois qui pointe vers une page leurre dont la visite se voit ; couture identique des deux côtés : quality.add_quality_measures (no-op du shim) remplacé par un enregistreur qui écrit (d, probe:qualityMeasured, activity) dans graph, comme le vrai écrit ses mesures DQV pendant la boucle, et les journaux du module imprimés sur la sortie que le harnais compare par appel ('Total pages:N').",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "unchanged (call[4], no PagedCollection, already existed).",
+    "translation_fixed": true,
     "mutants_killed": [
-      "lecture l.32 : (g) retiré",
-      "lecture l.32 -> None",
-      "lecture l.32 : sujet -> []",
-      "lecture l.32 : prédicat -> hydra:PagedCollection",
-      "lecture l.32 : prédicat -> hydra:previousPage",
-      "lecture l.32 : {next_page} nu au lieu de {URIRef(next_page)}",
-      ".one() à la place de .first() (l.21, l.22, l.32)",
-      "l.21 : objet -> [], prédicat -> ex:kind",
-      "l.22 : sujet -> [], prédicat -> hydra:previousPage",
-      "boucle finale -> [] ; objet -> []"
+      "guard `if cur is not None` -> `if True` (call[4]: TypeError vs None)"
     ],
-    "remaining": "wrong-construction (question 2 du tri) : `{URIRef(next_page)}` remplacé par `f<{next_page}>` reste vert, aussi sur la forme réelle (nextPage littéral) ; seul `{next_page}` nu est faux — à juger. La note de translation_notes qui dit que les trois .first() ont chacun une solution était fausse avec l'ancien pilote (le troisième n'en avait aucune) ; elle est vraie avec l'appel 2. article_candidate:true est contesté par le tri : non touché. La forme littérale de hydra:nextPage vient de ckanext-dcat (_add_pagination_triples), absent des clones du corpus : de mémoire, à confirmer si cela compte."
+    "remaining": "The pair departs from the one-line `m{ }.first()` form with a Python conditional, because None in subject position is no longer tolerated by the language. The earlier remaining question (`{URIRef(next_page)}` vs f<…>) is untouched.",
+    "previous": {
+      "date": "2026-10-30",
+      "driver": "trois appels de plus sur des pages générées à la forme réelle de ckanext-dcat (<URL de la page> a hydra:PagedCollection ; hydra:nextPage \"URL suivante\" — un LITTÉRAL) : chaîne de trois pages (la lecture de la ligne 32 a enfin une solution, puis le littéral falsy \"\" arrête la boucle), deux solutions pour chacune des trois lectures (.one() lèverait), aucune PagedCollection mais un hydra:nextPage voisin (cur None) ; dans chaque page, avant le nœud décisif, un voisin partageant deux termes sur trois qui pointe vers une page leurre dont la visite se voit ; couture identique des deux côtés : quality.add_quality_measures (no-op du shim) remplacé par un enregistreur qui écrit (d, probe:qualityMeasured, activity) dans graph, comme le vrai écrit ses mesures DQV pendant la boucle, et les journaux du module imprimés sur la sortie que le harnais compare par appel ('Total pages:N').",
+      "translation_fixed": false,
+      "mutants_killed": [
+        "lecture l.32 : (g) retiré",
+        "lecture l.32 -> None",
+        "lecture l.32 : sujet -> []",
+        "lecture l.32 : prédicat -> hydra:PagedCollection",
+        "lecture l.32 : prédicat -> hydra:previousPage",
+        "lecture l.32 : {next_page} nu au lieu de {URIRef(next_page)}",
+        ".one() à la place de .first() (l.21, l.22, l.32)",
+        "l.21 : objet -> [], prédicat -> ex:kind",
+        "l.22 : sujet -> [], prédicat -> hydra:previousPage",
+        "boucle finale -> [] ; objet -> []"
+      ],
+      "remaining": "wrong-construction (question 2 du tri) : `{URIRef(next_page)}` remplacé par `f<{next_page}>` reste vert, aussi sur la forme réelle (nextPage littéral) ; seul `{next_page}` nu est faux — à juger. La note de translation_notes qui dit que les trois .first() ont chacun une solution était fausse avec l'ancien pilote (le troisième n'en avait aucune) ; elle est vraie avec l'appel 2. article_candidate:true est contesté par le tri : non touché. La forme littérale de hydra:nextPage vient de ckanext-dcat (_add_pagination_triples), absent des clones du corpus : de mémoire, à confirmer si cela compte."
+    }
   }
 }

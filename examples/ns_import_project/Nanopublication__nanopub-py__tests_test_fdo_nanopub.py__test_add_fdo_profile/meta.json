@@ -32,7 +32,8 @@
     "`rdflib.Literal(\"FdoProfile\")`, used only as an m{ } pattern's object term, becomes the bare `\"FdoProfile\"` plain-literal form: inside an island a quoted string with no `@lang`/`^^dt` suffix is exactly `Literal(v)` with datatype=None, language=None (verified: this is the untyped case INSTRUCTIONS.md's own pitfall list contrasts with `Literal(v, datatype=xsd:string)`, and it applies here since `rdflib.Literal(\"FdoProfile\")` supplies neither). This one substitution also let `import rdflib` and the whole `from rdflib import RDF, RDFS, DCTERMS` plain-Python import drop out of translated.ldpy entirely: with RDFS.label/DCTERMS.conformsTo/rdflib.Literal(...) all moved into island syntax, none of the three names -- nor `rdflib` itself, nor RDF, already unused in original.py too -- has a remaining use.",
     "`assert_introduces_in_pubinfo`: a module-level helper the region's own body calls but the extraction did not capture (test_fdo_nanopub.py, defined ~line 21) -- an AGENT_BATCH '163 regions' executability restoration, transcribed verbatim and appended identically to both sides (its own RDF operation -- npx:introduces -- gets the same trav_existence-style bool(m{ }) translation as the region's own asserts, for the same reason).",
     "Dependency: `nanopub` is on PyPI (`pip index versions nanopub`: 2.2.2, ..., 0.1.0 -- present, not merely referenced) and was installed into ~/.venvs/ldpy; every transitive dependency (pycryptodome, pyshacl, rdflib>=6.3.2, requests, sparqlwrapper, typer, yatiml) was ALREADY satisfied in the venv, and rdflib stayed pinned at 7.2.1 after install (checked before and after) -- an ordinary dependency, not a network/database case. `FdoNanopub(FAKE_HANDLE, FAKE_LABEL)` with no `source_uri` and no `conf` (so `NanopubConf(profile=None)`) never reaches `nanopub.nanopub.Nanopub.__init__`'s `requests.get` branch (only taken when `source_uri` is given) -- verified by running the real call directly before writing this pair: no network access, no signing key needed.",
-    "Fixture-strength check: replacing `npx:introduces` with `npx:wrongPredicate` in `assert_introduces_in_pubinfo` flips `rdfeval check` to FAIL (translated.ldpy's own `assert bool(m{ ... })` raises AssertionError, caught by run_pair as an error); reverted afterward, OK confirmed again."
+    "Fixture-strength check: replacing `npx:introduces` with `npx:wrongPredicate` in `assert_introduces_in_pubinfo` flips `rdfeval check` to FAIL (translated.ldpy's own `assert bool(m{ ... })` raises AssertionError, caught by run_pair as an error); reverted afterward, OK confirmed again.",
+    "Repair 2026-11-02 (hollow green): the test returned None and passed on both sides, so no call made the original show anything. The driver now installs, in each call's factory, a variant of `FdoNanopub.add_fdo_profile` (identical on both sides) that falsifies one assertion at a time (nothing written, neighbouring object, other predicate, other subject, missing / language-tagged / other-handle / other-text label, missing or other npx:introduces): the original raises AssertionError on ten calls and both sides must raise alike. A departure from the original, justified by the fact that the original shows nothing otherwise. Translation unchanged; mutants `?o` for the conformsTo object, `?l` for the label text, `?o` for the introduces object, `?s` for the conformsTo subject each FAIL; hollow_green.py no longer lists the pair."
   ],
   "draft_sha": "d0dc98252294eab5",
   "provenance": {
@@ -51,5 +52,17 @@
     "method": "entry:test_add_fdo_profile",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "13 calls instead of 2: the real parametrization, a full http profile URL, and ten calls whose factory patches FdoNanopub.add_fdo_profile so that exactly one of the three assertions fails (raise compared by type and message).",
+    "translation_fixed": false,
+    "mutants_killed": [
+      "conformsTo object -> variable",
+      "label text -> variable",
+      "introduces object -> variable",
+      "conformsTo subject -> variable"
+    ],
+    "remaining": "The driver patches the project's method (a departure from the original, justified by the original showing nothing otherwise); the shim-invents-logic and wrong-construction questions of the triage stand."
   }
 }

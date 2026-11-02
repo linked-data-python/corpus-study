@@ -1,7 +1,7 @@
 # Extracted from RDFLib/pyLDAPI@c9be295b4e : pyldapi/renderer_container.py
 # region: ContainerRenderer._generate_mem_profile_rdf (lines 260-316, stratum ns_def_local)
 # licence of the source repository: see meta.json
-from rdflib import Graph, URIRef
+from rdflib import Graph, Literal, URIRef
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
@@ -16,7 +16,7 @@ def _generate_mem_profile_rdf(self):
 
     u = URIRef(self.instance_uri)
     +{ {u} a rdf:Bag ;
-           rdfs:label {self.label} ;
+           rdfs:label {Literal(self.label)} ;
            rdfs:comment {self.comment}@en }
     for member in self.members:
         if "uri" in member:
