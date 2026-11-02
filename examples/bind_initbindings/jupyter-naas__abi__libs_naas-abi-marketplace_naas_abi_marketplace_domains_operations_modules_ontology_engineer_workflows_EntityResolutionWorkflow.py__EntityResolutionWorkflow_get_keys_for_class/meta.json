@@ -45,5 +45,22 @@
     "method": "entry:get_keys_for_class",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the one-triple SELECT with its initBindings becomes `graph.objects(class_uri, URIRef(owl:hasKey IRI))` (same triples, same order; the header imports no OWL namespace); `cast`, `list_node`, `collection` and `keys` are inlined into `return list(Collection(graph, list_node))` inside the same try, with the same warning and `return None` on error, and the same `return None` when there is no key.",
+    "optimized.ldpy, from optimized.py: the read is `m{ {class_uri} owl:hasKey ?list }(graph)`; the rest is identical line for line.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Annotated, Set, Tuple, cast, RDFS, Literal and ResultRow go.",
+    "LD Python: the same names go; the owl: prefix is used."
+  ]
 }

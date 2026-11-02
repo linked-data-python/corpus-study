@@ -62,5 +62,22 @@
       "m{ } requête 5 : contrainte ?m <pyj:cmc> {cmc} retirée"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `cmcs` list is iterated in place; the `node_c` counter is `len(nodes)` (it counted the insertions), kept in a `node_id` set with the dict entry; the edge loops index `nodes` directly (the method-return loop keeps the df-then-method lookup order so a double KeyError names the same key); the two `subgraph`/`label` prints become one print with an embedded newline, which removes the original's `;`; `not s in` becomes `s not in`.",
+    "optimized.ldpy, from optimized.py: the four BGP queries are `m{ }` with `{cmc}` interpolated; the fifth, whose alternation `<pyj:method-call>|<pyj:method-call-arg>` kept it in `s{ }` in the translation, is now `m{ ?df {<pyj:method-call> | <pyj:method-call-arg>} ?m ... }`, an rdflib AlternativePath interpolated in predicate position (evaluated by graph.triples(), the same evaluation SPARQL uses; the driver is ordered=True and agrees). The rest is identical line for line.",
+    "No exception to the symmetry. A property path in m{ } is not in the closed construction vocabulary (counted under m{ } and interpolation {expr})."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)",
+    "IRI"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header has nothing unused on either side: optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

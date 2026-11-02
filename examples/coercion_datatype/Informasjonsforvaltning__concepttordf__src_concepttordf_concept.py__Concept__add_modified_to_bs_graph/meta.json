@@ -64,5 +64,24 @@
       "guard removed (`if True`)"
     ],
     "remaining": "article_candidate left true: once corrected the pair is a good example of the pitfall `Literal(n, datatype=...)` is not a bare interpolation, but NOT of a 'zero-cost notation gain' (the datatype now has to be written out). Only datetime.datetime inputs would still differ (unreached by the repository)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the black-style seven-line `self._g.add(...)` is written on two lines; nothing else to compress (the getattr guard stays).",
+    "optimized.ldpy: nothing to compress, identical to translated.ldpy (`+{ {bsnode} dct:modified f\"{...}\"^^xsd:date }(self._g)`, one line).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, URIRef and RelationToSource go (Betydningsbeskrivelse stays: it is the parameter annotation).",
+    "LD Python: Literal, Namespace, RDF, RDFS, URIRef and RelationToSource go, and the unused @prefix rdf: and rdfs: lines; dct: and xsd: are used."
+  ]
 }

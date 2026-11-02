@@ -64,5 +64,25 @@
       "m{ } du second îlot : prédicat rdfs:label -> rdfs:comment (rouge sur call[2] : 'A comment' au lieu de l'IRI)"
     ],
     "remaining": "wrong-construction (le second îlot, BGP pur à un motif, devrait-il être m{ } ?) reste à juger ; meta.json crédite s{ } pour les deux requêtes. Le cas qui prouve le second îlot (rdfs:label à objet IRI) est atypique dans le dépôt réel, où l'étiquette est un littéral déjà ramassé par la première requête."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: q_props binds ?s directly instead of `FILTER(?s = ?S)` + initBindings on ?S (same solutions); the per-row normalisation is one conditional expression (`str(row.olabel or \"\")` is exact); fields always accumulate lists through `setdefault(...).append`, and the final pass turns a one-element list back into its scalar and dedups longer lists (`dict.fromkeys` over non-empty values, falling back to the raw list when all are empty) -- the same result as the original's scalar/list merge plus its dedup loop, the step label list included; the second query (a single triple) becomes `graph.objects(URIRef(step_uri), URIRef(rdfs:label IRI))`, no namespace being imported in the header.",
+    "optimized.ldpy, from optimized.py: q_props is `s{ }` (FILTER, OPTIONAL, DISTINCT) with `{URIRef(step_uri)}` in subject position; the label read is `m{ {URIRef(step_uri)} rdfs:label ?label }(graph)`. The rest is identical line for line.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `List` goes from the typing import (the dedup loop's annotations are gone).",
+    "LD Python: `List` goes likewise; both @prefix lines are used (rdf: in the FILTER, rdfs: in both islands)."
+  ]
 }

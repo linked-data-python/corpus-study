@@ -49,5 +49,28 @@
     "method": "entry:_load",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `test` variable and the `loaded_vocabulary = voc_uri` alias are dropped (voc_uri used directly); the two `q` strings are inlined into their query calls (`self._PFX`); the vocabs set is a comprehension minus {None}, iterated in place (self.concept is still called once per broader concept, before any add). The `_result_single_value` and `_one_res` helpers stay: the first logs records the harness compares, and the bindings loop with its malformed `%` format string stays as is (it raises once records are formatted).",
+    "optimized.ldpy, from optimized.py: query 1 stays `s{ }(self._g).execute()` (the helper needs an rdflib Result); query 2 is `m{ [ a skos:Concept ; skos:broader ?s ; skos:inScheme {voc_uri} ] }(g_loaded)` iterated directly, which replaces `_one_res`; the add is `+{ f<{voc_uri}> rdfs:subPropertyOf f<{vocab}> }(self._g)`. The rest is identical line for line.",
+    "No exception to the symmetry. A blank node `[ ... ]` in m{ } is not in the closed construction vocabulary."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    ".execute()",
+    "call suffix (g)",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `import rdflib.namespace`, `import rdflib.plugins.sparql` and `import logging.config` go (rdflib, logging, typing, vocabulary_context, DEFAULT_FORMAT, rdfsT are used).",
+    "LD Python: the same three go, and `import rdflib` too (the add is an island, no rdflib name is left); both @prefix lines are used."
+  ]
 }

@@ -43,5 +43,25 @@
     "method": "entry:_convert_ontology_owl_restriction",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three `if exact/min_/max_:` blocks become one loop over (predicate, value) pairs with the same truthiness test and the same call order; the ranges list is a comprehension passed directly to `_build_property_ranges` (computed after the cardinalities, as before).",
+    "optimized.ldpy, from optimized.py: query 1 stays `s{ }` (three OPTIONAL); query 2, kept in `s{ }` by the translation for its two alternations, is now `m{ {c} {rdfs:subClassOf | owl:equivalentClass} [ a owl:Restriction ; owl:onProperty {p} ; {owl:allValuesFrom | owl:someValuesFrom | owl:hasValue} ?r ] }` read with `list()`: rdflib AlternativePaths in predicate position, the blank node keeps ?res unprojected so the solutions are bare terms with the SELECT's multiplicity. The rest is identical line for line.",
+    "No exception to the symmetry. A property path and a blank node `[ ... ]` in m{ } are not in the closed construction vocabulary. The notation loses on tokens: the SPARQL texts are single string tokens in Python."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode goes from the shim import.",
+    "LD Python: BNode goes likewise; both @prefix lines are used."
+  ]
 }

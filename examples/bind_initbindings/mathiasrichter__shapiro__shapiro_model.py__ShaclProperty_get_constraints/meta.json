@@ -44,5 +44,25 @@
     "method": "entry:get_constraints",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: props is a comprehension; the `result = []` / `result += query` accumulation and the constraint loop merge into a nested loop (pure reads, same order); `str(r.property)` is the loop's `p` (the bound term's text); `is_enum` is `c.endswith(...)`; `prop` is one conditional expression (its comment moved above it); the sh:in items are a comprehension. The three prepared queries stay class attributes read through `self`, as in the original.",
+    "optimized.ldpy, from optimized.py: the three queries become `m{ }` reads with rdflib property paths interpolated in predicate position: the UNION of `rdfs:subPropertyOf*` and `sh:path/rdfs:subPropertyOf*` is the AlternativePath `{(rdfs:subPropertyOf * \"*\") | (sh:path / (rdfs:subPropertyOf * \"*\"))}`, its DISTINCT a `dict.fromkeys` over the terms (first-occurrence order, as rdflib's DISTINCT); the constraint query is `m{ {self.get_node(p)} ?constraint ?value }` with the FILTER as a Python `startswith` test + `continue` (DISTINCT is vacuous: one bound subject in a Graph); the sh:in list is `m{ {prop} {sh:in / (rdf:rest * \"*\") / rdf:first} ?item }`.",
+    "Exception to the symmetry, and why: the FILTER-as-Python-test and the path rewrites are not carried into optimized.py because there they would REPLACE a one-line call to a prepared query defined outside the region with longer code (a namespace import, the paths, the test); in LD Python the alternative is inlining the query text as s{ }. The ldpy remains larger in tokens (notation > 1) for that reason: Python's queries live outside the region.",
+    "A property path in m{ } is not in the closed construction vocabulary (counted under m{ } and interpolation {expr})."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph and Tuple go.",
+    "LD Python: Graph and Tuple go; the three @prefix lines are used (rdf: and sh: in the sh:in path, rdfs: and sh: in the super-property path)."
+  ]
 }

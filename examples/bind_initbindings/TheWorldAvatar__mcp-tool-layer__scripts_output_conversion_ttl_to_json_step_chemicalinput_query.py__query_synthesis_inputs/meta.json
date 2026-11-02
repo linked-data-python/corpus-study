@@ -66,5 +66,23 @@
       "OPTIONAL ontosyn:hasAlternativeNames supprimé"
     ],
     "remaining": "Mutants équivalents, non comptés : DISTINCT retiré (le regroupement Python replie les doublons), garde `if row.chemical` retirée (?chemical toujours lié par l'UNION), garde `if alt` retirée (row.altName vrai implique str non vide)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `results` variable is inlined into the loop; the grouping `if chem_uri not in grouped: grouped[chem_uri] = {...}` becomes `grouped.setdefault(chem_uri, {...})[\"alternative_names\"]` (the entry dict is built on every row, side-effect free); `str(x) if x else \"N/A\"` becomes `str(x or \"N/A\")`, exact for a falsy Literal too; the `if row.altName:` / `alt = str(...)` / `if alt and ...` nest becomes `alt = str(row.altName or \"\")` + one test.",
+    "optimized.ldpy, from optimized.py: the query stays `s{ }` (UNION, three OPTIONAL, DISTINCT), the bound ?synthesis is the interpolation `{URIRef(synthesis_uri)}` in both UNION arms, the prologue comes from the @prefix lines; it is iterated in place. The rest is identical line for line.",
+    "No exception to the symmetry. The notation loses on tokens here: the SPARQL text is one string token in Python and is tokenised term by term in s{ }; only the PREFIX lines and the initBindings dict are saved."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header has nothing unused on either side: optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

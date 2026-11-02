@@ -58,5 +58,22 @@
       "m{ } : sh:property -> sh:node (rouge sur tous les appels qui ont des solutions, y compris les branches nœud blanc bn1 et bn2)"
     ],
     "remaining": "Question 2 du trieur (classification : la traduction réécrit le texte de SHAPE_QUERY, hissé hors région, en s{ } ; directly-expressible ou minor-restructuring) non traitée : jugement."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the dead `prop = None` goes and `prop` is one conditional expression (its comment moved above); the result loop is a comprehension and `shapes.sort(...)` + `return` becomes `return sorted(...)` (the same stable sort).",
+    "optimized.ldpy, from optimized.py: the query is `m{ ?shape sh:property {prop} }(self.graph)`, iterated for bare terms; the rest is identical line for line.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph and Tuple go.",
+    "LD Python: nothing to remove (translated.ldpy's header was already reduced to URIRef, BNode, List, urlparse, NodeShape and sh:), so optimized_header.ldpy is a copy of optimized.ldpy."
+  ]
 }

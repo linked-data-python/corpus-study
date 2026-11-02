@@ -45,5 +45,25 @@
     "method": "entry:trace_stats_to_json",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: tstats_dict is built as one OrderedDict literal; the unused `valconv_uri` and the `valconv` variable go; the first query loses its initNs (its text uses only xsd:, which the graph binds) and is iterated in place; the second keeps only the stats: prefix it uses; `len(stats_infos) > 0` becomes `stats_infos` (Result.__bool__ is len > 0); the groupby loop becomes a nested comprehension assigned once (the dict was local, so a raising val2jsonobj leaves nothing different); the `final` keys are set with `OrderedDict.fromkeys` and `dict.fromkeys`. The Virtuoso projection of $trace stays in both Python queries.",
+    "optimized.ldpy, from optimized.py: query 1 stays `s{ }` (FILTER, projected $trace) with `{str(KTBS_NS_STATS)}` and the bindings passed in the call suffix, inlined there since the island of query 2 no longer needs the shared `initBindings` dict; query 2 is `sorted(m{ {trace_uri} stats:obselCountPerType ?bn . ?bn ?pred ?obj }(graph), key=...)` (3 columns, no Virtuoso projection). Outside those lines the two files are identical except the 3- vs 4-column unpacking and `stats:obselCountPerType` for `KTBS_NS_STATS.obselCountPerType`.",
+    "No exception to the symmetry: the dropped `initBindings` variable follows from the island interpolating trace_uri, not from a restructuring available to Python (Python still uses it twice)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Counter, defaultdict, chain, KTBS and KTBS_NS_URI go (KTBS_NS_URI fed the '' prefix that optimized.py no longer declares); the shim import fits on one line.",
+    "LD Python: the same names go; both @prefix lines are used (xsd: in the FILTER, stats: in m{ } and as a Python term)."
+  ]
 }
