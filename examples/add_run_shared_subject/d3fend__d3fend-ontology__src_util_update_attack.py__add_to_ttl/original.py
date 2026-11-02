@@ -2,7 +2,8 @@
 # region: add_to_ttl (lines 401-452, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
 from rdflib import BNode, URIRef, Literal, RDF, RDFS, Namespace
-from build import get_graph, _xmlns as _XMLNS
+from context_shim import get_graph, _xmlns as _XMLNS
+from context_shim import get_framework_labels, get_deprecated_comment, ensure_superclasses
 owl = Namespace("http://www.w3.org/2002/07/owl#")
 rdfs = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 d3fend = Namespace("http://d3fend.mitre.org/ontologies/d3fend.owl#")

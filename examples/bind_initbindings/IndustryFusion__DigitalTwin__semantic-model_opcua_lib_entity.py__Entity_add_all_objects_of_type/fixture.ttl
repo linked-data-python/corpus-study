@@ -1,4 +1,40 @@
-# Input graph for IndustryFusion__DigitalTwin__semantic-model_opcua_lib_entity.py__Entity_add_all_objects_of_type — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for IndustryFusion__DigitalTwin__semantic-model_opcua_lib_entity.py__Entity_add_all_objects_of_type.
+# add_all_objects_of_type(self, g, obj) finds the nodes that share a class
+# with `obj` -- except classes that are (transitively) subclasses of
+# opcua:BaseNodeClass -- and copies their triples into self.e.
 @prefix ex: <http://example.org/> .
+@prefix opcua: <http://opcfoundation.org/UA/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# classes: ex:Base2 reaches opcua:BaseNodeClass in TWO steps (the + path);
+# ex:T2 has a superclass chain that does NOT reach it
+ex:Base  rdfs:subClassOf opcua:BaseNodeClass .
+ex:Base2 rdfs:subClassOf ex:Base .
+ex:T2    rdfs:subClassOf ex:Mid .
+ex:Mid   rdfs:subClassOf ex:Top .
+
+# n1, n2, n3 share ex:T1; n3 and n4 share ex:T2
+ex:n1 a ex:T1 , ex:Base2 ; ex:name "n1" ; ex:next ex:n2 ; ex:related ex:T3 .
+ex:n2 a ex:T1 ; ex:name "n2" ; ex:flag true .
+ex:n3 a ex:T1 , ex:T2 ; ex:name "n3" .
+ex:n4 a ex:T2 ; ex:name "n4" .
+
+# n5 shares with n1 only a subclass of opcua:BaseNodeClass: not a match
+ex:n5 a ex:Base2 ; ex:name "n5" .
+
+# neighbours that must not match: another class (also reached from n1 by a
+# predicate other than rdf:type), ex:T1 / ex:T2 mentioned
+# through a predicate other than rdf:type
+ex:n6 a ex:T3 ; ex:name "n6" .
+ex:n7 ex:related ex:T1 ; ex:name "n7" .
+ex:n8 ex:kind ex:T2 ; ex:name "n8" .
+
+# a node alone in its class, and one with no type at all
+ex:lonely  a ex:T9 ; ex:name "lonely" .
+ex:untyped ex:name "untyped" .
+
+# RDF lists, as the region receives them when `obj` is a blank node
+ex:holder  ex:items ( ex:n4 ex:lonely ) .
+ex:holder2 ex:items ( [ a ex:T4 ; ex:name "anon1" ] [ a ex:T4 ; ex:name "anon2" ] ) .
+# a blank node that is not a list
+ex:holder3 ex:single [ ex:name "not a list" ] .

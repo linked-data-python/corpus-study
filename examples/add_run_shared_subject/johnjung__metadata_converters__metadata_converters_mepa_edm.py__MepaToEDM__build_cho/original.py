@@ -2,5 +2,6 @@
 # region: MepaToEDM._build_cho (lines 201-201, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
 from rdflib.namespace import RDF, DC, DCTERMS, XSD
+from context_shim import self, graph
 
 self.graph.add((self.work_cho, DCTERMS.hasPart, self.recto_cho))

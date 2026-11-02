@@ -2,6 +2,7 @@
 # region: _parse_1_1 (lines 303-316, stratum add_run_shared_subject)
 # licence of the source repository: see meta.json
 from rdflib	import BNode
+from context_shim import graph, state, ns_rdf
 
 if state.new_list and not state.list_empty() :
 	for prop in state.get_list_props() :

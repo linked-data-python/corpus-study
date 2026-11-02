@@ -13,11 +13,19 @@
     "namespace_term": 5,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "prefixes: RDF->rdf; four g.add on the same subject n become one `+{ {n} a rdf:Statement ; rdf:subject {s[0]} ; rdf:predicate {s[1]} ; rdf:object {s[2]} }`; RDF['type'] is `a`",
+    "`@graph g` inside the method (g is a parameter); `self.conf['new_graph_uri']` is a stub in context_shim.py (a stable IRI derived from the triple)",
+    "difference NOT covered by the driver: `g.add((n, p, \"plain str\"))` raises AssertionError (\"Object ... must be an rdflib term\") while `rdf:object {s[2]}` coerces a plain Python str to a literal -- the translation is more permissive on an `s` that is not made of rdflib terms (real callers pass terms)"
   ],
   "draft_sha": "04de39a57ae2b6e5",
   "provenance": {
@@ -29,5 +37,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

@@ -3,9 +3,8 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, Literal, URIRef, BNode
 from rdflib.namespace import OWL, RDF, RDFS
-from lib.utils import NGSILD, collection_to_list, calculate_array_dimensions
+from context_shim import NGSILD, collection_to_list, calculate_array_dimensions
 import logging
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
@@ -22,23 +21,22 @@ def add_all_objects_of_type(self, g, obj):
     # collect all potential target nodes for NodeId references
     # after the loop, add them to the entity graph
     unique_onc = set()
+    @graph g
     for o in objects:
         unique_onc.add(o)
         logger.info(f"Adding all potential target nodes for NodeId reference of type {o}")
-        bindings = {'nodeclass': o}
-        result = g.query("""
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        result = s{
         SELECT ?onc ?type WHERE {
-            ?nodeclass a ?type .
-            FILTER NOT EXISTS {?type rdfs:subClassOf+ opcua:BaseNodeClass . }
+            {o} a ?type .
+            FILTER NOT EXISTS {?type rdfs:subClassOf+ {self.opcuans.BaseNodeClass} . }
             ?onc a ?type .
-            FILTER(?nodeclass != ?onc) .
-        }""", initBindings=bindings, initNs={'base': self.basens, 'opcua': self.opcuans})
+            FILTER({o} != ?onc) .
+        }}
         # Collect all unique rows in a set to avoid duplicates
 
         for row in result:
             unique_onc.add(row.onc)
         # Add all triples for each unique onc after collecting
     for onc in unique_onc:
-        for (s, p, o) in g.triples((onc, None, None)):
-            self.e += g{ {s} {p} {o} }
+        for p, o in m{ {onc} ?p ?o }:
+            +{ {onc} {p} {o} }(self.e)

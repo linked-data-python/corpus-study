@@ -14,11 +14,26 @@
     "namespace_term": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "m{ }",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs"
+    "prefixes: RDF->rdf, RDFS->rdfs (rdf:nil replaces RDF.nil)",
+    "the query has FILTER NOT EXISTS with a property path (rdfs:subClassOf+) and a FILTER: not a basic graph pattern, so `s{ }`. ?nodeclass is not projected (SELECT ?onc ?type), so initBindings={'nodeclass': o} (and the `bindings` dict) disappear: `{o}` in term position at its two occurrences, the subject of `a ?type` and the FILTER operand",
+    "opcua: is `self.opcuans`, an instance attribute, not a lexical IRI: it is interpolated, `{self.opcuans.BaseNodeClass}` in object position of the path, instead of a `@prefix` (which would freeze the namespace); initNs 'base' is unused by the query and dropped",
+    "`for (s, p, o) in g.triples((onc, None, None)): self.e.add((s, p, o))` becomes `for p, o in m{ {onc} ?p ?o }: +{ {onc} {p} {o} }(self.e)` (s is onc by construction); a blank-node onc is matched as the node, not as a variable, in m{ } (the driver has anonymous list members)",
+    "FILTER(?nodeclass != ?onc) is redundant with `unique_onc.add(o)` (the node's own triples are copied anyway): widening it to `?type != ?onc` is not detected by any fixture, by construction; widening `{o} a ?type` to a variable predicate, or dropping the NOT EXISTS, is",
+    "context: lib.utils is not importable (pyld...): context_shim.py has collection_to_list and calculate_array_dimensions VERBATIM, NGSILD, and the __init__ of Entity reduced to e / basens / opcuans; the log line names a blank node whose id differs per parse, masked by stdout_filter in the driver"
   ],
   "draft_sha": "f9cbaaa7fce62a82",
   "provenance": {
@@ -30,5 +45,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

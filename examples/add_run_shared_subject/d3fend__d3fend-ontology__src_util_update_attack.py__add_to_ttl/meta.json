@@ -14,11 +14,21 @@
     "term_constructor": 12,
     "triple_add": 15
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: owl->owl, rdfs->rdfs, d3fend->d3fend, skos->skos, RDF->rdf"
+    "prefixes: owl->owl, rdfs->rdfs, d3fend->d3fend, skos->skos; the module-level `Namespace(...)` definitions of the original become `@prefix` (the RDF.type / RDFS.label / d3fend[\"attack-id\"] / d3fend[revoked_by] forms become `a`, `rdfs:label`, `d3fend:attack-id`, `d3fend:{revoked_by}`)",
+    "the 4 / 5 / 6 consecutive adds on attack_uri of each branch become ONE `+{ s a owl:Class ; ... }` per branch (15 adds -> 5 islands); `owl:deprecated True` is the Turtle boolean `true` (Literal(True) is \"true\"^^xsd:boolean)",
+    "`Literal(x)` on a string is the plain interpolation `{x}`; mod_label / attack_id / pref_label / comment_text are strings in every call (labels come from STIX names); had one been None, the original would write the literal \"None\" and the interpolation would raise TypeError -- `{Literal(x)}` is the fully faithful form",
+    "`build` is not importable here (the installed `build` is PyPA's, and the repository's own build.py defines no `_xmlns`): context_shim.py carries `_xmlns`, a `get_graph` stub, and VERBATIM copies of get_framework_labels, get_deprecated_comment, ensure_superclasses and the tactic tables from update_attack.py",
+    "`@graph graph` declared in the function after `attack_uri`; ensure_superclasses(graph, ...) keeps its rdflib calls (outside the region)"
   ],
   "draft_sha": "1466e2eddecc5ecd",
   "provenance": {
@@ -30,5 +40,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

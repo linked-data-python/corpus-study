@@ -13,11 +13,19 @@
     "namespace_term": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, DC->dc, DCTERMS->dcterms, XSD->xsd"
+    "prefixes: DCTERMS->dcterms (the draft's rdf/dc/xsd declarations are unused and dropped)",
+    "the region is a single `self.graph.add(...)`: there is no run of adds on a shared subject in it -- `@graph self.graph` + one `+{ }` is the whole translation (the stratum label comes from the surrounding method)",
+    "`self` is a MepaToEDM stub from context_shim.py (graph, work_cho, recto_cho); the shim also exposes `graph = self.graph` so the harness, which compares module-level graphs, sees what the statement writes"
   ],
   "draft_sha": "04ee137e24315888",
   "provenance": {
@@ -29,5 +37,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

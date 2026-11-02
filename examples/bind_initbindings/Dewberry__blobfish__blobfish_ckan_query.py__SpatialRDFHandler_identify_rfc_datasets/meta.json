@@ -10,11 +10,23 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    ".execute()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, DCTERMS->dcterms, GEO->geo, GEOF->geof, SF->sf"
+    "the method raises NotImplementedError on its first line: the query is unreachable, so the driver proves the raise (type and message, compared like a value) and that `self` is untouched; the query translation itself is NOT proved by rdfeval",
+    "the query has property paths, an inverse path, and a FILTER: not a basic graph pattern, so `s{ }`; ?p is not projected (SELECT ?s3), so initBindings={'p': point_literal} becomes `{point_literal}` in term position at its three occurrences, including the FILTER argument (each occurrence gets its own generated variable, all bound to the same value); result read with `.execute()` since the method returns the rdflib Result",
+    "checked apart (outside the harness, raise removed from both sides, geof:sfWithin registered as an rdflib custom function, a graph with a literal-subject point as the original query needs): same rows on 3 points, one of them without solution",
+    "prefixes of the query come from `@prefix` declarations (rdf, aorc, dct, geosparql, geof, plus dcat which the original gets from rdflib's default bindings of the graph, not from initNs); the project IRIs (AORC) are the real ones from blobfish/pyrdf/_AORC.py",
+    "executability: `shapely` is not in the study venv (Point/Polygon/MultiPolygon stubs), and the relative imports (.const, ..pyrdf) are redirected to context_shim.py in original.py and translated.ldpy alike"
   ],
   "draft_sha": "537e1e8c4dcf88de",
   "provenance": {
@@ -26,5 +38,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

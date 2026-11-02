@@ -12,10 +12,21 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "region is a statement run at module level: `state`, `graph` and `ns_rdf` come from context_shim.py (subset of the pyRdfa execution context, `state` reduced to the five members the region calls); `@graph graph` is added before the `if`",
+    "the two adds on heads[i] (rdf:first, rdf:rest) are one `+{ s p1 o1 ; p2 o2 }`; the two single adds (rdf:nil for an empty list, the anchor) stay one `+{ }` each, as there is no second property on their subject",
+    "`ns_rdf[\"nil\"|\"first\"|\"rest\"]` becomes `rdf:nil|first|rest` through `@prefix rdf:` (pyRdfa's ns_rdf is that namespace); `ns_rdf` is still imported by both sides but unused on the ldpy side",
+    "`vals == None` kept as is (a Python test on data, not an RDF operation); BNode() list heads kept in Python, since they are built before the triples and indexed (heads[i+1])"
+  ],
   "draft_sha": "15aaa9f7f64f642e",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.433167+00:00",
@@ -26,5 +37,6 @@
   "strata": [
     "add_run_shared_subject"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }
