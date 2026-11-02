@@ -182,11 +182,19 @@ def case_object_deleted_from_iri_fallback():
     return ((_with_uri(evt, "http://ontology.naas.ai/abi/evt-del-2"),), {})
 
 
+def case_object_deleted_creator_null_item():
+    # EventCodec's JSON reconstruction can hand a list holding a null:
+    # Literal(None) is the string "None" in the original, and must stay so.
+    evt = ObjectDeleted(prefix="p", key="k", creator=["alice", None])
+    return ((_with_uri(evt, "http://ontology.naas.ai/abi/evt-del-3"),), {})
+
+
 VERDICT = run_pair(
     __file__,
     entry='rdf',
     calls=[case_full, case_bare, case_cycle, case_visited_leaf,
            case_object_put_service, case_object_put_reconstructed,
            case_object_deleted_creator_scalar,
-           case_object_deleted_from_iri_fallback],
+           case_object_deleted_from_iri_fallback,
+           case_object_deleted_creator_null_item],
 )

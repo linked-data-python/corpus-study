@@ -19,6 +19,8 @@
 # but the in-memory tree has no such restriction.
 import xml.etree.ElementTree as ET
 
+import rdflib
+
 _MATCH_TAG = ".//Viscoelastic//MeasurementMode"
 
 root = ET.Element("Root")
@@ -32,5 +34,5 @@ root.append(neighbour)
 
 expected_data = {}
 
-expected_data["viscoelastic_measurement_mode"] = [f{elem.text}
+expected_data["viscoelastic_measurement_mode"] = [f{rdflib.Literal(elem.text)}
                                 for elem in root.iter(".//Viscoelastic//MeasurementMode")]

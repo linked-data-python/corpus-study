@@ -1,7 +1,7 @@
 # Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-core/naas_abi_core/services/object_storage/ontologies/modules/ObjectStorageEventOntology.py
 # region: RDFEntity.rdf (lines 227-307, stratum coercion_datatype)
 # licence of the source repository: see meta.json
-from rdflib import Graph, URIRef
+from rdflib import Graph, Literal, URIRef
 @prefix bfo: <http://purl.obolibrary.org/obo/> as BFO .
 @prefix abi: <http://ontology.naas.ai/abi/> as ABI .
 @prefix cco: <https://www.commoncoreontologies.org/> as CCO .
@@ -57,7 +57,7 @@ def rdf(
 
     # Add label if it exists
     if hasattr(self, "label"):
-        +{ {subject} rdfs:label {self.label} }
+        +{ {subject} rdfs:label {Literal(self.label)} }
 
     object_props: set[str] = getattr(self, "_object_properties", set())
 
@@ -79,7 +79,7 @@ def rdf(
                         elif is_object_prop and isinstance(item, (str, URIRef)):
                             +{ {subject} {URIRef(prop_uri)} {URIRef(str(item))} }
                         else:
-                            +{ {subject} {URIRef(prop_uri)} {item} }
+                            +{ {subject} {URIRef(prop_uri)} {Literal(item)} }
                 elif hasattr(prop_value, "rdf") and hasattr(prop_value, "_uri"):
                     # Check if this entity was already visited to prevent cycles
                     if prop_value._uri not in visited:

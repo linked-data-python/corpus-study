@@ -13,14 +13,15 @@
     "term_constructor": 1
   },
   "translation_status": "final",
-  "classification": "directly-expressible",
+  "classification": "awkward",
   "constructions": [
     "f{ }"
   ],
   "translation_notes": [
-    "the region reads two names bound elsewhere in the enclosing test method (`root`, an ElementTree; `expected_data`, an accumulator dict): restored per AGENT_BATCH.md's kind:statement note, identically in original.py and translated.ldpy.",
-    "`rdflib.Literal(elem.text)` -> `f{elem.text}`: elem.text is a plain str, so node()'s default coercion produces a Literal with datatype None and language None, matching Literal(elem.text) exactly (terms.md: `f{\"a\"}.datatype is None`) -- the clean case of this stratum, no `^^`/`@` suffix needed since the original never passed one.",
-    "kept `root.iter(\".//Viscoelastic//MeasurementMode\")` byte-for-byte: ElementTree's .iter() matches an exact tag, not an XPath, so this is a pre-existing bug in the source repository, not something to fix (no refactoring). Built the fixture tree with ET.Element(...) instead of parsing XML text, so an element's .tag can hold that literal string with slashes (real XML forbids it) and the site actually executes over several matches plus a non-matching neighbour."
+    "the region reads two names bound elsewhere in the enclosing test method (`root`, an ElementTree; `expected_data`, an accumulator dict): restored per AGENT_BATCH.md's kind:statement note, identically in original.py and translated.ldpy (translated.ldpy also imports rdflib for the wrapped call).",
+    "`rdflib.Literal(elem.text)` -> `f{rdflib.Literal(elem.text)}`. elem.text is a str or None (an empty element, `<X/>`), and the original turns None into the literal \"None\" (rdflib's Literal(None)). The language's coercion does not: `f{elem.text}` raises TypeError on None in ldpy 0.7.1 (None is not an RDF term), so the bare form is not the same program; the Literal() call has to stay inside the island, where f{ } only passes an existing term through. The island adds nothing here -- the stratum's clean case (`f{x}` for a str) does not hold when the value may be None -- hence `awkward`.",
+    "kept `root.iter(\".//Viscoelastic//MeasurementMode\")` byte-for-byte: ElementTree's .iter() matches an exact tag, not an XPath, so this is a pre-existing bug in the source repository, not something to fix (no refactoring). Built the fixture tree with ET.Element(...) instead of parsing XML text, so an element's .tag can hold that literal string with slashes (real XML forbids it) and the site actually executes over several matches plus a non-matching neighbour.",
+    "driver.py runs a second phase on copies of both files whose matching elements carry the texts None, \"\", \"  \" and a non-ASCII string; Literal(None) must give \"None\" on both sides, and \"\" must stay a (empty) literal."
   ],
   "draft_sha": "4034ec8a60cf757f",
   "provenance": {
@@ -34,10 +35,10 @@
   ],
   "oracle": "isomorphism",
   "validation": {
-    "status": "equivalent",
-    "method": "module-state + None/empty texts",
+    "status": "unresolved",
+    "method": null,
     "diffs": [],
-    "error": null
+    "error": "driver produced no verdict (rc=1):  \"/tmp/tmpkm9bw08r/translated.ldpy\", line 36, in <module>\n    for elem in root.iter(\".//Viscoelastic//MeasurementMode\")]\n                      ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lefrancois/dev/github.com/linked-data-python/ldpy/ldpy/runtime.py\", line 257, in node\n    raise TypeError(_NONE_IS_NOT_A_TERM)\nTypeError: None is not an RDF term. To match any term, write a variable — ?any in -{ }, an unprojected [] in m{ } — or interpolate ldpy.ANY; to write nothing, test the value before the island"
   },
   "repair": {
     "date": "2026-10-30",
@@ -47,7 +48,8 @@
       "f{elem.text} -> f{elem.text or \"\"} (survivait : aucun texte None)",
       "compréhension filtrée par `if elem.text` (survivait : aucun texte falsy)",
       "îlot supprimé (str nue) ; f\"{elem.text}\"^^xsd:string ; f\"{elem.text}\"@en ; f<{elem.text}>",
-      "itération vidée ; première correspondance seulement"
+      "itération vidée ; première correspondance seulement",
+      "f{rdflib.Literal(elem.text)} -> f{elem.text} (TypeError on a None text)"
     ],
     "remaining": ""
   }

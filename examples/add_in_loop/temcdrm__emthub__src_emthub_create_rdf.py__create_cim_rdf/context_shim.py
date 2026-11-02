@@ -30,4 +30,12 @@ dyn_models = json.loads(
 
 g = rdflib.Graph()
 uuids = {}
-model_types_used = {'GENCLS', 'EXST1', 'REGCA1', 'WTARA1'}
+# Filled by .add() calls, as in the original, and NOT written as a set literal:
+# a literal of constants is compiled to a frozenset constant whose element
+# order is frozen into the .pyc under the hash seed of the compiling process,
+# so the iteration order of the resulting set depended on whether the first
+# side to import this shim compiled it or loaded a cached .pyc -- the two
+# sides could then end the loop on different models.
+model_types_used = set()
+for _mdl in ('GENCLS', 'EXST1', 'REGCA1', 'WTARA1'):
+    model_types_used.add(_mdl)
