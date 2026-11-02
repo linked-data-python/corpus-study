@@ -1,0 +1,48 @@
+# Extracted from d3fend/d3fend-ontology@cce593d61c : src/util/update_attack.py
+# region: add_to_ttl (lines 401-452, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import BNode, URIRef, Literal, RDF, RDFS, Namespace
+from context_shim import get_graph, _xmlns as _XMLNS
+from context_shim import get_framework_labels, get_deprecated_comment, ensure_superclasses
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix d3fend: <http://d3fend.mitre.org/ontologies/d3fend.owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+def add_to_ttl(tech, graph, framework="enterprise"):
+    # 3 cases:
+    # Not deprecated or revoked: add class, label, attack-id, subClassOf
+    # Deprecated: add class, label, attack-id, subclassOf, owl:deprecated true
+    # Revoked: add class, label, attack-id, subClassOf, owl:deprecated true, rdfs:seeAlso revoked_by_technique
+    # Have not seen any cases of deprecated & revoked
+
+    name = tech["label"]
+    attack_id = tech["id"]
+    subclass = tech["superclasses"]
+    revoked_by = tech["revoked_by"]
+    subtechnique = tech["data"]["x_mitre_is_subtechnique"]
+    attack_uri = URIRef(_XMLNS + attack_id)
+    mod_label, pref_label = get_framework_labels(name, framework)
+
+    @graph graph
+    if pref_label is not None:
+        +{ {attack_uri} skos:prefLabel {pref_label} }
+
+    ensure_superclasses(graph, attack_uri, subclass, framework, subtechnique)
+
+    +{ {attack_uri} a owl:Class ; rdfs:label {mod_label} ; d3fend:attack-id {attack_id} }
+    if tech["deprecated"]:
+        +{ {attack_uri} owl:deprecated true }
+        comment_text = get_deprecated_comment(tech, framework)
+        if comment_text:
+            +{ {attack_uri} rdfs:comment {comment_text} }
+        return "missing_deprecated"
+
+    if tech["revoked"]:
+        +{ {attack_uri} owl:deprecated true ;
+              rdfs:seeAlso d3fend:{revoked_by} ;
+              rdfs:comment f"This technique has been revoked by {revoked_by}" }
+        return "missing_revoked"
+
+    return "missing_neither"

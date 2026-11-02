@@ -49,5 +49,25 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four `g2.add(...)` calls, written two per line with `;` in the original, become one `g2 += [...]` list of four triples on `c` (Graph.__iadd__ takes an iterable of triples; g2 is a plain Graph). The loop data and `c = SEM[cid]` stay: `c` is used four times, so inlining SEM[cid] would cost tokens on the Python side.",
+    "optimized.ldpy, from optimized.py: one `+{ {SEM[cid]} a owl:Class ; rdfs:label f\"{clab}\"@en ; skos:definition f\"{cdef}\"@en ; dcterms:source f\"{S('R-TOGAF', 'R-DAMA')}\"@en }`. The three `Literal(x, lang=\"en\")` become language literals with an f-string lexical part (clab, cdef and S(...) are all str, so the literal is the same term).",
+    "Exception to the symmetry rule: `c = SEM[cid]` is dropped in optimized.ldpy only, and SEM[cid] interpolated in place, because the `;` of the island names the subject once; Python must repeat it four times, so the variable pays there. The loop's last `c` is a module-level value the driver compares only when both sides define it.",
+    "Not compressed: the three (cid, clab, cdef) rows and the SEM namespace are data; a `partial(Literal, lang=\"en\")` helper was rejected as golf."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `URIRef`, `XSD` and `PROV` go (unused); `Graph`, `Namespace`, `Literal`, RDF/RDFS/OWL/SKOS/DCTERMS, BASEDIR, S and the SEM/g2 lines stay.",
+    "optimized_header.ldpy: the whole `from rdflib.namespace import ...` line goes (rdf:type is `a`, the other four are @prefix names) and `URIRef`, `Literal` go from the rdflib import; `Graph` and `Namespace` stay for g2 and SEM, which the region interpolates. The four @prefix lines are all used and stay."
+  ]
 }

@@ -58,5 +58,23 @@
       "@graph test_graph -> @graph Graph() (écritures perdues)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `test_graph.add` calls become one `test_graph += [...]` list; `result` is inlined into `for row in adapter.query(...)`; the region's dead `import os` goes (os is never used in the extracted block). Prints, try/except and the `row.count` bug are unchanged.",
+    "optimized.ldpy, from optimized.py: `test_graph = Graph()` and the adds become one graph literal `test_graph = g{ {test_subject} a <http://example.org/Person> ; <http://example.org/name> \"Test Person\" }`, with `a` for rdflib.RDF.type (the translation interpolated {rdflib.RDF.type}).",
+    "Exception to the symmetry rule: building the graph in one expression is only possible with `g{ }`; Python has no graph literal, so optimized.py keeps `Graph()` followed by `+=`. `test_graph = Graph()` moves after `test_subject` in optimized.ldpy, which reads it.",
+    "Not compressed: `subject_graph` is kept rather than inlined as a call inside an f-string."
+  ],
+  "optimized_constructions": [
+    "g{ }",
+    "IRI",
+    "plain literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `BNode` goes from the rdflib import; `import rdflib` stays (rdflib.RDF.type, rdflib.Literal).",
+    "optimized_header.ldpy: `import rdflib` and `from rdflib import BNode, Graph, URIRef` both go: the region now uses IRI literals, `a`, and `g{ }` instead."
+  ]
 }

@@ -44,5 +44,21 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is one `self.graph.add(...)`. optimized.py is a byte copy of original.py and optimized.ldpy a byte copy of translated.ldpy (`@graph self.graph` + one `+{ }`). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: the rdflib.namespace import keeps only DCTERMS. The shim's `graph` stays although the region does not name it: it is the module-level graph the driver compares.",
+    "optimized_header.ldpy: the rdflib.namespace import goes entirely (dcterms: is a @prefix); the shim import stays for the same reason."
+  ]
 }

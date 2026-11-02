@@ -73,5 +73,28 @@
       "translated.ldpy:28, 40, 44 erasures removed (already killed by cases 1-2)"
     ],
     "remaining": "(1) Out of the repo's reach, not part of the pilot: pom[\"property\"] (and datatype/termType when tested) valued None is written as Literal('None') by `{pom[\"property\"]}` where rdflib's add() raises AssertionError -- known language gap; the repo's parseRML only reaches it for a POM without any predicate/constant (malformed RML), and the multi-path/rename branches would raise AttributeError on `.split` anyway. (2) article_candidate: the oracle is no longer the obstacle, but the gain is thin -- ONE real `;` fusion in 80 lines, every other write is a 1:1 `+{ }`/`-{ }` -- so the pair does not show the stratum's construction in three lines; Maxime to decide whether to drop the flag."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: local aliases `graph = self.initial_graph` and `shacl = self.shaclNS` (neither is reassigned by the called methods); each `remove((s, p, None))` followed by `add((s, p, o))` becomes `graph.set((s, p, o))`, which is that exact pair in rdflib 7.2.1; the duplicated minLength/maxLength blocks become one `for length in (shacl.minLength, shacl.maxLength):` loop (remove of the value read, not .set, because it removes only that value); the four-part match condition, written twice, becomes a nested `matches(pom, path, initial_path)`; the multi-path branch's three `URIRef(shape_identifier)` become one; the unconditional for/else of the fallback (no break) becomes a three-triple list plus a comprehension, as does the `shacl:property` loop.",
+    "optimized.ldpy, from optimized.py: the same structure under one `@graph self.initial_graph`. Each `.set` becomes `-{ s p ?o }` + `+{ s p o }`, which measures one token less than `self.initial_graph.set((s, shacl:path, ...))` here. `graph.value` becomes `m{ {shape_identifier} {length} ?o }.first()`, the `Literal(int(...) + int(value))` a bare `{int(...) + int(value)}` (an int interpolates as the same xsd:integer literal), and the comprehensions are `for` loops with `+{ }`.",
+    "Exception to the symmetry rule: the `graph`/`shacl` aliases exist only in optimized.py; their counterparts in optimized.ldpy are `@graph` and the `shacl:` prefix. The two `-{ }` of the datatype guard stay separate (a multi-pattern -{ } joins).",
+    "Guards kept as written (`self.findNS == []`, `self.findPS == []`, `constraints != {}`): `not x` would differ on a None."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Graph, Namespace, BNode, RDFS, XSD and OWL go; the two rdflib imports merge into `from rdflib import RDF, URIRef, Literal`.",
+    "optimized_header.ldpy: `Literal` goes from the rdflib import (the length is now a bare int interpolation); `URIRef` stays and `@prefix shacl:` is used."
+  ]
 }

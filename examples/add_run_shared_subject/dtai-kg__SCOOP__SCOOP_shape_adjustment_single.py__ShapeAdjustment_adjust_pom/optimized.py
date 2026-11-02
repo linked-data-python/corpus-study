@@ -1,0 +1,101 @@
+# Extracted from dtai-kg/SCOOP@40c6fc0420 : SCOOP/shape_adjustment_single.py
+# region: ShapeAdjustment.adjust_pom (lines 427-506, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, Namespace, BNode
+from rdflib.namespace import RDF, RDFS, XSD, OWL
+from context_shim import ShapeAdjustmentStub
+
+def adjust_pom(self, pom_list):
+    if self.findNS == []:
+        return None  # Comment it and next one if you want to add targetSubjectsOf to the shape which doesn't referenced by a node shape that has target declaration
+    graph = self.initial_graph
+    shacl = self.shaclNS
+
+    def matches(pom, path, initial_path):
+        #if initial_path == path or path.endswith(initial_path) or ("parent:" in path and self.validatePath(path, initial_path)):
+        return (initial_path == path) or path.endswith(initial_path) or (pom["constant"] == True and initial_path == self.iterator) or ("parent:" in path and self.validatePath(path, initial_path))
+
+    for pom in pom_list:
+        for path_list in pom["path"]:
+            if len(path_list) == 1:
+                path = path_list[0]
+                for shape_identifier in self.shape_path:
+                    if "NodeShape" in shape_identifier:
+                        continue
+                    for initial_path in self.shape_path[shape_identifier]:
+                        if matches(pom, path, initial_path):
+                            shape_identifier = URIRef(shape_identifier)
+                            if shape_identifier in self.adjusted_shape:
+                                # new_shape_identifier = shape_identifier + "/" + pom["property"].split("/")[-1]
+                                new_shape_identifier = URIRef(shape_identifier + "/" + pom["property"].split("/")[-1] + str(self.random_number.pop()))
+                                self.updateShape(shape_identifier, new_shape_identifier)
+                                shape_identifier = new_shape_identifier
+                            self.adjusted_shape.append(shape_identifier)
+                            graph.set((shape_identifier, shacl.path, pom["property"]))
+                            if pom["datatype"] is not None:
+                                graph.remove((shape_identifier, shacl.nodeKind, None))
+                                graph.set((shape_identifier, shacl.datatype, pom["datatype"]))
+                            if pom["termType"] is not None:
+                                graph.set((shape_identifier, shacl.nodeKind, pom["termType"]))
+                            if pom["template_length"] is not None:
+                                for length in (shacl.minLength, shacl.maxLength):
+                                    value = graph.value(shape_identifier, length)
+                                    if value is not None:
+                                        graph.remove((shape_identifier, length, value))
+                                        graph.add((shape_identifier, length,
+                                                   Literal(int(pom["template_length"]) + int(value))))
+                            # if self.findNS == []:
+                            #     self.initial_graph.add((shape_identifier, self.shaclNS.targetSubjectsOf, pom["property"]))
+                            self.findPS.append(shape_identifier)
+                            graph += [(subject, shacl.property, shape_identifier) for subject in self.findNS]
+
+            else:
+                constraints = {}
+                for path in path_list:
+                    for shape_identifier_temp in self.shape_path:
+                        if "NodeShape" in shape_identifier_temp:
+                            continue
+                        for initial_path in self.shape_path[shape_identifier_temp]:
+                            if matches(pom, path, initial_path):
+                                shape_identifier = shape_identifier_temp
+                                constraints = self.getConstraints(URIRef(shape_identifier_temp), constraints)
+                if constraints!={}:
+                    # new_shape_identifier = shape_identifier + "/" + pom["property"].split("/")[-1]
+                    shape_identifier = URIRef(shape_identifier + "/" + pom["property"].split("/")[-1] + str(self.random_number.pop()))
+                    self.adjusted_shape.append(shape_identifier)
+                    self.updateCombinationShape(shape_identifier, pom["property"], constraints,pom["template_length"])
+                    self.findPS.append(shape_identifier)
+
+        if self.findPS == []:
+            # shape_identifier = URIRef("http://example.com/PropertyShape/" + pom["property"].split("/")[-1])
+            shape_identifier = URIRef("http://example.com/PropertyShape/" + pom["property"].split("/")[-1] + str(self.random_number.pop()))
+
+            graph += [
+                (shape_identifier, RDF.type, shacl.PropertyShape),
+                (shape_identifier, shacl.path, pom["property"]),
+                (shape_identifier, shacl.targetObjectsOf, pom["property"]),
+            ]
+            graph += [(subject, shacl.property, shape_identifier) for subject in self.findNS]
+            if pom["datatype"] is not None:
+                graph.add((shape_identifier, shacl.datatype, pom["datatype"]))
+            if pom["termType"] is not None:
+                graph.add((shape_identifier, shacl.nodeKind, pom["termType"]))
+
+            self.findPS.append(shape_identifier)
+            self.adjusted_shape.append(shape_identifier)
+
+        self.findPS = []
+
+# Demo harness (identical on both sides, see meta.json): adjust_pom takes
+# `self` and mutates it (self.initial_graph, self.adjusted_shape, self.findPS)
+# rather than returning anything, and ShapeAdjustmentStub has no __eq__, so
+# comparing `self` as a call argument would compare object identity and
+# always fail. This wraps the call in a fresh stub per invocation, built from
+# plain fixture arguments, and hands back the three pieces of mutated state
+# that matter: the graph (isomorphism), and adjusted_shape/findPS as their
+# string form (URIRef has no meaningful __eq__ across the two module
+# namespaces' separately-imported rdflib classes here, but str() does).
+def demo(initial_graph, shape_path, findNS, pom_list, iterator=""):
+    self = ShapeAdjustmentStub(initial_graph, shape_path, findNS, iterator)
+    adjust_pom(self, pom_list)
+    return self.initial_graph, [str(x) for x in self.adjusted_shape], [str(x) for x in self.findPS]

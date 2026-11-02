@@ -1,0 +1,17 @@
+# Extracted from openworm/owmeta-core@cd69d77ad0 : owmeta_core/data.py
+# region: DataUser._reify (lines 309-318, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+def _reify(self, g, s):
+    """
+    Add a statement object to g that binds to s
+    """
+    n = self.conf['new_graph_uri'](s)
+    @graph g
+    +{ {n} a rdf:Statement ;
+          rdf:subject {s[0]} ;
+          rdf:predicate {s[1]} ;
+          rdf:object {s[2]} }
+    return n

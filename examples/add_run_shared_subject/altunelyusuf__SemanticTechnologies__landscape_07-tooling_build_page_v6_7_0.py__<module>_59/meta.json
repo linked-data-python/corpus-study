@@ -55,5 +55,24 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is a single `g.add((ONT, RDFS.label, Literal(..., lang=\"en\")))`. optimized.py is a byte copy of original.py and optimized.ldpy a byte copy of translated.ldpy (`@graph g` + one `+{ {ONT} rdfs:label \"...\"@en }`).",
+    "Unlike the v4_0_0 sibling, this translation kept the original's full import lines in its header, so the notation ratio here is smaller; the header variant makes the two siblings equal."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "IRI",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `Namespace` goes from the rdflib import, and the rdflib.namespace import keeps only RDFS.",
+    "optimized_header.ldpy: the rdflib.namespace import goes entirely and the rdflib import keeps only `Graph` (ONT is an IRI literal, the label a language literal); `@prefix rdfs:` stays."
+  ]
 }

@@ -47,5 +47,26 @@
     "method": "entry:add_to_ttl",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three adds every branch shares (rdf:type owl:Class, rdfs:label, d3fend:attack-id) are hoisted into one `graph += [...]` before the `if`; the revoked branch's three remaining adds become a second list; `key = \"\"` and the `key = ...` assignments become direct returns. The five `tech[...]` reads stay up front, so a missing key still raises before the graph is touched (inlining them would move that KeyError after the skos:prefLabel add).",
+    "optimized.ldpy, from optimized.py: the same structure with `+{ {attack_uri} a owl:Class ; rdfs:label {mod_label} ; d3fend:attack-id {attack_id} }`, `owl:deprecated true` for Literal(True), `d3fend:{revoked_by}` for d3fend[revoked_by], and a bare f-string plain literal for the revoked comment. No exception to the symmetry rule.",
+    "Notation difference not exercised by the driver: on a revoked technique whose `revoked_by` is None, `d3fend[None]` raises TypeError in the original and optimized.py, while `d3fend:{revoked_by}` writes the IRI `d3fend:None`. The translator's note on `{x}` with x None (Literal(None) is \"None\", the interpolation raises) applies here too.",
+    "graph is a plain Graph in the repository (build.get_graph), so `graph += [...]` adds to it exactly as `.add` does."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "plain literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `BNode` and the shim's `get_graph` go (unused); the owl/rdfs/d3fend/skos Namespaces, RDF, RDFS, URIRef and Literal stay.",
+    "optimized_header.ldpy: the rdflib import keeps only `URIRef` (attack_uri) and `get_graph` goes; the four @prefix lines are all used and stay."
+  ]
 }

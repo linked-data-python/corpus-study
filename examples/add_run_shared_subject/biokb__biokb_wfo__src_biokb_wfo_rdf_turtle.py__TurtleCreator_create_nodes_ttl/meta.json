@@ -69,5 +69,24 @@
       "logger.info retiré"
     ],
     "remaining": "Le shim garde des IRI example.org pour WFO_NS/NODE_NS/REL_NS/IPNI_NS et BASIC_NODE_LABEL = \"Taxon\" (le dépôt : https://www.worldfloraonline.org/taxon/wfo-, https://biokb.scai.fraunhofer.de/wfo/node#, …, \"DbWfo\") : sans effet sur l'équivalence, mais pas verbatim."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five unconditional `graph.add` calls on taxon_uri become one `graph += [...]` list (graph is the plain Graph get_empty_graph returns); the two guarded adds stay under their own `if`, with `parent_uri` and `ipni_uri` inlined; the `taxa = (...)` intermediate is removed and the query iterated directly in `for taxon in tqdm(...)`. `.all()` is kept: tqdm takes the length of a list, not of a Query.",
+    "optimized.ldpy, from optimized.py: one `+{ {taxon_uri} a {NODE...}, {NODE...} ; ... }` with an object list for the two rdf:type values and `{x}^^xs:string` for the three typed literals, and one `+{ }` under each `if`. Same control flow line for line; no exception to the symmetry rule.",
+    "Not compressed: the predicates and node types come from the project's `namespaces` module (ns.REL_NS[...], ns.NODE_NS[...]), so they stay interpolations. Writing them as @prefix names would copy the namespace IRIs into the region, which is not the same program."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `Graph`, DB_DEFAULT_CONNECTION_STR and EXPORT_FOLDER go (unused); the two context_shim imports are merged into one line.",
+    "optimized_header.ldpy: the same shim pruning and merge, and the whole rdflib import line goes (RDF, XSD, Graph, Literal are all replaced by `a`, `^^xs:string` and the islands). `@prefix xs:` stays: it is used, and the driver checks that `xs` stays bound on the serialised graph."
+  ]
 }

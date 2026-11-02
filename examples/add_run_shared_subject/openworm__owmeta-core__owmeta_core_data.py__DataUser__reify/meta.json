@@ -44,5 +44,23 @@
     "method": "entry:_reify",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four adds on n become one `g += [...]` list, with `RDF.type` for `RDF['type']` (the same URIRef). g is a plain Graph in the repository (add_reference passes `Graph()`), so `+=` adds exactly as `.add` does.",
+    "optimized.ldpy: a byte copy of translated.ldpy, which is already the most compact form (`@graph g` + one four-predicate `+{ }`). No exception to the symmetry rule.",
+    "The translator's note still holds: `rdf:object {s[2]}` coerces a plain str that `.add` and `+=` would reject."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `NamespaceManager` goes (unused).",
+    "optimized_header.ldpy: the whole rdflib.namespace import goes (rdf: is a @prefix)."
+  ]
 }

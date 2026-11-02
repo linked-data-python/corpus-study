@@ -53,5 +53,24 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the six adds on relevance_node become one `self.graph += [...]` list, with target_uri and rel_uri inlined; the original's `# Add ...` comments stay, one above each triple. The `if edge.conditional_on:` guard and its loop are unchanged. self.graph is a plain Graph (MRHGraph.__init__).",
+    "optimized.ldpy, from optimized.py: one six-predicate `+{ }` with the same comments inside the island; `mrh:{edge.relation.value}` for MRH[edge.relation.value]; `{x}^^xsd:decimal` and `{x}^^xsd:integer` for the three computed typed literals. `{x}^^dt` builds Literal(x, datatype=dt), so the lexical form is the same; a block-level `@prefix xsd:` is added inside the function for them.",
+    "No exception to the symmetry rule. LCT_NS[...] stays a Python interpolation: there is no lct: prefix in the header, and declaring one for two uses would cost as much as it saves."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `Graph` and `URIRef` go from the rdflib import (unused).",
+    "optimized_header.ldpy: `Literal` goes from the rdflib import, the `from rdflib.namespace import XSD` line goes, and `MRH = Namespace(...)` goes because `mrh:` now replaces MRH[...] as well. Namespace stays for LCT_NS, BNode for the call and the annotation."
+  ]
 }
