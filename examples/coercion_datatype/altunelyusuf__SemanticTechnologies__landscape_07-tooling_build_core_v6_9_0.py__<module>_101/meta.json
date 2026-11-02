@@ -75,5 +75,27 @@
     "names_only_original": [
       "SRNS"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the seven `g1.add`, some written two per line with `;`, become one `g1 += [ … ]`. `key.replace(chr(45), chr(95))` becomes `key.replace('-', '_')` (the same characters, and legal inside the f-string).",
+    "optimized.ldpy, written from optimized.py: one `+{ {corpus} rdfs:member {pub} . {pub} a {RO_PUB}, owl:NamedIndividual ; rdfs:label … ; rdfs:seeAlso f<{e[\"url\"]}> }` under the header's `@graph g1`. `pub = sr:Pub_{key.replace('-', '_')}` uses a local part that mixes a fixed prefix and an interpolation, in place of `sr:{f\"Pub_{…}\"}`.",
+    "Exception to the symmetry rule (island only): the two rdf:type objects share one predicate with `,`, and the two subjects share one island with `.`. In Python the equivalent `g1 += [...]` is already the one-batch form.",
+    "Not compressed: the `[:180]` slice and the loop variables key, e and pub (the driver compares them at module level). Writing the seven triples in one batch means a KeyError on an entry adds none of that entry's triples instead of the first few. The region is a module-level script with no handler, so that partial state is never observed, and the translation already batched six of the seven."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "f<…>",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: XSD and PROV go.",
+    "LD Python: Namespace, URIRef, Literal and the whole rdflib.namespace import go (RO_PUB is an IRI island, SRNS no longer exists in the translation's header). Only Graph stays. The five @prefix lines are used."
+  ]
 }

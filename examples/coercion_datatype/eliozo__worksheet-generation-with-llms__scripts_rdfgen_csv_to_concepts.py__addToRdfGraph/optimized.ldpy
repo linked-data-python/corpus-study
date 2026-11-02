@@ -1,0 +1,21 @@
+# Extracted from eliozo/worksheet-generation-with-llms@c065efff55 : scripts/rdfgen/csv_to_concepts.py
+# region: addToRdfGraph (lines 25-39, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+import rdflib
+eliozo_ns = "http://www.dudajevagatve.lv/eliozo#"
+RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+@prefix eliozo: <http://www.dudajevagatve.lv/eliozo#> .
+
+def addToRdfGraph(g, conceptID, termLV, descLV, termEN=None):
+    @graph g
+    topic_node = eliozo:{"TRM-" + conceptID}
+    if not termEN:
+        termEN = conceptID.replace("-", " ")
+    +{
+        {topic_node} a eliozo:Concept ;
+            eliozo:termEN {termEN}@en ;
+            eliozo:termLV {termLV}@lv ;
+            eliozo:conceptID {conceptID}@en
+    }
+    if descLV and descLV != "NA":
+        +{ {topic_node} eliozo:descLV {descLV}@lv }

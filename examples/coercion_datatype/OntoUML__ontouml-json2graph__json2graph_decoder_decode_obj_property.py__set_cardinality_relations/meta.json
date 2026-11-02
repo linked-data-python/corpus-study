@@ -70,5 +70,24 @@
     "method": "entry:set_cardinality_relations (custom: isomorphism, bindings, warnings, raises, stdout)",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five `ontouml_ref(...)` locals are inlined into the triples, because ontouml_ref is pure. ontology_cardinality_individual becomes `ontology_property_individual + \"_cardinality\"`, which is already a URIRef because URIRef.__add__ returns a URIRef. The three unconditional adds become one `ontouml_graph += [...]` (their comments are kept inside the list), and the two guarded adds become a second one.",
+    "optimized.ldpy, written from optimized.py: `@graph ontouml_graph` + one `+{ }` for the three unconditional triples, and one `+{ … ; … }` for the two bounds under the same guard.",
+    "Exception to the symmetry rule (island only): in the first `+{ }`, the cardinalityValue triple is moved next to the `a` triple so that both share the subject with `;`. In Python this reordering inside one batch saves nothing. The order of insertion inside a batch is not observable.",
+    "Kept: ontouml_ref on both sides (the project helper reads METADATA[\"conformsTo\"]; hard-coding an ontouml: prefix would bypass it), `URIRef(base + id)` on both sides (a non-str id raises TypeError in the original, and f<…> would not), and determine_cardinality_bounds before any write, as the error policy requires."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: load_ontouml_vocabulary goes (imported, never called).",
+    "LD Python: load_ontouml_vocabulary goes, and so do RDF, Literal and XSD from the rdflib import (only Graph and URIRef stay). The xsd @prefix is used."
+  ]
 }

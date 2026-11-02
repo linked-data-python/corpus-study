@@ -48,5 +48,24 @@
     "method": "entry:make_aif_time_component",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress, identical to original.py. The single g.add and the three add_literal calls are already minimal, and a loop over (property, value, datatype) triples would not be shorter.",
+    "optimized.ldpy, written from optimized.py: `@graph g` + `+{ }` becomes one `+{ {time_component} aif:timeType {self.time_type.name}^^xsd:string }(g)` (call suffix, one line fewer). The interchange_ontology.LDCTimeComponent/year/month/day arguments become the prefixed names aif:LDCTimeComponent, aif:year, aif:month, aif:day, which are equal URIRefs under the `@prefix aif:` the header already declares (the module's NAMESPACE).",
+    "No exception to the symmetry rule. add_literal is a method outside the region, so it stays a Python call on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "typed literal",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef goes (unused).",
+    "LD Python: the whole `from rdflib import XSD, Literal, URIRef` line goes, and so does `from shim import interchange_ontology`, because the region now writes aif: and xsd: prefixed names. Both @prefix lines are used."
+  ]
 }

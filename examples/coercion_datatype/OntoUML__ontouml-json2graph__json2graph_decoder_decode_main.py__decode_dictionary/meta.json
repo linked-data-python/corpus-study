@@ -62,5 +62,26 @@
       "{new_object} -> {dictionary_data[key]} dans l'îlot simple (déjà tué)"
     ],
     "remaining": "Deux mutants restent verts et sont équivalents, non comptés : `language != \"\"` -> `True` (rdflib 7.2.1 rend Literal(x, lang='') identique à Literal(x)) et `{dimension_value}` -> `{str(dimension_value)}` dans l'îlot typé (la garde ne laisse passer que des int exacts, dont la forme canonique est str(n))."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `for key, value in dictionary_data.items()` replaces `keys()` + repeated `dictionary_data[key]`. The intermediate names instance_uri, instance_type, new_predicate and dimension_value are inlined, and so is non_negative_integer_fields (`key in (\"width\", \"height\")`). The id/type skip and the restricted_fields skip are merged into one `if key in (\"id\", \"type\") or key in restricted_fields: continue`; this is safe because \"value\" belongs to neither, so the Text.value check that sat between them is not affected. `language != \"\"` becomes `language`. ontouml_ref is pure (URIRef of a constant + name), so calling it after the object branch instead of before has no effect on any input.",
+    "Error handling kept: the `\"id\" not in` early return, the LOGGER.error + continue on an invalid width/height (same message, `{value!r}` in place of `{dimension_value!r}`, the same value), the Text.value hook and the KeyError on a missing type.",
+    "optimized.ldpy, written from optimized.py: `@graph ontouml_graph` once, then `+{ {new_instance} a {ontouml_ref(dictionary_data[\"type\"])} }` and the shared `+{ {new_instance} {ontouml_ref(key)} {new_object} }`. The typed branch becomes `new_object = f\"{value}\"^^xsd:nonNegativeInteger`: the guard admits only exact ints, and str(int) is rdflib's canonical lexical form. The translation's inlined add + continue is no longer needed.",
+    "Not compressed: `Literal(value, lang=language)` (the tag is a run-time value, no island form) and the plain `Literal(value)` branch, kept as a Python call because `f{value}` raises on None where Literal(None) gives \"None\". URIRef(base + id) is kept on both sides, not `f<…>`: a non-str id raises TypeError in the original, and firi would str() it silently.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "typed literal",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused, so optimized_header.py is a copy of optimized.py.",
+    "LD Python: RDF and XSD go from the rdflib import (the region writes `a` and xsd:). Graph, URIRef and Literal stay. The xsd @prefix is used."
+  ]
 }

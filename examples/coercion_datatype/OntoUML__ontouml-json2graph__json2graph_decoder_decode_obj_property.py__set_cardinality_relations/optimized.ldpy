@@ -1,0 +1,47 @@
+# Extracted from OntoUML/ontouml-json2graph@982f12b9c4 : json2graph/decoder/decode_obj_property.py
+# region: set_cardinality_relations (lines 214-273, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+# Executability: the real file's relative imports (..modules) cannot resolve
+# under this harness (exec() sets no __package__); rewritten to absolute
+# imports against the local modules/ context shim (see meta.json).
+# determine_cardinality_bounds -- a sibling function defined earlier in the
+# same source file (lines 194-211), just outside this region -- is restored
+# via modules/decode_obj_property_predecl.py.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+from rdflib import Graph, URIRef, RDF, Literal, XSD
+from modules import arguments as args
+from modules.utils_graph import load_ontouml_vocabulary, ontouml_ref
+from modules.decode_obj_property_predecl import determine_cardinality_bounds
+
+def set_cardinality_relations(property_dict: dict, ontouml_graph: Graph) -> None:
+    """Create the ontouml:Cardinality instance and sets its properties.
+
+    :param property_dict: Property object loaded as a dictionary.
+    :type property_dict: dict
+    :param ontouml_graph: Knowledge graph that complies with the OntoUML Vocabulary.
+    :type ontouml_graph: Graph
+    """
+    @graph ontouml_graph
+    if "cardinality" in property_dict:
+        # Resolve before changing the graph so error policy aborts without creating a partial Cardinality individual.
+        full_cardinality, lower_bound, upper_bound = determine_cardinality_bounds(
+            property_dict["cardinality"], property_dict["id"]
+        )
+
+        ontology_property_individual = URIRef(args.ARGUMENTS["base_uri"] + property_dict["id"])
+        ontology_cardinality_individual = ontology_property_individual + "_cardinality"
+
+        +{
+            # Creating ontouml:Cardinality individuals (named after its related Property's name + '_cardinality' string)
+            {ontology_cardinality_individual} a {ontouml_ref("Cardinality")} ;
+                # Always preserve a Cardinality individual and its source or repaired cardinalityValue.
+                {ontouml_ref("cardinalityValue")} {full_cardinality} .
+            # Setting the ontouml:cardinality between an ontouml:Property and its ontouml:Cardinality
+            {ontology_property_individual} {ontouml_ref("cardinality")} {ontology_cardinality_individual}
+        }
+        # Bounds are emitted only for valid or successfully repaired values.
+        if lower_bound is not None and upper_bound is not None:
+            +{
+                {ontology_cardinality_individual} {ontouml_ref("lowerBound")} {lower_bound}^^xsd:nonNegativeInteger ;
+                    {ontouml_ref("upperBound")} {upper_bound}
+            }

@@ -1,0 +1,24 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v5_3_0.py
+# region: <module> (lines 118-126, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import Graph
+from context_shim import BASEDIR, S  # context shim, see meta.json
+@prefix sem: <http://example.org/semtech#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v5_2_0.ttl")
+@graph g2
+
+for ap, lab, dfn in [
+    ("criticalTerm", "critical term", "This annotation carries one critical term of the subject area as 'TERM | expansion | gloss' for glossary and lens rendering."),
+    ("syntacticExample", "syntactic example", "This annotation carries a small validated example in the subject area's concrete syntax as 'language | caption | code'."),
+    ("criticalTip", "critical tip", "This annotation carries the chapter's one critical practitioner consideration.")]:
+    p = sem:{ap}
+    +{
+        {p} a owl:AnnotationProperty ;
+           rdfs:label {lab}@en ;
+           skos:definition {dfn}@en ;
+           dcterms:source {S("R1")}@en
+    }

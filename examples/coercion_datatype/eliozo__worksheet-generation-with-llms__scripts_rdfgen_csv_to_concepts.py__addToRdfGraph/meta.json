@@ -64,5 +64,24 @@
       "eliozo:{\"TRM-\" + conceptID} -> eliozo:{conceptID}"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: a local `eliozo = rdflib.Namespace(eliozo_ns)` replaces the five `rdflib.URIRef(eliozo_ns + …)` and the four *_property locals. rdf_type_property becomes rdflib.RDF.type, the same IRI as RDF_NS + 'type'. The termEN fallback moves before the writes, so the four unconditional triples become one `g += [...]`: the fallback cannot raise once topic_node has been built (a non-str conceptID raises TypeError at topic_node, as before). `descLV != \"\"` is dropped because a truthy descLV is never \"\".",
+    "optimized.ldpy, written from optimized.py: `@graph g`, `topic_node = eliozo:{\"TRM-\" + conceptID}` (concatenation kept, so a non-str conceptID still raises), one `+{ {topic_node} a eliozo:Concept ; eliozo:termEN {termEN}@en ; eliozo:termLV {termLV}@lv ; eliozo:conceptID {conceptID}@en }`, and the guarded descLV island.",
+    "No exception to the symmetry rule. Batching the type triple with the three others means a failing Literal adds none of the four instead of the type triple alone, on inputs (non-str cells) that csv.reader never produces."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF_NS goes (the region now writes rdflib.RDF.type).",
+    "LD Python: `import rdflib`, eliozo_ns and RDF_NS go (the region uses only the eliozo: prefix). Only `@prefix eliozo:` stays."
+  ]
 }

@@ -51,5 +51,25 @@
     "method": "entry:SimpleUniqueMapping",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: entity_city_uri / entity_country_uri are built as URIRefs once, which removes the 13 `URIRef(...)` wrappers. The two type triples become one `self.g += [...]`. The nine column-to-literal adds become one loop over a table of (entity, prop, column, datatype), guarded by `if not self.is_nan(row[column])`; the original's section comments are kept inside the table. row[1] and row[4], the two unguarded adds, are non-NaN by the row-level `continue`, so the uniform guard is always true for them (is_nan is pure). The if/elif chain on row[8] becomes a dict `.get(row[8], self.lab6.cityIsLocatedIn)` (a NaN cell is hashable and falls to the default).",
+    "optimized.ldpy, written from optimized.py: `f<{self.lab6_ns_str}{row[…].lower().replace(\" \", \"_\")}>` for the two entities (str + str, so the same as URIRef), one `+{ … a … . … a … }(self.g)` for the type triples, `xsd:` names in the table, and `+{ {entity} {prop} {row[column]}^^{datatype} }(self.g)` in the loop (interpolated datatype; same Literal(value, datatype=…) constructor, so the numpy float lexical forms agree).",
+    "No exception to the symmetry rule. Most of the gain is the rereading (the table loop), which leaves only one typed literal for the notation to compress."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "f<…>",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode, OWL, RDFS and FOAF go. URIRef, Literal, RDF and XSD stay.",
+    "LD Python: both import lines go (nothing of rdflib is named in the region), and so do the owl:, rdf:, rdfs: and foaf: @prefix lines. Only xsd: stays."
+  ]
 }

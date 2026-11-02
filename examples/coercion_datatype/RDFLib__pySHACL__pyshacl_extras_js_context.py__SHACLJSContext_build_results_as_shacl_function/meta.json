@@ -45,5 +45,22 @@
     "method": "entry:build",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `lex = str(res)` is inlined. `XSD['decimal']` becomes `XSD.decimal`. `Literal(res, datatype=XSD['boolean'])` on a bool becomes `Literal(res)`: rdflib infers xsd:boolean with the lexical form \"true\"/\"false\", which is the same term. The last branch's type tuple loses float and bool, which no longer reach it (every float is taken by the return_type branch or the decimal branch, and every bool by the return_type branch or the bool branch).",
+    "optimized.ldpy, written from optimized.py: `f\"{res}\"^^xsd:decimal` and `f{res}`, as in the translation. The other changes are carried over line for line.",
+    "Not compressed: the three `Literal(…, normalize=False)` calls (the language cannot express normalize=False), the JSProxy try/except, and the `(Literal, URIRef, BNode)` pass-through, which stops a term (a str subclass) from reaching the last branch.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "typed literal",
+    "f{ }"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused, so optimized_header.py is a copy of optimized.py.",
+    "LD Python: `from rdflib.namespace import XSD` goes (the region writes xsd:decimal). Literal, URIRef and BNode stay."
+  ]
 }

@@ -81,5 +81,27 @@
       "sh:name d'un nom vide remplacé"
     ],
     "remaining": "Deux mutants restent verts, tous deux équivalents : `class_uuid not in class_uuids` -> True (get_class_dict rend un dict, dont les clés sont distinctes, donc les uuid5 aussi : la garde de classe est inatteignable) et `if prop['inverse'] is True` (inverse est un bool réel, via str2bool)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: each run of adds on one subject becomes one `self.shapes_graph += [...]`, split exactly where the original calls get_name, so the partial graph left when get_name raises is unchanged (the inverse-path add stays apart, under its condition and before the `\"← \" + name`). `Literal(\"true\", datatype=XSD.boolean)` becomes `Literal(True)`, the same term.",
+    "optimized.ldpy, written from optimized.py: the same islands, with the Turtle boolean `true` for the two shui flags. The translation's `\"true\"^^xsd:boolean` is equal (node(True) == Literal(\"true\", datatype=xsd:boolean)).",
+    "Exception to the symmetry rule (island only): `@graph self.shapes_graph` once at the top of the function replaces the six `(self.shapes_graph)` call suffixes. Python has no current graph. The attribute is never reassigned in the region, so the captured value is the one each add targets.",
+    "Not compressed: the class_uuids/prop_uuids dedup guards (the class one cannot be reached, but it is a guard of the original), get_name between the two node-shape batches, and the uuid5 computations.",
+    "Construction labels: the Turtle boolean `true` is not on the closed construction list, and rdfeval.constructions does not detect it as a typed literal, so `typed literal` is not declared. Nothing else in the region writes a typed literal."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: DCTERMS and XSD go (XSD is no longer used after Literal(True)).",
+    "LD Python: DCTERMS, RDF, RDFS, SH, XSD, Literal, Namespace and URIRef go, and so does `SHUI = Namespace(...)` (the region writes shui:). Graph stays for demo(). The xsd @prefix goes, because the Turtle `true` needs none."
+  ]
 }
