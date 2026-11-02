@@ -59,5 +59,25 @@
     "method": "entry:process_waterbodies_shp2ttl",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/elif chain on FTYPE only chooses the class name (`hyf_class`), and the type triple joins the five unconditional triples of the body and its geometry in one `kg += [...]`; the four hasCOMID/hasFTYPE/hasFCODE/hasReachCode adds become one comprehension over a (property, value) table. The 2D-forcing loop, the logger calls and the guarded adds are unchanged.",
+    "optimized.ldpy, from optimized.py: the `kg += [...]` is one `+{ }` with `;`/`.`; the table loop is `for prop, value in (...): +{ ... f\"{value}\"^^xsd:string }`; typed literals as in the translation (f\"...\"^^geo:wktLiteral, ^^xsd:string).",
+    "Not compressible on the ldpy side: the SAWGraph terms live in the runtime `_PREFIX` registry, so they stay `{_PREFIX[...][...]}` interpolations (finding already reported by the translation).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, OWL and PROV go.",
+    "LD Python: Graph and Literal go; the four prefix imports are used."
+  ]
 }

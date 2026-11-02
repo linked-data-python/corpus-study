@@ -62,5 +62,23 @@
       "triplet rdf:type retiré ; sv:citedBy inversé ; prov:wasDerivedFrom visant le site ; sv:citingLine sur le fragment ; Literal(str(line)) ; Literal(file) / Literal(str(file)) sans _text"
     ],
     "remaining": "Jugement non traité : wrong-construction (le dictionnaire `bindings` + @bindings est-il un habillage superflu face à `+{ {node} … {Literal(…)} }`), que la correction laisse en place pour le bloc des trois triplets et celui de sv:citingLine."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three triples written after the type become one `g += [...]` (the Literal is still computed after the type triple is added, so the partial graph left by a raising _text is unchanged); all guards and raises are kept. Little else to compress: the region is mostly validation.",
+    "optimized.ldpy, from optimized.py: plain loop on `@graph g` (no @bindings dicts); the type triple stays its own `+{ }` before the island that calls _text; Literal(_text(...)) and Literal(line) are bare interpolations (str and a validated int).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode goes; the shim import is put on one line.",
+    "LD Python: BNode, Literal, SV, PROV and RDF go; the shim import is put on one line; both @prefix lines are used."
+  ]
 }

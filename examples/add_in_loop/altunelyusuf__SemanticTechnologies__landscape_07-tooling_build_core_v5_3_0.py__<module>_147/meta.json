@@ -76,5 +76,24 @@
       "plab",
       "prange"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four g2.add, written two per line with `;` in the original, become one `g2 += [...]`; the one-line `if prange:` is the original's.",
+    "optimized.ldpy, from optimized.py: plain for over the tuples (no row dicts, no b.raw); `p = semtech:{pid}` (same IRI as SEM[pid], kept because the driver compares the module value p); one `+{ {p} a owl:ObjectProperty ; rdfs:label {plab}@en ; ... }` and `if prange: +{ {p} rdfs:range {prange} }`; SEM.Governance* in the table become semtech: prefixed names.",
+    "No exception to the symmetry. The driver's prefix-binding check reads translated.ldpy only; optimized.ldpy keeps `@prefix semtech:` from the header, so g2 keeps the semtech: binding too."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, XSD and PROV go.",
+    "LD Python: Namespace, URIRef, Literal, the whole rdflib.namespace import and `SEM = Namespace(...)` go (the region writes semtech: names); the five @prefix lines are used."
+  ]
 }

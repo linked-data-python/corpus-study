@@ -1,0 +1,30 @@
+# Extracted from OpenEnergyPlatform/oeplatform@ff28ef6390 : factsheet/views.py
+# region: create_factsheet_view (lines 201-253, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import RDF, Graph, Literal, URIRef
+from context_shim import obo:, oeo:, rdfs:, xsd:
+from context_shim import remove_non_printable, serialize_publication_date
+from context_shim import _publications, bundle, study_URI
+
+@graph bundle
+for item in _publications:
+    publications_URI = f<https://openenergyplatform.org/ontology/oekg/publication/{item['id']}>
+    # OEO_00020012
+    +{ {publications_URI} oeo:OEO_00390095 {item["id"]} ; a oeo:OEO_00020012 .
+       {study_URI} obo:BFO_0000051 {publications_URI} }
+    if item["report_title"] != "":
+        +{ {publications_URI} rdfs:label {remove_non_printable(item["report_title"])} }
+
+    for author in item["authors"]:
+        author_URI = f<https://openenergyplatform.org/ontology/oekg/{author['iri']}>
+        +{ {author_URI} a oeo:OEO_00000064 . {publications_URI} oeo:OEO_00000506 {author_URI} }
+
+    if item["doi"] != "":
+        +{ {publications_URI} oeo:OEO_00390098 {Literal(item["doi"])} }
+
+    if item["date_of_publication"] not in ("01-01-1900", ""):
+        +{ {publications_URI} oeo:OEO_00390096 f"{item['date_of_publication']}"^^xsd:dateTime }
+
+    if item["link_to_study_report"] != "":
+        +{ f<{item['link_to_study_report']}> a oeo:OEO_00000353 .
+           {publications_URI} oeo:OEO_00390078 f<{item['link_to_study_report']}> }

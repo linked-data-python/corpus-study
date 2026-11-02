@@ -66,5 +66,25 @@
       "OEKG",
       "OEO"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: runs of bundle.add become `bundle += [...]`; `_authors` is inlined; the double date test is `not in (\"01-01-1900\", \"\")`; the last `bundle.add((study_URI, OBO.BFO_0000051, publications_URI))` goes, since the same triple is already added at the top of the loop body.",
+    "optimized.ldpy, from optimized.py: each `bundle += [...]` becomes one `+{ }` with `;`/`.`; URIRef(\"...\" + x) is f<...{x}>; Literal(x) a bare {x} except Literal(item[\"doi\"]), kept because doi may be None; the dateTime literal is f\"...\"^^xsd:dateTime as in the translation.",
+    "No exception to the symmetry: author_URI stays (it appears twice in its island and is a module value the driver compares)."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, DC, OEKG and serialize_publication_date go; the three context_shim imports are merged into one.",
+    "LD Python: RDF, Graph, URIRef and serialize_publication_date go; the three context_shim imports are merged into one."
+  ]
 }

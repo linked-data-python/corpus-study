@@ -67,5 +67,27 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/else on about_url becomes `or`; `columns` keeps only the values; the two-step French decimal rewrite is one expression; `value_node = BNode()` is hoisted out of the three branches; the unreachable `else: value_node = URIRef(cell)` of the anyURI branch (len(split) >= 1 is always true) and its comment go, as do `uris`; runs of g.add become `g += [...]`; the aboutUrl/name branches compute a `predicate` and share one g.add; row_num fits one line and the url uses an f-string.",
+    "optimized.ldpy, from optimized.py: each `g += [...]` becomes one `+{ }` with `;`; Literal(cell) is a bare {cell}, Literal(cell, datatype=format) is `{cell}^^{format}`; URIRef(x) becomes f<{x}> (no @base).",
+    "Exceptions to the symmetry, island only: `row_node` and `body_node` disappear, written as Turtle anonymous blank nodes `[ ... ]` (each is used in a single island); Python needs the BNode() variable.",
+    "Not in the closed vocabulary: the Turtle blank-node property list `[ ... ]` inside +{ } (reported, not labelled). Collection(g, value_node, ...) is kept on both sides: the list head is value_node itself, which a Turtle `( )` cannot name."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "plain literal",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused, optimized_header.py is a copy of optimized.py.",
+    "LD Python: Namespace and the rdflib.namespace import (CSVW, RDF, XSD) go, replaced by the four @prefix lines, all used."
+  ]
 }

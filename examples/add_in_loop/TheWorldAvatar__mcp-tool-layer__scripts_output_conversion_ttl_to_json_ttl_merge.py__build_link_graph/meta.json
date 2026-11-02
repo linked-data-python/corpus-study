@@ -64,5 +64,27 @@
       "retrait de l'îlot label (nœud sélectionné et ChemicalInput), de l'îlot hasChemicalInput et de l'îlot rdf:type ChemicalInput"
     ],
     "remaining": "Reste vert, et équivalent : retirer `mop in selected` en gardant le test de type MOP (tout noeud typé MOP est sélectionné). Jugement non traité : wrong-construction (lectures g.objects/g.subjects et RDF_NS.type laissés en Python alors que trav_one_step est crédité)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `selected` is a set comprehension; the type triples of selected nodes are copied with `lg += g.triples((None, RDF_NS.type, t))` for each allowed type (exactly the triples the original filters back), labels and the ChemicalInput type with `lg += g.triples(...)` (adds the triple only if present, as the `if ... in g` did); the direct connections are one comprehension; the synth list is `g.subjects(RDF_NS.type, ONTOSYN.ChemicalSynthesis)` (all of them are selected); the redundant `mop in selected` test goes (every MOP-typed node is selected); synth_id/mop_id are inlined in an f-string and the skolem IRI is ONTOSYN[...].",
+    "optimized.ldpy, from optimized.py: `@graph as lg`; selectors become m{ }; the remaining adds become `+{ }`; copies of matching triples (`lg += g.triples(...)`) and the comprehension of direct connections have no island and stay Python with prefixed names.",
+    "Exception to the symmetry, island only: the nested loops synth -> hasChemicalInput and synth -> hasChemicalOutput -> isRepresentedBy -> MOP type become two flat loops over multi-pattern `m{ }` joins (the type test of the MOP becomes a pattern); Python keeps the nested loops.",
+    "ontosyn:{f\"instance/ChemicalOutput/{h}\"} replaces ONTOSYN[...] (same concatenation)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Dict, Iterable, List and Literal go.",
+    "LD Python: Dict, Iterable, List, Namespace, RDF, RDFS, Literal go, and the RDF_NS/RDFS_NS aliases (the region writes rdf:type and rdfs:label); the five @prefix lines are used."
+  ]
 }

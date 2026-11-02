@@ -52,5 +52,25 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `mappings` and `mapping_predicate` are inlined; the three unconditional triples become one `graph += [...]`; `self.namespaces` is read once into `ns`; the two guarded adds stay guarded (same truthiness tests). `to_uri` and `mapping_uri` stay, with their comments and the type: ignore.",
+    "optimized.ldpy, from optimized.py: plain `for mapping in ...` on `@graph graph` (the bindings-dict generator of translated.ldpy is not needed); the three triples are one `+{ }` with `.` and `;`; `ns.AIDPAIS[...]` becomes `aidpais:{...}`; Literal(confidence, datatype=XSD.float) becomes `{mapping.confidence}^^{self.namespaces.XSD.float}` (same conversion as rdflib), Literal(source) a bare `{mapping.source}`.",
+    "`ns = self.namespaces` exists only in optimized.py: it is an alias for namespace access, which the prefixed names replace on the ldpy side; Literal(mapping.mapping_type) is kept as is because mapping_type may be None (Literal('None'), whereas a bare {None} raises).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, Namespace, ConceptType, KnowledgeSource go (the region reads its namespaces through self.namespaces).",
+    "LD Python: the same imports go; Literal stays (mapping_type); both @prefix lines are used."
+  ]
 }

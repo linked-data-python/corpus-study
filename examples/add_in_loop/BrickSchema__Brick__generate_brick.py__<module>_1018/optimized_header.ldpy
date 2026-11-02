@@ -1,0 +1,12 @@
+# Extracted from BrickSchema/Brick@c12949f236 : generate_brick.py
+# region: <module> (lines 1018-1024, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from context_shim import brick:, qudt:, brickschema, get_units, get_units_brick
+G = brickschema.Graph()
+@graph G
+for brick_quant, qudt_quant in m{ ?quantity a brick:Quantity ; brick:hasQUDTReference ?qudtquant }:
+    for unit in get_units(qudt_quant):
+        +{ {brick_quant} qudt:applicableUnit {unit} }
+    # the symbols, units, and labels are already defined in the previous pass
+    for unit, _, _ in get_units_brick(brick_quant):
+        +{ {brick_quant} qudt:applicableUnit {unit} }

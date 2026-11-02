@@ -59,5 +59,26 @@
       "TAG",
       "VCARD"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `res` and the `r` unpacking disappear (the query result is unpacked in the for header); the two-pattern SELECT is written with `a` and `;` on one line; each inner loop of `G.add` becomes one `G += [... for unit in ...]` comprehension; the unused `symb, label` become `_, _`.",
+    "optimized.ldpy, from optimized.py: the SELECT becomes `m{ ?quantity a brick:Quantity ; brick:hasQUDTReference ?qudtquant }` on `@graph G`, unpacked in the for header.",
+    "Not compressed on the ldpy side: no island takes a comprehension, so each `G += [...]` line of optimized.py stays a two-line `for unit in ...: +{ {brick_quant} qudt:applicableUnit {unit} }` loop; the notation gains only on the query.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the 13-name namespace import keeps only QUDT; quantity_definitions goes; the shim import becomes one line.",
+    "LD Python: the 13 prefix imports keep brick: and qudt: (the only prefixed names of the region); quantity_definitions goes; one line, as on the Python side."
+  ]
 }

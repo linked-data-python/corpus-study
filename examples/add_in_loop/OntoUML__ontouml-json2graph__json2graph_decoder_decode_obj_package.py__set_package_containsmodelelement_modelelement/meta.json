@@ -44,5 +44,23 @@
     "method": "entry:set_package_containsmodelelement_modelelement",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the intermediate list of ids, the `package_id_contents_list` variable and the emptiness guard go (get_package_contents always returns a list, and a loop over an empty list adds nothing; its comment goes with it); one loop over the contents adds the triple directly. Difference only on malformed input: a content without 'id' raises after the earlier triples are added instead of before any.",
+    "optimized.ldpy, from optimized.py: `+{ }` on `@graph ontouml_graph`; ontouml_ref(\"containsModelElement\") is ontouml:containsModelElement and both URIRef(base + id) are f<{base}{id}>.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused, optimized_header.py is a copy of optimized.py.",
+    "LD Python: URIRef goes (f<…> replaces it)."
+  ]
 }

@@ -43,5 +43,23 @@
     "method": "entry:set_class_restrictedto_ontologicalnature",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `if 'restrictedTo' in class_dict: for ... in class_dict['restrictedTo']` becomes `for ... in class_dict.get('restrictedTo', [])`; the add fits three lines. The mapping table is data and is kept.",
+    "optimized.ldpy, from optimized.py: plain for loop on `@graph ontouml_graph` with one `+{ }`; ontouml_ref(\"restrictedTo\") is the prefixed name ontouml:restrictedTo, ontouml_ref(mapping[...]) is `ontouml:{...}` (same concatenation), URIRef(base + id) is f<{base}{id}> (no @base).",
+    "Nothing else to compress: the region is a table and one triple. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: XSD and Literal go.",
+    "LD Python: URIRef, XSD, Literal and the ontouml_ref import go."
+  ]
 }

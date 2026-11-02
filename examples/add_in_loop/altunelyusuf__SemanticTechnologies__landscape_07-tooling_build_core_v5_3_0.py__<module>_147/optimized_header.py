@@ -1,0 +1,25 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_core_v5_3_0.py
+# region: <module> (lines 147-155, stratum add_in_loop)
+# licence of the source repository: see meta.json
+# Executability: BASEDIR and S() -- defined earlier in the same source file,
+# just outside this region -- restored via context_predecl.py (context shim,
+# see meta.json).
+from rdflib import Graph, Namespace, Literal
+from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS
+from context_predecl import BASEDIR, S
+SEM = Namespace("http://example.org/semtech#")
+g2 = Graph().parse(f"{BASEDIR}/02-ontology/semtech_tbox_v5_2_0.ttl")
+
+for pid, plab, pdef, prange in [
+    ("governsSubject", "governs subject", "This property links a governance role, activity or rule to the taxonomy subject area it governs.", None),
+    ("performsActivity", "performs activity", "This property links a governance role to the activity it performs.", SEM.GovernanceActivity),
+    ("appliesRule", "applies rule", "This property links a governance activity to the rule it applies when a change or dispute arises.", SEM.GovernanceRule),
+]:
+    p = SEM[pid]
+    g2 += [
+        (p, RDF.type, OWL.ObjectProperty),
+        (p, RDFS.label, Literal(plab, lang="en")),
+        (p, SKOS.definition, Literal(pdef, lang="en")),
+        (p, DCTERMS.source, Literal(S("R-TOGAF"), lang="en")),
+    ]
+    if prange: g2.add((p, RDFS.range, prange))
