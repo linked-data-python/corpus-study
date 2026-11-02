@@ -13,11 +13,21 @@
     "namespace_term": 2,
     "term_constructor": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "@prefix",
+    "typed literal",
+    "f{ }"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "prefixes: XSD->xsd",
+    "context shim context_shim.py: pyduktape2 (Duktape binding) is not installed; JSProxy reduced to what the region uses (isinstance + toPython(), AttributeError when the JS object has no toPython). original.py and translated.ldpy import it from the shim.",
+    "binding restoration: the region is a module-level @classmethod, which is not callable by itself; both sides end with the same class + alias `build = SHACLJSContext.build_results_as_shacl_function` (identical on both sides) so the driver can call it.",
+    "Literal(str(res), datatype=XSD[\"decimal\"]) -> f\"{res}\"^^xsd:decimal (typed literal with an f-string lexical form; same rdflib constructor, so inf -> Infinity and 1e-05 -> 0.00001 normalisation agree, verified by the driver). `{res}^^xsd:decimal` is NOT available here: outside a graph island the suffix after `{expr}` does not parse (set display followed by ^^), only a quoted string takes ^^ in plain Python position.",
+    "Literal(res, datatype=XSD[\"boolean\"]) on a bool -> f{res}: the default coercion of a bool IS xsd:boolean \"true\" (rdflib infers it), checked equal; f\"{res}\"^^xsd:boolean also agrees on True/False only because rdflib normalises the lexical \"True\" (equivalent mutant, left out).",
+    "MISSING: the three other Literal(...) sites (`Literal(lex, datatype=return_type, normalize=False)` twice, once with a datatype computed at run time, and `Literal(res, datatype=return_type, normalize=False)`) have no spelling in the language: `{x}^^{dt}` / `f\"..\"^^{dt}` always go through rdflib normalisation, so \"5\"^^xsd:double becomes \"5.0\", \"05\"^^xsd:integer becomes \"5\", \"True\"^^xsd:boolean becomes \"true\", and b\"x\" would be \"bx\" (the driver kills the mutant that drops normalize=False). They are kept as Python Literal(...) calls: the island notation gives no gain there and cannot express normalize=False.",
+    "sabotage check: decimal -> double, decimal branch -> f{res}, normalize=False dropped: rdfeval check FAILED each time; restored, green."
   ],
   "draft_sha": "665a288ff99abbbe",
   "provenance": {

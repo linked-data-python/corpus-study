@@ -3,20 +3,18 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, PROV, RDF, XSD
-from asterism.qudt import quantity_kind_iri, unit_iri
-from asterism.text import (
+from context_shim import (  # context shim, see meta.json
+    parse_curator_timestamp,
     parse_float_array,
-    parse_issued,
-    safe_url,
-    slugify,
+    parse_project_names,
+    quantity_kind_iri,
     strip_quoted,
+    unit_iri,
 )
 @prefix schema: <https://schema.org/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
 WEBPLOTDIGITIZER_IRI = "https://automeris.io/WebPlotDigitizer"
 
 def _emit_curve(
@@ -39,6 +37,7 @@ def _emit_curve(
       - sd:xMin / sd:xMax / sd:yMin / sd:yMax / sd:pointCount を集約値として出す
       → 2 次元の局所範囲クエリは集約値だけでは答えられない (既知の限界)
     """
+    @graph g
     fig_id = row.get("figure_id", "").strip()
     sample_id = row.get("sample_id", "").strip()
     paper_sid = row.get("SID", "").strip()
@@ -48,20 +47,19 @@ def _emit_curve(
     curve = sdr[f"curve/{curve_key}"]
     sample_iri = sdr[f"sample/{paper_sid}-{sample_id}"]
 
-    g += g{
-        {curve} a {sd.Curve} ;
-           a prov:Entity ;
-           dcterms:identifier {Literal(curve_key)} ;
-           {sd.rawFigureId} {Literal(fig_id)}
+    +{
+        {curve} a {sd.Curve}, prov:Entity ;
+           dcterms:identifier {curve_key} ;
+           {sd.rawFigureId} {fig_id}
     }
 
     if ingestion_iri is not None:
-        g += g{ {curve} prov:wasGeneratedBy {ingestion_iri} }
+        +{ {curve} prov:wasGeneratedBy {ingestion_iri} }
 
     if figure_name := strip_quoted(row.get("figure_name", "")):
-        g += g{ {curve} {sd.figureName} {Literal(figure_name)} }
+        +{ {curve} {sd.figureName} {figure_name} }
 
-    g += g{ {curve} {sd.ofSample} {sample_iri} }
+    +{ {curve} {sd.ofSample} {sample_iri} }
 
     # Phase 1 string predicates are kept as-is for backward compatibility.
     for col_key, prop in (
@@ -72,7 +70,7 @@ def _emit_curve(
         ("comments", sd.comments),
     ):
         if value := strip_quoted(row.get(col_key, "")):
-            g += g{ {curve} {prop} {Literal(value)} }
+            +{ {curve} {prop} {value} }
 
     # Phase 2 #2: additively attach canonical QUDT IRIs when a curated mapping
     # exists. The string predicates above stay; these let AI clients pivot on a
@@ -83,14 +81,14 @@ def _emit_curve(
     ):
         value = strip_quoted(row.get(col_key, ""))
         if value and (iri := quantity_kind_iri(value)):
-            g += g{ {curve} {prop} {URIRef(iri)} }
+            +{ {curve} {prop} f<{iri}> }
     for col_key, prop in (
         ("unit_x", sd.unitX),
         ("unit_y", sd.unitY),
     ):
         value = strip_quoted(row.get(col_key, ""))
         if value and (iri := unit_iri(value)):
-            g += g{ {curve} {prop} {URIRef(iri)} }
+            +{ {curve} {prop} f<{iri}> }
 
     # x / y 配列: JSON literal + 集約値
     x_raw = row.get("x", "")
@@ -98,31 +96,31 @@ def _emit_curve(
     xs = parse_float_array(x_raw)
     ys = parse_float_array(y_raw)
     if x_raw:
-        g += g{ {curve} {sd.xValuesJSON} {Literal(x_raw)} }
+        +{ {curve} {sd.xValuesJSON} {x_raw} }
     if y_raw:
-        g += g{ {curve} {sd.yValuesJSON} {Literal(y_raw)} }
+        +{ {curve} {sd.yValuesJSON} {y_raw} }
     if xs:
-        g += g{
-            {curve} {sd.xMin} {Literal(min(xs), datatype=XSD.double)} ;
-               {sd.xMax} {Literal(max(xs), datatype=XSD.double)}
+        +{
+            {curve} {sd.xMin} {min(xs)}^^xsd:double ;
+               {sd.xMax} {max(xs)}^^xsd:double
         }
     if ys:
-        g += g{
-            {curve} {sd.yMin} {Literal(min(ys), datatype=XSD.double)} ;
-               {sd.yMax} {Literal(max(ys), datatype=XSD.double)}
+        +{
+            {curve} {sd.yMin} {min(ys)}^^xsd:double ;
+               {sd.yMax} {max(ys)}^^xsd:double
         }
     point_count = min(len(xs), len(ys))
     if point_count:
-        g += g{ {curve} {sd.pointCount} {Literal(point_count, datatype=XSD.integer)} }
+        +{ {curve} {sd.pointCount} {point_count}^^xsd:integer }
 
     for project in parse_project_names(row.get("project_names", "")):
-        g += g{ {curve} {sd.projectName} {Literal(project)} }
+        +{ {curve} {sd.projectName} {project} }
 
     created = strip_quoted(row.get("created_at", ""))
     if created:
-        g += g{ {curve} dcterms:created {Literal(created)} }
+        +{ {curve} dcterms:created {created} }
     if updated := strip_quoted(row.get("updated_at", "")):
-        g += g{ {curve} dcterms:modified {Literal(updated)} }
+        +{ {curve} dcterms:modified {updated} }
 
     # Phase 2 #6: scientific provenance. Each curve was digitized off a
     # published figure with WebPlotDigitizer; model that as a distinct
@@ -131,21 +129,20 @@ def _emit_curve(
     # prov:wasGeneratedBy two activities — the original digitization and our
     # ingestion — which is valid PROV-O.
     digitization = sdr[f"digitization/{curve_key}"]
-    g += g{
+    +{
         {curve} prov:wasGeneratedBy {digitization} .
-        {digitization} a {sd.DigitizationActivity} ;
-           a prov:Activity ;
-           prov:wasAssociatedWith {URIRef(WEBPLOTDIGITIZER_IRI)}
+        {digitization} a {sd.DigitizationActivity}, prov:Activity ;
+           prov:wasAssociatedWith f<{WEBPLOTDIGITIZER_IRI}>
     }
     if created and (at_time := parse_curator_timestamp(created)):
-        g += g{ {digitization} prov:atTime {Literal(at_time, datatype=XSD.dateTime)} }
+        +{ {digitization} prov:atTime {at_time}^^xsd:dateTime }
     # The WebPlotDigitizer agent description is shared across all curves; the
     # triples are IRI-keyed so Oxigraph set-semantics dedupes them on re-ingest.
-    agent = URIRef(WEBPLOTDIGITIZER_IRI)
-    g += g{
+    agent = f<{WEBPLOTDIGITIZER_IRI}>
+    +{
         {agent} a prov:SoftwareAgent ;
            schema:name "WebPlotDigitizer" ;
-           schema:url {URIRef(WEBPLOTDIGITIZER_IRI)}
+           schema:url f<{WEBPLOTDIGITIZER_IRI}>
     }
 
     return True

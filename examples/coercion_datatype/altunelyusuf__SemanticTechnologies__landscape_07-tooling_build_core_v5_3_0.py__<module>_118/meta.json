@@ -14,11 +14,24 @@
     "term_constructor": 3,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "language literal"
+  ],
   "translation_notes": [
-    "prefixes: SEM->sem, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "the flagged site (lines 118-126) has no `datatype=` at all: the four Literal(x, lang=\"en\") calls per iteration are LANGUAGE literals, so this region exercises the language half of the stratum (same as its sibling build_core_v6_0_0.py__<module>_142).",
+    "`Literal(lab, lang=\"en\")` -> `{lab}@en` (glued suffix on an interpolation, inside `+{ }`), likewise `{dfn}@en` and `{S(\"R1\")}@en`; lab, dfn and S(...) are plain str, so rdflib builds exactly the same Literal (the driver kills the mutants that drop or change the tag on any of the three).",
+    "the four `g2.add` calls on the same subject are folded into one `+{ {p} a owl:AnnotationProperty ; rdfs:label ... }` with `@graph g2`; `p = SEM[ap]` becomes `p = sem:{ap}` (a prefixed name with a computed local part; same IRI, checked by a mutant that lowercases the local name). SEM = Namespace(...) is therefore dropped from translated.ldpy (the draft kept `SEM[ap]` without defining SEM).",
+    "prefixes declared: sem, rdfs, owl, skos, dcterms (the five that appear as prefixed names); rdf/xsd/prov never appear (RDF.type is `a`).",
+    "context shim (context_shim.py): the region reads `BASEDIR` and `S`, not defined in the extracted lines. BASEDIR (a hardcoded /home/claude path in the source) is restored to the shim directory; S is copied verbatim with only the key it looks up, R1 (taxonomy_v1_0_0.py C[\"R1\"], same commit). original.py and translated.ldpy import both from the shim instead of the BASEDIR assignment.",
+    "fixture 02-ontology/semtech_tbox_v5_2_0.ttl: stand-in for the real tbox, with a class, an unrelated property and sem:criticalTip carrying a French label, so the added triples meet existing data.",
+    "anti-hollow-green: `@fr` instead of `@en` on definition, dropped tag on the source or on the label, and a lowercased local name each made rdfeval check FAIL; restored, green."
   ],
   "draft_sha": "a8ea70878be11039",
   "provenance": {
@@ -30,5 +43,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

@@ -1,0 +1,20 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix jlo: <http://data.judaicalink.org/ontology/> .
+@prefix rujen: <http://data.judaicalink.org/data/rujen/> .
+
+# labels to translate (skos:prefLabel), one of them for which the stand-in
+# service has no entry (it stays in Cyrillic) and one for which it answers
+# like a banned client
+rujen:ben-gurion skos:prefLabel "Давид Бен-Гурион"@ru ;
+    jlo:hasAbstract "Историк"@ru ;
+    skos:altLabel "Бен-Гурион, Давид"@ru .
+rujen:encyclopedia skos:prefLabel "Еврейская энциклопедия"@ru ;
+    jlo:hasAbstract "Писатель и журналист"@ru .
+rujen:unknown skos:prefLabel "Неизвестный"@ru .
+rujen:rabbi skos:prefLabel "Раввин"@ru .
+# subjects that only have an abstract: translated for real by the abstract tasks
+rujen:abstract-only jlo:hasAbstract "Писатель и журналист"@ru .
+rujen:abstract-banned jlo:hasAbstract "Раввин"@ru .
+# neighbours that must NOT be read: other predicates
+rujen:other skos:altLabel "Другое"@ru ;
+    skos:definition "Определение"@ru .

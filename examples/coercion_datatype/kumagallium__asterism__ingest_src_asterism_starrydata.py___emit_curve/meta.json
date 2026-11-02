@@ -14,11 +14,26 @@
     "term_constructor": 21,
     "triple_add": 28
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "typed literal",
+    "plain literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SCHEMA->schema, DCTERMS->dcterms, PROV->prov, RDF->rdf, XSD->xsd"
+    "prefixes declared: schema, dcterms, prov, xsd (the ones that appear as prefixed names); rdf never does (RDF.type is `a`). The namespaces sd and sdr arrive as PARAMETERS (built at run time from the dataset configuration), so their terms stay `{sd.Curve}` interpolations and `curve = sdr[f\"curve/{curve_key}\"]` stays Python; SCHEMA = Namespace(...) becomes `@prefix schema:`.",
+    "the four typed sites: `Literal(min(xs), datatype=XSD.double)` (x4: xMin, xMax, yMin, yMax), `Literal(point_count, datatype=XSD.integer)` and `Literal(at_time, datatype=XSD.dateTime)` become `{min(xs)}^^xsd:double`, `{point_count}^^xsd:integer`, `{at_time}^^xsd:dateTime`: the value is interpolated, never written as a lexical form, so rdflib's normalisation of the lexical form is the same on both sides (the driver's arrays give 1e-05 / 1e+22 / 3 -> \"3.0\" / 3e-05, and a +09:00 timestamp that comes back as UTC). NOTE: the explicit datatype is not observable here -- xs / ys are floats and point_count an int, for which the default coercion already gives xsd:double / xsd:integer, so `{min(xs)}` alone passes the check too (equivalent mutant); the suffix is kept because it says what the source says and survives a non-float value. at_time is a str, for which only the suffix gives xsd:dateTime (the bare form would be a plain literal; killed).",
+    "`g.add` -> `+{ }` under `@graph g` (g is a parameter, declared once at the top of the body): the runs on `curve` collapse into predicate-object lists (`a {sd.Curve}, prov:Entity ; dcterms:identifier ... ; {sd.rawFigureId} ...`, and the digitization block with its two subjects); every add under its own guard (`if figure_name :=`, the `for col_key, prop` loops, each if-branch) keeps its own island. 28 adds -> 18 islands.",
+    "`Literal(x)` for a str -> `{x}` (default coercion: plain literal; none of curve_key, fig_id, figure_name, value, x_raw, y_raw, project, created, updated can be None here, they are truthy or non-empty strs). `Literal(\"WebPlotDigitizer\")` -> the plain string `\"WebPlotDigitizer\"` in the island. `URIRef(iri)` / `URIRef(WEBPLOTDIGITIZER_IRI)` -> `f<{iri}>` / `f<{WEBPLOTDIGITIZER_IRI}>` (no @base in scope; `agent = f<{WEBPLOTDIGITIZER_IRI}>` keeps the local).",
+    "context shim (context_shim.py): the `asterism` package is not installed and the region uses six names it does not define: parse_float_array and strip_quoted (asterism/text.py), parse_project_names, parse_curator_timestamp and its regex (asterism/starrydata.py, the region's own file), quantity_kind_iri and unit_iri (asterism/qudt.py), all copied verbatim at f0977d4d3a. Only qudt's `_load_map` differs: it reads qudt_map.yaml (datasets/starrydata/qudt_map.yaml, copied verbatim next to the shim) from the shim's directory instead of through asterism.datasets.datasets_root(). The unused names the source imports (parse_issued, safe_url, slugify) are dropped from the import line in both representations.",
+    "driver: ten calls on the real function: the complete row (all guarded triples, mapped quantity kinds and units, +0900 timestamps), arrays whose extremes rdflib writes differently from str() (1e-05, 3 -> 3.0, 2.5e10, 1e22, NaN / null / \"n/a\" dropped, the longer y array so point_count is the shorter length), a created_at without timezone (no prov:atTime) with ingestion_iri None, unmapped property / unit with empty arrays, updated_at alone, the three early-return cases (missing figure_id / sample_id / SID: False, empty graph), whitespace and badly quoted strings, and a graph that already holds triples about the same curve (and a bound prefix).",
+    "anti-hollow-green: float instead of double, integer datatype removed, timestamp typed xsd:date or untyped, point_count from max, ofSample island removed, x_raw as an IRI, a language tag on the agent name: rdfeval check FAILED each time (the datatype-less min/max and str() forms survive as equivalent mutants, see above); restored, green."
   ],
   "draft_sha": "db98bc1947ee2864",
   "provenance": {

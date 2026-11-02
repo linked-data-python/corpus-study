@@ -1,0 +1,19 @@
+# Context shim (see meta.json): stand-in for the real
+# landscape/02-ontology/semtech_tbox_v5_2_0.ttl from altunelyusuf/
+# SemanticTechnologies @ bad0fa7c46af. `g2 = Graph().parse(...)` reads this
+# file BEFORE the region adds three annotation properties to it. Besides a
+# class and a property the region does not touch, it already holds
+# sem:criticalTip (one of the three the region declares) with a label of
+# another language, so the region's additions meet existing data.
+@prefix sem: <http://example.org/semtech#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+sem:RealWorldEntity a owl:Class ;
+    rdfs:label "Real-world entity"@en .
+
+sem:glossaryNote a owl:AnnotationProperty ;
+    rdfs:label "glossary note"@en .
+
+sem:criticalTip a owl:AnnotationProperty ;
+    rdfs:label "tip (earlier label)"@fr .

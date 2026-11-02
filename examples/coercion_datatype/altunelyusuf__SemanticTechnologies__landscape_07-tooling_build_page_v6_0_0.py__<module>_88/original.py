@@ -3,11 +3,9 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD, PROV
-HERE = "/home/claude/semtech-landscape"
-SEM = Namespace(T.BASE); IPO = Namespace("http://example.org/rdodi/interactive-page-ontology#")
+from context_shim import HERE, S, byid  # context shim, see meta.json
+IPO = Namespace("http://example.org/rdodi/interactive-page-ontology#")
 SP = Namespace("http://example.org/semtech/page#")
-nodes = []
-byid = {n["id"]: n for n in nodes}
 g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v5_4_0.ttl")
 lo15 = SP.LO15
 w20 = SP.W20

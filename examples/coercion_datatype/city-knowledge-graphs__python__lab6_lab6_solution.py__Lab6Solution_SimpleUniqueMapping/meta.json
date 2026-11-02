@@ -14,11 +14,26 @@
     "term_constructor": 22,
     "triple_add": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "f<…>",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, FOAF->foaf, XSD->xsd"
+    "prefixes: XSD->xsd; only xsd is declared (owl/rdf/rdfs/foaf of the draft never appear as prefixed names: RDF.type is `a`, the lab6 vocabulary is the instance attribute `self.lab6`, built at run time from `self.lab6_ns_str`, so it stays `{self.lab6.City}` interpolations).",
+    "the 9 `Literal(row[i], datatype=XSD.x)` calls become `{row[i]}^^xsd:x` (string x6, float x2, long x1), NOT `\"..\"^^`: the cells are numpy / pandas values, and pandas gives a float64 column when it holds a NaN, so population reaches the island as 29617000.0 and the original makes \"29617000.0\"^^xsd:long (the driver pins this). `{expr}^^dt` goes through the same Literal(value, datatype=...) constructor, so the lexical forms agree; a mechanical \"n\"^^dt or f\"{n}\" would not be the same program for the float columns (rdflib normalises)",
+    "the graph is `self.g`, an attribute of the receiver: each island takes the call suffix `(self.g)` (`@graph self.g` is documented only for a bare name). one suffix per island (10 islands for the 13 adds), the cost of an attribute receiver.",
+    "`URIRef(entity_city_uri)` -> `f<{entity_city_uri}>` (no @base in scope, so identical; the name is already a full IRI, built with lab6_ns_str).",
+    "restructuring: the three adds at the top (city a City, city name_ascii, country a Country) are folded into ONE `+{ }` (one subject with `;`, a second subject after `.`); every other add keeps its own island because each sits under its own is_nan guard. Order of insertion is the only thing that changes (not observable in a graph).",
+    "driver: `self` is a stub with the attributes the region reads (the real Lab6Solution.__init__ reads a CSV with pandas and a DBpedia lookup; the lookup is not needed here), data read with the SAME pd.read_csv call; cities.csv has NaN cells in every guarded column, a Namibia 'NA' iso code that pandas reads as NaN, empty/other/admin/primary/minor capital values, rows skipped by the NaN guard, a country shared by two cities, names with space, comma and non-ASCII characters. The DataFrame is held as a class attribute of the per-call stub class because the harness compares instance __dict__s and a DataFrame has no usable ==.",
+    "anti-hollow-green: population via int(), float -> double, dropped datatype on iso2, an always-true guard on iso3, the country name triple removed, subject and object of the final triple swapped: rdfeval check FAILED each time; restored, green.",
+    "MISSING (minor): none for the coercion itself; the only cost is that the typed literal `^^` appears inside a one-triple island per guarded add, so the gain over `self.g.add((s, p, Literal(v, datatype=XSD.x)))` is the removal of the Literal/URIRef calls, not of the guards."
   ],
   "draft_sha": "5fa6d882c64c73b2",
   "provenance": {

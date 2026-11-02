@@ -3,13 +3,13 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, PROV, RDF, XSD
-from asterism.qudt import quantity_kind_iri, unit_iri
-from asterism.text import (
+from context_shim import (  # context shim, see meta.json
+    parse_curator_timestamp,
     parse_float_array,
-    parse_issued,
-    safe_url,
-    slugify,
+    parse_project_names,
+    quantity_kind_iri,
     strip_quoted,
+    unit_iri,
 )
 WEBPLOTDIGITIZER_IRI = "https://automeris.io/WebPlotDigitizer"
 SCHEMA = Namespace("https://schema.org/")

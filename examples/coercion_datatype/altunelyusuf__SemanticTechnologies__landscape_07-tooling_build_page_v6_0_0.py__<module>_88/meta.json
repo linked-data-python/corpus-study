@@ -14,11 +14,24 @@
     "term_constructor": 5,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "language literal"
+  ],
   "translation_notes": [
-    "prefixes: IPO->ipo, SP->sp, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov"
+    "prefixes declared: ipo, sp, rdf, rdfs, owl, skos, dcterms (the ones that appear as prefixed names); xsd and prov never appear.",
+    "the flagged sites (lines 88-95) have no `datatype=`: the six Literal(x, lang=\"en\") in the tuple list are LANGUAGE literals, so this region exercises the language half of the stratum.",
+    "five of the six become `\"...\"@en` (glued suffix on the quoted string, valid in plain Python position, here inside the tuples of the list). The sixth has a computed lexical form, `Literal(S(*n13[\"refs\"]) + \" | \" + S(\"NR-PYODIDE\"), lang=\"en\")`: outside a graph island `{expr}@en` does not parse, only a quoted string takes the suffix, so it is rewritten as the f-string `f\"{S(*n13['refs'])} | {S('NR-PYODIDE')}\"@en` (S returns str, so same Literal; the driver kills the mutants that drop the second citation or the tag). MISSING, minor: a computed value tagged outside a graph island needs the f-string detour.",
+    "kept the loop over the constant list of (predicate, object) pairs, with `+{ {w20} {tr[0]} {tr[1]} }` under `@graph g` (a predicate that arrives as DATA is interpolated, which is fine: tr[0] is a URIRef). Collapsing the loop into one `+{ {w20} a ipo:InstructionalWidget, owl:NamedIndividual ; rdfs:label ... ; ... }` would be the idiom, but it removes the loop, i.e. a refactoring INSTRUCTIONS asks not to do.",
+    "context shim (context_shim.py): the region reads `HERE`, `S` and `byid`, not defined in the extracted lines. HERE (a hardcoded /home/claude path in the source) is restored to the shim directory; S is copied verbatim with only the four keys it looks up (R14, R16, W3C-SPARQL11, NR-PYODIDE, cites verbatim); byid keeps the T1C3 node's refs. original.py and translated.ldpy import them from the shim instead of the HERE/nodes/byid lines, and original.py drops the unused `SEM = Namespace(T.BASE)` (T, the taxonomy module, is not reproducible and SEM is not read by the region).",
+    "fixture 04-page/semtech_page_abox_v5_4_0.ttl: stand-in for the real ABox, holding the page, an older widget sp:W19 and a French label on sp:W20, so the eight added triples meet existing data.",
+    "anti-hollow-green: dropped the second citation, altered the computed literal, changed the tag of one literal to @fr, removed the tag of another, and wrote to sp:LO15 instead of sp:W20: rdfeval check FAILED each time; restored, green."
   ],
   "draft_sha": "61948de547a065c7",
   "provenance": {

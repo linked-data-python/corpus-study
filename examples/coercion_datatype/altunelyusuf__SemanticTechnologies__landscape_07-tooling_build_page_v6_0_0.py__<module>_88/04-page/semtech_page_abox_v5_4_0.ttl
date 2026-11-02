@@ -1,0 +1,20 @@
+# Context shim (see meta.json): stand-in for the real
+# landscape/04-page/semtech_page_abox_v5_4_0.ttl from altunelyusuf/
+# SemanticTechnologies @ bad0fa7c46af. `g = Graph().parse(...)` reads it
+# BEFORE the region adds the widget's description to sp:W20: it already holds
+# the page, an older widget (sp:W19), and a first line about sp:W20 itself
+# (a label in another language), so the added triples meet existing data.
+@prefix sp: <http://example.org/semtech/page#> .
+@prefix ipo: <http://example.org/rdodi/interactive-page-ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+sp:Page a ipo:InteractivePage ;
+    rdfs:label "Interactive page"@en .
+
+sp:W19 a ipo:InstructionalWidget, owl:NamedIndividual ;
+    rdfs:label "Concept map"@en .
+
+sp:W20 rdfs:label "Panneau de code"@fr .
+
+sp:LO15 a ipo:LearningObjective .
