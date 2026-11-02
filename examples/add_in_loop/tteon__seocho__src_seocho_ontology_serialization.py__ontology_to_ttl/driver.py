@@ -30,6 +30,7 @@ import traceback
 from contextlib import redirect_stdout
 from pathlib import Path
 
+from rdfeval import harness
 from rdfeval.harness import graphs_isomorphic
 from shim import NodeDef, Ontology, Property, PropertyType, RelDef
 
@@ -78,6 +79,7 @@ def _make_ontology(description: str = "A small ontology of companies and people.
 
 
 def _run(path: Path) -> tuple[object, str, str | None]:
+    harness._EXECUTED.append(path.name)
     ns: dict = {"__name__": "__mod__", "__file__": str(path)}
     out = io.StringIO()
     try:
@@ -100,11 +102,12 @@ def main() -> None:
                      "method": "call:ontology_to_ttl+read-back-isomorphism",
                      "diffs": [], "error": None}
 
-    ns_o, out_o, err_o = _run(ex_dir / "original.py")
-    ns_t, out_t, err_t = _run(ex_dir / "translated.ldpy")
+    # RDFEVAL_SIDES puts an optimized artefact in place of either file
+    ns_o, out_o, err_o = _run(harness._redirected(ex_dir / "original.py"))
+    ns_t, out_t, err_t = _run(harness._redirected(ex_dir / "translated.ldpy"))
     if err_o or err_t:
         verdict["error"] = f"original: {err_o}\ntranslated: {err_t}"
-        print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+        harness._emit(verdict)
         return
 
     diffs: list[str] = []
@@ -120,7 +123,7 @@ def main() -> None:
                 ns_t["ontology_to_ttl"](_make_ontology(description), out_path_t)
             except Exception:
                 verdict["error"] = traceback.format_exc(limit=8)
-                print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+                harness._emit(verdict)
                 return
 
             g_o = Graph().parse(source=str(out_path_o), format="turtle")
@@ -136,7 +139,7 @@ def main() -> None:
 
     verdict["diffs"] = diffs
     verdict["equivalent"] = not diffs
-    print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+    harness._emit(verdict)
 
 
 if __name__ == "__main__":

@@ -70,13 +70,13 @@
       "check": "OK"
     }
   },
-  "optimization_status": "draft",
+  "optimization_status": "final",
   "optimization_notes": [
-    "DRAFT because the driver cannot prove the optimized artefacts without being modified: it hard-codes `original.py` and `translated.ldpy` and does not read RDFEVAL_SIDES, so `rdfeval check` reports `driver compared None` for every optimized artefact. A scratch copy of the driver with the artefact name swapped in (the real driver untouched) gives `equivalent: true` for optimized.py, optimized.ldpy and both header variants, and the serialised Turtle of the two driver ontologies is byte-identical to the original's for optimized.py and optimized.ldpy.",
     "optimized.py: the loop's class IRI expression is `_cls_iri(label)`, the helper that already computes it for parents (a node value that is None, outside the Dict[str, NodeDef] contract, would now fail on `.description` instead of `.same_as`; the exception propagates before serialize either way); `URIRef(ns + _safe_local(x))` becomes `ns[_safe_local(x)]` (Namespace.term builds the same URIRef); `ns_str.endswith('/') or ns_str.endswith('#')` becomes `endswith(('/', '#'))` and `ns_str = ns_str + '/'` becomes `+=`; consecutive adds on one subject become `g += [...]`; the alias loops and the guarded subclass loop become comprehensions. The try/except ImportError, the `if parent in ontology.nodes` guard and every description guard are kept.",
     "optimized.ldpy, from optimized.py: `+{ }` with `;` for the same groups, plain loops with `+{ }` where Python has comprehensions, bare interpolations `{label}`, `{alias}` and `{x.description}` in place of Literal(x) (descriptions are guarded truthy, labels and aliases are str; a None alias would raise where Literal(None) gives 'None'), `f<{...same_as}>` for URIRef, `xsd:string` for the xsd_for default; `ns[...]` stays Python (ns is computed at run time, no @prefix can hold it).",
     "No exception to the symmetry. The rdflib import inside the try keeps only what optimized.ldpy still reads (rdflib, Namespace, OWL, RDFS, SKOS); the ImportError guard and its message are unchanged.",
-    "Considered and rejected, an ldpy finding: `@graph as g` would replace `g = rdflib.Graph()`, the three owl/rdfs/skos binds and `@graph g` (byte-identical Turtle on the driver's calls), but the graph it creates carries the runtime's CACHED NamespaceManager (runtime._nm_for), shared by every graph created under the same prefixes; the region's `g.bind('priv', ns)` then mutates that shared manager, and a second call with another namespace serialises `@prefix priv1:` instead of `priv:` (reproduced). `@graph g` on a graph the code creates (runtime.designate binds into the graph's own manager) has no such leak, so it is kept."
+    "Considered and rejected, an ldpy finding: `@graph as g` would replace `g = rdflib.Graph()`, the three owl/rdfs/skos binds and `@graph g` (byte-identical Turtle on the driver's calls), but the graph it creates carries the runtime's CACHED NamespaceManager (runtime._nm_for), shared by every graph created under the same prefixes; the region's `g.bind('priv', ns)` then mutates that shared manager, and a second call with another namespace serialises `@prefix priv1:` instead of `priv:` (reproduced). `@graph g` on a graph the code creates (runtime.designate binds into the graph's own manager) has no such leak, so it is kept.",
+    "The driver resolves its two files through harness._redirected and emits through harness._emit: rdfeval check proves every artefact."
   ],
   "optimized_constructions": [
     "@prefix",
@@ -86,10 +86,10 @@
     "f<…>",
     "interpolation {expr}"
   ],
-  "header_optimization_status": "draft",
+  "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python: TYPE_CHECKING, Any, Dict and Optional go from the typing import; Path, Union and _safe_local stay.",
     "LD Python: the same typing names go; the four @prefix lines are all used.",
-    "Draft for the same reason as optimized.*: the driver ignores RDFEVAL_SIDES; the scratch copy of the driver gives equivalent: true for both header-variant files."
+    "The driver resolves its two files through harness._redirected and emits through harness._emit: rdfeval check proves every artefact."
   ]
 }
