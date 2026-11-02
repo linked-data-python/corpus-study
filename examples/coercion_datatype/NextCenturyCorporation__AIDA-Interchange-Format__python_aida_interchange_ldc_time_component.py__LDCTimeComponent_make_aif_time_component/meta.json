@@ -14,11 +14,22 @@
     "term_constructor": 1,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "typed literal",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "The computed typed literal of the stratum: `g.add((tc, interchange_ontology.timeType, Literal(self.time_type.name, datatype=XSD.string)))` becomes `@graph g` + `+{ {time_component} aif:timeType {self.time_type.name}^^xsd:string }`. Literal('ON') and Literal('ON', datatype=XSD.string) are different terms in rdflib; the island keeps the datatype (mutant without ^^xsd:string fails the check).",
+    "The predicate interchange_ontology.timeType (a module of URIRef constants) is written `aif:timeType` with `@prefix aif:` (the module's NAMESPACE) inside the island; the other uses of interchange_ontology (the class argument of _make_aif_resource, the properties passed to add_literal) are ordinary Python arguments and stay as extracted. The mechanical draft's `xsd:gYear` etc. arguments are kept (a prefixed name evaluates to the URIRef).",
+    "add_literal (the three year/month/day triples) is a METHOD outside the region that writes `Literal(value)` then overwrites `_datatype`: not expressible as an island and not part of the region, so those calls stay.",
+    "Context shim (shim.py): interchange_ontology (generated constants), aifutils._make_aif_resource and LDCTimeComponent (__init__, add_literal), verbatim, because aida_interchange is not installed in the study venv.",
+    "Driver: four calls on fresh graphs (full date as strings with a pre-existing triple that must survive; integers; year only; type only), graph by isomorphism and the returned node by its place in the graph. `@graph g` adds the block's prefixes to the caller's graph (bindings, not triples); the check accepts bindings added by the translation."
   ],
   "draft_sha": "01a16e4023d2706d",
   "provenance": {
@@ -30,5 +41,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

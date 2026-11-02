@@ -2,9 +2,10 @@
 # region: LDCTimeComponent.make_aif_time_component (lines 47-60, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import XSD, Literal, URIRef
-from aida_interchange import aifutils
-from aida_interchange.rdf_ontologies import interchange_ontology
+from shim import aifutils
+from shim import interchange_ontology
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix aif: <https://raw.githubusercontent.com/NextCenturyCorporation/AIDA-Interchange-Format/master/java/src/main/resources/com/ncc/aif/ontologies/InterchangeOntology#> .
 
 
 def make_aif_time_component(self, g):
@@ -16,7 +17,8 @@ def make_aif_time_component(self, g):
     :returns: time_component node
     """
     time_component = aifutils._make_aif_resource(g, None, interchange_ontology.LDCTimeComponent, None)
-    g += g{ {time_component} {interchange_ontology.timeType} {Literal(self.time_type.name, datatype=XSD.string)} }
+    @graph g
+    +{ {time_component} aif:timeType {self.time_type.name}^^xsd:string }
     self.add_literal(g, time_component, interchange_ontology.year, self.year, xsd:gYear)
     self.add_literal(g, time_component, interchange_ontology.month, self.month, xsd:gMonth)
     self.add_literal(g, time_component, interchange_ontology.day, self.day, xsd:gDay)

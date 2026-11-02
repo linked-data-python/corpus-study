@@ -10,11 +10,22 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: KTBS_NS_STATS->ktbsnsstats"
+    "Query 1 has a FILTER and PROJECTS the bound variable ($trace, 'selected solely to please Virtuoso'): not a BGP, and an interpolation would not give the 3-column rows the loop unpacks, so it stays `s{ }(graph, initBindings)` -- the bindings travel through the call suffix, the INSTRUCTIONS rule for a projected initial binding. The namespace the original splices into the FILTER with `.format(KTBS_NS_STATS)` (and the `{{ }}` escaping that goes with it) becomes `{str(KTBS_NS_STATS)}`, an interpolation in term position (bound, not pasted). initNs is replaced by `@prefix stats:` / `@prefix xsd:`; the unused '' prefix is dropped.",
+    "Query 2 is a basic graph pattern plus ORDER BY ?bn: `sorted(m{ {trace_uri} stats:obselCountPerType ?bn . ?bn ?pred ?obj }(graph), key=lambda tpl: tpl[0])`. The Virtuoso-only projection of $trace is dropped, so the inner loop unpacks 3 columns instead of 4 (`for _, pred, obj in tuples`). That is why the classification is minor-restructuring, not directly-expressible.",
+    "`KTBS_NS_STATS.obselCountPerType` (a Namespace attribute, imported from the project) becomes `stats:obselCountPerType`; the IRI is http://tbs-platform.org/2016/trace-stats# (the mechanical draft's prefix, `ktbsnsstats`, renamed). The `compact_context` still uses the Python object KTBS_NS_STATS: a Namespace needed as an OBJECT, which a prefix alone would not give (`@prefix ... as NAME` would, but the module-level import is kept).",
+    "Context shim (shim.py): ktbs names (KTBS_NS_URI, KTBS_NS_STATS, CONTEXT_URI, load_document, ValueConverter reduced) and a STAND-IN for pyld.jsonld.compact (pyld is not in the study venv; the stand-in only contracts keys to 'stats:...'). The shim is therefore not faithful to JSON-LD compaction; it never touches the two RDF reads, which are what the check compares. Adding pyld==... to requirements-study.txt would let the real one run.",
+    "Driver: four traces on one fixture (t1: simple stats, time span and three obselCountPerType blank nodes; t2: stats only; t3: no stats; t4: another trace's stats), with decoys (a blank node on t1 through another predicate, non-stats predicates on t1 filtered by the FILTER). ordered=False because the blank-node ids differ between sides. Mutant `stats:obselCountPerType` -> `?q` in query 2 makes the check fail. NOT caught: removing the sort (the in-memory store happens to yield each blank node's triples contiguously), so the ORDER BY ?bn is not independently proved.",
+    "oracle: the draft's 'isomorphism' was stale; the region READS and returns a value (values)."
   ],
   "draft_sha": "a20ca1d6ed474778",
   "provenance": {
@@ -27,5 +38,6 @@
     "bind_initbindings",
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": false
 }

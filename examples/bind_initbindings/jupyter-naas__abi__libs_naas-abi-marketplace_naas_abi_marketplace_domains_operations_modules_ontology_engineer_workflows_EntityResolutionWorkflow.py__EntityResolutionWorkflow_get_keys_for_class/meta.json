@@ -13,11 +13,20 @@
     "graph_write": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: RDFS->rdfs"
+    "The query is a basic graph pattern with ONE initial binding on an unprojected variable (?class_uri), so it becomes `m{ {class_uri} owl:hasKey ?list }(graph)`: the bound value is a term interpolation, the SELECT/PREFIX text and the initBindings dict disappear. `graph` is a parameter, not the current graph, hence the call suffix (graph) rather than @graph (which would also add the owl: prefix to the caller's graph).",
+    "One projected variable: m{ } yields the bare term, so `row[0]` (ResultRow index) becomes `row` and the cast(ResultRow, ...) is no longer needed (the now-unused imports are left as extracted).",
+    "Context shim (shim.py): `logger` of naas_abi_core (not installable here), a plain logging.Logger; original.py and translated.ldpy import it from the shim.",
+    "Driver: six calls with fixture graphs. Person/Country (key lists), Broken (cyclic rdf:rest -> Collection raises, the region logs a warning and returns None: the log record is compared), Weird (literal as hasKey object -> empty list, not None), Company (key under ex:hasKey, a neighbour that must not match -> None), Other (no key -> None). Mutant `owl:hasKey` -> `?p` makes the check fail on five of the six calls.",
+    "Not a construct of the language: the Collection(graph, node) list reading stays rdflib (no list island)."
   ],
   "draft_sha": "f791e4208802b77e",
   "provenance": {
@@ -29,5 +38,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

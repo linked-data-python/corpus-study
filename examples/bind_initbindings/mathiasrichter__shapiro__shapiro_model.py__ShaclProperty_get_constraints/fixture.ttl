@@ -1,0 +1,39 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:   <http://example.org/> .
+
+# property hierarchy: ex:name < ex:generalName
+ex:name rdfs:subPropertyOf ex:generalName .
+
+# a property shape with its own constraints (stored in an order that is NOT
+# the order of the constraint IRIs), an enumeration, and a path whose
+# super-property carries a further constraint
+ex:PS1 sh:path ex:name ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:in ( "red" "green" "blue" ) ;
+    ex:comment "not a SHACL constraint: filtered out" .
+
+# inherited through rdfs:subPropertyOf, via sh:path
+ex:generalName sh:maxLength 50 .
+
+# a property shape with no SHACL constraint at all
+ex:PS2 sh:path ex:other ;
+    ex:comment "nothing to report" .
+
+# a property shape that is its own, with ONE constraint
+ex:PS3 sh:path ex:age ;
+    sh:minInclusive 0 .
+
+# neighbours that must not match: constraints of other shapes and of an
+# unrelated property
+ex:PS4 sh:path ex:unrelated ;
+    sh:pattern "^x" ;
+    sh:maxCount 9 .
+ex:unrelatedSuper sh:minLength 3 .
+ex:unrelated rdfs:subPropertyOf ex:unrelatedSuper .
+
+# a super-property carrying an enumeration (for the blank-node case "bn2")
+ex:enumSuper sh:in ( "x" "y" ) .
+ex:enumSub rdfs:subPropertyOf ex:enumSuper .

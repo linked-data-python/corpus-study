@@ -3,11 +3,11 @@
 # licence of the source repository: see meta.json
 from collections import Counter, defaultdict, OrderedDict
 from itertools import chain, groupby
-from pyld.jsonld import compact
-from ..namespace import KTBS, KTBS_NS_URI
-from .jsonld_parser import CONTEXT_URI, load_document
-from ..engine.trace_stats import NS as KTBS_NS_STATS
-@prefix ktbsnsstats: <http://tbs-platform.org/2016/trace-stats#> .
+# Context shim: the package-level names the region uses (see shim.py).
+from shim import (compact, KTBS, KTBS_NS_URI, CONTEXT_URI, load_document,
+                  KTBS_NS_STATS, ValueConverter)
+@prefix stats: <http://tbs-platform.org/2016/trace-stats#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 def trace_stats_to_json(graph, tstats, bindings=None):
@@ -36,49 +36,35 @@ def trace_stats_to_json(graph, tstats, bindings=None):
         '@type': 'TraceStatistics'
     }
 
-    initNs = {'': str(KTBS_NS_URI),
-              'stats': str(KTBS_NS_STATS)
-              }
     initBindings = {'trace': trace_uri}
 
     # How could I get predicates in the form stat:xxxxx
     # in the results, InitNs does not seem to be enough
     # Is it because of the filter clause ?
-    stats_infos = graph.query("""
+    stats_infos = s{
         SELECT ?pred ?obj
             $trace # selected solely to please Virtuoso
-        {{
+        {
             $trace ?pred ?obj
 
-            filter (strstarts(xsd:string(?pred), "{0:s}"))
-        }}
-    """.format(KTBS_NS_STATS),
-                              initNs=initNs,
-                              initBindings=initBindings)
+            filter (strstarts(xsd:string(?pred), {str(KTBS_NS_STATS)}))
+        }
+    }(graph, initBindings)
 
     for pred, obj, _ in stats_infos:
-        if pred != ktbsnsstats:obselCountPerType:
+        if pred != stats:obselCountPerType:
             tstats_dict[pred] = val2jsonobj(obj)
 
     # Recover data inside blank nodes : another request needed
-    stats_infos = graph.query("""
-        SELECT ?bn ?pred ?obj
-            $trace # selected solely to please Virtuoso
-        {
-            $trace stats:obselCountPerType ?bn .
-
-            ?bn ?pred ?obj .
-        }
-        ORDER BY ?bn
-        """,
-                              initNs=initNs,
-                              initBindings=initBindings)
+    stats_infos = sorted(m{ {trace_uri} stats:obselCountPerType ?bn .
+                            ?bn ?pred ?obj }(graph),
+                         key=lambda tpl: tpl[0])
 
     if len(stats_infos) > 0:
-        tstats_dict[ktbsnsstats:obselCountPerType] = ocpt =  []
+        tstats_dict[stats:obselCountPerType] = ocpt =  []
         for bn, tuples in groupby(stats_infos, lambda tpl: tpl[0]):
             ot_infos = {}
-            for _, pred, obj, _ in tuples:
+            for _, pred, obj in tuples:
                 pred = str(pred) # cast URIRef to plain unicode
                 ot_infos[pred] = val2jsonobj(obj)
 

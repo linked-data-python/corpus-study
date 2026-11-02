@@ -1,4 +1,23 @@
-# Input graph for jupyter-naas__abi__libs_naas-abi-marketplace_naas_abi_marketplace_domains_operations_modules_ontology_engineer_workflows_EntityResolutionWorkflow.py__EntityResolutionWorkflow_get_keys_for_class — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+@prefix ex:  <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# a class with a well-formed key list of three properties
+ex:Person owl:hasKey ( ex:ssn ex:passport ex:birthDate ) .
+
+# a class with a one-element key list
+ex:Country owl:hasKey ( ex:isoCode ) .
+
+# a class whose key list is cyclic: Collection iteration raises, region logs
+ex:Broken owl:hasKey ex:loop .
+ex:loop rdf:first ex:badKey ; rdf:rest ex:loop .
+
+# a class whose hasKey object is a literal
+ex:Weird owl:hasKey "not a list" .
+
+# neighbours that must not match: other properties, other classes
+ex:Company a owl:Class ;
+    ex:hasKey ( ex:vatNumber ) ;
+    owl:equivalentClass ex:Organisation .
+ex:Person ex:key ( ex:wrong ) .
+ex:Other owl:disjointWith ex:Person .

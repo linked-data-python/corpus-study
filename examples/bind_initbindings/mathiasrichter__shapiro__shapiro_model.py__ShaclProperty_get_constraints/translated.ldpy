@@ -5,18 +5,39 @@ from rdflib import Graph, URIRef, BNode
 from typing import Tuple, List
 from urllib.parse import urlparse
 
+# Context shim: ShaclConstraint (and, for the original, the class attributes
+# it reads through `self`) lived elsewhere in shapiro_model.py (see shim.py).
+from shim import ShaclConstraint
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
 def get_constraints(self) -> List[ShaclConstraint]:
     props = []
-    result = self.graph.query( # get prop and potential super-properties
-        self.TRANSITIVE_SUPERPROPERTIES_QUERY, initBindings={"subproperty": self.get_node(self.iri)}
-    )
+    result = s{ SELECT DISTINCT ?superproperty # get prop and potential super-properties
+        WHERE
+        {
+            {
+                {self.get_node(self.iri)} rdfs:subPropertyOf* ?superproperty .
+            }
+            UNION
+            {
+                {self.get_node(self.iri)} sh:path ?property.
+                ?property rdfs:subPropertyOf* ?superproperty .
+            }
+        } }(self.graph)
     for r in result:
         props.append(str(r.superproperty))
     result = []
     for p in props: # get all constraints including those from super-properties
-        result += self.graph.query(
-            self.SHACL_CONSTRAINTS_QUERY, initBindings={"property": self.get_node(str(p))}
-        )
+        result += s{ SELECT DISTINCT ?property ?constraint ?value
+            WHERE
+            {
+                {
+                    ?property ?constraint ?value .
+                    FILTER(STRSTARTS(STR(?constraint), "http://www.w3.org/ns/shacl#")) .
+                }
+            } }(self.graph, {"property": self.get_node(str(p))})
     constraints = []
     for r in result:
         p = str(r.property)
@@ -30,9 +51,10 @@ def get_constraints(self) -> List[ShaclConstraint]:
                 prop = BNode(self.iri)
             else:
                 prop = URIRef(self.iri)
-            items = self.graph.query(
-                self.SHACL_IN_QUERY, initBindings={"source": prop}
-            )
+            items = s{ SELECT ?source ?item
+                WHERE {
+                    ?source sh:in/rdf:rest*/rdf:first ?item
+                } }(self.graph, {"source": prop})
             for i in items:
                 v.append(i.item)
         constraints.append(ShaclConstraint(self, c, v, is_enum))

@@ -12,10 +12,19 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "`rdflib.Literal(x[0], datatype=rdflib.XSD.decimal)` in a pyparsing parse action: x[0] is the matched str, so `f\"{x[0]}\"^^xsd:decimal` is the faithful typed literal. The `{x[0]}^^xsd:decimal` spelling is not available here: it exists only inside a graph island (g{ } / +{ }); outside one, an interpolated lexical form has to go through an f-string, `\"...\"^^dt`. Verified on '.5', '01.5', '1.50': both sides give the same lexical form (rdflib normalises '.5' -> '0.5' and '01.5' -> '1.5' on both; it keeps '1.50').",
+    "No graph and no policy involved: the coercion_datatype stratum is exercised by the typed literal alone. Same shape as the sibling pyparsing region (schemaorg sdopythonapp parser.py <module>_322) but here the datatype is a constant, hence a typed literal.",
+    "Demo harness `demo(text)` appended identically to original.py and translated.ldpy (precedent: schemaorg ..._322): the region only defines a rule and its action, nothing at module scope is observable. Its parseAll=True failures are compared as raises.",
+    "Driver: nine tokens (1.50, .5, 01.5, 12.0, 0.000, and four non-matches that raise). Mutant datatype xsd:decimal -> xsd:double makes the check fail."
+  ],
   "draft_sha": "128540df8f109838",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.462020+00:00",
@@ -26,5 +35,6 @@
   "strata": [
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": false
 }

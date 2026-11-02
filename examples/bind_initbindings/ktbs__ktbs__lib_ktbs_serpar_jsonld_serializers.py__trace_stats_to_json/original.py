@@ -3,10 +3,9 @@
 # licence of the source repository: see meta.json
 from collections import Counter, defaultdict, OrderedDict
 from itertools import chain, groupby
-from pyld.jsonld import compact
-from ..namespace import KTBS, KTBS_NS_URI
-from .jsonld_parser import CONTEXT_URI, load_document
-from ..engine.trace_stats import NS as KTBS_NS_STATS
+# Context shim: the package-level names the region uses (see shim.py).
+from shim import (compact, KTBS, KTBS_NS_URI, CONTEXT_URI, load_document,
+                  KTBS_NS_STATS, ValueConverter)
 
 def trace_stats_to_json(graph, tstats, bindings=None):
     """

@@ -1,10 +1,12 @@
 # Extracted from usc-isi-i2/kgtk@b8d946b423 : kgtk/knowledge_graph/shacl.py
 # region: SHACLOntoConverter._convert_ontology_owl_restriction (lines 151-184, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from kgtk.knowledge_graph.node import URI, BNode, Literal, LiteralType
+from shim import URI, BNode, Literal, LiteralType
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 def _convert_ontology_owl_restriction(self):
-    for c, p, exact, min_, max_ in self.onto_graph.query("""
+    for c, p, exact, min_, max_ in s{
       SELECT ?c ?p ?exact ?min ?max
       WHERE {
         ?c rdfs:subClassOf|owl:equivalentClass ?res .
@@ -14,7 +16,7 @@ def _convert_ontology_owl_restriction(self):
         OPTIONAL {?res owl:minCardinality ?min}
         OPTIONAL {?res owl:maxCardinality ?max}
       }
-    """):
+    }(self.onto_graph):
         node_subject = self._class_shape(c)
         property_shape = self._property_shape(p)
         if exact:
@@ -24,15 +26,15 @@ def _convert_ontology_owl_restriction(self):
         if max_:
             property_shape.add_property(URI('sh:maxCount'), Literal(str(max_), type_=LiteralType.integer))
         ranges = []
-        for r, in self.onto_graph.query("""
+        for r, in s{
           SELECT ?r
           WHERE {
-            ?c rdfs:subClassOf|owl:equivalentClass ?res .
+            {c} rdfs:subClassOf|owl:equivalentClass ?res .
             ?res a owl:Restriction ;
-                 owl:onProperty ?p ;
+                 owl:onProperty {p} ;
                  owl:allValuesFrom|owl:someValuesFrom|owl:hasValue ?r
           }
-        """, initBindings={'c': c, 'p': p}):
+        }(self.onto_graph):
             ranges.append(r)
         self._build_property_ranges(property_shape, ranges)
         node_subject.add_property(URI('sh:property'), property_shape)

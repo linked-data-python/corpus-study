@@ -1,0 +1,30 @@
+@prefix ex:    <http://example.org/> .
+@prefix stats: <http://tbs-platform.org/2016/trace-stats#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# the trace under study: simple statistics + one blank node per obsel type
+<http://example.org/t1/> a ex:Trace ;
+    ex:label "first trace" ;
+    stats:obselCount 42 ;
+    stats:minTime 10 ;
+    stats:maxTime 99 ;
+    stats:duration 89 ;
+    stats:obselCountPerType
+        [ stats:hasObselType ex:Click ; stats:obselCount 30 ] ,
+        [ stats:hasObselType ex:Scroll ; stats:obselCount 9 ] ,
+        [ stats:hasObselType ex:Key ; stats:obselCount 3 ] .
+
+# a trace with statistics but no per-type breakdown and no time span
+<http://example.org/t2/> a ex:Trace ;
+    stats:obselCount 7 .
+
+# a trace with no statistics at all
+<http://example.org/t3/> a ex:Trace ;
+    ex:label "empty trace" .
+
+# neighbours that must NOT reach the result of t1: a blank node hanging off
+# another trace, and a blank node attached to t1 by another predicate
+<http://example.org/t4/> stats:obselCount 1000 ;
+    stats:obselCountPerType [ stats:hasObselType ex:Other ; stats:obselCount 1000 ] .
+<http://example.org/t1/> ex:related [ stats:hasObselType ex:Decoy ; stats:obselCount 5 ] .

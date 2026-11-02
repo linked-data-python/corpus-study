@@ -5,6 +5,10 @@ from rdflib import Graph, URIRef, BNode
 from typing import Tuple, List
 from urllib.parse import urlparse
 
+# Context shim: ShaclConstraint (and, for the original, the class attributes
+# it reads through `self`) lived elsewhere in shapiro_model.py (see shim.py).
+from shim import ShaclConstraint
+
 def get_constraints(self) -> List[ShaclConstraint]:
     props = []
     result = self.graph.query( # get prop and potential super-properties

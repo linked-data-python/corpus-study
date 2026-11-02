@@ -2,11 +2,11 @@
 # region: EntityResolutionWorkflow.get_keys_for_class (lines 210-240, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from typing import Annotated, List, Optional, Set, Tuple, cast
-from naas_abi_core import logger
+from shim import logger
 from rdflib import RDFS, Graph, Literal, Node, URIRef
 from rdflib.collection import Collection
 from rdflib.query import ResultRow
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 
 def get_keys_for_class(
@@ -18,18 +18,10 @@ def get_keys_for_class(
     :param class_uri: The URI of the class (as string or URIRef).
     :return: A list of keys (Node objects, typically URIRef) if the class has keys, None otherwise.
     """
-    query = """
-    PREFIX owl: <http://www.w3.org/2002/07/owl#>
-    SELECT ?list
-    WHERE {
-      ?class_uri owl:hasKey ?list .
-    }
-    """
-    results = graph.query(query, initBindings={"class_uri": class_uri})
+    results = m{ {class_uri} owl:hasKey ?list }(graph)
 
     for row in results:
-        result_row = cast(ResultRow, row)
-        list_node = result_row[0]  # ?list
+        list_node = row  # ?list
         # Extract all keys from the RDF list
         try:
             collection = Collection(graph, list_node)

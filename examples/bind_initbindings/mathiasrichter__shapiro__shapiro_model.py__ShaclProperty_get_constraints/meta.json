@@ -12,10 +12,21 @@
   "categories": {
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "None of the three queries is a basic graph pattern: the first has `rdfs:subPropertyOf*` and a UNION, the second a FILTER, the third a sequence path `sh:in/rdf:rest*/rdf:first`. All three are `s{ }(self.graph, ...)`.",
+    "initBindings: `subproperty` is not projected -> term interpolation `{self.get_node(self.iri)}` (twice, once per UNION branch: the original bound it once, so get_node is called twice; harmless here, noted). `property` and `source` ARE projected (SELECT ?property ...; SELECT ?source ...) -> they stay initial bindings through the call suffix `(self.graph, {\"property\": ...})`. The rule 'interpolate if not projected, bindings= if projected' applies inside one function, query by query.",
+    "The three prepared queries are class attributes of ShaclProperty (hoisted out of the region, like SHAPE_QUERY in the sibling get_nodeshapes), so the translation INLINES their text as s{ } islands and no longer reads self.SHACL_*_QUERY; that is the restructuring. The original text uses `sh:path` in the first query WITHOUT declaring `sh:` (rdflib's default namespace manager supplies it); the island needs the explicit `@prefix sh:`.",
+    "Context shim (shim.py): ShaclConstraint, and ShaclProperty minus get_constraints (iri, graph, get_node and the three prepared queries, verbatim) so the original runs through `self`.",
+    "Driver: six calls, ordered=True (the region sorts by constraint IRI; no ties). PS1 own constraints + sh:in list read back as literals + maxLength inherited through sh:path/rdfs:subPropertyOf; PS2 none; PS3 one; PS4 with decoy constraints on other shapes; blank-node shapes bn1 (sh:in on a BNode) and bn2 (constraint subject is an IRI while self.iri is a blank node: the enumeration is looked up on URIRef('bn2') and found empty). Mutant: dropping the FILTER makes the check fail."
+  ],
   "draft_sha": "0f62c0e120e76768",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.456483+00:00",
@@ -26,5 +37,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": false
 }

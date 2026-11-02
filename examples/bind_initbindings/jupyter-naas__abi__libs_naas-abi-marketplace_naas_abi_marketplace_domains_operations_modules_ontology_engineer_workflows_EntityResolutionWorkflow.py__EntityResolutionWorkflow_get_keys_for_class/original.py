@@ -2,7 +2,7 @@
 # region: EntityResolutionWorkflow.get_keys_for_class (lines 210-240, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from typing import Annotated, List, Optional, Set, Tuple, cast
-from naas_abi_core import logger
+from shim import logger
 from rdflib import RDFS, Graph, Literal, Node, URIRef
 from rdflib.collection import Collection
 from rdflib.query import ResultRow

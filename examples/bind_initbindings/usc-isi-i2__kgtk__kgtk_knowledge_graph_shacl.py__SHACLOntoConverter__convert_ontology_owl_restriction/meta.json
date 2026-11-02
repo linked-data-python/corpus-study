@@ -10,10 +10,22 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "Both queries use property-path alternatives (`rdfs:subClassOf|owl:equivalentClass`, `owl:allValuesFrom|owl:someValuesFrom|owl:hasValue`), and the first has three OPTIONALs: not BGPs, so `s{ }(self.onto_graph)`. The first query's prefixes (rdfs:, owl:), which the original relied on rdflib's default bindings for, are declared with @prefix.",
+    "Second query: the initBindings {'c': c, 'p': p} target variables that are NOT projected (SELECT ?r), so they become term interpolations in subject/object position, `{c} rdfs:subClassOf|... ; owl:onProperty {p} ;`: the initBindings dict disappears. This is the clean case of the bind_initbindings row.",
+    "Truthiness of the OPTIONAL columns is kept as Python (`if min_:`): a Literal 0 is falsy, so minCardinality 0 writes no sh:minCount, on both sides (the fixture has that case).",
+    "Context shim (shim.py): kgtk node classes (verbatim, except BNode() draws its id from a counter instead of uuid4 so two runs mint the same ids), Subject (without reify), Graph (reduced to add_subject/URI resolution), and SHACLOntoConverter minus the region and its sibling conversions. kgtk is not installed in the study venv.",
+    "Driver: `self` is a fresh converter whose onto_graph is the fixture; what is compared is the mutated `self` (the derived SHACL graph, by isomorphism, and the class-node table). Fixture: exact cardinality, falsy min 0 with a max, two ranges on one restriction (sh:or), equivalentClass + hasValue, the same property with another range on another class (ranges looked up per class and property), a restriction without range, and decoys (onProperty without owl:Restriction, an orphan restriction, a bare cardinality on a class); plus an ontology with no restriction. Mutant `{c}` -> `?c` in query 2 makes the check fail.",
+    "Not exercised: a blank-node class in `{c}` (ldpy's handling of an interpolated BNode in s{ } was not tried; the ids differ between sides in any case)."
+  ],
   "draft_sha": "260ae0b8ce8b3f04",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.445665+00:00",
@@ -24,5 +36,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "values",
+  "article_candidate": true
 }

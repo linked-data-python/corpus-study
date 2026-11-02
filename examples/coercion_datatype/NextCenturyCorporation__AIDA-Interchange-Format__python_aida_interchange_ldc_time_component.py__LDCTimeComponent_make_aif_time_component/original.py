@@ -2,8 +2,8 @@
 # region: LDCTimeComponent.make_aif_time_component (lines 47-60, stratum coercion_datatype)
 # licence of the source repository: see meta.json
 from rdflib import XSD, Literal, URIRef
-from aida_interchange import aifutils
-from aida_interchange.rdf_ontologies import interchange_ontology
+from shim import aifutils
+from shim import interchange_ontology
 
 def make_aif_time_component(self, g):
     """

@@ -1,15 +1,26 @@
-"""Validation driver for LexMalta__recipes__recipe-importer_rdflib_plugins_sparql_parser.py__<module>_266.
+"""Validation driver for LexMalta/recipes sparql/parser.py, <module>_266.
 
-Establishes semantic equivalence of original.py and translated.ldpy.
-Filled in during translation review; see rdfeval.harness for helpers.
+The region only DEFINES the pyparsing rule DECIMAL and its parse action, which
+builds `rdflib.Literal(x[0], datatype=XSD.decimal)` from the matched token.
+`demo` (identical on both sides, see original.py / translated.ldpy) runs the
+rule on a token and returns the term the action built, so the oracle is value
+equality on that term -- lexical form and datatype included -- and a parse
+failure is compared as a raise (type and message).
+
+Cases:
+* "1.50"     the lexical form is kept ("1.50", not "1.5");
+* ".5"       rdflib normalises the lexical form ("0.5"): a translation that
+             bound the raw token as an untyped/string literal would differ;
+* "01.5"     leading zero dropped by the same normalisation ("1.5");
+* "12.0", "0.000"  trailing zeros kept;
+* "12", "1e3", "abc", "1.5x"  no match (no dot / trailing junk): raises.
 """
 from rdfeval.harness import run_pair
 
-# entry=None executes both modules and compares every rdflib Graph found in
-# the module globals (plus captured stdout).  For function regions, set
-# entry="<function name>" and provide the fixture arguments.
 VERDICT = run_pair(
     __file__,
-    entry=None,
-    calls=None,
+    entry="demo",
+    calls=[((t,), {}) for t in ("1.50", ".5", "01.5", "12.0", "0.000",
+                                "12", "1e3", "abc", "1.5x")],
+    ordered=True,
 )

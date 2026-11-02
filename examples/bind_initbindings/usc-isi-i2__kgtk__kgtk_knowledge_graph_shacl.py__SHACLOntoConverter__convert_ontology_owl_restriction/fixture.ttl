@@ -1,0 +1,54 @@
+@prefix ex:   <http://example.org/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+ex:hasName rdfs:range xsd:string .
+
+# Person: exact cardinality + datatype range on hasName
+ex:Person a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty ex:hasName ;
+        owl:cardinality 1 ;
+        owl:allValuesFrom xsd:string ] ;
+    # min 0 is falsy: no sh:minCount is written; max 5 is
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty ex:hasChild ;
+        owl:minCardinality 0 ;
+        owl:maxCardinality 5 ;
+        owl:someValuesFrom ex:Person ] ;
+    # two ranges on one restriction: sh:or
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty ex:hasPet ;
+        owl:minCardinality 1 ;
+        owl:allValuesFrom ex:Cat ;
+        owl:someValuesFrom ex:Dog ] .
+
+# Employee: equivalentClass, hasValue, min cardinality only
+ex:Employee a owl:Class ;
+    owl:equivalentClass [ a owl:Restriction ;
+        owl:onProperty ex:worksFor ;
+        owl:minCardinality 1 ;
+        owl:hasValue ex:acme ] .
+
+# Robot: same property as Person, another range -> the ranges looked up per
+# (class, property) must not mix
+ex:Robot a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty ex:hasName ;
+        owl:maxCardinality 2 ;
+        owl:allValuesFrom xsd:token ] .
+
+# Manager: restriction with no range and no cardinality
+ex:Manager rdfs:subClassOf ex:Employee ,
+    [ a owl:Restriction ; owl:onProperty ex:manages ] .
+
+# neighbours that must NOT match
+# - a node with owl:onProperty but not typed owl:Restriction
+ex:Animal a owl:Class ;
+    rdfs:subClassOf [ owl:onProperty ex:ghost ; owl:cardinality 9 ;
+                      owl:allValuesFrom ex:Phantom ] .
+# - a restriction nobody is a subclass of
+[] a owl:Restriction ; owl:onProperty ex:orphan ; owl:cardinality 7 .
+# - a plain subclass link and a cardinality on the wrong predicate
+ex:Dog rdfs:subClassOf ex:Animal ; owl:cardinality 3 .

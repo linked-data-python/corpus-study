@@ -1,7 +1,7 @@
 # Extracted from usc-isi-i2/kgtk@b8d946b423 : kgtk/knowledge_graph/shacl.py
 # region: SHACLOntoConverter._convert_ontology_owl_restriction (lines 151-184, stratum bind_initbindings)
 # licence of the source repository: see meta.json
-from kgtk.knowledge_graph.node import URI, BNode, Literal, LiteralType
+from shim import URI, BNode, Literal, LiteralType
 
 def _convert_ontology_owl_restriction(self):
     for c, p, exact, min_, max_ in self.onto_graph.query("""
