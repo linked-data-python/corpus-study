@@ -28,6 +28,9 @@ from pathlib import Path
 from .harness import DEFAULT_SIDES, SIDES_ENV
 
 OPTIMIZED = ("optimized.py", "optimized.ldpy")
+#: The header variant: the optimized artefacts with the extracted header
+#: optimized too (AGENT_OPTIMIZE.md, "The header variant").
+HEADER = ("optimized_header.py", "optimized_header.ldpy")
 
 
 def _compiles(path: Path) -> str | None:
@@ -96,7 +99,7 @@ def check(ex_dir: Path, timeout: int = 120,
 def check_region(ex_dir: Path, timeout: int = 120) -> list[dict]:
     """The translated pair, then every optimized artefact present."""
     results = [check(ex_dir, timeout)]
-    for name in OPTIMIZED:
+    for name in OPTIMIZED + HEADER:
         if (Path(ex_dir) / name).exists():
             results.append(check(ex_dir, timeout, ("original.py", name)))
     return results
@@ -122,9 +125,16 @@ def sizes(ex_dir: Path) -> str | None:
     except Exception as e:                        # noqa: BLE001 - reported
         return f"sizes: {type(e).__name__}: {e}"
     r = {k: opt[f"ratios_{k}"]["tokens"] for k in ("care", "notation", "total")}
-    return (f"tokens: care {r['care']} (original → optimized.py), "
+    line = (f"tokens: care {r['care']} (original → optimized.py), "
             f"notation {r['notation']} (optimized.py → optimized.ldpy), "
             f"total {r['total']}")
+    if all((ex_dir / n).exists() for n in HEADER):
+        h = measure_optimized(py, (ex_dir / HEADER[0]).read_text(),
+                              (ex_dir / HEADER[1]).read_text(), preamble)
+        r = {k: h[f"ratios_{k}"]["tokens"] for k in ("care", "notation", "total")}
+        line += (f"\n     header variant: care {r['care']} notation "
+                 f"{r['notation']} total {r['total']}")
+    return line
 
 
 def main(argv: list[str] | None = None) -> int:

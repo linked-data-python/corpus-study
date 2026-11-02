@@ -77,7 +77,7 @@ In the directories of **your** regions only:
 |---|---|
 | `optimized.py` | to create |
 | `optimized.ldpy` | to create |
-| `meta.json` | the three keys below, nothing else |
+| `meta.json` | the three keys below (five with the header variant), nothing else |
 
 **Do not touch** `original.py`, `translated.ldpy`, `driver.py`, the
 fixtures, the shims, `review.json`, nor `rdfeval/`, `config/`, `../ldpy/`.
@@ -120,6 +120,40 @@ and you do not optimize it. The shims are imported the same way as in
   function, or failing that status `"draft"` and the reason in a note. Never
   modify the driver.
 - **A `FAIL`**: fix the artefact, never the driver nor the fixture.
+
+## The header variant
+
+The rule above keeps the extracted header untouched, so that removing an
+unused import cannot pass for a gain of the region. The header still
+weighs on the measure: `translated.ldpy`'s header carries the `@prefix`
+lines its translator added, some unused, and on a short region they
+outweigh what the islands save. The header variant measures that weight.
+
+Once `optimized.py` and `optimized.ldpy` are final, write two more files:
+
+| file | what it is |
+|---|---|
+| `optimized_header.py` | `optimized.py` with the header optimized too |
+| `optimized_header.ldpy` | `optimized.ldpy` with the header optimized too |
+
+- The lines of the region are those of `optimized.py` / `optimized.ldpy`,
+  **byte for byte**: only the header changes.
+- In the header, keep only what the region (and the `demo()` harness, and
+  the names the driver compares) needs: unused imports, unused `@prefix`
+  lines, unused shim imports go; imports may be merged
+  (`from rdflib import Graph, URIRef`). Nothing the driver reads may go.
+- The same rule on both sides: an import removed from one header is removed
+  from the other if it is unused there too. A `@prefix` is the ldpy
+  counterpart of a namespace import: keep exactly the prefixes the region
+  uses as prefixed names.
+- `rdfeval check` must give five `OK` lines (the translation, the two
+  optimized artefacts, the two header-variant artefacts), then the token
+  line and a `header variant:` line.
+- In `meta.json`, two more keys: `header_optimization_status` (`"final"`
+  only if the two header-variant lines are `OK`) and
+  `header_optimization_notes` (what the header lost on each side).
+- If the header has nothing unused, the two files are copies of the
+  optimized ones: say so, status `final`.
 
 ## What you return
 

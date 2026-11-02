@@ -361,6 +361,10 @@ OPTIMIZED_STEPS = {
     "care": ("python", "optimized_python"),
     "notation": ("optimized_python", "optimized_ldpy"),
     "total": ("python", "optimized_ldpy"),
+    # the header variant: the extracted header optimized too
+    "care_header": ("python", "header_python"),
+    "notation_header": ("header_python", "header_ldpy"),
+    "total_header": ("python", "header_ldpy"),
 }
 
 
@@ -378,6 +382,8 @@ def _optimized(ok: list[dict]) -> dict:
             for step, (a, b) in OPTIMIZED_STEPS.items():
                 vals = []
                 for p in rows:
+                    if a not in p or b not in p:
+                        continue
                     x, y = p[a].get(metric), p[b].get(metric)
                     if x:
                         vals.append(round(100.0 * (x - y) / x, 3))

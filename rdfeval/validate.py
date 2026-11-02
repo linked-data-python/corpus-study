@@ -44,6 +44,7 @@ def iter_examples(study: Study = STUDY):
 
 
 OPTIMIZED = ("optimized.py", "optimized.ldpy")
+HEADER = ("optimized_header.py", "optimized_header.ldpy")
 
 
 def _run_driver(ex_dir, timeout: int,
@@ -70,9 +71,10 @@ def _status(verdict: dict) -> str:
 def _validate_optimized(ex_dir, timeout: int) -> dict:
     """Each optimized artefact against the original, with the same driver."""
     out = {}
-    for name in OPTIMIZED:
+    for name in OPTIMIZED + HEADER:
         if not (ex_dir / name).exists():
-            out[name] = {"status": "unresolved", "error": f"no {name}"}
+            if name not in HEADER:          # the header variant is optional
+                out[name] = {"status": "unresolved", "error": f"no {name}"}
             continue
         try:
             verdict = _run_driver(ex_dir, timeout, ("original.py", name))

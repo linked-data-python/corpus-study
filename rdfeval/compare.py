@@ -357,6 +357,15 @@ def _optimized_ready(meta: dict) -> bool:
                for n in ("optimized.py", "optimized.ldpy"))
 
 
+def _header_ready(meta: dict) -> bool:
+    """The header variant final and proved against the original."""
+    if meta.get("header_optimization_status") != "final":
+        return False
+    v = meta.get("validation_optimized") or {}
+    return all((v.get(n) or {}).get("status") == "equivalent"
+               for n in ("optimized_header.py", "optimized_header.ldpy"))
+
+
 def run(config: dict, study: Study = STUDY) -> None:
     rows = []
     skipped = []
@@ -392,6 +401,14 @@ def run(config: dict, study: Study = STUDY) -> None:
                     (ex_dir / "optimized.ldpy").read_text(),
                     preamble=preamble))
                 optimized += 1
+            if _header_ready(meta):
+                h = measure_optimized(
+                    pair["python"],
+                    (ex_dir / "optimized_header.py").read_text(),
+                    (ex_dir / "optimized_header.ldpy").read_text(),
+                    preamble=preamble)
+                pair.update({"header_python": h["optimized_python"],
+                             "header_ldpy": h["optimized_ldpy"]})
         except LdpyMetricsError as e:
             print(f"  ! {meta['region_id']}: {e}")
             skipped.append((meta["region_id"], f"metrics-error: {e}"))

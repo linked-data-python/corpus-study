@@ -67,7 +67,8 @@ from pathlib import Path
 
 DEFAULT_SIDES = ("original.py", "translated.ldpy")
 SIDES_ENV = "RDFEVAL_SIDES"
-ARTEFACTS = ("original.py", "translated.ldpy", "optimized.py", "optimized.ldpy")
+ARTEFACTS = ("original.py", "translated.ldpy", "optimized.py", "optimized.ldpy",
+             "optimized_header.py", "optimized_header.ldpy")
 
 # The artefacts this process actually executed, by file name.  A driver that
 # reads its files some other way cannot then claim to have compared the

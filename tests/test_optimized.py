@@ -204,3 +204,24 @@ def test_aggregate_separates_rereading_from_notation(monkeypatch, tmp_path):
     assert out["tokens"]["faithful"]["median"] == 10.0
     assert out["tokens_host"]["notation"]["median"] == 20.0
     assert out["by_stratum"]["remove"]["n"] == 1
+
+
+def test_the_header_variant_is_a_side_and_a_step(monkeypatch, tmp_path):
+    from rdfeval import aggregate, harness
+    monkeypatch.setenv(harness.SIDES_ENV, "original.py,optimized_header.ldpy")
+    assert harness.sides_from_env() == ("original.py", "optimized_header.ldpy")
+    monkeypatch.setattr(aggregate, "RESULTS_RAW", tmp_path)
+
+    def side(tokens):
+        return {"tokens": tokens, "tokens_host": tokens}
+    with_header = {"region_id": "h", "stratum": "remove",
+                   "python": side(100), "ldpy": side(90),
+                   "optimized_python": side(80), "optimized_ldpy": side(60),
+                   "header_python": side(70), "header_ldpy": side(50)}
+    without = {**with_header, "region_id": "n"}
+    del without["header_python"], without["header_ldpy"]
+    out = aggregate._optimized([with_header, without])
+    assert out["n"] == 2
+    assert out["tokens"]["care"]["n"] == 2
+    assert out["tokens"]["care_header"]["n"] == 1
+    assert out["tokens"]["notation_header"]["median"] == round(100 * 20 / 70, 3)

@@ -53,7 +53,8 @@ UNATTESTED = {
 }
 
 # Files of an example directory that are not shims.
-NOT_SHIMS = ("original.py", "driver.py", "optimized.py")
+NOT_SHIMS = ("original.py", "driver.py", "optimized.py",
+             "optimized_header.py")
 
 
 def rests_on_written_export(ex_dir) -> bool:
