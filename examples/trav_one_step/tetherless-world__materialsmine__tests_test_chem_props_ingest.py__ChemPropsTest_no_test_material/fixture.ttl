@@ -1,4 +1,60 @@
-# Input graph for tetherless-world__materialsmine__tests_test_chem_props_ingest.py__ChemPropsTest_no_test_material — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for tetherless-world__materialsmine__tests_test_chem_props_ingest.py__ChemPropsTest_no_test_material.
+# Mirrors what the region's test expects to find in the materialsmine store:
+# three ChemicalSubstance resources (identifier, label, a density attribute),
+# each with skos:altLabel (several) and skos:notation (0, 1 or 2 values),
+# plus neighbours that none of the region's patterns may reach.
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix ex: <http://example.org/> .
+
+# Poly(ether ether ketone): one notation, two altLabels
+ex:peek a sio:ChemicalSubstance ;
+    dcterms:identifier "O(C1=CC=C(C=C1)C(=O)C2=CC=C(OC3=CC=C(C=C3)[*])C=C2)[*]" ;
+    rdfs:label "Poly(ether ether ketone)" ;
+    sio:hasAttribute ex:peek_density ;
+    skos:notation "PEEK" ;
+    skos:altLabel "Zeniva", "KetaSpire" .
+ex:peek_density sio:hasValue 1.29e0 .
+
+# Polystyrene: one notation, many altLabels (one language-tagged)
+ex:ps a sio:ChemicalSubstance ;
+    dcterms:identifier "C(C(C1=CC=CC=C1)[*])[*]" ;
+    rdfs:label "Polystyrene" ;
+    sio:hasAttribute ex:ps_density ;
+    skos:notation "PS" ;
+    skos:altLabel "Pelaspan", "Afcolene", "Styron", "polystyrol"@de, "polyphenylethene" .
+ex:ps_density sio:hasValue 1.04e0 .
+
+# Nylon 6: two notations, no altLabel at all would be the zero case; here
+# it has altLabels but the notation read must give both values
+ex:nylon a sio:ChemicalSubstance ;
+    dcterms:identifier "N(CCCCCC(=O)[*])[*]" ;
+    rdfs:label "Nylon 6" ;
+    sio:hasAttribute ex:nylon_density ;
+    skos:notation "PA 6", "Nylon 6" ;
+    skos:altLabel "Perlon", "Plaskon", "polycaprolactam" .
+ex:nylon_density sio:hasValue 1.08e0 .
+
+# Neighbours that must not be read or matched
+# - not a ChemicalSubstance, but wears every property
+ex:notchem a sio:Material ;
+    dcterms:identifier "XX" ;
+    rdfs:label "Not a chemical" ;
+    sio:hasAttribute ex:notchem_density ;
+    skos:notation "NOPE" ;
+    skos:altLabel "should not appear" .
+ex:notchem_density sio:hasValue 9.99e0 .
+# - a ChemicalSubstance without density: absent from the query result
+ex:nodensity a sio:ChemicalSubstance ;
+    dcterms:identifier "YY" ;
+    rdfs:label "No density" ;
+    skos:altLabel "must not be read" .
+# - skos:prefLabel / skos:hiddenLabel on the real chemicals are not altLabel
+ex:peek skos:prefLabel "PEEK polymer" ;
+    skos:hiddenLabel "peek" .
+ex:ps skos:prefLabel "PS polymer" .
+# - altLabel / notation hanging on a density node
+ex:nylon_density skos:altLabel "density alt" ;
+    skos:notation "d" .

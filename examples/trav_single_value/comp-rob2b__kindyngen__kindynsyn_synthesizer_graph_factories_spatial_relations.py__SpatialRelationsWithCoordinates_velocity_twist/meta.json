@@ -13,11 +13,22 @@
     "graph_read": 1,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "`self.rel.g.value(as_seen_by, GEOM_ENT[\"origin\"])` -> `m{ {as_seen_by} geom_ent:origin ?v }.first()` (None when there is no origin, as `g.value`); the frame check `GEOM_ENT[\"Frame\"] in self.rel.g[as_seen_by : RDF[\"type\"]]` -> `bool(m{ {as_seen_by} a geom_ent:Frame })` (existence). One `@graph self.rel.g` (an attribute chain, not a name) designates the graph for both.",
+    "`from kindynsyn.namespaces import geom_ent:` added next to the original name import, which is left untouched (it still imports names the region no longer uses; not tidied).",
+    "Context shim: kindynsyn/namespaces.py is a verbatim copy of comp-rob2b/kindyngen@414ebd52b2 (the real package is not installed); the `__init__.py` files are reduced to a comment. The two collaborators the region only calls, `self.rel.velocity(..)` and `self.coord.velocity_twist(..)`, are driver stand-ins that record their calls and return values built from their arguments, so the defaulted reference point reaches both the return value and the log.",
+    "Driver: `self` is a class instance whose `rel.g` is a `ReadLog` (real Graph recording the (subject, predicate) of each pattern the REGION asks; the object position is dropped because `o in g[s:p]` scans (s, p, None) while the island's existence test asks (s, p, o)); the log and the collaborators' calls are the `reads` attribute of `self`, compared as a mutation. 16 calls: a frame with an origin / with none / with two (first read wins) / a non-Frame with an origin (AssertionError) / origin under another predicate / a Point / unknown / empty graph; reference point given as positional or keyword (no read), None, an empty URIRef and 0 (falsy: defaulted), 'x' (truthy: kept); angular/linear arguments passed through. Mutations: ge:origin -> ge:Frame in the read, and `a geom_ent:Frame` -> `a geom_ent:Orthonormal` in the check, both FAIL; restored."
   ],
   "draft_sha": "d18c145d9d5ecad3",
   "provenance": {
@@ -29,5 +40,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

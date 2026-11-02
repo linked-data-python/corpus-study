@@ -1,4 +1,22 @@
-# Input graph for johnjung__metadata_converters__test_soc_sci_maps_marcxml_to_edm.py__TestSocSciMapsMarcXmlToEDM_test_cho_language — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for johnjung__metadata_converters__test_soc_sci_maps_marcxml_to_edm.py__TestSocSciMapsMarcXmlToEDM_test_cho_language.
+# The EDM graph of the record '7641168,3451312': a provided cultural heritage
+# object whose dc:language is "en" (the case the test expects), with neighbours
+# the language read must not pick up.
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix ex: <http://example.org/> .
+
+# a neighbour record, read first in the file, with another language
+<http://example.org/cho/1111111> dc:language "fr" ;
+    dc:title "Une carte" .
+
+# the record the test looks at: language "en", and other properties around it
+<http://example.org/cho/7641168,3451312> a ex:ProvidedCHO ;
+    dc:title "Map of the Soviet Union" ;
+    dcterms:language "ru" ;           # same local name, other namespace
+    ex:language "de" ;                # same local name, other namespace
+    dc:language "en" ;
+    dc:type "Map" .
+
+# a record with language only under dcterms: dc:language must not find it
+<http://example.org/cho/2222222> dcterms:language "en" .

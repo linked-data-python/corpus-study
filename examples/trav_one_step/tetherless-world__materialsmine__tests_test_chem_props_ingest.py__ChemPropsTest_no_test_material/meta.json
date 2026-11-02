@@ -14,10 +14,24 @@
     "sparql": 1,
     "term_constructor": 65
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "The two trav_one_step sites are `self.app.db.objects(chem[\"chem\"], rdflib.URIRef(skos#altLabel / skos#notation))` inside list comprehensions -> `m{ {chem[\"chem\"]} skos:altLabel ?o }` / `skos:notation ?o`, read through one `@graph self.app.db` placed before the query (arity 1: bare terms, so the comprehension bodies are unchanged).",
+    "The SELECT stays an `s{ }`: it projects ?abbrev, which no pattern binds, and the next line unpacks every row into FIVE names (`for chem, chem_id, stdname, abbrev, density in props`). An `m{ }` projects only the variables its pattern mentions, so it would give four-tuples and the unpacking would raise. The prologue is the block's (`@prefix sio:`, `dcterms:`, `rdfs:`), so the nine full IRIs of the query become prefixed names.",
+    "Kept as is on purpose: `[...].sort()` returns None, so `chem[\"altname\"]` and `chem[\"abbrev\"]` are None and so are the expected ones (`mat[\"abbrev\"].sort()`): what `objects()` reads is thrown away by the original itself. Not corrected (no tidying).",
+    "Test harness restored (kind=function, unittest.TestCase method): driver.py supplies a real unittest.TestCase whose `app.db` is a `ReadLog` (a real rdflib Graph that records every `triples()` pattern asked and every triple yielded); `demo(self)` (identical on both sides, appended to original.py and translated.ldpy) returns (\"ok\" | (\"assertion-failed\", msg), sorted reads). Because the region discards the traversal results, the recorded reads are the only place where the two `objects()` -> `m{ }` rewrites show; both sides ask (chem, altLabel, None) / (chem, notation, None) for each chemical the query returned.",
+    "Fixture and calls: the three expected materials (PEEK, polystyrene, nylon 6 with their ids, labels and doubles 1.29/1.04/1.08) -> 'ok'; neighbours that must not be read (a non-ChemicalSubstance wearing every property, a chemical without density, prefLabel/hiddenLabel, an altLabel on a density node); variants add a fourth chemical, drop a label, empty the graph, give a chemical two densities (one row per density), and give altLabel/notation values that are an IRI, an integer and a typed string. Mutation check: skos:altLabel -> skos:prefLabel in the translation made `rdfeval check` FAIL; restored."
+  ],
   "draft_sha": "d85cbc4a8a2334a3",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.691489+00:00",
@@ -28,5 +42,6 @@
   "strata": [
     "trav_one_step"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

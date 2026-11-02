@@ -1,9 +1,16 @@
 # Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v6_6_0.py
 # region: <module> (lines 114-121, stratum trav_single_value)
 # licence of the source repository: see meta.json
+# Context restored (see meta.json): HERE is the script's data directory
+# (/home/claude/semtech-landscape in the real script) -- here this region's own
+# directory, holding small stand-ins for the TTL files and the two tooling
+# modules the script loads; `load`, `nodes`, `secnum` and `cls_iri` come from
+# the context shim semtech_gates_ctx.py.
+from pathlib import Path
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD
-HERE = "/home/claude/semtech-landscape"
+from semtech_gates_ctx import load, nodes, secnum, cls_iri
+HERE = Path(__file__).resolve().parent
 SEM = Namespace("http://example.org/semtech#")
 T = load("taxonomy", "v1_0_0"); EC = load("enrichment_c", "v2_0_0")
 tb = Graph().parse(f"{HERE}/02-ontology/semtech_tbox_v6_6_0.ttl")

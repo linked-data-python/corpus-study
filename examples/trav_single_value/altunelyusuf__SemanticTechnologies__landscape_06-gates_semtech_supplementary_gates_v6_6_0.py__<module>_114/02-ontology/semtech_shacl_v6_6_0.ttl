@@ -1,0 +1,12 @@
+# Stand-in for the real semtech_shacl_v6_6_0.ttl of altunelyusuf/SemanticTechnologies@bad0fa7c46
+# (landscape/02-ontology): same header vocabulary, a handful of resources instead of
+# the full file, so the region's reads can be checked by hand.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix semtech: <http://example.org/semtech#> .
+
+<http://example.org/semtech/shacl> rdfs:label "no owl:Ontology type here" ;
+    owl:versionInfo "6.6.0" .

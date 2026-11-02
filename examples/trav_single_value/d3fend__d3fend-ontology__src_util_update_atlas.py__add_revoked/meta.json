@@ -15,11 +15,23 @@
     "term_constructor": 5,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: owl->owl, rdfs->rdfs, RDF->rdf, SKOS->skos"
+    "`graph.value(atlas_uri, owl.deprecated)` -> `m{ {atlas_uri} owl:deprecated ?v }.first()`, tested with `is None` as in the original (a present-but-falsy `owl:deprecated false` must NOT count as absent: call 2 of the driver). `(None, None, Literal(atlas_id)) in graph` -> `bool(m{ ?s ?p {Literal(atlas_id)} })` (existence; `Literal(..)` kept in the interpolation so a lang-tagged or typed literal of the same text does not match). The three `graph.add` on the shared subject -> one `+{ {atlas_uri} rdfs:seeAlso {Literal(revoked_by)} ; owl:deprecated true ; rdfs:comment {Literal(f\"...{revoked_by}\")} }` (the draft's `graph += g{ }` replaced), `Literal(True)` written `true`. `@graph graph` is the first line of the function.",
+    "`owl = Namespace(...)` / `rdfs = Namespace(...)` become `@prefix owl:` / `@prefix rdfs:` (ns_def_local); the draft's unused `@prefix rdf:` and `skos:` are dropped.",
+    "Context shim build.py (subset of src/util/build.py of d3fend/d3fend-ontology@cce593d61c): `get_graph`, `log`, `colors`, `PUBLIC_ONTOLOGY_FILEPATH` verbatim. FINDING OF THE CORPUS, not of the language: `_xmlns` is imported by update_atlas.py (and update_attack.py, test_cases.py) but build.py does not define it at that commit, so the real script raises ImportError; the shim restores it as the D3FEND namespace `http://d3fend.mitre.org/ontologies/d3fend.owl#` (the one update_atlas.py binds as `d3fend`), used as `URIRef(_XMLNS + atlas_id)`. The local build.py shadows the PyPA `build` package installed in the venv (the driver runs with the example directory first on sys.path).",
+    "Fixture and calls (17): not deprecated (annotations added, returns 1), deprecated true / false (0), id absent as a literal, id present only as @en or ^^xsd:token (0: plain Literal() does not match), the id shared by a deprecated and a non-deprecated subject, a near-miss property (d3f:deprecated), an unknown technique, a non-string and a non-ASCII revoked_by, first mitre-atlas reference among several, and three techniques with no usable atlas id (`_XMLNS + None` -> TypeError, compared as a raise). The mutated graph argument is compared by isomorphism. Mutation check: `owl:deprecated` -> `rdfs:comment` in the read made `rdfeval check` FAIL; restored. (`{atlas_id}` without `Literal()` also passes: for a str the coercion gives the same plain literal; `Literal()` kept to stay faithful.)"
   ],
   "draft_sha": "79ffb3c4d7e9da59",
   "provenance": {
@@ -31,5 +43,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

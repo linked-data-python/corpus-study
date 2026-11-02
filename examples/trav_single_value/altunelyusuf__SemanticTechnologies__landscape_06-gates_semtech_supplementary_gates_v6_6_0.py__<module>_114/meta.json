@@ -13,11 +13,22 @@
     "graph_read": 4,
     "namespace_term": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SEM->sem, RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd"
+    "Every read of the region is translated, not only the five `g.value` calls: `tb.value(IRI[..], SEM.classCode / SEM.sectionNumber)` (x2, G2) and `g.value(o, p)` / `g.value(o, OWL.versionInfo)` / `g.value(o, OWL.versionIRI)` (G7) -> `m{ {..} .. ?v }.first()`; `tb.subject_objects(p)` -> `m{ ?s {p} ?o }` (the predicate is data, `sem:{k}` for k in EC.REL_PROPS); `list(g.subjects(RDF.type, OWL.Ontology))` -> `list(m{ ?s rdf:type owl:Ontology })`. `@graph tb` before G2/G3; `@graph g` as the first line of the loop body (re-evaluated at each iteration, so it follows the loop variable).",
+    "`@prefix sem: <...> as SEM .` instead of dropping `SEM = Namespace(...)`: SEM is a module-level value that the original defines and the harness compares (module-state oracle), and `as SEM` keeps that object while the reads use the prefix. `or \"\"` is the original's own default (`str(tb.value(..) or \"\")`), kept after `.first()` -- not a replacement for `default=`.",
+    "Context restored (shim semtech_gates_ctx.py + stand-ins): `HERE` is the script's data directory (/home/claude/semtech-landscape in the real script), here the region's own directory; `load`, the `nodes`/`secnum` numbering loop and `cls_iri` come from the real script (lines before the region) and are copied verbatim into the shim; the two tooling modules the script `load`s (07-tooling/taxonomy_v1_0_0.py, enrichment_c_v2_0_0.py) and the six TTL files it parses are small stand-ins in the example directory (the real ones are 55 KB / 17 KB / 530 KB of data), same shapes and vocabulary.",
+    "Why the driver wraps `rdflib.Graph.triples` (in the driver process, before the sides fork): the excerpt keeps only the lines that touch RDF, so `bad` is re-assigned five times and only the last value survives in the module globals; G2's and G3's results leave no trace except `edges`/`sem_classes`. Each side prints every pattern asked and every triple yielded, and stdout is compared. `g.value`'s first-value-only behaviour shows too: a class with two classCode values prints a single 'got'. Five inputs (shipped, clean, empty, multi-first = the two classCode values in the other order, falsy = header values \"\"/0/false), each in a scratch copy of the directory. Mutation checks: sem:sectionNumber -> sem:classCode, and `.first()` -> `.one()` on versionInfo, both made `rdfeval check` FAIL; restored."
   ],
   "draft_sha": "524ad3005c11c289",
   "provenance": {
@@ -29,5 +40,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

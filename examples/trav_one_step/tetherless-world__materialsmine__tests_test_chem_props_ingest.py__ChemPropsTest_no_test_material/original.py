@@ -1,6 +1,14 @@
 # Extracted from tetherless-world/materialsmine@0be55da099 : tests/test_chem_props_ingest.py
 # region: ChemPropsTest.no_test_material (lines 42-149, stratum trav_one_step)
 # licence of the source repository: see meta.json
+#
+# Test harness only (see meta.json): ChemPropsTest.no_test_material is a
+# unittest.TestCase method that only asserts and returns None, and it needs
+# `self.app.db` and `self.assertCountEqual`.  driver.py supplies a real
+# unittest.TestCase instance whose `app.db` is a graph that records what is
+# read from it.  `demo` (identical on both sides) turns a failed assertion
+# into a comparable value and returns what the graph recorded, because the
+# region itself discards what `objects()` reads (`list.sort()` returns None).
 import rdflib
 
 def no_test_material(self):
@@ -111,3 +119,12 @@ def no_test_material(self):
         chem["abbrev"] = [abbrev for abbrev in self.app.db.objects(chem["chem"], rdflib.URIRef("http://www.w3.org/2004/02/skos/core#notation"))].sort()
         chem.pop("chem", None)
     self.assertCountEqual(expected_materials, materials)
+
+
+def demo(self) -> object:
+    try:
+        no_test_material(self)
+        outcome = "ok"
+    except AssertionError as e:
+        outcome = ("assertion-failed", str(e))
+    return (outcome, sorted(self.app.db.reads, key=repr))

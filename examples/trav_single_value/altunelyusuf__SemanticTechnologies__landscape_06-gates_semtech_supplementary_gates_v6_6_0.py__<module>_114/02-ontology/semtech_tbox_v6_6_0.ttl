@@ -1,0 +1,46 @@
+# Stand-in for the real semtech_tbox_v6_6_0.ttl of altunelyusuf/SemanticTechnologies@bad0fa7c46
+# (landscape/02-ontology): same header vocabulary, a handful of resources instead of
+# the full file, so the region's reads can be checked by hand.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix semtech: <http://example.org/semtech#> .
+
+<http://example.org/semtech/tbox> a owl:Ontology ;
+    rdfs:label "SemTech tbox stand-in"@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "SemTech Landscape authors" ;
+    dcterms:publisher "SemTech Landscape" ;
+    dcterms:creator "SemTech Landscape authors" ;
+    dcterms:created "2026-08-04"^^xsd:date ;
+    dcterms:identifier "semtech-tbox" ;
+    owl:versionInfo "6.6.0" ;
+    owl:versionIRI <http://example.org/semtech/tbox/6.6.0> ;
+    dcterms:modified "" .
+
+# classes: classCode / sectionNumber against the computed numbering
+semtech:T1_SemanticTechnologyFoundations a owl:Class ; semtech:classCode "T1" ; semtech:sectionNumber "1" .
+# two classCode values: the first one read is what counts
+semtech:T1C1_KnowledgeRepresentationModels a owl:Class ; semtech:classCode "T1C1", "ALT-CODE" ; semtech:sectionNumber "1.1" .
+# wrong sectionNumber
+semtech:T1C2_OntologyandSchemaLanguages a owl:Class ; semtech:classCode "T1C2" ; semtech:sectionNumber "1.3" .
+# empty classCode (falsy) and no sectionNumber
+semtech:T2_StandardsChapter a owl:Class ; semtech:classCode "" .
+# no classCode at all
+semtech:T2C1_W3CStandards a owl:Class ; semtech:sectionNumber "2.1" .
+# typed integer values: str() gives the expected "3"
+semtech:T3_Ecosystem a owl:Class ; semtech:classCode "T3" ; semtech:sectionNumber 3 .
+
+# relations (the six predicates the region reads, as in enrichment_c REL_PROPS)
+semtech:T1C2_OntologyandSchemaLanguages semtech:buildsOn semtech:T1C1_KnowledgeRepresentationModels .
+semtech:T1C1_KnowledgeRepresentationModels semtech:buildsOn semtech:T1_SemanticTechnologyFoundations .
+semtech:T1C1_KnowledgeRepresentationModels semtech:standardizedBy semtech:T2C1_W3CStandards .
+semtech:T1C2_OntologyandSchemaLanguages semtech:implementedBy semtech:T3_Ecosystem .
+semtech:T2_StandardsChapter semtech:governedBy semtech:T1_SemanticTechnologyFoundations .
+semtech:T1_SemanticTechnologyFoundations semtech:informs semtech:T3_Ecosystem .
+# endpoint that is not a class of the taxonomy
+semtech:T2C1_W3CStandards semtech:stewardedBy semtech:NoSuchClass .
+# neighbour predicate that is not in REL_PROPS
+semtech:T1C1_KnowledgeRepresentationModels semtech:relatedTo semtech:T2_StandardsChapter .

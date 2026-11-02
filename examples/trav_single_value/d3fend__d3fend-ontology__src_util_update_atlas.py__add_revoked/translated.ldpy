@@ -5,11 +5,9 @@ from rdflib import URIRef, Literal, RDF, RDFS, Namespace, BNode, SKOS
 from build import get_graph, _xmlns as _XMLNS
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-
 
 def add_revoked(graph, tech):
+    @graph graph
     revoked_by = tech["revoked_by"]
     tech = tech["data"]
     atlas_id = next(
@@ -23,15 +21,13 @@ def add_revoked(graph, tech):
     atlas_uri = URIRef(_XMLNS + atlas_id)
     new = 0
 
-    if (None, None, Literal(atlas_id)) in graph:
-        revoked_property = graph.value(atlas_uri, owl:deprecated)
+    if bool(m{ ?s ?p {Literal(atlas_id)} }):
+        revoked_property = m{ {atlas_uri} owl:deprecated ?v }.first()
         # Check if tech already has revoked annotations
         if revoked_property is None:
             new = 1
             # Add a triple indicating deprecation
-            graph += g{
-                {atlas_uri} rdfs:seeAlso {Literal(revoked_by)} ;
-                   owl:deprecated True ;
-                   rdfs:comment {Literal(f"This technique has been revoked by {revoked_by}")}
-            }
+            +{ {atlas_uri} rdfs:seeAlso {Literal(revoked_by)} ;
+                   owl:deprecated true ;
+                   rdfs:comment {Literal(f"This technique has been revoked by {revoked_by}")} }
     return new

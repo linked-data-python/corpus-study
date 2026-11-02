@@ -1,0 +1,25 @@
+# Stand-in for the real semtech_research_v6_6_0.ttl of altunelyusuf/SemanticTechnologies@bad0fa7c46
+# (landscape/01-research): same header vocabulary, a handful of resources instead of
+# the full file, so the region's reads can be checked by hand.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix semtech: <http://example.org/semtech#> .
+
+<http://example.org/semtech/research> a owl:Ontology ;
+    rdfs:label "SemTech research stand-in"@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rights "CC BY 4.0" ;
+    dcterms:rightsHolder "SemTech Landscape authors" ;
+    dcterms:publisher "SemTech Landscape" ;
+    dcterms:creator "SemTech Landscape authors" ;
+    dcterms:created "2026-08-04"^^xsd:date ;
+    dcterms:modified "2026-08-28"^^xsd:date ;
+    dcterms:identifier "semtech-research" ;
+    owl:versionInfo "6.6.0" ;
+    owl:versionIRI <http://example.org/semtech/research/6.6.0> .
+
+<http://example.org/semtech/research#ResearchCorpus> owl:versionInfo "9.9.9" ;
+    rdfs:label "corpus" .

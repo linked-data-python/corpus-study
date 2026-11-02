@@ -14,11 +14,24 @@
     "namespace_term": 1,
     "triple_add": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "Translated: the two plain-predicate equalities (`g.value(a, RBDYN_COORD[\"as-seen-by\"]) == g.value(b, GEOM_COORD[\"as-seen-by\"])`) -> `m{ {a} rbdyn_coord:as-seen-by ?v }.first() == m{ {b} geom_coord:as-seen-by ?v }.first()`; the seven `QUDT_UNIT[\"X\"] in self.g[s : QUDT_SCHEMA[\"unit\"]]` slice-membership asserts -> `bool(m{ {s} qudt_schema:unit qudt_unit:X })` (an existence test, trav_existence); the four `self.g.add` on the shared subject `id_` -> a single `+{ {id_} a rbdyn_op:InertialWrench ; ... }` (the draft's `self.g += g{ }` replaced), with `@graph self.g` as first line. The project's `kindynsyn.namespaces` (DefinedNamespace classes) is imported both ways: `from ... import geom_coord:, rbdyn_coord:, rbdyn_op:, qudt_schema:, qudt_unit:` for islands and the original name import, kept, for the path reads below.",
+    "NOT expressible, four of the six value equalities: `self.g.value(s, RBDYN_COORD[\"of-inertia\"] / RBDYN_ENT[\"about\"])` -- the predicate is an rdflib property PATH (URIRef / URIRef), and `m{ }` has no property paths. Interpolating the Path (`m{ {s} {RBDYN_COORD[\"of-inertia\"] / RBDYN_ENT[\"about\"]} ?v }.first()`) does not raise: it silently matches nothing and gives None (verified: the same graph answers urn:c through `g.value`), which makes `None == None` assertions pass -- a silent wrong answer, not an error. The only island that could do it is `s{ SELECT ?v WHERE { {s} p1/p2 ?v } }`, which has no `.first()` and no single-value reduction. The four reads are therefore left as `self.g.value(..)` on both sides (rdflib), so 4 of the 6 reads of the stratum are not covered.",
+    "A second lexical finding: the vocabulary's local names are hyphenated (`of-inertia`, `as-seen-by`, `M-KiloGM`, `RAD-PER-SEC`). Inside an island Turtle's character set applies and `rbdyn_coord:of-inertia` is a name; OUTSIDE an island `-` is subtraction (`p = rbdyn_coord:of-inertia` -> NameError: inertia), and inside a `{...}` interpolation the code is Python too. So a hyphenated name can only be written in a pattern; in an expression (the path above) one must fall back to `RBDYN_COORD[\"of-inertia\"]`, which forces keeping the Python-name import beside the prefix import.",
+    "Context shim: the real kindynsyn package is not installed; `kindynsyn/namespaces.py` and `kindynsyn/rdflib_tools/helpers.py` are verbatim copies of comp-rob2b/kindyngen@414ebd52b2 (the two `__init__.py` are reduced to a comment: the real ones re-export subpackages the region does not use). `uuid_ref()` is random: the driver replaces `uuid.uuid4` by a deterministic counter in the driver process before the sides fork.",
+    "Driver: `A failed assert raises a bare AssertionError()` -- the same value whichever of the thirteen asserts failed -- so `self` is a class instance whose `g` is a `ReadLog` (real Graph recording the (subject, predicate) of every pattern the REGION asks; frames of the harness's own post-call reads are excluded) and whose `reads` list is compared as an argument mutation: the log stops where the run stops. The object position is left out because `o in g[s:p]` scans (s, p, None) while the island's existence test asks (s, p, o): same question, not the same call. 27 calls: consistent triples; one edit per assertion (13); a unit present only as qudt:quantityKind; a unit held by another subject; None == None cases (missing on both sides); two as-seen-by values in both orders (first read counts); the as-seen-by moved to the other namespace; empty graph; unknown subjects. Mutation checks: geom_coord for rbdyn_coord on one as-seen-by, and qudt:unit -> qudt:quantityKind on one unit assert, both FAIL; restored."
   ],
   "draft_sha": "4637c2091188da26",
   "provenance": {
@@ -30,5 +43,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

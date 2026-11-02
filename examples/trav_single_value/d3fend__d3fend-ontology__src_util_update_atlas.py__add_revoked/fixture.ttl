@@ -1,4 +1,29 @@
-# Input graph for d3fend__d3fend-ontology__src_util_update_atlas.py__add_revoked — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for d3fend__d3fend-ontology__src_util_update_atlas.py__add_revoked.
+# ATLAS techniques of the D3FEND ontology, each carrying its ATLAS id as a plain
+# literal under a property of its own, in the state the region tests:
+#   T0001  present, not deprecated                  -> annotations get added
+#   T0002  present, already owl:deprecated true     -> left alone
+#   T0003  present, owl:deprecated false            -> left alone (a falsy value
+#          is not None)
+#   T0004  absent as a literal (only its IRI is there) -> nothing happens
+#   T0005  its id is only there language-tagged / typed -> plain Literal() misses
+#   T0006  present, and owl:deprecated hangs on ANOTHER subject only
+#   T0007  present twice (two subjects share the id), one deprecated
+@prefix d3f: <http://d3fend.mitre.org/ontologies/d3fend.owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+d3f:AML.T0001 rdfs:label "Technique one - ATLAS" ; d3f:atlas-id "AML.T0001" .
+d3f:AML.T0002 rdfs:label "Technique two - ATLAS" ; d3f:atlas-id "AML.T0002" ; owl:deprecated true .
+d3f:AML.T0003 rdfs:label "Technique three - ATLAS" ; d3f:atlas-id "AML.T0003" ; owl:deprecated false .
+d3f:AML.T0004 rdfs:label "Technique four - ATLAS" .
+d3f:AML.T0005 rdfs:label "Technique five - ATLAS" ;
+    d3f:atlas-id "AML.T0005"@en, "AML.T0005"^^xsd:token .
+# deprecated, but a different subject than the one the region asks about
+d3f:AML.T0009 rdfs:label "Technique nine - ATLAS" ; d3f:atlas-id "AML.T0006" ; owl:deprecated true .
+d3f:AML.T0006 rdfs:label "Technique six - ATLAS" ; d3f:atlas-id "AML.T0006" .
+d3f:AML.T0007 d3f:atlas-id "AML.T0007" .
+d3f:AML.T0008 d3f:atlas-id "AML.T0007" ; owl:deprecated true .
+# deprecation under a near-miss property
+d3f:AML.T0010 d3f:atlas-id "AML.T0010" ; rdfs:comment "deprecated" ; d3f:deprecated true .

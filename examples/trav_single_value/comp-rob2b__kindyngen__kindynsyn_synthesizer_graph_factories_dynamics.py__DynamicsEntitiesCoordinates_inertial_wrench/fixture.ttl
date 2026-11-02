@@ -1,4 +1,50 @@
-# Input graph for comp-rob2b__kindyngen__kindynsyn_synthesizer_graph_factories_dynamics.py__DynamicsEntitiesCoordinates_inertial_wrench — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for the region DynamicsEntitiesCoordinates.inertial_wrench of
+# comp-rob2b/kindyngen@414ebd52b2: a rigid-body-inertia coordinate, a velocity
+# twist coordinate and a wrench coordinate that agree on everything the region
+# checks, plus neighbours that must not satisfy its reads.
 @prefix ex: <http://example.org/> .
+@prefix gc: <https://comp-rob2b.github.io/metamodels/geometry/coordinates#> .
+@prefix gr: <https://comp-rob2b.github.io/metamodels/geometry/spatial-relations#> .
+@prefix re: <https://comp-rob2b.github.io/metamodels/newtonian-rigid-body-dynamics/structural-entities#> .
+@prefix rc: <https://comp-rob2b.github.io/metamodels/newtonian-rigid-body-dynamics/coordinates#> .
+@prefix qs: <http://qudt.org/schema/qudt/> .
+@prefix qu: <http://qudt.org/vocab/unit/> .
+
+# rigid-body inertia coordinate: several units, as-seen-by, and the inertia it is of
+ex:inertia rc:as-seen-by ex:frame1 ;
+    gc:as-seen-by ex:frameWrongNs ;           # same local name, geometry namespace: not read
+    rc:of-inertia ex:inertiaRel ;
+    qs:unit qu:KiloGM, qu:M-KiloGM, qu:KiloGM-M2 ;
+    qs:quantityKind qu:N-M .                  # not a unit
+ex:inertiaRel re:about ex:point1 ;
+    re:reference-point ex:pointWrongProp ;    # not the property the region follows
+    re:of-body ex:body1 .
+
+# velocity twist coordinate
+ex:twist gc:as-seen-by ex:frame1 ;
+    rc:as-seen-by ex:frameWrongNs ;           # wrong namespace for the twist
+    gc:of-velocity ex:velocityRel ;
+    qs:unit qu:RAD-PER-SEC, qu:M-PER-SEC ;
+    qs:quantityKind qu:KiloGM .               # not a unit
+ex:velocityRel gr:reference-point ex:point1 ;
+    gr:of ex:body1 ;
+    gr:with-respect-to ex:body2 .
+
+# wrench coordinate
+ex:wrench rc:as-seen-by ex:frame1 ;
+    rc:of-wrench ex:wrenchRel ;
+    qs:unit qu:N-M, qu:N ;
+    qs:value 3.0 .
+ex:wrenchRel re:reference-point ex:point1 ;
+    re:acts-on ex:body1 ;
+    re:of-body ex:bodyWrongProp .
+
+# a second, unrelated triple of coordinates (neighbours, never passed in)
+ex:inertia2 rc:as-seen-by ex:frame2 ; qs:unit qu:KiloGM, qu:M-KiloGM, qu:KiloGM-M2 ;
+    rc:of-inertia ex:inertiaRel2 .
+ex:inertiaRel2 re:about ex:point2 ; re:of-body ex:body2 .
+ex:twist2 gc:as-seen-by ex:frame2 ; qs:unit qu:RAD-PER-SEC, qu:M-PER-SEC ;
+    gc:of-velocity ex:velocityRel2 .
+ex:velocityRel2 gr:reference-point ex:point2 ; gr:of ex:body2 .
+ex:wrench2 rc:as-seen-by ex:frame2 ; qs:unit qu:N-M, qu:N ; rc:of-wrench ex:wrenchRel2 .
+ex:wrenchRel2 re:reference-point ex:point2 ; re:acts-on ex:body2 .

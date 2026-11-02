@@ -13,10 +13,22 @@
     "graph_read": 1,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "`self.edm[ids].graph.value(subject=self.cho[ids], predicate=URIRef('http://purl.org/dc/elements/1.1/language'))` -> `m{ {self.cho[ids]} dc:language ?v }.first()` under `@graph self.edm[ids].graph`: the keyword arguments of `value()` become the pattern, the `URIRef('...')` becomes a prefixed name. The `Literal('en')` of the expected side is untouched.",
+    "Test harness restored (kind=function, unittest.TestCase method that only asserts): driver.py supplies a real unittest.TestCase carrying what the real class's setUp binds (`edm[ids].graph`, `cho[ids]`); `demo(self)` (identical on both sides, appended to original.py and translated.ldpy) returns 'ok' or ('assertion-failed', message). The message of assertEqual contains the value that was read, so a wrong read is visible, not just a failed test.",
+    "Fixture and calls (12): 'en' present with neighbours (another record with 'fr', dcterms:language and ex:language on the same subject, a record with only dcterms:language) -> ok; 'fr'; no dc:language (None); two values in both orders (first read wins); \"en\"@en and \"en\"^^xsd:string (neither equals Literal('en')); an IRI value; self.cho mapped to other objects; ids missing from self.edm (KeyError compared as a raise); empty graph. Mutations: dc:language -> dc:title, and the subject `{self.cho[ids]}` -> `?s`, both FAIL; restored."
+  ],
   "draft_sha": "9c27b7a765600e72",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.710742+00:00",
@@ -27,5 +39,6 @@
   "strata": [
     "trav_single_value"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

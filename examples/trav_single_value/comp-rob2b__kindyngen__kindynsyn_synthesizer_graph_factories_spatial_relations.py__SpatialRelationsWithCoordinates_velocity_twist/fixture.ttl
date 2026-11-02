@@ -1,4 +1,26 @@
-# Input graph for comp-rob2b__kindyngen__kindynsyn_synthesizer_graph_factories_spatial_relations.py__SpatialRelationsWithCoordinates_velocity_twist — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for the region SpatialRelationsWithCoordinates.velocity_twist of
+# comp-rob2b/kindyngen@414ebd52b2: frames of the geometry metamodel, with and
+# without an origin, with several origins, and neighbours that must not match.
 @prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ge: <https://comp-rob2b.github.io/metamodels/geometry/structural-entities#> .
+@prefix gr: <https://comp-rob2b.github.io/metamodels/geometry/spatial-relations#> .
+
+# a frame with one origin
+ex:frame1 a ge:Frame, ge:Orthonormal ;
+    ge:origin ex:point1 .
+# a frame with no origin at all
+ex:frame2 a ge:Frame ;
+    gr:reference-point ex:pointNotAnOrigin .       # near-miss predicate
+# a frame with two origins: the first one read is the answer
+ex:frame3 a ge:Frame ;
+    ge:origin ex:point3a, ex:point3b .
+# not a Frame (an orthonormal thing, a rigid body) although it has an origin
+ex:notframe a ge:Orthonormal, ge:RigidBody ;
+    ge:origin ex:pointOfNotFrame .
+# a frame whose origin is typed through another property: no ge:origin
+ex:frame4 a ge:Frame ;
+    ex:origin ex:pointWrongNamespace .
+# a point is not a frame, and a frame is not the origin of itself
+ex:point1 a ge:Point ;
+    ge:origin ex:pointOfPoint .
