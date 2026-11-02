@@ -37,18 +37,18 @@
   ],
   "repair": {
     "date": "2026-10-31",
-    "driver": "inchangé",
+    "driver": "inchang\u00e9",
     "translation_fixed": false,
     "mutants_killed": [
-      "îlot +{ } supprimé",
-      "sujet {c} élargi en ?x",
-      "rdfs:label élargi en ?x",
-      "skos:definition élargi en ?x",
-      "dcterms:source élargi en ?x",
-      "@en retiré du label",
-      "@graph g2 retiré (refusé au transpilage)"
+      "\u00eelot +{ } supprim\u00e9",
+      "sujet {c} \u00e9largi en ?x",
+      "rdfs:label \u00e9largi en ?x",
+      "skos:definition \u00e9largi en ?x",
+      "dcterms:source \u00e9largi en ?x",
+      "@en retir\u00e9 du label",
+      "@graph g2 retir\u00e9 (refus\u00e9 au transpilage)"
     ],
-    "remaining": "Liaisons vérifiées hors pilote, dans une copie où le vrai semtech_tbox_v5_4_0.ttl (1329 lignes) remplace le substitut : le fichier lie déjà rdfs/owl/skos/dcterms aux mêmes IRI que les @prefix du bloc, donc @graph g2 n'en remplace aucune ; aucune liaison perdue ni ajoutée, sérialisations turtle identiques au caractère près. Valeurs : trois tuples de str écrits dans la région et S() qui rend une str, aucun autre type atteignable."
+    "remaining": "Liaisons v\u00e9rifi\u00e9es hors pilote, dans une copie o\u00f9 le vrai semtech_tbox_v5_4_0.ttl (1329 lignes) remplace le substitut : le fichier lie d\u00e9j\u00e0 rdfs/owl/skos/dcterms aux m\u00eames IRI que les @prefix du bloc, donc @graph g2 n'en remplace aucune ; aucune liaison perdue ni ajout\u00e9e, s\u00e9rialisations turtle identiques au caract\u00e8re pr\u00e8s. Valeurs : trois tuples de str \u00e9crits dans la r\u00e9gion et S() qui rend une str, aucun autre type atteignable."
   },
   "draft_sha": "f9baeb9e6677da01",
   "provenance": {
@@ -66,5 +66,19 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the four `g2.add((c, \u2026))`, written two per line with `;` in the original, become one `g2 += [ \u2026 ]` of four triples (Graph.__iadd__ takes any Iterable of triples, rdflib 7.2.1).",
+    "LD Python: from optimized.py, the `g2 += [ \u2026 ]` becomes one `+{ {c} a owl:Class ; rdfs:label {clab}@en ; \u2026 }(g2)`; `@graph g2` replaced by the call suffix, which mirrors `g2 +=`.",
+    "Not compressed: `c = SEM[cid]` stays on both sides (the driver compares the loop's last `c` at module level), and `SEM = Namespace(...)` stays a Python Namespace, as in the translation."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}",
+    "language literal"
+  ]
 }

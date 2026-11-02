@@ -61,5 +61,20 @@
       "sh:class du medium élargi"
     ],
     "remaining": "Mutants déjà tués avant : ASK forcé à True, sujet et prédicat de l'ASK élargis, SELECT vidé, rdf:rest* retiré, chemin s223:hasConnectionPoint élargi, sh:class de la cible élargi, classe du medium élargie, pin imbriqué retiré. Aucun mutant équivalent."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `not bool(g.query(ASK))` becomes `not g.query(ASK)` (a Result is truthy by its askAnswer); the `result` intermediate is inlined into the set comprehension.",
+    "optimized.ldpy: the ASK becomes `not m{ s223:Battery sh:property ?p }(g)`; the SELECT becomes an m{ } whose path is interpolated as `{sh:or / (rdf:rest * \"*\") / rdf:first / sh:property}`. The parentheses are required: in Python `/` and `*` have equal precedence and associate left, so without them the path is `(sh:or/rdf:rest)*/…`, which found one branch instead of two (check FAILed).",
+    "Exception to the symmetry rule, island-only: m{ } projects every variable, so `?prop` becomes the blank node `[ … ]` that carries its property list, and `?min` becomes `[]`. In the SPARQL of optimized.py they are simply not projected, so there is nothing to carry back.",
+    "m{ } measured 127 tokens against 125 for the s{ } form, fewer lines and characters; m{ } is kept as the more specific island. Notation ratio about 1.95: the Turtle pattern counts token by token where the Python query is one string token."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable",
+    "call suffix (g)"
+  ]
 }

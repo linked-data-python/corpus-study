@@ -58,5 +58,20 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the intermediates `date_str` and `date_epoch` are removed, and the three `graph.add` calls are chained on `Graph()` (Graph.add returns the graph) inside the `return`, so the `graph` variable goes too. The `elif isinstance(date, str)` stays an `elif`: other input types still fail as before.",
+    "ldpy: the chained graph is a `g{ }` in the same `return`, with an object list for the two `a` objects. `Literal(s, datatype=XSD.dateTime)` on a string becomes `f\"{...}\"^^xsd:dateTime`, and `Literal(date)` becomes `f{date}`. `ABI[...]` becomes `abi:{...}`.",
+    "There is no restructuring that only ldpy has: `g{ }` replaces the chained `Graph().add(...)` expression in the same place."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "g{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "typed literal",
+    "f{ }"
+  ]
 }

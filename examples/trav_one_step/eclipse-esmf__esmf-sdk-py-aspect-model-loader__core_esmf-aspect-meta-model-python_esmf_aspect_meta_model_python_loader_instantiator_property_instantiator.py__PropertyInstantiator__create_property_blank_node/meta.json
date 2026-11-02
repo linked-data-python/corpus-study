@@ -44,5 +44,18 @@
     "method": "fixture:fixture.ttl entry:_create_property_blank_node",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: keyword arguments subject=/predicate= of graph.value dropped; the five intermediate variables (optional_node, not_in_payload_node, payload_name, characteristic, example_value) are inlined into the DefaultProperty(...) call, whose keyword arguments are reordered so that the calls still run in the original order (payload_name, characteristic, example_value, then _get_base_attributes; the two flag reads are side-effect free); `value(s, p) is not None` becomes the existence test `(s, p, None) in graph`. Kept: the `if not property_node: raise ValueError` guard (falsy test included), the `# type: ignore` comment, the docstring.",
+    "optimized.ldpy is optimized.py with `@graph self._aspect_graph` and the reads as m{ ... }.first(), the two existence tests as bool(m{ ... }); the predicates stay interpolated (computed SAMM URNs, no @prefix can name them).",
+    "No exception to symmetry. The two existence tests lose their `is not None` on both sides."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "interpolation {expr}",
+    "variable"
+  ]
 }

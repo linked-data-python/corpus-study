@@ -47,15 +47,14 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "Both sides: the two `any(graph.triples(...))` disjuncts become two membership tests in optimized.py (`(None, OWL.imports, None) in graph or (None, RDF.type, OWL.Ontology) in graph`) and two `bool(m{ })` in optimized.ldpy; the unused imports of the extraction context (Dataset, Literal, URIRef, XSD, NamespaceManager) are removed, and so is the unused `xsd:` prefix declaration. The original's line-wrapped `or any(` is one line.",
-    "optimized.ldpy uses `@graph graph` once rather than a `(graph)` call suffix on each m{ } (smaller by tokens, measured); this is an ldpy-specific declaration with no Python counterpart, not a restructuring.",
-    "No exception to the symmetry rule. Not compressible further: m{ } has no union, so the two disjuncts stay two islands (the Python side likewise keeps two tests).",
-    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+    "optimized.py: the two `any(graph.triples((...)))` disjuncts become two membership tests, `(None, OWL.imports, None) in graph or (None, RDF.type, OWL.Ontology) in graph`, on one line; the extracted header is kept byte for byte.",
+    "optimized.ldpy: the same two disjuncts as `bool(m{ ?s owl:imports ?o }(graph)) or bool(m{ ?s a owl:Ontology }(graph))`; `a` for rdf:type. `@graph graph` and the call suffix measure the same number of tokens here; the suffix keeps the region to one statement, as on the Python side.",
+    "No exception to the symmetry rule. m{ } has no union, so the two disjuncts stay two islands, as the Python side keeps two tests. The notation ratio is above 1 because the three @prefix lines of the translated header (kept byte for byte) count against the ldpy side; the region line itself is shorter than its Python counterpart."
   ],
   "optimized_constructions": [
     "@prefix",
-    "@graph",
     "m{ }",
+    "call suffix (g)",
     "prefixed name",
     "variable"
   ],

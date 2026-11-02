@@ -63,5 +63,20 @@
       "SELECT DISTINCT ?s ?s"
     ],
     "remaining": "Écart subsistant hors dépôt : si la classe d'un cycle a une IRI sans '#' (ex. http://x/y/P), l'original construit le texte `brick:http://x/y/P` et lève une ParseException SPARQL, alors que la traduction ne trouve simplement rien ; le pilote ne l'exerce pas (il serait rouge) et Brick.ttl ne contient pas de tel cycle (le test existe pour prouver qu'il n'y en a aucun). `res1` avec `*` et un seul pas dans un seul motif sont des mutants équivalents. Jugement non traité : aucun drapeau de jugement n'était posé."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the `classes_in_cycles` list and its append loop are gone (the loop unpacks `(brick_class,)` from the query result, still named `classes_in_cycles`); the inner loop becomes `loops.update(<generator>)`; DISTINCT is dropped, the set absorbs duplicates; `assert len(loops) == 0` becomes `assert not loops`, same message.",
+    "optimized.py: the `% (minify(brick_class), minify(brick_class))` splice becomes `brick:{0}` twice with one `.format(minify(brick_class))`; optimized.ldpy keeps the translation's `{BRICK[minify(brick_class)]}` from the `as BRICK` of the header.",
+    "m{ } was tried for both queries (`{rdfs:subClassOf * \"+\"}` and `brick:{minify(brick_class)}`, which m{ } accepts): same rows, but the check FAILs for PYTHONHASHSEED 1 and 7 of 0-7. The driver's `_OrderedGraph` sorts rows only through `query()`, m{ } reads the store directly, so the set fills in another order and the AssertionError message prints it in another order. So s{ } stays in both places, for a reason the driver gives, not the region.",
+    "No exception to the symmetry rule. Notation ratio 1.5: two @prefix lines in the header, `{BRICK[minify(brick_class)]}` twice against `{0}`, and the s{ } bodies count token by token where a Python string is one token."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ]
 }

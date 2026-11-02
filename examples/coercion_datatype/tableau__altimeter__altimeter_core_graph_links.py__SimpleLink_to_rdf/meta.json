@@ -49,17 +49,31 @@
   },
   "repair": {
     "date": "2026-10-30",
-    "driver": "audit par mutation (15 mutants, 5 survivants ; la note « driver.py covers » de translation_notes ne décrit plus que les 4 premiers appels) : 10 appels à la forme de ValidatedGraphSet.to_rdf (Graph() par défaut, Namespace(\"alti:\"), NodeCache(), sujet BNode portant déjà un triplet) sur chaque type de SCALAR_TYPES : bool True/False, int 0, 2147483647 (borne), 2147483648, float 1.5 et 5e9, str \"\", datetime naïf et avec fuseau ; seconde phase qui rejoue chaque appel et exige que toute liaison de préfixe du graphe de l'original se retrouve dans la traduction (le dépôt sérialise le graphe en RDF/XML, writer.py:133) ; verdict de run_pair tu pour que check lise celui qui inclut la seconde phase.",
+    "driver": "audit par mutation (15 mutants, 5 survivants ; la note \u00ab driver.py covers \u00bb de translation_notes ne d\u00e9crit plus que les 4 premiers appels) : 10 appels \u00e0 la forme de ValidatedGraphSet.to_rdf (Graph() par d\u00e9faut, Namespace(\"alti:\"), NodeCache(), sujet BNode portant d\u00e9j\u00e0 un triplet) sur chaque type de SCALAR_TYPES : bool True/False, int 0, 2147483647 (borne), 2147483648, float 1.5 et 5e9, str \"\", datetime na\u00eff et avec fuseau ; seconde phase qui rejoue chaque appel et exige que toute liaison de pr\u00e9fixe du graphe de l'original se retrouve dans la traduction (le d\u00e9p\u00f4t s\u00e9rialise le graphe en RDF/XML, writer.py:133) ; verdict de run_pair tu pour que check lise celui qui inclut la seconde phase.",
     "translation_fixed": false,
     "mutants_killed": [
-      "sujet {subj} élargi en [] (survivait : sujet BNode seul dans un graphe d'un triplet, isomorphe à un BNode frais)",
+      "sujet {subj} \u00e9largi en [] (survivait : sujet BNode seul dans un graphe d'un triplet, isomorphe \u00e0 un BNode frais)",
       "isinstance(self.obj, int) -> isinstance(self.obj, (int, float)) (survivait : aucun float)",
       "> 2147483647 -> >= 2147483647 (survivait : borne absente)",
-      "@prefix xs: ajouté sur l'espace XSD ; @prefix r: ajouté sur l'espace RDF (survivaient : liaisons non comparées ; @graph graph rebascule l'espace sur le nouveau préfixe)",
-      "îlot supprimé ; objet élargi en [] ; {literal} -> {self.obj} ; prédicat fixe",
-      "garde isinstance forcée True / False ; garde de seuil forcée True / False",
-      "datatype xsd:nonNegativeInteger -> xsd:integer ; datatype retiré de Literal(...)"
+      "@prefix xs: ajout\u00e9 sur l'espace XSD ; @prefix r: ajout\u00e9 sur l'espace RDF (survivaient : liaisons non compar\u00e9es ; @graph graph rebascule l'espace sur le nouveau pr\u00e9fixe)",
+      "\u00eelot supprim\u00e9 ; objet \u00e9largi en [] ; {literal} -> {self.obj} ; pr\u00e9dicat fixe",
+      "garde isinstance forc\u00e9e True / False ; garde de seuil forc\u00e9e True / False",
+      "datatype xsd:nonNegativeInteger -> xsd:integer ; datatype retir\u00e9 de Literal(...)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the nested `if isinstance(...)` / `if self.obj > 2147483647` merged into one `and` condition, and the intermediate `literal` variable inlined into the `graph.add(...)` call.",
+    "LD Python: the same two changes; `@graph graph` replaced by the call suffix `+{ \u2026 }(graph)` (one island, one receiver: the declaration line is not worth it). The original's graph bindings are kept (driver's second phase).",
+    "Not compressible: `Literal(self.obj, datatype=datatype)` stays a Python call in both files, since `datatype` is None or xsd:nonNegativeInteger at run time. `{self.obj}^^{datatype}` is no substitute: with datatype None it builds a literal typed <None> (URIRef('None')), silently. Checked on 3, True, 1.5 and 'x'.",
+    "The two `@prefix` lines (rdf:, xsd:) of the translated.ldpy header are kept byte for byte and weigh on the notation ratio (rdf: is unused)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

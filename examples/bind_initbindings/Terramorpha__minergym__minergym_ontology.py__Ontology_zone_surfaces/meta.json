@@ -55,5 +55,17 @@
       "m{ } : ligne `?surface a \"BuildingSurface:Detailed\"` supprimée (rouge : le voisin zoneish fuit)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py is original.py: nothing a reviewer would accept is shorter. Inlining the multi-line query string into the comprehension saves two tokens for an unreadable call; a triples-API rewrite would need RDF/Literal imports the fixed header lacks and would hard-code the idf: IRI the original takes from the graph's bindings.",
+    "optimized.ldpy: `return list(m{ ?surface a \"BuildingSurface:Detailed\" ; idf:zone_name {zone} }(self.rdf))` -- the two patterns share their subject (`;`) and the `(self.rdf)` suffix replaces translated.ldpy's `@graph self.rdf` line. As in translated.ldpy, idf: is a module-level @prefix rather than the graph's runtime binding."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "m{ }(g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

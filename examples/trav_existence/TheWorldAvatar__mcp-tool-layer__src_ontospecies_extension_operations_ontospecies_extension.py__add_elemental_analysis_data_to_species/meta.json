@@ -63,5 +63,18 @@
       "molecular-formula +{ } removed"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the `exists` variable is removed (the existence test goes straight into the `if not`), `catalog` is inlined into the f-string of the error message, and the two near-identical Calculated / Experimental WeightPercentage blocks become one loop over `((calculated_value_text, \"Calculated\"), (experimental_value_text, \"Experimental\"))`, the predicate local names built as f\"hasWeightPercentage{kind}Value\" / f\"hasWeightPercentage{kind}\"; the mint order (calculated before experimental) is unchanged. The two section comments of those blocks are merged into one.",
+    "optimized.py keeps `any(g.triples(...))` as a membership test `(species_ref, RDF.type, _class(OS, \"Species\")) not in g`; optimized.ldpy has `if not m{ {species_ref} a {_class(OS, \"Species\")} }:` and one `@graph g` under the `with`, in place of four `(g)` suffixes; the four g.add calls are `+{ }`.",
+    "Kept on both sides: the three `g.set(...)` (replace-then-add, not covered by `+{ }`; the nodes are fresh only as long as `_mint_hash_iri` never repeats), the `_class(OS, ...)` project helper (its real definition is outside the region), every guard and error return. No exception to the symmetry rule.",
+    "The @prefix rdf: of the translated header (kept byte for byte) is now unused, since the island writes `a`; `a` has no label in the construction vocabulary."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "interpolation {expr}"
+  ]
 }

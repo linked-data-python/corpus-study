@@ -45,5 +45,18 @@
     "method": "entry:from_rdf",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: `sources` is inlined into the `for`; `sourcetype = None` and the trailing `if sourcetype:` are replaced by a `continue` at the end of the else branch (every other branch assigns a non-empty Literal); the `unique=True` third argument of `g.objects(parent, RML_NS.source, True)` is dropped, since with subject and predicate fixed each object comes out of a set-based store once.",
+    "optimized.ldpy: one `@graph g` instead of five `(g)` suffixes; the rml:source loop is `m{ {parent} {rml_vocab.RML_NS.source} ?source }`; the d2rq:Database read, left as native g.value in translated.ldpy, is now `m{ ?db a {rml_vocab.D2RQ_NS.Database} }.first(default=True)`, which reproduces the source's g.value(..., True) default-argument bug (an unmatched pattern gives True) on both sides.",
+    "Kept on both sides: the `if db:` guard and the truthiness tests of the three single-value reads (a falsy literal must not count). Namespaces come from the rml_vocab object, so every predicate is an interpolation, which is why the notation ratio is above 1. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

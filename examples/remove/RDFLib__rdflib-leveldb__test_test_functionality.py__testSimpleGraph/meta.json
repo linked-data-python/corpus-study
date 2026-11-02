@@ -69,5 +69,24 @@
       "m{ } de l'appel initBindings : <urn:pizza> -> <urn:cheese> (rouge : AssertionError dans la traduction seule)"
     ],
     "remaining": "Le mutant `<urn:pizza>` -> `<urn:cheese>` dans la dernière requête (celle d'après le retrait) survit : la requête de l'original est exécutée mais son résultat est jeté, `s{ }` est paresseux et rien n'est exécuté, donc aucun état ni valeur ne la distingue (mutant équivalent). Pour l'exécuter des deux côtés il faudrait ajouter du code à la région. La région ne contient aucun joker dans son -{ } : elle n'illustre pas l'idiome (s, p, None) de la strate ; l'article_candidate est à juger."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `graph = getgraph` dropped (get_context called on the parameter); the `r = g.triples(...)` + `assert len(list(r)) == N` pairs inlined, and the two fully bound ones become `assert (tarek, likes, pizza) in g` / `not in g` (a fully bound pattern matches 0 or 1 triple, and __contains__ reads the same store's triples()); the two query results use `len(r)` (rdflib's Result has __len__); the dead `r =` of the last query dropped, the query itself kept. The three adds stay `.add`: this is a store test, and `g +=` would route through addN, another store path.",
+    "optimized.ldpy, from optimized.py: `@graph g`; the three adds become one `+{ {tarek} {likes} {pizza} . {bob} {likes} {pizza}, {cheese} }` (object list, island only); the triples-pattern count becomes `m{ ?s {likes} {pizza} }.count()`, the membership tests `assert m{ … }` / `assert not m{ … }`; the initBindings query (a one-pattern BGP, PI decision) becomes `assert m{ {tarek} {likes} {pizza} }.count() == 1`, on one line where Python needs `r = …` + assert to stay under 100 columns; g.remove becomes `-{ }`; the two literal queries stay `s{ }`, the first read with `len(list(r))` because the lazy s{ } value has no __len__ (the RDF line differs from Python's len(r)).",
+    "The last query is a bare `s{ }` statement: lazy, never run, as rdflib's own SELECT result is never iterated in the original; unobservable either way (see driver.py).",
+    "Symmetry: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "+{ }(g)",
+    "-{ }",
+    "m{ }",
+    "m{ }.count()",
+    "bool(m{ })",
+    "s{ }",
+    "IRI",
+    "interpolation {expr}"
+  ]
 }

@@ -1,0 +1,48 @@
+# Extracted from CatholicOS/ontokit-api@23680a4d04 : ontokit/services/embedding_text_builder.py
+# region: build_embedding_text (lines 8-53, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from rdflib import Literal as RDFLiteral
+from rdflib.namespace import OWL, RDFS, SKOS
+from embedding_text_context import _local_name
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+def build_embedding_text(graph: Graph, entity_uri: URIRef, entity_type: str) -> str:
+    """Build a text representation of an entity for embedding.
+
+    Format: "{type}: {label}. {comment}. Parents: {parents}. Also known as: {alt_labels}"
+    """
+    def literals(subject, predicate):
+        return [str(o) for o in m{ {subject} {predicate} ?o }(graph) if isinstance(o, RDFLiteral)]
+
+    # Primary label
+    labels = literals(entity_uri, rdfs:label)
+    primary_label = labels[0] if labels else _local_name(str(entity_uri))
+    parts = [f"{entity_type}: {primary_label}"]
+
+    # Comments/definitions
+    desc = literals(entity_uri, rdfs:comment) or literals(entity_uri, skos:definition)
+    if desc:
+        parts.append(desc[0])
+
+    # Parents (use subPropertyOf for properties, subClassOf for classes)
+    parent_pred = rdfs:subPropertyOf if entity_type == "property" else rdfs:subClassOf
+    parent_labels = [
+        next(iter(literals(p, rdfs:label)), _local_name(str(p)))
+        for p in m{ {entity_uri} {parent_pred} ?p }(graph)
+        if isinstance(p, URIRef) and p != owl:Thing
+    ]
+    if parent_labels:
+        parts.append(f"Parents: {', '.join(parent_labels)}")
+
+    # Alternative labels
+    all_alt = literals(entity_uri, skos:altLabel) + [
+        lbl for lbl in labels[1:] if lbl != primary_label
+    ]
+    if all_alt:
+        parts.append(f"Also known as: {', '.join(all_alt)}")
+
+    return ". ".join(parts)

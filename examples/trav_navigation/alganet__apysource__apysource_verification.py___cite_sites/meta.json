@@ -73,5 +73,20 @@
       "jointure qui absorbe le g.value(citingFile) dans la boucle citedBy (survivant avant)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: `s.line if s.line else 0` becomes `s.line or 0` in the sort key, and the CiteSite(...) call fits on one line (96 characters).",
+    "optimized.ldpy: as translated.ldpy, `m{ {URIRef(urn)} sv:citedBy ?node }` and two `.first()` reads under one `@graph g`.",
+    "Not compressed: the loop is not a comprehension (the `file is None` skip would need a walrus), the `is None` / `is not None` tests stay (the fixture holds a \"\" file and a 0 line), and citingFile / citingLine are not joined into the citedBy pattern (a node with two citingFile values would give two sites). The region is close to minimal on both sides. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

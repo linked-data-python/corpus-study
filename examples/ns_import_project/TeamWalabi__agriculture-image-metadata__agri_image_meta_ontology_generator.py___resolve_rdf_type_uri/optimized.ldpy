@@ -1,0 +1,41 @@
+# Extracted from TeamWalabi/agriculture-image-metadata@d34fe77241 : agri_image_meta/ontology/generator.py
+# region: _resolve_rdf_type_uri (lines 49-66, stratum ns_import_project)
+# licence of the source repository: see meta.json
+#
+# `SOSA`/`FOAF` are read here as OBJECTS -- put in the `ns_map` registry,
+# then `str(ns)`-ed -- not dereferenced as `sosa:Thing`-style prefixed
+# names. `from … import p:` cannot supply that: "what travels is the
+# prefix bindings, which have no value to import by ordinary means"
+# (INSTRUCTIONS.md SS1). ldpy 0.4.0/0.6.4's `@prefix ex: <IRI> as EX .`
+# is the construction for exactly this need -- naming the Python
+# `Namespace` object `@prefix` builds -- so `sosa:`/`foaf:` are declared
+# with `as SOSA`/`as FOAF` instead of imported from the project's own
+# namespace module. AGIMAGE, SH, DCT, EXIF (imported in the real file but
+# never dereferenced here, agimage/sh/dct/exif) drop out, same convention
+# as unused names elsewhere in this stratum. `URIRef("http://www.w3.org/ns/dcat#")`
+# is a constant string with no `@base` in scope, so it becomes the bare
+# IRI term `<http://www.w3.org/ns/dcat#>` (piege 2 of
+# how-to/migrate-from-rdflib.md does not apply: no @base here).
+# `URIRef(str(ns) + local)` builds an IRI from a namespace object plus a
+# local-part variable, unencoded, exactly `f<...{expr}...>`'s own
+# semantics ("does NOT percent-encode" -- INSTRUCTIONS.md SS1); rdflib's
+# `Namespace`/`URIRef` are both `str` subclasses, so `f<{ns}{local}>`
+# interpolates identically to `str(ns) + local`.
+from rdflib import Graph, RDF, RDFS, OWL, URIRef, Literal, BNode, XSD
+@prefix sosa: <http://www.w3.org/ns/sosa/> as SOSA .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> as FOAF .
+
+
+def _resolve_rdf_type_uri(rdf_type_str):
+    """
+    Resolve a prefixed rdf_type string (e.g. 'sosa:Sensor') to a URIRef.
+
+    Returns None if it resolves to the agimage namespace.
+    """
+    if not rdf_type_str or ":" not in rdf_type_str:
+        return None
+    prefix, local = rdf_type_str.split(":", 1)
+    ns = {"sosa": SOSA, "foaf": FOAF, "dcat": "http://www.w3.org/ns/dcat#"}.get(prefix)
+    if ns is None:
+        return None
+    return f<{ns}{local}>

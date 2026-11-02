@@ -68,5 +68,20 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the nine-line `expected` list becomes a comprehension over `range(1, 10)`; `sorted([...])` takes a generator on one line; the query text is reflowed (`SELECT ?a ?b WHERE {` on the first line). The demo seam is copied as is.",
+    "optimized.py keeps `initNs={\"time\": TIME, \"tfun\": TFUN}`: when initNs is given, Graph.query does not fall back to the graph's bindings, so `time` cannot be dropped even though rdflib binds it by default.",
+    "optimized.ldpy: `q = s{ … }` and `q(g)`, the prologue from the header @prefix declarations, so initNs disappears; `id:{f\"a0{i}\"}` (computed local part) replaces `ID[f\"a0{i}\"]`.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ]
 }

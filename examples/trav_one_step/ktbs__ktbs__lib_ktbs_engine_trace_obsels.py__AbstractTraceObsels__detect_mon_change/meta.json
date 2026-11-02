@@ -47,17 +47,17 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "optimized.py: the intermediate names trace_uri, pseudomon_range and the bound-method alias self_state_value are removed and their uses inlined (self.trace_uri, self.state.value); pse_mon_b_limit and pse_mon_e_limit are KEPT, computed before the loop from self.trace.pseudomon_range (repair 2026-10-27, see below). Docstring, comments, the early return, the `end is None` guard, the three old_last_* snapshots (needed: prepared is mutated inside the loop) and the itertools.chain of three iterables are kept.",
-    "optimized.ldpy is optimized.py with each graph.value / self.state.value replaced by m{ ... }.first(), and graph.objects(new_obs, None) / graph.subjects(None, new_obs) by `(o for _, o in m{ {new_obs} ?p ?o })` and `(s for s, _ in m{ ?s ?p {new_obs} })`; the self.state alias removal also removes the local helper function that translated.ldpy needed.",
-    "Exception to symmetry (islands only): `@graph graph` at the top of the function makes `graph` the current graph, so the four reads on `graph` drop their `(graph)` suffix and only the reads on self.state keep one. Python has no current-graph mechanism.",
-    "Not compressible: the predicate-wildcard selectors have no terse island form (the unused ?p must be named and discarded), so the notation costs more than it saves here (notation ratio above 1). The chain of three sources is a union, which m{ } cannot express. Merging begin/end reads into one multi-pattern m{ } would change what happens when a value is missing or repeated, so it was not done.",
-    "2026-10-27 (repair): the first optimized.py inlined `old_last_begin - self.trace.pseudomon_range` into the two branches that use it, so it no longer raised TypeError when pseudomon_range is not a number (original.py:25-26 subtracts before the loop, whatever the obsels). The repaired driver compares raised exceptions and caught it (optimized.py and optimized.ldpy FAIL on call[20]); both now compute pse_mon_b_limit and pse_mon_e_limit before the loop, reading self.trace.pseudomon_range twice instead of once (in the repo it is an int property, so the case is unreachable there, but the eager evaluation is the original's behaviour)."
+    "optimized.py: the bound-method alias self_state_value is removed and its two calls read self.state.value directly (carried back from optimized.ldpy, where an m{ } cannot be aliased; token-neutral in Python); `elif begin == old_last_begin:` + nested `if obs <= old_last_obsel:` merged into one condition. Everything else is kept: the trace_uri alias, the three old_last_* snapshots (prepared is mutated inside the loop), the two pseudo-monotonic limits computed BEFORE the loop (the original raises TypeError there whatever the obsels, and the driver checks it), the early return, the `end is None` guard, the chain of three sources, the comments.",
+    "optimized.ldpy is optimized.py with each graph.value / self.state.value replaced by m{ ... }.first(), and graph.objects(new_obs, None) / graph.subjects(None, new_obs) by `(o for _, o in m{ {new_obs} ?p ?o })` / `(s for s, _ in m{ ?s ?p {new_obs} })`.",
+    "Exception to symmetry (island only): `@graph graph` makes the argument the current graph, so the four reads on it drop their receiver; the two reads on self.state keep the call suffix (self.state). Python has no current-graph mechanism.",
+    "Not compressible: the predicate-wildcard selectors have no terse island form (the unused ?p must be named and discarded), so the notation costs more than it saves here; the chain of three sources is a union m{ } cannot express; folding the begin/end reads into one multi-pattern m{ } would change what happens when a value is missing or repeated."
   ],
   "optimized_constructions": [
     "@prefix",
     "@graph",
     "m{ }",
     ".first()",
+    "call suffix (g)",
     "prefixed name",
     "variable",
     "interpolation {expr}"

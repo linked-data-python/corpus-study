@@ -47,16 +47,15 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "Both sides: the accumulation loop and the `tag_sets` dict filled item by item become one generator of class local names feeding a dict comprehension `{klass: set(klass.split(\"_\")) for klass in classes}`; the intermediate `tag_set` variable, the `qstr_allclasses` template and its `.format` call are gone. The query is one line (an f-string in optimized.py, an inline s{ } in optimized.ldpy). The `# Tags inside the class name.` comment is kept, moved above the comprehension.",
-    "optimized.py cannot drop the `rdfs:` prefix: rdflib's default namespace manager binds it, so the query text needs no PREFIX line; optimized.ldpy pays one `@prefix rdfs:` declaration instead (the prologue is built from @prefix in scope).",
-    "optimized.py uses an f-string `<{root}>`, which is string pasting and does not escape; the ldpy `{root}` is a term-position interpolation (initial binding) that coerces the value itself and drops the angle brackets. Same results on the fixture; the ldpy side is the safer of the two, which is a property of the notation, not a compression.",
-    "No exception to the symmetry rule. m{ } was tried in place of s{ }: it does not parse `rdfs:subClassOf+` (property path), so s{ } stays the most specific island here.",
-    "Not compressible further: the `print(root, len(tag_sets))` and the return are the observable behaviour, and the module-level `g` / `graph=g` harness is kept as is.",
-    "Repair 2026-10-27: the third note above is superseded. optimized.ldpy had the same `{root}` defect as translated.ldpy (0 classes instead of 4 on a str root) and now writes `{f<{root}>}`; optimized.py's f-string `<{root}>` was already right on a str. The claim that the ldpy side is 'the safer of the two' holds only as far as the value is an initial binding and not pasted text; `f<…>` does not percent-encode either. Notation ratio after the fix: see the check line, above 1 (the ldpy island is longer than the f-string)."
+    "Both sides: the `qstr_allclasses` template and its `.format` call are gone, the query is written once in the loop header; the intermediate `tag_set` is gone (`set(klass.split(\"_\"))` directly) and the `# Tags inside the class name.` comment moves to the end of that line.",
+    "optimized.py writes the query with `% root` (same `<…>` wrapping as `<{0}>`): Python 3.12's tokenizer splits an f-string into several tokens, so the f-string form measured more. A dict comprehension over a generator of local names measured 80 tokens against 75 for the plain loop, which stays. `graph.subjects(RDFS.subClassOf * \"+\", URIRef(root))` measured 90: it needs an import line the header does not have.",
+    "optimized.ldpy: the SELECT becomes `m{ ?class {rdfs:subClassOf * \"+\"} f<{root}> }(graph)`, the rdflib property path interpolated in predicate position; with one variable m{ } yields bare terms, so `row[0]` becomes the term (loop variable `subclass`). m{ } measured 83 tokens against 89 for the s{ } form. `f<{root}>` is needed because the repository passes the root as a str.",
+    "No exception to the symmetry rule; the lines outside RDF are identical. Notation ratio above 1: the header's `@prefix rdfs:` line and `f<…>` cost more than the pasted `<%s>` of the Python string."
   ],
   "optimized_constructions": [
     "@prefix",
-    "s{ }",
+    "m{ }",
+    "variable",
     "interpolation {expr}",
     "prefixed name",
     "f<…>",

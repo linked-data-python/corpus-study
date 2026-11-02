@@ -56,5 +56,21 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `graph = self.graph` once instead of thirteen `self.graph`; `full_msg = msg` set first so the `else` branch goes (the try/except on node.nodeName is kept); `ns[\"term\"]` item access becomes attribute access; the three unconditional adds on bnode are grouped before `if info_class` (order is irrelevant to the graph); `Literal(\"%s\" % context)` becomes `Literal(str(context))` (context is a URIRef or a str by the guard). The basestring try/except and the six bind calls are kept.",
+    "optimized.ldpy, from optimized.py: `@graph graph`; the three unconditional bnode triples become one `+{ {bnode} a … ; nsdc:description … ; nsdc:date …^^nsxsd:dateTime }`; Literal(full_msg) becomes a bare {full_msg} (a str in pyRdfa: plain literal by coercion); Literal(x, datatype=xsd:dateTime) becomes `{x}^^nsxsd:dateTime` (isoformat() is already a str).",
+    "Exception to the symmetry (island only): the context branch writes `+{ {bnode} nsrdfa:context [ a nsht:Request ; nsht:requestURI {str(context)} ] }`; the `[ ]` blank node property list removes the `htbnode = BNode()` line, which Python cannot do without the variable.",
+    "Demo harness copied as is. Symmetry otherwise line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "typed literal ^^",
+    "blank node [ ]"
+  ]
 }

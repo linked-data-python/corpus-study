@@ -72,5 +72,21 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three unconditional adds on subj and the two of the else branch are each one `g += [...]`; `g = g + note.as_graph()` is the in-place `g += note.as_graph()` (g is the function's own fresh graph); URIRef(subj) is subj (get_subject returns URIRef(self.create_uri()) in the repository); the four-branch label chain becomes one add with predicate `SKOS[label.label_type if label.label_type in label_types else \"altLabel\"]`, prefLabel and hiddenLabel being the only types that differ from the altLabel fallback. The narrower and sources loops stay loops: a comprehension fed to `g +=` would save two tokens each.",
+    "optimized.ldpy, from optimized.py: `@graph as g` creates and designates the graph, and the in-place union keeps it designated, so the second `@graph g` of translated.ldpy is gone; the grouped adds are one +{ } with `;` and one +{ } with `.` (two subjects); Literal(x, lang=y) becomes the language literal f\"{x}\"@{y}, Literal(self.notation) a bare {self.notation} (a str), URIRef(...) f<{...}>, and the label predicate `skos:{...}`.",
+    "The language literals raise on a None tag where rdflib gives a plain literal; pref_label_lang, SkosLabel.language and SkosSource.language are non-null CharFields in the repository, so None cannot occur.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ]
 }

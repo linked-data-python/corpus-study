@@ -55,18 +55,19 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "optimized.py: the original's if/else on prop.type becomes one conditional expression kept next to the original XXX comment; the unused rdflib imports (Graph, Namespace, NamespaceManager, XSD) are dropped. Little else compresses: the 6 graph.add calls have no common subject across the control flow, so Python keeps one call per triple.",
-    "optimized.ldpy, from optimized.py: the 3 base triples become one +{ } with ';' (the only structural change available only to the island, as Python has no shared-subject add); each graph.add in the two loops becomes +{ } with interpolation, and URIRef(x) becomes f<{x}>, Literal(x) becomes a bare {x}, NS.atom.Path becomes atom:Path.",
-    "Deliberate departure from translated.ldpy: the params loop is a plain `for param in plugin.params:` with +{ } directly (identical to optimized.py's loop header), not a `for @bindings in` over a generator of dicts -- the generator form is longer and the loop is the same in Python. The `for @bindings` construction therefore does not appear in the optimized artefact.",
-    "Kept the ternary value = URIRef(...) if ... else Literal(...) in both files: a Literal/URIRef choice on the object cannot be an island term, so it stays Python on both sides.",
-    "Symmetry: outside the RDF lines (graph.add vs +{ }) the two files are identical line for line; the only island-only restructuring is the ';' merge of the three preset triples.",
-    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+    "optimized.py: the three preset triples and the three triples of each param are each added by one `graph += [...]` (Graph.__iadd__ takes an iterable of triples) instead of one graph.add per triple; the if/else on prop.type becomes one conditional expression under the original's XXX comment; the pstate:state triple is added right after `state = BNode()` rather than after the loop (same graph). The loop over properties is kept as a loop: a comprehension fed to `graph +=` would save a few tokens but bury the URIRef/Literal choice and its comment inside a triple.",
+    "optimized.ldpy, from optimized.py: each `graph += [...]` / graph.add becomes one +{ }, URIRef(x) becomes f<{x}>, Literal(x) on a str or a float becomes a bare {x} or f{x} (same plain/xsd:double literal, checked by the driver), NS.x.y become prefixed names.",
+    "Exceptions to the symmetry, island only: (1) `preset = URIRef('')` disappears, the document IRI is written `<>` in every island (an inlined URIRef('') five times in Python would be longer and less clear, so Python keeps the variable); (2) `port = BNode()` disappears, the port is the Turtle anonymous node `<> lv2:port [ lv2:symbol ... ; pset:value ... ]`, which has no Python counterpart without a temporary; (3) the three preset triples share their subject with ';'. The `state` blank node cannot be anonymous: it collects triples across loop iterations.",
+    "Not in the closed construction vocabulary: the Turtle blank-node property list `[ ... ]` inside +{ }, used here for the port (reported, not labelled).",
+    "The `for @bindings in` of translated.ldpy is not used: a plain `for param in` loop with +{ } is shorter and is the same loop as optimized.py."
   ],
   "optimized_constructions": [
     "@prefix",
     "@graph",
     "+{ }",
+    "IRI",
     "f<…>",
+    "f{ }",
     "prefixed name",
     "interpolation {expr}"
   ],

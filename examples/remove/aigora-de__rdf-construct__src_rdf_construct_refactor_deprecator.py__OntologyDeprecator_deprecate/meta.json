@@ -75,5 +75,24 @@
       "-{ } de isReplacedBy remplacé par pass"
     ],
     "remaining": "`graph.bind(\"dcterms\", DCTERMS, override=False)` reste inobservé : un Graph() porte déjà dcterms et le harnais `demo` compare le graphe par isomorphisme, sans espaces de noms ; l'observer demanderait de modifier `demo` (dans original.py, interdit). Le contenu de l'article (candidat) reste à juger."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: `deprecated_graph` and `source_triples` move into the `DeprecationResult(...)` constructor. `entity_exists` is replaced by a for/else, and the early `return` of the not-found branch is kept. The label and comment loops become `extend` with a generator. The already-deprecated loop + `if not` becomes `if any(...)`/`else`.",
+    "Python: remove+add of isReplacedBy becomes `graph.set(...)`. The two `deprecation_msg` assignments become one conditional expression stored in `info.message`. The existing-comment search removes the comment inside the loop before `break`, so `existing_deprecated_comment` and `list()` are no longer needed. The redundant `result.success = True` (the default) is dropped.",
+    "ldpy: `graph.objects` becomes `m{ }`, the adds become `+{ }`, the comment removal becomes `-{ {entity_uri} rdfs:comment {comment} }`, and `graph.set` becomes `-{ ... ?old }` + `+{ ... f<{replaced_by}> }` (the same token count as keeping `graph.set` with a prefixed name). There is no restructuring that only ldpy has."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "typed literal",
+    "language literal",
+    "interpolation {expr}",
+    "f<…>"
+  ]
 }

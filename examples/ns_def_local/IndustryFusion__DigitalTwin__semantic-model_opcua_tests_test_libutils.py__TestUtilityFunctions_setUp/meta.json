@@ -37,10 +37,7 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "optimized.py: the four unused rdflib imports (Graph, URIRef, Literal, BNode) dropped; only Namespace remains. Nothing else to compress: one statement.",
-    "optimized.ldpy: `@prefix basens: <...> as BASENS .` plus `self.basens = BASENS`; no rdflib import at all. The explanatory comment of translated.ldpy is not carried (optimized files add no comments). No exception to symmetry.",
-    "the only measurable notation gain is the import line: the Namespace(\"...\") call and the @prefix ... as BASENS declaration are the same size.",
-    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+    "Nothing to compress: the region is one comment and one assignment of a Namespace to self.basens. optimized.py is original.py and optimized.ldpy is translated.ldpy, byte for byte (the @prefix ... as BASENS is in the header, the region reads `self.basens = BASENS`)."
   ],
   "optimized_constructions": [
     "@prefix"

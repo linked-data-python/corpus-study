@@ -42,5 +42,13 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is the single line `sio = Namespace(Constants.SIO)`. optimized.py is original.py, optimized.ldpy is translated.ldpy (`@prefix sio: f<{Constants.SIO}> as sio .`)."
+  ],
+  "optimized_constructions": [
+    "@prefix … as",
+    "f<…>"
+  ]
 }

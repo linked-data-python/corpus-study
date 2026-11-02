@@ -40,5 +40,15 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is one import line. optimized.py is identical to original.py, and optimized.ldpy is identical to translated.ldpy.",
+    "The `demo()` harness is copied as it is on each side. Its two versions differ as they do in the translation, because the prefix import binds no Python name to dereference."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

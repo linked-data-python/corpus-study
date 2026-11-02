@@ -73,5 +73,20 @@
       "someValuesFrom .first() -> last value"
     ],
     "remaining": "the join now covers two motifs instead of three: whether the pair stays directly-expressible and article_candidate is Maxime's call (triage question 1)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: `min_count = max_count = int(x)` chained for the exact and qualified cardinalities; the three identical owl:onClass reads of the qualified branches become one read after them, applied when any of qual_card / qual_min / qual_max is set (same value each time, set before someValuesFrom and allValuesFrom can overwrite node_class, as in the original); the class-or-datatype typing of someValuesFrom and allValuesFrom becomes one loop over `(some_from, all_from)`, someValuesFrom keeping its own `min_count = 1`.",
+    "Exception to the symmetry rule, island only: optimized.ldpy joins the rdfs:subClassOf loop and the owl:Restriction existence test into one `m{ {cls} rdfs:subClassOf ?superclass . ?superclass a owl:Restriction }`, so the `if (superclass, RDF.type, OWL.Restriction) not in source_graph: continue` of optimized.py and its comment disappear; the BNode guard then follows the join (two pure reads reordered). The twelve `source_graph.value(superclass, OWL.x)` are `m{ {superclass} owl:x ?v }.first()` under one `@graph source_graph`.",
+    "Not compressed: owl:onProperty stays a `.first()` outside the join (a restriction with two owl:onProperty gives one constraint); the truthiness tests stay (`owl:cardinality 0` must add nothing); has_constraint stays a flag, since replacing it by one condition over eight values is longer and harder to read."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

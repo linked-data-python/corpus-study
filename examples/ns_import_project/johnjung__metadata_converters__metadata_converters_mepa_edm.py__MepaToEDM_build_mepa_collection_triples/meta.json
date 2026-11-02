@@ -56,5 +56,20 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: `now` is inlined into the `rem_graph` call, and `datatype=XSD.dateTime` is dropped. `Literal(datetime)` already gets xsd:dateTime with the same lexical form. `utcnow()` is now evaluated after `agg_graph` and the loop. The driver freezes the clock, so this difference cannot be seen. The loop over (p, o) pairs is already the most compact Python form and stays.",
+    "Exception to the symmetry rule: ldpy replaces the loop over (p, o) pairs with one `+{ }(self.graph)` that has eight `;`-separated predicates. The loop exists only to factor the subject, and the island's `;` does that. In Python, unrolling the loop would make the code longer.",
+    "ldpy: `Literal(datetime.datetime.utcnow())` becomes `f{datetime.datetime.utcnow()}`. The header's `@prefix rdf:` and `@prefix xsd:` are now unused, but the header is kept byte for byte."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "plain literal",
+    "interpolation {expr}",
+    "f{ }"
+  ]
 }

@@ -43,5 +43,15 @@
     "method": "entry:_resolve_rdf_type_uri",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the `ns_map` dict is inlined into its single `.get(prefix)`, and `URIRef(str(ns) + local)` becomes `URIRef(ns + local)` (a Namespace or a str concatenates directly).",
+    "Both sides: the dcat entry is a plain string instead of `URIRef(\"...\")` / `<...>`, because the value is only concatenated and then wrapped again; so the dict line is identical on both sides and the notation gets no credit for that IRI.",
+    "ldpy: only `URIRef(ns + local)` -> `f<{ns}{local}>` (no `@base` in scope, no encoding on either side). Both `return None` guards are kept on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "f<…>"
+  ]
 }

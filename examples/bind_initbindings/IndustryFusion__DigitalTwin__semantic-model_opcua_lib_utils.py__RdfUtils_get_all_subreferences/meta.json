@@ -63,5 +63,18 @@
       "select ?target ?reference (déjà tué)"
     ],
     "remaining": "Le graphe réel du dépôt est Graph(store='Oxigraph') (owl2instances.py:732 ; requirements.txt : rdflib==6.3.2, oxrdflib==0.3.7). s{ }(graph) passe à graph.query un Query déjà préparé, qu'oxrdflib refuse (NotImplementedError, store.py:145) : rdflib évalue alors la requête avec son propre moteur au-dessus du store Oxigraph, là où l'original la confie au moteur d'Oxigraph. Mêmes lignes sur une sonde (losange, chaîne, littéral, nœud blanc), mais le moteur change sur un appel que le dépôt juge déjà coûteux (owlbuilder.py:173-180). Dans le venv de l'étude (oxrdflib 0.5.11), c'est l'original qui lève sur ce store (RuntimeError : ?superclass absent de la projection, les substitutions d'Oxigraph refusant une variable non projetée), pas la traduction ; le pilote n'a donc pas d'appel sur Oxigraph. À juger : cet écart de moteur sur store tiers compte-t-il contre la paire ou contre le langage (fiche sur s{ } et les stores qui exécutent eux-mêmes leurs requêtes) ?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `if len(result) > 0: results = list(result)` with `results = []` is just `list(result)`; result, results and bindings inlined into one `return list(graph.query(..., initBindings={...}))`; the dead `initNs={'opcua': self.opcuans}` dropped (the query text never uses opcua:, and translated.ldpy could not carry it either -- leaving it in Python would credit dead code to the notation).",
+    "optimized.ldpy: the query becomes `m{ {node} ?reference ?target . ?reference {rdfs:subPropertyOf * \"*\"} {reference} }(graph)`: a BGP whose second predicate is an rdflib path (ZeroOrMore) interpolated in predicate position, evaluated since 0.7.1+; translated.ldpy kept s{ } only for lack of this. The driver's deep-hierarchy call (chains, diamond, reflexive, cycle) passes; the mutant `\"?\"` for `\"*\"` fails it.",
+    "Token ratio notation > 1: the Python query is one string token, the island spells its patterns out. Symmetry otherwise line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "m{ }(g)",
+    "property path {expr} in predicate position",
+    "interpolation {expr}"
+  ]
 }

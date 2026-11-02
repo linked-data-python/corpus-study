@@ -70,5 +70,21 @@
     "method": "fixture:fixture.ttl entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the `profiles`, `cbd`, `prof_resource_descriptors` and `config_graph` intermediates are removed, `__iadd__` is written `+=`, the three single-value reads and the two `fetch(...)` calls are no longer wrapped, and each `Graph().parse(...)` + `load_owl_imports(...)` pair is one expression. The config graph is fetched by `self.get_graph(...)` just before it is parsed into, after `fetch` rather than before it (get_graph has no effect the region can observe).",
+    "optimized.py: `new_graph.value(None, RDF.type, PROF.Profile)` as a truth value becomes `(None, RDF.type, PROF.Profile) in new_graph`. optimized.ldpy: `m{ ?profile a prof:Profile }(graph)`, `@graph profile_graph` inside the profile loop for the four reads of profile_graph, `m{ [] prof:hasResource ?descriptor }` (the subject wildcard as a non-projected blank node, so the loop yields bare terms), three `.first()`, and `m{ [] a prof:Profile }(new_graph)` for the existence test.",
+    "Not compressed: the two branches each keep their own `logger.debug` and `fetch` (hoisting the fetch would test `role == LODE.config` twice and move the config-graph parse after `load_owl_imports`, whose real implementation is outside the region); the three `.first()` reads are not joined, since a descriptor without prof:hasRole must still be processed. The demo() harness is copied as is. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

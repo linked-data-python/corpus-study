@@ -78,5 +78,19 @@
       "preserve_existing inversé"
     ],
     "remaining": "Deux mutants restent verts et sont équivalents : l'objet du retrait élargi (`-{ {s} {p} ?q }` : au retrait, result.graph ne tient pour (s, p) que des valeurs que la boucle retire de toute façon) et `ev != o` forcé à True (le test `not in result.graph` a déjà exclu ev == o). Les identifiants de nœuds vides dans les messages de conflit ne sont pas exercés."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the two prefix-copy loops become one loop over `[*existing.namespaces(), *new_graph.namespaces()]`. The four branches of the first loop that all add and count are merged into one `else`. `set(new_graph.objects(s, p))` + `if new_values` becomes `(s, p, None) in new_graph` (`any()` would be wrong on falsy literals).",
+    "Python: conflicts are appended to `result.conflicts` directly (the dataclass initialises it to []). The `if ev != o` test is removed: it is always true there, because `(s, p, o) not in result.graph` was just checked. The driver already lists this as an equivalent mutant.",
+    "ldpy: `@graph result.graph` and islands at the same places: `m{ {s} {p} ?nv }(new_graph)` for the membership, `not m{ {s} {p} {o} }`, `list(m{ {s} {p} ?ev })`, `-{ {s} {p} {ev} }`, `+{ }`. `set(new_graph.subjects())` stays rdflib. There is no restructuring that only ldpy has."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "call suffix (g)",
+    "variable"
+  ]
 }

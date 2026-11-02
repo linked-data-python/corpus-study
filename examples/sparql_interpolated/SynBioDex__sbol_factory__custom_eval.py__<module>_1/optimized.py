@@ -1,0 +1,81 @@
+# Extracted from SynBioDex/sbol_factory@5d01ec7f4c : custom_eval.py
+# region: <module> (lines 1-63, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+#
+# Context restored (see meta.json): the real region's RDF logic lives inside
+# `if __name__ == "__main__":` (source lines 51-63). run_pair executes this
+# module with `__name__` set to "__original__"/"__translated__" (never
+# "__main__"), so under the guard as extracted, none of it would run and
+# both sides would compare two identical empty module namespaces -- a
+# hollow green demonstrating nothing. The guard line is dropped and the
+# body unindented one level, identically on both sides, so the region
+# actually executes; no other change (see driver.py, and the precedent for
+# this exact restoration: sparql_literal's owl2instances.py__<module>_855).
+#
+# `g.load(...)` -> `g.parse(...)`: `Graph.load` was a deprecated alias for
+# `Graph.parse`, removed in the rdflib version this study is pinned to
+# (7.2.1) -- same rename on both sides, no RDF meaning changed.
+#
+# foaf.n3 (see foaf.n3 in this directory): loaded via a plain relative path
+# by the original script, never committed to this repository -- restored
+# verbatim from the canonical dataset this exact example was written
+# against (see foaf.n3's own header).
+"""
+This example shows how a custom evaluation function can be added to
+handle certain SPARQL Algebra elements.
+
+A custom function is added that adds ``rdfs:subClassOf`` "inference" when
+asking for ``rdf:type`` triples.
+
+Here the custom eval function is added manually, normally you would use
+setuptools and entry_points to do it:
+i.e. in your setup.py::
+
+    entry_points = {
+        'rdf.plugins.sparqleval': [
+            'myfunc =     mypackage:MyFunction',
+            ],
+    }
+"""
+
+import rdflib
+
+from rdflib.plugins.sparql.evaluate import evalBGP
+from rdflib.namespace import FOAF
+
+inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
+
+
+def customEval(ctx, part):
+    """
+    Rewrite triple patterns to get super-classes
+    """
+
+    if part.name == "BGP":
+
+        # rewrite triples
+        triples = []
+        for s, p, o in part.triples:
+            if p == rdflib.RDF.type:
+                bnode = rdflib.BNode()
+                triples += [(s, p, bnode), (bnode, inferredSubClass, o)]
+            else:
+                triples.append((s, p, o))
+
+        # delegate to normal evalBGP
+        return evalBGP(ctx, triples)
+
+    raise NotImplementedError()
+
+
+# add function directly, normally we would use setuptools and entry_points
+rdflib.plugins.sparql.CUSTOM_EVALS["exampleEval"] = customEval
+
+g = rdflib.Graph().parse("foaf.n3")
+
+# Add the subClassStmt so that we can query for it!
+g.add((FOAF.Person, rdflib.RDFS.subClassOf, FOAF.Agent))
+
+# Find all FOAF Agents
+for x in g.query("SELECT * WHERE { ?s a foaf:Agent . }"):
+    print(x)

@@ -51,5 +51,22 @@
     "method": "fixture:fixture.ttl entry:add_map_to_attribute",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the six self.bindingsg.add((...)) become one `self.bindingsg += [six triples]` (Graph.__iadd__ is typed Iterable[triple] in rdflib 7.2.1); Namespace subscripts self.basens['x'] / RDF['type'] become attribute access self.basens.x / RDF.type. Kept: the five reads one per line (the ns -> nsuri chain is not fused: the original takes the FIRST namespace and raises if it has no hasUri), the default XSD.anyType, the StopIteration of the four reads without default, randname/mapiri, the docstring.",
+    "optimized.ldpy is optimized.py with `@graph g` and the five reads as m{ } (`.first(default=xsd:anyType)` for the defaulted one, `next(iter(m{ ... }))` for the four that must raise), and the list of triples as one `+{ {mapiri} a ... ; ... . {attribute_iri} ... }(self.bindingsg)`; the call suffix avoids a second designation.",
+    "No exception to symmetry: the grouping of the writes was carried back into Python as `+=`. What the notation still gains is `;` over the shared subject; what it loses is `next(iter(...))` around four reads."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

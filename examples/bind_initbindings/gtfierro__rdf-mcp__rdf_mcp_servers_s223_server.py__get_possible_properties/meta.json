@@ -70,5 +70,20 @@
       "UNION supprimé"
     ],
     "remaining": "L'accord avec le vrai 223P a été vérifié avec RDFEVAL_LIVE_223P=1 le 2026-10-30 (réseau joignable) mais n'est pas rejoué par check, qui utilise le fixture ontology_fixture.ttl : la question du trieur (la paire doit-elle rester `final` ?) n'a plus lieu d'être pour la dépendance réseau."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the deduplication `list(...bindings)` -> `set([...])` -> `list(paths)` becomes SELECT DISTINCT and one list comprehension `[row.path for row in ontology.query(...)]` over the result rows (no Variable lookup); the query string is passed inline; the three PREFIX lines the query never uses (owl, s223, rdf) are dropped, `PREFIX rdfs:` stays (sh: still comes from the graph's default bindings, as in the original).",
+    "optimized.ldpy, from optimized.py: the same comprehension over `s{ SELECT DISTINCT ... }(ontology)`, the bound value `{S223[term]}` interpolated at ?from's single (non-projected) occurrence, the prologue inherited from the header's @prefix lines. Iterating the lazy query yields rdflib ResultRows, so `.execute().bindings` of translated.ldpy is no longer needed.",
+    "m{ } cannot replace s{ }: the query uses the path `rdfs:subClassOf*`, a UNION, a BIND and a FILTER. Symmetry: the two files differ only in the query call.",
+    "The notation ratio is above 1 because the token count sees the Python query as one string token and the island's SPARQL as tokens; the RDF lines are otherwise the same length."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

@@ -60,5 +60,18 @@
       "@graph self._graph -> @graph Graph()"
     ],
     "remaining": "Mutant équivalent, non compté : if mapping_refs: -> if mapping_refs is not None: (une liste vide ne fait aucun tour de boucle). La correction repose sur le préfixe vide `:` qui recoupe la liaison du dépôt ; le suffixe d'appel (self._graph) sans @graph serait l'autre forme correcte : à Maxime de dire laquelle il préfère pour la strate add_isolated."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing worth compressing -- `if mapping_refs: for ref_id in mapping_refs:` becomes `for ref_id in mapping_refs or []:` (one line less, same token count). The four self._add_literal calls stay: inlining the helper (xsd:string literals) would bypass a method of the class, and a pair table would save a handful of tokens at the cost of clarity.",
+    "optimized.ldpy, from optimized.py: identical to translated.ldpy with the same loop change (`@prefix : f<{self._ns}> .`, `@graph self._graph`, two +{ }). The _add_literal arguments keep self._ns.entityCode etc.: the empty prefix cannot be written in a Python expression, and a second, named prefix for the same namespace would replace the default-namespace binding the driver checks.",
+    "No exception to the symmetry rule: the whole gain is the notation's (care 1.0, notation 0.88)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

@@ -72,5 +72,18 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five rdf:type adds, one per branch, become one assignment of owl_type per branch and a single `if owl_type: target.add((uri, RDF.type, owl_type))` after the chain (owl_type starts at None, so a PROPERTY without a known propertyType still adds nothing, and the ValueError branch still adds nothing). A dict keyed by PropertyTypeEnum was rejected: in oaklib the members are linkml PermissibleValue objects, whose hashing is not that of the == the original uses.",
+    "optimized.ldpy, from optimized.py: the OWL classes in the assignments are prefixed names (owl:Class ...), the two adds are `+{ {uri} a {owl_type} }` and `+{ {uri} rdfs:label {source.lbl} }` on `@graph target`.",
+    "No exception to the symmetry rule. The rereading takes most of what the translation gained (translated.ldpy 204 tokens, optimized.py 218, optimized.ldpy 202): once the class is a variable, the island writes `{owl_type}` instead of five literal owl: classes."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

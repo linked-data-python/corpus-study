@@ -71,5 +71,21 @@
       "@prefix rs: au lieu de rdfs: -- tué par la seule vérification des liaisons"
     ],
     "remaining": "Le shim invente l'espace https://altunelyusuf.github.io/SemanticTechnologies/07-tooling# pour les sujets de replay(), absent du dépôt (les vrais appels passent SP.*) ; le pilote couvre désormais les vrais sujets à part, mais le shim reste à juger (shim-invents-logic)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the four one-line `if x is not None: g.remove(...); g.add(...)` become one loop over (predicate, value) pairs. Each `is not None` guard is kept. remove + add becomes `g.set((iri, predicate, Literal(value, lang=\"en\")))`.",
+    "ldpy: the same loop. `set` has no island, so it is written as `-{ {iri} {predicate} ?old }` + `+{ {iri} {predicate} {value}@en }`. This is one token more than `g.set((iri, predicate, f\"{value}\"@en))`, and it was chosen as the most specific construction.",
+    "The whole-file notation ratio (>1) comes from the fixed header: the seven `@prefix` lines and `@graph g` of translated.ldpy. On the region lines alone, the tokens are original 194, optimized.py 90, optimized.ldpy 78 (notation 0.87)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "prefixed name",
+    "language literal",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

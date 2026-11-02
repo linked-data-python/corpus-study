@@ -59,5 +59,18 @@
     "method": "entry:query_find_platforms",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the query string is passed inline to g.query (the `query` variable goes, the print moves before the call, which keeps the printed order since the query runs after the print in both versions), and the full IRI <https://w3id.org/agri-image/platformName> becomes agimage:platformName under the PREFIX the query already declares.",
+    "optimized.ldpy, from optimized.py: the same, with s{ }(g) in place of g.query and the PREFIX line in the header's @prefix (inherited prologue).",
+    "Not compressed: the print loop (printing a joined string would print an empty line on the zero-solution call) and the returned rdflib Result (the interface returns it; m{ } would return tuples without .platformName, so s{ } stays). Symmetry: the two files differ only in the query call."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ]
 }

@@ -47,5 +47,21 @@
     "method": "entry:_bnode_value",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph.add` returns the graph, so creating it and adding the triple become one line; the query is unchanged.",
+    "optimized.ldpy: the graph is a `g{ }` literal with `f<{EX_A}> f<{EX_P}>` (no @base in scope, so `f<{x}>` is `URIRef(x)`) and `{BNode(\"b1\")}` kept, its label being what the returned row shows; the f-string query becomes `s{ }` with the same `f<…>` terms as initial bindings instead of pasted text.",
+    "`.execute()` keeps the returned value an rdflib Result, as `g.query` returned: without it the function returns the lazy PreparedQuery, which has no `.vars`; the driver, which materialises the rows, does not see that difference.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "g{ }",
+    "f<…>",
+    "interpolation {expr}",
+    "s{ }",
+    "variable",
+    "call suffix (g)",
+    ".execute()"
+  ]
 }

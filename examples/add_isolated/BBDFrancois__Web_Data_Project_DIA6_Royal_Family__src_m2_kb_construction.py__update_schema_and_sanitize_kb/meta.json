@@ -56,22 +56,19 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "STATUS DRAFT, reason: this region's custom driver.py hard-codes original.py vs translated.ldpy (it calls _exec_ldpy on translated.ldpy and never reads RDFEVAL_SIDES), so `rdfeval check` returns FAIL ('driver compared None') for optimized.py and optimized.ldpy although the translated pair is OK. The driver was not modified. Equivalence of both optimized artefacts was proved separately with a scratch copy of the driver (same fixtures, same graph-isomorphism comparison of the 3 output files and of stdout) with only the right-hand file swapped: equivalent=true for both; a deliberate mutation (rdfs:domain -> rdfs:seeAlso in optimized.ldpy) turned it false (ontology_expanded not isomorphic), so the fixture is not hollow. The driver needs a RDFEVAL_SIDES-aware right-hand side (rdfeval.harness.sides_from_env) to turn this to final.",
-    "optimized.py: `kb = Graph().parse(...)` replaces the Graph();parse pairs and the ';' one-liners are split; the noisy-triple filter drops the str() calls and the line-continuation backslash (startswith takes a tuple of namespaces, reusing DBO/DBP/DBR); `align.triples((None, P, None))` becomes align.subject_objects(P); `set(kb.subjects()) | set(kb.objects())` becomes kb.all_nodes(); prop_name is inlined; URIRef(p_str) and URIRef(node_str) become p and node (already URIRefs, so the same term); the unused imports (RDF is kept, XSD and the duplicate import dropped) and the `: dict` annotation are removed.",
-    "optimized.ldpy, from optimized.py: Namespace objects become `@prefix ... as NAME .` (PRIV, DBO, DBR, DBP, OWL, still available for bind()/startswith); PRIV[x] becomes priv:{x}; align.subject_objects(P) becomes m{ ?s P ?o }(align); each onto.add/align.add becomes +{ }(graph) with the call suffix, so the @graph onto / @graph align switches of translated.ldpy disappear; only clean_kb needs a @graph declaration.",
-    "Exception to symmetry, island only: the rdf:type and rdfs:domain triples on the same priv_prop merge into one +{ ; } (Python has no shared-subject add). The conditional rdfs:range triple stays a separate +{ } because ';' cannot include a pair conditionally.",
-    "Not compressed: the noisy-triple removal still collects then calls kb.remove(t) (t is data, -{ } cannot take it); the translation_map is not merged with aligned_* (the maps differ when an aligned entity is absent from the KB); onto.bind/align.bind calls kept so the serialised prefixes are unchanged.",
-    "2026-10-27: passed to final after the harness's _exec_python/_exec_ldpy learned to honour RDFEVAL_SIDES; `rdfeval check` then gave three OK with the unmodified driver.",
-    "2026-10-27 (orchestrator): extracted header restored mechanically per the header rule of AGENT_OPTIMIZE.md -- optimized.py takes original.py's header, optimized.ldpy translated.ldpy's, plus only the imported names the compressed region genuinely needs; `rdfeval check` re-run, three OK. Ratios recorded by the optimizing agent above predate this and are superseded."
+    "optimized.py: `Graph(); g.parse(...)` becomes `Graph().parse(...)` (parse returns the graph); the `;`-joined bind calls are one per line (same calls); the str() around terms in the noise filter is dropped (rdflib terms are str); the removal loop is `kb -= triples_to_remove`; the two `align.triples((None, P, None))` comprehensions use subject_objects(P); the startswith tests use the Namespaces themselves (`p_str.startswith((DBO, DBP))`, `startswith(DBR)`); prop_name is inlined; the rdf:type and rdfs:domain adds of a new property are one `onto += [...]`; URIRef(p_str)/URIRef(node_str) are p/node themselves; the set union is `{*kb.subjects(), *kb.objects()}`; the three new_s/new_p/new_o variables are inlined in the add. The eleven prints, the phase comments and translation_map are kept: replacing translation_map by the two aligned dictionaries would translate terms the original leaves alone.",
+    "optimized.ldpy, from optimized.py: `@graph onto` once after the parses (onto is never reassigned), the align adds with the call suffix (align) instead of re-declaring @graph twice, `@graph as clean_kb` for the rewritten graph; the two subject_objects reads become `m{ ?s owl:equivalentProperty ?o }(align)` and `m{ ?s owl:sameAs ?o }(align)` (m{ } iterates graph.triples in the same order, so the last-wins dict is the same), a little longer than the call with a prefixed name but the most specific construction; the rdf:type/rdfs:domain pair is one +{ } with `;`, the class chosen by `{owl:ObjectProperty if is_obj_prop else owl:DatatypeProperty}`.",
+    "No exception to the symmetry rule. The region is dominated by prints, file I/O and dictionary bookkeeping that neither the rereading nor the notation touches (care 0.90, notation 0.96)."
   ],
   "optimized_constructions": [
     "@prefix",
     "@graph",
     "+{ }",
     "m{ }",
-    "call suffix (g)",
+    "variable",
     "prefixed name",
-    "interpolation {expr}"
+    "interpolation {expr}",
+    "call suffix (g)"
   ],
   "validation_optimized": {
     "optimized.py": {

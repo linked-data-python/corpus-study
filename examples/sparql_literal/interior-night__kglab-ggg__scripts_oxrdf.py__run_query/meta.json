@@ -58,5 +58,12 @@
       "DISTINCT removed"
     ],
     "remaining": "Confirmer que l'appel kglab.KnowledgeGraph de scripts/oxrdf.py:55-57 compte comme atteint (il est dans le __main__ du même fichier) : si oui, la paire est not-expressible et c'est un constat sur le langage (s{ }(g) exige un g.query qui accepte initBindings) ; si non, rétablir la traduction s{ } de git et ne garder que les appels rdflib.Graph du pilote. Et article_candidate (laissé à true) : un cas not-expressible avec son extrait minimal est-il un exemple pour l'article ?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the two `duration` intermediates are inlined into their f-strings, two blank lines removed. Nothing else to compress.",
+    "optimized.ldpy is identical to optimized.py: the query text QUDT_QUERY9 is a header constant, kept byte for byte, so the region has no literal text for s{ } to take; s{ } would also move the measured cost from the 'init' print to the 'exec' print (lazy query).",
+    "Observation for the translation, not acted on here: with ../ldpy at 5b807db, `s{ … }(kg)` and `kg.query(s{ … })` both run on a minimal stand-in with kglab's `query(sparql, *, bindings=None)` signature, where the translation notes report a TypeError."
+  ],
+  "optimized_constructions": []
 }

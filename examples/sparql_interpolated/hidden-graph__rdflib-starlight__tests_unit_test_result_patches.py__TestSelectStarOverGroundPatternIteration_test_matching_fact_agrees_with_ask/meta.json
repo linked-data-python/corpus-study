@@ -55,5 +55,17 @@
       "EX_A remplacé par la chaîne \"<http://example/a>\" (littéral simple au lieu d'une IRI)"
     ],
     "remaining": "Jugement non traité : le retypage de EX_A/EX_B/EX_C (str -> URIRef) modifie des constantes que le dépôt partage avec _graph_with_one_fact ; la paire reste une région de test, qui ne peut pas illustrer l'article."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `g` and `ask` inlined into one `assert _graph_with_one_fact().query(...).askAnswer`; `is True` dropped, askAnswer being a bool.",
+    "optimized.ldpy: the ground ASK becomes `assert m{ {EX_A} {EX_B} {EX_C} }(_graph_with_one_fact())`, the existence test of m{ } (bool of its solutions); EX_A/EX_B/EX_C are IRIs in the translated header.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "IRI",
+    "m{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ]
 }

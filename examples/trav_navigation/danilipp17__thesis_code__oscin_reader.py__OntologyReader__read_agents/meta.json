@@ -56,5 +56,18 @@
       "island replaced by []"
     ],
     "remaining": "Classification (directly-expressible vs minor-restructuring for the two-break loop folded into one join) is Maxime's call. The two-recognised cases show that the fold agrees with the nested loops on the Memory store in both insertion orders, i.e. the equivalence rests on m{ } walking the store in the same nested order as objects(); the repository's populator writes a single recognised pattern, so the case is outside its real inputs."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the `name` temporary is removed -- `reasoning_pattern = _rp_type_map.get(str(rp_type), \"\")` then `if reasoning_pattern: break`, which keeps \"\" until a recognised type is met since every map value is non-empty and reasoning_pattern is \"\" before the loop; the outer selector call is no longer wrapped. Nothing else to compress in Python: the nested loops with their two breaks are the shortest readable form.",
+    "Exception to the symmetry rule, island only: optimized.ldpy merges the two selector loops into one `m{ {agent_uri} agentoscin:employsReasoningPattern [ a ?rp_type ] }(self.g)` and drops the outer `if reasoning_pattern: break`; the nested blank node keeps the pattern individual unprojected, so the loop yields bare types in the nested-loop order of the original.",
+    "Consequences, by design: the module-level loop leftovers `rp_uri` (the context's own value is left untouched) and `name` are no longer rebound; the driver compares reasoning_pattern and stdout on every case. The translator's comment placed before the loop in translated.ldpy is not carried over (no comment added, its claim about `rp_uri` no longer applies); the context lines before it are kept byte for byte."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ]
 }

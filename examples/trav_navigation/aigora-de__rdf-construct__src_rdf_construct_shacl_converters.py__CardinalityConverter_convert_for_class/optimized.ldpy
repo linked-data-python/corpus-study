@@ -1,0 +1,97 @@
+# Extracted from aigora-de/rdf-construct@670e400ea4 : src/rdf_construct/shacl/converters.py
+# region: CardinalityConverter.convert_for_class (lines 309-409, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
+from rdflib.namespace import OWL
+from context_shim import PropertyConstraint  # context shim -- see meta.json
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+
+def convert_for_class(
+    self,
+    cls: URIRef,
+    source_graph: Graph,
+    config: "ShaclConfig",
+) -> list[PropertyConstraint]:
+    """Extract cardinality restrictions from class definition."""
+    constraints: list[PropertyConstraint] = []
+    @graph source_graph
+
+    # Find restrictions that this class is a subclass of
+    for superclass in m{ {cls} rdfs:subClassOf ?superclass . ?superclass a owl:Restriction }:
+        if not isinstance(superclass, BNode):
+            continue
+
+        on_prop = m{ {superclass} owl:onProperty ?v }.first()
+        if not isinstance(on_prop, URIRef):
+            continue
+
+        constraint = PropertyConstraint(path=on_prop)
+        has_constraint = False
+
+        # Exact cardinality
+        exact = m{ {superclass} owl:cardinality ?v }.first()
+        if exact:
+            constraint.min_count = constraint.max_count = int(exact)
+            has_constraint = True
+
+        # Minimum cardinality
+        min_card = m{ {superclass} owl:minCardinality ?v }.first()
+        if min_card:
+            constraint.min_count = int(min_card)
+            has_constraint = True
+
+        # Maximum cardinality
+        max_card = m{ {superclass} owl:maxCardinality ?v }.first()
+        if max_card:
+            constraint.max_count = int(max_card)
+            has_constraint = True
+
+        # Qualified cardinality
+        qual_card = m{ {superclass} owl:qualifiedCardinality ?v }.first()
+        if qual_card:
+            constraint.min_count = constraint.max_count = int(qual_card)
+            on_data = m{ {superclass} owl:onDataRange ?v }.first()
+            if on_data:
+                constraint.datatype = on_data
+            has_constraint = True
+
+        # Qualified min cardinality
+        qual_min = m{ {superclass} owl:minQualifiedCardinality ?v }.first()
+        if qual_min:
+            constraint.min_count = int(qual_min)
+            has_constraint = True
+
+        # Qualified max cardinality
+        qual_max = m{ {superclass} owl:maxQualifiedCardinality ?v }.first()
+        if qual_max:
+            constraint.max_count = int(qual_max)
+            has_constraint = True
+
+        # Also get the qualification
+        on_class = m{ {superclass} owl:onClass ?v }.first()
+        if on_class and (qual_card or qual_min or qual_max):
+            constraint.node_class = on_class
+
+        # someValuesFrom implies at least one value
+        some_from = m{ {superclass} owl:someValuesFrom ?v }.first()
+        if some_from:
+            constraint.min_count = 1
+            has_constraint = True
+
+        # allValuesFrom constrains the type but not cardinality
+        all_from = m{ {superclass} owl:allValuesFrom ?v }.first()
+        for type_from in (some_from, all_from):
+            if type_from and isinstance(type_from, URIRef):
+                # Could be a class or datatype
+                if self._is_datatype(type_from, source_graph):
+                    constraint.datatype = type_from
+                else:
+                    constraint.node_class = type_from
+                has_constraint = True
+
+        if has_constraint:
+            constraints.append(constraint)
+
+    return constraints

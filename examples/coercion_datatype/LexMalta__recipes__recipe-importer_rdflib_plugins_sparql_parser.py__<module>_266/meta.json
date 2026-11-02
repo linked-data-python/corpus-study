@@ -42,5 +42,16 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is one line, `DECIMAL.setParseAction(lambda x: ...)`. optimized.py is original.py and optimized.ldpy is translated.ldpy, byte for byte.",
+    "LD Python keeps `f\"{x[0]}\"^^xsd:decimal`: outside a graph island an interpolated lexical form goes through an f-string.",
+    "The check line's `care` for this region is computed against original.py WITH its demo() harness, while optimized.py is measured without it (rdfeval/check.py sizes() does not apply strip_demo to the original, compare.py does): the ratio it prints is biased low; measured like compare.py, care = 1.0."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "typed literal",
+    "interpolation {expr}"
+  ]
 }

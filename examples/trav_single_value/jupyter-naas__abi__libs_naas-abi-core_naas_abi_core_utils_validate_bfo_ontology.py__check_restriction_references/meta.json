@@ -67,5 +67,20 @@
       "onProperty read and both owner reads -> None"
     ],
     "remaining": "One mutant survives and is equivalent: `m{ ?s a owl:DatatypeProperty }` -> `[]`, since every declared datatype property also satisfies the rdf:type test of `_is_known` (same redundancy in the original). Nothing else to judge from the repair."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three sets declared_classes, declared_properties, declared_data_properties are removed with their membership tests: each holds only subjects of an rdf:type triple (_named_classes and _named_object_properties are subjects of rdf:type owl:Class / owl:ObjectProperty in the same source file, the third set is g.subjects(RDF.type, OWL.DatatypeProperty)), so `(iri, RDF.type, None) in g` already answers for them; _is_known becomes one `str(iri).startswith(_VOCAB_PREFIXES_FOR_RESTRICTIONS) or (iri, RDF.type, None) in g` (the prefixes are already a tuple) and _severity one startswith on tuple(own_namespaces); the owner lookup is hoisted to the top of the loop body with its `if owner is None: continue` (in the original, both continues skip every issue of that restriction, the on_prop one also skipping the filler loop, and owner depends on bnode only); the two duplicated issue dicts become one local helper _issue(owner, iri, reference). Kept: the falsy-owner branches (`if owner else ...`, an empty IRI is a possible owner), the isinstance(URIRef) filters, the _severity docstring.",
+    "optimized.ldpy is optimized.py with `@graph g` and the reads as m{ }: the scan `m{ ?bnode a owl:Restriction }`, the owner `m{ ?owner rdfs:subClassOf {bnode} }.first()`, onProperty and the filler with the predicate interpolated, and bool(m{ {iri} a ?x }) for the membership test.",
+    "No exception to symmetry. Folding the owner lookup into the restriction scan as one multi-pattern m{ } was not done: a restriction with two owners would give two solutions where g.value takes the first (driver call 3)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

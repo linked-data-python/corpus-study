@@ -1,0 +1,29 @@
+# Extracted from LexMalta/recipes@b861b7ccea : recipe-importer/rdflib/plugins/sparql/parser.py
+# region: <module> (lines 266-266, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from pyparsing import (
+    Combine,
+    Forward,
+    Group,
+    Literal,
+    OneOrMore,
+    Optional,
+    ParseResults,
+    Regex,
+    Suppress,
+    ZeroOrMore,
+    delimitedList,
+    restOfLine,
+)
+import rdflib
+DECIMAL = Regex(r"[0-9]*\.[0-9]+")  # (?![eE])
+
+DECIMAL.setParseAction(lambda x: rdflib.Literal(x[0], datatype=rdflib.XSD.decimal))
+
+
+# Demo harness (identical on both sides, see meta.json): the region only
+# DEFINES a pyparsing rule and its parse action -- nothing runs it, so nothing
+# is observable at module scope.  demo() runs the rule on a concrete token and
+# returns the rdflib term the parse action built (or raises the parse error).
+def demo(text):
+    return DECIMAL.parseString(text, parseAll=True)[0]

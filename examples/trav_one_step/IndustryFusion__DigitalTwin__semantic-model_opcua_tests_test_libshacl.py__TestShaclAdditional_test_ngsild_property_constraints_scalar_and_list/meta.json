@@ -74,5 +74,19 @@
       "hasValueList -> hasValue"
     ],
     "remaining": "Les appels qui prouvent l'écart font tourner la région (un test unitaire) contre une bibliothèque Shacl régressée, définie dans driver.py : à confirmer que le comportement d'un test sur une bibliothèque cassée fait partie de ce que la traduction doit préserver (sinon `.first()` était équivalent sur la bibliothèque intacte). Mutant équivalent non compté : `{s}` -> `{shapes2[0]}`, la liste n'a qu'une forme pour les arguments écrits en dur dans la région."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `list(self.sh.shaclg)` in the first assertIn becomes the graph itself (Graph.__contains__ gives the same answer for a triple of concrete terms, and inner is never None since next() raises first); the `if (...) in g: found = True` of the list loop becomes `found |= (...) in g`. Kept: both next() reads with no default (a missing sh:property must raise StopIteration, the driver's regressed libraries check it), the loop over every shape (any() would stop early and skip a raising next()), every assertion and comment.",
+    "optimized.ldpy is optimized.py with the two next(g.objects(s, SH.property)) as `next(iter(m{ {s} sh:property ?prop }(self.sh.shaclg)))` (the only form faithful to next() without a default; .first() and .one() are not) and the namespace terms as prefixed names. The two triple-membership tests stay `(...) in self.sh.shaclg`, as in translated.ldpy: bool(m{ }) would be longer and the assertIn member is a triple handed to an assert method.",
+    "No exception to symmetry. self.sh.shaclg is reassigned twice, so it cannot be designated once with @graph; the notation adds `next(iter(...))` around each read and costs more than it saves."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

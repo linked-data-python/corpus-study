@@ -39,5 +39,16 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region is the final loop only (lines 86-88); the six prepared queries are header and stay byte for byte on both sides.",
+    "Both sides: the two concatenated f-strings of the print become one line. optimized.ldpy keeps `q(curr_graph)`; nothing else to compress.",
+    "The notation ratio (about 5.2) comes entirely from the header: the six queries are one string token each in Python and tokenized SPARQL in the s{ } islands of the translated header. The region lines differ only by `curr_graph.query(q)` against `q(curr_graph)`."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)"
+  ]
 }

@@ -61,5 +61,20 @@
       "if x.creator: -> if x.contributor: (5 vs 5, non isomorphes)"
     ],
     "remaining": "Jugements non traités : classification directly-expressible vs awkward (trois @graph g à ré-écrire après chaque g = g + ...) ; Literal(i.strip()), URIRef(y.legacy_id), URIRef(y.create_uri()) à écrire {i.strip()} et f<{...}> (cosmétique, vérifié équivalent par le triage) ; la note de meta.json dit « plain {i} » alors que le code écrit Literal(...)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three `g = g + ...` unions become in-place `g += ...` (Graph.__iadd__; g is a fresh local graph, so mutating it is safe, and the fixture objects whose graphs are added are never mutated), the first one folded into `g = rdflib.Graph() + scheme.as_graph()`; the intermediate variables concept and collection_graph are inlined; the redundant guards `if obj.collection.all():` and `if x.has_members.all():` are dropped (a loop over an empty queryset does nothing); the creator/contributor blocks become one loop over the pairs (DC.creator, x.creator), (DC.contributor, x.contributor), each guard `if names:` kept (''.split(';') would yield ['']); the legacy_id if/else becomes `URIRef(y.legacy_id or y.create_uri())`, the same truth test.",
+    "optimized.ldpy, from optimized.py: the in-place `g +=` keeps one graph object, so a single designation suffices where translated.ldpy needed `@graph g` re-declared after each reassignment; `g = rdflib.Graph()` + designation is `@graph as g`; the five g.add become +{ }, URIRef(x) becomes f<{x}>, Literal(i.strip()) a bare {i.strip()} (a str, so the same plain literal), DC.creator/DC.contributor in the pair table become dc:creator/dc:contributor.",
+    "No exception to the symmetry rule: outside the RDF lines (graph creation and designation, the adds, the namespace terms of the pair table) the two files are identical line for line.",
+    "The predicate of the creator/contributor island is interpolated ({predicate}) because the pair table, a pure-Python restructuring carried in both files, makes it a value."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

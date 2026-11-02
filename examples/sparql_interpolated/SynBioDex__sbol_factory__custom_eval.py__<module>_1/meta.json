@@ -70,5 +70,21 @@
       "(g) -> (Graph())"
     ],
     "remaining": "Jugement non traité : wrong-construction (`{rdflib.RDFS.subClassOf}` interpolé là où `rdfs:subClassOf` avec @prefix rdfs: serait plus spécifique) et article-example (pas d'interpolation de terme dans s{ })."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region starts at line 1 of the source, so the header is the provenance comments only; the module docstring and the imports belong to the region.",
+    "Both sides: `for t in part.triples` unpacks to `s, p, o` and the two appends become one `triples += [...]`; `g = rdflib.Graph().parse(\"foaf.n3\")` (parse returns the graph). The `if part.name == \"BGP\"` / `raise` order is kept: inverting it saves nothing.",
+    "optimized.py drops the `PREFIX foaf: <%s>` % FOAF templating: an rdflib Graph binds foaf: by default (and foaf.n3 declares it), and `g.query` without initNs falls back to the graph's bindings.",
+    "optimized.ldpy: `from rdflib.namespace import foaf:, rdf:, rdfs:` replaces `import FOAF` and turns the three rdflib constants into prefixed names (`rdfs:subClassOf * \"*\"`, `p == rdf:type`, the triple); the add is `+{ foaf:Person rdfs:subClassOf foaf:Agent }(g)`; the query stays `s{ }`, since m{ } would bypass the registered CUSTOM_EVALS (the subclass inference the script demonstrates) and print bare terms instead of rows.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name",
+    "+{ }",
+    "s{ }",
+    "variable",
+    "call suffix (g)"
+  ]
 }

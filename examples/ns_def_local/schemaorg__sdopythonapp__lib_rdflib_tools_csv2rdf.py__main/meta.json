@@ -17,7 +17,7 @@
   "classification": "awkward",
   "constructions": [
     "@prefix",
-    "f<…>"
+    "f<\u2026>"
   ],
   "translation_notes": [
     "The six `rdflib.Namespace(x)` sites (config `base`/`propbase`, -b/-p, --base/--propbase) only STORE the Namespace on the converter (`csv2rdf.BASE = rdflib.Namespace(opts['-b'])`): main() never writes a prefixed name, the namespace is dereferenced later, in CSV2RDF.convert(). The only construction that yields a Namespace OBJECT is `@prefix base: f<{expr}> as BASE .` (computed IRI, `as`), followed by `csv2rdf.BASE = BASE`: one line becomes two, with a declared prefix nobody uses. Hence awkward, not directly-expressible: the construction exists but is heavier than `rdflib.Namespace(x)`.",
@@ -43,5 +43,14 @@
     "method": "entry:main",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the nine short/long option pairs and the matching branches of the configuration-file loop are driven by one table `converters` (long name -> short option, conversion), in the original order of evaluation; the attribute is `name.upper()` (OUT, BASE, DELIM, DEFAULT, PROPBASE, LABEL, IDENT, SKIP, CLASS). The `--col`/`--prop` loop is kept apart: merging it into the table would turn the original's ValueError on `--propbase` (int(\"base\")) into an assignment.",
+    "LD Python: the table holds `rdflib.Namespace` and `rdflib.URIRef` as callables, which no island can replace, so the six Namespace sites and three of the five URIRef sites disappear into the table on both sides; only the two `rdflib.URIRef(v)` of the `prop` branches become `f<{v}>` (no @base in scope). No exception to the symmetry rule.",
+    "`eval`, passed through the table, still runs in main()'s frame, as in the original."
+  ],
+  "optimized_constructions": [
+    "f<\u2026>"
+  ]
 }

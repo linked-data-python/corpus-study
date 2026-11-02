@@ -1,0 +1,64 @@
+# Extracted from dice-group/COVID19DS@7842845de5 : acaps-covid19-government-measures/toRdf.py
+# region: <module> (lines 64-135, stratum remove)
+# licence of the source repository: see meta.json
+import urllib.parse
+import urllib
+import re
+from context_shim import pd, xls   # context shim -- see meta.json
+@prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .   #(for Object)
+@prefix cvdr: <https://covid-19ds.data.dice-research.org/resource/> .   #(for Subject/Resource)
+@prefix dbpediaowl: <http://dbpedia.org/ontology/> .
+@prefix dcmi: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dowl: <http://dbpedia.org/ontology/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@graph as g
+csv_data = pd.read_excel(xls, 'Dataset').fillna("unknown")
+
+for index, row in csv_data.iterrows():
+     dice = str(row['ID'])+'_GovMeasure'
+     print(dice)
+     iso = row["ISO"]
+     row['LINK'] = row['LINK'].strip()
+     if " " in row['LINK']:
+          row['LINK']=urllib.parse.quote_plus(row['LINK'])
+
+     +{
+        cvdr:{iso} a cvdo:Iso ;
+            dowl:isoCodeRegion {iso}^^xsd:string .
+        # cvdr:{str(row["ID"])} cvdo:hasISO {row["ISO"]}^^xsd:string .
+        #cvdr:ISO a lgdo:Feature .
+        cvdr:{row["COUNTRY"]} rdfs:label {row["COUNTRY"]}@en ;
+            a dbpediaowl:Country .
+        cvdr:{dice} cvdo:hasISO3 cvdr:{iso} ;
+            a cvdo:Covid19Measure ;
+            cvdo:hasCountry cvdr:{row["COUNTRY"]} ;
+            cvdo:hasPCODE {row['PCODE']}^^xsd:integer ;
+            dcmi:date {row['DATE_IMPLEMENTED']}^^xsd:date ;
+            cvdo:hasSource {row['SOURCE']}@en ;
+            cvdo:hasSourceLink f<{row['LINK']}> ;
+            cvdo:entryDate {row['ENTRY_DATE']}^^xsd:date ;
+            prov:hadPrimarySource cvdr:GovMeasuresCovidDataset .
+        # the provenance
+        cvdr:GovMeasuresCovidDataset a prov:Entity ;
+            prov:generatedAtTime "2021-02-22T02:52:02Z"^^xsd:dateTime ;
+            prov:wasDerivedFrom "https://data.humdata.org/dataset/acaps-covid19-government-measures-dataset"^^xsd:string
+     }
+
+     for p, column in ((cvdo:hasRegion, 'REGION'), (cvdo:hasAdminLevelName, 'ADMIN_LEVEL_NAME'),
+                       (cvdo:hasLogType, 'LOG_TYPE'), (dbpediaowl:category, 'CATEGORY'),
+                       (cvdo:hasMeasure, 'MEASURE'), (cvdo:targetedPopGroup, 'TARGETED_POP_GROUP'),
+                       (rdfs:comment, 'COMMENTS'), (cvdo:nonCompliance, 'NON_COMPLIANCE'),
+                       (cvdo:publisher, 'SOURCE_TYPE')):
+          +{ cvdr:{dice} {p} {row[column]}^^xsd:string }
+
+     # row['Alternative source']=urllib.parse.quote_plus(row['Alternative source'])
+     for a in re.split(';| \+| AND| and', row['Alternative source']):
+          # if a != 'and' and a != 'AND' and a != '':
+          +{ cvdr:{dice} cvdo:alternativeSource f<{a.strip().replace(" ", "")}> }
+
+     # Remove the triples that I marked as "unknown"
+     -{ ?s ?p <unknown> }
+     for datatype in (xsd:string, xsd:integer, xsd:date):
+          -{ ?s ?p "unknown"^^{datatype} }

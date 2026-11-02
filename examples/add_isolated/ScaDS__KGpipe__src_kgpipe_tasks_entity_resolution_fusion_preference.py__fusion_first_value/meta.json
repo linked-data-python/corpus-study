@@ -68,5 +68,20 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the TrackRecord built twice is built once (`record = ...`) before the existence test, the discarded case `continue`s, and the add plus the current_subjects update, duplicated in the fusable and non-fusable branches, are written once after an `elif (s_can, p_can, o_can) in seed_graph: continue`; str(o_can).startswith is o_can.startswith (rdflib terms are str). Comments are kept, moved with their code. `record` is a new module-level name (the region is module-level code, like its loop variables); the driver's comparison of module globals and of selected/discarded passes.",
+    "optimized.ldpy, from optimized.py: the add is `+{ {s_can} {p_can} {o_can} }`, RDF.type is rdf:type, and the two reads become islands: `any(m{ {s_can} {p_can} ?o })` (any() over bare terms, so a falsy object such as 0 or \"\" is still not counted, as in the original's any(seed_graph.objects(...)) -- bool(m{ }) would change that) and `elif m{ {s_can} {p_can} {o_can} }:` for the `in` test.",
+    "No exception to the symmetry rule. The notation saves nothing here (notation 1.0): the two @prefix/@graph lines of the extracted header cost what the islands save."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

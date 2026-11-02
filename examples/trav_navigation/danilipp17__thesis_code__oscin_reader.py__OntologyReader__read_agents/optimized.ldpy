@@ -1,0 +1,57 @@
+# Extracted from danilipp17/thesis_code@c2772e3555 : oscin/reader.py
+# region: OntologyReader._read_agents (lines 257-266, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, XSD
+from shim_namespaces import (
+    AGENTO,
+    AGENTOSCIN,
+    CALLS_CREW,
+    COORD_CUSTOM,
+    COORD_SEQUENTIAL,
+    HAS_DESCRIPTION,
+    HAS_TITLE,
+)
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix agento: <http://www.w3id.org/agentic-ai/onto#> .
+@prefix agentoscin: <http://www.semanticweb.org/danilippmann/ontologies/2026/3/agentoscin/> .
+
+# Context restored (meta.json): self.g is the instance graph, agent_uri and
+# _rp_type_map are set up by the enclosing method before this statement.
+# Populator writes exactly one employsReasoningPattern triple per agent, but
+# the rp individual can carry more than one rdf:type (its own class plus
+# owl:NamedIndividual, superclasses, ...), which is why the join below scans
+# several types and stops at the first one the map recognises.
+
+
+class _Self:
+    def __init__(self, g):
+        self.g = g
+
+
+g = Graph()
+agent_uri = URIRef("http://example.org/agent/1")
+rp_uri = URIRef("http://example.org/rp/1")
+g.add((agent_uri, agentoscin:employsReasoningPattern, rp_uri))
+g.add((rp_uri, rdf:type, owl:NamedIndividual))
+g.add((rp_uri, rdf:type, agentoscin:ReAct))
+
+self = _Self(g)
+_rp_type_map = {
+    str(agentoscin:ReAct): "ReAct",
+    str(agentoscin:ChainOfThought): "ChainOfThought",
+    str(agentoscin:ReflectionLoop): "ReflectionLoop",
+    str(agentoscin:TreeOfThoughts): "TreeOfThoughts",
+}
+reasoning_pattern = ""
+
+for rp_type in m{ {agent_uri} agentoscin:employsReasoningPattern [ a ?rp_type ] }(self.g):
+    reasoning_pattern = _rp_type_map.get(str(rp_type), "")
+    if reasoning_pattern:
+        break
+
+print(reasoning_pattern)

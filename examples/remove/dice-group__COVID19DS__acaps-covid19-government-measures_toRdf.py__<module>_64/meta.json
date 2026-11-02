@@ -83,5 +83,25 @@
       "xsd:integer -> xsd:decimal (126 vs 127)"
     ],
     "remaining": "Le mutant `-{ ?s ?p \"unknown\" }` (littéral simple) reste vert, équivalent : le programme n'écrit aucun littéral sans datatype ni langue. 'IRI' (le `<unknown>` du premier -{ }) est déclaré et employé, mais le détecteur de rdfeval.constructions ne reconnaît que les IRI avec schéma et le signale comme non employé."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: `fillna` is chained on `read_excel`. The `URIRef(cvdr[...])` wrappers are dropped, because the value is already a URIRef. `str(row[\"COUNTRY\"])` becomes `row[\"COUNTRY\"]`, because `cvdr[row[\"COUNTRY\"]]` already requires a str. `Literal(row[\"ISO\"])` reuses `iso`. The dead `altSources = None` and the unreachable `else` branch of `if altSources:` are removed (re.split never returns an empty list). The LINK normalisation moves before the adds, because it only feeds hasSourceLink.",
+    "Python: the nine `cvdr[dice]` adds of non-xsd:string objects go into one (p, o) table loop. The nine xsd:string columns go into one (predicate, column) table loop. The three typed \"unknown\" removes go into one loop over datatypes. The string-column table and the datatype loop are kept on both sides (`+{ cvdr:{dice} {p} {row[column]}^^xsd:string }`, `-{ ?s ?p \"unknown\"^^{datatype} }`).",
+    "Exception to the symmetry rule: ldpy writes the ISO, country, measure (p, o) table and provenance adds as ONE `+{ }` with four subjects. The Python (p, o) loop only factored the subject, and only an island lets a run of adds on several subjects be one statement.",
+    "The `remove((None, None, URIRef(\"unknown\")))` stays separate from the typed ones (`-{ ?s ?p <unknown> }`): a single `-{ }` would join."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "f<…>",
+    "prefixed name",
+    "IRI",
+    "variable",
+    "typed literal",
+    "language literal",
+    "interpolation {expr}"
+  ]
 }

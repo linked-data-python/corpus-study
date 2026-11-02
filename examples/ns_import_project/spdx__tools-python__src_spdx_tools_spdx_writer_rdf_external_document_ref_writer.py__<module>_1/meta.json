@@ -47,5 +47,19 @@
     "method": "entry:add_external_document_ref_to_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: there is nothing to compress (care 1.0). The only change is that the `doc_node` add moves before `add_checksum_to_graph`. The graph is a set, so the order does not matter, and this lets the two sides stay line for line.",
+    "Exception to the symmetry rule: ldpy merges the three adds, on two subjects, into ONE `+{ }` (`;` for the shared subject, `.` for the second subject). Only an island lets two subjects share one statement. With a single island, the `(graph)` call suffix is shorter than an `@graph graph` declaration.",
+    "`URIRef(f\"...\")` and `URIRef(document_uri)` become `f<...>`, because no `@base` is in scope. The imports (part of this module region) stay as in original.py and translated.ldpy."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}"
+  ]
 }

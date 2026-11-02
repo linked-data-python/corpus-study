@@ -75,5 +75,21 @@
       ".first() -> last value"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the seven next(graph.objects(s, p), None) become graph.value(s, p); assessed/statuses are inlined into `found`; `total` is inlined into the success message; one failures.append is joined onto one line. Kept: the two parse loops apart (section 1 reads the module graph before the instances are parsed), every guard, counter, comment, and the stderr report. The demo() harness is copied as is.",
+    "optimized.ldpy is optimized.py with `@graph graph`, the reads as m{ } (`.first()` for graph.value, `a` for rdf:type), and `len(set(...))` as `.count()`: a single pattern over a Graph yields distinct solutions, so the count equals the size of the set.",
+    "No exception to symmetry: `.count()` replaces the set and len of the same read, it does not restructure the code."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    ".count()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

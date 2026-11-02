@@ -48,5 +48,16 @@
     "method": "fixture:fixture.ttl entry:change_urls_in_result",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three copy-pasted blocks (one per position) become one generator that rewrites each term of the triple containing the remote location, then one remove/add when the rewritten triple differs. The original's intermediate add-then-remove of a half-rewritten triple is not reproduced: such a triple still contains the remote location, so it is itself rewritten by its own iteration (graph.triples((None, None, None)) iterates a snapshot), and the final graph is the same; the only divergence would need a local location that itself contains the remote one.",
+    "optimized.ldpy, from optimized.py: only the walk is an island, `m{ ?s ?p ?o }(graph)` in place of graph.triples((None, None, None)). The remove and add take the triple as a Python tuple, which no island accepts: `-{ }`/`+{ }` would need the three terms unpacked and re-interpolated, longer than graph.remove(triple)/graph.add(new_triple), so the two calls are kept (reported, as for a pattern received as data).",
+    "No exception to the symmetry rule. Almost all the gain is the rereading (care 0.44); the notation saves only the wildcard pattern."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "variable",
+    "call suffix (g)"
+  ]
 }

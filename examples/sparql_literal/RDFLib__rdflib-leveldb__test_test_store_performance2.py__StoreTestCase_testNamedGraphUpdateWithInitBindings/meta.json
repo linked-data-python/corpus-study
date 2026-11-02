@@ -46,5 +46,16 @@
     "method": "entry:testNamedGraphUpdateWithInitBindings",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the query variable `r` and the `bindings` are inlined into g.update; `set(g.triples((None, None, None)))` becomes `set(g)`, `set([x])` becomes `{x}`, assertEqual on one line; `t1` inlined into the log f-string (time() still called before log.debug).",
+    "optimized.ldpy, from optimized.py: `g.update(s{ INSERT { {michel} {likes} {pizza} } WHERE {} })` -- the three initBindings become interpolations in term position; passing the island to g.update replaces translated.ldpy's `@graph g` + `.execute()`.",
+    "Symmetry: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "s{ }",
+    "IRI",
+    "interpolation {expr}"
+  ]
 }

@@ -58,5 +58,21 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `concept = self.concept` once; the two identical double loops (related_instances values, other_properties) become one loop over `[*(… or {}).values(), *(… or [])]` (the `is not None` guards keep their effect: None contributes nothing); the if/else on the value shape becomes a conditional expression feeding one add; the four exploded `g.add((\\n c,\\n …))` blocks become one-line adds; `\"/\".join(str(c).split(\"/\")[:-1]) + \"/\"` becomes `str(c).rpartition(\"/\")[0] + \"/\"` (identical, slash or not); the serialise if/else becomes `is_json` + one serialize call; Response on one line.",
+    "optimized.ldpy, from optimized.py: `@graph as g` (g.bind calls kept, runtime prefixes); URIRef(…) becomes f<{…}>; the four Concept triples become one `+{ {c} a skos:Concept ; skos:prefLabel {…}@{lang} ; skos:definition {…}@{lang} ; skos:inScheme {cs} }` (shared subject, island only; Literal(x, lang=…) becomes `{x}@{config.DEFAULT_LANGUAGE}`, transpiled to Literal(x, lang=langtag(...))); the loop's value becomes `f<{prop.value}> if … else ?{prop.value}` and the add `+{ {c} f<{prop.uri}> {value} }`.",
+    "Symmetry: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph as",
+    "+{ }",
+    "f<…>",
+    "?{expr}",
+    "language-tagged literal @{expr}",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

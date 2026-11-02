@@ -55,5 +55,20 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "'@prefix' removed from constructions (no prefix declared in translated.ldpy)"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the eight-branch if/elif chain, which differs only by the SKOS predicate, becomes one add whose predicate is `SKOS[note.note_type if note.note_type in note_types else \"note\"]` (the note types are exactly the SKOS local names, and every other value falls back to skos:note as the original `else` does); the redundant guard `if obj.has_notes.all():` is dropped.",
+    "optimized.ldpy, from optimized.py: the add is `+{ {concept} skos:{...} f\"{note.name}\"@{note.language} }` -- a prefixed name with a computed local part and a language literal with an interpolated tag; it needs its own `@prefix skos:` (translated.ldpy declared none and kept SKOS as a Python Namespace in a lookup table) and `@graph g`.",
+    "The language literal is not exactly Literal(name, lang=language): a None tag raises TypeError in the island where rdflib gives a plain literal. The repository's SkosNote.language is a non-null CharField, so None cannot occur; an empty string gives a plain literal on both sides.",
+    "No exception to the symmetry rule. Most of the gain is the rereading (care 0.34): the notation adds little once the dispatch is a single add."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ]
 }

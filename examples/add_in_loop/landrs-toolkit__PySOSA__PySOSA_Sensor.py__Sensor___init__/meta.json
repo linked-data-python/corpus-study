@@ -55,5 +55,19 @@
     "method": "entry:__init__",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nearly nothing to compress -- only the redundant parentheses of `(args[3])`. The five obsgraph.add cannot be grouped by `obsgraph += [...]` without a `global obsgraph` (obsgraph is a module graph), which a reviewer would reject; the two filtered loops are already minimal; the order of the attribute assignments and of the adds is kept because the driver checks the IndexError and TypeError cases.",
+    "optimized.ldpy, from optimized.py: same as translated.ldpy (one +{ } with `;` for the three sensor triples, one +{ } per loop body, `@graph obsgraph` in the extracted header) plus `Literal(args[0])`/`Literal(args[1])` written `f{args[0]}`/`f{args[1]}`, the language's coercion of the same values (checked on a str, an int and a float by the driver).",
+    "No exception to the symmetry rule: the region was already as compact in Python as the doctrine allows, so the whole gain is the notation's."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "f{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
 }

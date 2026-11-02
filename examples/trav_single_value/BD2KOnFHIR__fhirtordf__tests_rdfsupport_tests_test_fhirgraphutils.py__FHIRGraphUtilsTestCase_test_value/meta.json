@@ -67,5 +67,20 @@
       "@graph g supprimé"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `g = Graph()` + `g.parse(...)` become `g = Graph().parse(...)` (parse returns the graph). Everything else is kept: both g.value reads are asserted and reused, the value() helper calls are outside the region. The demo() harness is copied as is.",
+    "optimized.ldpy is translated.ldpy with the same change: `@graph g` and the two reads as m{ ... }.first(), fhir:Account.servicePeriod and fhir:Period.end as prefixed names (PN_LOCAL allows the inner dot).",
+    "No exception to symmetry. Folding the two chained reads into one property path would lose `period`, which is asserted and read again."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

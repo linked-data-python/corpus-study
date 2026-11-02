@@ -47,5 +47,20 @@
     "method": "entry:test_provenance_records_every_fragment_it_examined",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the two assertions `len(verdicts) == 2` and `set(verdicts.values()) == {\"verified\", \"failed\"}` become `sorted(verdicts.values()) == [\"failed\", \"verified\"]`, which holds exactly when both did (a bare AssertionError either way, as the driver compares).",
+    "optimized.ldpy: the two `prov.value(v, ...)` are `m{ {v} p ?o }.first()` and the outer `prov.subjects(RDF.type, SV.VerificationResult)` is `m{ ?v a sv:VerificationResult }`, under one `@graph prov`, as in translated.ldpy.",
+    "Not compressed: the dict comprehension keyed by the fragment stays (it deduplicates by wasDerivedFrom); the two status reads are not joined into the outer pattern, which would multiply or drop verdicts. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }

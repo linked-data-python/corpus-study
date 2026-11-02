@@ -72,5 +72,19 @@
       "@graph graph rétabli (défaut de liaisons, tué par le contrôle des liaisons)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five copies of `[str(o) for o in graph.objects(s, P) if isinstance(o, RDFLiteral)]` become one local helper literals(subject, predicate); comments/definitions become `desc = literals(.., RDFS.comment) or literals(.., SKOS.definition)`; the parent loop becomes a list comprehension with `next(iter(literals(p, RDFS.label)), _local_name(str(p)))` (default still evaluated eagerly, as in the original); parts starts as `[f\"{entity_type}: {primary_label}\"]`; alt_labels and extra_labels are folded into all_alt. All section comments and the docstring are kept.",
+    "optimized.ldpy is optimized.py with the helper's read and the parent read as `m{ {subject} {predicate} ?o }(graph)` / `m{ {entity_uri} {parent_pred} ?p }(graph)` and the namespace terms as prefixed names. No @graph: the call suffix (graph) binds nothing in the caller's graph (2026-10-31 correction of the translation), and with only two islands left it costs no more than a designation.",
+    "No exception to symmetry. The helper absorbs most of what the notation would have saved: once the five reads share one line, the notation has a single read to rewrite, hence a notation ratio near 1."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
 }
