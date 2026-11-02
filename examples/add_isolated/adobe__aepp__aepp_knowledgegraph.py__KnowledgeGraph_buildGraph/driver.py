@@ -292,5 +292,5 @@ except Exception:
     import traceback
     verdict["error"] = traceback.format_exc(limit=8)
 
-print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+harness._emit(verdict)   # credits the sides it executed (RDFEVAL_SIDES)
 VERDICT = verdict

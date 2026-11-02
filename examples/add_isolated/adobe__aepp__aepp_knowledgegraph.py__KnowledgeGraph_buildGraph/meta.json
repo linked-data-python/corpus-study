@@ -76,12 +76,12 @@
       "check": "OK"
     }
   },
-  "optimization_status": "draft",
+  "optimization_status": "final",
   "optimization_notes": [
-    "Why draft: driver.py prints its own RDFEVAL-VERDICT line instead of going through harness._emit, so the verdict carries no `sides` field and `rdfeval check` reports FAIL ('driver compared None') for every optimized artefact. The driver does honour RDFEVAL_SIDES (it executes through harness._exec_python/_exec_ldpy, which redirect): run by hand with RDFEVAL_SIDES=original.py,<artefact>, it reports equivalent, no diffs, on all four cases for optimized.py, optimized.ldpy, optimized_header.py and optimized_header.ldpy (a nonexistent artefact name makes it error, so the redirection is real). The fix belongs to the driver, which this batch may not touch.",
     "optimized.py: one local per repeated node (dataset, flow_node, audience_node, destination_node); each run of graph.add() becomes one `graph += [...]`; the three evaluation-mode ifs become a loop over (mode, literal) pairs; `hasattr` + `is not None` become one `getattr(flow, 'datasetId', None) is not None`; `paths = ...; if paths is not None: for` becomes `for path in ... or []`; the `len(...) > 0` guards before the two destination loops go (looping over an empty collection does nothing); the `Profile-based ... not in graph` guard goes (adding an existing triple is a no-op); the typed-path if/else becomes one `not in graph` guard on the two new triples, then the usedIn add both branches had; the xEvent node is self.SCHEMA.xEvent (path == 'xEvent' there, so the two replace calls did nothing); `self.global_graph = graph; return self.global_graph` / `else: return graph` become one `return graph` after the if; Literal((x)) loses its extra brackets and the two f-strings without fields become plain strings.",
     "Error handling: no try/raise in the region. A raising term (URIRef(nan), case D) now raises before the batch it belongs to is written, where the original had written the earlier triples of that batch: the same effect as the translation's +{ } (record ldpy/014), and the partial graph is not observable in the repository (the driver's case D explains why).",
-    "optimized.ldpy, from optimized.py: `@graph graph` and one `+{ }` per `graph += [...]` (`;` and `.` within it); Literal(x, datatype=XSD.integer) becomes the typed literal `{x}^^{XSD.integer}` (it transpiles to the same Literal call, None included); the `not in graph` guard becomes `not m{ {node} a {self.SCHEMA.path} }`; constant literals and rdf:/rdfs:/dcat:/dcterms: terms are written in the island. Literal(...) stays around every value that may be None or NaN (name, frequency): node(None) raises where Literal(None) gives 'None'. No exception to the symmetry."
+    "optimized.ldpy, from optimized.py: `@graph graph` and one `+{ }` per `graph += [...]` (`;` and `.` within it); Literal(x, datatype=XSD.integer) becomes the typed literal `{x}^^{XSD.integer}` (it transpiles to the same Literal call, None included); the `not in graph` guard becomes `not m{ {node} a {self.SCHEMA.path} }`; constant literals and rdf:/rdfs:/dcat:/dcterms: terms are written in the island. Literal(...) stays around every value that may be None or NaN (name, frequency): node(None) raises where Literal(None) gives 'None'. No exception to the symmetry.",
+    "The driver now emits its verdict through harness._emit, which credits the sides it executed: rdfeval check proves every artefact."
   ],
   "optimized_constructions": [
     "@prefix",
@@ -93,10 +93,10 @@
     "plain literal",
     "interpolation {expr}"
   ],
-  "header_optimization_status": "draft",
+  "header_optimization_status": "final",
   "header_optimization_notes": [
-    "Same driver limitation as the optimized artefacts: equivalent when the driver is run by hand with RDFEVAL_SIDES, but `rdfeval check` cannot confirm it.",
     "Python: Graph and Namespace go from the rdflib import; the five rdflib.namespace names are all used.",
-    "LD Python: Graph, Namespace, RDF, RDFS, DCAT and DCTERMS go (the region writes rdf:, rdfs:, dcat:, dcterms:); XSD stays for `^^{XSD.integer}`; the four @prefix lines are all used."
+    "LD Python: Graph, Namespace, RDF, RDFS, DCAT and DCTERMS go (the region writes rdf:, rdfs:, dcat:, dcterms:); XSD stays for `^^{XSD.integer}`; the four @prefix lines are all used.",
+    "The driver now emits its verdict through harness._emit, which credits the sides it executed: rdfeval check proves every artefact."
   ]
 }

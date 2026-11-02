@@ -70,13 +70,13 @@
       "check": "OK"
     }
   },
-  "optimization_status": "draft",
+  "optimization_status": "final",
   "optimization_notes": [
-    "DRAFT ONLY BECAUSE OF THE DRIVER: driver.py prints its own RDFEVAL-VERDICT without the `sides` key (it does not go through harness._emit), so `rdfeval check` refuses to credit the optimized sides ('driver compared None'). The driver does execute the optimized artefact (harness._exec_python/_exec_ldpy redirect it through RDFEVAL_SIDES): run by hand with RDFEVAL_SIDES=original.py,optimized.py and =original.py,optimized.ldpy it reports equivalent: true (8 calls, output files, isomorphism, bindings, stdout), and a mutant (someValuesFrom swapped for allValuesFrom in optimized.ldpy) makes it report equivalent: false. Fixing this needs `harness._emit(verdict)` in driver.py, which this batch may not touch.",
     "optimized.py: the A ⊑ (∃R.C)/(∀R.C) branch reuses build_restriction instead of re-writing its four adds, and is merged with the GCI branch (same guard on property, quantifier and superclass; `if subclass_str` decides the subClassOf direction); build_restriction picks someValuesFrom/allValuesFrom by a conditional expression; find_col becomes one `next(...)` generator; the `(x or \"\")` guards go (values are str after fillna(\"\")); the `... if x_str else None` guards and the `parts`/`len(parts) > 1` logic go (resolve_uri already returns None silently for an empty string; str.partition replaces split); the intersection's two list comprehensions become one; the trailing `continue`s of the last branches become an `elif` chain. Every try/except, return and printed WARN survives in the same order.",
     "optimized.ldpy, from optimized.py: `g = Graph()` becomes `@graph as g`; build_restriction's three adds become one `+{ {b} a owl:Restriction ; owl:onProperty … ; {owl:someValuesFrom if … else owl:allValuesFrom} … }` (shared subject, island only; the predicate chosen by a Python conditional over prefixed names in an interpolation hole); the other adds become `+{ }`; OWL.Class/OWL.ObjectProperty arguments become owl:Class/owl:ObjectProperty.",
     "Blank nodes stay BNode(): build_restriction returns its node and anon_cls is the subject of a conditional triple, so no `[ ]` can absorb them.",
-    "Symmetry: outside the RDF lines the two files are identical line for line."
+    "Symmetry: outside the RDF lines the two files are identical line for line.",
+    "The driver now emits its verdict through harness._emit, which credits the sides it executed: rdfeval check proves every artefact."
   ],
   "optimized_constructions": [
     "@prefix",

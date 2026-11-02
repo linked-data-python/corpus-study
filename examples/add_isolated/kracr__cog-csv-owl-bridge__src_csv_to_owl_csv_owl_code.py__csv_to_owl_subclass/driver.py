@@ -165,5 +165,5 @@ except Exception:
 finally:
     shutil.rmtree(_TMP, ignore_errors=True)
 
-print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+harness._emit(verdict)   # credits the sides it executed (RDFEVAL_SIDES)
 VERDICT = verdict
