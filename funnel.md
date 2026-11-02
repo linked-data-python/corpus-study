@@ -388,20 +388,20 @@ the same `files_index.jsonl` as the new one.
 
 | stratum | sites | `f` | finals kept | completed | new-only | selected | decided | not expr. | measured | expressible, weighted | tokens, weighted median |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `add_in_loop` | 4,385 | 0.17 | 29 | 0 | 5 | 34 | 34 | 0 | 34 | 100 % | +3.9 % |
-| `add_isolated` | 6,414 | 0.22 | 24 | 1 | 5 | 30 | 29 | 0 | 29 | 100 % | +4.9 % |
-| `add_run_shared_subject` | 1,503 | 0.17 | 30 | 0 | 5 | 35 | 35 | 0 | 35 | 100 % | +10.7 % |
-| `bind_initbindings` | 170 | 0.28 | 13 | 12 | 2 | 27 | 27 | 4 | 23 | 87 % | +0.5 % |
-| `coercion_datatype` | 2,872 | 0.00 | 14 | 11 | 0 | 25 | 25 | 0 | 25 | 92 % | +12.5 % |
-| `ns_def_local` | 1,025 | 0.00 | 21 | 4 | 0 | 25 | 25 | 0 | 25 | 92 % | +3.0 % |
-| `ns_import_project` | 1,279 | 0.00 | 21 | 4 | 0 | 25 | 25 | 0 | 25 | 96 % | +3.1 % |
-| `remove` | 1,021 | 0.38 | 24 | 1 | 4 | 29 | 29 | 0 | 29 | 90 % | +10.3 % |
-| `sparql_interpolated` | 178 | 0.24 | 24 | 1 | 5 | 30 | 29 | 13 | 16 | 49 % | -7.2 % |
+| `add_in_loop` | 4,385 | 0.17 | 29 | 0 | 5 | 34 | 34 | 0 | 34 | 100 % | +11.5 % |
+| `add_isolated` | 6,414 | 0.22 | 24 | 1 | 5 | 30 | 29 | 0 | 29 | 100 % | +11.7 % |
+| `add_run_shared_subject` | 1,503 | 0.17 | 30 | 0 | 5 | 35 | 35 | 0 | 35 | 100 % | +16.2 % |
+| `bind_initbindings` | 170 | 0.28 | 13 | 12 | 2 | 27 | 27 | 4 | 23 | 87 % | +3.5 % |
+| `coercion_datatype` | 2,872 | 0.00 | 14 | 11 | 0 | 25 | 25 | 0 | 25 | 92 % | +20.5 % |
+| `ns_def_local` | 1,025 | 0.00 | 21 | 4 | 0 | 25 | 25 | 0 | 25 | 92 % | +7.6 % |
+| `ns_import_project` | 1,279 | 0.00 | 21 | 4 | 0 | 25 | 25 | 0 | 25 | 96 % | +4.7 % |
+| `remove` | 1,021 | 0.38 | 24 | 1 | 4 | 29 | 29 | 0 | 29 | 90 % | +20.9 % |
+| `sparql_interpolated` | 178 | 0.24 | 24 | 1 | 5 | 30 | 29 | 13 | 16 | 49 % | -2.1 % |
 | `sparql_literal` | 1,128 | 0.23 | 22 | 3 | 5 | 30 | 29 | 4 | 25 | 84 % | +0.0 % |
-| `trav_existence` | 3,013 | 0.92 | 25 | 0 | 10 | 35 | 33 | 1 | 32 | 99 % | +3.7 % |
-| `trav_navigation` | 1,389 | 0.26 | 29 | 0 | 5 | 34 | 34 | 0 | 34 | 95 % | -3.0 % |
-| `trav_one_step` | 7,842 | 0.34 | 24 | 1 | 4 | 29 | 28 | 0 | 28 | 97 % | -4.3 % |
-| `trav_single_value` | 3,549 | 0.37 | 35 | 0 | 5 | 40 | 40 | 0 | 40 | 89 % | -7.5 % |
+| `trav_existence` | 3,013 | 0.92 | 25 | 0 | 10 | 35 | 33 | 1 | 32 | 99 % | +14.8 % |
+| `trav_navigation` | 1,389 | 0.26 | 29 | 0 | 5 | 34 | 34 | 0 | 34 | 95 % | +6.3 % |
+| `trav_one_step` | 7,842 | 0.34 | 24 | 1 | 4 | 29 | 28 | 0 | 28 | 97 % | +0.6 % |
+| `trav_single_value` | 3,549 | 0.37 | 35 | 0 | 5 | 40 | 40 | 0 | 40 | 89 % | -1.2 % |
 | **credits** | 35,768 | — | 335 | 38 | 55 | 428 | 422 | 22 | 400 | — | — |
 
 "Finals kept", "completed" and "new-only" are the source of each credit;
@@ -410,7 +410,10 @@ ones, the denominator of the expressibility rate; "measured" the pairs
 `compare` measures (`not-expressible` regions have no pair). The token
 column is the weighted median over the measured pairs, string-embedded
 pairs set apart (§ 5.5). All figures are **provisional**: no pair is
-approved yet.
+approved yet. They count an island's body as RDF text — a prefixed name is
+one token — since `corpus-study` `f5d629f`: before, the `{` after `g`,
+`+`, `m`, `s`… was read as a Python interpolation, the body tokenised as
+Python, `ex:a` three tokens, and every ldpy figure was too high.
 
 A region credited to several strata counts in each, hence 428 credits for
 **385 distinct regions** over 146 repositories: 295 were final before the
@@ -440,6 +443,13 @@ Figures of 2026-11-02, on the resumed sample of 385.
 Expressiveness coverage over what could be evaluated: **344 / 379** (91 %),
 unweighted; the per-stratum rates of § 5.4 are the weighted ones.
 
+Median token reduction of the faithful translation over the 357 pairs:
+**+5.3 %** (interquartile −2.1 % to +16.0 %). RDF text is also counted
+apart, the same way on both sides: the queries and Turtle documents a
+Python string holds (one token for Python's tokenizer) and the bodies of
+the `s{ }` islands (`tokens_embedded`), and the host code without them
+(`tokens_host`), in `pairs.jsonl`.
+
 Of the 357 pairs, the oracle splits into **218 by graph isomorphism** (the
 region builds) and **139 by equality of the values produced** (it reads) —
 it is this second oracle (design record corpus/405) that lets the reading
@@ -452,7 +462,42 @@ module — installed (`nanopub`, `pyshacl`, `apysource`, `plastron`) or
 copied verbatim into a context shim — instead of a `__namespaces__` the
 translator wrote.
 
-### 5.6 Is `examples/` obsolete?
+### 5.6 Rereading against notation: 70 optimized pairs
+
+A reader will object that a careful rereading of the Python would gain as
+much as the notation. Five regions per stratum, drawn with a seed among the
+proved pairs of the sample (`scripts/draw_optimize.py`, seed 20261103,
+`results/raw/optimize_sample.json`), carry two more artefacts written by
+Opus under `AGENT_OPTIMIZE.md`: `optimized.py`, the most compact Python a
+demanding reviewer would accept, and `optimized.ldpy`, the same program
+with islands. The driver proves both against the original; 69 of 70 are
+final, the 70th has a driver outside `run_pair`. Median token reductions
+over the 68 that are equivalent and in the sample (`aggregate`, block
+`optimized`):
+
+| step | all tokens | host code |
+|---|---:|---:|
+| faithful translation (original → `translated.ldpy`) | +4.1 % | +7.3 % |
+| careful rereading (original → `optimized.py`) | +9.5 % | +9.5 % |
+| notation on top (`optimized.py` → `optimized.ldpy`) | +1.9 % | +3.2 % |
+| both (original → `optimized.ldpy`) | +13.1 % | +14.8 % |
+
+The notation pays where triples are written — +21.9 % in `add_in_loop`,
++20.1 % in `add_run_shared_subject`, +20.9 % in `ns_import_project` — and
+is neutral to slightly negative on reads (`trav_*`, −4.7 % to +0.9 %). In
+`sparql_literal` it goes from −67.9 % to +0.7 % once the query text is
+counted apart. The extracted header is not optimized and keeps the
+translation's `@prefix` lines, which weigh against the notation on short
+regions.
+
+**Model check.** Fable rewrote, independently, the two artefacts of one
+region per stratum (14, `results/raw/model_check/`,
+`scripts/model_check.py`). Its rereading is not stronger than Opus's —
+median care +3.9 % against +9.2 % on those 14 — and the notation's share
+is the same within a few points region by region (median −5.7 % against
+−6.4 %). The split does not depend on the stronger model.
+
+### 5.7 Is `examples/` obsolete?
 
 Not yet, and this is a point to settle rather than let drift. The two trees
 are **disjoint** (7 region identifiers in common out of 163 and 1,196, by
