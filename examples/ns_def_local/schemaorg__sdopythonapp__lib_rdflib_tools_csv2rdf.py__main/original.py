@@ -7,6 +7,7 @@ import fileinput
 import codecs
 import rdflib
 from six.moves import configparser
+from csv2rdf_context import CSV2RDF, column, csv_reader
 HELP = """
 csv2rdf.py \
     -b <instance-base> \
@@ -85,7 +86,7 @@ def main():
 
     if "-f" in opts:
         config = configparser.ConfigParser()
-        config.readfp(open(opts["-f"]))
+        config.read_file(open(opts["-f"]))
         for k, v in config.items("csv2rdf"):
             if k == "out":
                 csv2rdf.OUT = codecs.open(v, "w", "utf-8")

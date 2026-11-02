@@ -12,10 +12,18 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "prefixed name",
+    "IRI"
+  ],
+  "translation_notes": [
+    "`from plastron.namespaces import bibo, dcterms, dc, edm, geo, ore, schema, umd, xsd, pcdm` -> the same list with a colon: plastron-models 4.8.3 is installed and its `plastron.namespaces` exports each as an `rdflib.Namespace` named like the prefix, so no shim and no `__namespaces__` are needed. The 28 `ns.term` uses (descriptor predicates, `@rdf_type(bibo.Image, umd.Poster)`, `datatype=xsd.date`) become prefixed names.",
+    "`URIRef('http://purl.org/dc/elements/1.1/format')` -> `<http://purl.org/dc/elements/1.1/format>`, kept as an IRI like the original (its comment: `dc.format` is Namespace.format, a method). With a prefix it would be `dc:format`, which has no such trap; not changed, to keep the comment true. `URIRef` stays imported, unused.",
+    "The module defines a class and nothing else: no graph, no comparable module value, so run_pair's module-state comparison would be hollow. Hand-rolled driver: it executes both sides and compares what Poster means -- model_name, HEADER_MAP, the property set, every descriptor the class defines (class, predicate IRI, required, repeatable, datatype, object class, validator), the triples of an instance filled through every descriptor (with its rdf types from @rdf_type), and the properties failing validation on a half-filled instance. Mutant killed: `dc:date` -> `dc:created`."
+  ],
   "draft_sha": "eec8038007402e68",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.536233+00:00",
@@ -26,5 +34,6 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

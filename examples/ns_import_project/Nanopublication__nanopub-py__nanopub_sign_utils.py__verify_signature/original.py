@@ -1,6 +1,7 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : nanopub/sign_utils.py
 # region: verify_signature (lines 162-213, stratum ns_import_project)
 # licence of the source repository: see meta.json
+import logging
 from base64 import decodebytes, encodebytes
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA

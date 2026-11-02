@@ -1,16 +1,15 @@
 # Extracted from Nanopublication/nanopub-py@05022dc4bc : nanopub/sign_utils.py
 # region: verify_signature (lines 162-213, stratum ns_import_project)
 # licence of the source repository: see meta.json
+import logging
 from base64 import decodebytes, encodebytes
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from rdflib import BNode, Dataset, Graph, Literal, Namespace, URIRef
-from nanopub.namespaces import NPX
+from nanopub.namespaces import npx:
 from nanopub.trustyuri.rdf import RdfHasher, RdfUtils
 from nanopub.utils import MalformedNanopubError
-@prefix npx: <http://purl.org/nanopub/x/> .
-
 logger = logging.getLogger(__name__)
 
 def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -> bool:
@@ -56,7 +55,7 @@ def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -
     except Exception as e:
         raise MalformedNanopubError(e)
 
-    # np_signedBy = [o for _, _, o, _ in g.quads((np_signature_target, npx:signedBy, None, None))]
+    # np_signedBy = [o for _, _, o, _ in g.quads((np_signature_target, NPX.signedBy, None, None))]
     # if not np_signedBy:
     #     raise MalformedNanopubError("No signedBy found in the nanopublication RDF")
     # np_signedBy = np_signedBy[0]

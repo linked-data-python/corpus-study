@@ -13,11 +13,17 @@
     "graph_read": 4,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "from … import p:",
+    "prefixed name"
+  ],
   "translation_notes": [
-    "prefixes: NPX->npx"
+    "`from nanopub.namespaces import NPX` -> `from nanopub.namespaces import npx:` (installed nanopub 2.2.2 exports `NPX = Namespace(...)`, no shim needed); the five `NPX.x` become `npx:x` (the commented-out one is left as in the original).",
+    "The four reads are `g.quads((s, p, o, None))` over a Dataset and stay as they are: `m{ }` reads triples of ONE graph, and on `Dataset()` (default_union=False, which is what nanopub builds, everything living in named graphs) `m{ ?s npx:p {x} }(g)` sees only the default graph, verified (it matches only with Dataset(default_union=True)). `@graph` also designates 'a graph, never a dataset'. Quad reads over a dataset have no island: a gap, hence minor-restructuring rather than directly-expressible although the namespace import itself is direct.",
+    "Executability: the extracted region lacks `import logging` (module-level `logger = logging.getLogger(...)`); added to original.py and translated.ldpy identically. nanopub, pycryptodome are installed.",
+    "Driver: Dataset from fixture.trig (a real nanopublication signed once with nanopub's own add_signature, RSA-2048, key discarded, plus four decoy resources with the same npx:has* predicates targeting other nanopublications), 13 calls: valid signature (True), unknown target, missing signature, DSA (logged, True), ECDSA, missing algorithm (IndexError), lower-case algorithms, invalid key (ValueError), undecodable signature, tampered assertion. Finding on the original: PKCS1_v1_5.verify returns a boolean the region ignores, so a tampered assertion still returns True; only an undecodable signature or key fails. Mutant killed: hasAlgorithm read as hasSignature."
   ],
   "draft_sha": "baa5b41667587f9c",
   "provenance": {
@@ -29,5 +35,6 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

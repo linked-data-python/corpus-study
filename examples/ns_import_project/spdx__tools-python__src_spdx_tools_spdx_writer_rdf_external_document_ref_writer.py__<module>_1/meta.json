@@ -14,11 +14,21 @@
     "term_constructor": 2,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "prefixed name",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf"
+    "The project namespace is `SPDX_NAMESPACE`, not `SPDX`/`spdx`: `from m import spdx:` would not find it. The renaming form of the import does: `from spdx_context import SPDX_NAMESPACE: as spdx:` (the prefix name before `as` is the Python name the module exports, `as` gives the prefix used in the file). Worth knowing for the stratum: project namespaces are often named `X_NAMESPACE`/`X_NS`.",
+    "The two `graph.add` on the same subject become ONE `+{ ... a spdx:ExternalDocumentRef ; spdx:spdxDocument ... }`, the third a `+{ }` of its own; `@graph graph` on the parameter. `URIRef(f'{doc_namespace}#{id}')` -> `f<{doc_namespace}#{id}>` and `URIRef(document_uri)` -> `f<{document_uri}>`: equal here since no @base is in scope (a relative document URI stays relative, checked). `RDF` is no longer imported: `a` replaces RDF.type.",
+    "Executability: spdx-tools is not installed (and needs eight dependencies); spdx_context.py reproduces the four things the module imports (SPDX_NAMESPACE, Checksum/ChecksumAlgorithm/ExternalDocumentRef as plain dataclasses, add_checksum_to_graph verbatim from spdx/tools-python@cef432adee), and original.py/translated.ldpy import them from there instead of from spdx_tools.*.",
+    "Driver: the function returns None, the oracle is the mutation of the graph argument (isomorphism, so the checksum blank node is handled): empty graph + SHA1; BLAKE2B_256 into a graph already holding neighbours; relative URI, odd ref id, SHA3_512. Mutant killed: predicate altered."
   ],
   "draft_sha": "3bef26d0b2b1b8e6",
   "provenance": {
@@ -30,5 +40,6 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

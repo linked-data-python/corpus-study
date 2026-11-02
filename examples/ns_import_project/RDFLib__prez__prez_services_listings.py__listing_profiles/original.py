@@ -1,6 +1,7 @@
 # Extracted from RDFLib/prez@421ee0a9fe : prez/services/listings.py
 # region: listing_profiles (lines 81-137, stratum ns_import_project)
 # licence of the source repository: see meta.json
+import prez_context
 from rdflib import Literal, Namespace
 from rdflib.namespace import GEO, RDF, PROF
 from prez.reference_data.prez_ns import ALTREXT, OGCFEAT, PREZ

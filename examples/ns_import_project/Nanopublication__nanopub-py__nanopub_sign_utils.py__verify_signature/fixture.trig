@@ -1,0 +1,48 @@
+# A signed nanopublication (nanopub.sign_utils.add_signature, RSA-2048, key generated once and discarded),
+# plus four decoy resources targeting OTHER nanopublications: they carry the same npx:has* predicates and
+# must never be taken for the signature of the one under test. Regenerated with a script, not by hand.
+@prefix ns1: <http://example.org/> .
+@prefix ns2: <http://purl.org/nanopub/x/> .
+@prefix ns3: <http://www.nanopub.org/nschema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix this: <https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0> .
+
+<https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#provenance> {
+    <https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#assertion> prov:wasAttributedTo <https://orcid.org/0000-0002-1825-0097> .
+}
+
+<https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#assertion> {
+    ns1:sensor1 ns1:reads "21.5" .
+
+    ns1:sensor2 ns1:reads "19.0" .
+}
+
+<https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#pubinfo> {
+    ns1:decoy ns2:hasAlgorithm "DSA" ;
+        ns2:hasPublicKey "ZGVjb3ktcHVibGljLWtleQ==" ;
+        ns2:hasSignature "ZGVjb3ktc2lnbmF0dXJl" ;
+        ns2:hasSignatureTarget <http://purl.org/nanopub/temp/other#> .
+
+    ns1:decoy2 ns2:hasAlgorithm "ECDSA" ;
+        ns2:hasSignature "ZGVjb3kyLXNpZw==" ;
+        ns2:hasSignatureTarget <http://purl.org/nanopub/temp/other2#> .
+
+    ns1:decoy3 ns2:hasSignature "ZGVjb3kzLXNpZw==" ;
+        ns2:hasSignatureTarget <http://purl.org/nanopub/temp/other3#> .
+
+    ns1:decoy4 ns2:hasAlgorithm "RSA" ;
+        ns2:hasSignatureTarget <http://purl.org/nanopub/temp/other4#> .
+
+    <https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#sig> ns2:hasAlgorithm "RSA" ;
+        ns2:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2qD0RysToW7pzcQUPeAJgp5LARJcwCMNySGwwJPtbeQm5fuFeTvt3ZV5gFNtNpSGWdFvIaGjubCuoc4qstDT6P3NQcWx+BS/Mqx9rF3tfJlg2q8c8tZvzHH6rF/fWyDXeRRj2DINDWoAC9vApAyenJK+pWyiVvg8VYhUfTh/kkUwuokE0c/bQn5QvyXN7X2FopRGjMAHcLl2v9cX3p6GRqvav3KpPqyCc+41ajdKV3krZ49BNA18B5h5pj8XjZB+3J5gcPWjsUE4wu/X4veNzFxW/Ppg2YYDlKAOU4PC+sOPbtotIwwP8HMuiUDw6CZTrUpQ28omjzP1OTIzlohCuQIDAQAB" ;
+        ns2:hasSignature "J0TQLkluqO4uVJ28Xyvy/7nb0qfm3h+/iD31Yj0W1+iUKnvd3fkVDtPAC1AdWbR5QvzoE3/8MJtdZC/0Yzafc3pV4zElF8FG29FpNewZ+92++piVwGlmsx3B2nNtdlkRXws7ZVd4C38wAxfleVTza5174aRuD8CUYv8mMFtElJALRYyoLKCZ0RNvBHfIaBPmUr666mIBfkJ+Upth1SDIXCQUJN50lfolP6HhALnxdxXTjKuPcRhj+2USWJESZC5mM39Nj1tn3H1xe5UIiXDPOc5quchjuyX//aBBV11DlZrDrOROdmZsG1EPukd09GPDcUUPA8vmDRk9rEHvoRfjKQ==" ;
+        ns2:hasSignatureTarget this: ;
+        ns2:signedBy <https://orcid.org/0000-0002-1825-0097> .
+}
+
+<https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#Head> {
+    this: ns3:hasAssertion <https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#assertion> ;
+        ns3:hasProvenance <https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#provenance> ;
+        ns3:hasPublicationInfo <https://w3id.org/np/RA_dolDZ74j-ElpKlO72TF7xOEBRjUmxS4iREudSfrJk0#pubinfo> .
+}
+

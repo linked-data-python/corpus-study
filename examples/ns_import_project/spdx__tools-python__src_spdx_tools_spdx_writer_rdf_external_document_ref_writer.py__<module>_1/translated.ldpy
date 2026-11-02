@@ -4,23 +4,22 @@
 # SPDX-FileCopyrightText: 2023 spdx contributors
 #
 # SPDX-License-Identifier: Apache-2.0
-from rdflib import RDF, Graph, URIRef
+from rdflib import Graph, URIRef
 
-from spdx_tools.spdx.model import ExternalDocumentRef
-from spdx_tools.spdx.rdfschema.namespace import SPDX_NAMESPACE
-from spdx_tools.spdx.writer.rdf.checksum_writer import add_checksum_to_graph
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
+from spdx_context import ExternalDocumentRef  # spdx_tools.spdx.model
+from spdx_context import SPDX_NAMESPACE: as spdx:  # spdx_tools.spdx.rdfschema.namespace
+from spdx_context import add_checksum_to_graph  # spdx_tools.spdx.writer.rdf.checksum_writer
 
 
 def add_external_document_ref_to_graph(
     external_document_ref: ExternalDocumentRef, graph: Graph, doc_node: URIRef, doc_namespace: str
 ):
-    external_document_ref_resource = URIRef(f"{doc_namespace}#{external_document_ref.document_ref_id}")
-    graph += g{
-        {external_document_ref_resource} a {SPDX_NAMESPACE.ExternalDocumentRef} ;
-           {SPDX_NAMESPACE.spdxDocument} {URIRef(external_document_ref.document_uri)}
+    @graph graph
+    external_document_ref_resource = f<{doc_namespace}#{external_document_ref.document_ref_id}>
+    +{
+        {external_document_ref_resource} a spdx:ExternalDocumentRef ;
+            spdx:spdxDocument f<{external_document_ref.document_uri}>
     }
     add_checksum_to_graph(external_document_ref.checksum, graph, external_document_ref_resource)
 
-    graph += g{ {doc_node} {SPDX_NAMESPACE.externalDocumentRef} {external_document_ref_resource} }
+    +{ {doc_node} spdx:externalDocumentRef {external_document_ref_resource} }

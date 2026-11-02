@@ -1,9 +1,10 @@
 # Extracted from RDFLib/prez@421ee0a9fe : prez/services/listings.py
 # region: listing_profiles (lines 81-137, stratum ns_import_project)
 # licence of the source repository: see meta.json
+import prez_context
 from rdflib import Literal, Namespace
-from rdflib.namespace import GEO, RDF, PROF
-from prez.reference_data.prez_ns import ALTREXT, OGCFEAT, PREZ
+from rdflib.namespace import geo:, rdf:, prof:
+from prez.reference_data.prez_ns import altrext:, ogcfeat:, prez:
 from prez.renderers.renderer import (
     return_annotated_rdf_for_oxigraph,
     return_from_graph,
@@ -15,12 +16,6 @@ from prez.renderers.renderer import (
     get_geojson_int_count,
 )
 from prez.services.curie_functions import get_curie_id_for_uri
-@prefix geo: <http://www.opengis.net/ont/geosparql#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix prof: <http://www.w3.org/ns/dx/prof/> .
-@prefix altrext: <http://www.w3.org/ns/dx/connegp/altr-ext#> .
-@prefix ogcfeat: <http://www.opengis.net/ogcapi-features-1/1.0/> .
-@prefix prez: <https://prez.dev/> .
 
 
 async def listing_profiles(
@@ -64,10 +59,11 @@ async def listing_profiles(
     """
     count_query = count_query_template.format(profile_class=prof:Profile)
     profiles_g, _ = await system_repo.send_queries([describe_query, count_query], [])
-    for profile_uri in profiles_g.subjects(predicate=rdf:type, object=prof:Profile):
-        profiles_g += g{ {profile_uri} a prez:FocusNode }
+    @graph profiles_g
+    for profile_uri in m{ ?profile_uri a prof:Profile }:
+        +{ {profile_uri} a prez:FocusNode }
         curie = get_curie_id_for_uri(profile_uri)
-        profiles_g += g{ {profile_uri} prez:link {Literal(f"/profiles/{curie}")} }
+        +{ {profile_uri} prez:link {f"/profiles/{curie}"} }
 
     response = await return_from_graph(
         profiles_g,

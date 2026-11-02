@@ -14,11 +14,20 @@
     "graph_read": 3,
     "graph_write": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "`@graph self.graph` (an attribute as the graph), the two `self.graph.triples((x, None, None))` comprehensions become `m{ {self.__identifier} ?p ?o }` and `m{ ?s ?p {self.__identifier} }`, the removals `-{ {self.__identifier} {p1} {o1} }` / `-{ {s1} {p1} {self.__identifier} }`. The two `self.graph.remove` loops remove fully specified triples read just before, so there is no wildcard to write and the loops stay (the whole set could be `-{ {id} ?p ?o }` + `-{ ?s ?p {id} }`, but that is a rewrite, not a notation change); the stratum's `-{ s p ?o }` wildcard is therefore not exercised. An interpolated blank node is matched as that node, not as a wildcard, verified (fixture has blank nodes as object, subject and identifier).",
+    "`self.graph.addN([(i, p1, o1, self.graph) for ...])` has no island for a list of statements: it becomes a loop of `+{ {i} {p1} {o1} }`, one add per statement -- the minor restructuring. `compute_qname` is left as is; the unused `@prefix rdf/rdfs` of the draft were dropped (they would bind rdf/rdfs on the caller's graph through @graph, for nothing).",
+    "`self.__identifier` is not name-mangled: the region is extracted as a module-level function. Driver: `self` is a SimpleNamespace(graph, __identifier, qname), graph parsed from fixture.ttl per side, compared as an argument after the call (graph by isomorphism, qname). Calls: full rename (statements out, in, a self-loop, blank nodes), identity (no-op), a node without statements (zero solutions), rename to a blank node, a blank node as the old identifier, an IRI for which compute_qname fails, None (`assert i`). The fixture has a neighbour with another statement on the same (subject, predicate). Mutants killed: in-removal widened to a wildcard, any of the four loops removed, in-read widened."
   ],
   "draft_sha": "ddcacab3f67ac72e",
   "provenance": {
@@ -30,5 +39,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

@@ -15,11 +15,21 @@
     "term_constructor": 1,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "prefixed name",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: GEO->geo, RDF->rdf, PROF->prof, ALTREXT->altrext, OGCFEAT->ogcfeat, PREZ->prez"
+    "`from rdflib.namespace import GEO, RDF, PROF` and `from prez.reference_data.prez_ns import ALTREXT, OGCFEAT, PREZ` become `geo:, rdf:, prof:` and `altrext:, ogcfeat:, prez:`: rdflib's DefinedNamespace classes and prez's Namespace constants are taken as they are (ldpy 0.7.1), no `@prefix` with a copied IRI. geo/altrext/ogcfeat are imported and never used in the region, as in the original. `PROF.Profile` inside `.format(profile_class=...)` becomes `prof:Profile` (the URIRef is formatted into the query string, compared by the recorded queries).",
+    "The loop `for s in profiles_g.subjects(predicate=RDF.type, object=PROF.Profile)` with two `profiles_g.add(...)` becomes `@graph profiles_g` + `for profile_uri in m{ ?profile_uri a prof:Profile }` + two `+{ }`. The graph is modified while the loop reads it, as in the original; verified equal (m{} is not disturbed by the additions). `Literal(f'/profiles/{curie}')` -> `{f'/profiles/{curie}'}` (str coerces to a plain Literal). `@graph profiles_g` is declared right after the tuple assignment, since @graph captures the value at its line.",
+    "Executability: prez (RDFLib/prez@421ee0a9fe) is not installed; prez_context.py imports the REAL prez.reference_data.prez_ns and prez.services.curie_functions from the pinned clone (corpus/repos/RDFLib__prez), stubbing only what they need and cannot import (aiocache, prez.cache.prefix_graph, prez.config.settings) and the renderer (`return_from_graph` returns a dict of what it was given). `import prez_context` is the one line added to original.py and translated.ldpy.",
+    "Driver: the region is `async def`; the driver wraps the region's coroutine functions with asyncio.run (a patch of harness._exec_artefact in the driver, rdfeval untouched). The system repository stub records the two queries (compared as an argument), answers fixture.ttl (3 profiles in 3 namespaces, a ResourceDescriptor, a resource that merely points at prof:Profile, a prez:Profile impostor, an existing prez:FocusNode); calls: page 1, page 3 of 5 (offset), answer with no profile. Mutants killed: m{} on prez:Profile, `prez:link` value altered, offset altered."
   ],
   "draft_sha": "9fd318524e6bd4a6",
   "provenance": {
@@ -31,5 +41,6 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

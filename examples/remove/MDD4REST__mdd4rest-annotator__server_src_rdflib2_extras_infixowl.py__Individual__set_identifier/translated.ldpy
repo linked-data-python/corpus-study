@@ -10,25 +10,22 @@ from rdflib import (
     URIRef,
     Variable
 )
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 
 def _set_identifier(self, i):
     assert i
+    @graph self.graph
     if i != self.__identifier:
-        oldStmtsOut = [(p, o) for s, p, o in self.graph.triples(
-            (self.__identifier, None, None))]
-        oldStmtsIn = [(s, p) for s, p, o in self.graph.triples(
-            (None, None, self.__identifier))]
+        oldStmtsOut = [(p, o) for p, o in m{ {self.__identifier} ?p ?o }]
+        oldStmtsIn = [(s, p) for s, p in m{ ?s ?p {self.__identifier} }]
         for p1, o1 in oldStmtsOut:
-            self.graph.remove((self.__identifier, p1, o1))
+            -{ {self.__identifier} {p1} {o1} }
         for s1, p1 in oldStmtsIn:
-            self.graph.remove((s1, p1, self.__identifier))
+            -{ {s1} {p1} {self.__identifier} }
         self.__identifier = i
-        self.graph.addN(
-            [(i, p1, o1, self.graph) for p1, o1 in oldStmtsOut])
-        self.graph.addN([(s1, p1, i, self.graph) for s1, p1 in oldStmtsIn])
+        for p1, o1 in oldStmtsOut:
+            +{ {i} {p1} {o1} }
+        for s1, p1 in oldStmtsIn:
+            +{ {s1} {p1} {i} }
     if not isinstance(i, BNode):
         try:
             prefix, uri, localName = self.graph.compute_qname(i)

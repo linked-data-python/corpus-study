@@ -13,10 +13,19 @@
     "namespace_ctor": 6,
     "term_constructor": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "@prefix",
+    "f<…>"
+  ],
+  "translation_notes": [
+    "The six `rdflib.Namespace(x)` sites (config `base`/`propbase`, -b/-p, --base/--propbase) only STORE the Namespace on the converter (`csv2rdf.BASE = rdflib.Namespace(opts['-b'])`): main() never writes a prefixed name, the namespace is dereferenced later, in CSV2RDF.convert(). The only construction that yields a Namespace OBJECT is `@prefix base: f<{expr}> as BASE .` (computed IRI, `as`), followed by `csv2rdf.BASE = BASE`: one line becomes two, with a declared prefix nobody uses. Hence awkward, not directly-expressible: the construction exists but is heavier than `rdflib.Namespace(x)`.",
+    "The five `rdflib.URIRef(x)` (CLASS, PROPS) became `f<{x}>`; no @base is in scope so the two coincide, checked on a relative class IRI (`Thing`), which stays relative.",
+    "Executability: CSV2RDF, column and csv_reader come from the installed rdflib 7.2.1 (`rdflib.tools.csv2rdf`, same tool ported to Python 3) through csv2rdf_context.py, because the vendored 128be97 file is Python 2 (`csvreader.next()`) and its convert() fails before using any Namespace. `config.readfp` does not exist in Python 3.12: both sides call `config.read_file` (Graph.load precedent, no RDF meaning).",
+    "Findings on the original: `--propbase` ALWAYS raises ValueError (the closing loop reads it as `--prop<N>`: int('base')), so the --propbase site is only visible as that raise and a mutation of it is the one that survives; the long options `--col`/`--prop` are not declared to getopt; convert() fails on `-i`/`ident=` under the installed rdflib (a Python 2 `bytes.replace` left in it), so neither is used by the driver; with stdout redirected by the harness (no `.name`) a conversion without -o raises AttributeError, so every conversion that shows something writes to a file (-o, --out, or `out=` of the configuration file, relative to the example directory).",
+    "Driver: main() takes no argument, each call sets sys.argv; SystemExit of -h is turned into an exception by wrapping main (the harness catches Exception only); the elapsed time of convert() is filtered out of stderr. Mutants killed: each of the five other Namespace sites altered, a CLASS IRI altered. All six `@prefix` declarations coexist in one function because each sits in its own suite."
+  ],
   "draft_sha": "fbc473cf6a37922c",
   "provenance": {
     "generated_at": "2026-11-02T18:29:35.654320+00:00",
@@ -27,5 +36,6 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

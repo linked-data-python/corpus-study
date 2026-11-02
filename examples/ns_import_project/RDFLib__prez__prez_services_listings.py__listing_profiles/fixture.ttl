@@ -1,4 +1,21 @@
-# Input graph for RDFLib__prez__prez_services_listings.py__listing_profiles — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# What a Prez system repository answers to the DESCRIBE query of
+# listing_profiles(): the profiles of the page, with their description.
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix prez: <https://prez.dev/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org/profiles/> .
+@prefix other: <https://w3id.org/other#> .
+
+# three profiles, in three namespaces (three different curie prefixes)
+ex:ogc      a prof:Profile ; dcterms:title "OGC Features" ;
+            prof:hasResource ex:ogc-res .
+ex:dcat     a prof:Profile ; dcterms:title "DCAT" .
+other:vocab a prof:Profile , prof:ResourceDescriptor ; dcterms:title "Vocab" .
+
+# neighbours that must NOT be touched: a descriptor that is not a profile,
+# something that merely points AT prof:Profile, a profile-like class in
+# another namespace, a resource already known as a focus node
+ex:ogc-res  a prof:ResourceDescriptor ; dcterms:title "ogc resource" .
+ex:note     dcterms:references prof:Profile ; dcterms:title "mentions the class" .
+ex:fake     a prez:Profile ; dcterms:title "prez:Profile, not prof:Profile" .
+ex:known    a prez:FocusNode ; dcterms:title "already a focus node" .
