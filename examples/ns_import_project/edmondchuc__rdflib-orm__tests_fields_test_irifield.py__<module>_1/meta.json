@@ -47,5 +47,26 @@
     "method": "custom:pytest-functions",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three orm_context imports merged into one line (the imports are lines of the region, which spans the whole module); the intermediate `value`/`values`/`model` variables of four tests removed (`assert g.value(BASE_URI.test, RDF.value) == URIRef('123')`, `TestModel(...).save()`, `set(g.objects(...))` without the redundant `list`), the redundant `None` third argument of `g.value` dropped, and the last test passes `Graph()` directly to `Database.set_db` since it never reads `g`.",
+    "optimized.py, what was not done: the six identical TestModel class bodies were not factored into a factory, because the class qualname is part of the FieldError message and pytest tests are kept explicit; the `model = TestModel(...)` of the last test stays outside `pytest.raises`, so that the context manager does not widen to the constructor.",
+    "optimized.ldpy, from optimized.py: `g.value(...)` -> `m{ base:test rdf:value ?value }(g).first()` and `g.objects(...)` -> `m{ base:test rdf:value ?value }(g)`, rdf:/owl:/base: prefixed names and `<123>` IRIs; `from rdflib import URIRef` and `from rdflib.namespace import RDF, OWL` are dropped since they are region lines no longer used once the islands replace them. No exception to the symmetry rule.",
+    "Interaction with the stratum: rdflib's RDF/OWL still cannot be imported as prefixes (`from rdflib.namespace import rdf:` fails), so the two @prefix lines stay."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "IRI",
+    "m{ }",
+    ".first()",
+    "variable",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The extracted header is only the three provenance comment lines (the region is the whole module, its imports included): nothing to remove, the two header-variant files are copies of the optimized ones."
+  ]
 }

@@ -33,7 +33,7 @@ HERE = Path(__file__).resolve().parent
 verdict = {"example": HERE.name, "equivalent": False,
            "method": "module-state (hand-rolled: the Poster class, compared "
                      "by its descriptors and by an instance's graph)",
-           "diffs": [], "error": None, "sides": ["original.py", "translated.ldpy"]}
+           "diffs": [], "error": None}
 
 
 def _describe(ns):

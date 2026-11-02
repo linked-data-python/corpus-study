@@ -42,5 +42,21 @@
     "method": "custom: property tables, defaults, built instances (isomorphism), validation reports",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the region is declarative (six classes of descriptor declarations and a HEADER_MAP); the only compression is formatting the three single-entry nested dicts of HEADER_MAP on one line (`'subject': {'label': 'Subject'},`, without the magic trailing comma). Nothing else to compress: every line declares a distinct property.",
+    "optimized.ldpy, from optimized.py: prefix import and prefixed names as in the translation, `<http://id.loc.gov/datatypes/edtf>` for the datatype; `from rdflib import URIRef`, a line of the region (which spans the whole module) no longer used once the IRI is an island, is dropped. No exception to the symmetry rule.",
+    "The driver emits through harness._emit and honours RDFEVAL_SIDES: rdfeval check proves every artefact."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name",
+    "IRI"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The extracted header is only the three provenance comment lines (plus, in translated.ldpy, the translator's comment): the imports are lines of the region. Nothing to remove; the header-variant files are copies of the optimized ones (same driver limitation, hence draft).",
+    "The driver emits through harness._emit and honours RDFEVAL_SIDES: rdfeval check proves every artefact."
+  ]
 }

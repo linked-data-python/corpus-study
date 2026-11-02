@@ -66,5 +66,16 @@
       "garde `len(header_graph) == 0` forcée à True / à False ; `URIRef(graph_uri)` retiré"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph()` + `.parse(...)` chained (parse returns the graph); the add loop becomes `header_graph += manifest_graph.triples((graph_uri, None, None))` (Graph.__iadd__ is typed Iterable[triple] in rdflib 7.2.1); `len(header_graph) == 0` becomes `not header_graph`; the temporary NamespaceManager `nm` disappears: it is assigned to `header_graph.namespace_manager` first and the bindings go through `header_graph.bind(..., override=True)`, which delegates to that manager with the same arguments (driver: the header bindings compared on every case).",
+    "optimized.ldpy is identical to optimized.py: once the copy is a single `+=` over `graph.triples`, the translation's `for @bindings in m{ {graph_uri} ?p ?o }(manifest_graph): +{ {graph_uri} ?p ?o }(header_graph)` would be two lines and many more tokens, and no island yields whole triples to add in bulk. The rereading absorbs the region's only island; the notation brings nothing (ratio 1.0).",
+    "The CIMMetadataHeader scaffolding and the module-level alias are copied unchanged."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both header-variant files (identical): Node, RDF, BNode, Literal, DCTERMS and MD go; Path (annotation), Graph, URIRef, NamespaceManager and collect_specific_namespaces stay. NamespaceManager is not exported by the rdflib top-level package, so its import line cannot be merged."
+  ]
 }

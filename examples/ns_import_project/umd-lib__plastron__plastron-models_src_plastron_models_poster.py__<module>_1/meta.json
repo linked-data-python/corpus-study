@@ -41,5 +41,20 @@
     "method": "module-state (hand-rolled: the Poster class, compared by its descriptors and by an instance's graph)",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py is identical to original.py: one declarative class (descriptor declarations and a flat HEADER_MAP), nothing to compress.",
+    "optimized.ldpy, from optimized.py: prefix import and prefixed names; the full IRI `<http://purl.org/dc/elements/1.1/format>` becomes `dc:format`, and its comment ('use the full URI since dc.format returns the format method of Namespace') goes with the workaround it explained: a prefixed name has no such clash with a Namespace method. This is an exception to the symmetry rule that only the notation allows (in Python, `dc.format` is the str method). `from rdflib import URIRef`, a region line, is then unused and dropped.",
+    "The driver emits through harness._emit and honours RDFEVAL_SIDES: rdfeval check proves every artefact."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The extracted header is only the three provenance comment lines: the imports are lines of the region. Nothing to remove; the header-variant files are copies of the optimized ones (same driver limitation, hence draft).",
+    "The driver emits through harness._emit and honours RDFEVAL_SIDES: rdfeval check proves every artefact."
+  ]
 }

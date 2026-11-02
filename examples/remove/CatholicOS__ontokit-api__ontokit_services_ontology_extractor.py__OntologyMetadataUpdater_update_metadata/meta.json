@@ -67,5 +67,22 @@
       "même retrait avec le prédicat élargi en `?q` (appels 0 et 1)"
     ],
     "remaining": "Rien de nouveau à juger ; la remarque de la strate (sujet et prédicat calculés, le gain de `-{ }` se réduit au joker ?old_*) est déjà dans les notes."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: each remove((s, p, None)) + language-dependent add pair becomes one `graph.set((s, p, Literal(value, lang=prop.language)))`: Graph.set is exactly remove((s, p, None)) then add, and `Literal(x, lang=None)` and `Literal(x, lang='')` both give the plain literal the else branch built (so the if/else on `.language` goes); `Graph()` and `.parse()` chained inside the try; the dead `old_desc` computation (assigned, truncated, never read) removed; serialize with `encoding='utf-8'` returns the same bytes as encoding the str, so the isinstance/encode expression and `updated_content` go and the tuple is returned directly.",
+    "optimized.ldpy, from optimized.py: `@graph graph` after the try, `+{ {ontology_iri} dc:title {new_title} }` and the dc:description add, @prefix dc:. The two `graph.set(...)` stay Python: there is no replace island, and `-{ ... ?old }` + `+{ ... {Literal(..., lang=...)} }` would be longer (the variable language tag has no island form anyway). So the stratum's wildcard remove disappears from the optimized pair, absorbed by Graph.set in the rereading. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Namespace, URIRef, DCTERMS, OWL, RDF and RDFS go, and the two rdflib lines merge into `from rdflib import DC, Graph, Literal`.",
+    "optimized_header.ldpy: the rdflib.namespace line goes entirely (DC replaced by @prefix dc:), `from rdflib import Graph, Literal`."
+  ]
 }

@@ -65,5 +65,23 @@
       "removal restricted to the added value"
     ],
     "remaining": "subject=None: the repository reaches it (rdf_graph.value(s, RDF.object) of a reification missing rdf:object, main.py:3641, 3735, 3820, always overwrite=True) but there the ORIGINAL wipes every adb:collection statement and raises AssertionError (\"Subject None must be an rdflib term\", from Graph.add), so no run that completes differs; the translation writes Literal('None') as subject, silently, and removes nothing. Verified by execution on both artefacts. It is the known `{expr}`-is-None gap of the language (not expressible without a guard that the original does not have); not in the driver. Article: the example stays publishable (3 islands + @graph against remove/in/add), but only with this footnote; the equivalence holds for every subject that is an rdflib term, and for None the original aborts."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress beyond two blank lines: remove-or-test-then-add on an attribute graph is already minimal (a local alias for the graph would cost as much as it saves).",
+    "optimized.ldpy, from optimized.py: as the translation, `@graph self.__adb_col_statements`, `-{ ... ?o }` for the wildcard remove, `+{ }` for the add, and the existence test `elif m{ ... }:` without the translation's redundant `bool(...)`. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "-{ }",
+    "+{ }",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef (only in the docstring) goes; the shim import keeps only RDFTerm, the one name the region uses (in an annotation), on one line with its comment.",
+    "optimized_header.ldpy: the rdflib import goes entirely (Literal replaced by the coercion of `{adb_col}`), same shim line."
+  ]
 }

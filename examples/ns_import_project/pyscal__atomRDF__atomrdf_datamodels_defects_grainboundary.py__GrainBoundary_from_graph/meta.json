@@ -63,5 +63,26 @@
       "pilote sans isolation (sys.modules.pop retiré) : FAIL 'isolation broken'"
     ],
     "remaining": "Un mutant est équivalent, non compté : `if typev is not None and` -> `if typev and`. Un type falsy ne peut pas être égal à pldo:GrainBoundary. Pour Maxime : la boucle des défauts reste en graph.triples, aucun îlot n'y garde le joker sur None (écart connu n°9, que le dépôt atteint ici). Faut-il retirer de cette paire le crédit de m{ } ? Il n'y sert plus que pour la lecture de rdf:type. Et la classification directly-expressible tient-elle ?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `graph.triples((material, CDCO.hasCrystallographicDefect, None))` + `triple[2]` becomes `graph.objects(material, ...)` (objects() with a None subject is the same wildcard, so the material-None case stays equivalent); `typev` is inlined and `typev is not None and typev == PLDO.GrainBoundary` becomes `graph.value(...) == PLDO.GrainBoundary` (None never equals a URIRef). The explicit `return None` is kept (consistent returns).",
+    "optimized.ldpy, from optimized.py: the rdf:type read is `m{ {plane_defect} rdf:type ?type }(graph).first()` with the call suffix instead of the translation's `@graph graph` line; the defect loop stays `graph.objects(material, cdco:hasCrystallographicDefect)` because material may be None, which rdflib treats as a wildcard and an interpolation would turn into Literal('None'). No exception to the symmetry rule.",
+    "The binding restoration and the demo() harness are copied unchanged."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `from rdflib import Graph, Namespace, XSD, RDF, RDFS, BNode, URIRef` reduced to `from rdflib import RDF`, and the shim import loses the unused CMSO and fits on one line.",
+    "optimized_header.ldpy: the rdflib import line goes entirely (RDF is replaced by `@prefix rdf:`); the shim prefix import and the `@prefix rdf:` line are all used and stay."
+  ]
 }

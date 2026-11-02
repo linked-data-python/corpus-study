@@ -70,5 +70,27 @@
       "test `o_2.datatype == xsd:decimal` supprimé"
     ],
     "remaining": "Le couple (s, p) de obs15 est multi-valué dans in_second, donc `.value()` / `.first()` y rendent l'« premier objet du magasin » (non spécifié) ; les deux objets sont des décimaux de même valeur pour que la région reste déterministe quel que soit celui lu, mais l'ordre du magasin reste une hypothèse commune aux deux côtés. Le jugement sur la région (aucun joker réel dans le `-{ }`, `m{ }` plus long que `list(in_first)`) revient à Maxime."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nested ifs merge into one condition; `o_2 is not None` goes (isinstance(o_2, Literal) excludes None); the two datatype tests become the chained `o.datatype == o_2.datatype == XSD.decimal`. The order of the side-effect-free tests changes, not their result.",
+    "optimized.ldpy, from optimized.py: `in_second.value(s, p)` -> `m{ {s} {p} ?o_2 }(in_second).first()`, the add and the two removes as `+{ }(in_both)`, `-{ }(in_first)`, `-{ }(in_second)` (three graphs, so call suffixes and no @graph), `xsd:decimal`. The scan stays `list(in_first)`: the translation's `list(m{ ?s ?p ?o }(in_first))` is longer and adds nothing. No exception to the symmetry rule.",
+    "The notation costs here (ratio above 1): every island is a one-for-one replacement of a short rdflib call on a graph named by a variable, and m{ }.first() with an interpolated subject and predicate is longer than .value(s, p). Both removes are fully bound, so -{ } brings no wildcard to win on."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "+{ }",
+    "-{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: nothing unused (Graph in the annotations, Literal, XSD), a copy of optimized.py.",
+    "optimized_header.ldpy: XSD goes from the rdflib import (replaced by @prefix xsd:)."
+  ]
 }

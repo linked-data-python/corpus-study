@@ -66,5 +66,25 @@
       "garde de mode forcée à True / à False"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the property_url default and override become one `table_metadata['tableSchema'].get('propertyUrl', table_metadata['url'] + '#')` (the default is still evaluated, so a missing 'url' still raises KeyError); the unused `index` and `enumerate` go; `row_node = BNode()`, created in both branches, is hoisted before the `if` (blank-node labels are not observable, isomorphism).",
+    "optimized.ldpy, from optimized.py: `@graph self.graph`, the three head adds as one `+{ }` (two share table_node with `;`), `f<{table_metadata['url']}>` for the URIRef of the url (no @base in scope), and `-{ {dummy} csvw:describes {row_node} }` for the remove (fully bound, no wildcard). No exception to the symmetry rule.",
+    "The demo() harness is copied unchanged."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Graph and Literal go from the rdflib import (BNode, Namespace, RDF, URIRef stay; CSVW = Namespace(...) is part of the header and used).",
+    "optimized_header.ldpy: only BNode and URIRef stay (RDF is `a`, Namespace replaced by @prefix csvw:)."
+  ]
 }

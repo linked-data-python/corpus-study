@@ -50,5 +50,20 @@
       "IRI de c1 modifiée ; c2 égal à c1 ; assertNotEqual -> assertEqual ; assertIsInstance(cnode3) supprimé ; cnode2 = cnode(c1) au lieu de la chaîne ; {str(c1): …} -> {c1: …} : FAIL sur chacun"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `c2`, used once, is inlined into `converter.cnode(...)`; the second converter and `cnode4` are inlined into `self.assertEqual(SHACLOntoConverter({...}).cnode(c1), URI(':Person'))`, which keeps the order of the calls the driver logs (constructor, cnode, assertEqual). `c1` (used three times) and cnode1..3 stay: the three cnode calls must all happen before the first assertion, as the driver's log checks.",
+    "optimized.py, what was not done: the three assertIsInstance calls are not folded into a loop, which would hide which one failed.",
+    "optimized.ldpy, from optimized.py: the two `rdflib.URIRef('...')` become `<...>` IRIs. No exception to the symmetry rule.",
+    "The demo() harness is copied unchanged."
+  ],
+  "optimized_constructions": [
+    "IRI"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: SH, SHACL, Literal and LiteralType go, the two shim import lines become `from etk_context import SHACLOntoConverter, URI, BNode`; `import rdflib` stays.",
+    "optimized_header.ldpy: the same shim line, and `import rdflib` goes too (no URIRef call left)."
+  ]
 }
