@@ -12,11 +12,17 @@
   "categories": {
     "namespace_ctor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "f<…>",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "`sio = Namespace(Constants.SIO)` at module level -> `@prefix sio: f<{Constants.SIO}> as sio .`: a computed IRI, and the Namespace stays a module-level object (`sio` is used as an object by the rest of ants_seg_to_nidm.py). Here the prefix and the Python name coincide deliberately (the name must stay `sio`); the transpiler raises no warning.",
+    "Context shim (context_shim.py): `Constants.SIO` of PyNIDM nidm/core/Constants.py line 60 (http://semanticscience.org/ontology/sio.owl#); nidm is not in the venv. The draft's unused `@prefix rdf:` and `@prefix xsd:` were dropped.",
+    "Driver: run_pair's module-state comparison plus a probe of `sio` as an object (type, str, sio['x'], .term, bind + minted triple); a translation that makes it a bare str, or changes the IRI, FAILs (both verified)."
   ],
   "draft_sha": "b85de24bd63ed3ac",
   "provenance": {

@@ -18,11 +18,20 @@
     "term_constructor": 3,
     "triple_add": 10
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, FOAF->foaf, XSD->xsd"
+    "Two Namespace(...) -> two @prefix; FOAF/RDF/RDFS/XSD references -> foaf:/rdf:/rdfs:/xsd:. `@graph g` makes g inherit the block's prefixes, so the three g.bind(...) lines disappear (city, dbpo and foaf stay bound, visible in the printed Turtle). Ten g.add((...)) -> one +{ } (the shared subject city:ernesto merged; the blank node stays {bnode}). name/year become \"...\"^^xsd:string and \"...\"^^xsd:gYear (constant lexical forms, so the string form is exact).",
+    "original.py (and translated.ldpy) differ from the extracted region by one fix applied identically: `.decode(\"utf-8\")` after g.serialize(...) removed - rdflib >= 6 returns str, so the extracted region raised AttributeError before showing the graph. No RDF meaning.",
+    "The driver creates data/ (the region writes ./data/lab2_example_rdflib.ttl, the repository's own folder). It compares stdout (the Turtle text with prefix table), the file written (as a graph) and the return value; 6 mutants killed (typed-literal datatype, plain literal, namespace IRI, missing @graph, missing file)."
   ],
   "draft_sha": "ae432186a13a7177",
   "provenance": {
@@ -34,5 +43,6 @@
   "strata": [
     "ns_def_local"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

@@ -12,10 +12,15 @@
   "categories": {
     "namespace_ctor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix"
+  ],
+  "translation_notes": [
+    "`@prefix basens: <http://example.org/base/> as BASENS .` inside setUp, then `self.basens = BASENS`: the Namespace must outlive setUp (other TestCase methods read self.basens), which `as NAME` (ldpy/027) covers; the draft's unchanged Namespace(...) was the pre-0.6.3 not-expressible reading.",
+    "Driver: the stand-in `self` compares a probe of self.basens (type, str(), item access, .term(), graph.bind + a minted triple) and the attributes left on self, as the sibling region TestUtilityFunctions.setUp; a bare str or a URIRef with the same text is caught (verified: str(BASENS) -> FAIL, restored -> OK)."
+  ],
   "draft_sha": "7eefd38c32c0084f",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.517599+00:00",

@@ -4,4 +4,7 @@
 from rdflib import Graph, Namespace, URIRef, Literal, BNode
 
 def setUp(self):
-    self.basens = Namespace("http://example.org/base/")
+    # `as BASENS` binds the Namespace OBJECT: self.basens must outlive setUp
+    # for the other test methods (record ldpy/027).
+    @prefix basens: <http://example.org/base/> as BASENS .
+    self.basens = BASENS

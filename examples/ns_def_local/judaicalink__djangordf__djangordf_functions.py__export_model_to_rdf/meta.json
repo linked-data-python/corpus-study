@@ -18,11 +18,22 @@
     "term_constructor": 14,
     "triple_add": 5
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "f<…>",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, XSD->xsd"
+    "`ns = Namespace(ns_uri)` -> `@prefix ns: f<{ns_uri}> as NS .` (a computed IRI; the object stays because `g.bind(model.__name__.lower(), NS)` takes it by value under a prefix computed at run time, which no lexical @prefix can name). `URIRef(ns[x])` -> `ns:{x}` (ns[...] concatenates without encoding, like `ns:{expr}`). Two g.add in the loop and the three of the metadata block -> +{ } (the latter one island).",
+    "Typed literals: inside the metadata island `Literal(dump_name, datatype=XSD.string)` and `Literal(now.isoformat(), datatype=XSD.dateTime)` become `{dump_name}^^xsd:string` and `{...}^^xsd:dateTime`. In the field loop the literal is built in a five-branch chain and added once at the end: `{x}^^dt` exists only INSIDE an island (`literal = {v}^^xsd:integer` is a SyntaxError), so the branches keep Literal(field_value, datatype=xsd:T) (XSD.T -> prefixed name) and the final add is `+{ {s} {p} {literal} }`; using the typed island would mean five copies of the add, a refactoring.",
+    "Known gap: dump_name=None would write 'None' in the original (and in the file name) but raises TypeError with `{dump_name}^^xsd:string` in ldpy 0.7.1; dump_name is a documented str, and the driver does not test None.",
+    "Context shim (context_shim.py): `settings.BASE_DIR` = '.', Django not in the venv; `import logging` restored in original.py (the extracted header lacked it). The driver freezes datetime.now() for both sides, stands in for the Django model, and wraps Graph.serialize to print the exact N-Triples of the local graph to stdout: Turtle is lossy for an ill-typed literal (\"true\"^^xsd:integer is written bare), so the written file alone let a boolean-typed-as-integer mutant survive. A second phase compares the written Turtle text (prefix table). 9 mutants killed."
   ],
   "draft_sha": "229e399735acf7be",
   "provenance": {

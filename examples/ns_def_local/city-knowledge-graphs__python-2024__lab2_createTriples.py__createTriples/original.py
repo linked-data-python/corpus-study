@@ -51,5 +51,5 @@ def createTriples():
 
     print("Saving graph to 'lab2_example_rdflib.ttl':")
 
-    print(g.serialize(format="turtle").decode("utf-8"))    
+    print(g.serialize(format="turtle"))    
     g.serialize(destination='./data/lab2_example_rdflib.ttl', format='ttl')

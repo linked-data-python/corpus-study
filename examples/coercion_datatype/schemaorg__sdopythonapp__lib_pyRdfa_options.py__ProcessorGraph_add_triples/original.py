@@ -6,7 +6,7 @@ from rdflib	import URIRef
 from rdflib	import Literal
 from rdflib	import BNode
 from rdflib	import Namespace
-from .		import ns_xsd, ns_distill, ns_rdfa
+from context_shim import ns_rdf, ns_xsd, ns_distill, ns_rdfa  # context shim -- see meta.json
 ns_dc = Namespace("http://purl.org/dc/terms/")
 ns_ht = Namespace("http://www.w3.org/2006/http#")
 

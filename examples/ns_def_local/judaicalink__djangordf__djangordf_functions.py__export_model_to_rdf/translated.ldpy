@@ -2,13 +2,12 @@
 # region: export_model_to_rdf (lines 13-91, stratum ns_def_local)
 # licence of the source repository: see meta.json
 import os
+import logging
 from datetime import datetime
-from django.conf import settings
+from context_shim import settings  # context shim -- see meta.json
 from rdflib import Graph, Literal, Namespace, RDF, URIRef
 from rdflib.namespace import XSD
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
 logger = logging.getLogger(__name__)
 
 def export_model_to_rdf(model, dump_name, namespace=None, output_dir=None):
@@ -26,21 +25,22 @@ def export_model_to_rdf(model, dump_name, namespace=None, output_dir=None):
     :returns: Absolute path of the written Turtle file.
     """
     ns_uri = namespace or f"http://example.org/{model.__name__.lower()}/"
-    ns = Namespace(ns_uri)
+    @prefix ns: f<{ns_uri}> as NS .
 
     g = Graph()
-    g.bind(model.__name__.lower(), ns)
+    g.bind(model.__name__.lower(), NS)
+    @graph g
 
-    class_uri = URIRef(ns[model.__name__])
+    class_uri = ns:{model.__name__}
 
     for instance in model.objects.all():
-        subject_uri = URIRef(ns[str(instance.pk)])
-        g += g{ {subject_uri} a {class_uri} }
+        subject_uri = ns:{str(instance.pk)}
+        +{ {subject_uri} a {class_uri} }
 
         for field in model._meta.fields:
             field_name = field.name
             field_value = getattr(instance, field_name)
-            predicate_uri = URIRef(ns[field_name])
+            predicate_uri = ns:{field_name}
 
             if field_value is None:
                 continue
@@ -65,14 +65,14 @@ def export_model_to_rdf(model, dump_name, namespace=None, output_dir=None):
                     field_name,
                 )
                 continue
-            g += g{ {subject_uri} {predicate_uri} {literal} }
+            +{ {subject_uri} {predicate_uri} {literal} }
 
-    metadata_class = URIRef(ns["DumpMetadata"])
-    dump_metadata = URIRef(ns["dump_metadata"])
-    g += g{
+    metadata_class = ns:DumpMetadata
+    dump_metadata = ns:dump_metadata
+    +{
         {dump_metadata} a {metadata_class} ;
-           {URIRef(ns["dump_name"])} {Literal(dump_name, datatype=XSD.string)} ;
-           {URIRef(ns["timestamp"])} {Literal(datetime.now().isoformat(), datatype=XSD.dateTime)}
+            ns:dump_name {dump_name}^^xsd:string ;
+            ns:timestamp {datetime.now().isoformat()}^^xsd:dateTime
     }
 
     target_dir = output_dir or settings.BASE_DIR

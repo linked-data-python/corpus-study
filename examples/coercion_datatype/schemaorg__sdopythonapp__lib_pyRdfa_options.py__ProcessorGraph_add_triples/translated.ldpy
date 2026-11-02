@@ -6,13 +6,9 @@ from rdflib	import URIRef
 from rdflib	import Literal
 from rdflib	import BNode
 from rdflib	import Namespace
-from .		import ns_xsd, ns_distill, ns_rdfa
-@prefix nsdc: <http://purl.org/dc/terms/> .
-@prefix nsht: <http://www.w3.org/2006/http#> .
-@prefix nsxsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix nsdistill: <http://www.w3.org/2007/08/pyRdfa/vocab#> .
-@prefix nsrdfa: <http://www.w3.org/ns/rdfa#> .
-
+from context_shim import ns_rdf, ns_xsd, ns_distill, ns_rdfa, ns_xsd: as xsd:, ns_rdfa: as rdfa:  # context shim -- see meta.json
+@prefix dcterms: <http://purl.org/dc/terms/> as ns_dc .
+@prefix ht: <http://www.w3.org/2006/http#> as ns_ht .
 
 def add_triples(self, msg, top_class, info_class, context, node) :
 	"""
@@ -39,6 +35,7 @@ def add_triples(self, msg, top_class, info_class, context, node) :
 	self.graph.bind("rdfa",    ns_rdfa)
 	self.graph.bind("ht",      ns_ht)
 	self.graph.bind("xsd",     ns_xsd)
+	@graph self.graph
 	# Python 3 foolproof way
 	try :
 		is_context_string = isinstance(context, basestring)
@@ -55,18 +52,18 @@ def add_triples(self, msg, top_class, info_class, context, node) :
 	else :
 		full_msg = msg
 
-	self.graph += g{ {bnode} {ns_rdf["type"]} {top_class} }
+	+{ {bnode} a {top_class} }
 	if info_class :
-		self.graph += g{ {bnode} {ns_rdf["type"]} {info_class} }
-	self.graph += g{
-	    {bnode} nsdc:description {Literal(full_msg)} ;
-	       nsdc:date {Literal(datetime.datetime.utcnow().isoformat(),datatype=ns_xsd["dateTime"])}
+		+{ {bnode} a {info_class} }
+	+{
+	    {bnode} dcterms:description {Literal(full_msg)} ;
+	       dcterms:date {datetime.datetime.utcnow().isoformat()}^^xsd:dateTime
 	}
 	if context and (isinstance(context,URIRef) or is_context_string):
 		htbnode = BNode()
-		self.graph += g{
-		    {bnode} nsrdfa:context {htbnode} .
-		    {htbnode} {ns_rdf["type"]} nsht:Request ;
-		       nsht:requestURI {Literal("%s" % context)}
+		+{
+		    {bnode} rdfa:context {htbnode} .
+		    {htbnode} a ht:Request ;
+		       ht:requestURI {"%s" % context}
 		}
 	return bnode

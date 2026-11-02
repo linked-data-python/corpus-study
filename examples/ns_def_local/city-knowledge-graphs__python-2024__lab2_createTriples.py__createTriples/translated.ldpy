@@ -5,12 +5,6 @@ from rdflib import Graph
 from rdflib import URIRef, BNode, Literal
 from rdflib import Namespace
 from rdflib.namespace import OWL, RDF, RDFS, FOAF, XSD
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
 
 def createTriples():
 
@@ -18,37 +12,39 @@ def createTriples():
     g = Graph()
 
     #Special namspaces to create  
-    city = Namespace("http://www.example.org/university/london/city#")
-    dbpo = Namespace("http://dbpedia.org/ontology/")
+    @prefix city: <http://www.example.org/university/london/city#> .
+    @prefix dbpo: <http://dbpedia.org/ontology/> .
+    @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-    #Prefixes
-    g.bind("foaf", FOAF) #FOAF is given as defaulty namespace
-    g.bind("city", city) #city is a newly created namespace
-    g.bind("dbpo", dbpo) #dbpo is a newly created namespace 
+    #Prefixes (the designated graph inherits the block's prefixes)
+    @graph g
 
     #These lines are equivalent:    
-    #ernesto = <http://www.example.org/university/london/city#ernesto>
+    #ernesto = URIRef("http://www.example.org/university/london/city#ernesto")
     #city.ernesto
 
     #print(city.ernesto)
 
     bnode = BNode()  # a GUID is generated
 
-    name = Literal('Ernesto Jimenez-Ruiz', datatype=xsd:string)  # lang="en" for language tags
-    year = Literal('2024', datatype=xsd:gYear)  # lang="en" for language tags
+    name = "Ernesto Jimenez-Ruiz"^^xsd:string  # lang="en" for language tags
+    year = "2024"^^xsd:gYear  # lang="en" for language tags
 
 
-    g += g{
-        {city.inm713} a {city.Module} .
-        {city.ernesto} a {city.Lecturer} .
-        {city.Lecturer} rdfs:subClassOf foaf:Person .
-        {city.ernesto} foaf:name {name} ;
-           {city.teaches} {city.inm713} .
+    +{
+        city:inm713 a city:Module .
+        city:ernesto a city:Lecturer ;
+            foaf:name {name} ;
+            city:teaches city:inm713 .
+        city:Lecturer rdfs:subClassOf foaf:Person .
         {bnode} a rdf:Statement ;
-           rdf:subject {city.ernesto} ;
-           rdf:predicate {city.teaches} ;
-           rdf:object {city.inm713} ;
-           {dbpo.year} {year}
+            rdf:subject city:ernesto ;
+            rdf:predicate city:teaches ;
+            rdf:object city:inm713 ;
+            dbpo:year {year}
     }
 
 
@@ -56,5 +52,5 @@ def createTriples():
 
     print("Saving graph to 'lab2_example_rdflib.ttl':")
 
-    print(g.serialize(format="turtle").decode("utf-8"))    
+    print(g.serialize(format="turtle"))    
     g.serialize(destination='./data/lab2_example_rdflib.ttl', format='ttl')

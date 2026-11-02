@@ -15,11 +15,24 @@
     "term_constructor": 5,
     "triple_add": 7
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: ns_dc->nsdc, ns_ht->nsht, ns_xsd->nsxsd, ns_distill->nsdistill, ns_rdfa->nsrdfa"
+    "Context shim (context_shim.py): the package-level ns_rdf/ns_xsd/ns_distill/ns_rdfa of lib/pyRdfa/__init__.py, same IRIs; original.py imports them from the shim instead of `from . import`.",
+    "dcterms:date: Literal(utcnow().isoformat(), datatype=ns_xsd['dateTime']) -> {datetime.datetime.utcnow().isoformat()}^^xsd:dateTime inside the +{ } island (the computed typed literal of the stratum). The driver freezes utcnow() for both sides.",
+    "dcterms:description keeps {Literal(full_msg)}: full_msg is msg when node is None, and msg may be None (rdflib Literal(None) = 'None'; a bare {full_msg} raises TypeError in ldpy 0.7.1 - verified by a killed mutant). The requestURI literal is {\"%s\" % context}: a quoted \"{context}\" does not interpolate (trap 6).",
+    "The six self.graph.bind(...) calls are KEPT: `@graph self.graph` adds the block's prefixes WITHOUT overwriting an existing binding, whereas bind() rebinds (ht -> ht1 when `ht` is already bound elsewhere, a graph created with bind_namespaces='none', a namespace already bound under another prefix). Dropping them failed the driver's second phase on three such graphs; the call and its Namespace objects (ns_dc/ns_ht via `@prefix ... as`, ns_xsd/ns_rdf/ns_distill/ns_rdfa imported as objects) must survive.",
+    "ns_xsd and ns_rdfa are imported twice from the shim: as objects (for bind) and as prefixes (`ns_xsd: as xsd:`, `ns_rdfa: as rdfa:`) from an ordinary Python module. rdf:type is `a`.",
+    "Not covered by the driver: top_class=None (rdflib raises AssertionError, ldpy TypeError; the contract says URIRef)."
   ],
   "draft_sha": "c248131fea40e988",
   "provenance": {

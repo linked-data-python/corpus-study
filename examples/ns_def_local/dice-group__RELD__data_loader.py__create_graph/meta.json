@@ -14,10 +14,17 @@
     "graph_write": 12,
     "namespace_ctor": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph"
+  ],
+  "translation_notes": [
+    "Twelve Namespace(...) -> twelve @prefix, named by the prefix each g.bind uses (reld, reldr, ps...), not by the Python variable (prop, res, wikidata...). `@graph g` makes g inherit them: eleven of the twelve g.bind lines disappear.",
+    "ONE g.bind is kept: the original binds `dbo` twice (ontology, then dbpedia property namespace); rdflib files the second as `dbo1`. A @prefix cannot say that (@graph adds without overwriting; a second `@prefix dbo:` in one block would shadow, not rebind), so `@prefix dbpedia: <http://dbpedia.org/property/> as dbpedia .` + `g.bind('dbo', dbpedia)` after `@graph g`. Declaring `dbo1:` instead would match the table but encode an rdflib accident.",
+    "The region returns an EMPTY graph whose whole content is its prefix table; two empty graphs are isomorphic, so the driver compares the namespace tables in both directions (and the expected twelve bindings) on top of run_pair; mutants killed: dbo bind dropped, a prefix IRI changed, @graph removed."
+  ],
   "draft_sha": "fccc9f6b33feee7b",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.515463+00:00",

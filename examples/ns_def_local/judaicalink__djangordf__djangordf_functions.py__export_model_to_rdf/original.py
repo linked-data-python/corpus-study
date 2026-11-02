@@ -2,8 +2,9 @@
 # region: export_model_to_rdf (lines 13-91, stratum ns_def_local)
 # licence of the source repository: see meta.json
 import os
+import logging
 from datetime import datetime
-from django.conf import settings
+from context_shim import settings  # context shim -- see meta.json
 from rdflib import Graph, Literal, Namespace, RDF, URIRef
 from rdflib.namespace import XSD
 logger = logging.getLogger(__name__)
