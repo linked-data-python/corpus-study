@@ -1,6 +1,7 @@
 # Extracted from linkml/linkml@680595df54 : packages/linkml/src/linkml/generators/owlgen.py
 # region: OwlSchemaGenerator.add_enum (lines 1157-1262, stratum add_isolated)
 # licence of the source repository: see meta.json
+import context_shim
 import logging
 from typing import Any, ClassVar, TypeAlias, TypeVar
 from rdflib import DCTERMS, OWL, RDF, XSD, BNode, Graph, Literal, URIRef

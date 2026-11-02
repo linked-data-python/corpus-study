@@ -15,11 +15,21 @@
     "triple_add": 14
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DCTERMS->dcterms, OWL->owl, RDF->rdf, XSD->xsd, RDFS->rdfs, SKOS->skos",
-    "rdf:type aliases rendered as Turtle `a`: sub_pred"
+    "EXCLUDED ONLY FOR AN ENVIRONMENT REASON (category pip): the pair is complete and was proved equivalent (check OK, 8 calls) in an interpreter that has the missing packages, but `rdfeval check` in ~/.venvs/ldpy fails with ModuleNotFoundError: No module named 'deprecated'. context_shim.py imports the REAL linkml and linkml_runtime from the pinned clone (corpus/repos/linkml__linkml, packages/*/src, same commit 680595d), which need packages the study venv lacks. Proven with: PYTHONPATH=<dir> where <dir> came from `pip install --target <dir> -c <(echo rdflib==7.2.1) linkml==1.11.1 openapi-spec-validator watchdog` (dry-run resolves under rdflib==7.2.1 without touching the venv's rdflib; the venv's own pydantic 2.12.5 is enough, the pip --target copy of pydantic was removed for the final run). Installing those into ~/.venvs/ldpy (linkml==1.11.1 only for its dependency set; the clone shadows it on sys.path) and re-running `rdfeval check` should turn this region final with no other change. Note the pinned linkml declares rdflib>=7.6.0; it runs under the study's 7.2.1.",
+    "The draft was WRONG, not just heavy: its last line `g += g{ {pv_node} a {enum_uri} }` replaced `g.add((pv_node, sub_pred, enum_uri))`, where sub_pred is a Python variable (rdfs:subClassOf for all-class enums, rdf:type for individuals, dcterms:isPartOf for mixed ones). Written `+{ {pv_node} {sub_pred} {enum_uri} }`; changing it back to `a` makes every call fail (it was one of the two deliberate breaks).",
+    "The 14 g.add / self.graph.add calls become `+{ }` under `@graph g` (after `g = self.graph`, which is never reassigned in the region). The two adjacent triples on pv_node (type, label) are one `+{ {pv_node} a {pv_owl_type} ; rdfs:label {self._literal(pv.text, pv)} }` (if _literal raised, the type triple would no longer be added first; it does not raise). URIRef(EnumDefinition.class_class_uri) becomes f<{EnumDefinition.class_class_uri}> inside the islands (absolute IRI, no @base) and stays URIRef(...) in the _declare_grouping_class calls, which are not RDF writes. The comparisons and assignments of OWL.Class, RDFS.Literal, OWL.NamedIndividual, OWL.unionOf, OWL.oneOf, RDF.type, RDFS.subClassOf, DCTERMS.isPartOf become prefixed names (owl:Class, rdfs:Literal, ...) outside any island: notation only, no gain. The original's mixin quirk (a PV's mixin subClassOf triple is written on enum_uri, not pv_node) is kept as is.",
+    "The pair is a method extracted as a function, so `self` is the real OwlSchemaGenerator (built from a YAML schema by context_shim.generator, graph prepared as as_graph() does) behind a transparent proxy that only exposes `graph` as its own state: the harness compares what a call did to its arguments by walking attributes and recursed infinitely through the SchemaView. Eight calls: all-class enum (IRI from a curie meaning, a space in a text), is_a + sorted mixins + inherits, the same with enum_inherits_as_subclass_of and mixins_as_expressions, enum-level implements owl:NamedIndividual (rdf:type/oneOf), rdfs:Literal PVs (Literal nodes, plus the logged warning), a mixed enum with PV is_a/mixins and add_root_classes, metaclasses off, an empty enum. The other enums of the schema are neighbours that must not be written. Breaking the translation (sub_pred back to `a`; the mixin triple on pv_node) fails the check.",
+    "Finding: with `self` carrying the whole generator, `for @bindings in` has no foothold in this method (everything is per-PV Python control flow); the island gain is the removal of `g.add((` / `self.graph.add((` wrapper noise and the `;` merge, not new expressivity."
   ],
   "draft_sha": "fdd949cfd5c66853",
   "provenance": {
@@ -31,5 +41,6 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

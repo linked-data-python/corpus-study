@@ -1,6 +1,7 @@
 # Extracted from statnett/KGraphPy@38859be62f : tests/test_graph.py
 # region: test_iadd (lines 131-144, stratum add_isolated)
 # licence of the source repository: see meta.json
+import context_shim
 from rdflib import URIRef, Literal, Namespace
 from kgraphpy.processor import CIMProcessor
 from kgraphpy.graph import CIMGraph
@@ -9,10 +10,11 @@ def test_iadd() -> None:
     g = CIMGraph(identifier=<self_graph>)
     pr = CIMProcessor(g, provenance_description="Initial load")
     otherg = CIMGraph(identifier=<other_graph>)
-    otherg += g{ <s1> <p1> "o" }
+    @graph otherg
+    +{ <s1> <p1> "o" }
     g += otherg
 
-    assert (<s1>, <p1>, Literal("o")) in pr.graph
+    assert m{ <s1> <p1> "o" }(pr.graph)
     assert pr.provenance and pr._provenance
     entries = pr.provenance.entries
     assert len(entries) == 2

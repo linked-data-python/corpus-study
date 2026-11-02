@@ -2,7 +2,7 @@
 # region: add_ibr_plant (lines 1474-1501, stratum add_in_loop)
 # licence of the source repository: see meta.json
 import rdflib
-from .dll_config import get_dll_cim_parameter_kind
+from context_shim import g, d, dll, dllID, seq, CIM, get_dll_cim_parameter_kind
 EMT_NS = 'http://opensource.ieee.org/emtiop01v01#'
 
 for parm in d['ParametersInfo']:

@@ -13,10 +13,22 @@
     "term_constructor": 8,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "call suffix (g)",
+    "IRI",
+    "plain literal"
+  ],
+  "translation_notes": [
+    "Environment: neither kgraphpy nor linkml_runtime is installed in the study venv. context_shim.py imports the REAL kgraphpy (CIMGraph, CIMProcessor, Provenance, unmodified) from the pinned clone corpus/repos/statnett__KGraphPy (same commit 38859be), and, only when linkml_runtime is absent, registers empty stand-ins for the four names kgraphpy imports from it (SchemaView, SchemaDefinition, SlotDefinition, TypeDefinition), which this region never calls. original.py and translated.ldpy gain one identical line `import context_shim`.",
+    "`otherg.add((URIRef(\"s1\"), URIRef(\"p1\"), Literal(\"o\")))` becomes `@graph otherg` + `+{ <s1> <p1> \"o\" }`; the draft's `otherg += g{ ... }` was replaced because it builds a throw-away graph (a different code path: CIMGraph.__iadd__ instead of add). The membership assert on `pr.graph` becomes `assert m{ <s1> <p1> \"o\" }(pr.graph)`, the receiver being an attribute, hence the call suffix. The identifiers URIRef(\"self_graph\") / URIRef(\"other_graph\") become <self_graph> / <other_graph> (no @base in scope, so identical relative IRIs); `g += otherg` is a whole-graph union, no island involved.",
+    "The region is a test returning None, printing nothing and mutating nothing visible, so a driver that only calls it shows nothing. The driver calls it four times, patching kgraphpy.graph.CIMGraph.__iadd__ in the call callable (restored by the next call): unpatched (all asserts pass), merges nothing, merges without provenance entry, merges a different object. The original raises AssertionError at a different assert each time; a raise is compared like a value. Verified by breaking the translation twice: another literal in +{ } fails call 1, a widened `?x` in the final m{ } fails call 4 (call 4 exists precisely for that).",
+    "Finding (minor): the AssertionError messages are empty, so two failures at different asserts cannot be told apart by the harness; discrimination rests on which call raises."
+  ],
   "draft_sha": "ea7131ebfce9bec1",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.415023+00:00",
@@ -27,5 +39,6 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

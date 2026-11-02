@@ -13,10 +13,25 @@
     "term_constructor": 28,
     "triple_add": 15
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Executable: the extract is a module-level statement with free names (g, d, dll, dllID, seq, CIM, get_dll_cim_parameter_kind) and a relative import that cannot run. context_shim.py binds them (a graph already holding one triple, a five-parameter DLL description, seq = 0) and carries get_dll_cim_parameter_kind VERBATIM from emthub/dll_config.py; the only edit to original.py is that import line, replaced by `from context_shim import ...` (same line in translated.ldpy). CIM_NS / CIM are those of create_rdf.py (CIM_NS line 34, CIM = rdflib.Namespace(CIM_NS) line 247).",
+    "The 15 g.add calls become three +{ } under `@graph g`: five triples on `pt` with ';', then the pt-to-info link plus the eight triples on `inf` in one block, then the dllFixedValue triple alone. It is NOT merged into the info block because bFixed is computed after the block in the original and moving it would reorder the code (no refactoring); the +{ } follows the `if`.",
+    "`for @bindings in` does NOT apply: the loop body is statements (kind/val/ptID computations, an if, `seq += 1` carrying state from row to row), not a row of data; rewriting it as a generator of dicts would be a restructuring. The loop stays a Python `for` with `+{ }` and interpolation. A `@bindings parm` designation would give ?Name, ?GroupName... but a variable takes no `^^` suffix (and Literal(x, datatype=CIM.String) is needed on each), so interpolation `{parm['Name']}^^cim:String` is the form.",
+    "Literal(x, datatype=CIM.T) becomes `{x}^^cim:T`: checked that it goes through rdflib's own conversion for float, int, str, bool, '' and None alike (Literal(True, datatype=CIM.String) is \"true\", not \"True\"), so the trap of INSTRUCTIONS 2 bis does not bite; the driver data has a bool DefaultValue and a float with exponent to prove it. URIRef(ptID)/URIRef(infID) become f<{ptID}>/f<{infID}> (no @base in scope). The EMT_NS + 'X' IRIs become emt:X (local names with a dot, valid Turtle). `URIRef(EMT_NS + 'IEEECigreDLLParameterKind.{:s}'.format(kind))` keeps its .format call inside `emt:{...}` so a kind of None (unknown DataType) would raise the same TypeError on both sides.",
+    "Verified non-hollow: the original adds 75 triples and moves seq to 5; the harness compares g and the 14 module values. Breaking the translation (another datatype on bFixed, dropping the dllSequenceNumber line, not str()-ing MinValue) makes the check fail each time.",
+    "Finding: in this shape (a fixed pattern, wide subjects, 28 constructor calls) the gain is mostly in noise removed - `rdflib.URIRef (EMT_NS + 'X')` x28 and `g.add ((` x15 - not in new expressivity."
+  ],
   "draft_sha": "adef622b20971c10",
   "provenance": {
     "generated_at": "2026-11-02T18:29:36.638790+00:00",
@@ -29,5 +44,6 @@
     "remove",
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

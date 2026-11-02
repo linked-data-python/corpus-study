@@ -5,7 +5,8 @@ from rdflib import URIRef, Literal
 EX       = 'http://example.org/'
 
 def test_contains(self, sg):
+    @graph sg
     s, p, o = URIRef(EX+'alice'), URIRef(EX+'knows'), URIRef(EX+'bob')
-    assert (s, p, o) not in sg
-    sg += g{ {s} {p} {o} }
-    assert (s, p, o) in sg
+    assert not m{ {s} {p} {o} }
+    +{ {s} {p} {o} }
+    assert m{ {s} {p} {o} }

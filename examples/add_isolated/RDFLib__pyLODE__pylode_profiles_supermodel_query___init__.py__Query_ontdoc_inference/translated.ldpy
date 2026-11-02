@@ -2,44 +2,18 @@
 # region: Query.ontdoc_inference (lines 614-622, stratum add_isolated)
 # licence of the source repository: see meta.json
 from itertools import chain
-from rdflib.namespace import (
-    DC,
-    DCTERMS,
-    FOAF,
-    ORG,
-    OWL,
-    PROF,
-    PROV,
-    QB,
-    RDF,
-    RDFS,
-    SDO,
-    SH,
-    SKOS,
-    VANN,
-)
+from context_shim import g
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix org: <http://www.w3.org/ns/org#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix prof: <http://www.w3.org/ns/dx/prof/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix qb: <http://purl.org/linked-data/cube#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sdo: <https://schema.org/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix vann: <http://purl.org/vocab/vann/> .
 
-
+@graph g
 for s_, o in chain(
-    g.subject_objects(dc:creator),
-    g.subject_objects(sdo:creator),
-    g.subject_objects(sdo:author),
+    m{ ?s dc:creator ?o },
+    m{ ?s sdo:creator ?o },
+    m{ ?s sdo:author ?o },
 ):
-    g.remove((s_, dc:creator, o))
-    g.remove((s_, sdo:creator, o))
-    g.remove((s_, sdo:author, o))
-    g += g{ {s_} dcterms:creator {o} }
+    -{ {s_} dc:creator {o} }
+    -{ {s_} sdo:creator {o} }
+    -{ {s_} sdo:author {o} }
+    +{ {s_} dcterms:creator {o} }

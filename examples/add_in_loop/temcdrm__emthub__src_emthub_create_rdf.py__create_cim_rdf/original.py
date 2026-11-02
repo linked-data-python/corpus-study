@@ -2,6 +2,7 @@
 # region: create_cim_rdf (lines 1031-1054, stratum add_in_loop)
 # licence of the source repository: see meta.json
 import rdflib
+from context_shim import g, CIM, dyn_models, uuids, model_types_used
 CIM_NS = 'http://www.ucaiug.org/grid18v15#'
 EMT_NS = 'http://opensource.ieee.org/emtiop01v01#'
 

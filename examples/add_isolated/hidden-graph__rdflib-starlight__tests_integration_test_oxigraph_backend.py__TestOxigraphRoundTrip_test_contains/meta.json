@@ -12,10 +12,19 @@
   "categories": {
     "term_constructor": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "The region is a test method: `self` is unused (driver passes None) and `sg` is the Oxigraph-backed graph of the real fixture; the driver substitutes a plain rdflib Graph (the oxigraph store is not the object of the study).",
+    "`sg.add((s, p, o))` becomes `@graph sg` + `+{ {s} {p} {o} }`; the two membership asserts `(s, p, o) [not] in sg` become `assert [not] m{ {s} {p} {o} }` (truthiness of a lazy match; precedent in the trav_existence stratum). s, p, o are kept as the original's Python tuple assignment (no refactoring), so the three terms are interpolated: for a ground triple the island is no shorter than `(s, p, o) in sg` - the gain is nil here, the notation is only uniform with the rest of the file.",
+    "Driver: three calls - empty graph (both asserts pass, one triple added), graph already holding the triple (first assert raises AssertionError, compared as a value), graph with only neighbours (alice knows carol, bob knows alice, alice likes bob, alice knows \"bob\") where a too-broad membership test would raise. Verified non-hollow: widening the first membership pattern to `?q` makes call 3 differ, and changing the added object makes calls 1 and 3 differ."
+  ],
   "draft_sha": "783200cb3dc7dbe2",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.417790+00:00",
@@ -26,5 +35,6 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

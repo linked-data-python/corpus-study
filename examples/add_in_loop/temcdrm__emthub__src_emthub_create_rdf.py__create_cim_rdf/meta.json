@@ -13,10 +13,23 @@
     "term_constructor": 27,
     "triple_add": 14
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Executable: the extract is a module-level statement with free names (g, CIM, dyn_models, uuids, model_types_used). context_shim.py binds them: dyn_models is the REAL detailed_model_types.json read from the pinned emthub clone (corpus/repos/temcdrm__emthub, what load_detailed_model_types() returns), g an empty graph, uuids {}, model_types_used a set of four DYR models (GENCLS, WTARA1, EXST1, REGCA1). The only edit to original.py is the added `from context_shim import ...` line (same in translated.ldpy). CIM_NS stays defined in the region, as in the extract.",
+    "The 14 g.add calls become two +{ } under `@graph g`: the seven triples on `mtyp` (shared subject, one ';' block) and the seven on `desc` in the inner loop. `for @bindings in` does not apply: both loops carry statements (uuids[...] = ID mutations, ID reassigned and reused as an interpolated value, a model_type lookup) around the writes; as in add_ibr_plant, a generator of dicts would restructure the code.",
+    "Literal(x, datatype=CIM.T) becomes `{x}^^cim:T` (same conversion as rdflib for str, float and '' - the typicalValue column mixes all three - and for the int sequenceNumber, whose lexical form is checked by the isomorphism). URIRef(ID) becomes f<{ID}> (no @base). The five EMT_NS/CIM_NS + 'X' IRIs per block become emt:X / cim:X; the three computed `EMT_NS + 'NthAmModelKind.{:s}'.format(...)` stay as `emt:{'...'.format(...)}` (computed local part), a call that remains Python.",
+    "Verified non-hollow: 245 triples written, 35 entries added to uuids (a compared module value); `range(3, len(parms))` skips the first three descriptors of each model, and the library's 13 other DYR models are neighbours that must not appear. Breaking the translation (another datatype on sequenceNumber, range(2, ...), dropping the name triple) fails the check each time."
+  ],
   "draft_sha": "95ce4ba098952911",
   "provenance": {
     "generated_at": "2026-11-02T18:29:36.692866+00:00",
@@ -30,5 +43,6 @@
     "remove",
     "coercion_datatype"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

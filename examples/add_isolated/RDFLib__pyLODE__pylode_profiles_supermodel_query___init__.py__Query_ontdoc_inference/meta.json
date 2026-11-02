@@ -15,11 +15,23 @@
     "namespace_term": 7,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, FOAF->foaf, ORG->org, OWL->owl, PROF->prof, PROV->prov, QB->qb, RDF->rdf, RDFS->rdfs, SDO->sdo, SH->sh, SKOS->skos, VANN->vann"
+    "The region is a module-level statement acting on a free name `g`; context_shim.py binds `g` to a plain rdflib Graph parsed from fixture.ttl (in the real project it is the Query graph, a Graph subclass). Identical on both sides.",
+    "The three `g.subject_objects(P)` calls chained by itertools.chain become three `m{ ?s P ?o }` under `@graph g`, still chained (itertools.chain kept: the loop is not refactored). The three g.remove((s_, P, o)) with all three terms bound become three `-{ {s_} P {o} }` (no wildcard involved, so the 'received as data' pitfall does not arise); the add becomes `+{ {s_} dcterms:creator {o} }`.",
+    "Prefixes trimmed to the three really used (dc, dcterms, sdo); the draft's other 11 declarations were unused. SDO in rdflib 7.2.1 is https://schema.org/ - the fixture carries an http://schema.org/creator triple that must stay.",
+    "Fixture: dc/sdo creator and author on several subjects, a literal object, the same object under all three predicates, and neighbours (dc:contributor, existing dcterms:creator, http schema.org creator, sdo:name) that must not move. Verified non-hollow: the original removes 8 and adds 6 triples; dropping one `-{ }` line makes the check fail (12 vs 14 triples)."
   ],
   "draft_sha": "44a041b6437ad8bb",
   "provenance": {
@@ -31,5 +43,6 @@
   "strata": [
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

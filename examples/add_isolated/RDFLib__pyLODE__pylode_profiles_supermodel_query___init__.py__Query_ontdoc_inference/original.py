@@ -2,6 +2,7 @@
 # region: Query.ontdoc_inference (lines 614-622, stratum add_isolated)
 # licence of the source repository: see meta.json
 from itertools import chain
+from context_shim import g
 from rdflib.namespace import (
     DC,
     DCTERMS,

@@ -1,6 +1,7 @@
 # Extracted from statnett/KGraphPy@38859be62f : tests/test_graph.py
 # region: test_iadd (lines 131-144, stratum add_isolated)
 # licence of the source repository: see meta.json
+import context_shim
 from rdflib import URIRef, Literal, Namespace
 from kgraphpy.processor import CIMProcessor
 from kgraphpy.graph import CIMGraph
