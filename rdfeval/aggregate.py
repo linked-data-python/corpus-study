@@ -161,7 +161,7 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
         for p in ok]
 
     if study.incremental_review:
-        agg["by_stratum"] = _by_stratum(ok)
+        agg["by_stratum"] = _by_stratum(ok, _reprise_selection(study))
         agg["by_construction"] = _by_construction(ok)
         agg["unattested_constructions"] = _unattested(ok)
         agg["by_oracle"] = {
@@ -184,7 +184,7 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
           f"medians tokens {agg['by_metric']['tokens']['reduction_pct']}")
 
 
-def _by_stratum(ok: list[dict]) -> dict:
+def _by_stratum(ok: list[dict], reprise: dict | None = None) -> dict:
     """Coverage and benefit per stratum of use (fiche 403).
 
     A pair drawn for several strata counts in each: the question is whether
@@ -202,6 +202,13 @@ def _by_stratum(ok: list[dict]) -> dict:
     out: dict = {}
     for stratum in sorted({s for p in ok for s in p.get("strata", [])}):
         sub = [p for p in ok if stratum in p.get("strata", [])]
+        if reprise is not None:
+            # the resumed selection (record corpus/404): a pair that lost
+            # the stratum with the analyser correction no longer counts in it
+            selected = reprise.get(stratum, (0.0, {}))[1]
+            sub = [p for p in sub if p["region_id"] in selected]
+            if not sub:
+                continue
         classes: dict[str, int] = {}
         for p in sub:
             classes[p.get("classification") or "unclassified"] = \
@@ -223,7 +230,67 @@ def _by_stratum(ok: list[dict]) -> dict:
                 m: _dist([_reduction(p, m) for p in embedded]) for m in METRICS
             } if embedded else None,
         }
+        if reprise is not None:
+            out[stratum]["weighted"] = _weighted(sub, comparable,
+                                                 *reprise.get(stratum,
+                                                              (0.0, {})))
     return out
+
+
+def _reprise_selection(study: Study = STUDY) -> dict | None:
+    """``stratum -> (share_new, {region_id: subpop})`` of the resumed draw,
+    or None before it (record corpus/404, option E)."""
+    from .strata import STRATA_PATH
+    path = study.path(STRATA_PATH)
+    if not path.exists():
+        return None
+    rp = json.loads(path.read_text()).get("reprise")
+    if not rp:
+        return None
+    return {k: (s["share_new"],
+                {e["region_id"]: e["subpop"] for e in s["selection"]})
+            for k, s in rp["strata"].items()}
+
+
+def _weighted_median(values_weights: list[tuple[float, float]]):
+    pairs = sorted((v, w) for v, w in values_weights if v is not None)
+    total = sum(w for _, w in pairs)
+    if not pairs or total == 0:
+        return None
+    acc = 0.0
+    for v, w in pairs:
+        acc += w
+        if acc >= total / 2:
+            return v
+    return pairs[-1][0]
+
+
+def _weighted(sub: list[dict], comparable: list[dict], share: float,
+              subpop: dict) -> dict:
+    """Step 4 of the resumed draw: the part of the stratum the first
+    analyser saw and the part only the new one sees weigh ``1 − f`` and
+    ``f``, each estimated on its own pairs."""
+    from .reprise import weighted_rate
+    parts = {"both": [p for p in sub if subpop.get(p["region_id"]) != "new"],
+             "new": [p for p in sub if subpop.get(p["region_id"]) == "new"]}
+
+    def rate(ps):
+        return (sum(1 for p in ps if p.get("classification") in
+                    ("directly-expressible", "minor-restructuring")) / len(ps)
+                if ps else None)
+    weight = {"both": (1 - share), "new": share}
+    vw = []
+    for name, ps in parts.items():
+        comp = [p for p in ps if p in comparable]
+        for p in comp:
+            vw.append((_reduction(p, "tokens"), weight[name] / len(comp)))
+    return {
+        "share_new": share,
+        "n_both": len(parts["both"]), "n_new": len(parts["new"]),
+        "expressible_rate": weighted_rate(rate(parts["both"]),
+                                          rate(parts["new"]), share),
+        "tokens_reduction_median": _weighted_median(vw),
+    }
 
 
 def _by_construction(ok: list[dict]) -> dict:

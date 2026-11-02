@@ -186,6 +186,7 @@ def test_only_approved_pairs_enter_the_aggregates(tmp_path, monkeypatch):
     monkeypatch.setattr(aggregate, "load_pairs", lambda study: [
         pair("a", "approved"), pair("b", "unreviewed"), pair("c", "rejected")])
     monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
+    monkeypatch.setattr(aggregate, "_reprise_selection", lambda study: None)
     aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
                   STUDY)
     agg = json.loads((tmp_path / "aggregate.json").read_text())
