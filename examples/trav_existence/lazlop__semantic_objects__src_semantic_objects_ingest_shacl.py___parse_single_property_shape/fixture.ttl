@@ -1,4 +1,89 @@
-# Input graph for lazlop__semantic_objects__src_semantic_objects_ingest_shacl.py___parse_single_property_shape — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for _parse_single_property_shape (written for the study; the
+# SHACL idioms are the ones named in the region's own comments: Brick/S223
+# style class shapes). Each ex:Kxx holds ONE sh:property blank node, the
+# property shape the call asks about (the driver finds it with
+# g.value(ex:Kxx, sh:property)). Which branch of the function each exercises:
+#
+#   K01  sh:path is a blank node (sh:inversePath)       -> 'inverse-path'
+#   K02  no sh:path at all                              -> 'inverse-path'
+#   K03  sh:sparql                                      -> 'sparql'
+#   K04  sh:or of two clean sh:class members            -> Union field (or_branches)
+#   K05  sh:xone of two clean sh:class members          -> Union field (second predicate of the any())
+#   K06  sh:or with an unclean member (extra predicate) -> 'or'
+#   K07  sh:maxCount 0                                  -> 'forbidden'
+#   K08  sh:class + min/max count + comment + message   -> direct PropertyShapeIR
+#   K09  sh:datatype only, maxCount 1                   -> direct PropertyShapeIR (datatype)
+#   K10  qualifiedValueShape [ sh:class ] + qualifiedMinCount           -> qualified shape
+#   K11  as K10 with extra sh:node pins (clean)         -> nested_pins
+#   K12  as K10 with another extra predicate            -> supplementary_notes
+#   K13  qualifiedValueShape [ sh:xone ( [class] [class] ) ] alone      -> qualified Union field
+#   K14  qualifiedValueShape [ sh:xone (...) ; sh:name ] (more than the alternation) -> 'nested-node'
+#   K15  qualifiedValueShape [ sh:name ] (no class, no alternation)     -> 'nested-node'
+#   K16  just a path and sh:message / sh:severity       -> 'other'
+#   K17  sh:or AND sh:class together                    -> alternation wins (sh:or tested first)
+#   K18  sh:xone unclean                                -> 'or'
+#   K19  sh:and (not an alternation predicate)          -> 'other'
+#   K20  ex:or / ex:sparql (look alike, other namespace)-> 'other'
+#   K21  sh:path + sh:class on the bnode, sh:sparql on a SIBLING property shape
+#                                                       -> direct (sparql is not leaking)
+#   K22  sh:sparql sibling: the property shape that HAS sh:sparql (with sh:class too) -> 'sparql'
+#   K23  maxCount 0 together with sh:class              -> 'forbidden' (before the class test)
+#   K24  sh:class AND sh:datatype both                  -> both locals
+#   K25  sh:path, qualifiedValueShape with sh:class that has a hyphen -> field_name_for_qualified
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+ex:K01 sh:property [ sh:path [ sh:inversePath ex:isPartOf ] ; sh:message "inverse" ] .
+ex:K02 sh:property [ sh:class ex:Thing ; rdfs:comment "no path" ] .
+ex:K03 sh:property [ sh:path ex:hasValue ; sh:sparql [ sh:select "SELECT $this WHERE {}" ] ;
+                     sh:class ex:Thing ; sh:severity sh:Warning ] .
+ex:K04 sh:property [ sh:path ex:hasMedium ; sh:minCount 1 ;
+                     sh:or ( [ sh:class ex:Water ] [ sh:class ex:Oil ] ) ] .
+ex:K05 sh:property [ sh:path ex:isConnectedTo ;
+                     sh:xone ( [ sh:class ex:Pump ] [ sh:class ex:Fan ] ) ] .
+ex:K06 sh:property [ sh:path ex:hasMedium ; rdfs:comment "unclean or" ;
+                     sh:or ( [ sh:class ex:Water ; sh:minCount 2 ] [ sh:class ex:Oil ] ) ] .
+ex:K07 sh:property [ sh:path ex:isDeprecated ; sh:maxCount 0 ; rdfs:comment "forbidden" ; sh:message "no" ] .
+ex:K08 sh:property [ sh:path ex:hasConnectionPoint ; sh:class ex:ConnectionPoint ;
+                     sh:minCount 1 ; sh:maxCount 3 ;
+                     rdfs:comment "a connection point" ; sh:message "needs a cp" ] .
+ex:K09 sh:property [ sh:path ex:hasName ; sh:datatype xsd:string ; sh:maxCount 1 ] .
+ex:K10 sh:property [ sh:path ex:hasPart ; sh:qualifiedMinCount 2 ;
+                     sh:qualifiedValueShape [ sh:class ex:Valve ] ] .
+ex:K11 sh:property [ sh:path ex:hasPort ; sh:qualifiedMinCount 1 ;
+                     sh:qualifiedValueShape [ sh:class ex:Port ;
+                        sh:node [ rdf:type sh:NodeShape ;
+                                  sh:property [ sh:path ex:hasMedium ; sh:class ex:Water ] ] ] ] .
+ex:K12 sh:property [ sh:path ex:hasPart ; sh:qualifiedMinCount 1 ;
+                     sh:qualifiedValueShape [ sh:class ex:Valve ; sh:name "extra" ] ] .
+ex:K13 sh:property [ sh:path ex:hasCircuit ; sh:qualifiedMinCount 1 ;
+                     sh:qualifiedValueShape [ sh:xone ( [ sh:class ex:Cooling ] [ sh:class ex:Heating ] ) ] ] .
+ex:K14 sh:property [ sh:path ex:hasCircuit ; sh:qualifiedMinCount 1 ; rdfs:comment "more than the alternation" ;
+                     sh:qualifiedValueShape [ sh:xone ( [ sh:class ex:Cooling ] [ sh:class ex:Heating ] ) ;
+                                              sh:name "extra" ] ] .
+ex:K15 sh:property [ sh:path ex:hasCircuit ; sh:qualifiedMinCount 1 ;
+                     sh:qualifiedValueShape [ sh:name "no class" ] ] .
+ex:K16 sh:property [ sh:path ex:hasWhatever ; sh:message "msg" ; sh:severity sh:Info ] .
+ex:K17 sh:property [ sh:path ex:hasMedium ; sh:class ex:Fluid ;
+                     sh:or ( [ sh:class ex:Water ] [ sh:class ex:Oil ] ) ] .
+ex:K18 sh:property [ sh:path ex:hasMedium ;
+                     sh:xone ( [ sh:class ex:Water ; sh:name "x" ] [ sh:class ex:Oil ] ) ] .
+ex:K19 sh:property [ sh:path ex:hasMedium ; sh:and ( [ sh:class ex:Water ] [ sh:class ex:Oil ] ) ] .
+ex:K20 sh:property [ sh:path ex:hasMedium ; ex:or ( ex:a ex:b ) ; ex:sparql "not shacl" ] .
+
+# K21 / K22: a sibling of the shape asked about has sh:sparql, sh:or, sh:path.
+ex:K21 sh:property [ sh:path ex:hasMode ; sh:class ex:Mode ] ,
+                   [ sh:path ex:hasOther ; sh:sparql [ sh:select "SELECT $this WHERE {}" ] ;
+                     sh:or ( [ sh:class ex:A ] [ sh:class ex:B ] ) ] .
+ex:K22 sh:property [ sh:path ex:hasMode ; sh:sparql [ sh:select "SELECT $this WHERE {}" ] ; sh:class ex:Mode ] .
+
+ex:K23 sh:property [ sh:path ex:hasGone ; sh:maxCount 0 ; sh:class ex:Mode ] .
+ex:K24 sh:property [ sh:path ex:hasThing ; sh:class ex:Thing ; sh:datatype xsd:integer ; sh:minCount 0 ] .
+ex:K25 sh:property [ sh:path ex:hasFluid ; sh:qualifiedMinCount 1 ;
+                     sh:qualifiedValueShape [ sh:class <http://example.org/Fluid-Water> ] ] .
+
+# Neighbour node with the same predicates, never asked about.
+ex:Elsewhere sh:property [ sh:path ex:hasMode ; sh:sparql [ sh:select "x" ] ; sh:maxCount 0 ] .

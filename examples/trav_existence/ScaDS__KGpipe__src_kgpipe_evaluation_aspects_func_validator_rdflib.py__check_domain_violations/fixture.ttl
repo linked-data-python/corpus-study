@@ -1,4 +1,44 @@
-# Input graph for ScaDS__KGpipe__src_kgpipe_evaluation_aspects_func_validator_rdflib.py__check_domain_violations — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for check_domain_violations (written for the study).
+# Covers: several violations; compliant uses; zero-solution properties;
+# neighbours that must not match (a property typed owl:DatatypeProperty, which
+# the region does not look at; a domain declared on a different property;
+# subClassOf, which `(s, rdf:type, domain) in g` does not follow).
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+ex:Person   a owl:Class .
+ex:Agent    a owl:Class .
+ex:Student  a owl:Class ; rdfs:subClassOf ex:Person .
+ex:Org      a owl:Class .
+
+# ex:knows: rdf:Property AND owl:ObjectProperty (the set() dedups it), one domain.
+ex:knows a rdf:Property, owl:ObjectProperty ; rdfs:domain ex:Person .
+ex:alice a ex:Person ; ex:knows ex:bob .            # compliant
+ex:bob   a ex:Agent  ; ex:knows ex:alice, ex:carol . # two violations (ex:bob not a Person)
+ex:carol ex:knows ex:alice .                         # untyped subject -> violation
+
+# ex:worksFor: owl:ObjectProperty, two domains (one satisfied, one violated).
+ex:worksFor a owl:ObjectProperty ; rdfs:domain ex:Person, ex:Agent .
+ex:dave a ex:Person ; ex:worksFor ex:acme .          # Person ok, Agent missing -> 1 violation
+ex:erin a ex:Person, ex:Agent ; ex:worksFor ex:acme . # both ok
+
+# ex:memberOf: rdf:Property, a domain, used only by a Student: subClassOf is not followed.
+ex:memberOf a rdf:Property ; rdfs:domain ex:Person .
+ex:frank a ex:Student ; ex:memberOf ex:acme .        # not typed ex:Person -> violation
+
+# ex:label: owl:ObjectProperty without any domain -> never a violation.
+ex:label a owl:ObjectProperty .
+ex:gina ex:label "Gina" .
+
+# ex:unused: has a domain but no use -> zero solutions.
+ex:unused a rdf:Property ; rdfs:domain ex:Org .
+
+# Neighbours that must not match:
+# ex:age is a DatatypeProperty (not examined) although it has a domain it violates.
+ex:age a owl:DatatypeProperty ; rdfs:domain ex:Person .
+ex:acme ex:age 3 .
+# a domain declared on something that is not typed as a property.
+ex:notAProp rdfs:domain ex:Org .
+ex:henry ex:notAProp ex:acme .

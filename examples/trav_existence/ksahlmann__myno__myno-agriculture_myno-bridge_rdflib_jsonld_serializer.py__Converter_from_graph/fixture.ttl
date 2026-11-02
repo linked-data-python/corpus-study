@@ -1,4 +1,23 @@
-# Input graph for ksahlmann__myno__myno-agriculture_myno-bridge_rdflib_jsonld_serializer.py__Converter_from_graph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph for Converter.from_graph (written for the study).
+# Covers: IRI subjects (always processed, referenced or not); an unreferenced
+# blank node (processed); blank nodes referenced as an object by an IRI, by
+# another blank node, or only through a mutual cycle (all skipped);
+# neighbours that must not match: a literal and an IRI that merely look like a
+# blank-node reference, a blank node used as object under any predicate.
+@prefix ex:  <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:a ex:p ex:b ; ex:q "x" .                 # IRI subjects, ex:b is also an object
+ex:b a ex:Thing .
+
+[ ex:p ex:a ; ex:q "unreferenced" ] .       # unreferenced bnode -> processed
+[ ex:p "another unreferenced" ] .           # second one -> processed
+
+ex:c ex:hasPart [ ex:q "part of c" ] .      # bnode referenced by an IRI -> skipped
+ex:c ex:other [ ex:r [ ex:q "nested" ] ] .  # outer bnode referenced by ex:c; inner by the outer
+
+_:n1 ex:next _:n2 .                         # cycle: both referenced -> skipped
+_:n2 ex:next _:n1 .
+
+_:m1 ex:q "m1" .                            # referenced only through rdf:type position
+ex:d rdf:type _:m1 .                        # (predicate is not ex:p / ex:q: any predicate counts)

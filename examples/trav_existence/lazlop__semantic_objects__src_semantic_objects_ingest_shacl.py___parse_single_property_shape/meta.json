@@ -13,11 +13,24 @@
     "graph_read": 7,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, SH->sh"
+    "prefixes: RDF->rdf, RDFS->rdfs, SH->sh",
+    "Context shim semantic_objects_context.py: SH (namespaces.py), naming.py, ir.py (verbatim) and shacl.py lines 1-241 (everything above the region: _literal_str, _literal_int, _dump_subgraph, _iter_alternations, _parse_pin, _parse_nested_pins, _parse_value_shape, _parse_or_members, _or_property_shape, _parse_alternation_property_shape, _ALTERNATION_PREDICATES), verbatim from lazlop/semantic_objects@243c5efd8c; the package is not installed. Those helpers stay plain rdflib on both sides: only the region is translated.",
+    "Existence reads: `(bn, SH.sparql, None) in g` -> `bool(m{ {bn} sh:sparql ?o })`; `any((bn, pred, None) in g for pred in _ALTERNATION_PREDICATES)` -> `any(m{ {bn} {pred} ?o } for pred in _ALTERNATION_PREDICATES)` (predicate interpolated in predicate position; the predicates are a tuple of values, so the loop stays Python).",
+    "Value reads: the six `g.value(x, P)` -> `m{ {x} sh:P ?o }.first()` (g.value defaults to any=True, no error on several values, hence .first() and not .one()); `{p for p, _ in g.predicate_objects(qvs)}` -> `{p for p, _ in m{ {qvs} ?p ?o }}` (twice). The three `_literal_*` calls and `_dump_subgraph` stay: project helpers. `SH.node in extra_preds` etc. -> `sh:node in extra_preds`, `{SH['class']}` -> `{sh:class}`.",
+    "`from ..namespaces import SH` is replaced by `@prefix sh: <http://www.w3.org/ns/shacl#> .` in the block: the project module is plain Python, so `from … import sh:` (which imports prefixes declared by another ldpy module) does not apply.",
+    "Driver: 26 calls, one per branch of the function (inverse-path, sparql, sh:or / sh:xone Union, unclean alternation, forbidden, direct class/datatype, qualified with pins / supplementary notes / Union, nested-node, other) plus neighbours: look-alike predicates in another namespace (ex:or, ex:sparql), a sibling property shape carrying sh:sparql and sh:or, and another node with the same predicates. Compared as dataclasses, including raw_turtle. Mutants killed: free subject on sparql / alternation / datatype reads, sh:or only, .one() instead of .first(), no `- {sh:class}`, free qvs subject."
   ],
   "draft_sha": "0cf1fa90634f7c04",
   "provenance": {
@@ -29,5 +42,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

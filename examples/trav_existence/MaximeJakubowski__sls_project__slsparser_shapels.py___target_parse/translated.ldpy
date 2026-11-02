@@ -4,7 +4,10 @@
 from rdflib import Graph
 from rdflib import SH, RDF, RDFS
 from rdflib.term import URIRef, Literal, BNode, Node
-from slsparser.pathls import PANode, POp
+# `slsparser` is not installed: Op, SANode, PANode, POp and
+# _extract_parameter_values come from a context shim, verbatim copies from the
+# repository at the pinned commit (see meta.json).
+from sls_context import Op, SANode, PANode, POp, _extract_parameter_values
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -26,7 +29,7 @@ def _target_parse(graph: Graph, shapename: Node) -> SANode:
                 SANode(Op.HASVALUE, [tclass])
             ]))
 
-    if (shapename, rdf:type, rdfs:Class) in graph:
+    if m{ {shapename} a rdfs:Class }(graph):
         out.children.append(SANode(
             Op.COUNTRANGE,
             [

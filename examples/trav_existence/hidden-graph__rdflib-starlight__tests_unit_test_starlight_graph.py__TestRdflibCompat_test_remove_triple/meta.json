@@ -14,10 +14,22 @@
     "term_constructor": 9,
     "triple_add": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "prefixed name"
+  ],
+  "translation_notes": [
+    "Three lines, three islands: `sg.add((URIRef(EX+'s'), ...))` -> `+{ ex:s ex:p ex:o }`; `sg.remove(...)` -> `-{ ex:s ex:p ex:o }` (fully bound: ldpy calls graph.remove(triple)); `assert (...) not in sg` -> `assert not m{ ex:s ex:p ex:o }`. `EX = 'http://example.org/'` (context line above the region) is replaced by `@prefix ex: <http://example.org/> .`; `@graph sg` designates the fixture graph.",
+    "`sg` is a pytest fixture (`StarlightGraph()`, a Graph subclass of the `starlight` package, not installed; 1 600 lines with many dependencies, not shimmed). The driver passes a plain rdflib Graph, and Graph subclasses overriding `remove` or `add`. `demo(sg)` (identical on both sides, outside the region) turns the assertion into a value; the harness also compares the final graph, so the neighbours (same s+p, same p+o, same s+o, a Literal 'o') show that exactly one triple goes.",
+    "Finding: `x in g` calls `Graph.__contains__`, while `bool(m{ })` reads through `graph.triples()`. They agree on a plain Graph and on StarlightGraph (it overrides both with the same coercion), but would differ on a subclass overriding only one.",
+    "Mutants killed: `-{ ex:s ex:p ?o }` (removes neighbours), `m{ ex:s ex:p ?o }` / `m{ ?s ex:p ex:o }` in the assert, `assert m{`, remove deleted."
+  ],
   "draft_sha": "a41eb31edb616752",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.606603+00:00",
@@ -28,5 +40,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

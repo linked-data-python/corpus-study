@@ -15,10 +15,18 @@
     "namespace_term": 6
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "call suffix (g)"
+  ],
   "translation_notes": [
-    "prefixes: WIKI->wiki, RDFS->rdfs"
+    "prefixes: WIKI->wiki, RDFS->rdfs",
+    "EXCLUDED: needs a live server. The region does httpx.get('https://pod.vardeman.me/vault/ontology/wiki') (the author's Solid Pod) and asserts status 200 before reading the graph. Exact error on both sides here: httpx.ConnectError: [Errno -2] Name or service not known. The driver's check prints OK only because both sides raise the same error: a hollow green, so the status stays 'draft'.",
+    "Context shim cogitarelink_context.py: `_pod_base` copied verbatim from tests/conftest.py of LA3D/cogitarelink-solid@49121503ea (it is a pytest root conftest, not importable as tests.conftest). httpx is the real installed package.",
+    "Translation written and transpiled but never executed past the HTTP call: the two `(WIKI.X, RDFS.subClassOf, Y) in g` asserts become `assert m{ wiki:Source rdfs:subClassOf skos:Concept }(g)` and `assert m{ wiki:WorkingNote rdfs:subClassOf wiki:Page }(g)` (call suffix, since g is a local in a function; skos: declared in the block in place of SKOS = Namespace(...)). Faithful only by reading."
   ],
   "draft_sha": "915a53968c97bab9",
   "provenance": {
@@ -30,5 +38,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

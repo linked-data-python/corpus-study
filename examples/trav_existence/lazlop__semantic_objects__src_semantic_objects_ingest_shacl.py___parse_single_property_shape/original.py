@@ -4,9 +4,17 @@
 from typing import List, Optional, Tuple, Union
 from rdflib import BNode, Graph, RDF, URIRef
 from rdflib.namespace import RDFS
-from ..namespaces import SH
-from .ir import ComplexConstraintIR, PinIR, PropertyShapeIR
-from .naming import field_name_for_path, field_name_for_qualified, local_name
+# `semantic_objects` is not installed. The relative imports of the package
+# (namespaces.SH, ir.*, naming.*) and the helpers defined above the region in
+# the same file (shacl.py lines 1-241) come from a context shim, verbatim
+# copies from the repository at the pinned commit (see meta.json).
+from semantic_objects_context import (
+    SH, ComplexConstraintIR, PinIR, PropertyShapeIR,
+    field_name_for_path, field_name_for_qualified, local_name,
+    _literal_str, _literal_int, _dump_subgraph, _iter_alternations,
+    _parse_nested_pins, _parse_or_members, _or_property_shape,
+    _parse_alternation_property_shape,
+)
 _ALTERNATION_PREDICATES = (SH['or'], SH.xone)
 
 def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, ComplexConstraintIR]:

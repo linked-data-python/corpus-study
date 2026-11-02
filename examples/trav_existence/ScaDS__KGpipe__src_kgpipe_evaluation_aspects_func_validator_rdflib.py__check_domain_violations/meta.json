@@ -13,11 +13,21 @@
     "graph_read": 4,
     "namespace_term": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, XSD->xsd"
+    "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, XSD->xsd",
+    "The stratum's read: `if not (s, RDF.type, domain) in g:` -> `if not m{ {s} a {domain} }:` (`not in`, hence `not m{ }`), with `@graph g` once at the top.",
+    "The other three reads of the region are translated too, so every island is credited: `set(g.subjects(RDF.type, X))` -> `set(m{ ?s a X })` (arity 1, bare terms); `for s, p, o in g.triples((None, prop, None))` -> `for s, o in m{ ?s {prop} ?o }` (p was unused: the tuple loses one slot, the only restructuring); `for _, _, domain in g.triples((prop, RDFS.domain, None))` -> `for domain in m{ {prop} rdfs:domain ?d }`. The .union() of two sets stays Python: m{ } has no UNION. `a` stands for rdf:type (Turtle keyword, not in the closed construction list).",
+    "Fixture: ex:knows typed both rdf:Property and owl:ObjectProperty (the set() must not duplicate it; ex:bob gives two genuine violations), two domains of which one is satisfied, no domain, a domain with no use, subClassOf not followed, and neighbours that must not match (an owl:DatatypeProperty with a violated domain; a domain on a non-property). Mutants killed: `not` dropped, rdf:Property -> free type."
   ],
   "draft_sha": "a8eea9cdca871ce9",
   "provenance": {
@@ -29,5 +39,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

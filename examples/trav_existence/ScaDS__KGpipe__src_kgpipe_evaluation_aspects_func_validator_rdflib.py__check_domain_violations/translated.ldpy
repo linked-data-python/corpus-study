@@ -5,14 +5,14 @@ from rdflib import Graph, Namespace, RDF, RDFS, OWL, XSD, Literal
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 def check_domain_violations(g: Graph):
+    @graph g
     violations = []
-    for prop in set(g.subjects(rdf:type, rdf:Property)).union(g.subjects(rdf:type, owl:ObjectProperty)):
-        for s, p, o in g.triples((None, prop, None)):
-            for _, _, domain in g.triples((prop, rdfs:domain, None)):
-                if not (s, rdf:type, domain) in g:
+    for prop in set(m{ ?s a rdf:Property }).union(m{ ?s a owl:ObjectProperty }):
+        for s, o in m{ ?s {prop} ?o }:
+            for domain in m{ {prop} rdfs:domain ?d }:
+                if not m{ {s} a {domain} }:
                     violations.append((s, prop, "Expected domain", domain))
     return violations

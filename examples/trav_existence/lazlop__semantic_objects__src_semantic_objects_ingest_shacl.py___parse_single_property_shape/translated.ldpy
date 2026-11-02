@@ -4,9 +4,17 @@
 from typing import List, Optional, Tuple, Union
 from rdflib import BNode, Graph, RDF, URIRef
 from rdflib.namespace import RDFS
-from ..namespaces import SH
-from .ir import ComplexConstraintIR, PinIR, PropertyShapeIR
-from .naming import field_name_for_path, field_name_for_qualified, local_name
+# `semantic_objects` is not installed. The relative imports of the package
+# (namespaces.SH, ir.*, naming.*) and the helpers defined above the region in
+# the same file (shacl.py lines 1-241) come from a context shim, verbatim
+# copies from the repository at the pinned commit (see meta.json).
+from semantic_objects_context import (
+    ComplexConstraintIR, PinIR, PropertyShapeIR,
+    field_name_for_path, field_name_for_qualified, local_name,
+    _literal_str, _literal_int, _dump_subgraph, _iter_alternations,
+    _parse_nested_pins, _parse_or_members, _or_property_shape,
+    _parse_alternation_property_shape,
+)
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -18,7 +26,8 @@ def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, Complex
     field) or a ComplexConstraintIR (it doesn't). Shared by the class's direct
     sh:property walk and by class-level sh:or/xone branches that each wrap a
     full sh:property bnode of their own (see _parse_class_level_alternation)."""
-    path_obj = g.value(bn, sh:path)
+    @graph g
+    path_obj = m{ {bn} sh:path ?o }.first()
     comment = _literal_str(g, bn, rdfs:comment)
     message = _literal_str(g, bn, sh:message)
     severity = _literal_str(g, bn, sh:severity)
@@ -30,8 +39,8 @@ def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, Complex
         )
 
     path_local = local_name(path_obj)
-    has_sparql = (bn, sh:sparql, None) in g
-    has_alternation = any((bn, pred, None) in g for pred in _ALTERNATION_PREDICATES)
+    has_sparql = bool(m{ {bn} sh:sparql ?o })
+    has_alternation = any(m{ {bn} {pred} ?o } for pred in _ALTERNATION_PREDICATES)
     max_count = _literal_int(g, bn, sh:maxCount)
     min_count = _literal_int(g, bn, sh:minCount)
 
@@ -56,8 +65,8 @@ def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, Complex
             message=message, severity=severity, raw_turtle=_dump_subgraph(g, bn),
         )
 
-    direct_class = g.value(bn, sh:class)
-    datatype = g.value(bn, sh:datatype)
+    direct_class = m{ {bn} sh:class ?o }.first()
+    datatype = m{ {bn} sh:datatype ?o }.first()
 
     if direct_class is not None or datatype is not None:
         return PropertyShapeIR(
@@ -69,9 +78,9 @@ def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, Complex
             comment=comment, message=message,
         )
 
-    qvs = g.value(bn, sh:qualifiedValueShape)
+    qvs = m{ {bn} sh:qualifiedValueShape ?o }.first()
     if qvs is not None:
-        qvs_class = g.value(qvs, sh:class)
+        qvs_class = m{ {qvs} sh:class ?o }.first()
         if qvs_class is None:
             # No sh:class of its own - still resolves cleanly if the
             # qualified value shape's *entire* content is an sh:or/sh:xone of
@@ -81,7 +90,7 @@ def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, Complex
             # property-shape-level alternation, just qualified.
             found = next(_iter_alternations(g, qvs), None)
             qvs_alt_list, qvs_alt_pred = found if found is not None else (None, None)
-            if qvs_alt_list is not None and {p for p, _ in g.predicate_objects(qvs)} == {qvs_alt_pred}:
+            if qvs_alt_list is not None and {p for p, _ in m{ {qvs} ?p ?o }} == {qvs_alt_pred}:
                 branches = _parse_or_members(g, qvs_alt_list, path_local)
                 if branches is not None:
                     qmin = _literal_int(g, bn, sh:qualifiedMinCount)
@@ -103,7 +112,7 @@ def _parse_single_property_shape(g: Graph, bn) -> Union[PropertyShapeIR, Complex
             min_count=qmin, max_count=None, qualified=True,
             comment=comment, message=message,
         )
-        extra_preds = {p for p, _ in g.predicate_objects(qvs)} - {sh:class}
+        extra_preds = {p for p, _ in m{ {qvs} ?p ?o }} - {sh:class}
         if sh:node in extra_preds:
             pins = _parse_nested_pins(g, qvs)
             if pins:

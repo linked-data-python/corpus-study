@@ -4,12 +4,13 @@
 from rdflib.term import URIRef, Literal, BNode
 
 def from_graph(self, graph):
+    @graph graph
     nodemap = {}
 
     for s in set(graph.subjects()):
         ## only iri:s and unreferenced (rest will be promoted to top if needed)
         if isinstance(s, URIRef) or (isinstance(s, BNode)
-                and not any(graph.subjects(None, s))):
+                and not m{ ?x ?p {s} }):
             self.process_subject(graph, s, nodemap)
 
     return list(nodemap.values())

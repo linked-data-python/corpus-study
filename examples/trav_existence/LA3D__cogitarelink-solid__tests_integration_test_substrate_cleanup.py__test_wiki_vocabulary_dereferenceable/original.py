@@ -1,9 +1,13 @@
 # Extracted from LA3D/cogitarelink-solid@49121503ea : tests/integration/test_substrate_cleanup.py
 # region: test_wiki_vocabulary_dereferenceable (lines 154-172, stratum trav_existence)
 # licence of the source repository: see meta.json
+#
+# `tests.conftest._pod_base` comes from a context shim (cogitarelink_context.py,
+# verbatim copy, see meta.json). The region needs the author's live Solid Pod:
+# see meta.json (excluded).
 import httpx
 from rdflib import Graph, Namespace, URIRef
-from tests.conftest import _pod_base
+from cogitarelink_context import _pod_base
 POD_URL = _pod_base() + "/vault/"
 WIKI = Namespace("https://pod.vardeman.me/vault/ontology/wiki#")
 

@@ -12,10 +12,19 @@
   "categories": {
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "The stratum's read: `not any(graph.subjects(None, s))` -> `not m{ ?x ?p {s} }` (\"is s the object of any triple\"). The predicate wildcard cannot be `[]` in predicate position, so two throwaway variables ?x ?p are named, which the original did not need; `@graph graph` at the top of the function.",
+    "`set(graph.subjects())` stays: a full scan with no selection, for which the language reference says to keep the rdflib call (m{ ?s ?p ?o } yields triples, not subjects, and would need a comprehension).",
+    "`self` is the JSON-LD Converter, whose process_subject is out of the region: the driver passes a Recorder stub (in driver.py, same on both sides) that logs the subject and puts a node in nodemap, so both the returned list and the dispatched subjects are compared. Fixture: IRI subjects, an unreferenced bnode (processed), bnodes referenced by an IRI, by a bnode, through a cycle and in an rdf:type object position (skipped); plus an empty graph. Mutants killed: `not` dropped, subject/object swapped, predicate fixed."
+  ],
   "draft_sha": "10ff035c01f1cad9",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.598056+00:00",
@@ -26,5 +35,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

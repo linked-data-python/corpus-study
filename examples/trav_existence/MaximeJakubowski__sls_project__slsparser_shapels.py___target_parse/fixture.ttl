@@ -1,0 +1,36 @@
+# Input graph for _target_parse (written for the study).
+# Shapes (see driver.py for which one each call asks about):
+#   ex:ShapeAll        every kind of target + rdf:type rdfs:Class
+#   ex:ShapeClassOnly  rdf:type rdfs:Class only (implicit class target) -> single child, returned alone
+#   ex:ShapeNodeOnly   a single sh:targetNode                         -> single child, returned alone
+#   ex:ShapeNone       a shape with no target at all                  -> Op.BOT
+# Neighbours that must NOT make the existence read succeed:
+#   ex:OwlClassShape   rdf:type owl:Class (not rdfs:Class)
+#   ex:SubclassShape   rdfs:subClassOf rdfs:Class (wrong predicate)
+#   ex:MentionShape    rdfs:Class only as an object of some other predicate
+#   ex:OtherClass      IS an rdfs:Class, but it is a different node than the shape asked about
+#   ex:SwapShape       rdfs:Class in subject position (rdfs:Class rdf:type ex:SwapShape)
+# And a blank-node shape that is an rdfs:Class.
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+
+ex:ShapeAll a sh:NodeShape, rdfs:Class ;
+    sh:targetNode ex:n1, ex:n2 ;
+    sh:targetClass ex:C1, ex:C2 ;
+    sh:targetSubjectsOf ex:sp ;
+    sh:targetObjectsOf ex:op .
+
+ex:ShapeClassOnly a sh:NodeShape, rdfs:Class .
+ex:ShapeNodeOnly a sh:NodeShape ; sh:targetNode ex:n3 .
+ex:ShapeNone a sh:NodeShape .
+
+ex:OwlClassShape a sh:NodeShape, owl:Class .
+ex:SubclassShape a sh:NodeShape ; rdfs:subClassOf rdfs:Class .
+ex:MentionShape a sh:NodeShape ; ex:describes rdfs:Class .
+ex:OtherClass a rdfs:Class .
+rdfs:Class a ex:SwapShape .
+
+[ a sh:NodeShape, rdfs:Class ; ex:marker "anon" ; sh:targetClass ex:C3 ] .

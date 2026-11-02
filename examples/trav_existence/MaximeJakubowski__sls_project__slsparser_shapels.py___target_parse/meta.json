@@ -13,11 +13,21 @@
     "namespace_term": 10,
     "term_constructor": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: SH->sh, RDF->rdf, RDFS->rdfs"
+    "prefixes: SH->sh, RDF->rdf, RDFS->rdfs",
+    "Context shim sls_context.py: POp, PANode (slsparser/pathls.py), Op, SANode, _extract_parameter_values (slsparser/shapels.py), verbatim from MaximeJakubowski/sls_project@58f7d7840f; the package is not installed. The shim replaces `from slsparser.pathls import PANode, POp` in both files.",
+    "The stratum's read: `if (shapename, RDF.type, RDFS.Class) in graph:` -> `if m{ {shapename} a rdfs:Class }(graph):` (call suffix: graph is a parameter, and the function has no other m{ }). `a` is the Turtle keyword for rdf:type; the other `RDF.type` / `RDFS.subClassOf` in the PANode trees are values, not reads, and become `rdf:type` / `rdfs:subClassOf`.",
+    "The five `_extract_parameter_values(graph, shapename, SH.x)` calls stay: the helper is a project function (`list(graph.objects(...))`) taking the predicate as an argument; only its argument SH.x -> sh:x changes. Not rewritten in the region because it lives outside it.",
+    "Driver: ten calls on a fixture of shapes (every kind of target + implicit class; class-only and node-only single-child shortcuts; no target -> Op.BOT) with neighbours that must not match (owl:Class, rdfs:subClassOf rdfs:Class, rdfs:Class only as an object, a different node being an rdfs:Class, an absent IRI) and a blank-node shape. SANode.__eq__ compares op, children, constraintComponent. Mutants killed: `a ?c`, free subject, free predicate, `not`."
   ],
   "draft_sha": "fce970fcc938381a",
   "provenance": {
@@ -29,5 +39,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }
