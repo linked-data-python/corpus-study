@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at": "2026-11-02T19:43:46.678589+00:00",
-    "pipeline_revision": "59c41152d8faf50be00e243b050aceb972a0bb3f",
+    "generated_at": "2026-11-02T19:45:14.162073+00:00",
+    "pipeline_revision": "9b1f5b1f01ed804cc5a3c5d752133705c75f6caa",
     "config_version": "1.1.0",
     "metrics_version": "1.1.0"
   },
@@ -5750,53 +5750,53 @@
       }
     },
     "bind_initbindings": {
-      "n": 22,
-      "n_surface_comparable": 11,
+      "n": 23,
+      "n_surface_comparable": 12,
       "n_string_embedded": 11,
       "classification": {
-        "directly-expressible": 18,
+        "directly-expressible": 19,
         "minor-restructuring": 4
       },
-      "expressible": 22,
+      "expressible": 23,
       "by_subgroup": {
-        "inline-construction": 2,
+        "inline-construction": 3,
         "no-source-rdf": 3,
         "string-embedded": 11,
         "terms-only": 6
       },
       "code_loc": {
-        "n": 11,
-        "mean": -17.8369,
-        "median": 0.0,
-        "q1": -6.25,
-        "q3": 16.279,
+        "n": 12,
+        "mean": -16.1124,
+        "median": 1.4285,
+        "q1": -5.5207,
+        "q3": 15.9593,
         "min": -233.333,
         "max": 37.179
       },
       "tokens": {
-        "n": 11,
-        "mean": -15.9061,
-        "median": -7.178,
-        "q1": -37.931,
-        "q3": 3.077,
+        "n": 12,
+        "mean": -14.407,
+        "median": -3.358,
+        "q1": -31.309,
+        "q3": 2.8285,
         "min": -81.579,
         "max": 15.936
       },
       "chars": {
-        "n": 11,
-        "mean": -4.8058,
-        "median": 4.097,
-        "q1": -1.56,
-        "q3": 7.273,
+        "n": 12,
+        "mean": -3.5611,
+        "median": 4.4115,
+        "q1": -1.3902,
+        "q3": 7.7927,
         "min": -53.205,
-        "max": 8.596
+        "max": 10.131
       },
       "syntax_nodes": {
-        "n": 11,
-        "mean": 5.4831,
-        "median": 2.5,
-        "q1": -1.19,
-        "q3": 10.569,
+        "n": 12,
+        "mean": 7.2698,
+        "median": 4.771,
+        "q1": -0.6018,
+        "q3": 13.7805,
         "min": -9.091,
         "max": 29.878
       },
@@ -5839,16 +5839,16 @@
         }
       },
       "coverage": {
-        "finals": 26,
-        "expressible": 22,
+        "finals": 27,
+        "expressible": 23,
         "not_expressible": 4
       },
       "weighted": {
         "share_new": 0.2824,
-        "n_both": 17,
+        "n_both": 18,
         "n_new": 5,
-        "expressible_rate": 0.8633142857142857,
-        "tokens_reduction_median": -7.178
+        "expressible_rate": 0.8695272727272728,
+        "tokens_reduction_median": 0.462
       }
     },
     "coercion_datatype": {
@@ -6840,6 +6840,7 @@
         "add_in_loop",
         "add_isolated",
         "add_run_shared_subject",
+        "bind_initbindings",
         "ns_def_local",
         "remove",
         "sparql_interpolated",
