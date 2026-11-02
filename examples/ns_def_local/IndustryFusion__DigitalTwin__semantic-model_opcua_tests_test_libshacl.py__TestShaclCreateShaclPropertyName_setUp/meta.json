@@ -18,7 +18,7 @@
   "constructions": [
     "@prefix"
   ],
-  "translation_notes": "REJUG\u00c9E le 2026-09-03 apr\u00e8s ldpy 0.6.3 (fiche ldpy/027). Deux Namespace assign\u00e9s \u00e0 self et lus par les autres m\u00e9thodes du TestCase : 'as' lie les objets. M\u00eame motif que la r\u00e9gion s\u0153ur test_libutils. Casse d\u00e9lib\u00e9r\u00e9e v\u00e9rifi\u00e9e : FAIL puis OK.\n\n[note ant\u00e9rieure] Both Namespace() calls (basens, opcuans) are assigned straight to self.basens/self.opcuans and outlive the block: `@prefix` has no run-time object (INSTRUCTIONS.md #1, #5), so a self.basens = Namespace(...) that must be readable from other methods of the TestCase cannot become `@prefix ns: <...> .` -- there is nothing to store on self. Kept as plain Namespace(...) calls, unchanged from original.py. Context shim added: `from lib.shacl import Shacl, Validation` is unreachable outside the IndustryFusion/DigitalTwin repo, so both original.py and translated.ldpy import Shacl/Validation from context_shim.py instead (minimal constructor that records its four arguments, matching how setUp uses it) -- see AGENT_BATCH.md's shim protocol. driver.py: setUp(self) only mutates attributes on `self`; a fresh instance per side stands in for the TestCase, but its Graph() attribute (data_graph, and shacl.data_graph) gets a fresh BNode identifier per instantiation, so plain __eq__/SimpleNamespace comparison would report a false mismatch between two runs of identical code. The driver defines a small comparable stand-in whose __eq__ recurses through attributes and reduces any nested Graph to graphs_isomorphic() before comparing -- no change to original.py/translated.ldpy semantics, purely a comparison detail.",
+  "translation_notes": "REJUGÉE le 2026-09-03 après ldpy 0.6.3 (fiche ldpy/027). Deux Namespace assignés à self et lus par les autres méthodes du TestCase : 'as' lie les objets. Même motif que la région sœur test_libutils. Casse délibérée vérifiée : FAIL puis OK.\n\n[note antérieure] Both Namespace() calls (basens, opcuans) are assigned straight to self.basens/self.opcuans and outlive the block: `@prefix` has no run-time object (INSTRUCTIONS.md #1, #5), so a self.basens = Namespace(...) that must be readable from other methods of the TestCase cannot become `@prefix ns: <...> .` -- there is nothing to store on self. Kept as plain Namespace(...) calls, unchanged from original.py. Context shim added: `from lib.shacl import Shacl, Validation` is unreachable outside the IndustryFusion/DigitalTwin repo, so both original.py and translated.ldpy import Shacl/Validation from context_shim.py instead (minimal constructor that records its four arguments, matching how setUp uses it) -- see AGENT_BATCH.md's shim protocol. driver.py: setUp(self) only mutates attributes on `self`; a fresh instance per side stands in for the TestCase, but its Graph() attribute (data_graph, and shacl.data_graph) gets a fresh BNode identifier per instantiation, so plain __eq__/SimpleNamespace comparison would report a false mismatch between two runs of identical code. The driver defines a small comparable stand-in whose __eq__ recurses through attributes and reduces any nested Graph to graphs_isomorphic() before comparing -- no change to original.py/translated.ldpy semantics, purely a comparison detail.",
   "draft_sha": "6720d0610e2de6a9",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.300352+00:00",
@@ -39,9 +39,23 @@
   "optimization_status": "final",
   "optimization_notes": [
     "Nothing to compress: five attribute assignments read by the other methods of the TestCase. optimized.py is original.py and optimized.ldpy is translated.ldpy, byte for byte.",
-    "The two `@prefix \u2026 as BASENS/OPCUANS` lines sit before `def setUp` in translated.ldpy, so they belong to its header and are kept as they are; they weigh on the notation ratio (1.108)."
+    "The two `@prefix … as BASENS/OPCUANS` lines sit before `def setUp` in translated.ldpy, so they belong to its header and are kept as they are; they weigh on the notation ratio (1.108)."
   ],
   "optimized_constructions": [
     "@prefix"
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:setUp",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:setUp",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

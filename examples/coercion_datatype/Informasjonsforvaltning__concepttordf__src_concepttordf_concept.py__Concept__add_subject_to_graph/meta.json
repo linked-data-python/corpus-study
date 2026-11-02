@@ -51,7 +51,7 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "Python: the seven-line exploded `self._g.add(( \u2026 ))` packed onto three lines; nothing else to remove (`for key, value in self.subject.items()` was tried: one token more).",
+    "Python: the seven-line exploded `self._g.add(( … ))` packed onto three lines; nothing else to remove (`for key, value in self.subject.items()` was tried: one token more).",
     "LD Python: the computed language tag of ldpy 0.7.1 reaches the site the translation had to leave in Python: `{self.subject[key]}@{key}` replaces `{Literal(self.subject[key], lang=key)}`, and `f<{self.identifier}>` replaces `{URIRef(self.identifier)}` (no @base in scope).",
     "The three `@prefix` lines of the translated.ldpy header (dct:, plus unused rdf: and rdfs:) against one `DCT = Namespace(...)` line in the Python header keep the notation ratio above 1.",
     "The check line's `care` for this region is computed against original.py WITH its demo() harness, while optimized.py is measured without it (rdfeval/check.py sizes() does not apply strip_demo to the original, compare.py does): the ratio it prints is biased low; measured like compare.py, care = 0.989."
@@ -61,8 +61,22 @@
     "+{ }",
     "call suffix (g)",
     "prefixed name",
-    "f<\u2026>",
+    "f<…>",
     "language literal",
     "interpolation {expr}"
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

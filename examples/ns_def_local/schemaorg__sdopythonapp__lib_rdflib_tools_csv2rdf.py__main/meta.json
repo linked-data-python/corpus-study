@@ -17,7 +17,7 @@
   "classification": "awkward",
   "constructions": [
     "@prefix",
-    "f<\u2026>"
+    "f<…>"
   ],
   "translation_notes": [
     "The six `rdflib.Namespace(x)` sites (config `base`/`propbase`, -b/-p, --base/--propbase) only STORE the Namespace on the converter (`csv2rdf.BASE = rdflib.Namespace(opts['-b'])`): main() never writes a prefixed name, the namespace is dereferenced later, in CSV2RDF.convert(). The only construction that yields a Namespace OBJECT is `@prefix base: f<{expr}> as BASE .` (computed IRI, `as`), followed by `csv2rdf.BASE = BASE`: one line becomes two, with a declared prefix nobody uses. Hence awkward, not directly-expressible: the construction exists but is heavier than `rdflib.Namespace(x)`.",
@@ -51,6 +51,20 @@
     "`eval`, passed through the table, still runs in main()'s frame, as in the original."
   ],
   "optimized_constructions": [
-    "f<\u2026>"
-  ]
+    "f<…>"
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:main",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:main",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

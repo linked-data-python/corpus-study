@@ -28,7 +28,7 @@
     "`trans` is NOT always a str: on the cache hit it is `trans_cached[s].strip()`, but otherwise it is the googletrans Translated OBJECT (the source never takes `.text`), so the literal's lexical form is str(Translated) -- 'Translated(src=ru, dest=en, text=..., ...)'. `{trans}@{dest_lang}` reproduces this as is (`Literal(trans, lang=...)`, no coercion in between), which the driver pins by comparing both cases; the tag only has to be a str (`langtag` raises on None, where Literal(trans, None) would give a plain literal -- unreachable here, dest_lang is NameError until configure_task sets it).",
     "the assembled query string `\"SELECT ?s ?o WHERE {?s <\" + str(prop) + \"> ?o .}\"` + `ingraph.query(query)` becomes `m{ ?s {prop} ?o }(ingraph)` (a basic graph pattern, the predicate interpolated in term position, `(ingraph)` as receiver); the loop body is untouched and still reads `triple[\"s\"]` / `triple[\"o\"]` (ldpy's Row accepts the variable names). INSTRUCTIONS section 2 forbids the assembled query, hence this change outside the flagged site.",
     "prefixes: none declared (no vocabulary term is written in the region). The vocabulary (jlo, skos) comes from the project's own module and stays Python Namespaces (`prop = skos.prefLabel` is set by configure_task, outside the region).",
-    "context shim (context_shim.py): `from ._dataset_command import ...` imports django/scrapy/toml, `googletrans` is a Google Translate web client (not installed, network). The shim has jlo/skos with the real IRIs, the two loggers (same name as the source's), an empty DatasetCommand, a table-driven Translator whose Translated has the shape of googletrans's __str__ (a text the service does not know comes back unchanged, still Cyrillic; \"\u0420\u0430\u0432\u0432\u0438\u043d\" is answered as a banned client, src != ru), and configure_task copied from the source (it takes the module's globals). original.py / translated.ldpy get `translator = Translator()` (a module line of the source outside the region) and the same `run(task, ingraph)` harness at the end: it sets `prop` / `dest_lang` through configure_task and returns the written graph, since the region reads three module globals (prop, dest_lang, translator) it does not define.",
+    "context shim (context_shim.py): `from ._dataset_command import ...` imports django/scrapy/toml, `googletrans` is a Google Translate web client (not installed, network). The shim has jlo/skos with the real IRIs, the two loggers (same name as the source's), an empty DatasetCommand, a table-driven Translator whose Translated has the shape of googletrans's __str__ (a text the service does not know comes back unchanged, still Cyrillic; \"Раввин\" is answered as a banned client, src != ru), and configure_task copied from the source (it takes the module's globals). original.py / translated.ldpy get `translator = Translator()` (a module line of the source outside the region) and the same `run(task, ingraph)` harness at the end: it sets `prop` / `dest_lang` through configure_task and returns the written graph, since the region reads three module globals (prop, dest_lang, translator) it does not define.",
     "driver: five calls through run(): en-label (4 labels, one unknown to the service -> error log, one banned -> src != ru branch, renewal of translator), de-label on the same graph (cache hits tagged @de; the cache is per subject, not per language: the source's behaviour), en-abstract (the other predicate; two subjects cached by the labels, two that only have an abstract), de-abstract, and an empty graph. The log records (INFO from log/error) are compared as a multiset: the cached / translated / Cyrillic / banned branches show up there. fixture.ttl has skos:altLabel and skos:definition neighbours that must not be read.",
     "anti-hollow-green: tag fixed to @en, no tag, `.text` instead of the object, tag from src_lang, pattern widened to ?p, predicate fixed to skos:prefLabel: rdfeval check FAILED each time; restored, green."
   ],
@@ -63,5 +63,19 @@
     "variable",
     "interpolation {expr}",
     "language literal"
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:run",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:run",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

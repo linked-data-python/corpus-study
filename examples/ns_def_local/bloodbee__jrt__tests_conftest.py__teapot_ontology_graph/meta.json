@@ -26,7 +26,7 @@
     "prefixed name",
     "plain literal"
   ],
-  "translation_notes": "TRADUITE le 2026-09-03, apr\u00e8s ldpy 0.6.3 (fiche ldpy/027) \u2014 la r\u00e9gion \u00e9tait rest\u00e9e en brouillon parce que STUFF \u00e9tait li\u00e9 au graphe PAR VALEUR. L'h\u00e9ritage des pr\u00e9fixes par un graphe d\u00e9sign\u00e9 supprime le g.bind(), et STUFF dispara\u00eet avec lui : il ne servait qu'\u00e0 construire des termes, donc pas besoin de 'as'. Les quatre g.add() se groupent en un seul +{ } \u00e0 deux sujets. Pilote : la r\u00e9gion est une fixture pytest, donc demo() atteint le corps par __wrapped__. Casse d\u00e9lib\u00e9r\u00e9e : FAIL puis OK.\n\n[note ant\u00e9rieure] prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
+  "translation_notes": "TRADUITE le 2026-09-03, après ldpy 0.6.3 (fiche ldpy/027) — la région était restée en brouillon parce que STUFF était lié au graphe PAR VALEUR. L'héritage des préfixes par un graphe désigné supprime le g.bind(), et STUFF disparaît avec lui : il ne servait qu'à construire des termes, donc pas besoin de 'as'. Les quatre g.add() se groupent en un seul +{ } à deux sujets. Pilote : la région est une fixture pytest, donc demo() atteint le corps par __wrapped__. Casse délibérée : FAIL puis OK.\n\n[note antérieure] prefixes: OWL->owl, RDF->rdf, RDFS->rdfs",
   "draft_sha": "7a17c77297ed330e",
   "provenance": {
     "generated_at": "2026-08-28T17:54:58.634688+00:00",
@@ -46,22 +46,22 @@
   },
   "repair": {
     "date": "2026-10-31",
-    "driver": "renforc\u00e9 : liaisons de pr\u00e9fixes du graphe rendu compar\u00e9es (toute liaison de l'original doit \u00eatre dans la traduction), et aller-retour Turtle du fixture teapot_ontology (tests/conftest.py:113-118 : s\u00e9rialisation, re-lecture, isomorphisme et pr\u00e9fixes d\u00e9clar\u00e9s).",
+    "driver": "renforcé : liaisons de préfixes du graphe rendu comparées (toute liaison de l'original doit être dans la traduction), et aller-retour Turtle du fixture teapot_ontology (tests/conftest.py:113-118 : sérialisation, re-lecture, isomorphisme et préfixes déclarés).",
     "translation_fixed": false,
     "mutants_killed": [
-      "\u00eelot +{ } remplac\u00e9 par pass",
-      "second sujet stuff:stuffs retir\u00e9",
+      "îlot +{ } remplacé par pass",
+      "second sujet stuff:stuffs retiré",
       "\"TeaPot\" -> \"TeaPot\"@en",
-      "IRI de @prefix stuff: chang\u00e9e",
-      "@prefix stuff: renomm\u00e9 st: (m\u00eame IRI) \u2014 survivait",
-      "@graph g retir\u00e9, +{ }(g) en suffixe d'appel qui ne lie rien \u2014 survivait"
+      "IRI de @prefix stuff: changée",
+      "@prefix stuff: renommé st: (même IRI) — survivait",
+      "@graph g retiré, +{ }(g) en suffixe d'appel qui ne lie rien — survivait"
     ],
     "remaining": ""
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "Python: the four `g.add((\u2026))` become one `g += [ \u2026 ]` (Graph.__iadd__ takes an Iterable of triples); STUFF, `g = Graph()` and `g.bind(\"stuff\", STUFF)` stay, since the bindings are part of what the repository reads back.",
-    "LD Python: exception to the symmetry rule that only the island allows: the function body is a single `return g{ \u2026 }`. A g{ } graph inherits the block's prefixes (stuff: included), so it replaces the `g = Graph()`, the `bind()`, the four triples and the variable; Python has no expression that builds, binds and fills a graph at once.",
+    "Python: the four `g.add((…))` become one `g += [ … ]` (Graph.__iadd__ takes an Iterable of triples); STUFF, `g = Graph()` and `g.bind(\"stuff\", STUFF)` stay, since the bindings are part of what the repository reads back.",
+    "LD Python: exception to the symmetry rule that only the island allows: the function body is a single `return g{ … }`. A g{ } graph inherits the block's prefixes (stuff: included), so it replaces the `g = Graph()`, the `bind()`, the four triples and the variable; Python has no expression that builds, binds and fills a graph at once.",
     "The translation's comment about the removed `g.bind()` is dropped (it described deleted code, it was not in the original).",
     "The check line's `care` for this region is computed against original.py WITH its demo() harness, while optimized.py is measured without it (rdfeval/check.py sizes() does not apply strip_demo to the original, compare.py does): the ratio it prints is biased low; measured like compare.py, care = 0.9048, total = 0.3651."
   ],
@@ -70,5 +70,19 @@
     "g{ }",
     "prefixed name",
     "plain literal"
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo (as-written + bindings, Turtle round trip)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo (as-written + bindings, Turtle round trip)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }
