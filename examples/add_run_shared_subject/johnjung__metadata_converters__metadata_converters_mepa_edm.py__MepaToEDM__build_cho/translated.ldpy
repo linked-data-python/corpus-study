@@ -1,0 +1,11 @@
+# Extracted from johnjung/metadata_converters@36a81d6a97 : metadata_converters/mepa_edm.py
+# region: MepaToEDM._build_cho (lines 201-201, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, DC, DCTERMS, XSD
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+self.graph += g{ {self.work_cho} dcterms:hasPart {self.recto_cho} }

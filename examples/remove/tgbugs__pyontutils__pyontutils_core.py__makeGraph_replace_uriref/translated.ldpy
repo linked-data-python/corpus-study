@@ -1,0 +1,19 @@
+# Extracted from tgbugs/pyontutils@cb3efcd10f : pyontutils/core.py
+# region: makeGraph.replace_uriref (lines 2707-2722, stratum remove)
+# licence of the source repository: see meta.json
+def replace_uriref(self, find, replace):  # find and replace on the parsed graph
+    # XXX warning this does not update cases where an iri is in an annotation property!
+    #  if you need that just use sed
+    # XXX WARNING if you are doing multiple replaces you need to replace the ENTIRE
+    #  set first, and THEN transfer those, otherwise you will insert half replaced
+    #  triples into a graph!
+
+    find = self.check_thing(find)
+
+    for i in range(3):
+        trip = [find if i == _ else None for _ in range(3)]
+        for s, p, o in self.g.triples(trip):
+            rep = [s, p, o]
+            rep[i] = replace
+            self.add_trip(*rep)
+            self.g.remove((s, p, o))

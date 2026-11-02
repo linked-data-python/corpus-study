@@ -1,0 +1,28 @@
+# Extracted from Dewberry/blobfish@db89f34228 : blobfish/ckan/query.py
+# region: SpatialRDFHandler.identify_rfc_datasets (lines 101-118, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from shapely import Point, Polygon, MultiPolygon
+from rdflib import URIRef, Literal, BNode, RDF, DCTERMS
+from rdflib.namespace._GEO import GEO
+from rdflib.query import Result
+from .const import RFC_SHP_URL, GEOF, SF, CKAN_URL
+from ..pyrdf import AORC
+
+def identify_rfc_datasets(self, x: float, y: float) -> Result:
+    raise NotImplementedError("This function relies on geosparql functions which are not implemented in the SPARQL processor for RDFLib")
+    point = Point(x, y).wkt
+    point_literal = self.prepend_crs(point)
+    query = """
+    SELECT  ?s3
+    WHERE   {
+        ?r rdf:type aorc:RFC .
+        ?r dct:spatial/geosparql:hasGeometry ?g .
+        ?g geosparql:asWKT ?w .
+        ?r ^aorc:hasRFC ?p .
+        ?p dcat:dataset ?sda .
+        ?sda ^aorc:hasSourceDataset ?s3 .
+        FILTER (geof:sfWithin(?p, ?w))
+    }
+    """
+    results = self.graph.query(query, initNs={"rdf": RDF, "aorc": AORC, "dct": DCTERMS, "geosparql": GEO, "geof": GEOF}, initBindings={"p": point_literal})
+    return results

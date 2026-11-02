@@ -1,0 +1,102 @@
+# Extracted from calipho-sib/nextprot-scripts@f03504ce5e : src/polish-rdf/pylode/pyLODE-2.13.2/pylode/profiles/ontdoc.py
+# region: OntDoc._extract_metadata (lines 345-428, stratum trav_navigation)
+# licence of the source repository: see meta.json
+import markdown
+from rdflib import URIRef, BNode, Literal
+from rdflib.namespace import DC, DCTERMS, DOAP, OWL, PROF, PROV, RDF, RDFS, SDO, SKOS
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+for s in self.G.subjects(predicate=rdf:type, object=owl:Ontology):
+    s_str = str(s)  # this is the Ontology's URI
+    self.METADATA["uri"] = s_str
+
+    for p, o in self.G.predicate_objects(subject=s):
+        if p == owl:imports:
+            self.METADATA["imports"].add(self._make_formatted_uri(o))
+
+        if p == dcterms:title:
+            self.METADATA["title"] = str(o)
+
+        if p == dcterms:description:
+            if self.outputformat == "md":
+                self.METADATA["description"] = str(o)
+            elif self.outputformat == "adoc":
+                self.METADATA["description"] = str(o)
+            else:
+                self.METADATA["description"] = markdown.markdown(str(o))
+
+        if p == skos:historyNote:
+            if self.outputformat == "md":
+                self.METADATA["historyNote"] = str(o)
+            elif self.outputformat == "adoc":
+                self.METADATA["historyNote"] = str(o)
+            else:
+                self.METADATA["historyNote"] = markdown.markdown(str(o))
+
+        # dates
+        if p in [dcterms:created, dcterms:modified, dcterms:issued]:
+            date_type = p.split("/")[-1]
+            self.METADATA[date_type] = str(o)
+
+        if p == dcterms:source:
+            if str(o).startswith('http'):
+                self.METADATA["source"] = self._make_formatted_uri(o)
+            else:
+                self.METADATA["source"] = str(o)
+
+        if p == owl:versionIRI:
+            self.METADATA["versionIRI"] = self._make_formatted_uri(o)
+
+        if p == owl:versionInfo:
+            self.METADATA["versionInfo"] = str(o)
+
+        if p == <http://purl.org/vocab/vann/preferredNamespacePrefix>:
+            self.METADATA["preferredNamespacePrefix"] = str(o)
+
+        if p == <http://purl.org/vocab/vann/preferredNamespaceUri>:
+            self.METADATA["preferredNamespaceUri"] = str(o)
+
+        if p == dcterms:license:
+            self.METADATA["license"] = (
+                self._make_formatted_uri(o)
+                if str(o).startswith("http")
+                else str(o)
+            )
+
+        if p == dcterms:rights:
+            self.METADATA["rights"] = (
+                str(o)
+                    .replace("Copyright", "&copy;")
+                    .replace("copyright", "&copy;")
+                    .replace("(c)", "&copy;")
+            )
+
+        # Agents
+        if p in [
+            dcterms:creator, dcterms:contributor, dcterms:publisher, sdo:editor, sdo:funder, sdo:translator
+        ]:
+            agent_type = p.split("/")[-1] + "s"
+            if type(o) == Literal:
+                self.METADATA[agent_type].add(str(o))
+            else:  # Blank Node or URI
+                self.METADATA[agent_type].add(self._make_agent(o))
+
+        if p == prov:wasGeneratedBy:
+            for o2 in self.G.objects(subject=o, predicate=doap:repository):
+                self.METADATA["repository"] = self._make_formatted_uri(o2)
+
+        if p == sdo:codeRepository:
+            self.METADATA["repository"] = self._make_formatted_uri(o)
+
+    if self.METADATA.get("title") is None:
+        self.METADATA["title"] = "{no title found}"

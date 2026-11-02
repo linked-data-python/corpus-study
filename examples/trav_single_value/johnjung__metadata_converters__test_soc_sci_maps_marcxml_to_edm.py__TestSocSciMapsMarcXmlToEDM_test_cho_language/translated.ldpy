@@ -1,0 +1,17 @@
+# Extracted from johnjung/metadata_converters@36a81d6a97 : test_soc_sci_maps_marcxml_to_edm.py
+# region: TestSocSciMapsMarcXmlToEDM.test_cho_language (lines 201-212, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Literal, URIRef
+
+def test_cho_language(self):
+    """get dc:language from MARC to DC converter."""
+
+    ids = '7641168,3451312'
+
+    self.assertEqual(
+        self.edm[ids].graph.value(
+            subject=self.cho[ids],
+            predicate=<http://purl.org/dc/elements/1.1/language>
+        ),
+        Literal('en')
+    )

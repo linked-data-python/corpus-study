@@ -10,7 +10,7 @@ from .config import load_config
 
 STAGES = ("discover", "select", "acquire", "analyze",
           "validate", "compare", "aggregate", "audit",
-          "surface", "strata", "check", "status", "article", "review",
+          "surface", "strata", "reprise", "check", "status", "article", "review",
           "digest", "triage", "userstudy", "all")
 
 # `all` covers the offline stages only: network stages (discover/select/
@@ -52,6 +52,8 @@ def main(argv: list[str] | None = None) -> int:
                              "instead of the approved subset; the "
                              "numbers are then PROVISIONAL and every "
                              "artefact says so")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="reprise: print the plan, write nothing")
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
 
@@ -90,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
         elif stage == "strata":
             from . import strata
             strata.run(config)
+        elif stage == "reprise":
+            from . import reprise
+            reprise.run(config, dry_run=args.dry_run)
         elif stage == "review":
             from . import review
             review.run(config, study, stratum=args.stratum,

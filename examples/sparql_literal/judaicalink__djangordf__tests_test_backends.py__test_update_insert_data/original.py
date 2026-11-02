@@ -1,0 +1,9 @@
+# Extracted from judaicalink/djangordf@494eedbeba : tests/test_backends.py
+# region: test_update_insert_data (lines 77-82, stratum sparql_literal)
+# licence of the source repository: see meta.json
+def test_update_insert_data(backend):
+    backend.update(
+        'INSERT DATA { <http://example.org/s> <http://example.org/p> "v" }'
+    )
+    result = backend.query("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }")
+    assert len(result) == 1

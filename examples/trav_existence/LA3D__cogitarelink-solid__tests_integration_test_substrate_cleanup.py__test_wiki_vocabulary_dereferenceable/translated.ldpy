@@ -1,0 +1,30 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : tests/integration/test_substrate_cleanup.py
+# region: test_wiki_vocabulary_dereferenceable (lines 154-172, stratum trav_existence)
+# licence of the source repository: see meta.json
+import httpx
+from rdflib import Graph, Namespace, URIRef
+from tests.conftest import _pod_base
+@prefix wiki: <https://pod.vardeman.me/vault/ontology/wiki#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+POD_URL = _pod_base() + "/vault/"
+
+def test_wiki_vocabulary_dereferenceable():
+    """Class IRIs resolve to the vocabulary document hosted by the Pod.
+
+    D84: the wiki vocab is served EXTENSION-LESS at /vault/ontology/wiki (the .ttl
+    URL 404s). D98/D105: the conceptual backbone is skos:Concept — wiki:Source is a
+    subclass of skos:Concept (a Source is also a topic), wiki:WorkingNote subclasses
+    the document type wiki:Page.
+    """
+    from rdflib.namespace import RDFS
+    SKOS = Namespace("http://www.w3.org/2004/02/skos/core#")
+    r = httpx.get(POD_URL + "ontology/wiki",
+                  headers={"Accept": "text/turtle"}, timeout=5)
+    assert r.status_code == 200
+    g = Graph().parse(data=r.text, format="turtle",
+                      publicID=POD_URL + "ontology/wiki")
+    assert (wiki:Source, rdfs:subClassOf, SKOS.Concept) in g, \
+           "wiki:Source should subclass skos:Concept (D105 SKOS backbone)"
+    assert (wiki:WorkingNote, rdfs:subClassOf, wiki:Page) in g, \
+           "wiki:WorkingNote should subclass wiki:Page (document type)"

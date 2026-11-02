@@ -1,0 +1,33 @@
+# Extracted from landrs-toolkit/PySOSA@1993668bd7 : PySOSA/Sensor.py
+# region: Sensor.__init__ (lines 22-45, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import BNode, Literal, RDF, RDFS
+from PySOSA import config as cfg
+from PySOSA.ObservableProperty import ObservableProperty
+from PySOSA.Procedure import Procedure
+obsgraph = cfg.get_graph()
+
+def __init__(self, *args):
+    """ instantiating Sensor object
+       Args:
+           *args (str): label, comment, observable property, implementsPrdocedure
+           sensor object can be instantiated with multiple arguments
+       Returns:
+           sensor object: an instantiated sensor object with sensor id, label,comment and other properties
+    """
+    self.sensor_id = BNode()
+    self.platform_id = BNode()
+    self.label = Literal(args[0])
+    self.comment = Literal(args[1])
+    self.observableProperty = args[2]
+    self.implements_procedure = (args[3])
+    obsgraph.add((self.sensor_id, RDF.type,  cfg.sosa.Sensor))
+    obsgraph.add((self.sensor_id, RDFS.comment, self.comment))
+    obsgraph.add((self.sensor_id, RDFS.label, self.label))
+    # add list of observable properties
+    for obs in self.observableProperty:
+        if isinstance(obs, ObservableProperty):
+            obsgraph.add((self.sensor_id,  cfg.sosa.observes, obs.label))
+    for pro in self.implements_procedure:
+        if isinstance(pro, Procedure):
+            obsgraph.add((self.sensor_id,  cfg.sosa.implements, pro.label))

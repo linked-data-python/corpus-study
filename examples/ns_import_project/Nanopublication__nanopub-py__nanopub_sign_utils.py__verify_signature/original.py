@@ -1,0 +1,65 @@
+# Extracted from Nanopublication/nanopub-py@05022dc4bc : nanopub/sign_utils.py
+# region: verify_signature (lines 162-213, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from base64 import decodebytes, encodebytes
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+from rdflib import BNode, Dataset, Graph, Literal, Namespace, URIRef
+from nanopub.namespaces import NPX
+from nanopub.trustyuri.rdf import RdfHasher, RdfUtils
+from nanopub.utils import MalformedNanopubError
+logger = logging.getLogger(__name__)
+
+def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -> bool:
+    """Verify RSA signature in a nanopub Graph"""
+    # Get signature and public key from the triples
+    np_signature_target = [s for s, _, _, _ in g.quads((None, NPX.hasSignatureTarget, URIRef(source_uri), None))]
+    if not np_signature_target:
+        raise MalformedNanopubError("No Signature targeting the '{source_uri}' nanopublication")
+
+    np_signature_target = np_signature_target[0]
+
+    np_sign = [o for _, _, o, _ in g.quads((np_signature_target, NPX.hasSignature, None, None))]
+    if not np_sign:
+        raise MalformedNanopubError("No Signature found in the nanopublication RDF")
+
+    np_sign = np_sign[0]
+
+    np_algo = [o for _, _, o, _ in g.quads((np_signature_target, NPX.hasAlgorithm, None, None))][0]
+    if np_algo and str(np_algo).upper() != "RSA":
+        if np_algo and str(np_algo).upper() == "DSA":
+            # TODO implement DSA signature verification
+            logger.info("DSA signature algorithm is not supported yet, skipping signature verification")
+            return True
+        else:
+            raise MalformedNanopubError(
+                f"Signature algorithm '{np_algo}' is not supported, only RSA is supported"
+            )
+
+    # Normalize RDF
+    quads = RdfUtils.get_quads(g)
+    normed_rdf = RdfHasher.normalize_quads(
+        quads,
+        baseuri=str(source_namespace),
+        hashstr=" "
+    )
+    np_pubkey = [o for _, _, o, _ in g.quads((np_signature_target, NPX.hasPublicKey, None, None))][0]
+    # Verify signature using the normalized RDF
+    key = RSA.import_key(decodebytes(str(np_pubkey).encode()))
+    hash_value = SHA256.new(normed_rdf.encode())
+    verifier = PKCS1_v1_5.new(key)
+    try:
+        verifier.verify(hash_value, decodebytes(str(np_sign).encode()))
+    except Exception as e:
+        raise MalformedNanopubError(e)
+
+    # np_signedBy = [o for _, _, o, _ in g.quads((np_signature_target, NPX.signedBy, None, None))]
+    # if not np_signedBy:
+    #     raise MalformedNanopubError("No signedBy found in the nanopublication RDF")
+    # np_signedBy = np_signedBy[0]
+    # # TODO improve this by checking that the ORCID is a valid one
+    # if not str(np_signedBy).startswith("https://orcid.org/"):
+    #     raise MalformedNanopubError(
+    #         f"Invalid signedBy value '{np_signedBy}' in the nanopublication RDF, it should be an ORCID iD starting with 'https://orcid.org/'")
+    return True

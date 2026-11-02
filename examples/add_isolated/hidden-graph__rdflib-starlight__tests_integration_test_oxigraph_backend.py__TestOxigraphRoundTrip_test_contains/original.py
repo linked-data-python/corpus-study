@@ -1,0 +1,11 @@
+# Extracted from hidden-graph/rdflib-starlight@b7973da2b5 : tests/integration/test_oxigraph_backend.py
+# region: TestOxigraphRoundTrip.test_contains (lines 133-137, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, Literal
+EX       = 'http://example.org/'
+
+def test_contains(self, sg):
+    s, p, o = URIRef(EX+'alice'), URIRef(EX+'knows'), URIRef(EX+'bob')
+    assert (s, p, o) not in sg
+    sg.add((s, p, o))
+    assert (s, p, o) in sg

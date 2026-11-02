@@ -1,0 +1,69 @@
+# Extracted from eccenca/cmem-plugin-pyshacl@faf59e81de : tests/test_pyshacl.py
+# region: test_workflow_execution_with_violations (lines 208-256, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from os import environ
+import pytest
+from cmem_client.client import Client
+from cmem_plugin_base.testing import TestExecutionContext
+from rdflib import PROV, RDF, RDFS, SH, XSD, Graph, Literal, Namespace, URIRef
+from cmem_plugin_pyshacl.plugin_pyshacl import ShaclValidation
+UUID4 = "b36254a836e04279aecf411d2c8e364a"
+EX = Namespace("https://example.org/pyshacl-plugin-test/vocab#")
+SHUI = Namespace("https://vocab.eccenca.com/shui/")
+DATA_GRAPH_URI = f"https://example.org/pyshacl-plugin-test/data/{UUID4}"
+SHAPES_GRAPH_URI = f"https://example.org/pyshacl-plugin-test/shapes/{UUID4}"
+REPORT_GRAPH_URI = f"https://example.org/pyshacl-plugin-test/report/{UUID4}"
+EXPECTED_VIOLATIONS = 5
+needs_cmem = pytest.mark.skipif(
+    environ.get("CMEM_BASE_URI", "") == "", reason="Needs CMEM configuration"
+)
+
+@needs_cmem
+def test_workflow_execution_with_violations(_violations_setup: None) -> None:  # noqa: PT019
+    """Test plugin execution on a data graph that does not conform"""
+    plugin = ShaclValidation(
+        data_graph_uri=DATA_GRAPH_URI,
+        shacl_graph_uri=SHAPES_GRAPH_URI,
+        validation_graph_uri=REPORT_GRAPH_URI,
+        generate_graph=True,
+        output_entities=True,
+        clear_validation_graph=True,
+        skolemize=False,
+        add_labels=True,
+        include_graphs_labels=True,
+        add_shui_conforms=True,
+        remove_dataset_graph_type=True,
+    )
+    entities = plugin.execute(inputs=(), context=TestExecutionContext())
+
+    assert entities is not None
+    # one row per validation result, one column per path of the entity schema
+    rows = [[value[0] for value in entity.values] for entity in entities.entities]
+    assert len(rows) == EXPECTED_VIOLATIONS
+
+    focus_nodes = {row[0] for row in rows}
+    assert "Alice" in focus_nodes  # the label of ex:alice replaces its URI
+    assert EX.carol in focus_nodes  # ex:carol has no label, so its URI is kept
+    assert any("@prefix" in node for node in focus_nodes)  # the blank node as turtle
+
+    values = {row[2] for row in rows}
+    assert "Bob" in values  # the label of the offending object
+    assert '"not a number"' in values  # a literal without a datatype
+    # a literal with a datatype, whose lexical form rdflib may normalize
+    assert any(value.startswith('"7') and value.endswith(f"^^<{XSD.float}>") for value in values)
+
+    source_shapes = {row[3] for row in rows}
+    assert "name of a person" in source_shapes
+    assert "age of a person" in source_shapes
+    assert any("@prefix" in shape for shape in source_shapes)  # the blank node property shape
+
+    assert all(row[5] for row in rows)  # every result carries a message
+    assert {row[6] for row in rows} == {SH.Violation}
+
+    report = export_graph(Client.from_context(TestExecutionContext()), REPORT_GRAPH_URI)
+    results = list(report.subjects(RDF.type, SH.ValidationResult))
+    assert len(results) == EXPECTED_VIOLATIONS
+    assert list(report.objects(predicate=SH.conforms)) == [Literal(False)]
+    assert all(str(report.value(result, RDFS.label)).startswith("SHACL: ") for result in results)
+    flagged = set(report.subjects(SHUI.conforms, Literal(False, datatype=XSD.boolean)))
+    assert {EX.alice, EX.carol} <= flagged

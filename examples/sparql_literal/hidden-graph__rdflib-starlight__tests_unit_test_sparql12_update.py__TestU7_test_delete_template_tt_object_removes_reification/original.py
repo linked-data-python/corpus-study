@@ -1,0 +1,18 @@
+# Extracted from hidden-graph/rdflib-starlight@b7973da2b5 : tests/unit/test_sparql12_update.py
+# region: TestU7.test_delete_template_tt_object_removes_reification (lines 276-286, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, Literal
+EX = 'http://example.org/'
+RDF_REIFIES = URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies')
+
+def test_delete_template_tt_object_removes_reification(self, g):
+    """DELETE template with TT in object position removes the reification triple."""
+    g.update("""
+        PREFIX :   <http://example.org/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        DELETE { ?r rdf:reifies <<( ?s ?p ?o )>> }
+        WHERE  { ?r rdf:reifies <<( ?s ?p ?o )>> . ?r :confidence "0.9" }
+    """)
+    stmt1 = URIRef(EX + 'stmt1')
+    reifies = list(g.triples((stmt1, RDF_REIFIES, None)))
+    assert reifies == []

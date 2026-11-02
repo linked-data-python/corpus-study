@@ -1,0 +1,54 @@
+# Extracted from OpenEnergyPlatform/oeplatform@ff28ef6390 : factsheet/views.py
+# region: create_factsheet_view (lines 201-253, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import RDF, Graph, Literal, URIRef
+from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, XSD
+from factsheet.utils import remove_non_printable, serialize_publication_date
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix oekg: <https://openenergyplatform.org/ontology/oekg/> .
+@prefix oeo: <https://openenergyplatform.org/ontology/oeo/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+for item in _publications:
+    publications_URI = URIRef(
+        "https://openenergyplatform.org/ontology/oekg/publication/" + item["id"]
+    )
+    # OEO_00020012
+    bundle += g{
+        {publications_URI} oeo:OEO_00390095 {Literal(item["id"])} ;
+           a oeo:OEO_00020012 .
+        {study_URI} obo:BFO_0000051 {publications_URI}
+    }
+    if item["report_title"] != "":
+        bundle += g{ {publications_URI} rdfs:label {Literal(remove_non_printable(item["report_title"]))} }
+
+    _authors = item["authors"]
+    for author in _authors:
+        author_URI = URIRef(
+            "https://openenergyplatform.org/ontology/oekg/" + author["iri"]
+        )
+        bundle += g{
+            {author_URI} a oeo:OEO_00000064 .
+            {publications_URI} oeo:OEO_00000506 {author_URI}
+        }
+
+    if item["doi"] != "":
+        bundle += g{ {publications_URI} oeo:OEO_00390098 {Literal(item["doi"])} }
+
+    if (
+        item["date_of_publication"] != "01-01-1900"
+        and item["date_of_publication"] != ""
+    ):
+        bundle += g{ {publications_URI} oeo:OEO_00390096 {Literal(item["date_of_publication"], datatype=XSD.dateTime)} }
+
+    if item["link_to_study_report"] != "":
+        bundle += g{
+            {URIRef(item["link_to_study_report"])} a oeo:OEO_00000353 .
+            {publications_URI} oeo:OEO_00390078 {URIRef(item["link_to_study_report"])}
+        }
+
+    bundle += g{ {study_URI} obo:BFO_0000051 {publications_URI} }

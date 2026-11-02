@@ -1,0 +1,37 @@
+# Extracted from pyscal/atomRDF@c9b070e15f : atomrdf/datamodels/workflow/workflow.py
+# region: Simulation.to_graph_calculated_properties (lines 402-416, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, XSD, RDF, RDFS, BNode, URIRef
+from atomrdf.namespace import (
+    CMSO,
+    LDO,
+    PLDO,
+    PODO,
+    CDCO,
+    PROV,
+    Literal,
+    ASMO,
+    MDO,
+)
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cmso: <http://purls.helmholtz-metadaten.de/cmso/> .
+@prefix ldo: <http://purls.helmholtz-metadaten.de/cdos/ldo/> .
+@prefix pldo: <http://purls.helmholtz-metadaten.de/cdos/pldo/> .
+@prefix podo: <http://purls.helmholtz-metadaten.de/cdos/podo/> .
+@prefix cdco: <http://purls.helmholtz-metadaten.de/cdos/cdco/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix asmo: <http://purls.helmholtz-metadaten.de/asmo/> .
+@prefix mdo: <https://w3id.org/mdo/calculation/> .
+
+
+def to_graph_calculated_properties(self, graph, simulation):
+    if self.calculated_property:
+        for param in self.calculated_property:
+            param_uri = param.to_graph(graph)
+            graph += g{ {param_uri} asmo:wasCalculatedBy {simulation} }
+            if param.associate_to_sample:
+                for sample_id in param.associate_to_sample:
+                    print(sample_id)
+                    graph += g{ {URIRef(sample_id)} asmo:hasCalculatedProperty {param_uri} }

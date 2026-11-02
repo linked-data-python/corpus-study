@@ -1,0 +1,132 @@
+# Extracted from linkml/linkml@680595df54 : packages/linkml/src/linkml/generators/owlgen.py
+# region: OwlSchemaGenerator.add_enum (lines 1157-1262, stratum add_isolated)
+# licence of the source repository: see meta.json
+import logging
+from typing import Any, ClassVar, TypeAlias, TypeVar
+from rdflib import DCTERMS, OWL, RDF, XSD, BNode, Graph, Literal, URIRef
+from rdflib.namespace import RDFS, SKOS
+from linkml import METAMODEL_NAMESPACE_NAME
+from linkml_runtime.linkml_model.meta import (
+    AnonymousClassExpression,
+    AnonymousSlotExpression,
+    AnonymousTypeExpression,
+    ClassDefinition,
+    ClassDefinitionName,
+    ClassRule,
+    Definition,
+    EnumDefinition,
+    EnumDefinitionName,
+    PermissibleValue,
+    SchemaDefinitionName,
+    SlotDefinition,
+    SlotDefinitionName,
+    TypeDefinition,
+    TypeDefinitionName,
+)
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+logger = logging.getLogger(__name__)
+OWL_EXPRESSION: TypeAlias = BNode | URIRef
+OWL_VALUE: TypeAlias = OWL_EXPRESSION | Literal
+
+def add_enum(self, e: EnumDefinition) -> None:
+    g = self.graph
+    enum_uri = self._enum_uri(e.name)
+    g += g{ {enum_uri} a owl:Class }
+
+    self.add_metadata(e, enum_uri)
+    has_parent = False
+    if e.is_a:
+        self.graph += g{ {enum_uri} rdfs:subClassOf {self._enum_uri(e.is_a)} }
+        has_parent = True
+    for mixin in sorted(e.mixins):
+        parent = self._enum_uri(mixin)
+        if self.mixins_as_expressions:
+            parent = self._some_values_from(self._metaslot_uri("mixins"), parent)
+        else:
+            has_parent = True
+        self.graph += g{ {enum_uri} rdfs:subClassOf {parent} }
+    if self.enum_inherits_as_subclass_of:
+        for parent_name in e.inherits:
+            self.graph += g{ {enum_uri} rdfs:subClassOf {self._enum_uri(parent_name)} }
+    if not has_parent and self.add_root_classes:
+        self.graph += g{ {enum_uri} rdfs:subClassOf {URIRef(EnumDefinition.class_class_uri)} }
+        self._declare_grouping_class(URIRef(EnumDefinition.class_class_uri), EnumDefinition.class_name)
+    if self.metaclasses:
+        g += g{ {enum_uri} a {URIRef(EnumDefinition.class_class_uri)} }
+    pv_uris: list[OWL_VALUE] = []
+    owl_types: list[URIRef | None] = []
+    enum_owl_type = self._get_metatype(e, self.default_permissible_value_type)
+
+    for pv in e.permissible_values.values():
+        pv_owl_type = self._get_metatype(pv, enum_owl_type)
+        owl_types.append(pv_owl_type)
+        if pv_owl_type == rdfs:Literal:
+            pv_node = Literal(pv.text)
+            if pv.meaning:
+                logger.warning(f"Meaning on literal {pv.text} in {e.name} is ignored")
+        else:
+            pv_node = self._permissible_value_uri(pv, enum_uri, e)
+        pv_uris.append(pv_node)
+        g += g{ {enum_uri} {self.metamodel.namespaces[METAMODEL_NAMESPACE_NAME]["permissible_values"]} {pv_node} }
+        if not isinstance(pv_node, Literal):
+            self.add_metadata(pv, pv_node)
+            g += g{
+                {pv_node} a {pv_owl_type} ;
+                   rdfs:label {self._literal(pv.text, pv)}
+            }
+            # TODO: make this configurable
+            # self._add_element_properties(pv_uri, pv)
+            if self.metaclasses:
+                g += g{ {pv_node} a {enum_uri} }
+            has_parent = False
+            if pv.is_a:
+                self.graph += g{ {pv_node} rdfs:subClassOf {self._permissible_value_uri(pv.is_a, enum_uri, e)} }
+                has_parent = True
+            for mixin in sorted(pv.mixins):
+                parent = self._permissible_value_uri(mixin, enum_uri, e)
+                if self.mixins_as_expressions:
+                    parent = self._some_values_from(self._metaslot_uri("mixins"), parent)
+                else:
+                    has_parent = True
+                self.graph += g{ {enum_uri} rdfs:subClassOf {parent} }
+            if not has_parent and self.add_root_classes:
+                self.graph += g{ {pv_node} rdfs:subClassOf {URIRef(PermissibleValue.class_class_uri)} }
+                self._declare_grouping_class(URIRef(PermissibleValue.class_class_uri), PermissibleValue.class_name)
+    if all([pv is not None for pv in pv_uris]):
+        # every single PV in the enum is not-null
+        all_is_class = all([owl_type == owl:Class for owl_type in owl_types])
+        all_is_individual = all([owl_type == owl:NamedIndividual for owl_type in owl_types])
+        all_is_literal = all([owl_type == rdfs:Literal for owl_type in owl_types])
+        sub_pred = dcterms:isPartOf
+        combo_pred = None
+        if all_is_class or all_is_individual or all_is_literal:
+            if all_is_class:
+                combo_pred = owl:unionOf
+                # self._union_of(pv_uris, node=enum_uri)
+                sub_pred = rdfs:subClassOf
+            elif all_is_individual:
+                combo_pred = owl:oneOf
+                # self._object_one_of(pv_uris, node=enum_uri)
+                sub_pred = rdf:type
+            elif all_is_literal:
+                combo_pred = owl:oneOf
+                # self._object_one_of(pv_uris, node=enum_uri)
+                sub_pred = rdf:type
+            if combo_pred:
+                self._boolean_expression(
+                    pv_uris,
+                    combo_pred,
+                    enum_uri,
+                    owl_types={owl_type for owl_type in owl_types if owl_type is not None},
+                )
+        for pv_node in pv_uris:
+            # this would normally be entailed, but we assert here so it is visible
+            # without reasoning
+            if not isinstance(pv_node, Literal):
+                g += g{ {pv_node} a {enum_uri} }

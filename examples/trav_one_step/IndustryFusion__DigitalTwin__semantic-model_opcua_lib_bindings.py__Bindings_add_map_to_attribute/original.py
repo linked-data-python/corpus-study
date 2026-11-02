@@ -1,0 +1,37 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/lib/bindings.py
+# region: Bindings.add_map_to_attribute (lines 77-103, stratum trav_one_step)
+# licence of the source repository: see meta.json
+import random
+import string
+from rdflib import Graph, Namespace, Literal, XSD
+from rdflib.namespace import RDF
+import lib.utils as utils
+randnamelength = 16
+
+def add_map_to_attribute(self, g, attribute_iri, varname, var_node, connector):
+    """
+    Add a map to an attribute.
+    This function associates a OPC Ua variable with a given attribute IRI in the graph.
+    Args:
+        g (rdflib.Graph): The RDF graph to which the map will be added.
+        attribute_iri (rdflib.term.Identifier): The IRI of the attribute to bind.
+        varname (str): The name of the variable to bind.
+        var_node (rdflib.term.Identifier): The identifier of the variable node in the graph.
+        connector (rdflib.term.Identifier): The identifier of the connector to bind.
+
+    """
+    randname = ''.join(random.choices(string.ascii_uppercase + string.digits, k=randnamelength))
+    mapiri = self.binding_namespace['map_' + randname]
+    dtype = next(g.objects(var_node, self.basens['hasDatatype']), XSD.anyType)
+    node_id = next(g.objects(var_node, self.basens['hasNodeId']))
+    idtype = next(g.objects(var_node, self.basens['hasIdentifierType']))
+    ns = next(g.objects(var_node, self.basens['hasNamespace']))
+    nsuri = next(g.objects(ns, self.basens['hasUri']))
+    self.bindingsg.add((mapiri, RDF['type'], self.basens['BoundMap']))
+    self.bindingsg.add((mapiri, self.basens['bindsConnector'], connector))
+    self.bindingsg.add((mapiri, self.basens['bindsLogicVar'], Literal(varname)))
+    self.bindingsg.add((mapiri, self.basens['bindsMapDatatype'], dtype))
+    self.bindingsg.add((attribute_iri, self.basens['bindsMap'], mapiri))
+    self.bindingsg.add((mapiri,
+                        self.basens['bindsConnectorParameter'],
+                        Literal(f'nsu={nsuri};{utils.idtype2String(idtype, self.basens)}={node_id}')))
