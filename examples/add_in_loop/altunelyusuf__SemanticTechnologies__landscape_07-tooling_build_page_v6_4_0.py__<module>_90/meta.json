@@ -60,5 +60,24 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the loop `for tr in [...]: g.add((w20, tr[0], tr[1]))` unpacks its pairs: `for p, o in [...]: g.add((w20, p, o))`. Nothing else to compress: `g += [(w20, p, o), ...]` would write w20 eight times for no gain, and the eight literals are data.",
+    "optimized.ldpy = translated.ldpy: one `+{ {w20} a ipo:InstructionalWidget, owl:NamedIndividual ; ... }` with `;` and `,`. The list of (predicate, object) pairs that the Python loop walks is the island's predicate-object list. This is the notation itself, not a restructuring that pure Python could copy, so there is no exception to the symmetry rule.",
+    "The language literals become `\"...\"@en` and `{S(...) + ...}@en`, which removes eight `Literal(..., lang=\"en\")` calls; this is the main part of the gain."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef, XSD and PROV are unused imports and go. `SEM = Namespace(T.BASE)` is unused in the region, so it goes with the shim import `T`; the `;` line becomes `IPO = Namespace(...)` alone.",
+    "optimized_header.ldpy: the line `SEM = ...; IPO = ...` goes (the `ipo:` prefix replaces IPO), with Namespace, URIRef, Literal, T and the whole `rdflib.namespace` import, none of them used outside the island. The five `@prefix` lines are all used."
+  ]
 }

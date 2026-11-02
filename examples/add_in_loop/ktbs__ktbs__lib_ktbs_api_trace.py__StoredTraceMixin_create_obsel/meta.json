@@ -71,5 +71,25 @@
       "source_obsels -> []"
     ],
     "remaining": "Mutant équivalent non compté : {Literal(label)} -> {label} reste vert (même littéral pour str, int, \"\" et 0 ; ne diffère que pour un label déjà nœud RDF, qu'aucun appelant du dépôt ne passe). Jugements non traités : wrong-construction (enveloppes {Literal(x)})."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the begin and end blocks are three-way tests `if isinstance(x, str): x = parse_date(x)`, then Integral / datetime / raise. Their `x = x.replace(tzinfo=UTC)` lines are dead code: they reassign begin/end, but the function never reads them again, and Literal(begin_dt) uses the value that was not replaced. These lines go. The two `raise ValueError(...)` keep the same arguments.",
+    "optimized.py: type_uri, k_uri, v_node, rtype_uri, other_uri and s_uri are inlined. The coerce_to_uri calls keep their order, which is the order of the tuple. The four `if x is not None: for ...` become `for ... in x or ()` / `(attributes or {}).items()`: the same effect for None and for an empty collection.",
+    "optimized.ldpy, from optimized.py: `@graph graph`. `+{ {obs} a {coerce_to_uri(type, self.uri)} ; ktbs:hasTrace {self.uri} }` replaces two adds. `{int(begin)}` and `{begin}` (a datetime) use the language coercion, which gives the same Literal. The relation loops interpolate their coerce_to_uri calls in place, and post_graph/factory get `ktbs:Obsel`.",
+    "Kept explicit in optimized.ldpy: `{val if isinstance(val, Node) else Literal(val)}` and `{Literal(label)}`. A bare `{val}` raises on None, where the original writes Literal('None'). A bare `{label}` would let a Node label pass, where Literal(label) makes it a string. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Real, XSD, ParseError, cache_result and ObselProxy are unused and go. The four shim imports are merged into one line.",
+    "optimized_header.ldpy: the same names go, and also RDF and RDFS, which the islands replace (a, rdfs:). `from context_shim import ktbs:` and `@prefix rdfs:` stay, both used."
+  ]
 }

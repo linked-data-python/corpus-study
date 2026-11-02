@@ -74,5 +74,26 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the per-row values (dice, the geometry) are computed once per row, not once per heading, and the heading loop becomes `for heading, value in row.items()`. The original adds the same triples again on each heading, which has no effect. `heading = str(heading)` goes, because the keys are CSV column names.",
+    "optimized.py: the longitude/latitude state becomes one per-row test `row.get('X') not in (None, '') and row.get('Y') not in (None, '')`, with an f-string `POINT(...)` (for str/int/float, format() gives the same text as str()). dice is `ndice[...]` (resource is the same IRI as ndice). The ObjectId and published datatypes go in a `datatypes` dict, and headingLower/strCamelCase/strName/metapredicate/iso are inlined.",
+    "optimized.py: the X/Y/iso3/adm0_name tests become an if/elif chain. The pycountry lookup, which depends only on the cell and not on the item, is moved out of the isoitem loop. The runs of three triples are `g += [...]` (module level, so no `global` is needed). The overrides of metaobject (datatypes, source URIRef) are still applied before the emptiness test, so the module-level metaobject is the same as in the original (the driver compares it).",
+    "optimized.ldpy, from optimized.py: the same structure. Each `g += [...]` run becomes one `+{ }` with `.` and `;`. The geometry is `f\"POINT(...)\"^^virtrdf:Geometry` and the region code is `{iso2.alpha_2}^^xsd:string`. dice is `ndice:{...}_AirlineRestrictions` and the dynamic predicate is `cvdo:{re.sub(...)}` in place. ndice[...]/cvdo[...] concatenate without encoding like the original, so ndice:{} and cvdo:{} are the same IRIs.",
+    "No exception to the symmetry rule. The provenance triples are written once per row on both sides; the original writes them once per heading of the row (same graph: a CSV row is never empty)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: BNode, DCTERMS and OWL are unused imports and go; the two rdflib imports are merged. The first `g = Graph()`, which the second one overwrites, and `resource` (unused, because dice is now `ndice[...]`) also go.",
+    "optimized_header.ldpy: BNode, Namespace, Graph, XSD and the whole `rdflib.namespace` import go (only Literal and URIRef are used outside the islands). `g = Graph()`, which `@graph as g` overwrites, and `resource` also go. The eight `@prefix` lines are all used."
+  ]
 }

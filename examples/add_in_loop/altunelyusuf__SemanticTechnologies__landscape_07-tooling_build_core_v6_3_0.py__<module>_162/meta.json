@@ -65,5 +65,23 @@
       "p_",
       "s_"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two-line loop becomes one `g2 += ((IRI[s_], SEM[p_], IRI[d_]) for s_, p_, d_ in en.NEW_RELATIONS)`; Graph.__iadd__ is typed Iterable[triple] in rdflib 7.2.1, so this is the documented bulk add, not a trick. It saves 2 tokens and a line, and s_/p_/d_ no longer leak to module level (the driver compares only the names both sides define).",
+    "optimized.ldpy, from optimized.py: `@graph g2` + `for s_, p_, d_ in en.NEW_RELATIONS:` + `+{ {IRI[s_]} semtech:{p_} {IRI[d_]} }`. The `for @bindings in [dict comprehension]` of translated.ldpy only reshaped the tuples into rows, so direct interpolation is shorter. A bulk `g2 += ((IRI[s_], semtech:{p_}, IRI[d_]) for ...)` measures the same 96 tokens and hardly uses the notation, so the island form was kept.",
+    "No exception to the symmetry rule. The notation gains nothing here: `semtech:{p_}` replaces `SEM[p_]` token for token, and the `@prefix` line of the fixed header makes optimized.ldpy 2 tokens longer than optimized.py."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: nothing unused in the header (Graph, Namespace, the four shim names and the SEM namespace are all used); a byte copy of optimized.py.",
+    "optimized_header.ldpy: the line `SEM = Namespace(...)` and the `Namespace` import go, because the `semtech:` prefix replaces them. The `@prefix semtech:` line stays: it is used, and `@graph g2` must bind it (the driver checks g2's prefix bindings)."
+  ]
 }

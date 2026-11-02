@@ -64,5 +64,25 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "'@prefix' added to constructions (declared and used, was missing)"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the node_type if/elif chain becomes `node_types.get(node.node_type, OWL.Class)` (two entries; 'class' and any other type fall to the default). The six edge types with a fixed predicate become a `predicates` dict. The xsd: special case of RANGE is moved to a `target = XSD[...]` before the lookup.",
+    "optimized.py: RELATED_TO and the custom-type else branch are one branch now, with a `related_to` flag. Their three common triples are one `g += [...]`, and the rdfs:label triple is written only for a custom type with a label. Both comments of the original are kept above this branch.",
+    "optimized.py, other compressions: `endswith((\"#\", \"/\"))`; onto_uri and format_map are inlined; the raise and logger.info are on one line each; `len(serialised) if serialised else 0` becomes `len(serialised)`, because serialize(format=...) always returns a str. The fmt check stays after the graph build, so the order of the possible exceptions does not change.",
+    "optimized.ldpy, from optimized.py: `@graph g`, then one `+{ }` per write. The three triples on rel_uri are one `+{ {rel_uri} a owl:ObjectProperty ; rdfs:domain {source} ; rdfs:range {target} }`. The dicts hold prefixed names (`owl:ObjectProperty`, `rdfs:subClassOf`) and the RANGE datatype is `xsd:{...}`. `f<{namespace_uri...}>` replaces `URIRef(...)` (no @base in scope), and `{node.label}` replaces `Literal(node.label)`: the value is a non-empty str, because the guard tests truthiness.",
+    "No exception to the symmetry rule. The two optional triples of the nodes (label, comment) could be written as one island with `@bindings {\"label\": node.label or None, ...}` and the unbound-variable drop. That trick is not clearer and saves only a few tokens, so the two `if` blocks are kept on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py and optimized_header.ldpy: only the unused shim import GraphService goes, on both sides. logging, logger, GraphData and _resolve_uri are used, and the three `@prefix` lines (owl:, rdfs:, xsd:) are used."
+  ]
 }

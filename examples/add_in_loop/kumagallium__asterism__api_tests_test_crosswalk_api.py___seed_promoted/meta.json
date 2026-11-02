@@ -63,5 +63,21 @@
       "Literal(raw) -> Literal(raw or \"z\") (perd '' et 0)"
     ],
     "remaining": "Jugements non traités : la forme de l'îlot (constructeurs rdflib gardés dans +{ } au lieu de f<{entity}> f<{PRED}> {raw}, drapeau wrong-construction) et la classification directly-expressible alors que l'INSERT DATA interpolé reste une f-string (classification-doubt)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nearly nothing to compress. The add loop becomes `g += ((rdflib.URIRef(entity), rdflib.URIRef(PRED), rdflib.Literal(raw)) for entity, raw in rows)`, which saves 2 tokens. The INSERT DATA update and the meta.json dump stay as they are (the repository is formatted with black, which keeps the dict exploded).",
+    "optimized.ldpy, from optimized.py: `@graph ds.graph(rdflib.URIRef(key))` and `+{ f<{entity}> f<{PRED}> {rdflib.Literal(raw)} }` in the loop. `f<…>` replaces rdflib.URIRef(...) (no @base). `rdflib.Literal(raw)` stays explicit, because a bare `{raw}` raises on None where the original writes Literal('None').",
+    "The INSERT DATA cannot become `s{ }`: its terms would be initial bindings, and an INSERT DATA has no WHERE clause that could use them. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py and optimized_header.ldpy: only the unused import crosswalk_runtime goes, on both sides. There is no `@prefix` in this header."
+  ]
 }

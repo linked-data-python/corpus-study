@@ -66,5 +66,25 @@
       "isBlank -> isIRI"
     ],
     "remaining": "Jugement non traité (drapeau wrong-construction) : les six +{ } gardent {rdflib.term.URIRef(RML_…)} au lieu de f<{RML_…}> (équivalent selon le triage ; dans les s{ } la forme f<{…}> est refusée par le parseur SPARQL)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: five of the six rules have the same body (`for term_map, _ in query: add((term_map, TERM_TYPE, X))`). A local helper `complete(termtype, query)` replaces them and takes the query inline, so the `query = ... \\` variables go. `rdflib.term.URIRef(RML_TERM_TYPE)` is computed once as term_type. The queries keep their f-string text with the RML_* constants, because the repository keeps its IRIs in constants. They stay sequential, because each rule sees the termtypes that the rules before it added.",
+    "optimized.py, what was not done: a rewrite in triple-pattern calls (OPTIONAL/FILTER !bound as `not in` tests) is longer. A single VALUES query for the four rules of the last loop is also longer.",
+    "optimized.ldpy, from optimized.py: the same helper, whose body is `+{ {term_map} {term_type} f<{termtype}> }`. The queries are `s{ }` with `f<{RML_X}>` and `{term_type}` as initial bindings, which is shorter than the `{rdflib.term.URIRef(RML_X)}` of translated.ldpy.",
+    "Rule 5 (referencing object maps) is a pure BGP, so it becomes `list(m{ ?term_map f<{RML_PARENT_TRIPLES_MAP}> [ f<{RML_SUBJECT_MAP}> [ {term_type} ?termtype ] ] })`: the nested blank nodes are the non-projected intermediate variables. The `list()` is needed for exactness: m{ } is a lazy join over triples(), and a termtype added during the iteration could otherwise feed a later solution. The SPARQL result is materialised before the adds. This is the notation (the most specific island for a BGP), not a restructuring.",
+    "The notation ratio is above 1 (1.22) because the tokenizer counts a Python query string as one token per string piece, but counts the SPARQL inside `s{ }` token by token. The `s{ }` text is not longer than the f-string text. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "s{ }",
+    "m{ }",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in the header: rdflib and the sixteen RML_* constants are all used on both sides, so optimized_header.py and optimized_header.ldpy are byte copies of the optimized artefacts."
+  ]
 }

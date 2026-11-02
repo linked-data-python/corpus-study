@@ -65,5 +65,23 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `for triple in artifact: merged.add(triple)` becomes `merged += artifact`. The `continue` guard is inverted into an `if ... in catalog:`. The innermost loop `for obj in catalog.objects(target, predicate): merged.add(...)` becomes `merged += catalog.triples((target, predicate, None))`.",
+    "optimized.ldpy, from optimized.py: `for target in m{ [] eco:relationshipTarget ?target }(artifact):` and `if m{ {target} a sstim:SensoryStimulationImplementation }(catalog):` replace the objects() selector and the `in` test. The profile set holds prefixed names. `merged += artifact` and `merged += catalog.triples(...)` stay: no island is shorter for a bulk copy.",
+    "Measured and rejected: a join `m{ {target} a sstim:SensoryStimulationImplementation ; ?predicate ?obj }(catalog)` filtered on the profile set, with `+{ {target} {predicate} {obj} }` (209 tokens), and a `m{ {target} {predicate} ?obj }` loop (216). Both are longer than the kept form (205), so there is no exception to the symmetry rule. The notation brings nothing on top of the rereading here (notation ratio 1.0)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Literal, URIRef, OWL, PROV and XSD are unused and go; the two rdflib imports become `from rdflib import DCTERMS, RDF, RDFS, Graph, Namespace`.",
+    "optimized_header.ldpy: only Graph is used (in the annotations), so `from rdflib import Graph` stays alone and the `rdflib.namespace` import goes. The five `@prefix` lines are all used."
+  ]
 }

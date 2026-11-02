@@ -1,0 +1,67 @@
+# Extracted from morph-kgc/morph-kgc@a2122e88bb : src/morph_kgc/mapping/mapping_parser.py
+# region: _complete_termtypes (lines 231-291, stratum add_in_loop)
+# licence of the source repository: see meta.json
+import rdflib
+from rml_constants import (
+    RML_QUOTED_TRIPLES_MAP, RML_TERM_TYPE, RML_RDF_STAR_TRIPLE,
+    RML_CONSTANT, RML_BLANK_NODE, RML_LITERAL, RML_OBJECT_MAP,
+    RML_REFERENCE, RML_EXECUTION, RML_LANGUAGE_MAP, RML_DATATYPE_MAP,
+    RML_PARENT_TRIPLES_MAP, RML_SUBJECT_MAP, RML_IRI,
+    RML_PREDICATE_MAP, RML_GRAPH_MAP,
+)
+
+def _complete_termtypes(mapping_graph):
+    """
+    Completes term types of mapping rules that do not have rr:termType property as indicated in R2RML specification
+    (https://www.w3.org/2001/sw/rdb2rdf/r2rml/#termtype).
+    """
+
+    term_type = rdflib.term.URIRef(RML_TERM_TYPE)
+    @graph mapping_graph
+
+    def complete(termtype, query):
+        for term_map, _ in mapping_graph.query(query):
+            +{ {term_map} {term_type} f<{termtype}> }
+
+    # add missing RDF-star triples termtypes (in the subject and object maps)
+    complete(RML_RDF_STAR_TRIPLE, s{ SELECT DISTINCT ?term_map ?quoted_triples_map WHERE {
+            ?term_map f<{RML_QUOTED_TRIPLES_MAP}> ?quoted_triples_map .
+            OPTIONAL { ?term_map {term_type} ?termtype . } .
+            FILTER ( !bound(?termtype) ) } })
+
+    # add missing blanknode termtypes in the constant-valued object maps
+    complete(RML_BLANK_NODE, s{ SELECT DISTINCT ?term_map ?constant WHERE {
+            ?term_map f<{RML_CONSTANT}> ?constant .
+            OPTIONAL { ?term_map {term_type} ?termtype . } .
+            FILTER ( !bound(?termtype) && isBlank(?constant) ) } })
+
+    # add missing literal termtypes in the constant-valued object maps
+    complete(RML_LITERAL, s{ SELECT DISTINCT ?term_map ?constant WHERE {
+            ?term_map f<{RML_CONSTANT}> ?constant .
+            OPTIONAL { ?term_map {term_type} ?termtype . } .
+            FILTER ( !bound(?termtype) && isLiteral(?constant) ) } })
+
+    # add missing literal termtypes in the object maps
+    complete(RML_LITERAL, s{ SELECT DISTINCT ?om ?pom WHERE {
+            ?pom f<{RML_OBJECT_MAP}> ?om .
+            OPTIONAL { ?om {term_type} ?termtype . } .
+            OPTIONAL { ?om f<{RML_REFERENCE}> ?reference . } .
+            OPTIONAL { ?om f<{RML_EXECUTION}> ?execution . } .
+            OPTIONAL { ?om f<{RML_LANGUAGE_MAP}> ?language . } .
+            OPTIONAL { ?om f<{RML_DATATYPE_MAP}> ?datatype . } .
+            FILTER ( !bound(?termtype) && (
+            bound(?reference) || bound(?execution) || bound(?language) || bound(?datatype) ) ) } })
+
+    # complete referencing object maps with the termtype coming from the subject of the parent
+    for term_map, termtype in list(m{ ?term_map f<{RML_PARENT_TRIPLES_MAP}>
+                                          [ f<{RML_SUBJECT_MAP}> [ {term_type} ?termtype ] ] }):
+        +{ {term_map} {term_type} f<{termtype}> }
+
+    # now all missing termtypes are IRIs
+    for term_map_property in [RML_SUBJECT_MAP, RML_PREDICATE_MAP, RML_OBJECT_MAP, RML_GRAPH_MAP]:
+        complete(RML_IRI, s{ SELECT DISTINCT ?term_map ?x WHERE {
+                ?x f<{term_map_property}> ?term_map .
+                OPTIONAL { ?term_map {term_type} ?termtype . } .
+                FILTER ( !bound(?termtype) ) } })
+
+    return mapping_graph

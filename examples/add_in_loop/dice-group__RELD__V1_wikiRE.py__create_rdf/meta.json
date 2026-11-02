@@ -67,5 +67,23 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `URIRef(res+\"R-\"+str(nytid))` becomes `res[f\"R-{nytid}\"]` (Namespace.__getitem__; for the numpy integer, format() and str() give the same text), and the four-line g.add is on one line with its `# nyt` comment. nytid stays a separate statement: inlined, it makes an unreadable line.",
+    "optimized.ldpy, from optimized.py: `+{ f<{relation}> owl:sameAs {res[f\"R-{nytid}\"]} }  # nyt`. `f<{relation}>` replaces `{URIRef(relation)}`, because no @base is in scope. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: of the eleven `rdflib.namespace` names only OWL is used, and Literal is unused; the two imports become `from rdflib import OWL, Graph, Namespace, URIRef`. The `# here is some error` comment of the rewritten line goes with it.",
+    "optimized_header.ldpy: the `rdflib.namespace` import goes completely (owl: is a prefix), and URIRef and Literal go too (`f<{relation}>`): only `from rdflib import Graph, Namespace` stays. The `@prefix owl:` line is used."
+  ]
 }

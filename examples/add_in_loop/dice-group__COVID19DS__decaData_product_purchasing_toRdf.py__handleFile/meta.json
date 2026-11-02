@@ -64,5 +64,27 @@
       "?o lié à metapredicate au lieu de metaobject"
     ],
     "remaining": "Jugement non traité : wrong-construction (les `@bindings {…}` et `?var` sont-ils un crédit indu face à l'interpolation directe, et les `{Literal(const, datatype=…)}` de la provenance des enveloppes inutiles) — question 1 du tri, inchangée."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nineteen `g.namespace_manager.bind(...)` calls become a `prefixes` dict and a `g.bind` loop. Graph.bind passes the same override=True/replace=False to namespace_manager.bind, and the dict keeps the order of the calls.",
+    "optimized.py: `rowNum` comes from `enumerate(reader, 1)`. dice is `ndice[f\"{rowNum}_ProductPurchasingBehavior\"]` once per row: re.sub on the digits of rowNum never matches an underscore, and resource is the same IRI as ndice. The heading loop is `row.items()`.",
+    "optimized.py: the five datatype overrides become a `datatypes` dict and the two predicate overrides a `predicates` dict, used with `.get(heading, default)`. The zip-code branch tests `heading == 'STORE_ZIP_CODE' and value != \"\"` and keeps `zipcodes.matching(...)[0]` in zipcodeInfo. The geometry literal is an f-string. The local `dice = None` goes. The provenance is written once per row, not once per heading (same graph).",
+    "optimized.py: the adds stay one call per triple. g is a module global inside a function, so `g += [...]` would need a `global g`, which a reviewer would reject.",
+    "optimized.ldpy, from optimized.py: one `@prefix xsd:` at the top of the function body (the fixed header has none), and `@graph g`. The six zip-code triples are one `+{ }`, with the city, county and label as `{...}^^xsd:string` and the geometry as `f\"POINT(...)\"^^{virtrdf.Geometry}`. The two conditional triples and the four provenance triples are one `+{ }` each. The dicts hold `xsd:integer`, `cvdo:quantity` and other prefixed names. dice is `ndice:{rowNum}_ProductPurchasingBehavior`.",
+    "No exception to the symmetry rule. The added `@prefix xsd:` line pays for itself: five `Literal(..., datatype=XSD.x)` calls become `^^xsd:x`."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef and BNode are unused imports and go. The first `g = Graph()`, which the second one overwrites, and `resource` (unused, because dice is now `ndice[...]`) also go. The seventeen Namespace objects stay: the bind dict uses them.",
+    "optimized_header.ldpy: URIRef, BNode, XSD, RDF and RDFS go (the islands use a, rdfs: and xsd:). DCTERMS and OWL stay for the bind dict. The duplicate `g = Graph()` and `resource` also go. The six `@prefix` lines of the header are all used."
+  ]
 }

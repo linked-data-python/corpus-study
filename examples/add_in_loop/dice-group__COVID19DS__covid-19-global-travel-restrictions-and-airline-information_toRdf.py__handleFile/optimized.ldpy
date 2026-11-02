@@ -1,0 +1,57 @@
+# Extracted from dice-group/COVID19DS@7842845de5 : covid-19-global-travel-restrictions-and-airline-information/toRdf.py
+# region: handleFile (lines 65-123, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib import URIRef, BNode, Literal, Namespace, Graph, XSD
+from rdflib.namespace import RDF, RDFS, DCTERMS, OWL
+import re
+import pycountry
+from _context import repl, capitalizeWords, reader
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix cvdo: <https://covid-19ds.data.dice-research.org/ontology/> .
+@prefix ndice: <https://covid-19ds.data.dice-research.org/resource/> .
+@prefix virtrdf: <http://www.openlinksw.com/schemas/virtrdf#> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix dowl: <http://dbpedia.org/ontology/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+g = Graph()
+resource = "https://covid-19ds.data.dice-research.org/resource/"
+# reader restored from the context shim: no pandas in the study venv, and the
+# source CSV is not committed to the repository at the pinned commit either
+# (see _context.py) -- reader is not the mechanical `pd.read_csv(...)` line
+# from the pipeline draft, it is the missing binding itself.
+@graph as g
+
+datatypes = {'ObjectId': xsd:nonNegativeInteger, 'published': xsd:date}
+for row in reader:
+    # snakecase to lowerCamelCase
+    dice = ndice:{re.sub(r"_(\w)", repl, str(row['ObjectId']))}_AirlineRestrictions
+    if row.get('X') not in (None, '') and row.get('Y') not in (None, ''):
+        +{ {dice} geo:geometry f"POINT({row['Y']} {row['X']})"^^virtrdf:Geometry }
+
+    for heading, value in row.items():
+        metaobject = Literal(value, datatype=datatypes.get(heading, xsd:string))
+        if heading == 'source' and "http" in value:
+            metaobject = URIRef(value)
+
+        if heading == "iso3":
+            iso2 = pycountry.countries.get(alpha_3=value)
+            for isoitem in value.split(','):
+                isoitem = isoitem.strip()
+                +{ {dice} cvdo:hasISO3 ndice:{isoitem} .
+                   ndice:{isoitem} a cvdo:Iso ; cvdo:iso3 {metaobject} }
+                if iso2:
+                    +{ ndice:{isoitem} dowl:isoCodeRegion {iso2.alpha_2}^^xsd:string }
+        elif heading == "adm0_name":
+            adm = capitalizeWords(value)
+            +{ {dice} cvdo:hasCountry ndice:{adm} .
+               ndice:{adm} a dowl:Country ; rdfs:label {metaobject} }
+        elif heading not in ('X', 'Y') and value != "":
+            +{ {dice} a cvdo:AirlineRestrictions ;
+                   cvdo:{re.sub(r"_(\w)", repl, heading.lower())} {metaobject} }
+
+    # the provenance
+    +{ {dice} prov:hadPrimarySource ndice:AirlineRestrictionsCovidDataset .
+       ndice:AirlineRestrictionsCovidDataset a prov:Entity ;
+           prov:wasDerivedFrom "https://data.humdata.org/dataset/covid-19-global-travel-restrictions-and-airline-information"^^xsd:string }
