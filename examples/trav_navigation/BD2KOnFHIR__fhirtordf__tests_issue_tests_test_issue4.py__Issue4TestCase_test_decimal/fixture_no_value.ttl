@@ -1,0 +1,13 @@
+# dispense.add exists but carries no fhir:value (last link missing); a "2.00"
+# decimal sits under a neighbouring predicate (dispense.prism) and as a
+# fhir:value directly on the resource, neither of which is the chain's path.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/VisionPrescription/33123> a fhir:VisionPrescription ;
+    fhir:value "2.00"^^xsd:decimal ;
+    fhir:VisionPrescription.dispense [
+        fhir:index 0 ;
+        fhir:VisionPrescription.dispense.prism [ fhir:value "2.00"^^xsd:decimal ] ;
+        fhir:VisionPrescription.dispense.add [ fhir:index 0 ]
+    ] .

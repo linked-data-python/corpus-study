@@ -1,11 +1,9 @@
 # Extracted from alganet/apysource@f800ec97c1 : tests/test_emit.py
 # region: test_provenance_records_every_fragment_it_examined (lines 191-204, stratum trav_navigation)
 # licence of the source repository: see meta.json
-from rdflib import Graph, RDF
-from apysource.namespaces import PROV, SV
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix sv: <https://alganet.github.io/apysource/vocab.ttl#> .
-
+from rdflib import Graph
+from apysource.namespaces import prov:, sv:
+from provenance_shim import _run_with_provenance
 
 def test_provenance_records_every_fragment_it_examined():
     """Including the failures.
@@ -15,9 +13,10 @@ def test_provenance_records_every_fragment_it_examined():
     the run never reached. A file that omits its failures is not a record.
     """
     _, prov = _run_with_provenance()
+    @graph prov
     verdicts = {
-        str(prov.value(v, PROV.wasDerivedFrom)): str(prov.value(v, sv:verificationStatus))
-        for v in prov.subjects(rdf:type, sv:VerificationResult)
+        str(m{ {v} prov:wasDerivedFrom ?o }.first()): str(m{ {v} sv:verificationStatus ?o }.first())
+        for v in m{ ?v a sv:VerificationResult }
     }
     assert len(verdicts) == 2
     assert set(verdicts.values()) == {"verified", "failed"}

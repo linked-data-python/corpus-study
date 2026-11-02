@@ -1,31 +1,29 @@
 # Extracted from spdx/tools-python@cef432adee : tests/spdx/writer/rdf/test_file_writer.py
 # region: test_add_file_to_graph (lines 11-30, stratum trav_existence)
 # licence of the source repository: see meta.json
-from rdflib import RDF, RDFS, Graph, Literal, URIRef
-from spdx_tools.spdx.rdfschema.namespace import LICENSE_NAMESPACE, SPDX_NAMESPACE
-from spdx_tools.spdx.writer.rdf.file_writer import add_file_to_graph
-from tests.spdx.fixtures import file_fixture
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
+from rdflib import Graph, Literal, rdfs:
+from spdx_shim import license_namespace:, spdx_namespace:
+from spdx_shim import add_file_to_graph
+from spdx_shim import file_fixture
 
 def test_add_file_to_graph():
     graph = Graph()
+    @graph graph
     file = file_fixture()
 
     add_file_to_graph(file, graph, "docNamespace", {})
 
-    assert (<docNamespace#SPDXRef-File>, rdf:type, SPDX_NAMESPACE.File) in graph
-    assert (None, SPDX_NAMESPACE.fileName, Literal(file.name)) in graph
-    assert (None, SPDX_NAMESPACE.fileType, SPDX_NAMESPACE.fileType_text) in graph
-    assert (None, SPDX_NAMESPACE.licenseComments, Literal(file.license_comment)) in graph
-    assert (None, SPDX_NAMESPACE.licenseConcluded, None) in graph
-    assert (None, SPDX_NAMESPACE.licenseInfoInFile, LICENSE_NAMESPACE.MIT) in graph
-    assert (None, SPDX_NAMESPACE.licenseInfoInFile, LICENSE_NAMESPACE["GPL-2.0-only"]) in graph
-    assert (None, SPDX_NAMESPACE.licenseInfoInFile, SPDX_NAMESPACE.noassertion) in graph
-    assert (None, SPDX_NAMESPACE.copyrightText, Literal(file.copyright_text)) in graph
-    assert (None, rdfs:comment, Literal(file.comment)) in graph
-    assert (None, SPDX_NAMESPACE.noticeText, Literal(file.notice)) in graph
-    assert (None, SPDX_NAMESPACE.fileContributor, Literal(file.contributors[0])) in graph
-    assert (None, SPDX_NAMESPACE.checksum, None) in graph
-    assert (None, SPDX_NAMESPACE.attributionText, Literal(file.attribution_texts[0])) in graph
+    assert m{ <docNamespace#SPDXRef-File> a spdx_namespace:File }
+    assert m{ [] spdx_namespace:fileName {file.name} }
+    assert m{ [] spdx_namespace:fileType spdx_namespace:fileType_text }
+    assert m{ [] spdx_namespace:licenseComments {Literal(file.license_comment)} }
+    assert m{ [] spdx_namespace:licenseConcluded [] }
+    assert m{ [] spdx_namespace:licenseInfoInFile license_namespace:MIT }
+    assert m{ [] spdx_namespace:licenseInfoInFile license_namespace:GPL-2.0-only }
+    assert m{ [] spdx_namespace:licenseInfoInFile spdx_namespace:noassertion }
+    assert m{ [] spdx_namespace:copyrightText {Literal(file.copyright_text)} }
+    assert m{ [] rdfs:comment {Literal(file.comment)} }
+    assert m{ [] spdx_namespace:noticeText {Literal(file.notice)} }
+    assert m{ [] spdx_namespace:fileContributor {file.contributors[0]} }
+    assert m{ [] spdx_namespace:checksum [] }
+    assert m{ [] spdx_namespace:attributionText {file.attribution_texts[0]} }

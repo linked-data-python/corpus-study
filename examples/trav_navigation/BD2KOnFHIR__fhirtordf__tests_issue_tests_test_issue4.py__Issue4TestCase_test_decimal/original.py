@@ -2,10 +2,10 @@
 # region: Issue4TestCase.test_decimal (lines 40-57, stratum trav_navigation)
 # licence of the source repository: see meta.json
 import unittest
-from jsonasobj import loads
+from fhirtordf_shim import loads
 from rdflib import URIRef, Literal, XSD
-from fhirtordf.rdfsupport.namespaces import FHIR
-from tests.utils.base_test_case import FHIRGraph
+from fhirtordf_shim import FHIR
+from fhirtordf_shim import FHIRGraph
 json_data = """{
   "resourceType": "VisionPrescription",
   "id": "33123",
@@ -36,7 +36,7 @@ json_data = """{
 @unittest.expectedFailure
 def test_decimal(self):
     test_json = loads(json_data)
-    from fhirtordf.loaders.fhirresourceloader import FHIRResource
+    from fhirtordf_shim import FHIRResource
     test_rdf = FHIRResource(FHIRGraph(), None, "http://hl7.org/fhir", test_json)
     g = test_rdf.graph
     # rdflib supports decimal precision if you create the data as a string.

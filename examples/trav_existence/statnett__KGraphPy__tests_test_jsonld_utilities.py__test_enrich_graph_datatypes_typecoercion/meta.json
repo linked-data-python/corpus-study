@@ -16,11 +16,24 @@
     "term_constructor": 12,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "prefixed name",
+    "typed literal",
+    "plain literal"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd"
+    "The two `g.add` become one `+{ }` after `@graph g`; the two `(s, p, Literal(...)) in g` become `assert m{ … }`. `@prefix ex: <http://example.com/>` mirrors the `g.bind(\"ex\", ...)` the test does, so the four URIRef constructors become `ex:age`, `ex:hasAge`, `ex:duration`; `XSD` is imported by `from rdflib import xsd:`.",
+    "Literals: `Literal(30.0, datatype=XSD.float)` and `Literal(30.0, datatype=XSD.integer)` are written `\"30.0\"^^xsd:float` / `\"30.0\"^^xsd:integer`, which is equal here although the argument is a float (INSTRUCTIONS pitfall `Literal(n, datatype=...)`): rdflib's lexical form of 30.0 is '30.0', and `Literal(30.0, datatype=XSD.integer)` is the ill-typed '30.0'^^xsd:integer; checked equal, and the driver's `int_form` case (the function writing '30') fails both sides identically. `Literal(\"not-a-number\", datatype=None)` is the plain literal `\"not-a-number\"`; `Literal(\"not-a-number\", datatype=XSD.integer)` is `\"not-a-number\"^^xsd:integer` (also ill-typed).",
+    "The dict value `XSD.integer` becomes the prefixed name `xsd:integer` in a Python dict (`dt_map`); its key stays the string the function expects.",
+    "Context shim `kgraphpy_shim.py`: the verbatim copy of kgraphpy/jsonld_utilities.py (kgraphpy is not installed; the module needs only rdflib and the standard library).",
+    "Driver: a self-contained test (no argument, returns None). Its only external part is the function under test, so the driver installs in the imported function object (`__code__`) the real function and seven variants that each get one thing wrong (no-op, only untyped, only wrongly typed, wrong datatype, old triples kept, lexical form, int form): the original raises for some and passes for others, the two assertions are separated (`untyped_only` and `typed_only`). Broken once on purpose (second assertion replaced by `m{ ex:duration ex:hasAge ?o }`: call 3 fails) and restored."
   ],
   "draft_sha": "90dbc32be2f6099b",
   "provenance": {
@@ -32,5 +45,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

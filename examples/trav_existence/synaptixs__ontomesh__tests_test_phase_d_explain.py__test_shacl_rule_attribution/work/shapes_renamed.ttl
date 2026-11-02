@@ -1,0 +1,12 @@
+# The right triple is derived, by a rule whose id does not mention "Trigger".
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <https://test.example/phased#> .
+:FlagShape
+  a sh:NodeShape ;
+  sh:targetClass :Trigger ;
+  sh:rule [
+    a sh:TripleRule ;
+    sh:subject sh:this ;
+    sh:predicate :flag ;
+    sh:object true ;
+  ] .

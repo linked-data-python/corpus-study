@@ -1,0 +1,13 @@
+# The loader output FHIR wants: the decimal keeps its lexical form "2.00".
+# The region's last assertion holds (the "expected failure" would pass).
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/VisionPrescription/33123> a fhir:VisionPrescription ;
+    fhir:nodeRole fhir:treeRoot ;
+    fhir:VisionPrescription.dispense [
+        fhir:index 0 ;
+        fhir:VisionPrescription.dispense.sphere [ fhir:value "-2.00"^^xsd:decimal ] ;
+        fhir:VisionPrescription.dispense.prism [ fhir:value "0.5"^^xsd:decimal ] ;
+        fhir:VisionPrescription.dispense.add [ fhir:value "2.00"^^xsd:decimal ]
+    ] .

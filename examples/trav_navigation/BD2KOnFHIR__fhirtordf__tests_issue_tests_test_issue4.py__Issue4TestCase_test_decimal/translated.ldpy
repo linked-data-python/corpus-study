@@ -2,12 +2,10 @@
 # region: Issue4TestCase.test_decimal (lines 40-57, stratum trav_navigation)
 # licence of the source repository: see meta.json
 import unittest
-from jsonasobj import loads
-from rdflib import URIRef, Literal, XSD
-from fhirtordf.rdfsupport.namespaces import FHIR
-from tests.utils.base_test_case import FHIRGraph
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from fhirtordf_shim import loads
+from rdflib import Literal, xsd:
+from fhirtordf_shim import fhir:
+from fhirtordf_shim import FHIRGraph
 json_data = """{
   "resourceType": "VisionPrescription",
   "id": "33123",
@@ -38,18 +36,17 @@ json_data = """{
 @unittest.expectedFailure
 def test_decimal(self):
     test_json = loads(json_data)
-    from fhirtordf.loaders.fhirresourceloader import FHIRResource
+    from fhirtordf_shim import FHIRResource
     test_rdf = FHIRResource(FHIRGraph(), None, "http://hl7.org/fhir", test_json)
     g = test_rdf.graph
+    @graph g
     # rdflib supports decimal precision if you create the data as a string.
-    self.assertNotEqual(Literal("2.00", datatype=xsd:decimal), Literal("2.0", datatype=xsd:decimal))
+    self.assertNotEqual("2.00"^^xsd:decimal, "2.0"^^xsd:decimal)
     self.assertEqual(Literal(2.00), Literal(2.0))
 
     # FHIR requires that *all* decimals use the first form.  While the diopter example above
     # would work, issues arise in situations where numbers really ARE decimal...
-    self.assertEqual(Literal("2.00", datatype=xsd:decimal),
-                     g.value(
-                         g.value(
-                             g.value(<http://hl7.org/fhir/VisionPrescription/33123>,
-                                     FHIR.VisionPrescription.dispense),
-                             FHIR.VisionPrescription.dispense.add), FHIR.value))
+    dispense = m{ <http://hl7.org/fhir/VisionPrescription/33123> fhir:VisionPrescription.dispense ?o }.first()
+    add = m{ {dispense} fhir:VisionPrescription.dispense.add ?o }.first() if dispense is not None else None
+    value = m{ {add} fhir:value ?o }.first() if add is not None else None
+    self.assertEqual("2.00"^^xsd:decimal, value)

@@ -13,11 +13,22 @@
     "graph_read": 3,
     "namespace_term": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, SV->sv"
+    "`prov.value(v, PROV.wasDerivedFrom)` and `prov.value(v, SV.verificationStatus)` are two INDEPENDENT reads fed by the one outer selector `prov.subjects(RDF.type, SV.VerificationResult)`: they stay two `m{ {v} p ?o }.first()` inside the comprehension (fusing them into one `m{ ?v a sv:VerificationResult ; prov:wasDerivedFrom ?d ; sv:verificationStatus ?s }` would multiply solutions when a verdict has several of either, and drop a verdict lacking one, where `value` gives None; record ldpy/016). Outer: `m{ ?v a sv:VerificationResult }`.",
+    "`PROV`, `SV` come from `apysource.namespaces` (a real installed module exporting `Namespace`s): `from apysource.namespaces import prov:, sv:` takes them as prefixes, an attested use of that form with no shim. `RDF.type` is `a`. A Python local named `prov` coexists with the prefix `prov:` (the transpiler's warning concerns an assignment that STARTS with the prefix name; `_, prov = ...` does not trigger it).",
+    "Context shim `provenance_shim.py`: the test module's own helpers `_Fetcher` and `_run_with_provenance`, which run the real apysource 0.10.0 `check_graph(..., emit_provenance=True)`. One difference, stated in the shim: the page is a few lines of HTML instead of the 150 kB un_charter.html; it is a module variable (BODY) that the driver rebinds.",
+    "Driver: no argument and returns None, so five cases rebind the page the real apysource checks two fixed fragments against: one sentence on the page (one verified, one failed: passes), both (two verified: raises), none (two failed: raises), the other one only (swapped: passes), a page too short to be evidence (raises). Broken once on purpose (a spurious pattern added in the status read: calls 0 and 3 fail) and restored."
   ],
   "draft_sha": "c917aea3d82c24f9",
   "provenance": {
@@ -29,5 +40,6 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

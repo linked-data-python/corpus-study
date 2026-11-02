@@ -1,4 +1,18 @@
-# Input graph for BD2KOnFHIR__fhirtordf__tests_issue_tests_test_issue4.py__Issue4TestCase_test_decimal — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Loader output for the region's JSON, as fhirtordf produces it (see
+# fhirtordf_shim.py): the decimals come out as "2.0" -- the issue the test pins
+# (the JSON number 2.00 is a float, str(2.0) == "2.0"), so the region's last
+# assertion fails here, as the repository expects.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/VisionPrescription/33123> a fhir:VisionPrescription ;
+    fhir:nodeRole fhir:treeRoot ;
+    fhir:Resource.id [ fhir:value "33123" ] ;
+    fhir:VisionPrescription.dispense [
+        fhir:index 0 ;
+        fhir:VisionPrescription.dispense.eye [ fhir:value "right" ] ;
+        fhir:VisionPrescription.dispense.sphere [ fhir:value "-2.0"^^xsd:decimal ] ;
+        fhir:VisionPrescription.dispense.prism [ fhir:value "0.5"^^xsd:decimal ] ;
+        fhir:VisionPrescription.dispense.base [ fhir:value "down" ] ;
+        fhir:VisionPrescription.dispense.add [ fhir:value "2.0"^^xsd:decimal ]
+    ] .

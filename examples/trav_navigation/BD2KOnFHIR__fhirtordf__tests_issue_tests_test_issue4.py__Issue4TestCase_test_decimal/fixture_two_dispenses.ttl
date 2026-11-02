@@ -1,0 +1,15 @@
+# Two dispense entries. g.value follows the FIRST one at every step: it has no
+# dispense.add, so the chain ends on None and the assertion fails. The SECOND
+# has the "2.00" that a single join over the whole chain would find (any path,
+# not the first).
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/VisionPrescription/33123> a fhir:VisionPrescription ;
+    fhir:VisionPrescription.dispense [
+        fhir:index 0 ;
+        fhir:VisionPrescription.dispense.prism [ fhir:value "0.5"^^xsd:decimal ]
+    ] , [
+        fhir:index 1 ;
+        fhir:VisionPrescription.dispense.add [ fhir:value "2.00"^^xsd:decimal ]
+    ] .

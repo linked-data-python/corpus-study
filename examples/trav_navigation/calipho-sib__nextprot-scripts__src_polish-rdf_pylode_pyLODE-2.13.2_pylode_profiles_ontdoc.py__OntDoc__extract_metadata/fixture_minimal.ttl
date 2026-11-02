@@ -1,0 +1,16 @@
+# An ontology with nothing but its type: no title (the region gives it the
+# placeholder one). A titled class and a labelled node beside it are not read.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sdo: <https://schema.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix ex: <http://example.org/onto#> .
+
+<http://example.org/bare> a owl:Ontology .
+ex:Thing a owl:Class ; dcterms:title "Not the ontology" .

@@ -1,0 +1,10 @@
+# The dispense entry has no dispense.add (middle link missing): the chain
+# reaches None before its last read, which g.value answers with None.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/VisionPrescription/33123> a fhir:VisionPrescription ;
+    fhir:VisionPrescription.dispense [
+        fhir:index 0 ;
+        fhir:VisionPrescription.dispense.eye [ fhir:value "right" ]
+    ] .

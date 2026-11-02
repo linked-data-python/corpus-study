@@ -3,6 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import Graph, RDF
 from apysource.namespaces import PROV, SV
+from provenance_shim import _run_with_provenance
 
 def test_provenance_records_every_fragment_it_examined():
     """Including the failures.

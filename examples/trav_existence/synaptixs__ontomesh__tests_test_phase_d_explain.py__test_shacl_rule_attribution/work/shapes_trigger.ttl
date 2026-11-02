@@ -1,0 +1,12 @@
+# The test's own shapes: Trigger instances get :flag true (xsd:boolean).
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <https://test.example/phased#> .
+:TriggerShape
+  a sh:NodeShape ;
+  sh:targetClass :Trigger ;
+  sh:rule [
+    a sh:TripleRule ;
+    sh:subject sh:this ;
+    sh:predicate :flag ;
+    sh:object true ;
+  ] .

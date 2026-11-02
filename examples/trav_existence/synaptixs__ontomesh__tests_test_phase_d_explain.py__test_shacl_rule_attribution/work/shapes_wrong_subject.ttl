@@ -1,0 +1,14 @@
+# The right predicate and a rule id naming "Trigger", but for another subject
+# (:t2, a target node): the statement about (:t2, :flag) is there, the one the
+# region looks for is not.
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <https://test.example/phased#> .
+:TriggerShape
+  a sh:NodeShape ;
+  sh:targetNode :t2 ;
+  sh:rule [
+    a sh:TripleRule ;
+    sh:subject sh:this ;
+    sh:predicate :flag ;
+    sh:object true ;
+  ] .

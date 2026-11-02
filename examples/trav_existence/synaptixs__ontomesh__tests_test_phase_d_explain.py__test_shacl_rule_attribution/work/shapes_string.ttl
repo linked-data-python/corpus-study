@@ -1,0 +1,13 @@
+# The object is the plain string "true": explain_triple's lookup for "true"
+# succeeds, so the region's fallback does not run.
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <https://test.example/phased#> .
+:TriggerShape
+  a sh:NodeShape ;
+  sh:targetClass :Trigger ;
+  sh:rule [
+    a sh:TripleRule ;
+    sh:subject sh:this ;
+    sh:predicate :flag ;
+    sh:object "true" ;
+  ] .

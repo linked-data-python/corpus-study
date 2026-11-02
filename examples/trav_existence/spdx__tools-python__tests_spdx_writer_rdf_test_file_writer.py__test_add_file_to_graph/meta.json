@@ -14,11 +14,22 @@
     "namespace_term": 2,
     "term_constructor": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "Fourteen `(s, p, o) in graph` become fourteen `assert m{ … }` (truth value of a lazy match = ASK). `None` positions become `[]` (unprojected blank node, matched but not projected); `RDF.type` becomes `a`; `URIRef(\"docNamespace#SPDXRef-File\")` becomes the relative IRI `<docNamespace#SPDXRef-File>` (no @base in scope, so it stays relative, as the original). `@graph graph` after `graph = Graph()` replaces the receiver of all fourteen reads.",
+    "Namespaces: the project's `SPDX_NAMESPACE` / `LICENSE_NAMESPACE` are imported as prefixes by `from spdx_shim import license_namespace:, spdx_namespace:` (the import takes the module attribute named `license_namespace` or its upper-case form `LICENSE_NAMESPACE`, so a constant named `X_NAMESPACE` is reachable as the prefix `x_namespace:` -- long, but one source of truth); `RDFS` from rdflib as `rdfs:`. `LICENSE_NAMESPACE[\"GPL-2.0-only\"]` is `license_namespace:GPL-2.0-only` (hyphens and dots are legal in a Turtle local part). The module that exports them is ordinary Python (a `Namespace`), not ldpy.",
+    "Fidelity point: `Literal(x)` is kept inside the interpolation for the four optional strings (license_comment, copyright_text, comment, notice): `Literal(None)` is `Literal('None')` in rdflib (the assertion simply fails when the writer wrote nothing), whereas an interpolated bare `None` raises TypeError in `m{ }`. Proved: with `{file.license_comment}` the case license_comment=None gives AssertionError on the original and TypeError on the translation. `{file.name}`, `{file.contributors[0]}` and `{file.attribution_texts[0]}` (a str by type, evaluated in the hole: an empty list gives the same IndexError as the original) are bare interpolations.",
+    "Context shim `spdx_shim.py`: spdx_tools is not installed (needs beartype, license_expression); the writer functions the region exercises are copied verbatim, the license-expression objects are a minimal stand-in (AND/OR/LicenseSymbol), `spdx_licensing.parse(...)` replaced by the objects it returns. See the header of the shim for what is verbatim and what is not.",
+    "Driver: the test takes no argument and returns None; the driver changes what the fixture builds (`file_fixture.__defaults__`) in eighteen cases, one alteration each (a missing predicate, a wrong object under a present predicate, an empty list, None for an optional string, an extra licence that must not matter, a text shared between predicates), so the original raises on some calls and passes on others. The translation was broken once on purpose (fileType object widened to `[]`: call 4 fails) and restored."
   ],
   "draft_sha": "a266d4c7eccc3a03",
   "provenance": {
@@ -30,5 +41,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

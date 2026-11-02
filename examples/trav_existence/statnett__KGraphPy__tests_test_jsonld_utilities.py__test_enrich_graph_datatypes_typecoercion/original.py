@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 from rdflib import URIRef, Graph, Literal
 from rdflib import XSD
-from kgraphpy.jsonld_utilities import (
+from kgraphpy_shim import (
     reorder_jsonld, 
     sort_subjects, 
     sort_predicates, 

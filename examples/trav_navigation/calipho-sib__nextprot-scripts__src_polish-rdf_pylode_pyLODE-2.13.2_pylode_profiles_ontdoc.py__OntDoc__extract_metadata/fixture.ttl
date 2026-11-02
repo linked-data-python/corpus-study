@@ -1,0 +1,55 @@
+# Input graph: an ontology with every property the region reads, agents of
+# every kind (literal, URI, blank node with name and homepage, organisation
+# behind affiliation), two imports, two repositories behind prov:wasGeneratedBy;
+# plus neighbours that must NOT be read: metadata-looking triples on a class
+# and on a blank node, which are not the ontology.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sdo: <https://schema.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix ex: <http://example.org/onto#> .
+
+ex: a owl:Ontology ;
+    owl:imports <http://example.org/other#> , ex:Extra ;
+    dcterms:title "Example ontology" ;
+    dcterms:description "Some **bold** description." ;
+    skos:historyNote "Created in *2020*." ;
+    dcterms:created "2020-01-01"^^xsd:date ;
+    dcterms:modified "2021-02-02"^^xsd:date ;
+    dcterms:issued "2021-03-03"^^xsd:date ;
+    dcterms:source <http://example.org/src> ;
+    owl:versionIRI <http://example.org/onto/1.0> ;
+    owl:versionInfo "1.0" ;
+    vann:preferredNamespacePrefix "ex" ;
+    vann:preferredNamespaceUri "http://example.org/onto#" ;
+    dcterms:license <http://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rights "Copyright 2020 (c) the authors, copyright held" ;
+    dcterms:creator "Alice Literal" , ex:bob ,
+        [ foaf:name "Carol Blank" ; foaf:homepage <http://example.org/carol> ] ;
+    dcterms:contributor <http://example.org/people/dave> ;
+    dcterms:publisher [ sdo:name "Pub Org" ; sdo:email <mailto:pub@example.org> ] ;
+    sdo:editor [ sdo:name "Eve" ;
+                 sdo:affiliation [ sdo:name "Eve's Lab" ; sdo:url <http://example.org/lab> ] ] ;
+    sdo:funder <http://example.org/funder> ;
+    sdo:translator "Frank" ;
+    prov:wasGeneratedBy <http://example.org/gen> ;
+    sdo:codeRepository <http://example.org/code> .
+
+<http://example.org/gen> doap:repository <http://example.org/repo1> , <http://example.org/repo2> .
+
+# neighbours
+ex:Thing a owl:Class ;
+    dcterms:title "Not the ontology" ;
+    dcterms:creator "Mallory" ;
+    dcterms:license "decoy" ;
+    prov:wasGeneratedBy <http://example.org/gen> ;
+    sdo:codeRepository <http://example.org/decoy-code> .
+[] dcterms:source <http://example.org/decoy-source> ;
+   owl:versionInfo "decoy" .
+<http://example.org/gen> dcterms:title "gen is not the ontology either" .

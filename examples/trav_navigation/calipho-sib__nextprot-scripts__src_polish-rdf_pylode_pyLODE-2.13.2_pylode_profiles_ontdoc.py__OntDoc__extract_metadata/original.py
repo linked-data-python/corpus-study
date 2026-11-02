@@ -5,7 +5,12 @@ import markdown
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import DC, DCTERMS, DOAP, OWL, PROF, PROV, RDF, RDFS, SDO, SKOS
 
-for s in self.G.subjects(predicate=RDF.type, object=OWL.Ontology):
+# Wrapped in a function (context restoration, meta.json: the region is the
+# body of a method, `self` is a free variable of it). The body itself, from the
+# `for` line to the end of the file, is what was extracted; only that `for`
+# line is indented by one space, so that it can sit under the `def`.
+def extract_metadata_region(self):
+ for s in self.G.subjects(predicate=RDF.type, object=OWL.Ontology):
     s_str = str(s)  # this is the Ontology's URI
     self.METADATA["uri"] = s_str
 

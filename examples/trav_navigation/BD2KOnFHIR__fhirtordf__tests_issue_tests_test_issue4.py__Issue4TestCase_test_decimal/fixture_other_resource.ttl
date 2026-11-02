@@ -1,0 +1,10 @@
+# The prescription the region asks about is absent (first link missing); a
+# complete one with the right "2.00" is there under another id.
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://hl7.org/fhir/VisionPrescription/33124> a fhir:VisionPrescription ;
+    fhir:VisionPrescription.dispense [
+        fhir:index 0 ;
+        fhir:VisionPrescription.dispense.add [ fhir:value "2.00"^^xsd:decimal ]
+    ] .

@@ -2,9 +2,9 @@
 # region: test_add_file_to_graph (lines 11-30, stratum trav_existence)
 # licence of the source repository: see meta.json
 from rdflib import RDF, RDFS, Graph, Literal, URIRef
-from spdx_tools.spdx.rdfschema.namespace import LICENSE_NAMESPACE, SPDX_NAMESPACE
-from spdx_tools.spdx.writer.rdf.file_writer import add_file_to_graph
-from tests.spdx.fixtures import file_fixture
+from spdx_shim import LICENSE_NAMESPACE, SPDX_NAMESPACE
+from spdx_shim import add_file_to_graph
+from spdx_shim import file_fixture
 
 def test_add_file_to_graph():
     graph = Graph()

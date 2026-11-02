@@ -1,9 +1,8 @@
 # Extracted from statnett/KGraphPy@38859be62f : tests/test_jsonld_utilities.py
 # region: test_enrich_graph_datatypes_typecoercion (lines 301-313, stratum trav_existence)
 # licence of the source repository: see meta.json
-from rdflib import URIRef, Graph, Literal
-from rdflib import XSD
-from kgraphpy.jsonld_utilities import (
+from rdflib import Graph, xsd:
+from kgraphpy_shim import (
     reorder_jsonld, 
     sort_subjects, 
     sort_predicates, 
@@ -11,21 +10,19 @@ from kgraphpy.jsonld_utilities import (
     extract_datatype_map,
     enrich_graph_datatypes
 )
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+@prefix ex: <http://example.com/> .
 
 def test_enrich_graph_datatypes_typecoercion() -> None:
     g = Graph()
     g.bind("ex", "http://example.com/")
-    g += g{
-        <http://example.com/age> <http://example.com/hasAge> {Literal(30.0, datatype=XSD.float)} .
-        <http://example.com/duration> <http://example.com/hasAge> {Literal("not-a-number", datatype=None)}
-    }
+    @graph g
+    +{ ex:age ex:hasAge "30.0"^^xsd:float .
+       ex:duration ex:hasAge "not-a-number" }
     dt_map = {
         "http://example.com/hasAge": xsd:integer
     }
 
     enrich_graph_datatypes(g, dt_map)
 
-    assert (<http://example.com/age>, <http://example.com/hasAge>, Literal(30.0, datatype=xsd:integer)) in g
-    assert (<http://example.com/duration>, <http://example.com/hasAge>, Literal("not-a-number", datatype=xsd:integer)) in g
+    assert m{ ex:age ex:hasAge "30.0"^^xsd:integer }
+    assert m{ ex:duration ex:hasAge "not-a-number"^^xsd:integer }

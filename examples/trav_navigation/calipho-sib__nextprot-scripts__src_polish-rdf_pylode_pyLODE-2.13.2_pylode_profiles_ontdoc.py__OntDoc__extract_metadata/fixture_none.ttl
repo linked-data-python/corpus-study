@@ -1,0 +1,16 @@
+# No ontology at all: the loop does not run (the zero-solution case). Triples
+# that look like metadata are there and must stay unread.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sdo: <https://schema.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix ex: <http://example.org/onto#> .
+
+ex:Thing a owl:Class ; dcterms:title "Not the ontology" ;
+    dcterms:creator "Mallory" ; owl:imports <http://example.org/other#> .

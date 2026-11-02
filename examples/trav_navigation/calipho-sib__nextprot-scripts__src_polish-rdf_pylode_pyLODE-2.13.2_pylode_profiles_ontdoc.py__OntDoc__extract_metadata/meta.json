@@ -14,11 +14,22 @@
     "namespace_term": 23,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, DOAP->doap, OWL->owl, PROF->prof, PROV->prov, RDF->rdf, RDFS->rdfs, SDO->sdo, SKOS->skos"
+    "The loop `for s in self.G.subjects(RDF.type, OWL.Ontology)` is `for s in m{ ?s a owl:Ontology }:`, its inner `for p, o in self.G.predicate_objects(subject=s)` is `for p, o in m{ {s} ?p ?o }:` and the innermost `for o2 in self.G.objects(subject=o, predicate=DOAP.repository)` is `for o2 in m{ {o} doap:repository ?o2 }:`. The two outer loops are NOT fused into `m{ ?s a owl:Ontology . ?s ?p ?o }`: the body acts per ontology (`METADATA[\"uri\"]` before the inner loop, the missing-title placeholder after it), so the inner loop cannot be flattened. The `p == DCTERMS.x` tests are prefixed names; the two `URIRef(\"http://purl.org/vocab/vann/...\")` are IRIs (no vann prefix in the source module).",
+    "The region is the body of a method (`self` free): wrapped in `def extract_metadata_region(self):`, by indenting the one `for` line by a single space (as the adobe/aepp pair does), on both sides. `@graph self.G` is the first line of that function; it designates the object's graph and, per the documented behaviour, adds the prefixes in scope to it without overwriting any binding (the harness tolerates additions; the graph's triples are unchanged). The unused imports (`URIRef`, `BNode`) are dropped in the translation, the namespaces come from `from rdflib.namespace import dcterms:, doap:, owl:, prov:, sdo:, skos:`.",
+    "Context shim `ontdoc_shim.py`: the part of pyLODE 2.13.2's OntDoc the region calls (`_make_formatted_uri`, `_make_agent` and what they use), verbatim method bodies from the vendored copy in the repository; the installed pylode is 3.x and has no such class. The jinja templates are the repository's own, inlined (orcid.html reduced to a link, agent.adoc/orcid.adoc absent as in the repository: an agent in `adoc` output raises TemplateNotFound).",
+    "Driver: eleven calls on `OntDoc` stand-ins over six Turtle fixtures (every property, every kind of agent, two imports, markdown rendering per output format, an adoc run that raises half way, a non-http source and license, prov:wasGeneratedBy with and without sdo:codeRepository, no title with and without a preset one, two ontologies, none). The region returns None: what is compared is the stand-in after the call (METADATA, graph digest, the lines `_make_agent` prints, with blank-node ids masked) and any exception. Broken twice on purpose (`?x` for `{o}` in the innermost read, a wrong pattern on the outer one): both fail, restored."
   ],
   "draft_sha": "ba2a84ebdd38f36c",
   "provenance": {
@@ -30,5 +41,6 @@
   "strata": [
     "trav_navigation"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

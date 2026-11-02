@@ -1,0 +1,27 @@
+# An ontology whose values are plain strings, with no agent (an agent in
+# "adoc" output has no template, see ontdoc_shim.py): a non-http source and
+# license, prov:wasGeneratedBy pointing at a literal (no doap:repository to
+# follow), a language-tagged title, a description to render per output format.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sdo: <https://schema.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix ex: <http://example.org/onto#> .
+
+<http://example.org/plain> a owl:Ontology ;
+    dcterms:title "Plain"@en ;
+    dcterms:description "Text with a *star*." ;
+    skos:historyNote "An old note." ;
+    dcterms:source "a local file" ;
+    dcterms:license "MIT" ;
+    dcterms:rights "(c) someone, Copyright someone, copyright someone" ;
+    dcterms:modified "2022-05-05"^^xsd:date ;
+    owl:versionIRI <http://example.org/plain/2> ;
+    prov:wasGeneratedBy "a run" ;
+    owl:imports <http://example.org/onto#Extra> .

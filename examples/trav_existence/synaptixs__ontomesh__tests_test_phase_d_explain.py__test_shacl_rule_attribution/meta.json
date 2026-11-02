@@ -15,11 +15,23 @@
     "namespace_term": 11,
     "serialize_parse": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: NS->ns, TOOLKIT->toolkit, PROV->prov, RDF->rdf"
+    "`g.subjects(_RDF.type, _RDF.Statement)` becomes `m{ ?stmt a rdf:Statement }`; the two chained existence tests `(stmt, RDF.subject, NS.t1) in g and (stmt, RDF.predicate, NS.flag) in g` (with a backslash continuation) become ONE `m{ {stmt} rdf:subject ns:t1 ; rdf:predicate ns:flag }` in the `if`: a conjunction of two existence tests on the same fixed subject is the existence of the join, so there is no cardinality question (the cases `wrong_subject` and `wrong_predicate`, where one of the two holds and not the other, are what distinguish it from a single test). The three `next(g.objects(x, p), None)` are `m{ {x} p ?o }.first()` (None when there is none, as `next(..., None)`); `assert deriv` precedes the reads that use it.",
+    "`NS`/`TOOLKIT` (`Namespace(...)` constants of the test module) become `@prefix ns:` / `@prefix toolkit:`; `PROV`, `RDF` are imported as prefixes from rdflib.namespace (`from rdflib.namespace import prov:, rdf:`). The local `from rdflib.namespace import RDF as _RDF` is no longer needed and is dropped; `from rdflib import Literal` inside the function is the original's (unused) and is kept. `@graph g` goes after `g.parse(...)`.",
+    "Context shim `materializer.py`: the VERBATIM copy of src/materializer.py of the repository (the module is not installed and the region imports it by that name; it needs owlrl and pyshacl, which are installed), so the real engines run. The pytest fixture `workspace` is rebuilt by the driver as the same dict of paths over static files in work/ (ontology, SPARQL rule, one SHACL file per case).",
+    "Driver: seven cases that differ in the SHACL shapes only (the test's own, a string object so that explain_triple answers and the fallback does not run, a rule that fires elsewhere, a rule id without \"Trigger\", a statement with the right predicate for another subject, one with the right subject for another predicate, two rules of which the first must be skipped). The clock and stopwatch of the materializer are frozen in the driver (the outputs it writes are compared between sides by the harness). The region raises on four cases and passes on three. Broken twice on purpose (predicate test dropped from the join; `\"Trigger\" in str(rule)` weakened): both fail, restored."
   ],
   "draft_sha": "b5949ff7debb9fa7",
   "provenance": {
@@ -31,5 +43,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

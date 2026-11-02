@@ -1,0 +1,13 @@
+# The rule targets a class t1 is not an instance of: nothing is derived for
+# t1, no lineage record for (t1, :flag).
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <https://test.example/phased#> .
+:TriggerShape
+  a sh:NodeShape ;
+  sh:targetClass :Other ;
+  sh:rule [
+    a sh:TripleRule ;
+    sh:subject sh:this ;
+    sh:predicate :flag ;
+    sh:object true ;
+  ] .

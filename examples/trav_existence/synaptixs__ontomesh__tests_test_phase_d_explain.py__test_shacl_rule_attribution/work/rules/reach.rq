@@ -1,0 +1,3 @@
+PREFIX : <https://test.example/phased#>
+CONSTRUCT { ?x :reaches ?z }
+WHERE     { ?x :partOf ?y . ?y :partOf ?z }

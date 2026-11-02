@@ -1,0 +1,8 @@
+@prefix : <https://test.example/phased#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+:partOf a owl:ObjectProperty, owl:TransitiveProperty .
+:Trigger a owl:Class .
+:Other a owl:Class .
+:t1 a :Trigger .
+:A :partOf :B .
+:B :partOf :C .

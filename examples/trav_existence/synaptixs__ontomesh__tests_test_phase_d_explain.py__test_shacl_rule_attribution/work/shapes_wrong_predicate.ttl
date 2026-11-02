@@ -1,0 +1,13 @@
+# The right subject and a rule id naming "Trigger", but another predicate
+# (:mark): the statement about (:t1, :mark) is there, not (:t1, :flag).
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <https://test.example/phased#> .
+:TriggerMarkShape
+  a sh:NodeShape ;
+  sh:targetClass :Trigger ;
+  sh:rule [
+    a sh:TripleRule ;
+    sh:subject sh:this ;
+    sh:predicate :mark ;
+    sh:object true ;
+  ] .
