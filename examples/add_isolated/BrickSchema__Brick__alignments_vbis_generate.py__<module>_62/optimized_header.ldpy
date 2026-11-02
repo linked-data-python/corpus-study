@@ -1,0 +1,65 @@
+# Extracted from BrickSchema/Brick@c12949f236 : alignments/vbis/generate.py
+# region: <module> (lines 62-125, stratum add_isolated)
+# licence of the source repository: see meta.json
+import csv
+from rdflib import Graph, Literal, BNode
+from rdflib.collection import Collection
+from vbis_context import get_brick_class, get_vbis_tags, rewrite_vbis_pattern
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix vbisalign: <https://brickschema.org/schema/Brick/alignments/vbis#> .
+
+graph = Graph()
+@graph graph
+finished_brick_classes = set()
+
+with open("vbis-brick-v5.csv") as f:
+    for d in csv.DictReader(f):
+        bc = get_brick_class(d)
+        if bc is None or bc in finished_brick_classes:
+            continue
+        finished_brick_classes.add(bc)
+        tagsOrPatterns = get_vbis_tags(d)
+        if not tagsOrPatterns:
+            continue
+        print(f"Defining shapes for {bc}")
+        # create a shape for each set of tags
+        node_shape = vbisalign:{f"{bc}Shape"}
+        +{ {node_shape} a sh:NodeShape ; sh:targetClass brick:{bc} }
+
+        # patterns is the list of patterns that match this Brick class
+        patterns = []
+        # vbtags is the list of fully qualified VB tags that match this Brick class
+        vbtags = []
+        # loop through all of the tags and/or patterns we get and sort them into
+        # the above two lsits
+        for vb in tagsOrPatterns:
+            isPattern, patOrValue = rewrite_vbis_pattern(vb)
+            (patterns if isPattern else vbtags).append(patOrValue)
+        print(f"{len(patterns)} patterns; {len(vbtags)} full tags")
+
+        # handle patterns; this is either a SH:pattern directly (if there is one)
+        # or a SH:or of a set of patterns (if there is > 1)
+        if len(patterns) > 1:
+            shapeList = BNode()
+            +{ {node_shape} sh:or {shapeList} }
+            patternList = []
+            for vbtag in patterns:
+                pattern = BNode()
+                patternList.append(pattern)
+                +{ {pattern} a sh:PropertyShape ; sh:path vbisalign:hasVBISTag ; sh:pattern {vbtag} }
+            Collection(graph, shapeList, patternList)
+        else:
+            shape = BNode()
+            +{ {node_shape} sh:property {shape} .
+               {shape} a sh:PropertyShape ; sh:path vbisalign:hasVBISTag }
+            if patterns:
+                +{ {shape} sh:pattern {patterns[0]} }
+            # handle fully qualified tags. If there is one, then it is a mandatory
+            # value. If there are multiple, then we must have one of them as a value
+            elif len(vbtags) == 1:
+                +{ {shape} sh:hasValue {vbtags[0]} }
+            else:
+                valueList = BNode()
+                +{ {shape} sh:in {valueList} }
+                Collection(graph, valueList, [Literal(x) for x in vbtags])

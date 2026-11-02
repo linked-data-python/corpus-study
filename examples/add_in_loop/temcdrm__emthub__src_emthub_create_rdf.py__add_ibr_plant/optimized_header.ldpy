@@ -1,0 +1,31 @@
+# Extracted from temcdrm/emthub@c9834a2c67 : src/emthub/create_rdf.py
+# region: add_ibr_plant (lines 1474-1501, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from context_shim import g, d, dll, dllID, seq, get_dll_cim_parameter_kind
+@prefix emt: <http://opensource.ieee.org/emtiop01v01#> .
+@prefix cim: <http://www.ucaiug.org/grid18v15#> .
+
+@graph g
+for parm in d['ParametersInfo']:
+  kind = get_dll_cim_parameter_kind (parm['DataType'])
+  val = str(parm['DefaultValue'])
+  #print (seq, kind, val)
+  pt = f<{dllID}_{seq}>
+  # make an info class
+  inf = f<{pt}_info>
+  +{ {pt} a emt:IEEECigreDLLParameter ;
+          emt:IEEECigreDLLParameter.IEEECigreDLL {dll} ;
+          emt:IEEECigreDLLParameter.dllSequenceNumber {seq}^^cim:Integer ;
+          emt:IEEECigreDLLParameter.value {val}^^cim:String ;
+          emt:IEEECigreDLLParameter.dllParameterKind emt:{f'IEEECigreDLLParameterKind.{kind:s}'} ;
+          emt:IEEECigreDLLParameter.IEEECigreDLLParameterInfo {inf} .
+     {inf} a emt:IEEECigreDLLParameterInfo ;
+           emt:IEEECigreDLLParameterInfo.dllName {parm['Name']}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllGroupName {parm['GroupName']}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllDescription {parm['Description']}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllUnit {parm['Unit']}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllDefaultValue {val}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllMinValue {str(parm['MinValue'])}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllMaxValue {str(parm['MaxValue'])}^^cim:String ;
+           emt:IEEECigreDLLParameterInfo.dllFixedValue {parm['FixedValue'] != 0}^^cim:Boolean }
+  seq += 1

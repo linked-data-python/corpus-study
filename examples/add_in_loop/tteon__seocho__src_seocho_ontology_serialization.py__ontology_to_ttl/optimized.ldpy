@@ -1,0 +1,100 @@
+# Extracted from tteon/seocho@09f72a4569 : src/seocho/ontology/serialization.py
+# region: ontology_to_ttl (lines 360-448, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from shim import _safe_local
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+def ontology_to_ttl(
+    ontology: "Ontology",
+    path: Union[str, Path],
+) -> Path:
+    """Write an ``Ontology`` out as Turtle.
+
+    Inverse of :func:`ontology_from_ttl` for the OWL subset we map.
+    Requires ``rdflib``.
+    """
+    try:
+        import rdflib
+        from rdflib import Namespace, OWL, RDFS, SKOS
+    except ImportError as exc:
+        raise ImportError(
+            "Ontology.to_ttl requires 'rdflib'. "
+            "Install it with: pip install seocho[ontology]"
+        ) from exc
+
+    from shim import PropertyType
+
+    ns_str = ontology.namespace or "https://seocho.dev/ontology/"
+    if not ns_str.endswith(("/", "#")):
+        ns_str += "/"
+    ns = Namespace(ns_str)
+
+    g = rdflib.Graph()
+    g.bind("owl", OWL)
+    g.bind("rdfs", RDFS)
+    g.bind("skos", SKOS)
+    g.bind("priv", ns)
+    @graph g
+
+    onto_iri = ns[_safe_local(ontology.name)]
+    +{ {onto_iri} a owl:Ontology }
+    if ontology.description:
+        +{ {onto_iri} rdfs:label {ontology.description} }
+
+    xsd_for = {
+        PropertyType.STRING: xsd:string,
+        PropertyType.INTEGER: xsd:integer,
+        PropertyType.FLOAT: xsd:decimal,
+        PropertyType.BOOLEAN: xsd:boolean,
+        PropertyType.DATETIME: xsd:dateTime,
+    }
+
+    def _cls_iri(node_label: str):
+        nd = ontology.nodes.get(node_label)
+        if nd is not None and nd.same_as:
+            return f<{nd.same_as}>
+        return ns[_safe_local(node_label)]
+
+    for label, node in ontology.nodes.items():
+        cls_iri = _cls_iri(label)
+        # ISO-704 surfacing: the human name is rdfs:label, the meaning/definition
+        # is skos:definition (which the loader prefers). This keeps the definition
+        # a first-class SKOS annotation instead of overloading rdfs:label.
+        +{ {cls_iri} a owl:Class ; rdfs:label {label} }
+        if node.description:
+            +{ {cls_iri} skos:definition {node.description} }
+        for alias in node.aliases or []:
+            +{ {cls_iri} skos:altLabel {alias} }
+        # Subclass hierarchy: broader -> rdfs:subClassOf (round-trips with from_ttl).
+        for parent in node.broader or []:
+            if parent in ontology.nodes:
+                +{ {cls_iri} rdfs:subClassOf {_cls_iri(parent)} }
+        for pname, p in node.properties.items():
+            prop_iri = ns[_safe_local(pname)]
+            +{ {prop_iri} a owl:DatatypeProperty ;
+                          rdfs:domain {cls_iri} ;
+                          rdfs:range {xsd_for.get(p.property_type, xsd:string)} }
+            if p.description:
+                +{ {prop_iri} rdfs:label {p.description} }
+
+    for rtype, rel in ontology.relationships.items():
+        prop_iri = f<{rel.same_as}> if rel.same_as else ns[_safe_local(rtype)]
+        +{ {prop_iri} a owl:ObjectProperty }
+        if rel.description:
+            +{ {prop_iri} rdfs:label {rel.description} }
+        if rel.source and rel.source != "Any":
+            +{ {prop_iri} rdfs:domain {ns[_safe_local(rel.source)]} }
+        if rel.target and rel.target != "Any":
+            +{ {prop_iri} rdfs:range {ns[_safe_local(rel.target)]} }
+        for alias in rel.aliases or []:
+            +{ {prop_iri} skos:altLabel {alias} }
+
+    out = Path(path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    g.serialize(destination=str(out), format="turtle")
+    return out

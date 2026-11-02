@@ -68,5 +68,26 @@
       "test de type du sujet str inversé, type iri inversé, message ValueError changé"
     ],
     "remaining": "Non prouvé : l'ordre de list(set)[0] pour une référence `mappings` à un ensemble de plusieurs éléments (le dépôt passe des ensembles ; le pilote n'utilise que des ensembles d'un élément car l'ordre d'un ensemble n'est pas stable, donc [0] -> [-1] reste vert sur ces cas). Cosmétique non vérifié : {rdflib.term.Literal(parameter[1][2:-1])} pourrait s'écrire {parameter[1][2:-1]}."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the PO term map `mapping_value['predicateobjects'][position]` and the subject map get local names; a str term map is normalised to {'value': str}, which removes the two str branches (the dict path then does the same template call and finds no condition/type keys); the subjectMap triple is hoisted out of the subjects/no-subjects alternative; the duplicated quoted/quotedNonAsserted loops and the duplicated join-condition block become two module-level helpers `_add_quoted` and `_add_join_condition` called at both sites (the condition dict is passed whole so that a missing 'parameters' still raises after the joinCondition triple); the two term-type if/elif chains become a `term_types` dict guarded by a tuple membership test (a tuple, not the dict, so an unhashable type value still raises ValueError and not TypeError); in the PO dict branch the referencing-object-map case is tested first (`'mappings' in term_map and 'function' not in term_map`) so the three other cases share one property triple, the ref_tm lookup still running before any triple of that branch is written; `rdflib.term.URIRef/Literal` become `rdflib.URIRef/Literal`; consecutive adds become `mapping_graph += [...]`.",
+    "The reassignments `mapping_graph = _add_...(mapping_graph, ...)` are kept on both sides (the helpers' contract returns the graph); optimized.ldpy therefore keeps a `@graph mapping_graph` after each one, as the translation does.",
+    "optimized.ldpy, from optimized.py: `+{ }` everywhere, the two triples of the no-subject case and of the referencing object map each in one island, `rml:constant []` for the fresh blank node, `a` for rdf:type, `f<{ref_tm}>`, `f<{mapping_id}>` and `f<{term_map['datatype']}>` for the URIRef calls (no @base in scope), term_types holding prefixed names; the join-condition literals are bare interpolations (a str slice), but `rdflib.Literal(term_map['language'])` is kept because a YAML null would give Literal('None') in the original where a bare interpolation raises.",
+    "No exception to the symmetry: every restructuring is in both files.",
+    "The anonymous blank node `[]` used in `+{ }` has no label in the closed construction vocabulary; it is not listed in optimized_constructions."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused in the header (every RML_* constant and helper is still read), optimized_header.py is a copy of optimized.py.",
+    "LD Python: the `@prefix rdf:` line goes (rdf:type is written `a`); rdflib and the three helpers stay."
+  ]
 }

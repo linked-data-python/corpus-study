@@ -57,5 +57,22 @@
     "method": "entry:sparql_construct_res_to_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the intermediate variables s, p, o go; the loop body is one g.add with the three terms inlined, in the same evaluation order. Nothing else to compress.",
+    "optimized.ldpy, from optimized.py: one `+{ }` with `f<{binding['s']['value']}>` and `f<{binding['p']['value']}>` for the URIRef calls (no @base in scope) and an interpolation of json_to_term(...), which always returns an RDF term.",
+    "Exception to the symmetry, island-only: `@graph as g` replaces `g = Graph()` and `@graph g`. No prefix is in scope, so the runtime gives a plain rdflib Graph with its own namespace manager (the cached shared manager is attached only when prefixes are in scope), and the function does not bind anything on it."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal goes from the rdflib.term import.",
+    "LD Python: both rdflib imports go (`@graph as g` replaces Graph, f<…> replaces URIRef, Literal was unused); the json_to_term import stays."
+  ]
 }

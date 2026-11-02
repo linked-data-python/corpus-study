@@ -51,5 +51,26 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `EMT = rdflib.Namespace(EMT_NS)` before the loop and the imported `CIM` namespace in place of the `rdflib.URIRef (EMT_NS/CIM_NS + 'X')` calls (subscripts, the local names hold a dot); each block of seven g.add becomes one `g += [...]`; `for i in range(3, len(parms))` with `parms[i]` becomes `for parm in model_type['parameterDescriptors'][3:]` (parms and i go); `'NthAmDynamicModel' + ':' + key` becomes `'NthAmDynamicModel:' + key` and the `.format` calls become f-strings with the same `:s` specs, so a non-str value raises as before. ID is still reassigned in the inner loop, so its last value is unchanged.",
+    "Merging the adds changes only the partial graph left when a row raises (a missing key, a None kind): none of that block's triples is written, as with the translation's +{ }. The module-level names parms and i are no longer defined, so the harness does not compare them.",
+    "optimized.ldpy, from optimized.py: the same loops, two `+{ }` with `;`, `{x}^^cim:T` for the typed literals, `f<{ID}>`, `emt:{f\"NthAmModelKind.{...:s}\"}` for the computed local names.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the `CIM_NS = ...` line goes (the imported CIM namespace replaces it); rdflib, the five context names and EMT_NS stay.",
+    "LD Python: `import rdflib`, `CIM`, `CIM_NS` and `EMT_NS` go (f<…>, `cim:` and `emt:` replace them); both @prefix lines are used."
+  ]
 }

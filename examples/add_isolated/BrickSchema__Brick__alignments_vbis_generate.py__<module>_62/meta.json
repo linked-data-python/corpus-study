@@ -75,5 +75,23 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `csv.reader` + `header = next(r)` + `dict(zip(header, row))` become `for d in csv.DictReader(f)` (a blank line or a short row gives the same branch, since the helpers read d with .get and test truthiness; two differences outside the fixture: an empty file no longer raises StopIteration, and the leftover module value d of a short last row carries None for the missing columns; r, header and row are no longer defined); `len(x) == 0` becomes `not x`; `VBIS[f\"{bc}Shape\"]`, used four times, gets the name node_shape; the pattern/tag sorting if/else becomes `(patterns if isPattern else vbtags).append(patOrValue)`; the four branches are regrouped: tagsOrPatterns is non-empty, so `elif len(vbtags) > 0` was always true, and the single-pattern, single-tag and several-tags cases share the one property-shape block (BNode, sh:property, type, path) before adding sh:pattern, sh:hasValue or sh:in; consecutive adds become `graph += [...]`. Both original comments on the branches are kept where their case now starts.",
+    "optimized.ldpy, from optimized.py: `+{ }` with `;` for the same groups, `node_shape = vbisalign:{f\"{bc}Shape\"}`, `brick:{bc}`, bare interpolations of the pattern and tag strings; the two Collection calls and `[Literal(x) for x in vbtags]` stay Python (no island builds an rdf:List from a Python list).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS, XSD and OWL go and the two rdflib imports merge into one; Namespace stays (BRICK, SH, VBIS), and `graph = Graph()` stays once, as the driver's second run requires.",
+    "LD Python: Namespace, RDF, RDFS, XSD and OWL go and the two rdflib imports merge into `from rdflib import Graph, Literal, BNode`; the three @prefix lines are used."
+  ]
 }

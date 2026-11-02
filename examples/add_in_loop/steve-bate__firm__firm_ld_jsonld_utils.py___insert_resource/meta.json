@@ -57,5 +57,22 @@
       "retrait de la garde isinstance(obj, dict) (la traduction d'origine, rejetée par RESOURCE_4 et RESOURCE_5)"
     ],
     "remaining": "Jugements non traités : la classification directly-expressible tient-elle, maintenant que la branche len(obj) == 1 garde un `g.add` en repli ? (classification-doubt) ; la boucle des types en `for @bindings in ({\"t\": …} for …)` au lieu de `for type_ in value: +{ {subject} a {rdflib.URIRef(type_)} }` (classification-doubt)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `if key == '@id': continue` folds into `elif key != '@id'`; the `@list` test becomes `len(obj) == 1 and '@list' in obj` with a bare `continue` (the `else: continue` goes); the two object branches (len 1 / other) merge into one chain `@value` -> Literal, len != 1 -> recursion, `@id` -> URIRef, else the dict as is, followed by one shared g.add: a len-1 dict cannot hold both @id and @value, so the order of the two tests does not matter, and the same chain gives the same exceptions on str and list items; `len(obj['@list']) > 0` is kept (truthiness would not raise on a non-sized value). The try/except/print/raise is unchanged; the TODO comment block is kept.",
+    "optimized.ldpy, from optimized.py: `@graph g`, `+{ {subject} a f<{type_}> }` in a plain loop (no @bindings generator, unlike the translation), `f<…>` for the three URIRef calls, one `+{ {subject} f<{key}> {obj} }` after the chain.",
+    "Cost of the island, not a restructuring to carry back: the len-1 dict that is neither @id, @value nor @list must still reach rdflib's AssertionError, which `+{ }` would turn into a Literal; optimized.ldpy therefore gives the chain an explicit `else:` that keeps `g.add` and `continue`s. Python needs no such branch.",
+    "rdflib.Literal(obj['@value']) is kept as a call: obj is then interpolated whole, and a null @value gives Literal('None') where a bare interpolation raises."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in the header on either side (json, Any and rdflib are all read): optimized_header.py and optimized_header.ldpy are copies of the optimized files."
+  ]
 }

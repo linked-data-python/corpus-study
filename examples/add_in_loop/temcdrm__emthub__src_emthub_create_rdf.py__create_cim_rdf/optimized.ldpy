@@ -1,0 +1,34 @@
+# Extracted from temcdrm/emthub@c9834a2c67 : src/emthub/create_rdf.py
+# region: create_cim_rdf (lines 1031-1054, stratum add_in_loop)
+# licence of the source repository: see meta.json
+import rdflib
+from context_shim import g, CIM, dyn_models, uuids, model_types_used
+CIM_NS = 'http://www.ucaiug.org/grid18v15#'
+EMT_NS = 'http://opensource.ieee.org/emtiop01v01#'
+@prefix cim: <http://www.ucaiug.org/grid18v15#> .
+@prefix emt: <http://opensource.ieee.org/emtiop01v01#> .
+
+@graph g
+for key in model_types_used:
+  model_type = dyn_models['DYR'][key]
+  ID = model_type['mRID']
+  uuids['NthAmDynamicModel:' + key] = ID
+  mtyp = f<{ID}>
+  +{ {mtyp} a emt:NthAmDynamicModel ;
+            cim:IdentifiedObject.name {key}^^cim:String ;
+            cim:IdentifiedObject.mRID {ID}^^cim:String ;
+            emt:NthAmDynamicModel.modelKind emt:{f"NthAmModelKind.{model_type['modelKind']:s}"} ;
+            emt:NthAmDynamicModel.nameKind emt:{f"NthAmModelNameKind.{model_type['nameKind']:s}"} ;
+            emt:NthAmDynamicModel.statusKind emt:{f"NthAmModelStatusKind.{model_type['statusKind']:s}"} ;
+            emt:NthAmDynamicModel.closestStandardModel {model_type['closestStandardModel']}^^cim:String }
+  for parm in model_type['parameterDescriptors'][3:]:
+    ID = parm['mRID']
+    uuids[f"ParameterDescriptor:{key:s}_{parm['name']:s}"] = ID
+    desc = f<{ID}>
+    +{ {desc} a cim:ParameterDescriptor ;
+              cim:IdentifiedObject.name {parm['name']}^^cim:String ;
+              cim:IdentifiedObject.mRID {ID}^^cim:String ;
+              cim:DetailedModelDescriptor.DetailedModelTypeDynamics {mtyp} ;
+              cim:ParameterDescriptor.typicalValue {parm['typicalValue']}^^cim:String ;
+              cim:ParameterDescriptor.engineeringUnit {parm['engineeringUnit']}^^cim:String ;
+              cim:ParameterDescriptor.sequenceNumber {parm['sequenceNumber']}^^cim:Integer }

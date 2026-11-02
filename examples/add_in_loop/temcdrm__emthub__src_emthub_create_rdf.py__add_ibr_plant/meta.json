@@ -51,5 +51,28 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `EMT = rdflib.Namespace(EMT_NS)` before the loop, so the 17 `rdflib.URIRef (EMT_NS + 'X')` become `EMT['X']` (the local names hold a dot, hence the subscript); the 15 g.add become one `g += [...]`; val is reused for dllDefaultValue (the same `str(parm['DefaultValue'])`); ptID, infID and bFixed go (bFixed becomes `parm['FixedValue'] != 0` in the Literal, a bool for every JSON value); `'_{:d}'.format(seq)` becomes `f'{dllID}_{seq}'` (seq is the int counter set to 0 before the loop and only incremented, so the `:d` spec has no effect); `'...{:s}'.format(kind)` becomes an f-string with `:s`, which raises on a None kind as before.",
+    "Merging the adds changes only the partial graph left when a row raises (an unknown DataType gives kind None, a missing key a KeyError): no triple of that row is written, where the original wrote those before the failing one; the translation's +{ } blocks already behave so. The intermediate module-level names ptID, infID, bFixed are no longer defined, so the harness does not compare them.",
+    "Considered and not taken: a loop over the field names building `dll{key}` IRIs; it would hide the vocabulary and needs two groups anyway (four fields are not str()-ed, and Literal(True, datatype=CIM.String) is not Literal('True', ...)).",
+    "optimized.ldpy, from optimized.py: a single `+{ }` with `;` for the 16 triples (the pt block and the inf block joined by `.`), `{x}^^cim:T` for the typed literals, `f<{dllID}_{seq}>` and `f<{pt}_info>`, `emt:{f'IEEECigreDLLParameterKind.{kind:s}'}` for the computed local name.",
+    "Finding: f<…> does not accept a format spec (`f<{dllID}_{seq:d}>` transpiles to invalid Python), whereas an f-string does; it did not matter here because `:d` was dropped on both sides.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused (rdflib, the seven context names and EMT_NS are all read): optimized_header.py is a copy of optimized.py.",
+    "LD Python: `import rdflib`, `CIM` and the `EMT_NS = ...` line go (f<…>, `+{ }`, `cim:` and `emt:` replace them); both @prefix lines are used."
+  ]
 }

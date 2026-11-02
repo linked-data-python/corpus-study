@@ -67,5 +67,23 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the prop_types and domains loops become `graph += [...]` comprehensions; the two PropertyShape triples become one `graph += [...]`; `\"range\" in propdefn.keys()` + `pop` becomes `propdefn.pop(\"range\", None)` (absent and None take the same no-op path, and propshape is still read only when a range is given, so the stale or unbound propshape of a non-Brick property behaves as before); `.keys()` goes from the two other membership tests; the datatype if/else becomes one add with `SH[\"or\"] if dtype_defn == BSH.NumericValue else SH.datatype` as predicate (the equality holds only for that very URIRef, so the object is the same term); expected_properties and other_properties fold into one dict comprehension over propdefn.items(). Kept: `len(definitions) == 0` (it raises on None where `not definitions` would return), both asserts, the order of the writes around the recursive call, and the two separate `prop.startswith(BRICK)` tests (the recursion sits between them).",
+    "optimized.ldpy, from optimized.py: `+{ }` everywhere, loops with `+{ }` where Python has comprehensions, `propshape = bsh:{f\"...Shape\"}` (the local part is always a str, so it equals BSH[...]), the datatype ternary inside the predicate interpolation with prefixed names. `BRICK[prop]` stays Python: `brick:{prop}` concatenates str(prop) and raises on None, where Namespace.__getitem__ yields the bare namespace for a non-str key; the Collection call stays Python.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Literal, REC, OWL, TAG, SOSA, SKOS, QUDT, VCARD and REF go; the context import is put on one line.",
+    "LD Python: the same names go, and also BSH, RDF, RDFS and SH (replaced by bsh:, rdf:, rdfs: and sh:); BRICK stays for startswith/len/BRICK[prop]; the five @prefix lines are used."
+  ]
 }

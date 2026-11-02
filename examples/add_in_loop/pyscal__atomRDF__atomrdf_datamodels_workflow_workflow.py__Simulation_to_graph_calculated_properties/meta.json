@@ -54,5 +54,25 @@
     "method": "entry:to_graph_calculated_properties",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `if x:` guards around the loops become `for … in x or []` (same effect on None, [] and any other falsy value); the five-line graph.add is written on one line.",
+    "optimized.ldpy, from optimized.py: the same loops on `@graph graph`, each graph.add a `+{ }`, `URIRef(sample_id)` as `f<{sample_id}>` (no @base in scope).",
+    "The translation's known difference stays: a None `simulation` or `param_uri` raises AssertionError in Python and TypeError in the island.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Namespace, XSD, RDF, RDFS, BNode and eight of the nine context names go; `from rdflib import URIRef` and `from atomrdf_context import ASMO` remain.",
+    "LD Python: the rdflib import goes entirely (f<…> replaces URIRef) and the prefix import keeps only `asmo:`; Literal and the eight other prefixes go."
+  ]
 }

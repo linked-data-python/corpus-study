@@ -1,0 +1,13 @@
+# Extracted from vlizBE/vocabserver-app@af910ef750 : services/content-unification/sparql_util.py
+# region: sparql_construct_res_to_graph (lines 48-56, stratum add_in_loop)
+# licence of the source repository: see meta.json
+from rdflib.graph import Graph
+from rdflib.term import URIRef
+from json_to_term_shim import json_to_term
+
+def sparql_construct_res_to_graph(res):
+    """ Turn results of a sparql construct query into an rdflib graph """
+    g = Graph()
+    for binding in res['results']['bindings']:
+        g.add((URIRef(binding['s']['value']), URIRef(binding['p']['value']), json_to_term(binding['o'])))
+    return g

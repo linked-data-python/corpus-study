@@ -44,5 +44,20 @@
     "method": "fixture:fixture.ttl entry:map_node",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Almost nothing to compress: optimized.py only swaps the two branches so that `if not isinstance(o, BNode)` loses its `not`; the add still precedes the recursive call, so the partial gout left by a failing recursion is unchanged.",
+    "optimized.ldpy, from optimized.py: `@graph gout` and the two `+{ }` of the translation. The two reads stay rdflib calls: `m{ {s} ?p ?o }(gin)` would be no shorter than `gin.predicate_objects(s)`, and `m{ {o} fhir:index ?i }(gin).first()` is longer than `gin.value(o, FHIR.index)` and would need an @prefix.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python alike: OWL and RDF go from the rdflib import; URIRef, Graph, BNode, Node, FHIR and subj_pred_idx_to_uri stay (annotations and body)."
+  ]
 }
