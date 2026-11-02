@@ -297,14 +297,15 @@ def _by_construction(ok: list[dict]) -> dict:
     """How often each island of the language actually served, and where.
 
     This is what lets a construction be credited or debited on its own
-    rather than hidden inside a global average.  An unattested construction
-    (``constructions.UNATTESTED``) is not credited: ``_unattested`` counts it.
+    rather than hidden inside a global average.  A construction a pair does
+    not attest (``constructions.uncredited``) is not credited to that pair:
+    ``_unattested`` counts it.
     """
-    from .constructions import UNATTESTED
+    credited = {id(p): set(p.get("constructions", []))
+                - _uncredited(p) for p in ok}
     out: dict = {}
-    for c in sorted({c for p in ok for c in p.get("constructions", [])}
-                    - set(UNATTESTED)):
-        sub = [p for p in ok if c in p.get("constructions", [])]
+    for c in sorted(set().union(*credited.values()) if credited else ()):
+        sub = [p for p in ok if c in credited[id(p)]]
         out[c] = {
             "pairs": len(sub),
             "repositories": len({p["repository"] for p in sub}),
@@ -314,11 +315,17 @@ def _by_construction(ok: list[dict]) -> dict:
     return out
 
 
+def _uncredited(pair: dict) -> set:
+    from .constructions import uncredited
+    # a pair measured before the field existed is not credited
+    return uncredited(pair.get("constructions", []),
+                      pair.get("written_export", True))
+
+
 def _unattested(ok: list[dict]) -> dict:
     """What ``_by_construction`` leaves out, so nothing is dropped silently."""
     from .constructions import UNATTESTED
-    return {c: {"pairs": len([p for p in ok
-                              if c in p.get("constructions", [])]),
+    return {c: {"pairs": len([p for p in ok if c in _uncredited(p)]),
                 "stratum": stratum, "reason": reason}
             for c, (stratum, reason) in UNATTESTED.items()}
 

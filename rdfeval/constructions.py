@@ -37,18 +37,37 @@ CONSTRUCTIONS = (
     "call suffix (g)", "global/nonlocal modifier",
 )
 
-# Constructions a translation can use but the corpus cannot attest: they pay
-# only once ANOTHER module is written in ldpy, which no repository is.  Every
-# use found rests on a `__namespaces__` the translator wrote into a shim.
-# They are reported apart, never credited with a citation or a reduction.
+# Constructions a translation can use but a pair does not always attest.
+# `from m import p:` reads the prefix from an ordinary Python module since
+# ldpy 0.7.1 (record ldpy/013) — `EX = Namespace(...)`, a DefinedNamespace —
+# so a pair importing from the repository's own namespaces module attests
+# it.  A pair whose import rests on a `__namespaces__` the translator wrote
+# into a shim (:func:`rests_on_written_export`) attests nothing: that use is
+# reported apart, never credited with a citation or a reduction.
 # Value: (the stratum drawn for them, why).
 UNATTESTED = {
     "from … import p:": (
         "ns_import_project",
-        "needs the exporting module written in ldpy (its `__namespaces__`); "
-        "no repository has one, so every use rests on an export the "
-        "translator wrote"),
+        "the import rests on a `__namespaces__` the translator wrote into a "
+        "shim, not on a module of the repository"),
 }
+
+# Files of an example directory that are not shims.
+NOT_SHIMS = ("original.py", "driver.py", "optimized.py")
+
+
+def rests_on_written_export(ex_dir) -> bool:
+    """Does a shim of ``ex_dir`` write a ``__namespaces__`` export?"""
+    from pathlib import Path
+    return any("__namespaces__" in p.read_text(encoding="utf-8")
+               for p in sorted(Path(ex_dir).glob("*.py"))
+               if p.name not in NOT_SHIMS)
+
+
+def uncredited(constructions, written_export: bool) -> set:
+    """The constructions of a pair that :data:`UNATTESTED` sets apart."""
+    return set(constructions) & set(UNATTESTED) if written_export else set()
+
 
 # What people write -> what it is.  Accents, spacing and the two languages of
 # the project are folded away before lookup, so only real synonyms live here.

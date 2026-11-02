@@ -199,17 +199,19 @@ def test_only_approved_pairs_enter_the_aggregates(tmp_path, monkeypatch):
 
 def test_an_unattested_construction_is_counted_apart_not_credited(
         tmp_path, monkeypatch):
-    """`from … import p:` pays only once the exporting module is in ldpy, and
-    no repository's is: every use rests on an export the translator wrote.
-    The aggregates set it apart, and the provenance table cites nothing."""
+    """`from … import p:` resting on a `__namespaces__` the translator wrote
+    into a shim attests nothing: the aggregates set it apart, and the
+    provenance table cites nothing."""
     import json
     from rdfeval import aggregate, article
     from rdfeval.study import STUDY
 
+    (tmp_path / "ns_shim.py").write_text("__namespaces__ = {}\n")
     meta = {"region_id": "r", "repository": "o/r", "path": "m.py",
             "lineno": 1, "stratum": "ns_import_project",
             "strata": ["ns_import_project"], "translation_status": "final",
             "constructions": ["from … import p:", "+{ }"],
+            "written_export": True,
             "oracle": "isomorphism", "review_status": "approved",
             "classification": "directly-expressible",
             "validation_status": "equivalent",
@@ -233,6 +235,48 @@ def test_an_unattested_construction_is_counted_apart_not_credited(
     assert "not attested" in row and "m.py" not in row
     assert "m.py" in next(line for line in table.splitlines()
                           if line.startswith(r"\texttt{+\{ \}}"))
+
+
+def test_a_prefix_import_from_a_python_module_is_credited(
+        tmp_path, monkeypatch):
+    """Since ldpy 0.7.1 an ordinary Python namespaces module exports its
+    prefixes (record ldpy/013): a pair importing from one attests the
+    construction, and is credited and cited like any other."""
+    import json
+    from rdfeval import aggregate, article, compare
+    from rdfeval.constructions import rests_on_written_export
+    from rdfeval.study import STUDY
+
+    (tmp_path / "context_shim.py").write_text(
+        "from rdflib import Namespace\nEX = Namespace('http://e/')\n")
+    (tmp_path / "driver.py").write_text("# __namespaces__ in a driver\n")
+    assert not rests_on_written_export(tmp_path)
+    meta = {"region_id": "r", "repository": "o/r", "path": "m.py",
+            "lineno": 1, "stratum": "ns_import_project",
+            "strata": ["ns_import_project"], "translation_status": "final",
+            "constructions": ["from … import p:"],
+            "written_export": False,
+            "oracle": "isomorphism", "review_status": "approved",
+            "classification": "directly-expressible",
+            "validation_status": "equivalent",
+            "python": {"code_loc": 10, "tokens": 100, "chars": 200,
+                       "syntax_nodes": 50, "rdf_ops": 3, "islands": 0},
+            "ldpy": {"code_loc": 6, "tokens": 60, "chars": 120,
+                     "syntax_nodes": 30, "rdf_ops": 3, "islands": 1},
+            "ratios": {}}
+    monkeypatch.setattr(aggregate, "load_pairs", lambda study: [meta])
+    monkeypatch.setattr(aggregate, "RESULTS_SUMMARY", tmp_path)
+    aggregate.run({"meta": {"config_version": "1", "metrics_version": "1"}},
+                  STUDY)
+    agg = json.loads((tmp_path / "aggregate.json").read_text())
+    assert agg["by_construction"]["from … import p:"]["pairs"] == 1
+    assert agg["unattested_constructions"]["from … import p:"]["pairs"] == 0
+
+    monkeypatch.setattr(article, "iter_examples",
+                        lambda study: [(tmp_path, meta)])
+    table = article.constructions_table(STUDY)
+    row = next(line for line in table.splitlines() if "import p:" in line)
+    assert "not attested" not in row and "m.py" in row
 
 
 def test_check_reports_a_pair_that_does_not_transpile(tmp_path):

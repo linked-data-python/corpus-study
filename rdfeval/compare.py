@@ -46,6 +46,7 @@ import tokenize
 from .analyze import SIGNIFICANT_TOKENS, analyze_source
 from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .ldpy_metrics import LdpyMetricsError, measure_ldpy_source
+from .constructions import NOT_SHIMS, rests_on_written_export
 from .constructions import normalise as normalise_constructions
 from .study import Study, STUDY
 from .validate import iter_examples
@@ -321,10 +322,6 @@ def measure_optimized(py: dict, opt_py_source: str, opt_ldpy_source: str,
     }
 
 
-# Every module of a region that is not one of these is a context shim.
-NOT_SHIMS = ("original.py", "driver.py", "optimized.py")
-
-
 def _optimized_ready(meta: dict) -> bool:
     """Both optimized artefacts final and proved against the original."""
     if meta.get("optimization_status") != "final":
@@ -381,6 +378,7 @@ def run(config: dict, study: Study = STUDY) -> None:
             "strata": meta.get("strata", []),
             "constructions": constructions,
             "constructions_unknown": unknown,
+            "written_export": rests_on_written_export(ex_dir),
             "oracle": meta.get("oracle", "isomorphism"),
             "review_status": _review_status(ex_dir),
             "classification": meta.get("classification"),
