@@ -11,12 +11,11 @@
 # dropped.  IRIField.validate/convert/convert_to_python, Model.__init__ and
 # Model.save() (rollback included) are otherwise reproduced verbatim.
 #
-# __namespaces__ exports BASE_URI under the prefix "base" -- this is what
-# lets translated.ldpy write `from orm_context import base:` instead of
-# inlining the IRI.  It works here because this module (standing in for the
-# project's own tests/__init__.py) is something we can add one line to; see
-# translation_notes for why the SAME trick is not available for RDF/OWL,
-# which come from rdflib.namespace itself, an unmodified dependency.
+# translated.ldpy writes `from orm_context import base_uri: as base:` instead of
+# inlining the IRI: ldpy reads the Namespace BASE_URI under the prefix's
+# upper-cased name. This module stands in for the project's own
+# tests/__init__.py; see translation_notes for why RDF/OWL, which come from
+# rdflib.namespace itself, cannot be imported the same way.
 
 import inspect
 import logging
@@ -27,7 +26,6 @@ from rdflib import Graph, URIRef, Namespace
 logger = logging.getLogger(__name__)
 
 BASE_URI = Namespace('http://example.com/')
-__namespaces__ = {"base": BASE_URI}
 
 
 class InvalidDBKeyTypeError(Exception):

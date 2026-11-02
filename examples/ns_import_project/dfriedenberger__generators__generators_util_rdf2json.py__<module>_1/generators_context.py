@@ -26,7 +26,6 @@
 from rdflib import Namespace
 
 ANS = Namespace("http://example.org/dfriedenberger/generators/assets#")
-__namespaces__ = {"ans": ANS}
 
 
 class SparQLWrapper:

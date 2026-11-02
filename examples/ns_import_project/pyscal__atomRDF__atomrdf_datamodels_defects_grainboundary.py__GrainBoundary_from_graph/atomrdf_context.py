@@ -25,8 +25,6 @@ CMSO = Namespace("http://purls.helmholtz-metadaten.de/cmso/")
 PLDO = Namespace("http://purls.helmholtz-metadaten.de/cdos/pldo/")
 CDCO = Namespace("http://purls.helmholtz-metadaten.de/cdos/cdco/")
 
-__namespaces__ = {"cmso": CMSO, "pldo": PLDO, "cdco": CDCO}
-
 
 def get_material(kg, sample_id):
     from rdflib import URIRef

@@ -22,7 +22,7 @@ else :
 	from rdflib.RDF	import RDFNS  as ns_rdf
 @prefix nsrdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-from pyrdfa_context import nsrdfa:
+from pyrdfa_context import ns_rdfa: as nsrdfa:
 
 Prototype = nsrdfa:Pattern
 pref      = nsrdfa:copy

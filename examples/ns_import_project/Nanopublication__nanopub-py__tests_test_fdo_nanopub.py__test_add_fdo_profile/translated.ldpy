@@ -25,13 +25,13 @@
 # in original.py, so there is nothing to declare a prefix for. `HDL`,
 # `FDOF`, `NPX` come from `nanopub.namespaces`, the line the stratum
 # actually sampled (declaration_site_line 11): this one DOES take `from …
-# import p:`, through `nanopub_ns_shim` (see its header and meta.json --
-# the real `nanopub.namespaces` module lacks `__namespaces__`, ldpy/012
-# point 15bis's sanctioned per-module fix).
+# import p:`, straight from the installed `nanopub.namespaces` module, which
+# exports the Namespace objects HDL, FDOF and NPX (ldpy reads them under the
+# prefix's upper-cased name).
 import pytest
 from nanopub.constants import FDO_DATA_REF_HANDLE, FDO_PROFILE_HANDLE, FDO_DATA_REFS_HANDLE
 from nanopub.fdo.fdo_nanopub import FdoNanopub, to_hdl_uri
-from nanopub_ns_shim import hdl:, fdof:, npx:
+from nanopub.namespaces import hdl:, fdof:, npx:
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 

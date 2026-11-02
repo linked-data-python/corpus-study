@@ -3,9 +3,9 @@
 # licence of the source repository: see meta.json
 #
 # `from plastron.namespaces import bibo, dc, ...` becomes a prefix import and
-# each `ns.term` becomes `ns:term`. The real module has no `__namespaces__`
-# registry, so the import points at plastron_ns_shim, which re-exports the
-# package's own Namespace objects and adds the registry (see meta.json).
+# each `ns.term` becomes `ns:term`. The module defines the namespaces as
+# plain Namespace attributes under the prefixes' own names, which ldpy reads
+# directly.
 from rdflib import URIRef
 
 from plastron.handles import HandleBearingResource
@@ -14,7 +14,7 @@ from plastron.models.authorities import UMD_TERMS_OF_USE_STATEMENTS, UMD_PRESENT
 from plastron.models.fedora import FedoraResource
 from plastron.models.pcdm import PCDMObject
 from plastron.models.page import Page
-from plastron_ns_shim import bibo:, dc:, dcmitype:, dcterms:, edm:, geo:, rel:, skos:, ore:, owl:, umd:, schema:, pcdm:
+from plastron.namespaces import bibo:, dc:, dcmitype:, dcterms:, edm:, geo:, rel:, skos:, ore:, owl:, umd:, schema:, pcdm:
 from plastron.rdfmapping.decorators import rdf_type
 from plastron.rdfmapping.descriptors import ObjectProperty, DataProperty
 from plastron.rdfmapping.resources import RDFResource

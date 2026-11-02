@@ -31,6 +31,3 @@ class QUDTQK(DefinedNamespace):
     _NS = Namespace("http://qudt.org/vocab/quantitykind/")
     Temperature: URIRef
     Length: URIRef
-
-
-__namespaces__ = {"qudt": QUDT, "qudtu": QUDTU, "qudtqk": QUDTQK}

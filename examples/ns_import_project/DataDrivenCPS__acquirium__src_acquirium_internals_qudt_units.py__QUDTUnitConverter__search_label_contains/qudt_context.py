@@ -37,8 +37,6 @@ QUDT = Namespace("http://qudt.org/schema/qudt/")
 UNIT = Namespace("http://qudt.org/vocab/unit/")
 QUDT_QUANTITY_KIND = Namespace("http://qudt.org/vocab/quantitykind/")
 
-__namespaces__ = {"qudt": QUDT}
-
 
 class UnitNotFound(ValueError):
     """Raised when a unit URI is not present in the supplied graph (qudt_units.py line 64)."""

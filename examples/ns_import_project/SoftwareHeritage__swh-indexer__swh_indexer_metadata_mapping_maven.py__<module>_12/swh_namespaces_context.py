@@ -7,11 +7,10 @@
 # meta.json's translation_notes for whether it should itself have been an
 # ldpy module. `swh.indexer` is on PyPI (verified: `pip index versions
 # swh.indexer` -> 4.12.0 latest) but not installed in this venv, and even
-# installed it would not help: it is an ordinary Python file and exports no
-# `__namespaces__`, which ldpy's `from … import p:` needs. Value transcribed
+# installed it would not be needed for the prefix: it is an ordinary Python
+# file whose Namespace attribute SCHEMA ldpy's `from … import p:` reads under
+# the prefix's upper-cased name. Value transcribed
 # verbatim (namespaces.py: SCHEMA = _Namespace("http://schema.org/")).
 from rdflib import Namespace
 
 SCHEMA = Namespace("http://schema.org/")
-
-__namespaces__ = {"schema": SCHEMA}

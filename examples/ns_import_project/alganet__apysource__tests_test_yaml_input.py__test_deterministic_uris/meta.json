@@ -23,7 +23,7 @@
   "translation_notes": [
     "prefixes: DCTERMS->dcterms, RDF->rdf, RDFS->rdfs, OA->oa, SCHEMA->schema, SV->sv",
     "Runs against the REAL installed apysource 0.10.0 (load_yaml, namespaces) on both sides; no logic is re-implemented. Only `_write_yaml`, a module-level test helper the region calls, is transcribed verbatim into original.py/translated.ldpy.",
-    "`from apysource.namespaces import oa:, schema:, sv:` fails against the real module (ImportError: cannot import name '__namespaces__'): the package defines SV/OA/SCHEMA as rdflib Namespaces but no `__namespaces__` registry, which a prefix import reads at run time. Finding: `from m import p:` works only on modules written for it (ldpy modules, or ones with a registry); on an ordinary project namespaces module a two-line shim is needed. apysource_ns_shim.py re-exports the package's own objects and adds the registry; classification minor-restructuring for that reason.",
+    "`from apysource.namespaces import sv:` resolves against the real installed module: the package defines SV (like OA and SCHEMA) as an rdflib Namespace attribute, which ldpy's `from … import p:` reads under the prefix's upper-cased name; no shim is needed.",
     "`from rdflib.namespace import DCTERMS, RDF, RDFS` cannot take `from … import p:` (ldpy/012 point 21); only RDF is dereferenced, so `@prefix rdf:` covers it.",
     "`g.subjects(RDF.type, SV.Source)` -> `m{ ?s rdf:type sv:Source }(g)` (one pattern, one projected variable, bare terms; sorted() makes the order irrelevant).",
     "Proof: the region only asserts and returns None, so driver.py gives it a tmp_path whose write_text stores chosen content: (1) same YAML twice -> passes; (2) YAML differing only in a fragment label -> passes (a pattern widened to any typed subject then raises); (3) a second source -> AssertionError (a pattern narrowed to another class then passes). Checked by breaking the translation: widened `?s rdf:type ?t` -> FAIL (call[1] None vs AssertionError); narrowed `sv:Fragment` -> FAIL (call[1] and call[2] outcomes swap); restored -> OK.",
@@ -47,5 +47,11 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
+  },
+  "validation": {
+    "status": "equivalent",
+    "method": "entry:test_deterministic_uris",
+    "diffs": [],
+    "error": null
   }
 }

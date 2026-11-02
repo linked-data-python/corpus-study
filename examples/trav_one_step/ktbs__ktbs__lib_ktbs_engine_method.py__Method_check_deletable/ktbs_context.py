@@ -16,9 +16,6 @@ from rdflib import Namespace
 
 KTBS = Namespace("http://liris.cnrs.fr/silex/2009/ktbs#")
 
-# what `from ktbs_context import ktbs:` reads
-__namespaces__ = {"ktbs": KTBS}
-
 
 class Diagnosis(object):
     """I contain a list of problems and eval to True if there is no problem.

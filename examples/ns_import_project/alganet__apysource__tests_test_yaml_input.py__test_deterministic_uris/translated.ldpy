@@ -4,15 +4,15 @@
 #
 # `from apysource.namespaces import OA, SCHEMA, SV` becomes a prefix import of
 # SV, the only one this body uses.
-# The real module exports no `__namespaces__` registry, so the import points at
-# apysource_ns_shim, which re-exports the package's own SV/OA/SCHEMA objects
-# and adds the registry (see meta.json). `from rdflib.namespace import ...`
+# The module defines SV as a plain Namespace attribute, which ldpy reads under
+# the prefix's upper-cased name, so the import targets the package itself.
+# `from rdflib.namespace import ...`
 # cannot take `from ... import p:` (ldpy/012 point 21); only RDF is used in
 # the body, so `@prefix rdf:` covers it. `g.subjects(RDF.type, SV.Source)` is
 # a one-pattern read: `m{ ?s rdf:type sv:Source }(g)`.
 from pathlib import Path
 from rdflib.namespace import DCTERMS, RDF, RDFS
-from apysource_ns_shim import sv:
+from apysource.namespaces import sv:
 from apysource.yaml_input import load_yaml, _slugify, _make_uri
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 SIMPLE_YAML = """\

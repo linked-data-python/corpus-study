@@ -24,9 +24,6 @@ PODO = Namespace("http://purls.helmholtz-metadaten.de/cdos/podo/")
 CDCO = Namespace("http://purls.helmholtz-metadaten.de/cdos/cdco/")
 PROV = Namespace("http://www.w3.org/ns/prov#")
 
-# what `from atomrdf_context import cmso:, prov:` reads
-__namespaces__ = {"cmso": CMSO, "prov": PROV}
-
 
 def get_sample_object(sample_id):
     if isinstance(sample_id, str):

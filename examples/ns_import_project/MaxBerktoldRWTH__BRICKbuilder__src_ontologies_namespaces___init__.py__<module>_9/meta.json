@@ -50,6 +50,6 @@
       "préfixes qudtu: et qudtqk: échangés (as) : FAIL (demo() terms)",
       "QUDT rebindé sur QUDT._NS (Namespace au lieu de la classe) : FAIL (identité, type de clé, avertissement perdu)"
     ],
-    "remaining": "Constat pour Maxime, hors de la paire : un nom préfixé sur un DefinedNamespace ne passe pas par sa validation. Si la ligne 182 est réécrite qudt:degreeCelsius au lieu de QUDT.degreeCelsius, l'avertissement 'Code: degreeCelsius is not defined in namespace QUDT' disparaît (expérience dans une copie : FAIL sur les avertissements). Avec _fail=True, c'est un AttributeError qui disparaîtrait. Le crédit de `from … import p:` reste à juger : l'import doit lier aussi les noms, et le __namespaces__ du shim est écrit à la main (le dépôt n'en a pas)."
+    "remaining": "Constat pour Maxime, hors de la paire : un nom préfixé sur un DefinedNamespace ne passe pas par sa validation. Si la ligne 182 est réécrite qudt:degreeCelsius au lieu de QUDT.degreeCelsius, l'avertissement 'Code: degreeCelsius is not defined in namespace QUDT' disparaît (expérience dans une copie : FAIL sur les avertissements). Avec _fail=True, c'est un AttributeError qui disparaîtrait. Le crédit de `from … import p:` reste à juger : l'import doit lier aussi les noms."
   }
 }

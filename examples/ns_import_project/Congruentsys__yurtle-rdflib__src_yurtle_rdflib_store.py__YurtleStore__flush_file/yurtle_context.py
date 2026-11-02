@@ -32,8 +32,6 @@ PM = Namespace("https://yurtle.dev/pm/")
 BEING = Namespace("https://yurtle.dev/being/")
 PROVENANCE = Namespace("https://yurtle.dev/provenance/")
 
-__namespaces__ = {"yurtle": YURTLE, "pm": PM, "being": BEING, "provenance": PROVENANCE}
-
 
 @dataclass
 class YurtleDocument:

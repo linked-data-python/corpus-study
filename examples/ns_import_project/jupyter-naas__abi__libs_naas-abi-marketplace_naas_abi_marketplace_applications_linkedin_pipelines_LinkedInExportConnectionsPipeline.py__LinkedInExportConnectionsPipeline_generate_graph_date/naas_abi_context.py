@@ -7,5 +7,3 @@ from rdflib import Namespace
 BFO = Namespace("http://purl.obolibrary.org/obo/")
 ABI = Namespace("http://ontology.naas.ai/abi/")
 CCO = Namespace("https://www.commoncoreontologies.org/")
-
-__namespaces__ = {"abi": ABI, "bfo": BFO, "cco": CCO}

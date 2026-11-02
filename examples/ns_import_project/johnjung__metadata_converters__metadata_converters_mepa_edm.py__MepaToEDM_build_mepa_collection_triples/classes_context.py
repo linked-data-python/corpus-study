@@ -39,12 +39,6 @@ PREMIS2 = Namespace('http://www.loc.gov/premis/rdf/v1#')
 PREMIS3 = Namespace('http://www.loc.gov/premis/rdf/v3/')
 VRA = Namespace('http://purl.org/vra/')
 
-__namespaces__ = {
-    "bf": BF, "edm": EDM, "erc": ERC, "madsrdf": MADSRDF, "mix": MIX,
-    "oai": OAI, "ore": ORE, "premis": PREMIS, "premis2": PREMIS2,
-    "premis3": PREMIS3, "vra": VRA,
-}
-
 
 class DigitalCollectionToEDM:
     def __init__(self):

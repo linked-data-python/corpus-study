@@ -21,8 +21,8 @@
   ],
   "translation_notes": [
     "Runs against the REAL installed plastron-models 4.8.3 / plastron-utils (handles, models.*, rdfmapping.*, validation.*); original.py is unchanged. Nothing of the framework is re-implemented.",
-    "The 13 namespaces (`bibo dc dcmitype dcterms edm geo rel skos ore owl umd schema pcdm`) come in as prefixes: `from plastron_ns_shim import bibo:, dc:, ...` and every `ns.term` (28 uses) becomes `ns:term` (`owl:sameAs`, `edm:Agent`, `dcterms:title`, ...). The raw `URIRef('http://id.loc.gov/datatypes/edtf')` datatype argument becomes `<http://id.loc.gov/datatypes/edtf>`.",
-    "Finding: `plastron.namespaces` is plain `NAME = Namespace('...')` attributes with no `__namespaces__` registry, which `from m import p:` reads at run time (ImportError: cannot import name '__namespaces__' otherwise). plastron_ns_shim.py re-exports the package's own Namespace objects and adds the registry, so the translation needs one extra module the original does not: classification minor-restructuring. The prefix import works only on modules written for it, not on an existing project's namespace module.",
+    "The 13 namespaces (`bibo dc dcmitype dcterms edm geo rel skos ore owl umd schema pcdm`) come in as prefixes: `from plastron.namespaces import bibo:, dc:, ...` and every `ns.term` (28 uses) becomes `ns:term` (`owl:sameAs`, `edm:Agent`, `dcterms:title`, ...). The raw `URIRef('http://id.loc.gov/datatypes/edtf')` datatype argument becomes `<http://id.loc.gov/datatypes/edtf>`.",
+    "`plastron.namespaces` defines the namespaces as plain `NAME = Namespace('...')` attributes under the prefixes' own names, which ldpy's `from … import p:` reads directly: the prefix import targets the installed package, with no shim.",
     "`from rdflib import URIRef` is kept as is; it is no longer used in the translation (only the datatype argument used it).",
     "Proof: the module defines classes and prints nothing, so run_pair(entry=None) finds nothing observable. driver.py is custom: it executes both artefacts and compares, for the six classes, the property table (attribute -> predicate, required, repeatable, datatype, embed, target class), the default rdf:type values, model_name/is_top_level/HEADER_MAP, and instances built through the descriptors (empty / complete / coerced-date / malformed-date Letter, Agent, Concept, Place, Collection, an embedded author): their graphs by isomorphism, and validate()/is_valid per property. The original shows a 20-triple letter graph, validation failures for the empty letter and for the malformed date. Break checks: `dcterms:title` -> `dc:title` FAIL; datatype IRI changed FAIL; `@rdf_type(edm:Agent)` -> `edm:Place` FAIL; restored OK."
   ],
@@ -36,5 +36,11 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "validation": {
+    "status": "equivalent",
+    "method": "custom: property tables, defaults, built instances (isomorphism), validation reports",
+    "diffs": [],
+    "error": null
+  }
 }

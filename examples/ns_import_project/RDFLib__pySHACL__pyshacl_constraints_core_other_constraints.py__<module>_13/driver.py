@@ -36,7 +36,7 @@ with contextlib.redirect_stderr(_buf):
     )
 
 if VERDICT["equivalent"]:
-    from pyshacl_consts_context import RDFS, SH
+    from pyshacl.consts import RDFS, SH
 
     ns_t, _ = _exec_ldpy(Path(__file__).resolve().parent / "translated.ldpy")
     namespaces = ns_t.get("__namespaces__", {})
