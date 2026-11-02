@@ -50,5 +50,26 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: chain() of three subject_objects becomes one subject_objects over the alternative path `DC.creator | SDO.creator | SDO.author` (rdflib evaluates the alternatives in written order, so the solutions and the last (s_, o) the module leaves are the same); the three removes become `g -= [... for p in (...)]` (a comprehension, so no module-level name is added to the compared values).",
+    "optimized.ldpy, from optimized.py: the path goes into the predicate position of one `m{ ?s {dc:creator | sdo:creator | sdo:author} ?o }`; the removes stay three `-{ }` (same token count as the `g -= [...]` line, and the specific island; a multi-pattern `-{ }` would join).",
+    "No exception to the symmetry: the path is a Python expression on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: chain goes, and the namespace import keeps DC, DCTERMS, SDO of its fourteen names.",
+    "LD Python: chain goes; the three @prefix lines are used."
+  ]
 }

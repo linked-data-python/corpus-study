@@ -63,5 +63,21 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the filtering loop becomes `new_graph += [comprehension]`.",
+    "optimized.ldpy: `new_graph = Graph()` + `@graph new_graph` becomes `@graph as new_graph` (island-only, no prefix in scope); the loop with a one-line `if ...: +{ {s} {p} {o} }` is kept because it measures below the Python comprehension (51 against 53 tokens): the island has no comprehension form.",
+    "Exception to the symmetry: optimized.ldpy keeps the original loop instead of the comprehension of optimized.py, because the island form is the shorter one; nothing of optimized.ldpy is a restructuring Python could carry back."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal and RDF go.",
+    "LD Python: Literal and RDF go; Graph stays for the annotation."
+  ]
 }

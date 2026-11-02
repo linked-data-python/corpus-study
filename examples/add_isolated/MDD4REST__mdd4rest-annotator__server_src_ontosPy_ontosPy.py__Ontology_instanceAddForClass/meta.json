@@ -58,5 +58,21 @@
       "ns ignoré"
     ],
     "remaining": "Mutant équivalent, non compté : `@graph self.sessionGraph` remonté au-dessus du if (le fichier ne déclare aucun préfixe, la désignation ne lie rien)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: guard clauses: the class check raises first; `type(x) == type(\"string\") or type(x) == type(u\"unicode\")` is `type(x) == str` in Python 3; the string branch rebinds anInstance to `(ns or self.sessionNS)[anInstance]` (the `# needed?` comment stays on it) and a non-URIRef raises, so a single add and a single return remain. Both raises keep their message and their order relative to the write (case G still raises TypeError before anything is written; exact-type tests kept for Literal and Genid).",
+    "optimized.ldpy, from optimized.py: the single add becomes `@graph self.sessionGraph` + `+{ {anInstance} a {aClass} }` (2 tokens below the `(self.sessionGraph)` call suffix).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace, RDFS and BNode go.",
+    "LD Python: Namespace, RDFS, RDF (written `a`) and BNode go."
+  ]
 }

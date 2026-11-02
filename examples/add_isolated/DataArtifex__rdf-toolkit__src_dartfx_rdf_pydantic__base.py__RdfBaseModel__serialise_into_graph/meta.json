@@ -59,5 +59,21 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy; constructions no longer credit @prefix"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the LangStringList fast-path loop becomes `graph += (generator)` (lazy, so a raising Literal leaves the same partial graph); the is_list if/else that built `values` becomes one conditional expression iterated directly; `if item is None: continue` becomes `if item is not None:` and the intermediate `node` is inlined into the add (still computed after subject/predicate and before the add, so the nested triples _value_to_node writes keep their order). Both `continue` guards on prop/value and the fast-path `continue` are kept.",
+    "optimized.ldpy, from optimized.py: the three adds become `+{ }` under `@graph graph`; the fast path stays a two-line `for` over `+{ }`, which measures 2 tokens below keeping the Python `graph += (...)` in the ldpy file. Literal(ls_item.value, lang=ls_item.lang) is kept: a computed tag `{v}@{k}` raises on the untagged (lang=None) entries the region accepts.",
+    "No exception to the symmetry beyond the choice of the island loop over the generator for the fast path (the island has no comprehension form)."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: XSD and Namespace go; the shim import is put on one line.",
+    "LD Python: RDF (written `a`), XSD and Namespace go; the shim import is put on one line. BNode, Graph and URIRef stay, used by the annotations."
+  ]
 }

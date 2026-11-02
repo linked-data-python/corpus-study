@@ -55,5 +55,24 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two unconditional adds become one `outg += [...]`. The try/except around URIRef (continue) and around the formula add (pass), the ONTOSYN module name and the print are kept; no new module name (module values are compared).",
+    "optimized.ldpy, from optimized.py: the two triples are one `+{ }` with `.`; Literal(lbl) becomes a bare interpolation (a str label, None excluded by the guards); URIRef in the try is kept, since `f<…>` would not raise on a non-str IRI and the `continue` would change.",
+    "Not compressed: ONTOMOPS and ONTOSYN are Python Namespaces (shim / region), so their terms stay `{NS.x}` interpolations.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused; optimized_header.py is a copy of optimized.py.",
+    "LD Python: Literal goes, and the whole `from rdflib.namespace import RDF, RDFS` line (written `a` and rdfs:label); @prefix rdfs is used."
+  ]
 }

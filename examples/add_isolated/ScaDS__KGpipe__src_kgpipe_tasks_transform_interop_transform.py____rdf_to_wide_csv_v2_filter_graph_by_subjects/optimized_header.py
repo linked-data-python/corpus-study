@@ -1,0 +1,9 @@
+# Extracted from ScaDS/KGpipe@67ca171cfd : src/kgpipe_tasks/transform_interop/transform.py
+# region: __rdf_to_wide_csv_v2.filter_graph_by_subjects (lines 74-79, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph
+
+def filter_graph_by_subjects(graph: Graph, subjects: set):
+    new_graph = Graph()
+    new_graph += [(s, p, o) for s, p, o in graph if str(s) in subjects]
+    return new_graph

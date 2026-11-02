@@ -1,0 +1,87 @@
+# Extracted from DataArtifex/rdf-toolkit@226d8a1be3 : src/dartfx/rdf/pydantic/_base.py
+# region: RdfBaseModel._serialise_into_graph (lines 1335-1409, stratum add_isolated)
+# licence of the source repository: see meta.json
+from __future__ import annotations
+from rdflib import RDF, XSD, BNode, Graph, Literal, Namespace, URIRef
+from context_shim import (
+    LangStringList,
+    _ensure_uri,
+    _field_type_info,
+    _get_rdf_property,
+)
+
+
+def _serialise_into_graph(
+    self,
+    graph: Graph,
+    *,
+    base_uri: str | None = None,
+    rdf_uri_generator: RdfUriGenerator | None = None,
+) -> URIRef | BNode:
+    """Internal method to serialize this model into an RDF graph.
+
+    Converts all annotated fields to RDF triples and adds them to the graph.
+    This method handles the core serialization logic.
+
+    Parameters
+    ----------
+    graph : Graph
+        The rdflib Graph to add triples to.
+    base_uri : str | None, optional
+        Base URI for subject generation.
+    rdf_uri_generator : RdfUriGenerator | None, optional
+        A custom function to generate subject URIs for model instances.
+
+    Returns
+    -------
+    URIRef | BNode
+        The subject URI of the serialized resource.
+    """
+    subject = self._subject_uri(base_uri=base_uri, rdf_uri_generator=rdf_uri_generator)
+    self._bind_prefixes(graph)
+
+    rdf_type_uri = _ensure_uri(self.rdf_type)
+    if rdf_type_uri is not None:
+        graph.add((subject, RDF.type, rdf_type_uri))
+
+    for name, field in self.__class__.model_fields.items():
+        prop = _get_rdf_property(field)
+        if prop is None:
+            continue
+        value = getattr(self, name)
+        if value is None:
+            continue
+        predicate = prop.predicate_uri()
+
+        # Fast path for LocalizedStr fields (LangStringList)
+        if isinstance(value, LangStringList):
+            graph += (
+                (subject, predicate, Literal(ls_item.value, lang=ls_item.lang)) for ls_item in value
+            )
+            continue
+
+        is_list, _accepts_scalar, inner_type = _field_type_info(field)
+        # Support both single values and lists for fields that allow both
+        for item in (value if is_list and isinstance(value, list) else [value]):
+            if item is not None:
+                graph.add((subject, predicate, self._value_to_node(
+                    item, inner_type, prop, graph, base_uri, rdf_uri_generator=rdf_uri_generator
+                )))
+
+    return subject
+
+
+# Demo harness (identical on both sides, see meta.json): _serialise_into_graph
+# is a method of RdfBaseModel, extracted with an explicit `self` parameter
+# (a bound-method extraction, same pattern as
+# JonasHeinickeBio__biomedical-knowledge-lookup__.../__add_concept_mappings
+# already in this corpus). `model` is built by the driver from
+# context_shim.RdfBaseModelStub with a fixed subject and the fields under
+# test; demo() calls the extracted function on it and returns only the graph
+# it wrote into, not `self`/`model` (comparing the stub instance itself would
+# report a spurious difference every call: each side owns a distinct Python
+# object with no notion of "the same" beyond structural equality, which the
+# harness already gets from comparing the resulting graph).
+def demo(model, graph):
+    _serialise_into_graph(model, graph)
+    return graph

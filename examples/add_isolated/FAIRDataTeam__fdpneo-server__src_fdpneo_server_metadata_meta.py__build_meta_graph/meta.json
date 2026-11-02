@@ -60,5 +60,24 @@
       "`prov:atTime {Literal(now)}` -> `{Literal(effective_created)}`"
     ],
     "remaining": "Le drapeau wrong-construction reste à juger : meta.json ne déclare que la strate add_isolated alors que la traduction fusionne avec `;`."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the graph is fresh and local (discarded if anything raises), so the order of the writes is free: the nine unconditional adds become one `graph += [...]`, the three guarded adds follow, each under its own `if`; `prior_creator if not is_creation else subject` becomes `subject if is_creation else prior_creator`. All comments kept.",
+    "optimized.ldpy, from optimized.py: `graph = Graph()` + `@graph graph` becomes `@graph as graph` (island-only; the graph also carries the block's prefixes as serialisation bindings, cosmetic); the nine triples become one `+{ }` on two subjects (`;`, `.`, and the object list `a prov:Activity, {...}`); Literal(x) becomes a bare interpolation (datetime, int and str values, never None on the annotated types: `or now` guards the dates); URIRef(x) becomes `f<{x}>` (no @base in scope; inputs are str by annotation or by _extract_validated_against).",
+    "No exception to the symmetry: the regrouping of the writes is carried by optimized.py."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: meta_graph_uri (unused shim import) goes.",
+    "LD Python: meta_graph_uri and Literal go; every imported prefix is used."
+  ]
 }

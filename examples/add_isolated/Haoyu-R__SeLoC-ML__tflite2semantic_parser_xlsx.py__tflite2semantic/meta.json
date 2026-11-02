@@ -62,5 +62,23 @@
       "if j == 0: -> if j == 1:"
     ],
     "remaining": "Le second `+{ {middleLayer} {nnet.hasIndex} {Literal(j)} }` de la branche else double littéralement le premier (artefact du dépôt) : le supprimer ne change pas le graphe (ensemble de triplets), c'est un mutant équivalent et non un trou du pilote. Les triplets d'addCommonInfo (l. 376-391) restent hors région et inertes. Le drapeau wrong-construction (enveloppes Literal(j+1)/Literal(j)) est un jugement, non traité."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the repeated add of (middleLayer, hasIndex, j) after addCommonInfo is dropped (a set graph makes it a no-op, and addCommonInfo only adds); the two adds that precede addCommonInfo in the middle branch become one `g += [...]`; `\"{}_\".format(j)` goes into an f-string, idOfNN still concatenated with `+`. The adds around addCommonInfo keep their side of the call.",
+    "optimized.ldpy, from optimized.py: the three URIRef(... + idOfNN) become `f<...{idOfNN}>` (idOfNN is str(uuid4()) in the repository); Literal(j) and Literal(j+1) become bare interpolations (ints); the middle-branch pair is one `+{ }` with `.`.",
+    "Not compressed: nnet is a Python Namespace in the header, so its terms stay `{nnet.x}` interpolations; a `@prefix nnet:` in the region would duplicate the namespace and shadow the Python name.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused; optimized_header.py is a copy of optimized.py.",
+    "LD Python: Literal and URIRef go (bare interpolations and f<…>)."
+  ]
 }

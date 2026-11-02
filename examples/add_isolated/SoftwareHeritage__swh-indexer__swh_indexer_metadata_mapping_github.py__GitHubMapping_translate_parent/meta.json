@@ -60,5 +60,22 @@
       "garde -> False"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the intermediate `repository` is inlined into the add.",
+    "optimized.ldpy, from optimized.py: URIRef(v[\"html_url\"]) becomes `f<{v[\"html_url\"]}>` (the guard ensures a str, no @base in scope; URIRef(\"\") is kept on the empty-string case); `@graph graph` + `+{ }` replaces the call suffix `(graph)`, which the metric counts 9 tokens higher here.",
+    "No exception to the symmetry. Metric observation: with a call suffix, `f<{x}>` counts like `{URIRef(x)}`; under `@graph` it counts like `{x}`."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Tuple, RDF, Literal and the unused shim names (ACTIVITYSTREAMS, CODEMETA, SCHEMA, XSD, BaseExtrinsicMapping, JsonMapping) go; the two shim imports merge into one.",
+    "LD Python: the same, plus URIRef (now f<…>)."
+  ]
 }

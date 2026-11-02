@@ -47,5 +47,25 @@
     "method": "entry:_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress; it is original.py. The three independent flags each guard one add, and a table-driven loop would cost readability for a few tokens.",
+    "optimized.ldpy: translated.ldpy with URIRef(DIST) and URIRef(RIGHTS) written `f<{DIST}>` and `f<{RIGHTS}>` (str constants, no @base in scope). Kept separate from the islands: `subject` is used four times.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "IRI",
+    "interpolation {expr}",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused; optimized_header.py is a copy of optimized.py.",
+    "LD Python: URIRef and the DCAT/DCT shim import go (the region uses the dcat:/dct: prefixes); both @prefix lines are used."
+  ]
 }

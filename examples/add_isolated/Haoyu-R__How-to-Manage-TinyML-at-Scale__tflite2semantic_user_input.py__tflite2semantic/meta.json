@@ -60,5 +60,23 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/else around addActivation becomes one call with a conditional argument (opt.FusedActivationFunction() still called only when hasActivation). The three adds stay where they are: the sibling helpers write to the same g in between.",
+    "optimized.ldpy, from optimized.py: same change; Literal(shape) becomes a bare interpolation (the coercion is Literal(value) for a non-None, non-term value).",
+    "No exception to the symmetry. The trailing invocations are harness, kept as is."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS and SDO go.",
+    "LD Python: Literal and Namespace go, and the whole `from rdflib.namespace import RDF, RDFS, SDO` line (RDF written `a`); @prefix nnet is used."
+  ]
 }
