@@ -108,3 +108,21 @@ def test_a_final_pair_left_out_of_the_selection_is_not_published(
     agg = json.loads((tmp_path / "aggregate.json").read_text())
     assert agg["pairs_total"] == 1
     assert agg["pairs_outside_selection"] == ["left"]
+
+
+def test_a_region_completed_into_another_stratum_is_credited_in_its_meta(
+        tmp_path, monkeypatch):
+    import json
+    from rdfeval import reprise
+
+    d = tmp_path / "remove" / "r"
+    d.mkdir(parents=True)
+    (d / "meta.json").write_text(json.dumps(
+        {"region_id": "r", "strata": ["remove"]}))
+    monkeypatch.setattr(reprise, "EXAMPLES_DIR", tmp_path)
+    strata = {"remove": {"selection": [{"region_id": "r"}]},
+              "bind_initbindings": {"selection": [{"region_id": "r"}]}}
+    assert reprise.credit_metas(strata) == 1
+    assert json.loads((d / "meta.json").read_text())["strata"] == [
+        "remove", "bind_initbindings"]
+    assert reprise.credit_metas(strata) == 0

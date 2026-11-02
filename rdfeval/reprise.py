@@ -243,7 +243,32 @@ def run(config: dict, dry_run: bool = False) -> dict:
     STRATA_PATH.write_text(json.dumps(draw, indent=2, ensure_ascii=False),
                            encoding="utf-8")
     print("translate:", materialise_selected(config, draw, todo))
+    print("credited:", credit_metas(result["strata"]))
     return result
+
+
+def credit_metas(strata: dict) -> int:
+    """Add to ``meta.json`` the strata the resumed selection credits a region
+    with: a region already in the draw, completed into another stratum by
+    step 2, carries only the strata it was first drawn for, and ``compare``
+    reads its strata from there."""
+    metas = {}
+    for path in sorted(EXAMPLES_DIR.glob("*/*/meta.json")):
+        metas[json.loads(path.read_text())["region_id"]] = path
+    changed = 0
+    for kind, st in strata.items():
+        for e in st["selection"]:
+            path = metas.get(e["region_id"])
+            if path is None:
+                continue
+            meta = json.loads(path.read_text())
+            if kind in meta.setdefault("strata", []):
+                continue
+            meta["strata"].append(kind)
+            path.write_text(json.dumps(meta, indent=2, ensure_ascii=False)
+                            + "\n", encoding="utf-8")
+            changed += 1
+    return changed
 
 
 def materialise_selected(config: dict, draw: dict, region_ids) -> dict:
