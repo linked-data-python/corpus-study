@@ -1,0 +1,18 @@
+{
+  "region_id": "FAIRDataTeam__fdpneo-server__src_fdpneo_server_metadata_profiles_applier.py___repository_graph",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `for triple in helper(...): graph.add(triple)` loops are merged into one loop over the concatenation of the two lists the helpers return. Nothing else: the rights triple is guarded by `if rights_iri is not None`, and the first two adds have no shared-subject form in rdflib.",
+    "optimized.ldpy, from optimized.py: `graph = Graph()` and its designation become one `@graph as graph` (the fresh graph additionally carries the block's dct binding, record ldpy/027; the driver compares by isomorphism); the type/title pair becomes one `+{ ... ; ... }`; the guarded rights add becomes +{ } inside its if; URIRef(x) becomes f<{x}> (no @base), Literal(title) the bare {title}.",
+    "The merged helper loop stays `graph.add(triple)` on both sides: the triples arrive assembled by out-of-region helpers, and `for s, p, o in ...: +{ {s} {p} {o} }` would be longer without saying anything.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
+}

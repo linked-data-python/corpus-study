@@ -1,0 +1,16 @@
+{
+  "region_id": "DataDrivenCPS__acquirium__src_acquirium_Storage_graph_store.py___graph_affects_closure",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `any(graph.triples(...))` disjuncts became two membership tests, `(None, OWL.imports, None) in graph or (None, RDF.type, OWL.Ontology) in graph`, on one line (Graph.__contains__ is exactly the existence test).",
+    "optimized.ldpy: `@graph graph` once, then `bool(m{ ?s owl:imports ?o }) or bool(m{ ?s a owl:Ontology })`; `@graph graph` costs fewer tokens than a `(graph)` suffix on each island but one more line. `bool(m{ } or m{ })` would save one bool() and was rejected as less explicit. No exception to the symmetry; m{ } has no UNION, so the two disjuncts stay two islands, as the Python keeps two tests.",
+    "The header (imports and the three @prefix lines, xsd: and rdf: included) is kept byte for byte although the region uses none of the extra names; the unused names are the extraction's, not the region's."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ]
+}

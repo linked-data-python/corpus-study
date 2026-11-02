@@ -1,0 +1,17 @@
+{
+  "region_id": "tableau__altimeter__altimeter_core_graph_links.py__SimpleLink_to_rdf",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two nested ifs become one `if isinstance(...) and self.obj > 2147483647:`; `literal` is inlined into the add. A one-line conditional expression for datatype would exceed 100 characters.",
+    "optimized.ldpy, from optimized.py: XSD.nonNegativeInteger becomes xsd:nonNegativeInteger; the single add becomes +{ } with the `(graph)` call suffix (one site: a suffix is shorter than a `@graph graph` line; the driver's binding phase only checks that no binding is lost). The literal stays `Literal(self.obj, datatype=datatype)` interpolated whole: the datatype is None or xsd:nonNegativeInteger by a runtime test, and the only term-position alternative (two +{ } in two branches, `{self.obj}` and `f\"{self.obj}\"^^xsd:nonNegativeInteger`, both verified equal) is longer.",
+    "Notation ratio above 1 (1.10): the frozen header's two @prefix lines (rdf: unused) weigh more than the one prefixed name they serve in a four-line region.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ]
+}

@@ -1,0 +1,38 @@
+# Extracted from BrickSchema/Brick@c12949f236 : handle_extensions.py
+# region: <module> (lines 1-37, stratum remove)
+# licence of the source repository: see meta.json
+import glob
+import rdflib
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+
+# read the base Brick ontology
+@graph as brick_graph
+brick_graph.parse("Brick.ttl", format="ttl")
+BRICK = <https://brickschema.org/schema/1.5/Brick>
+
+# add extension files to Brick graph
+for filename in glob.glob("extensions/*.ttl"):
+    brick_graph.parse(filename)
+
+# remove duplicate ontology definitions and
+# move prefixes onto Brick ontology definition
+for pfx in m{ [] sh:declare ?pfx }:
+    -{ ?s sh:declare {pfx} }
+    +{ {BRICK} sh:declare {pfx} }
+
+# reassign where rules find their prefixees
+for rule in m{ ?rule sh:prefixes [] }:
+    -{ {rule} sh:prefixes ?pfxs }
+    +{ {rule} sh:prefixes {BRICK} }
+
+# remove ontology declarations
+for ontology in m{ ?ontology a owl:Ontology }:
+    if ontology != BRICK:
+        -{ {ontology} a owl:Ontology }
+        -{ {ontology} owl:imports ?o }
+        -{ {ontology} owl:versionInfo ?o }
+
+# serialize Brick with all extensions added
+with open("Brick+extensions.ttl", "w", encoding="utf-8") as fp:
+    fp.write(brick_graph.serialize(format="turtle").rstrip() + "\n")

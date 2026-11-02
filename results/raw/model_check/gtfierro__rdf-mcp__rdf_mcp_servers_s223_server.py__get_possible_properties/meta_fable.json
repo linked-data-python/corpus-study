@@ -1,0 +1,18 @@
+{
+  "region_id": "gtfierro__rdf-mcp__rdf_mcp_servers_s223_server.py__get_possible_properties",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the query's three unused PREFIX lines (owl, s223, rdf -- the query only uses rdfs and sh, sh resolving through rdflib's default bindings) are dropped; `SELECT DISTINCT` replaces the `set(...)` built from `.bindings`, and the rows are read as `row.path` instead of `.bindings` dicts indexed by `Variable(\"path\")`; the `query` variable is inlined into the call and `return list(paths)` becomes a list comprehension over the result (order is not part of the contract: the driver compares as a multiset).",
+    "optimized.ldpy, from optimized.py: the query becomes `s{ }(ontology)`, its prologue inherited from the header's @prefix lines, the never-projected `?from` replaced by `{S223[term]}` at its single occurrence (`s223:{term}` is not SPARQL and is rejected inside s{ }); the lazy query is iterated directly, so `.execute()` is no longer needed.",
+    "Notation ratio above 1 (1.62): the frozen translated.ldpy header carries five @prefix lines, two of them (owl, rdf) unused, whereas the Python region now declares the one PREFIX it uses. The header rule puts that cost on the notation side on purpose.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
+}

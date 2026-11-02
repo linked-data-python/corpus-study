@@ -1,0 +1,15 @@
+{
+  "region_id": "TeamWalabi__agriculture-image-metadata__agri_image_meta_ontology_generator.py___resolve_rdf_type_uri",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `ns_map` on one line; `URIRef(str(ns) + local)` becomes `URIRef(ns + local)` (Namespace and URIRef are str subclasses). The `not rdf_type_str` guard (None input) and the `if ns is None: return None` guard are kept.",
+    "optimized.ldpy, from optimized.py: `URIRef(\"http://www.w3.org/ns/dcat#\")` becomes the bare IRI term, `URIRef(ns + local)` becomes `f<{ns}{local}>` (no @base; neither encodes); SOSA/FOAF come from the header's `@prefix ... as` declarations, taken byte for byte from translated.ldpy.",
+    "Nothing else: the function is a string dispatch, the islands only touch its two term constructors.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "IRI",
+    "f<…>"
+  ]
+}

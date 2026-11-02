@@ -1,0 +1,21 @@
+{
+  "region_id": "SpotlightKid__jack-audio-tools__carla_carxp2lv2presets.py__create_lv2_preset",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/else on prop.type becomes one conditional expression, the XXX comment kept above it. Nothing else compresses in Python: the six graph.add sites keep one call per triple (rdflib has no shared-subject form), the `if plugin.properties:` guard is load-bearing (it also guards the pstate:state triple), and `port = BNode()` is needed by three calls.",
+    "optimized.ldpy, from optimized.py: the three base triples become one +{ } with ';'; URIRef('') becomes the bare IRI <> (no @base in scope, verified equal to URIRef('')); URIRef(x) becomes f<{x}>; Literal(x) on a str becomes the bare interpolation {x} in term position and f{x} in Python position; NS.x.y becomes a prefixed name (pstate: for NS.state, since `state` is a Python variable of the region).",
+    "Exception to the symmetry rule (island-only): the params loop body is a single `+{ {preset} lv2:port [ lv2:symbol {param.symbol} ; pset:value {param.value} ] }` -- Turtle's anonymous blank-node property list replaces `port = BNode()` and the three adds. Python has no anonymous-node literal, so it cannot be carried back. The plain `for param in plugin.params:` of optimized.py is kept: `for @bindings in` over a generator of dicts would be longer than the island with interpolation, so that construction does not appear in the optimized artefact.",
+    "The URIRef/Literal choice on the property value stays a Python conditional expression on both sides (a conditional is not a term); in ldpy it reads `f<{prop.value}> if prop.type == str(atom:Path) else f{prop.value}`.",
+    "Header of original.py / translated.ldpy taken byte for byte; the demo() harness copied verbatim into both artefacts."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "f{ }",
+    "IRI",
+    "prefixed name",
+    "interpolation {expr}"
+  ]
+}

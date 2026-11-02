@@ -1,0 +1,17 @@
+{
+  "region_id": "altunelyusuf__SemanticTechnologies__landscape_06-gates_rdodi_procedure_audit_v6_4_0.py__<module>_60",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is the single line `sc = str(rs.value(RES.ResearchCorpus, SKOS.note) or \"\")` and everything before it (imports, HERE, RES, rs) is restored context, kept byte for byte as the header. optimized.py is identical to original.py.",
+    "optimized.ldpy is identical to translated.ldpy: `str(m{ res:ResearchCorpus skos:note ?o }.first() or \"\")`. `rs.value(..., default=\"\")` was considered on the Python side and rejected: `or \"\"` also maps the falsy literals \"\", 0 and false to \"\" (the driver exercises them), default= only maps None.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable"
+  ]
+}

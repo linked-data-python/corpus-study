@@ -1,0 +1,21 @@
+{
+  "region_id": "BrickSchema__Brick__handle_extensions.py__<module>_1",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph()` and its `.parse()` folded into one statement (parse returns the graph); the `extension_files` variable inlined into the for; the `subject_objects` loop over sh:prefixes became `for rule in brick_graph.subjects(predicate=SH.prefixes): brick_graph.set((rule, SH.prefixes, BRICK))` (Graph.set removes every (rule, sh:prefixes, *) then adds the one triple: the same final graph, pfxs no longer a module-level name, the driver compares only the names both sides define); `subjects(RDF.type, OWL.Ontology)` positional instead of keyword; the two fp.write calls became one write of `.rstrip() + \"\\n\"` (same bytes). The header's `import rdflib` is kept byte for byte, so the region keeps the `rdflib.X` spelling: a second `from rdflib import ...` in the region would be two import styles for one module, which a reviewer would not accept.",
+    "optimized.ldpy: `@graph as brick_graph` replaces `rdflib.Graph()` + `@graph brick_graph` (the written file's @prefix lines are unchanged, the driver compares them); `rdflib.URIRef(...)` is the bare <IRI>; the three selector loops are m{ } (`[]` as the non-distinguished subject of the sh:declare pattern so that the loop variable stays a bare term), removals -{ } and additions +{ }.",
+    "Exception to the symmetry, in the notation's disfavour: Graph.set has no island, so the sh:prefixes loop is `-{ {rule} sh:prefixes ?pfxs }` then `+{ {rule} sh:prefixes {BRICK} }`, one line more than the Python. A single `s{ DELETE ... INSERT ... WHERE }` update per loop was not shorter and would hide the -{ } / +{ } islands the stratum measures.",
+    "Kept on both sides: the three separate removals of the last block (a multi-pattern -{ } is a joined DELETE WHERE and removes nothing on an ontology without owl:imports or owl:versionInfo), the `if ontology != BRICK` guard, the lazy iteration over the graph being mutated (the module-level loop variables are compared by the driver, a set snapshot would change their final value)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "IRI",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
+}

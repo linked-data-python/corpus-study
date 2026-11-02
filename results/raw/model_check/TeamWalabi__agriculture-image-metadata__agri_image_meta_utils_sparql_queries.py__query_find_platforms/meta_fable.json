@@ -1,0 +1,15 @@
+{
+  "region_id": "TeamWalabi__agriculture-image-metadata__agri_image_meta_utils_sparql_queries.py__query_find_platforms",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `query` variable is inlined into `g.query(...)`; inside the query text the full IRI `<https://w3id.org/agri-image/platformName>` is written with the PREFIX the query already declares (`agimage:platformName`) and the two triple patterns of one subject sit on one line. The print, the loop over the rows and `return results` are the interface and stay.",
+    "optimized.ldpy: the same text as an `s{ SELECT ... }(g)` island, its PREFIX line replaced by the header's `@prefix agimage:`. No exception to the symmetry; the island is re-iterable like rdflib's Result, so the loop followed by `return results` is unchanged.",
+    "Not compressible further on either side. The notation ratio is above 1 because the query is one Python token on the Python side and is tokenised as SPARQL inside s{ }."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name"
+  ]
+}

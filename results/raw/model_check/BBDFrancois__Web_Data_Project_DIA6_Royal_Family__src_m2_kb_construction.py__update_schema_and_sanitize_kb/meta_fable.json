@@ -1,0 +1,21 @@
+{
+  "region_id": "BBDFrancois__Web_Data_Project_DIA6_Royal_Family__src_m2_kb_construction.py__update_schema_and_sanitize_kb",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph().parse(...)` replaces the three `g = Graph(); g.parse(...)` pairs; `p_str.startswith((DBO, DBP))` and `node_str.startswith(DBR)` reuse the namespaces the function already defines instead of repeating their IRIs (Namespace is a str subclass); `align.triples((None, P, None))` becomes `align.subject_objects(P)`; `set(kb.subjects()) | set(kb.objects())` becomes `kb.all_nodes()`; `URIRef(p_str)` and `URIRef(node_str)` are `p` and `node` themselves (already URIRefs); `prop_name` and the `new_s`/`new_p` temporaries of phase 4 are inlined (`new_o` kept to stay under 100 characters). Kept: the `for t in triples_to_remove: kb.remove(t)` loop (a `kb -= list` would lean on an operator documented for graphs), the original's own ';'-joined bind lines, every print and counter.",
+    "optimized.ldpy, from optimized.py: `PRIV = Namespace(...)` becomes a function-local `@prefix priv: <...> as PRIV .` (the object is still needed by bind()), so `PRIV[x]` becomes `priv:{x}`; one `@graph onto` after the parse block, with the `(align)` and `(clean_kb)` call suffixes for the other two receivers instead of re-declaring @graph at each switch (translated.ldpy had five @graph lines); the two subject_objects reads become two-variable `m{ ?s owl:... ?o }(align)`; every add becomes +{ }, the type/domain pair merged with ';' and the type chosen inside the hole with prefixed names (`{owl:ObjectProperty if is_obj_prop else owl:DatatypeProperty}`).",
+    "DBO/DBR/DBP stay `Namespace(...)` on both sides: they are only ever objects (bind, startswith), never written as a prefixed name, and a `@prefix` never used lexically would be an empty declaration. The bind() lines stay on both sides: `@graph onto` does bind the block's prefixes on onto, but the call suffix binds nothing on its receiver (verified on 0.7.1), and the serialised files' prefixes are part of the function's output.",
+    "`kb.remove(t)` on a triple received as data stays rdflib on both sides: `-{ {s} {p} {o} }(kb)` is correct here (no None) but longer.",
+    "No exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ]
+}

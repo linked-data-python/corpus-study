@@ -1,0 +1,19 @@
+{
+  "region_id": "altunelyusuf__SemanticTechnologies__landscape_06-gates_semtech_supplementary_gates_v1_0_0.py__<module>_149",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the first filter, `list(g_ab.objects(s, RDF.type)) and`, is dead (every s comes from `subjects(RDF.type, OWL.NamedIndividual)`, so its rdf:type objects are never empty) and is dropped; `str(SEM) + \"T\"` is `SEM.T` (the same string, as a URIRef); the rest of the comprehension is unchanged, including `not g_ab.value(...)` whose truthiness test (\"\" , 0 and false count as no provenance) the driver exercises.",
+    "optimized.ldpy: `m{ ?s a owl:NamedIndividual }` for the subjects, `m{ {s} a ?t }` for the types of s inside the any(), `m{ {s} sem:hasSourceProvenance ?p }.first()` for the value, `sem:T` for the prefix string (a prefixed name used as a Python str). No exception to the symmetry.",
+    "The stratum's expected construction, one joined `m{ ?s a owl:NamedIndividual ; a ?t }`, was not used: the join yields one row per (s, t) and the original's list is one entry per s in graph order, so the join needs `dict.fromkeys` to undo its multiplicity and is longer than the nested any() over `m{ {s} a ?t }`, which has the original's cardinality for free. The negation (`not ... .first()`) can only live in Python, m{ } having no FILTER NOT EXISTS.",
+    "The header, `SEM = Namespace(...)` and the `g_ab = Graph(); g_ab.parse(...)` line included, is kept byte for byte on both sides (restored context of the extraction); SEM is therefore declared but unused in optimized.ldpy, where @prefix sem: takes its two roles."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ]
+}

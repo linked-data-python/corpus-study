@@ -1,0 +1,19 @@
+{
+  "region_id": "ktbs__ktbs__lib_ktbs_engine_trace_obsels.py__AbstractTraceObsels__detect_mon_change",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the bound-method alias `self_state_value = self.state.value` is inlined at its two call sites and the three-line `chain(...)` header of the loop is one line. Nothing else moves: the `is None` guards and the early return stay, the `old_last_*` aliases are snapshots that the loop body overwrites in `prepared` and cannot be inlined, and the two `pse_mon_*_limit` variables must stay computed before the loop (the driver checks that a non-numeric pseudomon_range raises before any obsel is compared). Tokens are a wash (the alias cost six, each inlined call costs four more), lines and characters go down.",
+    "optimized.ldpy: `@graph graph` once at the top of the body, so the six reads on `graph` need no `(graph)` suffix (`m{ ?s ktbs:hasTrace {trace_uri} }.first()`, `m{ {new_obs} ktbs:hasBegin ?o }.first()`, ...); the two reads on `self.state` keep their `(self.state)` suffix. The translated.ldpy's local `def self_state_value` wrapper is gone with the alias. `graph.objects(new_obs, None)` and `graph.subjects(None, new_obs)` have a wildcard predicate: the island must name and project it, `(o for _, o in m{ {new_obs} ?p ?o })` and `(s for s, _ in m{ ?s ?p {new_obs} })`, one line longer than the Python -- the known cost of this stratum, not a restructuring.",
+    "No exception to the symmetry. The region is 90 % non-RDF control flow that neither side can shorten: the care ratio is 1.00 and the notation ratio is above 1 because of the two wildcard-predicate selectors."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ]
+}

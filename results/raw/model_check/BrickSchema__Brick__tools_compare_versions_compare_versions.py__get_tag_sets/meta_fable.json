@@ -1,0 +1,17 @@
+{
+  "region_id": "BrickSchema__Brick__tools_compare_versions_compare_versions.py__get_tag_sets",
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `qstr_allclasses` template and its `.format(root)` became an f-string passed straight to graph.query (`<{root}>` kept, it is what makes a str root an IRI); the row loop filling `tag_sets` item by item became a generator of class local names and a dict comprehension `{klass: set(klass.split(\"_\")) for klass in classes}`; the `tag_set` variable is gone; the `# Tags inside the class name.` comment stays on the line that splits the name.",
+    "optimized.ldpy: the same two statements, the query being `s{ select ?class where { ?class rdfs:subClassOf+ {f<{root}>} } }(graph)` -- the root is the formatted-IRI island `f<{root}>` in term position (an initial binding; a bare `{root}` would coerce a str root to a Literal and match nothing, the driver passes str roots), the rdfs: prologue comes from the header's @prefix. No exception to the symmetry.",
+    "Not compressible further: `print(root, len(tag_sets))` and the returned dict are the interface; m{ } does not take the property path `rdfs:subClassOf+` written in the pattern (an rdflib path object could be interpolated in predicate position, but that trades a one-token query string for two imports and a path expression on the Python side, which is longer, not shorter). The notation ratio is above 1 because a SPARQL query is one Python token and the s{ } island is tokenised as SPARQL."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name",
+    "f<…>",
+    "call suffix (g)"
+  ]
+}
