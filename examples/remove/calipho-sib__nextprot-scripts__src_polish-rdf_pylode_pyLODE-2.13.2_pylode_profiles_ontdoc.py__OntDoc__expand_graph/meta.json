@@ -15,11 +15,24 @@
     "namespace_term": 44,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, DOAP->doap, OWL->owl, PROF->prof, PROV->prov, RDF->rdf, RDFS->rdfs, SDO->sdo, SKOS->skos"
+    "prefixes: dc, dcterms, owl, rdf, rdfs, sdo, skos. The draft also declared doap, prof, prov: removed, the region never uses DOAP, PROF or PROV.",
+    "All reads are translated, not only the removals: every `self.G.subject_objects(P)` / `subjects(RDF.type, C)` becomes `m{ ?s P ?o }` / `m{ ?s a C }` (two variables unpack as (s, o), one variable gives the bare term), and the `chain(...)` of the original is kept around the m{ } islands. `self.G.subjects(OWL.onProperty)` is subjects(PREDICATE), so it is `m{ ?s owl:onProperty [] }` (a blank node is matched, not projected).",
+    "The stratum site (the nine `self.G.remove((s, P, o))`) is fully bound: `-{ {s} dc:creator {o} }`. No wildcard, and one `-{ }` per removal on purpose: folding them with `;` would make a DELETE WHERE join that removes nothing as soon as one of the three triples is missing.",
+    "`@graph self.G` designates an attribute (works for reads, `+{ }` and `-{ }`). It adds the seven prefixes to the caller's graph without overwriting its own bindings; the harness compares bindings (the original's must not be lost) and is green.",
+    "Context shim pylode_context.py: OntDoc reduced to its `G` attribute (the real __init__ parses an ontology). The pyLODE 2.13.2 class is not importable (installed pylode is 3.2.3, a different API).",
+    "Driver: whole fixture, a graph with nothing to expand (zero solutions), and the fixture with dc:creator already moved. Fixture has neighbours that share two of three terms with a removed triple (same document and agent under another predicate; same agent on another document). Mutants killed: `-{ {s} sdo:creator {o} }` widened to `-{ {s} ?p {o} }`; `m{ ?s owl:onProperty [] }` pointed at owl:someValuesFrom. Equivalent mutant, noted: `-{ ?x dc:publisher {o} }` (any such triple is itself in the loop's source set and goes anyway)."
   ],
   "draft_sha": "5f116fa26033cb40",
   "provenance": {
@@ -31,5 +44,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

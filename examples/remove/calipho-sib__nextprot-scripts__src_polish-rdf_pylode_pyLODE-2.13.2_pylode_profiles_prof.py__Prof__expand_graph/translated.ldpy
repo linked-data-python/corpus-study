@@ -5,69 +5,68 @@ from rdflib.namespace import DC, DCTERMS, OWL, PROF, RDF, RDFS, SDO, SKOS
 from itertools import chain
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prof: <http://www.w3.org/ns/dx/prof/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sdo: <https://schema.org/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 
 def _expand_graph(self):
+    @graph self.G
     # label
     for s, o in chain(
-            self.G.subject_objects(dc:title),
-            self.G.subject_objects(skos:prefLabel),
-            self.G.subject_objects(dcterms:title)
+            m{ ?s dc:title ?o },
+            m{ ?s skos:prefLabel ?o },
+            m{ ?s dcterms:title ?o }
     ):
-        self.G.remove((s, dc:title, o))
-        self.G.remove((s, skos:prefLabel, o))
-        self.G.remove((s, dcterms:title, o))
-        self.G += g{ {s} rdfs:label {o} }
+        -{ {s} dc:title {o} }
+        -{ {s} skos:prefLabel {o} }
+        -{ {s} dcterms:title {o} }
+        +{ {s} rdfs:label {o} }
 
     # comment
     for s, o in chain(
-            self.G.subject_objects(dc:description),
-            self.G.subject_objects(dcterms:description),
-            self.G.subject_objects(sdo:description),
-            self.G.subject_objects(skos:definition),
+            m{ ?s dc:description ?o },
+            m{ ?s dcterms:description ?o },
+            m{ ?s sdo:description ?o },
+            m{ ?s skos:definition ?o },
     ):
-        self.G.remove((s, dc:description, o))
-        self.G.remove((s, dcterms:description, o))
-        self.G.remove((s, sdo:description, o))
-        self.G.remove((s, skos:definition, o))
-        self.G += g{ {s} rdfs:comment {o} }
+        -{ {s} dc:description {o} }
+        -{ {s} dcterms:description {o} }
+        -{ {s} sdo:description {o} }
+        -{ {s} skos:definition {o} }
+        +{ {s} rdfs:comment {o} }
 
     # Agents
     # creator
     for s, o in chain(
-            self.G.subject_objects(dc:creator),
-            self.G.subject_objects(sdo:creator),
-            self.G.subject_objects(sdo:author)  # conflate sdo:author with dcterms:creator
+            m{ ?s dc:creator ?o },
+            m{ ?s sdo:creator ?o },
+            m{ ?s sdo:author ?o }  # conflate sdo:author with dcterms:creator
     ):
-        self.G.remove((s, dc:creator, o))
-        self.G.remove((s, sdo:creator, o))
-        self.G.remove((s, sdo:author, o))
-        self.G += g{ {s} dcterms:creator {o} }
+        -{ {s} dc:creator {o} }
+        -{ {s} sdo:creator {o} }
+        -{ {s} sdo:author {o} }
+        +{ {s} dcterms:creator {o} }
 
     # contributor
     for s, o in chain(
-            self.G.subject_objects(dc:contributor),
-            self.G.subject_objects(sdo:contributor)
+            m{ ?s dc:contributor ?o },
+            m{ ?s sdo:contributor ?o }
     ):
-        self.G.remove((s, dc:contributor, o))
-        self.G.remove((s, sdo:contributor, o))
-        self.G += g{ {s} dcterms:contributor {o} }
+        -{ {s} dc:contributor {o} }
+        -{ {s} sdo:contributor {o} }
+        +{ {s} dcterms:contributor {o} }
 
     # publisher
     for s, o in chain(
-            self.G.subject_objects(dc:publisher),
-            self.G.subject_objects(sdo:publisher)
+            m{ ?s dc:publisher ?o },
+            m{ ?s sdo:publisher ?o }
     ):
-        self.G.remove((s, dc:publisher, o))
-        self.G.remove((s, sdo:publisher, o))
-        self.G += g{ {s} dcterms:publisher {o} }
+        -{ {s} dc:publisher {o} }
+        -{ {s} sdo:publisher {o} }
+        +{ {s} dcterms:publisher {o} }
 
     # Resource Descriptors
-    for s, o in self.G.subject_objects(prof:hasResource):
-        self.G += g{ {o} a prof:ResourceDescriptor }
+    for s, o in m{ ?s prof:hasResource ?o }:
+        +{ {o} a prof:ResourceDescriptor }

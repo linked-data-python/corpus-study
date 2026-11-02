@@ -5,78 +5,75 @@ from itertools import chain
 from rdflib.namespace import DC, DCTERMS, DOAP, OWL, PROF, PROV, RDF, RDFS, SDO, SKOS
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix doap: <http://usefulinc.com/ns/doap#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix prof: <http://www.w3.org/ns/dx/prof/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sdo: <https://schema.org/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-
 def _expand_graph(self):
+    @graph self.G
     # name
     for s, o in chain(
-            self.G.subject_objects(dc:title),
-            self.G.subject_objects(rdfs:label),
-            self.G.subject_objects(skos:prefLabel),
-            self.G.subject_objects(sdo:name)
+            m{ ?s dc:title ?o },
+            m{ ?s rdfs:label ?o },
+            m{ ?s skos:prefLabel ?o },
+            m{ ?s sdo:name ?o }
     ):
-        self.G += g{ {s} dcterms:title {o} }
+        +{ {s} dcterms:title {o} }
 
     # description
     for s, o in chain(
-            self.G.subject_objects(dc:description),
-            self.G.subject_objects(rdfs:comment),
-            self.G.subject_objects(skos:definition),
-            self.G.subject_objects(sdo:description)
+            m{ ?s dc:description ?o },
+            m{ ?s rdfs:comment ?o },
+            m{ ?s skos:definition ?o },
+            m{ ?s sdo:description ?o }
     ):
-        self.G += g{ {s} dcterms:description {o} }
+        +{ {s} dcterms:description {o} }
 
     # property types
     for s in chain(
-            self.G.subjects(rdf:type, owl:ObjectProperty),
-            self.G.subjects(rdf:type, owl:FunctionalProperty),
-            self.G.subjects(rdf:type, owl:DatatypeProperty),
-            self.G.subjects(rdf:type, owl:AnnotationProperty)
+            m{ ?s a owl:ObjectProperty },
+            m{ ?s a owl:FunctionalProperty },
+            m{ ?s a owl:DatatypeProperty },
+            m{ ?s a owl:AnnotationProperty }
     ):
-        self.G += g{ {s} a rdf:Property }
+        +{ {s} a rdf:Property }
 
     # class types
-    for s in self.G.subjects(rdf:type, owl:Class):
-        self.G += g{ {s} a rdfs:Class }
+    for s in m{ ?s a owl:Class }:
+        +{ {s} a rdfs:Class }
 
     # owl:Restrictions from Blank Nodes
-    for s in self.G.subjects(owl:onProperty):
-        self.G += g{ {s} a owl:Restriction }
+    for s in m{ ?s owl:onProperty [] }:
+        +{ {s} a owl:Restriction }
 
     # Agents
     # creator
     for s, o in chain(
-            self.G.subject_objects(dc:creator),
-            self.G.subject_objects(sdo:creator),
-            self.G.subject_objects(sdo:author)  # conflate sdo:author with dcterms:creator
+            m{ ?s dc:creator ?o },
+            m{ ?s sdo:creator ?o },
+            m{ ?s sdo:author ?o }  # conflate sdo:author with dcterms:creator
     ):
-        self.G.remove((s, dc:creator, o))
-        self.G.remove((s, sdo:creator, o))
-        self.G.remove((s, sdo:author, o))
-        self.G += g{ {s} dcterms:creator {o} }
+        -{ {s} dc:creator {o} }
+        -{ {s} sdo:creator {o} }
+        -{ {s} sdo:author {o} }
+        +{ {s} dcterms:creator {o} }
 
     # contributor
     for s, o in chain(
-            self.G.subject_objects(dc:contributor),
-            self.G.subject_objects(sdo:contributor)
+            m{ ?s dc:contributor ?o },
+            m{ ?s sdo:contributor ?o }
     ):
-        self.G.remove((s, dc:contributor, o))
-        self.G.remove((s, sdo:contributor, o))
-        self.G += g{ {s} dcterms:contributor {o} }
+        -{ {s} dc:contributor {o} }
+        -{ {s} sdo:contributor {o} }
+        +{ {s} dcterms:contributor {o} }
 
     # publisher
     for s, o in chain(
-            self.G.subject_objects(dc:publisher),
-            self.G.subject_objects(sdo:publisher)
+            m{ ?s dc:publisher ?o },
+            m{ ?s sdo:publisher ?o }
     ):
-        self.G.remove((s, dc:publisher, o))
-        self.G.remove((s, sdo:publisher, o))
-        self.G += g{ {s} dcterms:publisher {o} }
+        -{ {s} dc:publisher {o} }
+        -{ {s} sdo:publisher {o} }
+        +{ {s} dcterms:publisher {o} }

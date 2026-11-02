@@ -1,9 +1,9 @@
 # Extracted from comp-int-hum/ochre-python@8392c11405 : src/pyochre/server/ochre/fields/machinelearningmodelsignaturefield.py
 # region: MachineLearningModelSignatureField.to_representation (lines 43-94, stratum sparql_interpolated)
 # licence of the source repository: see meta.json
-from importlib.resources import files
-from django.conf import settings
-from django.urls import reverse
+# Context shim: django.conf.settings, django.urls.reverse and
+# importlib.resources.files("pyochre") are not available outside the project.
+from ochre_context import settings, reverse, files
 from rdflib.namespace import RDF, RDFS, Namespace
 OCHRE = Namespace(settings.OCHRE_NAMESPACE)
 

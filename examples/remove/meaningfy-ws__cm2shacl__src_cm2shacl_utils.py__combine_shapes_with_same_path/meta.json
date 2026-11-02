@@ -16,11 +16,28 @@
     "term_constructor": 7,
     "triple_add": 18
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "IRI",
+    ".first()"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs, SH->sh"
+    "prefixes: rdf, sh. The draft also declared rdfs, never used here: removed. `import ldpy` added for ldpy.ANY.",
+    "THE finding of the region: `graph.remove((ps, SH.path, path))` is run when `path = graph.value(ps, SH.path)` is None (a property shape without sh:path), and rdflib reads that None as a wildcard (it removes nothing, since the shape has no sh:path). `-{ {ps} sh:path {path} }` raises TypeError there (an interpolated None never matches silently). The faithful form is `-{ {ps} sh:path {ldpy.ANY if path is None else path} }`: the wildcard that arrives as data is ldpy.ANY, per the reference. Not a literal `-{ {ps} sh:path ?p }`: that would remove EVERY sh:path of a shape, where the original removes the one g.value returned (the fixture has a shape with two sh:path values; the mutant fails). This is the one site of the stratum with a None: the other 7 removals are fully bound.",
+    "Reads: `graph.objects(None, SH.property)` -> `m{ [] sh:property ?ps }`; `graph.subjects(RDF.type, C)` -> `m{ ?ps a C }`; `graph.objects(ps, P)` -> `m{ {ps} P ?o }`; `graph.value(ps, SH.path)` -> `m{ {ps} sh:path ?path }.first()` (value() takes the first, no cardinality check); `graph.triples((ps, dctsource, None))` with the unpacking `_, _, o` -> `m{ {ps} {dctsource} ?o }`. The mutations of the graph inside these loops (remove of the very triple being walked) behave the same in both.",
+    "`dctsource = <http://purl.org/dc/terms/source>` stays a Python variable holding an IRI (it is then interpolated as `{dctsource}` in term position, predicate included): turning it into `dcterms:source` would delete a variable of the original.",
+    "Kept as Python: `graph.items(o)`, `Collection(graph, o)`, `collection.clear()` (RDF list traversal and clearing: no island for a collection), and every `BNode()` (a `_:{}` blank node is a function of its data, not a fresh node). Not folded: the `first`/`rest` pairs separated by `next_b = BNode()` (folding would move the BNode() call; the pairs that follow each other, `first`+`rest rdf:nil`, are one `;` island). The two adds `(ns, sh:property, shapes[0])` and `(shapes[0], sh:path, path)` are one two-statement `+{ }`.",
+    "`@graph graph` designates the parameter; the nested `add_or_shape` function uses `+{ }` and sees the enclosing designation (no `nonlocal` needed). Prefix bindings: sh and rdf are added to the caller's graph without overwriting; harness green.",
+    "No shim: rdflib's SH, Collection and collections are real.",
+    "Driver: whole fixture (merge of three shapes on a path with sh:in overlap, sh:or on nodeKind/datatype/class, a lone shape, a shape without sh:path, a shape with two sh:path values, a node shape with no property shapes, an orphan property shape, stray neighbours), a graph with no node shape, a graph with only the shape without sh:path. The sets in_values/nodeKinds are walked to build RDF lists: only IRIs and literals go in them, so the order is the same on both sides (each forked from the driver). Mutants killed: `{path}` (TypeError), `?x` for the removed path (two-path shape loses its second path), `-{ ?z {dctsource} {o} }` (needs a source shared between two shapes: srcShared on nameB and ageShape). Equivalent mutant, noted: `-{ {ps} sh:datatype ?x }` (all datatypes of ps are in the loop's set and go anyway)."
   ],
   "draft_sha": "43b94ca8a8e597ec",
   "provenance": {
@@ -32,5 +49,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": true
 }

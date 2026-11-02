@@ -9,6 +9,7 @@ def replace_uriref(self, find, replace):  # find and replace on the parsed graph
     #  triples into a graph!
 
     find = self.check_thing(find)
+    @graph self.g
 
     for i in range(3):
         trip = [find if i == _ else None for _ in range(3)]
@@ -16,4 +17,4 @@ def replace_uriref(self, find, replace):  # find and replace on the parsed graph
             rep = [s, p, o]
             rep[i] = replace
             self.add_trip(*rep)
-            self.g.remove((s, p, o))
+            -{ {s} {p} {o} }

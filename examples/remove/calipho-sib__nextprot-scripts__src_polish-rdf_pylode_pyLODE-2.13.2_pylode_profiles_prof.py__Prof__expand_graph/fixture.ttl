@@ -1,4 +1,70 @@
-# Input graph for calipho-sib__nextprot-scripts__src_polish-rdf_pylode_pyLODE-2.13.2_pylode_profiles_prof.py__Prof__expand_graph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+@prefix ex:      <http://example.org/> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix prof:    <http://www.w3.org/ns/dx/prof/> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo:     <https://schema.org/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+
+# --- label: three sources are removed and become rdfs:label
+ex:l1 dc:title "dc title" .
+ex:l2 skos:prefLabel "pref label"@en .
+ex:l3 dcterms:title "dcterms title" .
+# the same value through the three sources on one subject
+ex:l4 dc:title "same" ; skos:prefLabel "same" ; dcterms:title "same" .
+# different values on one subject: each goes, each becomes a label
+ex:l5 dc:title "five dc" ; skos:prefLabel "five pref" ; dcterms:title "five dcterms" .
+# neighbours that must stay: same subject and value under another predicate,
+# same value on another subject
+ex:l6 dc:title "shared" ;
+      skos:altLabel "shared" ;
+      dc:subject "shared" ;
+      rdfs:seeAlso ex:l1 .
+ex:l7 skos:hiddenLabel "shared" ;
+      sdo:name "shared" ;
+      rdfs:label "already a label" .
+
+# --- comment: four sources
+ex:c1 dc:description "dc description" .
+ex:c2 dcterms:description "dcterms description" .
+ex:c3 sdo:description "sdo description" .
+ex:c4 skos:definition "skos definition" .
+ex:c5 dc:description "twice" ; dcterms:description "twice" ;
+      sdo:description "twice" ; skos:definition "twice" .
+ex:c6 skos:note "a note" ;
+      skos:scopeNote "twice" ;
+      rdfs:comment "already a comment" .
+
+# --- creator
+ex:doc1 dc:creator ex:alice ; sdo:creator ex:bob ; sdo:author ex:carol .
+ex:doc2 dc:creator ex:dave ; sdo:creator ex:dave ; sdo:author ex:dave .
+ex:doc3 sdo:author "Eve the author" .
+ex:doc1 ex:reviewedBy ex:alice ; dc:rights "rights of doc1" .
+ex:doc2 ex:endorsedBy ex:dave .
+ex:doc4 dc:creator ex:frank ; dc:contributor ex:frank ; ex:inspiredBy ex:frank .
+ex:doc5 dcterms:creator ex:gina ; sdo:provider ex:gina .
+
+# --- contributor
+ex:doc1 dc:contributor ex:hugo ; sdo:contributor ex:ines .
+ex:doc6 sdo:contributor ex:hugo ; ex:funder ex:hugo .
+ex:doc7 dcterms:contributor ex:jean .
+
+# --- publisher
+ex:doc1 dc:publisher "Publisher P" .
+ex:doc8 sdo:publisher ex:pub ; ex:printedBy ex:pub .
+ex:doc9 dc:publisher ex:pub ; sdo:publisher ex:pub .
+ex:doc10 dcterms:publisher ex:pub2 ; sdo:provider ex:pub2 .
+
+# --- resource descriptors: the objects of prof:hasResource are typed
+ex:profile1 a prof:Profile ; prof:hasResource ex:res1 , ex:res2 .
+ex:profile2 a prof:Profile ; prof:hasResource ex:res3 .
+ex:res1 prof:hasRole ex:roleSchema .
+# neighbours: another predicate with the same objects, a descriptor already typed
+ex:profile3 a prof:Profile ; prof:isProfileOf ex:res4 ; ex:uses ex:res5 .
+ex:res6 a prof:ResourceDescriptor .
+ex:profile2 prof:hasResource ex:res6 .
+
+# --- nothing to expand
+ex:quiet ex:p ex:o ; ex:q "plain" .

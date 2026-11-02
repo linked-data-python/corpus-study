@@ -14,11 +14,20 @@
     "namespace_term": 6,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "NOT EXPRESSIBLE (the stratum's site): `sig.query(\"PREFIX ochre: <{}>\\n\".format(settings.OCHRE_NAMESPACE) + mvq_string)` stays as is. Two pieces of text spliced as SYNTAX: (a) a PREFIX header whose IRI, between angle brackets, comes from a run-time setting (`@prefix ochre: <…>` and `s{ }` need a transpile-time IRI; `settings.OCHRE_NAMESPACE` is an environment-configurable value, default https://cdh.jhu.edu/ in env.py); (b) the whole query, `mvq_string = files(\"pyochre\").joinpath(\"data/model_visualization_query.sparql\").read_text()`, a package resource read at run time. Minimal excerpt: `sig.query(\"PREFIX ochre: <{}>\\n\".format(NS) + file_text)`. Nothing here is a value in term position; the query is data. Even a constant file could not be written in: the interpolation would still be the IRI of the PREFIX.",
+    "What IS translated: the only read with a pattern written in the code, `for s, p, o in sig.triples((None, OCHRE[\"simpleFormat\"], None))` -> `@graph sig` + `for s, o in m{ ?s {OCHRE[\"simpleFormat\"]} ?o }` (the predicate is a computed term, interpolated; the draft's rdf/rdfs `@prefix` were unused and removed; `p` of the original is unused there and overwritten later).",
+    "Context shim ochre_context.py: django.conf.settings (OCHRE_NAMESPACE, default of env.py), django.urls.reverse (a stand-in route), importlib.resources.files (\"pyochre\" -> pyochre_pkg/). The imports of original.py and translated.ldpy were changed identically to take these three from the shim (django and pyochre are not installed). Django, rest_framework and the project's widgets, models and vega imports of the real module are not reproduced: the region uses none of them.",
+    "MISSING RESOURCE: data/model_visualization_query.sparql does not exist in the tree of comp-int-hum/ochre-python at the pinned commit (three fields reference it; none of the 19 files of src/pyochre/data is it; the real call would raise FileNotFoundError). pyochre_pkg/data/model_visualization_query.sparql is a RECONSTRUCTION from what the region does with the rows (?s ?p ?o of the subjects whose ochre:instanceOf is a widget_map class), flagged as such in its own header. It does not change the finding: the translation does not touch the query.",
+    "The region is almost invisible by itself: `tab_list` is never filled (the append is commented out), so the return is always `str(object)` and the six `self.style` keys are the same; `input_widget_map` and `output_widget_map` are not defined in the extracted module (NameError if a simpleFormat triple has ochre:Input / ochre:Output as subject). The driver makes it observable: the signature graph is a RecordingGraph whose `.query()` logs (query text, sorted rows) into a list the model object carries, which the harness compares as argument state; the two NameError and the KeyError (a returned widget with no hasDescription) are compared as outcomes.",
+    "Driver: 5 calls (fixture with four widgets returned and three neighbours not; no widget; widget without hasDescription; Input simpleFormat; Output simpleFormat next to a neutral subject). Mutants killed: the m{ } predicate changed to hasLabel; the m{ } pattern turned into `?s ?p ?o`; the PREFIX header altered (caught through the query log, not through the return)."
   ],
   "draft_sha": "ab87b68523dfab0e",
   "provenance": {
@@ -30,5 +39,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

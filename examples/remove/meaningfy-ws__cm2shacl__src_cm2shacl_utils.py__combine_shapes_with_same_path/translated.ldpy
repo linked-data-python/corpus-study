@@ -1,49 +1,50 @@
 # Extracted from meaningfy-ws/cm2shacl@ec908f3d43 : src/cm2shacl/utils.py
 # region: combine_shapes_with_same_path (lines 36-150, stratum remove)
 # licence of the source repository: see meta.json
+import ldpy
 from rdflib import Graph, URIRef, Literal, BNode, RDF, RDFS, Namespace, SH
 from collections import defaultdict
 from rdflib.collection import Collection
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
 
 def combine_shapes_with_same_path(graph):
+    @graph graph
     dctsource = <http://purl.org/dc/terms/source>
     dctsource_dict = defaultdict(list)
 
     # Collect dct:source info and remove
-    for ps in graph.objects(None, sh:property):
-        for _, _, o in graph.triples((ps, dctsource, None)):
+    for ps in m{ [] sh:property ?ps }:
+        for o in m{ {ps} {dctsource} ?o }:
             dctsource_dict[ps].append(o)
-            graph.remove((ps, dctsource, o))
-    for ps in graph.subjects(rdf:type, sh:PropertyShape):
-        for _, _, o in graph.triples((ps, dctsource, None)):
+            -{ {ps} {dctsource} {o} }
+    for ps in m{ ?ps a sh:PropertyShape }:
+        for o in m{ {ps} {dctsource} ?o }:
             dctsource_dict[ps].append(o)
-            graph.remove((ps, dctsource, o))
+            -{ {ps} {dctsource} {o} }
 
     # Find NodeShapes
-    for ns in graph.subjects(rdf:type, sh:NodeShape):
+    for ns in m{ ?ns a sh:NodeShape }:
         path_dict = defaultdict(list)
 
         # Group property shapes by path
-        for ps in graph.objects(ns, sh:property):
-            path = graph.value(ps, sh:path)
+        for ps in m{ {ns} sh:property ?ps }:
+            path = m{ {ps} sh:path ?path }.first()
             if path:
                 path_dict[path].append(ps)
-            graph.remove((ps, sh:path, path))
-            graph.remove((ns, sh:property, ps))
+            -{ {ps} sh:path {ldpy.ANY if path is None else path} }
+            -{ {ns} sh:property {ps} }
 
         # Add refined property shapes
         for path, shapes in path_dict.items():
             if len(shapes) == 1:
-                graph += g{
+                +{
                     {ns} sh:property {shapes[0]} .
                     {shapes[0]} sh:path {path}
                 }
                 for src in dctsource_dict[shapes[0]]:
-                    graph += g{ {shapes[0]} {dctsource} {src} }
+                    +{ {shapes[0]} {dctsource} {src} }
                 continue
 
             # graph.remove((ps, sh:path, path))
@@ -54,39 +55,39 @@ def combine_shapes_with_same_path(graph):
             dataTypes = set()
             classes = set()
             for ps in shapes:
-                for o in graph.objects(ps, sh:in):
+                for o in m{ {ps} sh:in ?o }:
                     for val in graph.items(o):
                         in_values.add(val)
                     collection = Collection(graph, o)
                     for item in collection:
                         pass  # Just to initialize the collection
                     collection.clear()
-                    graph.remove((ps, sh:in, o))
-                for o in graph.objects(ps, sh:nodeKind):
+                    -{ {ps} sh:in {o} }
+                for o in m{ {ps} sh:nodeKind ?o }:
                     nodeKinds.add(o)
-                    graph.remove((ps, sh:nodeKind, o))
-                for o in graph.objects(ps, sh:datatype):
+                    -{ {ps} sh:nodeKind {o} }
+                for o in m{ {ps} sh:datatype ?o }:
                     dataTypes.add(o)
-                    graph.remove((ps, sh:datatype, o))
-                for o in graph.objects(ps, sh:class):
+                    -{ {ps} sh:datatype {o} }
+                for o in m{ {ps} sh:class ?o }:
                     classes.add(o)
-                    graph.remove((ps, sh:class, o))
+                    -{ {ps} sh:class {o} }
 
             # Create new merged shape
             merged_ps = BNode()
             # graph.add((merged_ps, rdf:type, sh:PropertyShape))
-            graph += g{ {merged_ps} sh:path {path} }
+            +{ {merged_ps} sh:path {path} }
 
             if in_values:
                 in_list = BNode()
-                graph += g{ {merged_ps} sh:in {in_list} }
+                +{ {merged_ps} sh:in {in_list} }
                 in_bnode = in_list
                 for val in list(in_values)[:-1]:
-                    graph += g{ {in_bnode} rdf:first {val} }
+                    +{ {in_bnode} rdf:first {val} }
                     next_b = BNode()
-                    graph += g{ {in_bnode} rdf:rest {next_b} }
+                    +{ {in_bnode} rdf:rest {next_b} }
                     in_bnode = next_b
-                graph += g{
+                +{
                     {in_bnode} rdf:first {list(in_values)[-1]} ;
                        rdf:rest rdf:nil
                 }
@@ -98,11 +99,11 @@ def combine_shapes_with_same_path(graph):
                 if not values:
                     return
                 if len(values) == 1:
-                    graph += g{ {merged_ps} {predicate} {next(iter(values))} }
+                    +{ {merged_ps} {predicate} {next(iter(values))} }
                 else:
                     for v in values:
                         b = BNode()
-                        graph += g{ {b} {predicate} {v} }
+                        +{ {b} {predicate} {v} }
                         or_shapes.append(b)
 
             add_or_shape(sh:nodeKind, nodeKinds)
@@ -111,22 +112,22 @@ def combine_shapes_with_same_path(graph):
 
             if or_shapes:
                 or_bnode = BNode()
-                graph += g{ {merged_ps} sh:or {or_bnode} }
+                +{ {merged_ps} sh:or {or_bnode} }
                 current = or_bnode
                 for s in or_shapes[:-1]:
-                    graph += g{ {current} rdf:first {s} }
+                    +{ {current} rdf:first {s} }
                     next_b = BNode()
-                    graph += g{ {current} rdf:rest {next_b} }
+                    +{ {current} rdf:rest {next_b} }
                     current = next_b
-                graph += g{
+                +{
                     {current} rdf:first {or_shapes[-1]} ;
                        rdf:rest rdf:nil
                 }
 
-            graph += g{ {ns} sh:property {merged_ps} }
+            +{ {ns} sh:property {merged_ps} }
 
             for ps in shapes:
                 for src in dctsource_dict[ps]:
-                    graph += g{ {merged_ps} {dctsource} {src} }
+                    +{ {merged_ps} {dctsource} {src} }
 
     return graph

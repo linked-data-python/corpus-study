@@ -1,0 +1,15 @@
+# RECONSTRUCTION (see ochre_context.py): src/pyochre/data/model_visualization_query.sparql
+# is read by the region but is absent from the tree of comp-int-hum/ochre-python
+# at 8392c11405 (three fields point at it, none of the 19 files of src/pyochre/data
+# is it).  This body is written from what the region does with the rows: ?s ?p ?o
+# for the subjects whose ochre:instanceOf is one of the widget classes of
+# `widget_map` in the same module.  The `ochre:` prefix comes from the header the
+# region prepends.
+SELECT ?s ?p ?o WHERE {
+  ?s ochre:instanceOf ?class .
+  VALUES ?class {
+    ochre:TabularVisualization ochre:EditorInteraction ochre:VegaVisualization
+    ochre:AudioRecorder ochre:ImageRecorder ochre:TextEditor
+  }
+  ?s ?p ?o .
+}

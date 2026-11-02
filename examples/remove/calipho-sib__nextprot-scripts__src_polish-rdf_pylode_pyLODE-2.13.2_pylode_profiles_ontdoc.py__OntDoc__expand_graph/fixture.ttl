@@ -1,4 +1,90 @@
-# Input graph for calipho-sib__nextprot-scripts__src_polish-rdf_pylode_pyLODE-2.13.2_pylode_profiles_ontdoc.py__OntDoc__expand_graph — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+@prefix ex:      <http://example.org/> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo:     <https://schema.org/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix doap:    <http://usefulinc.com/ns/doap#> .
+
+# --- name: four sources, one subject each, plus a literal with a language
+ex:n1 dc:title "dc title" .
+ex:n2 rdfs:label "rdfs label"@en .
+ex:n3 skos:prefLabel "skos label" .
+ex:n4 sdo:name "sdo name" .
+# several sources on one subject: each value must be copied
+ex:n5 dc:title "five dc" ; rdfs:label "five label" ; sdo:name "five name" .
+# neighbours that are NOT sources of dcterms:title
+ex:n6 dcterms:title "already a dcterms title" ;
+      skos:altLabel "an alt label" ;
+      sdo:alternateName "an alternate name" ;
+      rdfs:seeAlso ex:n1 .
+
+# --- description
+ex:d1 dc:description "dc description" .
+ex:d2 rdfs:comment "rdfs comment" .
+ex:d3 skos:definition "skos definition" .
+ex:d4 sdo:description "sdo description" .
+ex:d5 rdfs:comment "five comment" ; skos:definition "five definition" .
+# neighbours
+ex:d6 dcterms:description "already a dcterms description" ;
+      skos:note "a note" ;
+      skos:scopeNote "a scope note" .
+
+# --- property types: the four that count, and the ones that do not
+ex:pObject     a owl:ObjectProperty .
+ex:pFunctional a owl:FunctionalProperty .
+ex:pDatatype   a owl:DatatypeProperty .
+ex:pAnnotation a owl:AnnotationProperty .
+ex:pTwice      a owl:ObjectProperty , owl:FunctionalProperty .
+ex:pTransitive a owl:TransitiveProperty .
+ex:pSymmetric  a owl:SymmetricProperty .
+ex:pPlain      a rdf:Property .
+# the objects are properties but the subject has no such type
+ex:notAProperty ex:kindOf owl:ObjectProperty .
+
+# --- class types
+ex:C1 a owl:Class .
+ex:C2 a owl:Class , ex:Other .
+ex:C3 a rdfs:Class .
+ex:C4 a owl:NamedIndividual .
+ex:notAClass ex:kindOf owl:Class .
+
+# --- restrictions: blank nodes with owl:onProperty, one named, one with two
+[] owl:onProperty ex:pObject ; owl:someValuesFrom ex:C1 .
+[] owl:onProperty ex:pDatatype ; owl:allValuesFrom ex:C2 .
+ex:namedRestriction owl:onProperty ex:pAnnotation .
+ex:noRestriction owl:someValuesFrom ex:C1 .
+
+# --- creator: the three sources are removed and replaced by dcterms:creator
+ex:doc1 dc:creator ex:alice .
+ex:doc1 sdo:creator ex:bob .
+ex:doc1 sdo:author ex:carol .
+# the same agent through the three sources on one document
+ex:doc2 dc:creator ex:dave ; sdo:creator ex:dave ; sdo:author ex:dave .
+ex:doc3 sdo:author "Eve the author" .
+# neighbours sharing two of the three terms with a removed triple: they must stay
+ex:doc1 ex:reviewedBy ex:alice ;
+        dc:rights "rights of doc1" .
+ex:doc2 ex:endorsedBy ex:dave .
+ex:doc4 dc:creator ex:frank ;
+        dc:contributor ex:frank ;
+        ex:inspiredBy ex:frank .
+# dcterms:creator already there stays
+ex:doc5 dcterms:creator ex:gina ; sdo:author ex:gina .
+
+# --- contributor
+ex:doc1 dc:contributor ex:hugo ;
+        sdo:contributor ex:ines .
+ex:doc6 sdo:contributor ex:hugo ; ex:funder ex:hugo .
+ex:doc7 dcterms:contributor ex:jean .
+
+# --- publisher
+ex:doc1 dc:publisher "Publisher P" .
+ex:doc8 sdo:publisher ex:pub ; ex:printedBy ex:pub .
+ex:doc9 dc:publisher ex:pub ; sdo:publisher ex:pub .
+ex:doc10 dcterms:publisher ex:pub2 ; sdo:provider ex:pub2 .
+
+# --- nothing to expand
+ex:quiet ex:p ex:o ; ex:q "plain" .

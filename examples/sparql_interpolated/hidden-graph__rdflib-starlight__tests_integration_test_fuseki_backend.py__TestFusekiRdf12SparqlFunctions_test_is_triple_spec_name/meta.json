@@ -13,9 +13,15 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
+  "classification": "excluded",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "EXCLUDED: the test needs a live Apache Jena Fuseki 5.5+ (and the `starlight` package, not installed; the repository's tests/conftest.py also imports `sparql1_2_to_rdf`). Its fixture `sg_rdf12` first POSTs `CLEAR SILENT GRAPH` to http://localhost:3030/starlight/update. Exact error here (run through the fixture's own request): requests.exceptions.ConnectionError: HTTPConnectionPool(host='localhost', port=3030): Max retries exceeded with url: /starlight/update (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3030): Failed to establish a new connection: [Errno 111] Connection refused\")). Run as upstream's own pytest, the class is SKIPPED by its `@fuseki` skipif (\"Fuseki not running\"; needs `--noconftest` here to get that far).",
+    "The assertion is about Fuseki's ENGINE: `isTRIPLE(TRIPLE(<a>, <b>, <c>))` is a SPARQL 1.2 / RDF 1.2 function pair that no local parser knows, so there is no local value to compare even with a graph stand-in.",
+    "Translation = identity, and the region is also not expressible for a reason independent of the server. (1) Text spliced as syntax: `<{EX}a>` is an IRI between angle brackets built from a string; `EX = 'http://example.org/'` is a module-level constant, so the three IRIs could be written in. (2) But the written-in query is rejected at transpile time: `s{ SELECT (isTRIPLE(TRIPLE(<http://example.org/a>, <http://example.org/b>, <http://example.org/c>)) AS ?v) WHERE {} }` gives `requête SPARQL invalide : Expected SelectQuery, found '(' (at char 16)`: s{ } is validated by rdflib's SPARQL 1.1 grammar, which has neither TRIPLE nor isTRIPLE. Minimal excerpt: `sg_rdf12.query(f\"SELECT (isTRIPLE(TRIPLE(<{EX}a>, <{EX}b>, <{EX}c>)) AS ?v) WHERE {{}}\")`. A query for a store whose dialect is newer than the parser the island uses has no island.",
+    "Context shim fuseki_context.py: constants and `_clear_graph()` of the fixture verbatim, plus a stand-in `SgRdf12` whose first `query()` does that request (inside the region, so the raise is the region's outcome, compared on both sides). The 'check OK' is two identical ConnectionErrors: it proves nothing about the translation (the break test, `.query(` -> `.update(`, does turn it red).",
+    "Left as `draft` / `excluded` on purpose: AGENT_BATCH.md, 'When it does not pass', case 1."
+  ],
   "draft_sha": "1fd03c8bf47c0104",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.570624+00:00",
@@ -26,5 +32,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

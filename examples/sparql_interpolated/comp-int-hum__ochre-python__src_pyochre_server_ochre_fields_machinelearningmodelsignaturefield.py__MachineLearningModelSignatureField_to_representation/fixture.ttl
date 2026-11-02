@@ -1,4 +1,36 @@
-# Input graph for comp-int-hum__ochre-python__src_pyochre_server_ochre_fields_machinelearningmodelsignaturefield.py__MachineLearningModelSignatureField_to_representation — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+@prefix ochre: <https://cdh.jhu.edu/> .
+@prefix ex:    <http://example.org/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# The signature graph of a model, as the region reads it: widgets are subjects
+# with ochre:instanceOf (one of the classes of widget_map) and
+# ochre:hasDescription; ochre:hasLabel is optional.
+
+# --- widgets the query returns (several, one with two labels)
+ex:imageWidget ochre:instanceOf ochre:ImageRecorder ;
+    ochre:hasDescription "Upload an image" .
+ex:vegaWidget ochre:instanceOf ochre:VegaVisualization ;
+    ochre:hasDescription "Topic proportions" ;
+    ochre:hasLabel "Topics" , "Proportions" .
+ex:textWidget ochre:instanceOf ochre:TextEditor ;
+    ochre:hasDescription "Free text" ;
+    ochre:hasLabel "Text" .
+# a subject that is an instance of two widget classes
+ex:twoClasses ochre:instanceOf ochre:AudioRecorder , ochre:EditorInteraction ;
+    ochre:hasDescription "Audio or editor" .
+
+# --- neighbours the query must not return
+# instanceOf another class (the sibling model_interaction_query's)
+ex:interaction ochre:instanceOf ochre:ModelInteraction ;
+    ochre:hasDescription "Free text interaction" ;
+    ochre:hasFieldClass "text" .
+# a description with no instanceOf
+ex:orphanDescription ochre:hasDescription "No widget here" .
+# same local name in another namespace
+ex:otherNs <http://example.org/instanceOf> <https://cdh.jhu.edu/ImageRecorder> ;
+    ochre:hasDescription "Not an ochre instanceOf" .
+
+# --- simpleFormat: the region's first loop looks at it; the subjects below are
+# neither ochre:Input nor ochre:Output, so no widget map is consulted
+ex:format1 ochre:simpleFormat "text" .
+ex:format2 ochre:simpleFormat ochre:Text , ochre:Image .

@@ -10,10 +10,21 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "awkward",
+  "constructions": [
+    "@graph",
+    "-{ }",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Only the removal is translated: `self.g.remove((s, p, o))` -> `@graph self.g` + `-{ {s} {p} {o} }`, fully bound (s, p, o come out of the loop's own triples, never None). The island is correct but buys almost nothing here: one line for one line, plus the `@graph` declaration.",
+    "The READ stays Python and is what makes the region awkward: `self.g.triples(trip)` where `trip` is a list built at run time with `find` in position i and None elsewhere, i in range(3). The pattern is DATA (its wildcard position is computed), and m{ } takes a written pattern. `ldpy.ANY` would stand for the wildcards, but a wildcard is never projected and the loop needs the three terms back (`rep = [s, p, o]; rep[i] = replace`). The only m{ } rendering is to unroll the loop into three (`m{ {find} ?p ?o }`, `m{ ?s {find} ?o }`, `m{ ?s ?p {find} }`), which duplicates the body and loses the 'replace in position i' structure: not done (no refactoring). Missing: a pattern whose wildcard position is a run-time value, projected.",
+    "`self.add_trip(*rep)` is the project's own helper (CURIE expansion, empty-object guard), not an rdflib call: it stays. Nothing here for `+{ }`.",
+    "Context shim pyontutils_context.py: makeGraph from pyontutils/core.py@cb3efcd10f, `expand`, `check_thing` and `add_trip` verbatim, `__init__` reduced to `g` and `namespaces`. pyontutils is not installed in the study venv (it also needs the ontology tool chain), so it is a shim and not the real package.",
+    "No `@prefix`: the region names no vocabulary term, so `@graph self.g` adds no prefix binding to the caller's graph.",
+    "Driver: 6 calls on the same fixture, each with a fresh graph: IRIs (all positions, triples with `find` two and three times that go through half-replaced states, neighbours ex:oldish and another namespace's `old`), CURIEs expanded by check_thing, no match, an empty-literal replacement (add_trip refuses the empty object, the removal still happens), a literal `find`, an unknown-prefix replacement (KeyError after partial work, compared as the outcome). Mutants killed: `-{ {s} {p} ?x }`, `-{ ?x {p} {o} }`, removal deleted."
+  ],
   "draft_sha": "4e330bb4d162add8",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.552299+00:00",
@@ -24,5 +35,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

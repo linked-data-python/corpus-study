@@ -1,4 +1,67 @@
-# Input graph for meaningfy-ws__cm2shacl__src_cm2shacl_utils.py__combine_shapes_with_same_path — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+@prefix ex:      <http://example.org/> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+# --- ex:PersonShape: three property shapes on ex:name (merged), one on ex:age
+# (alone), one without any sh:path, one with two sh:path values.
+ex:PersonShape a sh:NodeShape ;
+    sh:property ex:nameA , ex:nameB , ex:nameC , ex:ageShape , ex:noPathShape , ex:twoPathsShape ;
+    dct:source ex:personSource .
+
+ex:nameA a sh:PropertyShape ;
+    sh:path ex:name ;
+    sh:in ( "alice" "bob" ) ;
+    sh:nodeKind sh:Literal ;
+    sh:datatype xsd:string ;
+    sh:class ex:Name ;
+    dct:source ex:srcA1 , ex:srcA2 ;
+    sh:minCount 1 .
+ex:nameB sh:path ex:name ;
+    sh:in ( "bob" "carol" ) ;
+    sh:nodeKind sh:IRI ;
+    sh:datatype xsd:token ;
+    dct:source ex:srcB , ex:srcShared .
+# no rdf:type here: the dct:source is reached through sh:property only
+ex:nameC sh:path ex:name ;
+    sh:class ex:Label ;
+    sh:maxCount 3 .
+
+ex:ageShape a sh:PropertyShape ;
+    sh:path ex:age ;
+    sh:datatype xsd:integer ;
+    sh:in ( 1 2 3 ) ;
+    dct:source ex:srcAge , ex:srcShared .
+
+ex:noPathShape a sh:PropertyShape ;
+    sh:datatype xsd:string ;
+    dct:source ex:srcNoPath .
+
+ex:twoPathsShape sh:path ex:first , ex:second ;
+    sh:nodeKind sh:IRI .
+
+# --- ex:OtherShape: two blank property shapes on ex:p with only a nodeKind /
+# datatype each (an sh:or), then a shape listed alone.
+ex:OtherShape a sh:NodeShape ;
+    sh:property [ sh:path ex:p ; sh:nodeKind sh:IRI ; sh:datatype xsd:string ] ,
+                [ sh:path ex:p ; sh:nodeKind sh:BlankNode ; sh:datatype xsd:string ] ,
+                [ sh:path ex:q ; sh:class ex:Q ] .
+
+# --- ex:EmptyShape: a node shape with no property shape (nothing to group)
+ex:EmptyShape a sh:NodeShape ; rdfs:label "empty" .
+
+# --- a property shape that no node shape references: only its dct:source is
+# collected (and removed) by the second loop
+ex:orphanShape a sh:PropertyShape ;
+    sh:path ex:orphanPath ;
+    dct:source ex:srcOrphan , ex:srcShared .
+
+# --- neighbours that the region must not touch
+ex:notAShape dct:source ex:srcStray ;
+    ex:path ex:name ;
+    sh:in ( "unrelated" ) .
+ex:someNode ex:property ex:nameA ;
+    rdfs:seeAlso ex:nameB .
+ex:strayList sh:in ( "x" "y" ) .

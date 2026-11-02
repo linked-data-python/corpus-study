@@ -1,0 +1,25 @@
+@prefix ex:   <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+# --- ex:old in the subject position (several triples), the predicate position
+# and the object position
+ex:old a owl:Class ; rdfs:label "old class" ; rdfs:comment "the old one"@en .
+ex:a ex:old ex:b .
+ex:c ex:old "a literal object" .
+ex:d ex:linksTo ex:old .
+ex:e rdfs:subClassOf ex:old .
+ex:f ex:linksTo ex:old , ex:other .
+# ex:old in two or three positions of one triple: the half-replaced case of the
+# region's own warning
+ex:old ex:linksTo ex:old .
+ex:old ex:old ex:old .
+ex:g ex:old ex:old .
+
+# --- neighbours that must stay: a name that merely starts like ex:old, the
+# same terms in other triples, a different IRI with the same local part
+ex:oldish a owl:Class ; ex:linksTo ex:old2 .
+ex:old2 ex:linksTo ex:oldish .
+<http://example.com/old> a owl:Class ; ex:linksTo ex:a .
+ex:a ex:linksTo ex:b ; rdfs:label "a" .
+ex:b rdfs:seeAlso ex:c .

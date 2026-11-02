@@ -15,11 +15,24 @@
     "namespace_term": 36,
     "triple_add": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, OWL->owl, PROF->prof, RDF->rdf, RDFS->rdfs, SDO->sdo, SKOS->skos"
+    "prefixes: dc, dcterms, prof, rdfs, sdo, skos. The draft also declared owl and rdf, which the region never uses: removed (the new triple `{o} a prof:ResourceDescriptor` uses `a`).",
+    "All reads are translated: each `self.G.subject_objects(P)` is `m{ ?s P ?o }` inside the original `chain(...)`. The stratum sites, 14 `self.G.remove((s, P, o))` over five loops, are all fully bound: `-{ {s} P {o} }`, one island per removal. A `;` fold would be a DELETE WHERE join that removes nothing when one of the three or four triples is absent (the fixture has such subjects, e.g. one with only dc:title).",
+    "The removals happen while the chain is still being walked (a value carried by dc:title, skos:prefLabel and dcterms:title on one subject is removed at the first source, so the later generators no longer yield it). m{ } is lazy like the rdflib generator, and the fixture has that subject (ex:l4, ex:c5): same graph on both sides.",
+    "`@graph self.G` designates an attribute and adds the six prefixes to the caller's graph without overwriting its bindings; the harness compares bindings and is green.",
+    "Context shim pylode_context.py: Prof reduced to its `G` attribute (the real __init__ parses a profile). pyLODE 2.13.2 is not importable here (installed pylode is 3.2.3, a different API).",
+    "Driver: whole fixture, a graph with nothing to expand, the fixture with dc:title already moved. Mutants killed: `-{ {s} skos:prefLabel ?x }`, `-{ {s} ?p {o} }` (neighbours sharing subject and value under another predicate), `m{ ?s prof:hasResource ?o }` pointed at prof:isProfileOf. Equivalent mutant, noted: `-{ ?x sdo:description {o} }` (every such triple is itself in the loop's source set)."
   ],
   "draft_sha": "9f2ad9f10d0676fc",
   "provenance": {
@@ -31,5 +44,6 @@
   "strata": [
     "remove"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }
