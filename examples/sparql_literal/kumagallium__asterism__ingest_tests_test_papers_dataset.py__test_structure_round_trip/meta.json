@@ -20,15 +20,17 @@
   "constructions": [
     "@prefix",
     "@graph",
-    "s{ }",
-    "interpolation {expr}"
+    "m{ }",
+    "interpolation {expr}",
+    ".first()"
   ],
   "translation_notes": [
     "Both g.query(text, initBindings={...}) calls bind a variable (paper, sent) that is NOT in the query's own SELECT list, so per the bind_initbindings row of the correspondence table each becomes a term interpolation ({rdflib.URIRef(PAPER)}, {rdflib.URIRef(sent)}) in the s{ } query text, in place of the corresponding ?paper / ?sent occurrences, rather than a call-suffix s{ }(bindings=...).",
     "Test harness restored (kind=function, module-level helper call, see original.py): _seed_ttl() in the real file reads datasets/papers/seed/paper.ttl (521 KB) from disk; redefined here to read fixture.ttl instead, identically on both sides -- same on-disk-fixture rename already used for examples/trav_single_value/BD2KOnFHIR__fhirtordf__.../test_value. demo() turns a failed assertion into a comparable value instead of letting run_pair abort on the first raise, same convention as that example.",
     "fixture.ttl is hand-authored (not a trimmed real file, unlike the FHIR precedent): two complete paper->sec->para->sent chains so LIMIT 1 has more than one candidate, plus a linked-but-untyped para (must not satisfy '?para a doco:Paragraph') and a second paper's own complete chain (must not surface once ?paper is interpolated as the exact PAPER IRI) as the neighbourhood that must not match.",
     "No genuine zero-solution fixture: test_structure_round_trip() asserts non-emptiness of both `down` and `up`, so a fixture engineered to miss would make BOTH sides raise the same AssertionError and demo() catch it identically on both -- a green for the wrong reason. The zero-solution requirement is met instead by the neighbourhood triples above, which the query must skip while still finding a match elsewhere.",
-    "Correction (2026-11-01, record corpus/403, defect 2): what this note says of run_pair is not true. run_pair compares a raise like a value — the same exception type and message on both sides, or a difference — and goes on with the next call; it never aborts the comparison on the first side that raises. A workaround described above stays valid, but is not needed."
+    "Correction (2026-11-01, record corpus/403, defect 2): what this note says of run_pair is not true. run_pair compares a raise like a value — the same exception type and message on both sides, or a difference — and goes on with the next call; it never aborts the comparison on the first side that raises. A workaround described above stays valid, but is not needed.",
+    "Rewritten from s{ } to m{ } (2026-11-02, PI decision): both queries are pure basic graph patterns whose LIMIT 1 has no ORDER BY, so `.first()` is the equivalent reduction (any single solution is acceptable to the test; the consumer reads only the first row, as before). Rows are read unpacked in order of first appearance of the variables, as the SELECT lists were (sec, para, sent; then para, sec, paper, ctx). The unpacked-row assertion and the decoy-first fixtures show m{ } and rdflib pick a first row that satisfies the same assertions on all 13 fixtures."
   ],
   "draft_sha": "31c0415b42770ef4",
   "provenance": {
@@ -49,9 +51,9 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "Seam: demo(fixture=...) sets the file _seed_ttl() reads (identical harness edit in original.py and translated.ldpy, region body untouched); 12 new fixtures, one call each, each making one pattern decisive whatever the store order: only another paper has a chain (zero solutions for PAPER), sec/para/sent typed otherwise, each po:contains link of the down path replaced by another predicate, up-links on another sentence only, no wasQuotedFrom, no referenceContext, wrong context, and decoys written before the real chain for the up-query patterns only an order can expose.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "Seam: demo(fixture=...) sets the file _seed_ttl() reads (identical harness edit in original.py and translated.ldpy, region body untouched); 12 new fixtures, one call each, each making one pattern decisive whatever the store order: only another paper has a chain (zero solutions for PAPER), sec/para/sent typed otherwise, each po:contains link of the down path replaced by another predicate, up-links on another sentence only, no wasQuotedFrom, no referenceContext, wrong context, and decoys written before the real chain for the up-query patterns only an order can expose. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : il distingue déjà les deux formes (sorties 'ok'/assertion comparées sur les 13 fixtures).",
+    "translation_fixed": true,
     "mutants_killed": [
       "{rdflib.URIRef(PAPER)} -> ?paper",
       "both {rdflib.URIRef(sent)} -> ?sentx",
@@ -64,7 +66,10 @@
       "prov:wasQuotedFrom -> ?p4",
       "nif:referenceContext -> ?p5",
       "up ?sec po:contains ?para -> ?p6 (order-dependent)",
-      "up ?para po:contains {sent} -> ?p7"
+      "up ?para po:contains {sent} -> ?p7",
+      "m{ } : `?sec a doco:Section` retiré (rouge sur call[2])",
+      "m{ } : `?sec po:contains ?para` de la remontée -> variable libre (rouge)",
+      "m{ } : sujet lié {rdflib.URIRef(PAPER)} -> ?paper (rouge)"
     ],
     "remaining": "LIMIT 1 removed from both queries stays green: the test reads only down[0] and up[0], so the mutant is not observable (the translation keeps LIMIT 1 verbatim). Two up-query kills rely on the store yielding the decoys first (no ORDER BY in the original)."
   }

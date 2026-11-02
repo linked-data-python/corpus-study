@@ -18,6 +18,7 @@
   "constructions": [
     "@prefix",
     "s{ }",
+    "m{ }",
     "call suffix (g)",
     "interpolation {expr}",
     "prefixed name",
@@ -29,7 +30,8 @@
     "PREFIX rdfs:/PREFIX rdf: (embedded literally inside both query-text strings in the original, no initNs used at all here) move to @prefix declarations at file scope, inherited into s{ }'s prologue (querying.md), same mechanical move as the kglab-ggg sparql_literal precedent -- confirms the 'prologue hérité des @prefix' half of the strate's correspondence line applies just as much to inline PREFIX lines as to an explicit initNs= dict.",
     "Two islands in the function, on the same graph parameter, so `@graph graph` was considered against the call suffix twice; kept the call suffix `s{ ... }(graph)` on both since `graph` is also still referenced by name nowhere else in the body (unlike the acquirium-style precedent where a bare-name graph favours a declaration) -- either reads fine here, recorded as a close call rather than a hard rule.",
     "`query_step_type_label`, `_camelize` and `_local_name` are helper functions from the same source file (step_details.py) but outside the extracted region and its captured context lines -- restored via step_details_context.py per AGENT_BATCH.md's shim protocol, copied verbatim from the real upstream file (fetched at the exact commit) rather than invented. Left as plain rdflib Python in the shim (not translated): `query_step_type_label` is itself another instance of this exact stratum's idiom (`FILTER(?step = ?S)` + initBindings) on the SAME file, which the assigned region does not cover -- worth noting for anyone later sampling this repository again, since a second `bind_initbindings` draw on step_details.py would land here and find it already characterised.",
-    "meta.oracle was already 'values' from the pipeline (categories: sparql:2 correctly detected) and is kept as-is."
+    "meta.oracle was already 'values' from the pipeline (categories: sparql:2 correctly detected) and is kept as-is.",
+    "Reviewed 2026-11-02 (PI decision: m{ } for any BGP). The second island (`SELECT ?label WHERE { {URIRef(step_uri)} rdfs:label ?label }`, a single triple pattern, no DISTINCT) is now `m{ {URIRef(step_uri)} rdfs:label ?label }(graph)`, whose one projected variable yields bare terms. The first island stays s{ } because of FILTER(?p != rdf:type), OPTIONAL and DISTINCT, none of which m{ } expresses."
   ],
   "article_candidate": true,
   "draft_sha": "05d2a069b46354b5",
@@ -50,15 +52,16 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "Fixture : ex:step3, dont le seul rdfs:label est une IRI (ex:labelNode, lue vide par la première requête) et qui porte un rdfs:comment ; troisième appel du pilote sur ex:step3 ; docstring qui dit pourquoi cette étape isole le second îlot.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "Fixture : ex:step3, dont le seul rdfs:label est une IRI (ex:labelNode, lue vide par la première requête) et qui porte un rdfs:comment ; troisième appel du pilote sur ex:step3 ; docstring qui dit pourquoi cette étape isole le second îlot. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : il distingue déjà les deux formes (call[2] ex:step3).",
+    "translation_fixed": true,
     "mutants_killed": [
       "second îlot remplacé par `labels = []`",
       "prédicat du second îlot rdfs:label -> rdfs:comment",
       "sujet du second îlot remplacé par une variable libre",
       "FILTER(?p != rdf:type) retiré",
-      "OPTIONAL rétiré"
+      "OPTIONAL rétiré",
+      "m{ } du second îlot : prédicat rdfs:label -> rdfs:comment (rouge sur call[2] : 'A comment' au lieu de l'IRI)"
     ],
     "remaining": "wrong-construction (le second îlot, BGP pur à un motif, devrait-il être m{ } ?) reste à juger ; meta.json crédite s{ } pour les deux requêtes. Le cas qui prouve le second îlot (rdfs:label à objet IRI) est atypique dans le dépôt réel, où l'étiquette est un littéral déjà ramassé par la première requête."
   }

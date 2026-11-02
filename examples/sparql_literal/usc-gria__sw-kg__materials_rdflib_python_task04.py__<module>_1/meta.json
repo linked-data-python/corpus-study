@@ -21,6 +21,7 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
+    "m{ }",
     "s{ }",
     "typed literal",
     "prefixed name",
@@ -33,7 +34,8 @@
     "fixture.ttl is a real graph (john/jane/bob/carol) exercising all 5 queries, including the foaf:knows join of q5 and a non-matching neighbour (ex:carol): this is not a hollow-graph pass, module-level stdout differs whenever a query result differs.",
     "q3 and q5 bind ?Family / ?JaneSmithFullName via initBindings, but neither variable is projected: per the bind_initbindings rule the bound value is written directly as a typed literal term in the pattern (\"Smith\"^^xsd:string, \"Jane Smith\"^^xsd:string) instead of passed as a binding.",
     "prepareQuery(...) + g.query(query, initNs=...) becomes s{ } bound once and called on the graph (q1(g), ...); no s{ } was needed where m{ } would have sufficed, since every query here is a genuine SELECT the module treats as a query object, matching the sparql_literal stratum.",
-    "VCARD.Given is printed as a plain Python value outside any island in q5's last line, so @prefix vcard: <...> as VCARD binds the Namespace object for that use; the other prefixes (xsd, foaf) are only ever used inside islands and need no 'as' binding."
+    "VCARD.Given is printed as a plain Python value outside any island in q5's last line, so @prefix vcard: <...> as VCARD binds the Namespace object for that use; the other prefixes (xsd, foaf) are only ever used inside islands and need no 'as' binding.",
+    "Reviewed 2026-11-02 (PI decision: m{ } for any BGP in the initBindings queries). q3 and q5, the two queries that carried initBindings, are pure basic graph patterns without DISTINCT and are now m{ }: q3 is `m{ ?Subject vcard:Family \"Smith\"^^xsd:string }` (one projected variable, so the loop reads bare terms and prints them; the original's projected ?x never occurs in its WHERE clause and is never read, so it has no counterpart), q5 is `m{ ?Subject foaf:knows [ vcard:FN \"Jane Smith\"^^xsd:string ] ; vcard:Given ?Given }` (the join variable ?JaneSmith, never projected, is a blank node, which m{ } matches without projecting and without merging duplicate solutions: checked on a graph with two matching Janes). The loop variable stays `r` because the module-state oracle compares module globals. q1, q2 and q4 have no initBindings: they are the sparql_literal illustration of this pair and stay s{ } (queries bound once to a name and called on the graph)."
   ],
   "article_candidate": true,
   "draft_sha": "a10396cb350e32ef",
@@ -55,9 +57,9 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "fixture.ttl: a second knower of Jane (as in the repository's example3.rdf); a knower of someone not named \"Jane Smith\"; \"Jane Smith\" plain and @en (other terms than ^^xsd:string); \"Jane Smith\"^^xsd:string under another predicate; a relation to Jane other than foaf:knows; a knower without vcard:Given; \"Smith\" plain, @en and under another predicate for q3; an e-mail under vcard:EMAIL for q4. driver.py docstring says what the fixture exercises.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "fixture.ttl: a second knower of Jane (as in the repository's example3.rdf); a knower of someone not named \"Jane Smith\"; \"Jane Smith\" plain and @en (other terms than ^^xsd:string); \"Jane Smith\"^^xsd:string under another predicate; a relation to Jane other than foaf:knows; a knower without vcard:Given; \"Smith\" plain, @en and under another predicate for q3; an e-mail under vcard:EMAIL for q4. driver.py docstring says what the fixture exercises. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : il distingue déjà les deux formes (stdout et globaux du module).",
+    "translation_fixed": true,
     "mutants_killed": [
       "q5 \"Jane Smith\"^^xsd:string -> ?jn",
       "q5 ?JaneSmith -> ?Jx in foaf:knows",
@@ -70,7 +72,10 @@
       "q3 -> plain \"Smith\"",
       "q3 vcard:Family -> ?pf",
       "q4 foaf:email -> ?pe",
-      "q1 vcard:FN -> ?pp"
+      "q1 vcard:FN -> ?pp",
+      "m{ } q3 : \"Smith\"^^xsd:string -> \"Smith\" (rouge)",
+      "m{ } q5 : [ vcard:FN \"Jane Smith\"^^xsd:string ] -> [ vcard:FN ?jn ] (rouge)",
+      "m{ } q5 : \"Jane Smith\"^^xsd:string -> \"Jane Smith\" (rouge)"
     ],
     "remaining": ""
   }

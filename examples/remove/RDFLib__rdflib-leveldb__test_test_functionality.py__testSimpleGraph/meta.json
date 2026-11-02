@@ -33,7 +33,8 @@
     "verified the remove specifically is not a hollow green: widening it to `-{ ?anything {likes} {pizza} }` (subject wildcard) makes the driver FAIL on `call[0].arg[0]` (the two Datasets no longer isomorphic) -- because at that point in the run `g` holds BOTH tarek-likes-pizza and bob-likes-pizza, so a subject-wildcard removal deletes one triple too many where the fully-bound form deletes exactly one. Restored before finalising.",
     "the real `getgraph` pytest fixture is `ConjunctiveGraph(store='LevelDB')`, an external C-extension store out of reach; the region's own body only ever calls get_context/.add/.remove/.query/.triples, all of which an in-memory `rdflib.Dataset` supports identically, so the driver substitutes one -- see driver.py for why it goes through a `_DatasetProxy` (a pre-existing rdflib/rdfeval interaction: `to_isomorphic` -- what run_pair's generic argument comparison uses for a bare Graph -- raises on a quad-yielding Dataset; same sidestep as the sibling region testUpdateWithInitNs/driver.py, which hits the identical issue from the same source file).",
     "fixture.ttl seeds unrelated data in the DEFAULT graph only, to prove get_context() isolation; the region's own asserted counts (3, 1, 2, 2, 1, 1, 0 triples/solutions at each step) already are the several-solutions / zero-solution / non-matching-neighbour cases the reading oracle asks for, so the fixture does not need to duplicate them -- see its own header.",
-    "article_candidate: the -{ } line by itself is unremarkable (one-for-one with g.remove), but the region as a whole -- two graphs, a literal query, initBindings, three .triples() patterns and a remove, ALL translated, ALL still checked by the source test's own asserts -- is a compact demonstration that `m{ }`/`s{ }`/`+{ }`/`-{ }` interoperate under a shared `@graph` without the reads and writes needing to agree on which island form to use."
+    "article_candidate: the -{ } line by itself is unremarkable (one-for-one with g.remove), but the region as a whole -- two graphs, a literal query, initBindings, three .triples() patterns and a remove, ALL translated, ALL still checked by the source test's own asserts -- is a compact demonstration that `m{ }`/`s{ }`/`+{ }`/`-{ }` interoperate under a shared `@graph` without the reads and writes needing to agree on which island form to use.",
+    "Reviewed 2026-11-02 (PI decision: m{ } for any BGP in the initBindings queries). The call `g.query(\"SELECT * WHERE { ?s <urn:likes> <urn:pizza> . }\", initBindings={\"s\": tarek})` is a single triple pattern whose result the test only counts, so it is now `m{ {tarek} <urn:likes> <urn:pizza> }` (a fully bound pattern yields one empty solution per match, so len(list(r)) == 1 as before); the s{ } bindings call suffix is gone. The two other s{ } queries (first, and the lazy one after the removal) carry no initBindings: they are the sparql_literal part of this region (a store test of its SPARQL path) and stay s{ }."
   ],
   "draft_sha": "0c4611a364810306",
   "provenance": {
@@ -55,15 +56,16 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "le Dataset fourni rend, pour <urn:graph>, un Graph dont remove() ajoute une fois, avant le premier retrait, deux voisins du triplet lié (tarek likes cheese : même sujet et prédicat ; tarek eats pizza : même sujet et objet) ; bob likes pizza, ajouté par la région, est le voisin de prédicat et d'objet. La fixture ne pouvait pas les porter : les assertions de la région comptent exactement les triplets de <urn:graph> (len(g) == 3, « tarek doesn't like cheese » = 0). Docstring mise à jour.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "le Dataset fourni rend, pour <urn:graph>, un Graph dont remove() ajoute une fois, avant le premier retrait, deux voisins du triplet lié (tarek likes cheese : même sujet et prédicat ; tarek eats pizza : même sujet et objet) ; bob likes pizza, ajouté par la région, est le voisin de prédicat et d'objet. La fixture ne pouvait pas les porter : les assertions de la région comptent exactement les triplets de <urn:graph> (len(g) == 3, « tarek doesn't like cheese » = 0). Docstring mise à jour. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : les assertions internes de la région distinguent les deux formes.",
+    "translation_fixed": true,
     "mutants_killed": [
       "-{ ?x {likes} {pizza} } (sujet élargi)",
       "-{ {tarek} ?x {pizza} } (prédicat élargi)",
       "-{ {tarek} {likes} ?x } (objet élargi)",
       "-{ {tarek} ?x ?y }",
-      "-{ } remplacé par pass"
+      "-{ } remplacé par pass",
+      "m{ } de l'appel initBindings : <urn:pizza> -> <urn:cheese> (rouge : AssertionError dans la traduction seule)"
     ],
     "remaining": "Le mutant `<urn:pizza>` -> `<urn:cheese>` dans la dernière requête (celle d'après le retrait) survit : la requête de l'original est exécutée mais son résultat est jeté, `s{ }` est paresseux et rien n'est exécuté, donc aucun état ni valeur ne la distingue (mutant équivalent). Pour l'exécuter des deux côtés il faudrait ajouter du code à la région. La région ne contient aucun joker dans son -{ } : elle n'illustre pas l'idiome (s, p, None) de la strate ; l'article_candidate est à juger."
   }

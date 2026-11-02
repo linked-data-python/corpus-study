@@ -26,7 +26,8 @@
     "`?division` is NOT projected (SELECT DISTINCT ?sector); per INSTRUCTIONS_403 SS4 that is the case for a bare interpolation, so `initBindings={'division': division}` becomes `{division}` written directly at each of its 4 occurrences (the three UNION branches' `someValuesFrom`/direct-property positions, plus the FILTER). Confirmed by a scratch test that the SAME interpolated expression repeated several times in one island each becomes an independent synthetic SPARQL variable pre-bound to the same value (ldpy/transpiler/core.py names them `__i0`, `__i1`, ... one per occurrence) -- so repetition is not a problem, and a FILTER operand accepts `{expr}` exactly like a triple-pattern term position (not shown as such in querying.md, verified directly against the transpiler).",
     "`SECTOR_MEMBERS_QUERY` was a module-level string passed to `g.query(...)`; `s{ }` needs its text literal at the island site, so the query moved from the module level into the function body (same structural consequence as the other two SPARQL-string regions in this lot).",
     "`_label(g, node)`, used only for the sort key, is NOT part of this region (it lives elsewhere in factsheet/helper.py) and was restored via context_shim.py, transcribed verbatim, identical on both sides -- not itself a bind_initbindings construction.",
-    "fixture.ttl covers all three UNION branches with distinct labelled sectors (for the sort order), the FILTER self-reference case, the isinstance(...,URIRef) blank-node case, and one neighbourhood triple per branch shape that must not match; a second call with an unreferenced division is the zero-solution case. Verified against original.py directly: division1 -> [agriculture, energy, transport] (alphabetical by label), divisionZero -> []."
+    "fixture.ttl covers all three UNION branches with distinct labelled sectors (for the sort order), the FILTER self-reference case, the isinstance(...,URIRef) blank-node case, and one neighbourhood triple per branch shape that must not match; a second call with an unreferenced division is the zero-solution case. Verified against original.py directly: division1 -> [agriculture, energy, transport] (alphabetical by label), divisionZero -> [].",
+    "Reviewed 2026-11-02 (PI decision: m{ } for any BGP): kept as s{ } because the query uses UNION (three branches), FILTER (?sector != ?division) and DISTINCT, which m{ } does not express."
   ],
   "draft_sha": "33c1fedcb9bc016d",
   "provenance": {
@@ -46,8 +47,8 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "fixture.ttl complété de voisins qui partagent les autres termes de la branche et diffèrent d'un seul : restriction de la branche 3 (rdfs:subClassOf) sur une autre owl:onProperty, nœud de restriction non typé owl:Restriction atteint par rdf:type et par rdfs:subClassOf, restrictions de bonne propriété mais de mauvais remplissage (someValuesFrom division2, owl:allValuesFrom division1) atteintes par les deux formes, un membre à étiquette en minuscules et un membre sans étiquette pour la clé de tri (.lower(), repli sur l'IRI) ; troisième appel pour ex:division2, qui a des membres par chaque branche ; docstring mise à jour.",
+    "date": "2026-11-02",
+    "driver": "fixture.ttl complété de voisins qui partagent les autres termes de la branche et diffèrent d'un seul : restriction de la branche 3 (rdfs:subClassOf) sur une autre owl:onProperty, nœud de restriction non typé owl:Restriction atteint par rdf:type et par rdfs:subClassOf, restrictions de bonne propriété mais de mauvais remplissage (someValuesFrom division2, owl:allValuesFrom division1) atteintes par les deux formes, un membre à étiquette en minuscules et un membre sans étiquette pour la clé de tri (.lower(), repli sur l'IRI) ; troisième appel pour ex:division2, qui a des membres par chaque branche ; docstring mise à jour. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Traduction conservée en s{ } (UNION, FILTER, DISTINCT) ; pilote inchangé.",
     "translation_fixed": false,
     "mutants_killed": [
       "suppression de owl:onProperty dans la branche 3",

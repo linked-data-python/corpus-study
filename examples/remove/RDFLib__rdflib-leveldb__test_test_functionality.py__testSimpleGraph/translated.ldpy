@@ -33,7 +33,7 @@ def testSimpleGraph(getgraph):
     assert len(list(r)) == 2  # "two people like pizza")
 
     # Test initBindings
-    r = s{ SELECT * WHERE { ?s <urn:likes> <urn:pizza> . } }(bindings={"s": tarek})
+    r = m{ {tarek} <urn:likes> <urn:pizza> }
     assert len(list(r)) == 1  # "i was asking only about tarek")
 
     r = m{ {tarek} {likes} {pizza} }

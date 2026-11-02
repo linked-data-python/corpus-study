@@ -17,9 +17,9 @@ def get_nodeshapes(self) -> List[NodeShape]:
         prop = BNode(self.iri)
     else:
         prop = URIRef(self.iri)
-    result = s{ SELECT DISTINCT ?shape WHERE { ?shape sh:property {prop} } }(self.graph)
+    result = m{ ?shape sh:property {prop} }(self.graph)
     shapes = []
-    for r in result:
-        shapes.append(NodeShape(str(r.shape), self.graph))
+    for shape in result:
+        shapes.append(NodeShape(str(shape), self.graph))
     shapes.sort(key=lambda s: s.label)
     return shapes

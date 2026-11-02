@@ -13,11 +13,9 @@ def get_type_assertions(g, typed_object):
     :returns: A list of type assertions for the specified entity
     :rtype: list
     """
-    query_result = s{
-        SELECT ?typeAssertion WHERE {
-          ?typeAssertion a rdf:Statement .
-          ?typeAssertion rdf:predicate rdf:type .
-          ?typeAssertion rdf:subject {typed_object} .
-          }
+    type_assertions = m{
+        ?typeAssertion a rdf:Statement .
+        ?typeAssertion rdf:predicate rdf:type .
+        ?typeAssertion rdf:subject {typed_object}
     }(g)
-    return [x for (x,) in query_result]
+    return list(type_assertions)

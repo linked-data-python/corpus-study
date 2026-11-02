@@ -15,7 +15,7 @@
   "constructions": [
     "@prefix",
     "@graph",
-    "s{ }",
+    "m{ }",
     "interpolation {expr}",
     "prefixed name",
     "variable",
@@ -26,7 +26,8 @@
     "The region is a method extracted as a free function with `self` as an explicit, unannotated parameter (rdf_ops: 0). `self.rdf` is a rdflib.Graph attribute set on the `Ontology` dataclass elsewhere in minergym/ontology.py; `driver.py` restores the binding by building a small object with a `.rdf` attribute directly (no shim module needed, since the graph is a call argument, not a module-level name).",
     "The raw SPARQL string has no PREFIX line for `idf:` -- it relies on rdflib's default `initNs=dict(self.namespaces())` in `Graph.query`, since `IDF = Namespace(\"https://energyplus.net/\")` is bound as \"idf\" on the graph in `Ontology.from_object` (also outside the region's own lines). Restored in the translation as a module-level `@prefix idf: <https://energyplus.net/> .`, which is exactly what the block's prologue is built from (querying.md: \"the prologue is the block's\").",
     "`?zone` is bound by initBindings but never projected (SELECT ?surface only): the most specific construction is a bare interpolation `{zone}` in term position, not `s{ }(bindings=...)` -- exactly the case the stratum table calls out. No string concatenation anywhere, so the injection the original avoids via initBindings is structurally impossible here.",
-    "meta.oracle says \"isomorphism\", but the region only reads and returns a list[Node] -- it never builds or mutates a graph, so isomorphism has nothing to compare (same mismatch as the LA3D trav_existence precedent). driver.py uses the reading oracle instead: three zones (two solutions, one solution, zero solutions) plus neighbourhood in the graph that must not match."
+    "meta.oracle says \"isomorphism\", but the region only reads and returns a list[Node] -- it never builds or mutates a graph, so isomorphism has nothing to compare (same mismatch as the LA3D trav_existence precedent). driver.py uses the reading oracle instead: three zones (two solutions, one solution, zero solutions) plus neighbourhood in the graph that must not match.",
+    "Rewritten from s{ } to m{ } (2026-11-02, PI decision): a pure two-pattern basic graph pattern, one projected variable, SELECT without DISTINCT (same multiplicity). `{zone}` is interpolated in object position; m{ } yields bare terms, so `[r.surface for r in ...]` becomes `list(m{ ... })`. The plain literal \"BuildingSurface:Detailed\" matches the same term in the graph under m{ } as under rdflib's SPARQL engine (triples are matched as terms in both)."
   ],
   "draft_sha": "357cef97ad50982e",
   "provenance": {
@@ -45,5 +46,14 @@
     "method": "entry:zone_surfaces",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : il distingue déjà les deux formes.",
+    "translation_fixed": true,
+    "mutants_killed": [
+      "m{ } : ligne `?surface a \"BuildingSurface:Detailed\"` supprimée (rouge : le voisin zoneish fuit)"
+    ],
+    "remaining": ""
   }
 }

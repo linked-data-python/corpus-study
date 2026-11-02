@@ -53,19 +53,12 @@ for r in q2(g):
 
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# ?Family is not projected by q3 (only ?Subject ?x are), so the
-# stratum's rule for bind_initbindings applies: the bound term is written
-# directly in the pattern rather than passed as initBindings.
-q3 = s{
-  SELECT
-    ?Subject ?x
-  WHERE {
-    ?Subject vcard:Family "Smith"^^xsd:string.
-  }
-}
-
-for r in q3(g):
-  print(r.Subject)
+# initBindings stratum: q3 is a basic graph pattern, so m{ } (not s{ }); the
+# bound term is written directly in the pattern. The projected ?x of the
+# original never occurs in its WHERE clause (always unbound) and is never
+# read, so it has no counterpart.
+for r in m{ ?Subject vcard:Family "Smith"^^xsd:string }(g):
+  print(r)
 
 """Obtenemos todos los elementos que contienen un email asociado"""
 
@@ -84,17 +77,9 @@ for q in q4(g):
 
 """Consultamos todos los que conocen (FOAF:knows) a "Jane Smith" y obtenemos sus nombres de pila (VCARD:Given)"""
 
-# ?JaneSmithFullName is not projected by q5 either (only ?Subject ?Given
-# are): same rule, the bound term goes straight into the pattern.
-q5 = s{
-  SELECT
-    ?Subject ?Given
-  WHERE {
-    ?Subject foaf:knows ?JaneSmith.
-    ?JaneSmith vcard:FN "Jane Smith"^^xsd:string.
-    ?Subject vcard:Given ?Given.
-  }
-}
-
-for r in q5(g):
+# q5 is a basic graph pattern too: m{ }. ?JaneSmith is only a join variable
+# (never projected), so it is a blank node, which m{ } matches without
+# projecting and without merging duplicate solutions.
+for r in m{ ?Subject foaf:knows [ vcard:FN "Jane Smith"^^xsd:string ] ;
+                                  vcard:Given ?Given }(g):
   print(r.Subject, VCARD.Given, r.Given)

@@ -13,7 +13,7 @@
   "translation_status": "final",
   "classification": "directly-expressible",
   "constructions": [
-    "s{ }",
+    "m{ }",
     "@prefix",
     "prefixed name",
     "interpolation {expr}",
@@ -23,7 +23,8 @@
     "The bound variable `typedObject` is NOT projected by the query (SELECT ?typeAssertion WHERE {...}); per INSTRUCTIONS_403 SS4 that is the case for a bare interpolation in term position, so `initBindings={'typedObject': typed_object}` becomes `{typed_object}` written directly where `?typedObject` stood.",
     "`_TYPE_QUERY = prepareQuery(\"\"\"...\"\"\")` was a module-level prepared-query object passed to `g.query(_TYPE_QUERY, ...)`; `s{ }` requires its query text literal at the island site, so that variable and the `prepareQuery` call collapse into the island written directly inside `get_type_assertions`. ldpy prepares and caches queries itself (a small hand-written LRU, querying.md) so nothing is lost by not naming the prepared query -- it moved from a Python-level cache to the transpiler's own.",
     "The query never declares `PREFIX rdf:` and the original code never passes `initNs` either: it relies on rdflib's implicit default namespace bindings (a fresh Graph() binds rdf/rdfs/xsd/xml automatically), which `Graph.query()` falls back to when no PREFIX/initNs is given. `s{ }` does NOT inherit that fallback -- its prologue comes only from `@prefix` declarations lexically in scope (traced in ldpy/runtime.py: `PreparedQuery._execute` calls `graph.query(prep, ...)` with `prep` already compiled by `prepareQuery(text, initNs=dict(namespaces))`, `namespaces` being exactly the @prefix set at the island, nothing more). So `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .` had to be added explicitly, even though the original source never wrote it: a fidelity trap worth flagging for the study, since it is invisible in a diff against the query TEXT alone.",
-    "added `from rdflib.plugins.sparql import prepareQuery` to original.py only, to restore the top-of-file import the real repo has (see original.py) -- not needed on the ldpy side since s{ } prepares its own query."
+    "added `from rdflib.plugins.sparql import prepareQuery` to original.py only, to restore the top-of-file import the real repo has (see original.py) -- not needed on the ldpy side since s{ } prepares its own query.",
+    "Rewritten from s{ } to m{ } (2026-11-02, PI decision): the query is a pure basic graph pattern with one projected variable, SELECT without DISTINCT (a graph holds each triple once, so each ?typeAssertion yields one solution under both forms). `{typed_object}` is interpolated in object position; with one projected variable m{ } yields bare terms, so `[x for (x,) in query_result]` becomes `list(type_assertions)`."
   ],
   "draft_sha": "c45b44f6729ecea9",
   "provenance": {
@@ -44,13 +45,14 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "Deux voisins de obj1 (predicate rdf:type, subject obj1) qui ne sont pas typés rdf:Statement : ta5 sans type, ta6 typé ex:NotAStatement ; docstring qui dit quelle ligne du motif exclut chaque voisin.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "Deux voisins de obj1 (predicate rdf:type, subject obj1) qui ne sont pas typés rdf:Statement : ta5 sans type, ta6 typé ex:NotAStatement ; docstring qui dit quelle ligne du motif exclut chaque voisin. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : il distingue déjà les deux formes (sorties comparées).",
+    "translation_fixed": true,
     "mutants_killed": [
       "suppression de `?typeAssertion a rdf:Statement .`",
       "suppression de `?typeAssertion rdf:predicate rdf:type .`",
-      "`?typeAssertion rdf:subject {typed_object}` remplacé par une variable libre"
+      "`?typeAssertion rdf:subject {typed_object}` remplacé par une variable libre",
+      "m{ } : `rdf:predicate rdf:type` remplacé par `rdf:predicate rdf:subject` (rouge : valeurs diffèrent)"
     ],
     "remaining": "wrong-construction (s{ } ou m{ } pour un BGP pur) reste à juger. La note de traduction attribue le préfixe rdf: implicite à Graph.query() ; selon le trieur c'est le prologue par défaut de prepareQuery (compilé au chargement du module, sans graphe) : note non corrigée ici, la conclusion (@prefix rdf: nécessaire côté ldpy) reste vraie."
   }

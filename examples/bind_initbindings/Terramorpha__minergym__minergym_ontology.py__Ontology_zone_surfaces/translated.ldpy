@@ -7,7 +7,7 @@ from rdflib.term import Node
 def zone_surfaces(self, zone: Node) -> list[Node]:
     """Return all the surfaces that have `zone_name` equal to `zone`."""
     @graph self.rdf
-    return [r.surface for r in s{ SELECT ?surface WHERE {
+    return list(m{
       ?surface a "BuildingSurface:Detailed" .
-      ?surface idf:zone_name {zone} .
-    } }]
+      ?surface idf:zone_name {zone}
+    })

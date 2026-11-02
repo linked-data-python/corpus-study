@@ -24,7 +24,8 @@
     "`initNs={'opcua': self.opcuans}` is dead: the query text never references an `opcua:` prefixed name. No `@prefix opcua:` was written -- there is nothing to bind it to (self.opcuans is a runtime attribute, not a static IRI a @prefix declaration can take), and dropping it changes nothing observable. Only `rdfs:`, embedded as an inline `PREFIX rdfs: <...>` line inside the original query STRING, was hoisted to a module-level `@prefix rdfs: <...> .` -- s{ }'s prologue comes from @prefix declarations in scope, never from PREFIX lines written inside the island (querying.md).",
     "The query text lived in a separate variable (`query_generic_references = \"\"\"...\"\"\"`) passed to `graph.query(...)`; `s{ }` requires its query text literal at the island site (validated at transpile time), so that variable collapses into the island written directly at the call site. This is a structural consequence of the island, not a stylistic refactor -- it recurs on every sparql_literal/bind_initbindings region that used a named query variable (see also the NextCenturyCorporation region in this same lot).",
     "`s{ }`'s value is a lazy prepared query with no `__len__` (querying.md: \"len() deliberately fails\"), unlike rdflib's `Result`. The original's `if len(result) > 0: results = list(result)` therefore had to materialise first (`result = list(s{...}(graph))`) before applying the same (redundant, since list(empty)==[]) guard -- the guard itself is left untouched, only the point where the lazy result becomes a list moved earlier.",
-    "measurement note per the batch warning: this region genuinely exercises BOTH `initBindings` and `initNs` together (not one of the 33 initNs-only false positives in this stratum's sample)."
+    "measurement note per the batch warning: this region genuinely exercises BOTH `initBindings` and `initNs` together (not one of the 33 initNs-only false positives in this stratum's sample).",
+    "Reviewed 2026-11-02 (PI decision: m{ } for any BGP): kept as s{ } because the query uses the property path `rdfs:subPropertyOf*`, which m{ } does not express."
   ],
   "draft_sha": "6b632de7c414f2f5",
   "provenance": {
@@ -44,8 +45,8 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "troisième appel _call_deep_hierarchy, à la forme de la hiérarchie OPC UA que parcourt le dépôt (owl2instances.py:262-268) : chaînes de deux et trois sauts, losange (d sous a et b, eux-mêmes sous super : une seule ligne), sous-propriété réflexive, cycle qui n'atteint pas super, cibles littéral \"\" et nœud blanc, nœud de départ en objet et en sujet d'un rdfs:subPropertyOf (ne doivent pas sortir). Mutants équivalents, non comptés : garde `if len(result) > 0` forcée à True (results = result de toute façon) ; SELECT DISTINCT (le chemin * de rdflib rend chaque nœud une fois, les triplets d'un Graph sont uniques).",
+    "date": "2026-11-02",
+    "driver": "troisième appel _call_deep_hierarchy, à la forme de la hiérarchie OPC UA que parcourt le dépôt (owl2instances.py:262-268) : chaînes de deux et trois sauts, losange (d sous a et b, eux-mêmes sous super : une seule ligne), sous-propriété réflexive, cycle qui n'atteint pas super, cibles littéral \"\" et nœud blanc, nœud de départ en objet et en sujet d'un rdfs:subPropertyOf (ne doivent pas sortir). Mutants équivalents, non comptés : garde `if len(result) > 0` forcée à True (results = result de toute façon) ; SELECT DISTINCT (le chemin * de rdflib rend chaque nœud une fois, les triplets d'un Graph sont uniques). || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Traduction conservée en s{ } (chemin de propriétés subPropertyOf*) ; pilote inchangé.",
     "translation_fixed": false,
     "mutants_killed": [
       "rdfs:subPropertyOf* -> rdfs:subPropertyOf? (survivait)",

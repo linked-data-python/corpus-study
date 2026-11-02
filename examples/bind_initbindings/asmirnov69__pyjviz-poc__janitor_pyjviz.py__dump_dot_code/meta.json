@@ -13,6 +13,8 @@
   "translation_status": "final",
   "classification": "directly-expressible",
   "constructions": [
+    "@prefix",
+    "m{ }",
     "s{ }",
     "interpolation {expr}",
     "call suffix (g)",
@@ -23,7 +25,8 @@
     "No `@prefix` was needed: the queries use only bare `rdf:` (bound by rdflib's/ldpy's built-in default namespaces) and full opaque IRIs written literally as `<pyj:CMC>` etc. (scheme `pyj`, not a namespace prefix) -- there is no PREFIX clause to inherit as a prologue in this region.",
     "Corrected `oracle` from the pipeline's `isomorphism` to `values`: the function only reads `g` and returns a dot-source string built from `.query()` results and `print()`/f-strings; nothing here builds or mutates an RDF graph, so the driver compares the returned string (design record corpus/405) via a Turtle fixture rather than graph isomorphism.",
     "fixture.ttl: two `pyj:CMC` clusters covering both branches of the `cmc_label != \"none\"` subgraph-wrapper test, each with a dataframe/method/call/return match for every query; the method-call/method-call-arg property-path alternation is exercised on different cmcs; a stray dataframe+method pair tagged with a `pyj:cmc` value that is itself never typed `pyj:CMC` checks that untyped cmcs do not leak into the loop; a second call with an empty graph covers the zero-solution `cmcs == []` case.",
-    "Deliberately broke `translated.ldpy` (retyped one `<pyj:Method>` to `<pyj:MethodX>`) and confirmed `rdfeval check` turns FAIL with a KeyError from the now-missing node -- not a hollow green."
+    "Deliberately broke `translated.ldpy` (retyped one `<pyj:Method>` to `<pyj:MethodX>`) and confirmed `rdfeval check` turns FAIL with a KeyError from the now-missing node -- not a hollow green.",
+    "Reviewed 2026-11-02 (PI decision: m{ } for any BGP): four of the five queries are pure basic graph patterns without DISTINCT (same multiplicity) and are now m{ }; their rows are unpacked as before (two or three projected variables yield tuples, in order of first appearance). The cmc-bound ones interpolate `{cmc}` in object position. m{ } needs `rdf:` declared, which s{ } got from rdflib's default bindings, so `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .` was added. The fourth query (method-call edges) stays s{ } because of the property-path alternation `<pyj:method-call>|<pyj:method-call-arg>`, which m{ } does not express."
   ],
   "draft_sha": "cee4ddd82261a00d",
   "provenance": {
@@ -43,16 +46,20 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "fixture.ttl reçoit cinq arêtes inter-cmc (method-call, method-call-arg et method-return) entre un dataframe d'une cmc et une méthode de l'autre cmc, dans les deux sens, de sorte que chaque contrainte `?df <pyj:cmc> {cmc}` et `?m <pyj:cmc> {cmc}` des requêtes 4 et 5 soit nécessaire à elle seule (sans elle, le nœud n'est pas dans `nodes` et l'appel lève KeyError) ; la docstring du pilote le dit. Les deux appels du pilote sont inchangés.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "fixture.ttl reçoit cinq arêtes inter-cmc (method-call, method-call-arg et method-return) entre un dataframe d'une cmc et une méthode de l'autre cmc, dans les deux sens, de sorte que chaque contrainte `?df <pyj:cmc> {cmc}` et `?m <pyj:cmc> {cmc}` des requêtes 4 et 5 soit nécessaire à elle seule (sans elle, le nœud n'est pas dans `nodes` et l'appel lève KeyError) ; la docstring du pilote le dit. Les deux appels du pilote sont inchangés. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé (ordered=True : l'ordre des solutions de m{ } donne le même texte dot que celui de rdflib sur la fixture).",
+    "translation_fixed": true,
     "mutants_killed": [
       "retrait de `?m <pyj:cmc> {cmc}` de la requête 4 seule",
       "retrait de `?df <pyj:cmc> {cmc}` de la requête 4 seule",
       "retrait de `?m <pyj:cmc> {cmc}` de la requête 5 seule",
       "retrait de `?df <pyj:cmc> {cmc}` de la requête 5 seule",
       "retrait des deux contraintes cmc de la requête 4",
-      "`method-call|method-call-arg` réduit à `method-call` ou à `method-call-arg`"
+      "`method-call|method-call-arg` réduit à `method-call` ou à `method-call-arg`",
+      "m{ } requête 1 : rdf:label -> <pyj:label>",
+      "m{ } requête 2 : contrainte <pyj:cmc> {cmc} retirée",
+      "m{ } requête 3 : contrainte <pyj:cmc> {cmc} retirée",
+      "m{ } requête 5 : contrainte ?m <pyj:cmc> {cmc} retirée"
     ],
     "remaining": ""
   }

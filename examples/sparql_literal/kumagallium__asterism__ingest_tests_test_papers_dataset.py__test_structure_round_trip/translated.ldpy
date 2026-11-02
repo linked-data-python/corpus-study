@@ -44,26 +44,22 @@ def test_structure_round_trip() -> None:
     @graph g
     # Downward: paper -> section -> paragraph -> sentence, all via po:contains.
     # ?paper is bound (initBindings) but not projected, so it becomes a term
-    # interpolation instead of a variable.
-    down = list(
-        s{ SELECT ?sec ?para ?sent WHERE {
-              {rdflib.URIRef(PAPER)} po:contains ?sec . ?sec a doco:Section ; po:contains ?para .
-              ?para a doco:Paragraph ; po:contains ?sent . ?sent a doco:Sentence .
-            } LIMIT 1 }
-    )
+    # interpolation instead of a variable. LIMIT 1 without ORDER BY: .first().
+    down = m{
+        {rdflib.URIRef(PAPER)} po:contains ?sec . ?sec a doco:Section ; po:contains ?para .
+        ?para a doco:Paragraph ; po:contains ?sent . ?sent a doco:Sentence
+    }.first()
     assert down, "no paper -> sec -> para -> sentence containment path"
-    sec, para, sent = (str(x) for x in down[0])
+    sec, para, sent = (str(x) for x in down)
     # Upward from the sentence: its paragraph, its section, the paper it was quoted
     # from, and its NIF reference context — both up-links the gate names.
     # ?sent is bound but not projected here either.
-    up = list(
-        s{ SELECT ?para ?sec ?paper ?ctx WHERE {
-              ?para po:contains {rdflib.URIRef(sent)} . ?sec po:contains ?para .
-              {rdflib.URIRef(sent)} prov:wasQuotedFrom ?paper ; nif:referenceContext ?ctx .
-            } LIMIT 1 }
-    )
+    up = m{
+        ?para po:contains {rdflib.URIRef(sent)} . ?sec po:contains ?para .
+        {rdflib.URIRef(sent)} prov:wasQuotedFrom ?paper ; nif:referenceContext ?ctx
+    }.first()
     assert up, "cannot walk back up from the sentence"
-    u_para, u_sec, u_paper, ctx = (str(x) for x in up[0])
+    u_para, u_sec, u_paper, ctx = (str(x) for x in up)
     assert u_para == para and u_sec == sec and u_paper == PAPER
     assert ctx == PAPER + "/fulltext"
 

@@ -16,7 +16,7 @@
   "classification": "directly-expressible",
   "constructions": [
     "@prefix",
-    "s{ }",
+    "m{ }",
     "interpolation {expr}",
     "call suffix (g)"
   ],
@@ -24,7 +24,8 @@
     "initBindings variable 'property' is not projected (only ?shape is), so it becomes a term interpolation {prop} in s{ }, per the bind_initbindings row of INSTRUCTIONS.md#2.",
     "self.graph is not the module's current graph, so s{ } uses the explicit call suffix (self.graph) rather than reading an ambient @graph.",
     "NodeShape and the label lookup it needs (itself an initBindings query one level up, in SemanticModelElement.__init__) are outside the extracted region; restored via a context shim (shim.py) faithful to shapiro_model.py's DESCRIPTION_QUERY/prune_iri, since the region's sort key (s.label) depends on them.",
-    "oracle: reading region (self.graph.query -> a value), not isomorphism; meta's initial oracle field was stale from the draft and the driver instead uses fixture.ttl via calls= (entry takes self, not a graph, so fixture= could not be used directly)."
+    "oracle: reading region (self.graph.query -> a value), not isomorphism; meta's initial oracle field was stale from the draft and the driver instead uses fixture.ttl via calls= (entry takes self, not a graph, so fixture= could not be used directly).",
+    "Rewritten from s{ } to m{ } (2026-11-02, PI decision): a single triple pattern `?shape sh:property {prop}`. The original's SELECT DISTINCT is vacuous here: with the object bound, each ?shape comes from a distinct triple, and a graph holds each triple once, so there are no duplicate rows to remove. m{ } yields bare terms (one projected variable), hence `for shape in result` and `str(shape)`. The blank-node branch (`BNode(self.iri)` interpolated) is matched as a term by m{ } and is exercised by calls bn1 and bn2."
   ],
   "draft_sha": "5a66e5d921deba2c",
   "provenance": {
@@ -45,15 +46,16 @@
     "error": null
   },
   "repair": {
-    "date": "2026-10-30",
-    "driver": "Quatre appels ajoutés : prop3 (deux formes dont l'ordre des étiquettes « Zeta »/« Alpha » est l'inverse de l'ordre de stockage et des IRI, fixture.ttl), « bn1 » (branche nœud blanc, un BNode ajouté à la main au graphe car Turtle renomme ses nœuds blancs) et « bn2 » (nœud blanc à deux formes, tri sur la branche BNode) ; docstring mise à jour.",
-    "translation_fixed": false,
+    "date": "2026-11-02",
+    "driver": "Quatre appels ajoutés : prop3 (deux formes dont l'ordre des étiquettes « Zeta »/« Alpha » est l'inverse de l'ordre de stockage et des IRI, fixture.ttl), « bn1 » (branche nœud blanc, un BNode ajouté à la main au graphe car Turtle renomme ses nœuds blancs) et « bn2 » (nœud blanc à deux formes, tri sur la branche BNode) ; docstring mise à jour. || 2026-11-02 : revue m{ }/s{ } (décision du PI : m{ } pour tout BGP). Pilote inchangé : il distingue déjà les deux formes.",
+    "translation_fixed": true,
     "mutants_killed": [
       "prop = BNode(self.iri) -> URIRef(self.iri) (appels bn1, bn2)",
       "prop = URIRef(self.iri) -> BNode(self.iri) (prop1, otherProp, prop3...)",
       "shapes.sort(...) -> pass (appel prop3)",
       "key=lambda s: s.label -> key=lambda s: s.iri (appel prop3)",
-      "tri avec reverse=True"
+      "tri avec reverse=True",
+      "m{ } : sh:property -> sh:node (rouge sur tous les appels qui ont des solutions, y compris les branches nœud blanc bn1 et bn2)"
     ],
     "remaining": "Question 2 du trieur (classification : la traduction réécrit le texte de SHAPE_QUERY, hissé hors région, en s{ } ; directly-expressible ou minor-restructuring) non traitée : jugement."
   }
