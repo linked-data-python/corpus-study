@@ -40,9 +40,11 @@
   ],
   "oracle": "values",
   "validation": {
-    "status": "equivalent",
+    "status": "not-equivalent",
     "method": "fixture:fixture.ttl entry:select_local_license",
-    "diffs": [],
+    "diffs": [
+      "call[4]: log records (from #1) differ ([('WARNING', 'dataset_preparation', \"SPARQL error in select_local_license: 'NoneType' object has no attribute 'query'\")] vs [('WARNING', 'dataset_preparation', \"SPARQL error in select_local_license: s{ } with no graph: declare '@graph ...' in scope, or apply the query to a graph — s{ ... }(g)\")])"
+    ],
     "error": null
   },
   "repair": {

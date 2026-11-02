@@ -35,10 +35,10 @@
   ],
   "oracle": "isomorphism",
   "validation": {
-    "status": "unresolved",
-    "method": null,
+    "status": "equivalent",
+    "method": "module-state + None/empty texts",
     "diffs": [],
-    "error": "driver produced no verdict (rc=1):  \"/tmp/tmpkm9bw08r/translated.ldpy\", line 36, in <module>\n    for elem in root.iter(\".//Viscoelastic//MeasurementMode\")]\n                      ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lefrancois/dev/github.com/linked-data-python/ldpy/ldpy/runtime.py\", line 257, in node\n    raise TypeError(_NONE_IS_NOT_A_TERM)\nTypeError: None is not an RDF term. To match any term, write a variable — ?any in -{ }, an unprojected [] in m{ } — or interpolate ldpy.ANY; to write nothing, test the value before the island"
+    "error": null
   },
   "repair": {
     "date": "2026-10-30",
