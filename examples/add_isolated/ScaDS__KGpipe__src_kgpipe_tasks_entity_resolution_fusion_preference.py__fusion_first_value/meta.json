@@ -27,7 +27,8 @@
     "`if p_can == RDF.type` became `if p_can == rdf:type`: a prefixed name used directly as a Python expression (comparison operand), not inside any g{ }/+{ } island -- the same pattern as `A = rdf:type` in the already-approved BrickSchema__Brick__generate_brick.py__define_relationships pair.",
     "Context shim kgpipe_context.py restores TrackRecord (verbatim) and the real TARGET_ONTOLOGY_NAMESPACE value copied from the sibling kgpipe/common/config.py at the same commit (\"http://kg.org/ontology/\"). canonicalize_entity_term/canonicalize_property_term are reduced to the identity function: their real bodies depend on an external match file (entity/relation matching is not what this region does or what add_isolated measures); allowed_predicates/fusable_properties are concrete hand-picked sets standing in for ones the real code builds from an external ontology file. build_fixture_graphs() is a factory returning a fresh (source_graph, seed_graph) pair per call -- not a shared Graph object imported from the shim, which would make original.py's run and translated.ldpy's run silently mutate the SAME graph (Python caches the shim module on the second import within the same process) and pass regardless of what the translation says.",
     "Fixture covers: a fusable predicate with no existing seed value (added), a fusable predicate whose subject already has one (discarded), an rdf:type triple outside TARGET_ONTOLOGY_NAMESPACE (skipped before the fusable check runs), a predicate absent from allowed_predicates (skipped), a non-fusable but allowed predicate not yet in the seed graph (copied), and the same non-fusable predicate where the exact triple already sits in the seed graph (skipped -- zero triples added for that one).",
-    "Coverage caveat: because canonicalize_entity_term/canonicalize_property_term are identity in this fixture, s_can/p_can/o_can are always equal to s/p/o, so this fixture alone could not catch a translation that wrote {s}/{p}/{o} instead of {s_can}/{p_can}/{o_can}. Verified the check is not a hollow green on a corruption that IS within its reach: hardcoding the predicate of the first +{ } to rdfs:comment flips the check to FAIL (7 vs 7 triples, not isomorphic)."
+    "Coverage caveat: because canonicalize_entity_term/canonicalize_property_term are identity in this fixture, s_can/p_can/o_can are always equal to s/p/o, so this fixture alone could not catch a translation that wrote {s}/{p}/{o} instead of {s_can}/{p_can}/{o_can}. Verified the check is not a hollow green on a corruption that IS within its reach: hardcoding the predicate of the first +{ } to rdfs:comment flips the check to FAIL (7 vs 7 triples, not isomorphic).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `owl:`, `rdfs:`, `skos:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "25ab9a5277a0ba29",
   "provenance": {
@@ -61,6 +62,11 @@
       "îlot 2 supprimé",
       "garde rdf:type -> rdfs:label"
     ],
-    "remaining": ""
+    "remaining": "",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

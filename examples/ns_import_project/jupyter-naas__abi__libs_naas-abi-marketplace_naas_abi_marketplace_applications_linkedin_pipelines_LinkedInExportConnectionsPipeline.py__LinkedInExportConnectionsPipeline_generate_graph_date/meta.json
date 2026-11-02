@@ -31,7 +31,8 @@
     "`ABI[str(date_epoch)]` and `ABI[date_str]` are the local part COMPUTED at run time -- exactly `abi:{expr}` (ex:{expr} computes the local part). Deliberately not `e<...>`: neither value can contain a space or slash here (an epoch-millisecond int, and an ISO-8601 string with no such characters), so plain concatenation without percent-encoding is the region's own semantics, not a corner cut. `ABI.ISO8601UTCDateTime` is a fixed local part, so it became the plain prefixed name `abi:ISO8601UTCDateTime`.",
     "The three `graph.add((...))` calls on a freshly-constructed local `graph` share the same subject (`date_uri`) across all three, and NEVER just once each independently: this is the run_shared_subject idiom even though the stratum under test is ns_import_project, matching INSTRUCTIONS_403 sec2's directive to always use the construction the idiom actually calls for -- became one `@graph graph` + `+{ {date_uri} a owl:NamedIndividual ; a abi:ISO8601UTCDateTime ; rdfs:label {date_literal} }`, not three separate `+{ }` islands.",
     "`Literal(date_str, datatype=XSD.dateTime)` (the `datetime` branch) -> `datatype=xsd:dateTime` is a plain prefixed-name substitution inside the kept `Literal(...)` call -- the value `date_str` is a string already (`date.strftime(...)`), not a coercion_datatype site of the kind INSTRUCTIONS_403 warns about (a non-string value normalised through Literal(...)), so no `\"...\"^^xsd:...` rewrite was attempted or needed here; the plain `Literal(date_str)` in the `str` branch is untouched.",
-    "No restoration needed for this region (unlike its siblings in this batch): `self` is never read anywhere in generate_graph_date's own body -- verified directly against the extracted lines -- so `None` in the driver's calls is a faithful argument, not a stand-in for a lost binding."
+    "No restoration needed for this region (unlike its siblings in this batch): `self` is never read anywhere in generate_graph_date's own body -- verified directly against the extracted lines -- so `None` in the driver's calls is a faithful argument, not a stand-in for a lost binding.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "d63ec5e72d7407b6",
   "provenance": {
@@ -49,5 +50,13 @@
     "method": "entry:generate_graph_date",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
   }
 }

@@ -28,7 +28,8 @@
     "The one `self.graph.add((self.MEPA_CHO, p, o))` inside the for-loop -- add_isolated's own idiom even though this region's stratum is ns_import_project, and INSTRUCTIONS_403 §2 forbids leaving a bare .add() where an island covers the case -- became `+{ {self.MEPA_CHO} {p} {o} }(self.graph)`: the CALL-SUFFIX form (current-graph.md's `+{ ... }(store.graph)` example is this exact shape, an attribute holding the graph) rather than `@graph self.graph` + `+{ }`, since it needs no extra declaration line and works unmodified against an attribute access, matching the doc's own worked example almost verbatim. `now = Literal(datetime.datetime.utcnow(), datatype=XSD.dateTime)` -> `datatype=xsd:dateTime` is a plain prefixed-name substitution, counted under 'prefixed name' and not separately as 'typed literal' -- the value itself (datetime.datetime.utcnow()) is computed and non-string, so this is NOT a coercion_datatype site of the kind INSTRUCTIONS_403 warns about (Literal(...) with an explicit datatype= is kept verbatim, only the XSD.dateTime term is rewritten), and it is not `\"...\"^^xsd:...` syntax either, so 'typed literal' would misrepresent what changed here.",
     "Restoring the binding (AGENT_BATCH's 163-regions case): the region is `@classmethod def build_mepa_collection_triples(self): ...` at module scope after extraction, dangling outside any class. Verified directly against the pinned commit that calling it as an ordinary classmethod cannot work at all in the real repository: MEPA_AGG/MEPA_CHO/MEPA_REM are set as INSTANCE attributes in MepaToEDM.__init__ (mepa_edm.py lines 34-38), but @classmethod binds `self` to the CLASS, not an instance -- self.MEPA_AGG would raise AttributeError on the class; and agg_graph/rem_graph, plain instance methods on DigitalCollectionToEDM (classes.py lines 196-213), would be looked up unbound through the class and called with one argument short. A second, independent bug in the same commit: MEPA_WBR is referenced bare (not self.MEPA_WBR) and is never assigned anywhere in mepa_edm.py -- NameError. Neither bug is introduced by this extraction or its translation. Followed the RDFLib/prez sibling precedent in this same corpus (a `demo()` harness, identical on both sides, appended after the region) rather than silently changing @classmethod to a plain method (which the extracted lines forbid touching): `demo()` builds a real MepaStub(DigitalCollectionToEDM) instance carrying the bindings the extraction lost, and calls the classmethod's own wrapped function directly via `.__func__`, bypassing the broken descriptor protocol without altering the region's own decorator or body.",
     "`now`'s wall-clock value (`datetime.datetime.utcnow()`, stored as dcterms:modified by rem_graph) is neutralised by freezing `datetime.datetime` for the duration of the driver's run_pair call (unittest.mock.patch on the module-level class, reaching both exec'd sides via the shared sys.modules entry) -- not by editing the region, which computes it exactly as upstream does; see driver.py.",
-    "classes_context.py's BASE = 'ark:/61001/' is a placeholder for a name that, verified directly, does not exist in classes.py at this commit at all (`from classes import BASE, ...` -- a genuine upstream ImportError bug, not introduced here) -- picked to match the base literal used a few lines below in the real file's own DigitalCollectionToEDM.triples(). Immaterial to this region: BASE is never read inside build_mepa_collection_triples."
+    "classes_context.py's BASE = 'ark:/61001/' is a placeholder for a name that, verified directly, does not exist in classes.py at this commit at all (`from classes import BASE, ...` -- a genuine upstream ImportError bug, not introduced here) -- picked to match the base literal used a few lines below in the real file's own DigitalCollectionToEDM.triples(). Immaterial to this region: BASE is never read inside build_mepa_collection_triples.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `bf:, madsrdf:, mix:, oai:, ore:, premis:, premis2:, premis3:, vra:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "article_candidate": true,
   "draft_sha": "f763b1d5db0f5c84",
@@ -47,5 +48,13 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
   }
 }

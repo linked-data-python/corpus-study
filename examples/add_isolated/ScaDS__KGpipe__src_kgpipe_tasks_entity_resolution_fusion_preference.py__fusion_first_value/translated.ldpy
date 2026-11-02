@@ -8,10 +8,7 @@ from kgpipe_context import (
     canonicalize_entity_term, canonicalize_property_term,
     allowed_predicates, is_fusable, build_fixture_graphs,
 )
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 logger = getLogger(__name__)
 

@@ -31,7 +31,8 @@
     "the two loops each add exactly one triple per iteration on the same subject c but with a per-iteration predicate/object pair chosen by an if/else on the value shape (IRI vs literal): kept as one +{ } per branch rather than merged, since predicate and object differ per call and there is nothing shared to factor with ';'.",
     "g.bind(...) calls (including the dynamic '' and 'cs' prefixes) are namespace-manager bindings on runtime-computed values, not @prefix declarations resolvable at transpile time, so they are left as plain rdflib calls.",
     "driver re-parses each side's serialised Turtle response body into a fresh Graph and compares those by isomorphism, instead of comparing the Flask Response objects/bytes directly, since raw serialisation order and Response identity are not a valid oracle.",
-    "context shim vocprez/_config.py added to bind DEFAULT_LANGUAGE, mirroring vocprez/_config/template.py at the pinned commit."
+    "context shim vocprez/_config.py added to bind DEFAULT_LANGUAGE, mirroring vocprez/_config/template.py at the pinned commit.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `dcterms:`, `rdf:`, `rdfs:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "cdf7a53e3bb69c72",
   "provenance": {
@@ -49,5 +50,13 @@
     "method": "entry:_render_skos_rdf (re-parsed graphs)",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
   }
 }

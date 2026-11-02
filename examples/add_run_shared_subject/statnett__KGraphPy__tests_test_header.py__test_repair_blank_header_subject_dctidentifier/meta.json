@@ -33,7 +33,8 @@
     "URIRef(\"urn:uuid:1234\") is a constant IRI compared with ==, so it becomes <urn:uuid:1234> directly.",
     "context shim: vendored a subset of the kgraphpy package (kgraphpy/header.py, kgraphpy/namespaces.py, kgraphpy/exceptions.py, kgraphpy/__init__.py) verbatim from statnett/KGraphPy@38859be62f, since the package is not on PyPI and this test exercises real logic in CIMMetadataHeader.from_graph/_repair_blank_header_subject (the blank-node-to-urn:uuid repair and the logger.error call the test's own assertions check) that no context shim could fake without inventing it.",
     "the region's caplog parameter (a pytest fixture, not a real argument) has no equivalent when run_pair calls the entry point directly outside pytest; driver.py supplies a _FakeCaplog whose .messages mirrors caplog.messages closely enough for the region's own len(records)==1 / 'blank node' in records[0] assertions -- which remain the real oracle here, unmodified -- to run as written.",
-    "2026-10-30 repair: `constructions` gains `interpolation {expr}`, employed by `{b}` and `{header_type}` in the +{ } island but not declared (material error; the translation itself is unchanged)."
+    "2026-10-30 repair: `constructions` gains `interpolation {expr}`, employed by `{b}` and `{header_type}` in the +{ } island but not declared (material error; the translation itself is unchanged).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "2ddcecc4e91198e0",
   "provenance": {
@@ -69,6 +70,11 @@
       "triplet dcterms:identifier supprimé (déjà tué)",
       "îlot +{ } supprimé (déjà tué)"
     ],
-    "remaining": ""
+    "remaining": "",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

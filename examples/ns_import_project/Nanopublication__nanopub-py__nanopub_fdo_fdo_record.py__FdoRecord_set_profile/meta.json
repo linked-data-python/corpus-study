@@ -24,7 +24,8 @@
     "prefixes: RDFS->rdfs, DCTERMS->dcterms, PROV->prov, FDOF->fdof, FDOC->fdoc",
     "Same repository, same finding as the ns_import_project sibling test_add_fdo_profile: `from rdflib.namespace import RDFS, DCTERMS, PROV` cannot take `from … import p:` (ldpy/012 point 21 -- rdflib.namespace exports no `__namespaces__`); only DCTERMS is dereferenced in this region's body, so it alone becomes `@prefix dcterms:` (RDFS, PROV drop out, unused here and in original.py). `from nanopub.namespaces import FDOF, FDOC` DOES take `from … import p:`, through a hand-written `nanopub_ns_shim.py` (ldpy/012 point 15bis's sanctioned fix for a real third-party module lacking `__namespaces__`) -- values transcribed verbatim from the installed `nanopub` package's namespaces.py at the pinned commit. FDOF is imported but never dereferenced in this region's body; kept anyway, mirroring the whole import line as one unit, same convention as the sibling's own FDOF.",
     "`self.tuples[pred] = URIRef(uri)` is a dict assignment on `self`, not a graph write -- there is no `@graph`/`+{ }` here, just term construction and prefixed-name dereference (this region's own `categories`: namespace_term 1, term_constructor 1). driver.py calls `set_profile` directly with `self` duck-typed as `types.SimpleNamespace(tuples={})` (compares equal by `__dict__`), so the mutated `self.tuples` dict is the oracle for which predicate `use_fdof` picks.",
-    "Fixture-strength check: swapping the two branches (`dcterms:conformsTo if use_fdof else fdoc:hasFdoProfile`) flips `rdfeval check` to FAIL on all three calls (wrong predicate holds the URIRef); reverted afterward, OK confirmed again."
+    "Fixture-strength check: swapping the two branches (`dcterms:conformsTo if use_fdof else fdoc:hasFdoProfile`) flips `rdfeval check` to FAIL on all three calls (wrong predicate holds the URIRef); reverted afterward, OK confirmed again.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `fdof:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "2ea69e2518b1d49a",
   "provenance": {
@@ -53,6 +54,11 @@
       "`URIRef(uri)` -> `uri`",
       "IRI de `@prefix dcterms:` changée ; IRI de FDOC changée dans nanopub_ns_shim.py (l'original importe le vrai nanopub.namespaces) ; `fdoc:hasFdoProfile` -> `fdoc:profile`"
     ],
-    "remaining": ""
+    "remaining": "",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

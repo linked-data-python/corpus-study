@@ -29,7 +29,8 @@
     "BRICK, BSH, SH etc. stay bound as plain rdflib Namespace objects (from the context shim) alongside the @prefix forms, because the function also uses them as Python values outside any island: `prop.startswith(BRICK)`, `BRICK[prop]`, `BSH[f'...']` slicing off len(BRICK). Only the terms actually written into a triple became prefixed names / interpolations.",
     "Context shim brick_context.py restores: the real IRIs from bricksrc/namespaces.py (package not installed), a plain rdflib.Graph standing in for the heavyweight brickschema.Graph (reached only as define_relationships's *default* graph= value -- irrelevant here since every call passes an explicit graph=), and add_relationships, the sibling top-level function this region calls at its own end (reproduced verbatim from generate_brick.py).",
     "Driver: entry+calls (isomorphism oracle) comparing the graph= kwarg after the call, since the function mutates it in place and returns nothing; the case is a callable building a fresh `definitions` dict per invocation because the region itself consumes it via propdefn.pop(...).",
-    "Verified the fixture is not a hollow green: corrupting rdfs:subPropertyOf to rdfs:seeAlso in translated.ldpy flips the check to FAIL (33 vs 33 triples, not isomorphic)."
+    "Verified the fixture is not a hollow green: corrupting rdfs:subPropertyOf to rdfs:seeAlso in translated.ldpy flips the check to FAIL (33 vs 33 triples, not isomorphic).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rec:`, `owl:`, `tag:`, `sosa:`, `skos:`, `qudt:`, `vcard:`, `ref:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "9f88017ac209cde3",
   "provenance": {
@@ -60,6 +61,11 @@
       "superprop is not None et dtype == NumericValue forcés",
       "@prefix bsh: renommé (liaison du dépôt perdue)"
     ],
-    "remaining": "Mutants équivalents, non comptés : `if superprop:` (superprop est une URIRef non vide), `elif range_defn:` (URIRef, liste ou None), `len(definitions) == 0` forcé à False (seule trace : @graph lie des préfixes que G a déjà sous les mêmes noms)."
+    "remaining": "Mutants équivalents, non comptés : `if superprop:` (superprop est une URIRef non vide), `elif range_defn:` (URIRef, liste ou None), `len(definitions) == 0` forcé à False (seule trace : @graph lie des préfixes que G a déjà sous les mêmes noms).",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

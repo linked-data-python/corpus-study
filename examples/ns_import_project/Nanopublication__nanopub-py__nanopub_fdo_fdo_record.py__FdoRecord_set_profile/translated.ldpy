@@ -12,11 +12,11 @@
 # take `from … import p:`, through `nanopub_ns_shim` (see its header) --
 # same fix, same repository as that sibling
 # (Nanopublication__nanopub-py__tests_test_fdo_nanopub.py__test_add_fdo_profile).
-# FDOF is kept even though this body never dereferences it, mirroring the
-# whole import line as one unit, same convention as that sibling's FDOF.
+# Only FDOC is dereferenced by this body, so only `fdoc:` is imported; FDOF
+# drops out like RDFS/PROV.
 from typing import Optional, Union, List
 from rdflib import Graph, URIRef, Literal
-from nanopub_ns_shim import fdof:, fdoc:
+from nanopub_ns_shim import fdoc:
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
 

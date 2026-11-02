@@ -31,7 +31,8 @@
     "prefixes: SDO->sdo, SKOS->skos, OWL->owl, RDF->rdf, PROF->prof, XSD->xsd, FOAF->foaf",
     "Literal(x, datatype=xsd:date) kept as a Literal(...) constructor call (not rewritten to a typed-literal island \"...\"^^xsd:date): the value comes from METADATA.get(...), not a literal string, so a bare interpolation could not be trusted to carry the same datatype (2bis pitfall); only the XSD.date attribute access was rewritten to the xsd:date prefixed-name term.",
     "the first two .add() calls on the same subject (rdf:type, sdo:name) were fused into one +{ s a T ; p o } block: the region is double-tagged add_isolated/add_run_shared_subject, and this is the add_run_shared_subject idiom applied to its shared-subject pair.",
-    "every remaining if-guarded .add() becomes a one-line `if cond: +{ ... }` (0.4.0 compound-statement support), one +{ } per original .add()."
+    "every remaining if-guarded .add() becomes a one-line `if cond: +{ ... }` (0.4.0 compound-statement support), one +{ } per original .add().",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `skos:`, `owl:`, `rdf:`, `prof:`, `foaf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "dad7d52302552a98",
   "provenance": {
@@ -62,6 +63,11 @@
       "gardes rights / description en vérité au lieu de `is not None`",
       "îlots dateCreated / copyrightYear supprimés"
     ],
-    "remaining": "Pour le crédit : les clés date_created, date_modified et copyright_year qui gardent trois des îlots ne sont jamais posées par le dépôt (seules created/modified le sont) : ces trois îlots sont du code mort en réalité ; le pilote les exerce en posant les clés à la main."
+    "remaining": "Pour le crédit : les clés date_created, date_modified et copyright_year qui gardent trois des îlots ne sont jamais posées par le dépôt (seules created/modified le sont) : ces trois îlots sont du code mort en réalité ; le pilote les exerce en posant les clés à la main.",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

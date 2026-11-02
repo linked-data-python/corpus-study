@@ -28,7 +28,8 @@
     "The region is a nested function DEFINITION (addCommonInfo) that closes over a per-model `g` from an enclosing scope it is not part of, rather than taking it as a parameter; its three .add() calls became one @graph g (first line of the function body) plus three +{ } statements, each guarded exactly where the original had it (input_layer / output_layer / unconditional) -- no restructuring.",
     "addCommonInfo also calls addTrainable/addLayer/addActivation, three sibling closures defined outside the region (source lines 292-372) that also write to the same `g`. They are plain Python, untranslated (outside the assigned region), reproduced verbatim in the context shim tflite_context.py via a factory bound to each side's own `g` -- importing one shared, pre-built Graph from the shim would make both sides' runs mutate the SAME object (Python caches the shim module on the second import within the same process), which would make the check pass regardless of what the translation says.",
     "Explicit invocations of addCommonInfo were added at the end of original.py/translated.ldpy, identically on both sides, because a function definition alone writes nothing to compare (entry=None/module-state oracle, since addCommonInfo does not take `g` as an argument the entry=/calls= harness could otherwise inspect). The three calls mirror the real source's own three call sites (lines 391/397/404): input layer, output layer, and a middle layer with neither flag -- the last is the neighbourhood that must NOT get shapeIn/shapeOut triples.",
-    "Verified the fixture is not a hollow green: corrupting nnet:shapeIn to nnet:shapeInWRONG in translated.ldpy flips the check to FAIL (14 vs 14 triples, not isomorphic)."
+    "Verified the fixture is not a hollow green: corrupting nnet:shapeIn to nnet:shapeInWRONG in translated.ldpy flips the check to FAIL (14 vs 14 triples, not isomorphic).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, `rdfs:`, `sdo:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "a46a2246e72aab25",
   "provenance": {
@@ -51,5 +52,13 @@
     "names_only_original": [
       "nnet"
     ]
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
   }
 }

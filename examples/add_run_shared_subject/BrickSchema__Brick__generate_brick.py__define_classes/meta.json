@@ -26,7 +26,8 @@
     "`@graph graph` is declared once at the top of the function body: `graph` is a parameter, never reassigned within the function (including across the recursive `define_classes(subclassdef, classname, graph=graph)` call, which opens its own frame), so one declaration per call is enough -- see INSTRUCTIONS.md SS2bis on `@graph` capturing a value, not a name.",
     "context shim `brick_context.py` restores bricksrc.namespaces' constants (real Brick IRIs, matching the @prefix bindings above) plus no-op stand-ins for `add_tags`/`define_constraints` (helper functions defined outside the region, called with empty tag/constraint lists in driver.py) and a minimal `brickschema.Graph = rdflib.Graph` stand-in backing the unused `graph=G` default argument -- restoring bindings only, no invented logic; identical on both sides.",
     "the region's final branch (`graph.add((classname, propname, propval))` on a non-`str` `propname`) is untouched rdflib -- it is reached by driver.py's fixture but sits outside every `add_run_shared_subject` run (each is its own single-triple `.add`, not a shared-subject group), so it stays plain Python on both sides.",
-    "anti-vert-creux: broke `rdfs:subClassOf {parent}` into `rdfs:subClassOf {classname}` in translated.ldpy -- check went FAIL (graphs not isomorphic); restored, check OK again."
+    "anti-vert-creux: broke `rdfs:subClassOf {parent}` into `rdfs:subClassOf {classname}` in translated.ldpy -- check went FAIL (graphs not isomorphic); restored, check OK again.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `bsh:`, `rec:`, `tag:`, `sosa:`, `skos:`, `qudt:`, `vcard:`, `ref:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "4d317f0a6d4746e9",
   "provenance": {
@@ -60,6 +61,11 @@
       "+{ {alias} brick:aliasOf {classname} } retiré / objet []",
       "@graph graph -> @graph G"
     ],
-    "remaining": "Mutant équivalent, non compté : un @prefix brk: ajouté puis brick: re-déclaré (la dernière liaison rétablit brick). La traduction était juste : les 13 préfixes du bloc portent les mêmes noms que bind_prefixes du dépôt."
+    "remaining": "Mutant équivalent, non compté : un @prefix brk: ajouté puis brick: re-déclaré (la dernière liaison rétablit brick). La traduction était juste : les 13 préfixes du bloc portent les mêmes noms que bind_prefixes du dépôt.",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

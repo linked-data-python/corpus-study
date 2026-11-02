@@ -31,7 +31,8 @@
     "`Literal(row.GEOMETRY, datatype=GEO.wktLiteral)`, `Literal(str(x), datatype=XSD.string)` and `Literal(row.GNIS_NAME, datatype=XSD.string)` are `f\"{…}\"^^geo:wktLiteral` / `^^xsd:string` (str() of a shapely geometry is its WKT; the stand-in geometry is a WKT string). They keep the xsd:string datatype, which `Literal('x')` would not (INSTRUCTIONS § 2 bis).",
     "`kg.serialize(outfile, format='turtle')` is kept (no island writes). `@graph kg` adds the block's prefixes to the graph without overwriting the registry's bindings; the written file is compared as an RDF graph.",
     "Context shim: shapely, geopandas and the shapefile are not available. context_shim.py has `_PREFIX` (IRIs reconstructed from the repository's conventions; both sides read the same registry), the three helpers the script defines above the region (`load_waterbodies` reads a CSV with the shapefile's columns, NULL as None), and a `shapely.wkb` stand-in that drops the Z ordinate of WKT. The driver uses fixed relative paths and the harness compares the written .ttl as a graph; a second call on a missing file compares the raise.",
-    "Not translated (identical to the original): the `gdf_waterbody._set_value` loop and the `logger.info` calls."
+    "Not translated (identical to the original): the `gdf_waterbody._set_value` loop and the `logger.info` calls.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `owl:, prov:, rdf:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "61a84d76e62b3da7",
   "provenance": {
@@ -44,5 +45,13 @@
     "add_in_loop"
   ],
   "oracle": "isomorphism",
-  "article_candidate": false
+  "article_candidate": false,
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
+  }
 }

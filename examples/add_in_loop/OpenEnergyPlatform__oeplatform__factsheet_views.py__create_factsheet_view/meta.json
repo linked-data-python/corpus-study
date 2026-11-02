@@ -30,7 +30,8 @@
     "`URIRef(\"…/publication/\" + item[\"id\"])`, `URIRef(\"…/\" + author[\"iri\"])` and `URIRef(item[\"link_to_study_report\"])` are `f<…{item['id']}…>` (no @base in scope, no encoding in either form, so the IRIs are identical).",
     "`Literal(item[\"date_of_publication\"], datatype=XSD.dateTime)` is `f\"{item['date_of_publication']}\"^^xsd:dateTime`: equal for a string AND for None (lexical form \"None\"), checked with rdflib 7.2.1.",
     "`Literal(item[\"doi\"])` is KEPT as `{Literal(item[\"doi\"])}` on purpose: the doi arrives as data from the front end and may be None, in which case the original writes the literal \"None\" whereas a bare `{item[\"doi\"]}` raises TypeError (ldpy 0.7.1). The driver has a publication with `doi: None`, and the mutation `{item[\"doi\"]}` makes the check FAIL. `Literal(item[\"id\"])` and `Literal(remove_non_printable(…))` are bare interpolations: the first is concatenated into an IRI just above (a str or the original raises first), the second is a str by construction.",
-    "Context shim: factsheet.* is a Django project, not installed. context_shim.py holds the namespaces, the two helpers, and the loop's free variables (`bundle`, `study_URI`, `_publications`, locals of the enclosing view that the extraction did not capture); the four publications span the branches of the loop."
+    "Context shim: factsheet.* is a Django project, not installed. context_shim.py holds the namespaces, the two helpers, and the loop's free variables (`bundle`, `study_URI`, `_publications`, locals of the enclosing view that the extraction did not capture); the four publications span the branches of the loop.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `dc:, oekg:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "c6ae2ec9f8a69f1a",
   "provenance": {
@@ -45,5 +46,13 @@
     "add_isolated"
   ],
   "oracle": "isomorphism",
-  "article_candidate": true
+  "article_candidate": true,
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
+  }
 }

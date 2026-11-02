@@ -28,7 +28,8 @@
     "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, SKOS->skos, DCTERMS->dcterms, XSD->xsd, PROV->prov",
     "the extracted line is a single g.add on ONT; it exercises +{ } but not the multi-predicate ';' grouping the stratum otherwise targets, since only one statement was in scope.",
     "URIRef(\"http://example.org/semtech/page\") is a constant IRI, so it becomes <http://example.org/semtech/page> directly rather than f<...>.",
-    "context shim (shim.py) supplies HERE (a path helper only, no RDF logic) pointing at a minimal stand-in for the sibling ABox file 04-page/semtech_page_abox_v6_6_0.ttl (the real landscape ABox from the origin repo was not fetched; the stand-in only needs to parse identically for both representations, which it does since both call the same Graph().parse(...))."
+    "context shim (shim.py) supplies HERE (a path helper only, no RDF logic) pointing at a minimal stand-in for the sibling ABox file 04-page/semtech_page_abox_v6_6_0.ttl (the real landscape ABox from the origin repo was not fetched; the stand-in only needs to parse identically for both representations, which it does since both call the same Graph().parse(...)).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, `owl:`, `skos:`, `dcterms:`, `xsd:`, `prov:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "cee0f38190c0d20e",
   "provenance": {
@@ -46,5 +47,13 @@
     "method": "module-state",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
   }
 }

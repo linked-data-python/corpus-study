@@ -5,7 +5,6 @@ from rdflib import DC, DCTERMS, OWL, RDF, RDFS, SKOS, XSD, Graph, Literal, URIRe
 from context_shim import modelprops_to_graph
 from context_shim import ConceptStub, NoteStub, SkosConceptStub, SourceStub, LabelStub
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 def as_graph(self):

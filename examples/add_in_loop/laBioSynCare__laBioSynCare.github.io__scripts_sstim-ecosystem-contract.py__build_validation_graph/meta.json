@@ -25,7 +25,8 @@
   "translation_notes": [
     "prefixes: SSTIM->sstim, ECO->eco, RDF->rdf, RDFS->rdfs, DCTERMS->dcterms, OWL->owl, PROV->prov, XSD->xsd",
     "The region's module-level code depends on undefined names (ROOT, MANIFEST_MODULES, FULL_PROFILE, ONTOLOGY_DIR, parse_graph) that live elsewhere in the source file; added shim.py (context shim) providing minimal, faithful stand-ins plus small local Turtle fixture files for the context/catalog files it loads, so the region executes.",
-    "Both add-in-loop sites (merging artifact's own triples, and copying the profile predicates from the catalog) translate to +{ } inside the original for loops; the reading part (artifact.objects, catalog.objects, membership test) is left as ordinary rdflib calls since it drives a plain Python loop, not a bindings mapping."
+    "Both add-in-loop sites (merging artifact's own triples, and copying the profile predicates from the catalog) translate to +{ } inside the original for loops; the reading part (artifact.objects, catalog.objects, membership test) is left as ordinary rdflib calls since it drives a plain Python loop, not a bindings mapping.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `owl:`, `prov:`, `xsd:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "dfa97c6aa52221ff",
   "provenance": {
@@ -58,6 +59,11 @@
       "objet {obj} -> {target} ou sujet {target} -> {obj}",
       "copie des triplets de l'artefact supprimée"
     ],
-    "remaining": "Jugement non traité : les @prefix owl, prov, xsd de translated.ldpy ne servent pas dans la région (note secondaire du tri)."
+    "remaining": "Jugement non traité : les @prefix owl, prov, xsd de translated.ldpy ne servent pas dans la région (note secondaire du tri).",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

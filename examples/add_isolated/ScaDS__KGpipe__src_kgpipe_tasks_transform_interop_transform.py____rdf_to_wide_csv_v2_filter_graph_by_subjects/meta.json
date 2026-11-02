@@ -22,7 +22,8 @@
   ],
   "translation_notes": [
     "prefixes: RDF->rdf",
-    "the .add() inside the loop is an isolated triple write per iteration: @graph new_graph designates the receiver once, +{ } replaces each .add() one-for-one."
+    "the .add() inside the loop is an isolated triple write per iteration: @graph new_graph designates the receiver once, +{ } replaces each .add() one-for-one.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "0464a8f85a16dcc5",
   "provenance": {
@@ -56,6 +57,11 @@
       "garde -> véracité `if s`",
       "@graph new_graph -> @graph graph (écriture dans l'entrée)"
     ],
-    "remaining": "Liaisons vérifiées : new_graph est un Graph() frais dont rdf: est déjà la liaison par défaut ; @graph n'y change rien (namespaces() identiques), et l'appelant du dépôt (__rdf_to_wide_csv, transform.py:10-54) ne lit que les triplets et str(o)."
+    "remaining": "Liaisons vérifiées : new_graph est un Graph() frais dont rdf: est déjà la liaison par défaut ; @graph n'y change rien (namespaces() identiques), et l'appelant du dépôt (__rdf_to_wide_csv, transform.py:10-54) ne lit que les triplets et str(o).",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

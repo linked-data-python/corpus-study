@@ -19,18 +19,10 @@ from brick_context import (
     define_constraints,
 )
 @prefix brick: <https://brickschema.org/schema/Brick#> .
-@prefix bsh: <https://brickschema.org/schema/BrickShape#> .
-@prefix rec: <https://w3id.org/rec#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tag: <https://brickschema.org/schema/BrickTag#> .
-@prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
 
 G = brickschema.Graph()
 A = rdf:type

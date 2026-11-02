@@ -26,7 +26,8 @@
     "`from apysource.namespaces import oa:, schema:, sv:` fails against the real module (ImportError: cannot import name '__namespaces__'): the package defines SV/OA/SCHEMA as rdflib Namespaces but no `__namespaces__` registry, which a prefix import reads at run time. Finding: `from m import p:` works only on modules written for it (ldpy modules, or ones with a registry); on an ordinary project namespaces module a two-line shim is needed. apysource_ns_shim.py re-exports the package's own objects and adds the registry; classification minor-restructuring for that reason.",
     "`from rdflib.namespace import DCTERMS, RDF, RDFS` cannot take `from … import p:` (ldpy/012 point 21); only RDF is dereferenced, so `@prefix rdf:` covers it.",
     "`g.subjects(RDF.type, SV.Source)` -> `m{ ?s rdf:type sv:Source }(g)` (one pattern, one projected variable, bare terms; sorted() makes the order irrelevant).",
-    "Proof: the region only asserts and returns None, so driver.py gives it a tmp_path whose write_text stores chosen content: (1) same YAML twice -> passes; (2) YAML differing only in a fragment label -> passes (a pattern widened to any typed subject then raises); (3) a second source -> AssertionError (a pattern narrowed to another class then passes). Checked by breaking the translation: widened `?s rdf:type ?t` -> FAIL (call[1] None vs AssertionError); narrowed `sv:Fragment` -> FAIL (call[1] and call[2] outcomes swap); restored -> OK."
+    "Proof: the region only asserts and returns None, so driver.py gives it a tmp_path whose write_text stores chosen content: (1) same YAML twice -> passes; (2) YAML differing only in a fragment label -> passes (a pattern widened to any typed subject then raises); (3) a second source -> AssertionError (a pattern narrowed to another class then passes). Checked by breaking the translation: widened `?s rdf:type ?t` -> FAIL (call[1] None vs AssertionError); narrowed `sv:Fragment` -> FAIL (call[1] and call[2] outcomes swap); restored -> OK.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `oa:, schema:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "b24bfc9b492f3401",
   "provenance": {
@@ -38,5 +39,13 @@
   "strata": [
     "ns_import_project"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
+  }
 }

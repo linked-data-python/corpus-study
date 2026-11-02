@@ -30,7 +30,8 @@
     "each g.add((uri, RDF.type, OWL.X)) becomes {uri} a owl:X (rdf:type abbreviated as 'a', still the same prefixed-name construction)",
     "rdflib.Literal(source.lbl) is a plain (untyped, unlagged) literal built from a str; the language's default coercion of a str value is a plain literal, so a bare interpolation {source.lbl} preserves it -- no need to keep the rdflib.Literal(...) call",
     "context_shim.py replaces the oaklib.datamodels.obograph import (package not installed) and stands in for OboGraphToRdfOwlConverter's self, providing _uri_ref and a stub _convert_meta; _convert_meta itself is outside the region and is not exercised (meta=None in every fixture)",
-    "self is passed through the harness's call/arg comparison, which is not graph-aware for arbitrary objects; context_shim.Converter defines __eq__/__hash__ as class-only equality (it is stateless) purely so the fixture objects compare equal across the two runs -- not a change to the region's semantics"
+    "self is passed through the harness's call/arg comparison, which is not graph-aware for arbitrary objects; context_shim.Converter defines __eq__/__hash__ as class-only equality (it is stateless) purely so the fixture objects compare equal across the two runs -- not a change to the region's semantics",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "2b642f27faf1d805",
   "provenance": {
@@ -65,6 +66,11 @@
       "@prefix owl: renommé (liaison perdue)",
       "return None"
     ],
-    "remaining": "Mutant équivalent, non compté : `if source.meta` -> `is not None` (une Meta est toujours vraie)."
+    "remaining": "Mutant équivalent, non compté : `if source.meta` -> `is not None` (une Meta est toujours vraie).",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

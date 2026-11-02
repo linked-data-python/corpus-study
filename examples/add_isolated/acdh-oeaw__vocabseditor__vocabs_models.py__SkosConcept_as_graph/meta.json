@@ -32,7 +32,8 @@
     "Three unconditional adds on the shared subject `subj` at the top (rdf:type, skos:prefLabel, skos:inScheme) merged into one `+{ s p1 o1 ; p2 o2 ; p3 o3 }` -- add_run_shared_subject shape, but the honest most-specific translation for an unconditional run (same precedent as the BBDFrancois pair). The two `else:` branch adds keep separate +{ } because they have DIFFERENT subjects (main_concept_scheme vs subj) -- `;` cannot join them. The four label_type branches stay one +{ } each: they are mutually exclusive (if/elif/elif/else), so joining any two with `;` would add triples that never coexist in one run of the original.",
     "Context shim (context_shim.py): modelprops_to_graph transcribed VERBATIM from vocabs/utils.py (local clone, lines 85-108) -- untouched by the translation, called identically by both sides, so its own internals do not bear on the equivalence proof as long as it runs; the stub `self._meta.fields = []` makes it a genuine no-op rather than reproducing Django's field-descriptor/set_extra machinery for code this region never touches.",
     "driver.py uses a `demo(scenario)` harness (identical on both sides, appended to original.py and translated.ldpy) rather than calling as_graph(self) directly from the driver: an earlier version passed the SkosConceptStub itself as entry='as_graph''s sole argument, and `rdfeval check` FAILed with 'call[0].arg[0]: values differ' -- the harness's per-argument comparison (`call[i].arg[j]`) falls back to Python identity equality for a plain object with no __eq__, so two structurally identical stub instances (one built per side) compared unequal. demo(scenario) takes a bare string instead, and returns the one thing meant to be compared: the graph.",
-    "Fixture strength checked directly: corrupting one predicate in translated.ldpy (skos:broader -> skos:seeAlso) flips `rdfeval check` to FAIL (12 vs 12 triples, not isomorphic); reverted afterward, and OK confirmed again."
+    "Fixture strength checked directly: corrupting one predicate in translated.ldpy (skos:broader -> skos:seeAlso) flips `rdfeval check` to FAIL (12 vs 12 triples, not isomorphic); reverted afterward, and OK confirmed again.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "810d7b03d28651fc",
   "provenance": {
@@ -65,6 +66,11 @@
       "garde prefLabel -> False / -> True",
       "garde hiddenLabel -> False"
     ],
-    "remaining": "Trois mutants équivalents, non comptés : `notation != \"\"` -> véracité (CharField sans null=True, models.py:746-752 : toujours une str) ; `broader_concept` -> `is not None` (TreeForeignKey null=True, models.py:753-760 : None ou une instance, toujours vraie) ; garde altLabel -> False (la branche else écrit le même skos:altLabel). Liaisons vérifiées : namespaces() identiques des deux côtés dans les deux scénarios (dc:, rdf:, skos: y sont déjà liés aux mêmes IRI par défaut), ce qui compte puisque rdf_utils.graph_construct_qs (rdf_utils.py:27-52) unit puis sérialise ces graphes."
+    "remaining": "Trois mutants équivalents, non comptés : `notation != \"\"` -> véracité (CharField sans null=True, models.py:746-752 : toujours une str) ; `broader_concept` -> `is not None` (TreeForeignKey null=True, models.py:753-760 : None ou une instance, toujours vraie) ; garde altLabel -> False (la branche else écrit le même skos:altLabel). Liaisons vérifiées : namespaces() identiques des deux côtés dans les deux scénarios (dc:, rdf:, skos: y sont déjà liés aux mêmes IRI par défaut), ce qui compte puisque rdf_utils.graph_construct_qs (rdf_utils.py:27-52) unit puis sérialise ces graphes.",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

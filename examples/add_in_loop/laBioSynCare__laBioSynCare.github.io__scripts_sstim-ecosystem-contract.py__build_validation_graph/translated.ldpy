@@ -9,9 +9,6 @@ from shim import ROOT, MANIFEST_MODULES, FULL_PROFILE, ONTOLOGY_DIR, parse_graph
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 CONTEXT_FILES = tuple(
     ROOT / MANIFEST_MODULES[module_id]["source"]["path"]

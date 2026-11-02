@@ -30,7 +30,8 @@
     "prefixes: QUDT->qudt, OA->oa, CSVW->csvw, RDF->rdf, XSD->xsd",
     "self.g is a mutated-in-place function parameter, never reassigned: one `@graph g` at the top of the function covers the whole body, so every g.add(...) becomes a bare +{ } (no per-triple (g) suffix needed).",
     "oa:value's Literal(cell, datatype=format) has a datatype decided at run time from the CSVW column's format; `{cell}^^{format}` (interpolation with a glued, itself-interpolated datatype) reproduces it exactly -- a genuine 'typed literal' use, safe here because cell is already a str (see instructions Sec.2bis on the Literal(x, datatype=) pitfall).",
-    "preserved two pre-existing bugs verbatim rather than fixing them: row_uri = \"table-{TABLE}-gid-{GID}\".format(table) (positional arg into named placeholders, only reachable when about_url is falsy -- the fixture keeps about_url truthy for every table to avoid an unrelated crash on both sides), and the anyURI branch's `else: value_node = URIRef(cell)`, which len(cell.split(' ')) >= 1 makes unreachable for any string including \"\"."
+    "preserved two pre-existing bugs verbatim rather than fixing them: row_uri = \"table-{TABLE}-gid-{GID}\".format(table) (positional arg into named placeholders, only reachable when about_url is falsy -- the fixture keeps about_url truthy for every table to avoid an unrelated crash on both sides), and the anyURI branch's `else: value_node = URIRef(cell)`, which len(cell.split(' ')) >= 1 makes unreachable for any string including \"\".",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "article_candidate": true,
   "draft_sha": "2f7155d435c8cb90",
@@ -60,6 +61,11 @@
       "terme data[\"dialect\"][csvw:headerRowCount] retiré de row_num",
       "if unit: -> if False:"
     ],
-    "remaining": "Jugements non traités (drapeau wrong-construction) : l'IRI csvw:url reste en {URIRef(\"{}/row={}\".format(...))} au lieu de f<{self.csv_url}/row={row_num}> (le triage l'a vérifié équivalent)."
+    "remaining": "Jugements non traités (drapeau wrong-construction) : l'IRI csvw:url reste en {URIRef(\"{}/row={}\".format(...))} au lieu de f<{self.csv_url}/row={row_num}> (le triage l'a vérifié équivalent).",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

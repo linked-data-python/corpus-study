@@ -6,10 +6,8 @@ from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, RDFS, OWL, XSD
 from rdflib import Graph, Namespace
 from helpers import load_prefixes, _bind_prefixes_to_graph, resolve_uri, ensure_declaration, reconstruct_intersection
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 def csv_to_owl_subclass(subclass_csv_file: str, prefix_file: str, output_file="subclass.owl"):

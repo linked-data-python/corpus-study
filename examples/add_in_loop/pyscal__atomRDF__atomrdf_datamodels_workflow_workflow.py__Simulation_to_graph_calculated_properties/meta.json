@@ -16,7 +16,6 @@
   "translation_status": "final",
   "classification": "directly-expressible",
   "constructions": [
-    "from … import p:",
     "@graph",
     "+{ }",
     "f<…>",
@@ -27,7 +26,8 @@
     "The two `graph.add` in the nested loops are `+{ {param_uri} asmo:wasCalculatedBy {simulation} }` and `+{ f<{sample_id}> asmo:hasCalculatedProperty {param_uri} }`, on `@graph graph` declared at the top of the function (the graph is its parameter, so `param.to_graph(graph)` and the island act on the same one). `ASMO.…` is `asmo:…` through `from atomrdf_context import asmo:, …`; the unused imports (CMSO, LDO, …, and rdflib's XSD, RDF, RDFS) become prefix imports too, as in the original import list.",
     "`URIRef(sample_id)` is `f<{sample_id}>` (a str or a URIRef; no @base in scope).",
     "KNOWN DIFFERENCE, not covered by the driver: if `simulation` (or the URI returned by `to_graph`) is None, the original raises AssertionError from `Graph.add`, the translation TypeError from the island (ldpy 0.7.1: an interpolated None raises). The same invalid call fails on both sides with a different exception type.",
-    "Context shim: atomrdf is not installed; atomrdf_context.py holds the namespaces of atomrdf.namespace (real IRIs). `param.to_graph` is outside the region and is a stub in the driver (it writes a label and returns the property URI)."
+    "Context shim: atomrdf is not installed; atomrdf_context.py holds the namespaces of atomrdf.namespace (real IRIs). `param.to_graph` is outside the region and is a stub in the driver (it writes a label and returns the property URI).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `xsd:, rdf:, rdfs:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `constructions` no longer credits 'from … import p:'; `rdfeval check` stays OK."
   ],
   "draft_sha": "ec1951018b905509",
   "provenance": {
@@ -40,5 +40,13 @@
     "add_in_loop"
   ],
   "oracle": "isomorphism",
-  "article_candidate": false
+  "article_candidate": false,
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy; constructions no longer credit from … import p:"
+  }
 }

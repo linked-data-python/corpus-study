@@ -17,6 +17,7 @@
   "translation_status": "final",
   "classification": "directly-expressible",
   "constructions": [
+    "@prefix",
     "+{ }",
     "call suffix (g)",
     "prefixed name",
@@ -29,7 +30,8 @@
     "_class, _mint_hash_iri, _ensure_type_with_label, _safe_parent, _sanitize_label and locked_graph (module-level helpers used by add_atomic_weight_to_element but defined elsewhere in the same source file) restored via context_shim.py. Two are deliberately NOT verbatim: _mint_hash_iri is made to return a fixed IRI instead of hashing datetime.now() (the real version would mint a different `aw` on every call, including the two separate calls -- original vs translated -- this pilot makes, breaking the isomorphism oracle for a reason that has nothing to do with the translation); locked_graph is simplified to `yield Graph()`, dropping the real FileLock+TTL-parse/serialise (an external dependency -- a real data directory and the filelock package -- that add_atomic_weight_to_element's own body never inspects, since it only reads/writes the yielded `g` inside the `with` block, which the driver observes directly).",
     "add_atomic_weight_to_element never returns nor is ever passed the graph it writes to (it returns only str(aw) or an error string), so run_pair's built-in entry=/calls= comparison (return value + arguments only) cannot see whether the tail +{ }(g) actually ran -- a hollow green matching the deterministic aw regardless. driver.py therefore bypasses run_pair (precedent: add_isolated/BBDFrancois...driver.py) and drives both sides by hand, snapshotting context_shim.LAST_GRAPH (set by locked_graph on every call) right after each call, with the two calls never overlapping so there is no race on that shared slot.",
     "Four cases: a normal float value (reaches the tail add), the literal \"N/A\" (other g.set branch), a value that fails float() (early return INSIDE the try/except, before the tail add -- proves no spurious triple there), and a non-absolute element_iri (earliest return, graph never touched).",
-    "Verified not a hollow green: changing the tail add's object from {aw} to {parent} (self-loop) flips the check to FAIL on cases 0 and 1 (the two that reach the tail add), graphs reported not isomorphic; cases 2 and 3 correctly stay unaffected (they never reach that line either way)."
+    "Verified not a hollow green: changing the tail add's object from {aw} to {parent} (self-loop) flips the check to FAIL on cases 0 and 1 (the two that reach the tail add), graphs reported not isomorphic; cases 2 and 3 correctly stay unaffected (they never reach that line either way).",
+    "Credit correction (2026-11-02, corpus/403 defect 3): `constructions` now credits '@prefix' -- translated.ldpy declares and uses xsd: as terms; translated.ldpy unchanged."
   ],
   "draft_sha": "9faa73703b10d190",
   "provenance": {
@@ -67,6 +69,11 @@
       "garde value == \"N/A\" -> False",
       "îlot déplacé avant le try (écrit avant la levée de float())"
     ],
-    "remaining": "Mutant équivalent, non compté : `if parent is None` -> `if not parent` (_safe_parent rend None ou un URIRef à schéma et hôte non vides, jamais falsy). L'îlot est en suffixe d'appel (g) : aucune liaison du graphe que locked_graph relit et sérialise n'est touchée."
+    "remaining": "Mutant équivalent, non compté : `if parent is None` -> `if not parent` (_safe_parent rend None ou un URIRef à schéma et hôte non vides, jamais falsy). L'îlot est en suffixe d'appel (g) : aucune liaison du graphe que locked_graph relit et sérialise n'est touchée.",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "'@prefix' added to constructions (declared and used, was missing)",
+      "check": "OK"
+    }
   }
 }

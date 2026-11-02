@@ -28,7 +28,8 @@
     "prefixes: RDF->rdf, RDFS->rdfs, OWL->owl, XSD->xsd",
     "helpers.py: load_prefixes/_bind_prefixes_to_graph/resolve_uri/ensure_declaration/reconstruct_intersection are the real module-level helpers copied verbatim from kracr/cog-csv-owl-bridge@d238191ecc's src/csv_to_owl/csv_owl_code.py (they sit above the extracted region in the same file, so the draft's original.py could not run without them). Fixture data (subclass.csv, prefixes.csv) exercises all five branches of the function: simple A<=B, textual 'some' restriction, '&' intersection, an on-property/quantifier restriction column, and the empty-Subclass GCI row.",
     "driver.py bypasses run_pair's entry=/calls= mechanism: the function's whole observable effect is the OWL file it serializes (no graph argument, no return value), so comparing only its string arguments would be a hollow green. The driver instead calls each side's function directly and compares the two serialized files by rdflib graph isomorphism, using the same harness helpers run_pair itself uses.",
-    "blank nodes (restriction, anon_cls) stay plain BNode() -- the original never keys them on data, so there is nothing for _:{ } to hash; not listed as a construction used."
+    "blank nodes (restriction, anon_cls) stay plain BNode() -- the original never keys them on data, so there is nothing for _:{ } to hash; not listed as a construction used.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, `xsd:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "30ba0c3484987f8d",
   "provenance": {
@@ -62,6 +63,11 @@
       "WARN message changed",
       "owl namespace rebound to another prefix before serialisation"
     ],
-    "remaining": "Not a repair flag: the translator's note says helpers.py is copied verbatim, but _bind_prefixes_to_graph lost its comments and its `return bound_count` (no effect here, the caller ignores it); the note stays inaccurate."
+    "remaining": "Not a repair flag: the translator's note says helpers.py is copied verbatim, but _bind_prefixes_to_graph lost its comments and its `return bound_count` (no effect here, the caller ignores it); the note stays inaccurate.",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

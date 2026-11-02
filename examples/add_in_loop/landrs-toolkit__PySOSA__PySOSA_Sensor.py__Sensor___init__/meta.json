@@ -27,7 +27,8 @@
     "The five `obsgraph.add` become three `+{ }` in the method (one run on `{self.sensor_id}` with `;`, one island per loop body), on `@graph obsgraph` declared once at module level after `obsgraph = cfg.get_graph()` and seen by the method. `cfg.sosa.Sensor`, `.observes`, `.implements` are `sosa:Sensor`, `sosa:observes`, `sosa:implements` through `from context_shim import sosa:` (the Namespace the module exports as `cfg.sosa`); `RDF`, `RDFS` from rdflib are imported as prefixes (`rdf:`, `rdfs:`).",
     "The terms `self.sensor_id` (a BNode), `self.comment`, `self.label`, `obs.label` are bound objects and stay interpolations; `_:{ }` does not apply, the BNode is created by `BNode()` and kept on `self`.",
     "Hollow-green trap avoided in the driver: the region writes to a MODULE graph, not to an argument, so each call's stub `self` carries that same graph (`self.graph`), which makes the harness canonicalise it after the call. Mutations checked: removing the `isinstance(pro, Procedure)` test and dropping `rdfs:comment` both FAIL.",
-    "Context shim: PySOSA is not installed. context_shim.py has `config` (the shared graph returned by get_graph(), the SOSA namespace) and ObservableProperty / Procedure reduced to their `label`."
+    "Context shim: PySOSA is not installed. context_shim.py has `config` (the shared graph returned by get_graph(), the SOSA namespace) and ObservableProperty / Procedure reduced to their `label`.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `rdf:` from the prefix import, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "e29f7489a33c8e35",
   "provenance": {
@@ -40,5 +41,13 @@
     "add_in_loop"
   ],
   "oracle": "isomorphism",
-  "article_candidate": false
+  "article_candidate": false,
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": true,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "unused prefix declarations dropped from translated.ldpy"
+  }
 }

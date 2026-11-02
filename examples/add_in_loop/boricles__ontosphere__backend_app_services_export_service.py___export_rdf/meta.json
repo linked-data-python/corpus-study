@@ -21,6 +21,7 @@
   "translation_status": "final",
   "classification": "directly-expressible",
   "constructions": [
+    "@prefix",
     "@graph",
     "+{ }",
     "@bindings",
@@ -36,7 +37,8 @@
     "`@graph g` designates the existing local `g = Graph()` (not `@graph as g`) -- the more specific form for a graph already constructed by hand, letting `g.bind(...)` stay untouched Python (it configures the rdflib Graph's serialiser prefix map, not an RDF operation) and every write below be a bare `+{ }` instead of the mechanical `g += g{ ... }` a first pass produced.",
     "prefixes: owl:/rdfs:/xsd: declared and used (OWL.Class etc., RDFS.subClassOf etc., XSD[...] via the interpolated local part above). rdf: is NOT declared: RDF.type is written as `a` inside `+{ }`, so an unused rdf: prefix would inflate the construction count for nothing -- confirmed by grep: the only RDF.* use in this region is RDF.type/RDF.Ontology, both `a` in Turtle. onto:/NS is not declared as a prefix either: `g.bind(\"onto\", NS)` only registers a serialiser prefix, and NS never appears as a term prefix in any triple pattern -- every node/edge URI goes through `_resolve_uri(x, NS)` in plain Python, arriving at the island already a computed URIRef, so it is `{node_uri}`/`{source}`/`{target}` interpolation, not `onto:{x}` (which would silently NOT percent-encode per bindings.md's `ex:{?id}` warning, and would also be wrong here since _resolve_uri's own choice between an absolute IRI and a namespace-relative one is exactly the kind of decision INSTRUCTIONS_403 SS2 asks to make in full knowledge -- keeping it in Python means the region's own encoding choice, whatever it is, is preserved unchanged rather than silently replaced by ldpy's).",
     "context_shim.py restores `_resolve_uri` (a module-level helper in the same source file, just below the extracted region's line range, so extraction did not capture it -- copied verbatim) and GraphNode/GraphEdge/GraphData (the real @dataclass field shapes from backend/app/services/graph_service.py, copied verbatim; GraphService itself is an empty placeholder, imported by name but never touched by this region). `import logging` is added to original.py's header: `logger = logging.getLogger(__name__)` was present in the extracted region but the module-level `import logging` sits above the region's line range in the real file, so it was silently missing.",
-    "demo(graph_data, fmt, namespace_uri) is appended identically to original.py and translated.ldpy (documented in both): _export_rdf's graph never escapes the function except serialised to text, and rdflib's serialisers are not byte-stable across two independently built (even isomorphic) graphs, so comparing the returned strings by equality would be judging serialisation order, not RDF content -- exactly what rdfeval.harness's docstring says graph comparison must never do. demo() round-trips the returned text back into a fresh Graph with the same fmt -> rdf_format mapping _export_rdf itself uses, so the driver compares two GRAPHS by isomorphism."
+    "demo(graph_data, fmt, namespace_uri) is appended identically to original.py and translated.ldpy (documented in both): _export_rdf's graph never escapes the function except serialised to text, and rdflib's serialisers are not byte-stable across two independently built (even isomorphic) graphs, so comparing the returned strings by equality would be judging serialisation order, not RDF content -- exactly what rdfeval.harness's docstring says graph comparison must never do. demo() round-trips the returned text back into a fresh Graph with the same fmt -> rdf_format mapping _export_rdf itself uses, so the driver compares two GRAPHS by isomorphism.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): `constructions` now credits '@prefix' -- translated.ldpy declares and uses owl:, rdfs:, xsd: as terms; translated.ldpy unchanged."
   ],
   "draft_sha": "e91507327d943adf",
   "provenance": {
@@ -54,5 +56,13 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": false,
+    "mutants_killed": [],
+    "remaining": "",
+    "credit": "'@prefix' added to constructions (declared and used, was missing)"
   }
 }

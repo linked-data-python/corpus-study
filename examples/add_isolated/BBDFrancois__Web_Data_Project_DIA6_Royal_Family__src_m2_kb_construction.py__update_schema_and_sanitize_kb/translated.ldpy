@@ -4,10 +4,8 @@
 from rdflib import Graph, Literal, RDF, URIRef, Namespace
 from rdflib.namespace import OWL, RDFS, XSD
 from rdflib import Graph, URIRef
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
 def update_schema_and_sanitize_kb(expanded_kb_file, ontology_file, alignment_file,

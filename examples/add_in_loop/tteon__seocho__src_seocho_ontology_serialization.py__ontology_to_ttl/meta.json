@@ -32,7 +32,8 @@
     "prefixes: OWL->owl, RDF->rdf, RDFS->rdfs, SKOS->skos, XSD->xsd",
     "The extracted function relies on a module-private _safe_local() and on `from .core import PropertyType`, neither resolvable outside the package; added shim.py with faithful copies (same regex-based slugification, same PropertyType members) so both versions run, and rewired the relative import to `from shim import PropertyType`.",
     "Every g.add((s, p, o)) becomes +{ {s} {p} {o} } under one `@graph g` set right after g is created (g is never reassigned). Two places in the original issue two consecutive .add() calls on the very same subject (class -> rdf:type + rdfs:label; property -> rdf:type + domain + range); those became one +{ s p1 o1 ; p2 o2 ; p3 o3 } rather than three separate +{ } islands, since it is exactly the same graph write with no reordering.",
-    "The region never exposes its Graph: it serialises it straight to a file and returns a Path, so comparing the two returned Path values (rdfeval.harness.run_pair's default entry-mode comparison) would prove nothing. driver.py therefore calls both entry points directly, reads the two Turtle files back, and checks isomorphism itself — the fixture Ontology instance covers a node with same_as, one with a broader parent, one plain node, properties of several PropertyType values, and a relationship with/without same_as."
+    "The region never exposes its Graph: it serialises it straight to a file and returns a Path, so comparing the two returned Path values (rdfeval.harness.run_pair's default entry-mode comparison) would prove nothing. driver.py therefore calls both entry points directly, reads the two Turtle files back, and checks isomorphism itself — the fixture Ontology instance covers a node with same_as, one with a broader parent, one plain node, properties of several PropertyType values, and a relationship with/without same_as.",
+    "Credit correction (2026-11-02, corpus/403 defect 3): dropped `@prefix` for `rdf:`, declared by the mechanical draft but never used as a term in the translated region (and not among the bindings the original sets on its graph); `rdfeval check` stays OK."
   ],
   "draft_sha": "bc4ee655ad4844ca",
   "provenance": {
@@ -62,6 +63,11 @@
       "FLOAT -> xsd:double",
       "BOOLEAN -> xsd:string"
     ],
-    "remaining": "Le drapeau wrong-construction (7 `{Literal(x)}` remplaçables par `{x}`) n'est pas traité : c'est un jugement."
+    "remaining": "Le drapeau wrong-construction (7 `{Literal(x)}` remplaçables par `{x}`) n'est pas traité : c'est un jugement.",
+    "credit_correction": {
+      "date": "2026-11-02",
+      "what": "unused prefix declarations dropped from translated.ldpy",
+      "check": "OK"
+    }
   }
 }

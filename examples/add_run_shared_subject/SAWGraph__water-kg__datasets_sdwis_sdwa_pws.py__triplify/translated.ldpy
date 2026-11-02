@@ -4,10 +4,6 @@
 from rdflib.namespace import OWL, XMLNS, XSD, RDF, RDFS
 from rdflib import URIRef, BNode, Literal
 from shim import prefixes, Initial_KG, get_attributes, get_iris
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xmlns: <http://www.w3.org/XML/1998/namespace> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 def triplify(df):

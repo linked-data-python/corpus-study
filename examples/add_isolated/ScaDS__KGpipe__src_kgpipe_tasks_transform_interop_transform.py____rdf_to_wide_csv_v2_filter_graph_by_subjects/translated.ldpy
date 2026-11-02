@@ -2,7 +2,6 @@
 # region: __rdf_to_wide_csv_v2.filter_graph_by_subjects (lines 74-79, stratum add_isolated)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Literal, RDF
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 
 def filter_graph_by_subjects(graph: Graph, subjects: set):
