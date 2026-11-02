@@ -34,8 +34,8 @@ term, constructors per triple). All thresholds live in
 revision and configuration version.
 
 The complete funnel — how 1 187 discovered candidates become 376 measured
-repositories, 29 231 located sites, 1 196 drawn regions and the pairs that
-survive, with every exclusion criterion at every level (repository, file,
+repositories, 36 081 located sites, 1 196 drawn regions, the sample of 385
+carried over when the analyser was corrected, and the pairs that survive, with every exclusion criterion at every level (repository, file,
 region, pair) and what each one removes — is documented in
 [funnel.md](funnel.md), with a per-repository table in
 `results/summary/candidates.csv`.
@@ -56,10 +56,13 @@ python -m rdfeval acquire     # clone at pinned commits -> corpus/repos/ (gitign
 python -m rdfeval analyze     # AST analysis -> results/raw/analysis/, files_index.jsonl
 python -m rdfeval surface     # shapes of the code -> surface.json + sites.jsonl,
                               #     one record per located occurrence of a
-                              #     stratum shape (29 231 sites, 14 strata)
+                              #     stratum shape (36 081 sites, 14 strata)
 python -m rdfeval strata      # seeded draw, 100 regions per stratum, capped at
                               #     4 per repository -> results/raw/strata.json
                               #     + examples/<stratum>/<id>/ with drafts
+python -m rdfeval reprise     # carry the sample over a corrected analyser:
+                              #     finals kept, strata completed to 25, new
+                              #     sites sampled, rates weighted [--dry-run]
 #   -- translation by batches: see INSTRUCTIONS.md --
 python -m rdfeval validate    # drivers -> results/raw/validation.jsonl
 python -m rdfeval compare     # pair metrics -> results/raw/pairs.jsonl, summary/pairs.csv
@@ -112,8 +115,10 @@ The strata overlap by design, so a region drawn for several is translated once
 and credited to each. Regions that **read** a graph are proved equivalent not
 by isomorphism but by the equality of the values both versions produce from a
 `fixture.ttl` input graph ([corpus/405](../corpus/405-oracle-de-lecture.md)).
-Current draw: **1 196 regions over 242 repositories, 14 strata** — 777 proved
-by isomorphism, 419 by values.
+Current sample: **385 regions over 146 repositories, 14 strata**, resumed
+from a draw of 1 196 after the analyser correction (`rdfeval reprise`,
+funnel.md § 5.4) — 379 final, 357 measured pairs, 218 proved by
+isomorphism and 139 by values, none approved yet.
 
 Install: `pip install -e .[plots,dev]` plus `pip install -e ../ldpy`
 (the transpiler; used for translation validation and ldpy-side metrics).
