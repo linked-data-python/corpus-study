@@ -178,7 +178,7 @@ def detected(ldpy_source: str) -> set[str]:
 # means a credit for nothing.  These two are checked in that direction only.
 _CLAIM_ONLY = {
     "typed literal": re.compile(r"\^\^"),
-    "language literal": re.compile(r"[\"'}]@[A-Za-z]"),
+    "language literal": re.compile(r"[\"'}]@[A-Za-z{]"),   # {v}@{k} too
 }
 
 

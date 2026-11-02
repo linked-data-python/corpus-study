@@ -107,11 +107,15 @@ def sizes(ex_dir: Path) -> str | None:
     ex_dir = Path(ex_dir)
     if not all((ex_dir / n).exists() for n in OPTIMIZED):
         return None
-    from .compare import NOT_SHIMS, measure_optimized, python_side
+    from .compare import (NOT_SHIMS, measure_optimized, python_side,
+                          strip_demo)
     shims = [p for p in sorted(ex_dir.glob("*.py")) if p.name not in NOT_SHIMS]
     preamble = "\n".join(p.read_text() for p in shims) or None
     try:
-        py = python_side((ex_dir / "original.py").read_text(), preamble)
+        # measured as compare measures it: without the demo() harness, which
+        # measure_optimized strips from the optimized artefacts too
+        py = python_side(strip_demo((ex_dir / "original.py").read_text()),
+                         preamble)
         opt = measure_optimized(py, (ex_dir / "optimized.py").read_text(),
                                 (ex_dir / "optimized.ldpy").read_text(),
                                 preamble)
