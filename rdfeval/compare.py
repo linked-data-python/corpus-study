@@ -344,6 +344,11 @@ def run(config: dict, study: Study = STUDY) -> None:
         if meta.get("classification") in ("not-expressible", "excluded"):
             skipped.append((meta["region_id"], meta.get("classification")))
             continue
+        if meta.get("disabled"):
+            # a pair no driver can make show anything (record corpus/403,
+            # defect 2): kept for the record, counted nowhere
+            skipped.append((meta["region_id"], "disabled"))
+            continue
         vstatus = (meta.get("validation") or {}).get("status")
         constructions, unknown = normalise_constructions(
             meta.get("constructions", []))
