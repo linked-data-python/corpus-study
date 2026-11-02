@@ -48,5 +48,26 @@
     "method": "fixture:fixture.ttl entry:listing_profiles",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "header_optimization_status": "final",
+  "optimization_notes": [
+    "Python: the two `*_template` variables are inlined (`describe_query = \"\"\"…\"\"\".format(...)`); `.format` is kept rather than f-strings because the doubled `{{ }}` of the SPARQL make an f-string cost more tokens (and ldpy cannot put `prof:Profile` in an f-string hole, which reads it as a format spec). `subjects(predicate=…, object=…)` loses its keywords, `response = …; return response` becomes `return await …`.",
+    "Python: the two adds on the profile become one `profiles_g += [(…FocusNode), (…link…)]` (Graph.__iadd__ goes through addN, with the same node checks as add), and `curie = get_curie_id_for_uri(profile_uri)` moves before it, on both sides. Consequence, the same on both sides: if get_curie_id_for_uri raised (no handler in the region), the FocusNode triple of that profile would no longer have been added before the exception.",
+    "LD Python: `@graph profiles_g`, `for profile_uri in m{ ?profile_uri a prof:Profile }` and ONE `+{ {profile_uri} a prez:FocusNode ; prez:link {f\"/profiles/{curie}\"} }`; `prof:Profile` in the two `.format` calls and the return_from_graph argument. The rest is line for line with optimized.py. No exception to the symmetry rule: the merge of the two adds exists on the Python side too (`+=` list)."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name",
+    "@graph",
+    "m{ }",
+    "variable",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_notes": [
+    "Both sides keep `import prez_context` (the shim) and `get_curie_id_for_uri`, and the renderer import shrinks to `return_from_graph` (seven unused names go).",
+    "Python: Namespace, GEO, ALTREXT, OGCFEAT go; Literal, RDF, PROF, PREZ stay.",
+    "LD Python: the whole `from rdflib import Literal, Namespace` goes (the link literal is an interpolation), and `geo:`, `rdf:` (the island writes `a`), `altrext:`, `ogcfeat:` go; `prof:` and `prez:` stay."
+  ]
 }

@@ -51,5 +51,17 @@
       "QUDT rebindé sur QUDT._NS (Namespace au lieu de la classe) : FAIL (identité, type de clé, avertissement perdu)"
     ],
     "remaining": "Constat pour Maxime, hors de la paire : un nom préfixé sur un DefinedNamespace ne passe pas par sa validation. Si la ligne 182 est réécrite qudt:degreeCelsius au lieu de QUDT.degreeCelsius, l'avertissement 'Code: degreeCelsius is not defined in namespace QUDT' disparaît (expérience dans une copie : FAIL sur les avertissements). Avec _fail=True, c'est un AttributeError qui disparaîtrait. Le crédit de `from … import p:` reste à juger : l'import doit lier aussi les noms."
-  }
+  },
+  "optimization_status": "final",
+  "header_optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is the single import line `from qudt_ns_context import QUDT, QUDTU, QUDTQK`, whose three names the driver requires. optimized.py is original.py and optimized.ldpy is translated.ldpy, byte for byte (the demo() harness copied as is).",
+    "The LD Python import must bind the three names AND the three prefixes (demo() and the driver read both), so the notation adds tokens here (notation 1.75): a result, not a defect."
+  ],
+  "optimized_constructions": [
+    "from … import p:"
+  ],
+  "header_optimization_notes": [
+    "The header is only the provenance and executability comments: nothing unused, the two header-variant files are copies of the optimized ones."
+  ]
 }

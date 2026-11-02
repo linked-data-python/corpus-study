@@ -60,5 +60,20 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "header_optimization_status": "final",
+  "optimization_notes": [
+    "Python: the intermediate `pred` goes, the conditional expression becomes the dict key directly: `self.tuples[FDOC.hasFdoProfile if use_fdof else DCTERMS.conformsTo] = URIRef(uri)`.",
+    "LD Python: the same line with `fdoc:hasFdoProfile` and `dcterms:conformsTo`. `URIRef(uri)` is kept rather than `f<{uri}>`: URIRef raises TypeError on a non-str `uri` (None, an int) where f<…> would silently mint the IRI `None`, so the error behaviour would change. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_notes": [
+    "Python: keeps `from typing import Union`, `from rdflib import URIRef`, `from rdflib.namespace import DCTERMS`, `from nanopub.namespaces import FDOC`; Optional, List, Graph, Literal, RDFS, PROV and FDOF go.",
+    "LD Python: keeps `from typing import Union`, `from rdflib import URIRef`, `from nanopub.namespaces import fdoc:` and `@prefix dcterms:`; Optional, List, Graph, Literal go, and so does the translator's comment explaining the import choices."
+  ]
 }

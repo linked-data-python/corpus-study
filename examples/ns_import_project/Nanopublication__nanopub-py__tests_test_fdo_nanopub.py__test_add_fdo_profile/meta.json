@@ -64,5 +64,24 @@
       "conformsTo subject -> variable"
     ],
     "remaining": "The driver patches the project's method (a departure from the original, justified by the original showing nothing otherwise); the shim-invents-logic and wrong-construction questions of the triage stand."
-  }
+  },
+  "optimization_status": "final",
+  "header_optimization_status": "final",
+  "optimization_notes": [
+    "Python: the intermediate `uri` goes, `to_hdl_uri(fdo_profile)` moves into the first assert. to_hdl_uri is a pure function, and add_fdo_profile calls it first on the same value, so a bad profile still raises the same ValueError.",
+    "LD Python: the same inlining, and `assert bool(m{ … })` becomes `assert m{ … }`: assert already calls Match.__bool__. The `assert_introduces_in_pubinfo` helper and the constants before the region are header (restored context) and stay byte for byte. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}",
+    "m{ }",
+    "call suffix (g)",
+    "plain literal"
+  ],
+  "header_optimization_notes": [
+    "Python: RDF, FDO_DATA_REF_HANDLE, FDO_DATA_REFS_HANDLE and FDOF go; pytest, rdflib (rdflib.Literal), RDFS, DCTERMS, HDL, NPX and the restored helper stay.",
+    "LD Python: FDO_DATA_REF_HANDLE, FDO_DATA_REFS_HANDLE and `fdof:` go, and so does the translator's comment explaining the import choices; `hdl:`, `npx:`, `@prefix rdfs:`, `@prefix dcterms:` and the helper stay."
+  ]
 }

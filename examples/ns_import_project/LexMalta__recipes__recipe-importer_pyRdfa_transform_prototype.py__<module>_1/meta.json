@@ -49,5 +49,28 @@
     "method": "entry:handle_prototypes",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The imports and the module docstring (part of this module region, lines 1-37) stay as in original.py and translated.ldpy, as in the sibling spdx region; only the two constants and handle_prototypes are optimized.",
+    "Python: `graph.triples((None,pref,None))` becomes `graph.subject_objects(pref)` (the predicate is bound, so `ref` is always `pref`) and the inner `graph.triples((PR,None,None))` becomes `graph.predicate_objects(PR)`. Both are lazy generators over the same triples() call, so reading while adding is unchanged.",
+    "Python: the explicit `to_remove.add((PR,type,Prototype))` goes: the inner loop runs over every triple of PR, the type triple included (its presence was just tested), so `to_remove.add((PR,p,y))` moves before the copy test and collects it. `not (p == type and y == Prototype)` becomes `(p,y) != (type,Prototype)`, a one-line `if` as in the file's own style, and the final removal loop becomes `graph -= to_remove` (Graph.__isub__ removes each triple through the store).",
+    "LD Python: `@graph graph`, the outer loop and the membership test merged into ONE two-pattern `m{ ?x nsrdfa:copy ?PR . ?PR a nsrdfa:Pattern }`: m{ } joins in written order, lazily, through graph.triples(), so the type test still runs per copy triple at iteration time, exactly like the `in` test. Exception to the symmetry rule: only an island merges a selector loop and its membership guard into one loop (Python needs the `for` and the `if`). The inner loop is `m{ {PR} ?p ?y }` and the copy `+{ {x} {p} {y} }` as the suite of the one-line `if`.",
+    "Not compressed: `to_remove` stays a Python set of bound triples (a bookkeeping variable, see the translation notes); `Prototype`/`pref` stay, they are public module names."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "from … import p:",
+    "prefixed name",
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}",
+    "+{ }"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the unused `from rdflib import Namespace` goes; the rdflib version switch that binds `ns_rdf` stays (ns_rdf is used, and replacing the compatibility branch would change code, not drop an unused import).",
+    "LD Python: `from rdflib import Namespace` goes, and so does the whole `import rdflib` / version switch: `ns_rdf` is never referenced in optimized.ldpy, which writes `nsrdf:type` and `a`. `@prefix nsrdf:` and `from pyrdfa_context import ns_rdfa: as nsrdfa:` stay, both used."
+  ]
 }

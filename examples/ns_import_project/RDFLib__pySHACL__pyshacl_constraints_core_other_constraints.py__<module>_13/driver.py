@@ -21,7 +21,7 @@ import json
 import sys
 from pathlib import Path
 
-from rdfeval.harness import _exec_ldpy, run_pair
+from rdfeval.harness import _exec_ldpy, run_pair, sides_from_env
 
 # run_pair() prints its own RDFEVAL-VERDICT line to stderr as a side effect;
 # rdfeval.check takes the FIRST such line, so it has to be silenced here and
@@ -35,7 +35,9 @@ with contextlib.redirect_stderr(_buf):
         calls=None,
     )
 
-if VERDICT["equivalent"]:
+# only an ldpy module exports __namespaces__; a Python side (an optimized
+# artefact under RDFEVAL_SIDES) imports RDFS/SH themselves, compared above
+if VERDICT["equivalent"] and sides_from_env()[1].endswith(".ldpy"):
     from pyshacl.consts import RDFS, SH
 
     ns_t, _ = _exec_ldpy(Path(__file__).resolve().parent / "translated.ldpy")

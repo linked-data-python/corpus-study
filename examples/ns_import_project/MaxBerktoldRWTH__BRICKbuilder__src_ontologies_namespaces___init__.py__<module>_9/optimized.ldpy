@@ -1,0 +1,56 @@
+# Extracted from MaxBerktoldRWTH/BRICKbuilder@28f0710933 : src/ontologies/namespaces/__init__.py
+# region: <module> (lines 9-9, stratum ns_import_project)
+# licence of the source repository: see meta.json
+#
+# Executability restoration (AGENT_BATCH "163 regions" case, see meta.json):
+# `src.ontologies.namespaces.qudt` rewritten to `qudt_ns_context`, the shim
+# module next to this file (the real dotted project path does not resolve
+# for a single extracted file).
+from qudt_ns_context import QUDT, QUDTU, QUDTQK, qudt:, qudtu:, qudtqk:
+
+
+
+# Demo harness (identical on both sides, see meta.json): this region is a
+# single re-export line with rdf_ops=0 -- it binds names but performs no
+# graph operation of its own.  What it decides is observable only through
+# the names it binds and how the rest of the repository module uses them,
+# so demo(case) replays those uses (src/ontologies/namespaces/__init__.py
+# at the pinned commit):
+#   "terms"        one declared term of each namespace, as a string;
+#   "bindings"     lines 44-59 (the three QUDT keys of `bindings`) and
+#                  139-145 (`bind_namespaces`): the namespace OBJECTS are
+#                  dict keys and are bound on a graph under their prefixes;
+#   "abbreviation" lines 88-98 (`find_abbreviation`): `str(ns)` of each key
+#                  decides which short name an IRI gets;
+#   "main"         line 182: `QUDT.degreeCelsius`, a term the class does
+#                  not declare (DefinedNamespace warns -- the driver
+#                  records warnings).
+def demo(case="terms"):
+    if case == "terms":
+        return (str(qudt:hasUnit), str(qudtu:M), str(qudtqk:Length))
+    if case == "bindings":
+        from rdflib import Graph
+        bindings = {QUDT: "qudt", QUDTQK: "qudtqk", QUDTU: "qudtu"}
+        g = Graph()
+        for namespace, prefix in bindings.items():
+            g.bind(prefix, namespace)
+        return ([type(k).__name__ for k in bindings],
+                sorted((p, str(n)) for p, n in g.namespaces() if p.startswith("qudt")))
+    if case == "abbreviation":
+        bindings = {QUDT: "qudt", QUDTQK: "qudtqk", QUDTU: "qudtu"}
+
+        def find_abbreviation(uri):
+            uri = str(uri)
+            for ns, short in bindings.items():
+                if uri.startswith(str(ns)):
+                    return short
+            return None
+        return [find_abbreviation(u) for u in (
+            "http://qudt.org/schema/qudt/hasUnit",
+            "http://qudt.org/vocab/unit/M",
+            "http://qudt.org/vocab/quantitykind/Length",
+            "http://qudt.org/schema/other/x",
+            "")]
+    if case == "main":
+        return str(QUDT.degreeCelsius)
+    raise ValueError(case)

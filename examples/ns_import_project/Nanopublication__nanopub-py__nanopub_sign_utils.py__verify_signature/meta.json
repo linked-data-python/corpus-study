@@ -42,5 +42,20 @@
     "method": "entry:verify_signature",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "header_optimization_status": "final",
+  "optimization_notes": [
+    "Python: the three reads of an object of the signature target (`[o for _, _, o, _ in g.quads((np_signature_target, NPX.x, None, None))]`) become one nested helper `objects(predicate)`, called for hasSignature, hasAlgorithm and hasPublicKey; each call keeps its `if not …: raise` or its `[0]` (IndexError on a missing algorithm or key, as before).",
+    "Python: the redundant `np_algo and` of the inner test and the `else:` after `return True` go; `quads = RdfUtils.get_quads(g)` is inlined into normalize_quads; `key` is inlined into `PKCS1_v1_5.new(RSA.import_key(...))`. RSA.import_key and SHA256.new stay OUTSIDE the try, so an invalid key still raises ValueError and only verify() is wrapped into MalformedNanopubError.",
+    "Not compressed: the first read (subjects targeting source_uri) keeps the list-then-[0] shape (a `next(..., None)` costs as many tokens and folds the line); `next()` is not used for hasAlgorithm/hasPublicKey because it would raise StopIteration where the original raises IndexError.",
+    "LD Python: the same code with `npx:` prefixed names. The four reads are `g.quads` over a Dataset whose triples live in named graphs: no island reads quads (translation notes), so the notation gains only the prefixed names. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name"
+  ],
+  "header_optimization_notes": [
+    "Both sides: `encodebytes` and the rdflib names BNode, Graph, Literal go (unused); Dataset and Namespace stay (annotations), URIRef stays. The `logger` line stays. The NPX import (`npx:` in ldpy) stays."
+  ]
 }

@@ -1,0 +1,23 @@
+# Extracted from Nanopublication/nanopub-py@05022dc4bc : nanopub/fdo/fdo_record.py
+# region: FdoRecord.set_profile (lines 137-139, stratum ns_import_project)
+# licence of the source repository: see meta.json
+#
+# `from rdflib.namespace import RDFS, DCTERMS, PROV` cannot become `from …
+# import p:` (ldpy/012 point 21: rdflib.namespace does not export
+# `__namespaces__`, and nothing can add it there). Only DCTERMS is ever
+# dereferenced in this region's body (RDFS, PROV never are, here or in
+# original.py), so a single `@prefix dcterms:` covers every use; RDFS/PROV
+# drop out, same as RDF dropped out of the ns_import_project sibling for
+# this same repository. `from nanopub.namespaces import FDOF, FDOC` DOES
+# take `from … import p:`: the installed `nanopub.namespaces` module exports
+# the Namespace objects FDOC and FDOF, which ldpy reads under the prefix's
+# upper-cased name. Only FDOC is dereferenced by this body, so only `fdoc:`
+# is imported; FDOF drops out like RDFS/PROV.
+from typing import Optional, Union, List
+from rdflib import Graph, URIRef, Literal
+from nanopub.namespaces import fdoc:
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+def set_profile(self, uri: Union[str, URIRef], use_fdof: bool = False) -> None:
+    self.tuples[fdoc:hasFdoProfile if use_fdof else dcterms:conformsTo] = URIRef(uri)
