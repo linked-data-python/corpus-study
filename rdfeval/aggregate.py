@@ -20,7 +20,7 @@ import json
 import statistics as st
 
 from .compare import load_pairs
-from .config import RESULTS_SUMMARY, provenance
+from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
 from .stats import paired_report
 from .study import Study, STUDY
 
@@ -173,6 +173,7 @@ def run(config: dict, study: Study = STUDY, force: bool = False) -> None:
 
     if study.incremental_review:
         agg["by_stratum"] = _by_stratum(ok, reprise, _outcomes(study, force))
+        agg["optimized"] = _optimized(ok)
         agg["by_construction"] = _by_construction(ok)
         agg["unattested_constructions"] = _unattested(ok)
         agg["by_oracle"] = {
@@ -350,6 +351,53 @@ def _weighted(sub: list[dict], comparable: list[dict], share: float,
                                           rate(outcome_parts["new"]), share),
         "tokens_reduction_median": _weighted_median(vw),
     }
+
+
+#: The four readings of a pair with optimized artefacts (record corpus/403):
+#: the faithful translation, the careful rereading of the Python, the
+#: notation on top of it, and both.
+OPTIMIZED_STEPS = {
+    "faithful": ("python", "ldpy"),
+    "care": ("python", "optimized_python"),
+    "notation": ("optimized_python", "optimized_ldpy"),
+    "total": ("python", "optimized_ldpy"),
+}
+
+
+def _optimized(ok: list[dict]) -> dict:
+    """Rereading against notation, on the pairs that carry the optimized
+    artefacts: token reduction of each step, on all tokens and on the host
+    code alone (RDF text in strings and s{ } bodies counted apart, record
+    corpus/403), overall and per stratum."""
+    sub = [p for p in ok if "optimized_python" in p and "optimized_ldpy" in p]
+
+    def steps(rows):
+        out = {"n": len(rows)}
+        for metric in ("tokens", "tokens_host"):
+            out[metric] = {}
+            for step, (a, b) in OPTIMIZED_STEPS.items():
+                vals = []
+                for p in rows:
+                    x, y = p[a].get(metric), p[b].get(metric)
+                    if x:
+                        vals.append(round(100.0 * (x - y) / x, 3))
+                out[metric][step] = _dist(vals)
+        return out
+    result = steps(sub)
+    # the stratum each region was drawn for (scripts/draw_optimize.py), else
+    # the one it is filed under
+    drawn = {}
+    path = RESULTS_RAW / "optimize_sample.json"
+    if path.exists():
+        for k, regions in json.loads(path.read_text())["strata"].items():
+            for e in regions:
+                drawn[e["region_id"]] = k
+    of = {p["region_id"]: drawn.get(p["region_id"], p.get("stratum"))
+          for p in sub}
+    result["by_stratum"] = {
+        k: steps([p for p in sub if of[p["region_id"]] == k])
+        for k in sorted(set(of.values()))}
+    return result
 
 
 def _by_construction(ok: list[dict]) -> dict:

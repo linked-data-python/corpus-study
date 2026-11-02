@@ -185,3 +185,22 @@ def test_a_driver_reading_files_itself_cannot_claim_the_sides(tmp_path):
     results = {r["artefact"]: r for r in check_region(ex)}
     assert results["translated.ldpy"]["ok"]       # what it was written for
     assert not results["optimized.ldpy"]["ok"]
+
+
+def test_aggregate_separates_rereading_from_notation(monkeypatch, tmp_path):
+    from rdfeval import aggregate
+    monkeypatch.setattr(aggregate, "RESULTS_RAW", tmp_path)   # no sample file
+
+    def side(tokens, host):
+        return {"tokens": tokens, "tokens_host": host}
+    pair = {"region_id": "r", "stratum": "remove",
+            "python": side(100, 90), "ldpy": side(90, 80),
+            "optimized_python": side(80, 70), "optimized_ldpy": side(60, 56)}
+    out = aggregate._optimized([pair, {"region_id": "x", "python": {}}])
+    assert out["n"] == 1
+    assert out["tokens"]["care"]["median"] == 20.0
+    assert out["tokens"]["notation"]["median"] == 25.0
+    assert out["tokens"]["total"]["median"] == 40.0
+    assert out["tokens"]["faithful"]["median"] == 10.0
+    assert out["tokens_host"]["notation"]["median"] == 20.0
+    assert out["by_stratum"]["remove"]["n"] == 1
