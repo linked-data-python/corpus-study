@@ -1,7 +1,7 @@
 # Extracted from ktbs/ktbs@4f9f50c770 : lib/ktbs/engine/method.py
 # region: Method.check_deletable (lines 182-194, stratum trav_one_step)
 # licence of the source repository: see meta.json
-from ..namespace import KTBS
+from ktbs_context import KTBS, Method
 
 def check_deletable(self, parameters):
     """I implement :meth:`~rdfrest.cores.local.ILocalCore.check_deletable`

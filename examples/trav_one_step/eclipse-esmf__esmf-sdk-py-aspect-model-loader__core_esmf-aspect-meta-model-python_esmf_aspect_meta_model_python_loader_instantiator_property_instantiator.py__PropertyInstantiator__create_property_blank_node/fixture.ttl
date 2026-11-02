@@ -1,4 +1,53 @@
-# Input graph for eclipse-esmf__esmf-sdk-py-aspect-model-loader__core_esmf-aspect-meta-model-python_esmf_aspect_meta_model_python_loader_instantiator_property_instantiator.py__PropertyInstantiator__create_property_blank_node — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Aspect graph for PropertyInstantiator._create_property_blank_node.
+# Each blank node with an ex:tag is one element_node of a call; the driver
+# finds it by its tag (a blank node has no stable name across parses).
 @prefix ex: <http://example.org/> .
+@prefix samm: <urn:samm:org.eclipse.esmf.samm:meta-model:2.1.0#> .
+@prefix old: <urn:samm:org.eclipse.esmf.samm:meta-model:1.0.0#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# full: optional, notInPayload, payloadName, example value and characteristic
+[ ex:tag "full" ; samm:property ex:prop1 ; samm:optional true ;
+  samm:notInPayload true ; samm:payloadName "payload1" ] .
+ex:prop1 samm:characteristic ex:ch1 ; samm:exampleValue "42"^^xsd:int ;
+         # the flags are read on the blank node, never on the property
+         samm:optional false ; samm:notInPayload false ; samm:payloadName "WRONG" .
+
+# minimal: property and characteristic only (flags False, no payload name,
+# no example value)
+[ ex:tag "minimal" ; samm:property ex:prop2 ] .
+ex:prop2 samm:characteristic ex:ch2 .
+
+# only one of the two flags
+[ ex:tag "optional-only" ; samm:property ex:prop3 ; samm:optional false ] .
+ex:prop3 samm:characteristic ex:ch3 ; samm:exampleValue "x" .
+[ ex:tag "payload-only" ; samm:property ex:prop3 ; samm:notInPayload true ] .
+
+# the property is itself a blank node with an example value
+[ ex:tag "nested" ; samm:property [ ex:tag "nested-prop" ; samm:characteristic ex:ch4 ;
+                                    samm:exampleValue "deep" ] ] .
+
+# two values for one predicate (value() takes the first)
+[ ex:tag "two-values" ; samm:property ex:prop5 , ex:prop6 ] .
+ex:prop5 samm:characteristic ex:ch5 ; samm:exampleValue 1 , 2 .
+ex:prop6 samm:characteristic ex:ch5 ; samm:exampleValue 1 , 2 .
+
+# no samm:property at all: only the OLD meta-model version's terms (not read)
+[ ex:tag "no-property" ; old:property ex:prop7 ; old:optional true ; ex:property ex:prop7 ] .
+ex:prop7 samm:characteristic ex:ch7 .
+
+# a property that has no characteristic (required: _get_child raises)
+[ ex:tag "no-characteristic" ; samm:property ex:prop8 ] .
+ex:prop8 samm:exampleValue "orphan" .
+
+# a literal "property" (a subject that is not a node): nothing to read on it
+[ ex:tag "literal-property" ; samm:property "not a node" ] .
+
+# a falsy property node: an empty literal
+ex:emptyprop samm:property "" .
+
+# neighbours: the same subject with the properties as OBJECTS, and a second
+# element whose terms must not leak into the first
+ex:reverse samm:optional [ ex:tag "reverse" ] .
+[ ex:tag "other" ; samm:property ex:prop9 ; samm:optional true ; samm:payloadName "other" ] .
+ex:prop9 samm:characteristic ex:ch9 ; samm:exampleValue "other-value" .

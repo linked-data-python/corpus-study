@@ -14,11 +14,24 @@
     "namespace_term": 19,
     "term_constructor": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "interpolation {expr}",
+    "variable"
+  ],
   "translation_notes": [
-    "prefixes: DC->dc, DCTERMS->dcterms, DOAP->doap, OWL->owl, PROV->prov, RDF->rdf, RDFS->rdfs, SDO->sdo, SKOS->skos"
+    "prefixes: DC->dc, DCTERMS->dcterms, DOAP->doap, OWL->owl, PROV->prov, RDF->rdf, RDFS->rdfs, SDO->sdo, SKOS->skos",
+    "Two reads kept as two nested m{ }, NOT fused into one multi-pattern join: the outer loop body writes METADATA[\"uri\"] between the two reads (a join would repeat it per (p, o) row), and the third read (objects of o for doap:repository) is fed by o only inside ONE branch (p == prov:wasGeneratedBy) -- a join would silently drop every row without a repository. Reads are therefore not a true conjunctive chain (cf. ldpy/016).",
+    "@graph self.G designates the graph of the stand-in self once, so the three m{ } are receiver-less; the original spelled self.G three times.",
+    "Context: self (a pyLODE VocPub) is a driver-local stand-in (FakeVocPub) with only G, METADATA, COLLECTIONS, CONCEPTS, outputformat, _make_formatted_uri and _make_agent; the two helpers are reconstructions (pyLODE 2.13.2 is not installable). `markdown` is the real installed package. original.py untouched.",
+    "Driver: 6 calls (full fixture html/md, two schemes, non-http source/licence + literal/URI-without-repository wasGeneratedBy, ValueError on missing title, zero schemes with a preset title); fixture holds a skos:Concept, owl:Ontology, skos:Collection and a foreign prov:wasGeneratedBy that must not be read. Verified by mutation: replacing doap:repository or skos:ConceptScheme in the translation makes check FAIL.",
+    "An m{ } with a literal bound in subject position ({o} = Literal) yields no solution rather than raising, like G.objects(subject=Literal)."
   ],
   "draft_sha": "7c718ed6ef61dd50",
   "provenance": {

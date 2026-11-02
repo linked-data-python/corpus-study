@@ -15,10 +15,23 @@
     "term_constructor": 2
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: EX->ex, SHUI->shui, PROV->prov, RDF->rdf, RDFS->rdfs, SH->sh, XSD->xsd"
+    "prefixes: EX->ex, SHUI->shui, PROV->prov, RDF->rdf, RDFS->rdfs, SH->sh, XSD->xsd",
+    "EXCLUDED: the region cannot run without a live eccenca Corporate Memory (CMEM). Exact error of `python -m rdfeval check`: `ModuleNotFoundError: No module named cmem_client` (original.py line 6, `from cmem_client.client import Client`; cmem_client, cmem_plugin_base and cmem_plugin_pyshacl are not installed). Installing them would not help: the test is decorated `@needs_cmem` (skipif CMEM_BASE_URI is empty: `Needs CMEM configuration`), takes the pytest fixture `_violations_setup` (uploads data/shapes graphs to CMEM through Client.from_context(TestExecutionContext())), runs `plugin.execute` against that instance and reads the report back with export_graph(Client...) -- every input of the four reads is produced by the service. The graph the reads act on (`report`) exists only as the CMEM export; a stand-in for ShaclValidation would be inventing the plugin, not a context shim.",
+    "translation_status stays draft: the translation was NOT proved by the driver. It transpiles (`python -m ldpy -t`), and its four reads were checked outside the pair, in a scratch module, against the original idioms on a hand-built report graph (results, a sh:conforms with a free subject, rdfs:label per result incl. a missing label, shui:conforms false incl. neighbours true / the plain string \"false\"): identical values.",
+    "Translation: `@graph report` after the export; report.subjects(RDF.type, SH.ValidationResult) -> m{ ?s a sh:ValidationResult }; report.objects(predicate=SH.conforms) (free subject) -> m{ [] sh:conforms ?o }; report.value(result, RDFS.label) -> m{ {result} rdfs:label ?l }.first(); report.subjects(SHUI.conforms, Literal(False, datatype=XSD.boolean)) -> m{ ?s shui:conforms false }. The other namespace uses (EX.carol, SH.Violation, XSD.float, ...) are prefixed names inside assertions, not reads; EX and SHUI become @prefix declarations of the module.",
+    "PITFALL found in the mechanical draft: `f\"^^<{XSD.float}>\"` became `f\"^^<{xsd:float}>\"`, which Python reads as the value `xsd` formatted with the spec `float` -- a silent runtime error, not a transpile error (no island is recognised inside an f-string field). Rewritten as `\"^^<\" + str(xsd:float) + \">\"`.",
+    "Not tested by a driver: driver.py is the unmodified skeleton and fails on the import; there is nothing to make the ORIGINAL show something without CMEM (the whole function is assertions on service output)."
   ],
   "draft_sha": "8420f0cd20a67591",
   "provenance": {

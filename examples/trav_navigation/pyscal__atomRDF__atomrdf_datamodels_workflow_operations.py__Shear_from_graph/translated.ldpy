@@ -1,56 +1,36 @@
 # Extracted from pyscal/atomRDF@c9b070e15f : atomrdf/datamodels/workflow/operations.py
 # region: Shear.from_graph (lines 359-399, stratum trav_navigation)
 # licence of the source repository: see meta.json
-from atomrdf.utils import get_sample_object
-from atomrdf.namespace import (
-    CMSO,
-    LDO,
-    PLDO,
-    PODO,
-    CDCO,
-    PROV,
-    Literal,
-    ASMO,
-)
-@prefix cmso: <http://purls.helmholtz-metadaten.de/cmso/> .
-@prefix ldo: <http://purls.helmholtz-metadaten.de/cdos/ldo/> .
-@prefix pldo: <http://purls.helmholtz-metadaten.de/cdos/pldo/> .
-@prefix podo: <http://purls.helmholtz-metadaten.de/cdos/podo/> .
-@prefix cdco: <http://purls.helmholtz-metadaten.de/cdos/cdco/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix asmo: <http://purls.helmholtz-metadaten.de/asmo/> .
-
+from atomrdf_context import get_sample_object, classmethod, cmso:, prov:
 
 @classmethod
 def from_graph(cls, graph, activity_id):
+    @graph graph
     activity = get_sample_object(activity_id)
-    output_sample = next(
-        (s for s, _, _ in graph.triples((None, prov:wasGeneratedBy, activity))),
-        None,
-    )
+    output_sample = m{ ?s prov:wasGeneratedBy {activity} }.first()
     input_sample = (
-        graph.value(output_sample, prov:wasDerivedFrom) if output_sample else None
+        m{ {output_sample} prov:wasDerivedFrom ?o }.first() if output_sample else None
     )
 
     shear_vector = None
-    for vec in graph.objects(activity, cmso:hasVector):
-        x = graph.value(vec, cmso:hasComponent_x)
-        y = graph.value(vec, cmso:hasComponent_y)
-        z = graph.value(vec, cmso:hasComponent_z)
+    for vec in m{ {activity} cmso:hasVector ?vec }:
+        x = m{ {vec} cmso:hasComponent_x ?x }.first()
+        y = m{ {vec} cmso:hasComponent_y ?y }.first()
+        z = m{ {vec} cmso:hasComponent_z ?z }.first()
         shear_vector = [x.toPython(), y.toPython(), z.toPython()]
         break
 
     normal_vector = None
     distance = None
-    plane = graph.value(activity, cmso:hasPlane)
+    plane = m{ {activity} cmso:hasPlane ?plane }.first()
     if plane is not None:
-        nv = graph.value(plane, cmso:hasNormalVector)
+        nv = m{ {plane} cmso:hasNormalVector ?nv }.first()
         if nv is not None:
-            x = graph.value(nv, cmso:hasComponent_x)
-            y = graph.value(nv, cmso:hasComponent_y)
-            z = graph.value(nv, cmso:hasComponent_z)
+            x = m{ {nv} cmso:hasComponent_x ?x }.first()
+            y = m{ {nv} cmso:hasComponent_y ?y }.first()
+            z = m{ {nv} cmso:hasComponent_z ?z }.first()
             normal_vector = [x.toPython(), y.toPython(), z.toPython()]
-        d = graph.value(plane, cmso:hasDistanceFromOrigin)
+        d = m{ {plane} cmso:hasDistanceFromOrigin ?d }.first()
         if d is not None:
             distance = d.toPython()
 

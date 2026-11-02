@@ -5,7 +5,7 @@ import random
 import string
 from rdflib import Graph, Namespace, Literal, XSD
 from rdflib.namespace import RDF
-import lib.utils as utils
+import opcua_lib_utils as utils
 randnamelength = 16
 
 def add_map_to_attribute(self, g, attribute_iri, varname, var_node, connector):

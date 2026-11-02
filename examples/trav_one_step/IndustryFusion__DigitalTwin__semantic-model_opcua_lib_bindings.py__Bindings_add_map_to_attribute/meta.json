@@ -15,11 +15,25 @@
     "term_constructor": 2,
     "triple_add": 6
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd, RDF->rdf"
+    "prefixes: XSD->xsd, RDF->rdf",
+    "The five reads are five single-pattern m{ } with the predicate interpolated ({self.basens[\"hasNodeId\"]}); next(g.objects(s, p), default) is `.first(default=xsd:anyType)`, next(g.objects(s, p)) with no default is the faithful `next(iter(m{ … }))` (raises StopIteration like the original; `.first()` would return None and let a missing hasNodeId through). The chain ns -> nsuri is NOT fused into a join: the original consumes the FIRST namespace only, a join would find another namespace that has a hasUri instead of raising (ldpy/016 pitfall).",
+    "The six .add() on self.bindingsg are one +{ } (add_run_shared_subject): five triples share the subject {mapiri}, the sixth has {attribute_iri} as subject; order of adds is immaterial in a graph. `@graph g` for the reads then `@graph self.bindingsg` for the write: two successive designations in one block. RDF[\"type\"] becomes `a`. The draft`s `self.bindingsg += g{ }` was dropped: a fresh graph merged into the target is the add_isolated pattern, not this one.",
+    "Context shim opcua_lib_utils.py: idtype2String copied verbatim from semantic-model/opcua/lib/utils.py@3b40088b88 (fetched with gh); original.py edited only on its import line (`import lib.utils as utils` -> `import opcua_lib_utils as utils`), translated.ldpy has the same. `self` is the driver-local Bindings with the __init__ of bindings.py verbatim; basens is the real base.ttl namespace.",
+    "The map IRI is drawn with random.choices: the driver seeds `random` in each call (each side runs in its own forked process), so both draw the same name.",
+    "Driver: 10 calls: numeric/string/guid/opaque identifier types, default datatype, unknown identifier type (stdout warning compared), missing hasNodeId / namespace without hasUri / unknown node (StopIteration on both sides), several values for one property (first wins), non-empty target graph. Neighbours (same local names in another namespace, reversed, other nodes) must not match. Verified by mutation (default datatype, hasUri -> hasNodeId, extra triple): check FAILS."
   ],
   "draft_sha": "ff152614d48adf97",
   "provenance": {

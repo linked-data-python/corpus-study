@@ -2,9 +2,9 @@
 # region: PropertyInstantiator._create_property_blank_node (lines 61-99, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Node, URIRef
-from esmf_aspect_meta_model_python.base.property import Property
-from esmf_aspect_meta_model_python.impl.default_property import DefaultProperty
-from esmf_aspect_meta_model_python.vocabulary.samm import SAMM
+from esmf_context import Property
+from esmf_context import DefaultProperty
+from esmf_context import SAMM
 
 def _create_property_blank_node(self, element_node: BNode) -> Property:
     """Handle a blank node holding a reference to the property and having additional attributes.
@@ -18,24 +18,20 @@ def _create_property_blank_node(self, element_node: BNode) -> Property:
     Raises:
         ValueError: If the property node cannot be found.
     """
-    property_node = self._aspect_graph.value(subject=element_node, predicate=self._samm.get_urn(SAMM.property))
+    @graph self._aspect_graph
+    property_node = m{ {element_node} {self._samm.get_urn(SAMM.property)} ?o }.first()
     if not property_node:
         raise ValueError(f"Could not find property for the node {element_node}")
 
-    optional_node = self._aspect_graph.value(subject=element_node, predicate=self._samm.get_urn(SAMM.optional))
-    not_in_payload_node = self._aspect_graph.value(
-        subject=element_node, predicate=self._samm.get_urn(SAMM.not_in_payload)
-    )
+    optional_node = m{ {element_node} {self._samm.get_urn(SAMM.optional)} ?o }.first()
+    not_in_payload_node = m{ {element_node} {self._samm.get_urn(SAMM.not_in_payload)} ?o }.first()
     payload_name = self._get_child(element_node, self._samm.get_urn(SAMM.payload_name))
     characteristic = self._get_child(
         property_node,  # type: ignore
         self._samm.get_urn(SAMM.characteristic),
         required=True,
     )
-    example_value = self._aspect_graph.value(
-        subject=property_node,
-        predicate=self._samm.get_urn(SAMM.example_value),
-    )
+    example_value = m{ {property_node} {self._samm.get_urn(SAMM.example_value)} ?o }.first()
 
     return DefaultProperty(
         meta_model_base_attributes=self._get_base_attributes(property_node),

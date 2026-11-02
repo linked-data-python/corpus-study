@@ -12,10 +12,22 @@
   "categories": {
     "graph_read": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "Two sibling loops `for i in self.state.subjects(KTBS.p, self.uri)` -> `for i in m{ ?i ktbs:p {self.uri} }`, with `@graph self.state` once. The iteration value is a bare term (arity 1) so the body is unchanged. Not fused: the two predicates feed two independent sets of messages (hasMethod then hasParentMethod); a join would require both.",
+    "KTBS comes from the project (`from ..namespace import KTBS`), so `from ktbs_context import ktbs:` imports the prefix (the shim exports __namespaces__). original.py is edited only on that import line (`from ..namespace import KTBS` -> `from ktbs_context import KTBS, Method`, Method being the class the region names in `super(Method, self)`); translated.ldpy imports Method the same way.",
+    "Context shim ktbs_context.py: the KTBS namespace IRI of lib/ktbs/namespace.py (a ClosedNamespace there, a plain Namespace here), rdfrest.util.Diagnosis verbatim minus the & operators, LocalCore.check_deletable (the default Diagnosis) as the superclass method, and a Method with uri + state. Sources fetched with gh at ktbs/ktbs@4f9f50c770 (rdfrest is in the repository at that tag).",
+    "Driver: 5 calls (m1 used both ways; m2 through hasMethod only, by a trace and by a method; m3 parent only; m4 used by nothing, whose own outgoing hasParentMethod/hasMethod and look-alike predicates must not count; an unknown method). The Diagnosis instance is compared attribute by attribute, its messages as a multiset. Verified by mutation (subject/object swapped in the second pattern, second predicate replaced by hasMethod): check FAILS."
+  ],
   "draft_sha": "50476fd4097cc439",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.699371+00:00",

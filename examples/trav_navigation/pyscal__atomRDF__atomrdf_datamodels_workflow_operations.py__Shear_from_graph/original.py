@@ -1,8 +1,8 @@
 # Extracted from pyscal/atomRDF@c9b070e15f : atomrdf/datamodels/workflow/operations.py
 # region: Shear.from_graph (lines 359-399, stratum trav_navigation)
 # licence of the source repository: see meta.json
-from atomrdf.utils import get_sample_object
-from atomrdf.namespace import (
+from atomrdf_context import get_sample_object, classmethod
+from atomrdf_context import (
     CMSO,
     LDO,
     PLDO,

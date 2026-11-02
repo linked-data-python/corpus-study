@@ -1,4 +1,53 @@
-# Input graph for calipho-sib__nextprot-scripts__src_polish-rdf_pylode_pyLODE-2.13.2_pylode_profiles_vocpub.py__VocPub__extract_concept_scheme — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for VocPub._extract_concept_scheme: one skos:ConceptScheme with
+# every property the region reads, and neighbours that must NOT be read.
 @prefix ex: <http://example.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix sdo: <https://schema.org/> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:scheme a skos:ConceptScheme ;
+    skos:prefLabel "Fruit vocabulary" ;
+    skos:definition "A *small* vocabulary of fruit." ;
+    skos:historyNote "Created in **2020**." ;
+    dcterms:created "2020-01-01"^^xsd:date ;
+    dcterms:modified "2021-02-03"^^xsd:date ;
+    dcterms:issued "2021-03-04"^^xsd:date ;
+    dcterms:source <http://example.org/source-doc> ;
+    owl:versionIRI <http://example.org/scheme/1.0> ;
+    owl:versionInfo "1.0" ;
+    vann:preferredNamespacePrefix "fr" ;
+    vann:preferredNamespaceUri "http://example.org/fruit/" ;
+    dcterms:license <http://example.org/licence> ;
+    dcterms:rights "Copyright 2021, (c) Example; copyright reserved" ;
+    dcterms:creator "Alice (literal)" , ex:bob , [ sdo:name "Carol (blank)" ] ;
+    dcterms:contributor ex:dave , "Eve (literal)" ;
+    dcterms:publisher [ sdo:name "Frank Press" ] ;
+    prov:wasGeneratedBy [ doap:repository <http://example.org/repo/generator> ] ;
+    sdo:codeRepository <http://example.org/repo/code> ;
+    # read by no branch of the region
+    rdfs:label "ignored label" ;
+    dcterms:description "ignored description" .
+
+# neighbours that must not match
+ex:concept a skos:Concept ;
+    skos:prefLabel "NOT the scheme title" ;
+    skos:definition "NOT the description" ;
+    dcterms:creator "Mallory" ;
+    owl:versionInfo "9.9" ;
+    sdo:codeRepository <http://example.org/repo/other> .
+
+ex:ontology a owl:Ontology ;
+    skos:prefLabel "An ontology, not a scheme" ;
+    dcterms:publisher "Oscar" .
+
+ex:collection a skos:Collection ;
+    skos:prefLabel "NOT a scheme either" .
+
+# the object of the SAME predicate is read from the scheme only
+ex:elsewhere prov:wasGeneratedBy [ doap:repository <http://example.org/repo/not-this-one> ] .

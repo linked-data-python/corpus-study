@@ -5,9 +5,8 @@ import random
 import string
 from rdflib import Graph, Namespace, Literal, XSD
 from rdflib.namespace import RDF
-import lib.utils as utils
+import opcua_lib_utils as utils
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 randnamelength = 16
 
@@ -25,16 +24,18 @@ def add_map_to_attribute(self, g, attribute_iri, varname, var_node, connector):
     """
     randname = ''.join(random.choices(string.ascii_uppercase + string.digits, k=randnamelength))
     mapiri = self.binding_namespace['map_' + randname]
-    dtype = next(g.objects(var_node, self.basens['hasDatatype']), xsd:anyType)
-    node_id = next(g.objects(var_node, self.basens['hasNodeId']))
-    idtype = next(g.objects(var_node, self.basens['hasIdentifierType']))
-    ns = next(g.objects(var_node, self.basens['hasNamespace']))
-    nsuri = next(g.objects(ns, self.basens['hasUri']))
-    self.bindingsg += g{
-        {mapiri} rdf:type {self.basens['BoundMap']} ;
-           {self.basens['bindsConnector']} {connector} ;
-           {self.basens['bindsLogicVar']} {Literal(varname)} ;
-           {self.basens['bindsMapDatatype']} {dtype} .
-        {attribute_iri} {self.basens['bindsMap']} {mapiri} .
-        {mapiri} {self.basens['bindsConnectorParameter']} {Literal(f'nsu={nsuri};{utils.idtype2String(idtype, self.basens)}={node_id}')}
+    @graph g
+    dtype = m{ {var_node} {self.basens['hasDatatype']} ?o }.first(default=xsd:anyType)
+    node_id = next(iter(m{ {var_node} {self.basens['hasNodeId']} ?o }))
+    idtype = next(iter(m{ {var_node} {self.basens['hasIdentifierType']} ?o }))
+    ns = next(iter(m{ {var_node} {self.basens['hasNamespace']} ?o }))
+    nsuri = next(iter(m{ {ns} {self.basens['hasUri']} ?o }))
+    @graph self.bindingsg
+    +{
+        {mapiri} a {self.basens['BoundMap']} ;
+            {self.basens['bindsConnector']} {connector} ;
+            {self.basens['bindsLogicVar']} {Literal(varname)} ;
+            {self.basens['bindsMapDatatype']} {dtype} ;
+            {self.basens['bindsConnectorParameter']} {Literal(f'nsu={nsuri};{utils.idtype2String(idtype, self.basens)}={node_id}')} .
+        {attribute_iri} {self.basens['bindsMap']} {mapiri}
     }

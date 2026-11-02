@@ -24,9 +24,10 @@ def _extract_concept_scheme(self):
     self.METADATA["creators"] = set()
     self.METADATA["contributors"] = set()
     self.METADATA["publishers"] = set()
-    for s in self.G.subjects(predicate=rdf:type, object=skos:ConceptScheme):
+    @graph self.G
+    for s in m{ ?s a skos:ConceptScheme }:
         self.METADATA["uri"] = str(s)
-        for p, o in self.G.predicate_objects(subject=s):
+        for p, o in m{ {s} ?p ?o }:
             if p == skos:prefLabel:
                 self.METADATA["title"] = str(o)
 
@@ -91,7 +92,7 @@ def _extract_concept_scheme(self):
             # TODO: cater for other Agent representations
 
             if p == prov:wasGeneratedBy:
-                for o2 in self.G.objects(subject=o, predicate=doap:repository):
+                for o2 in m{ {o} doap:repository ?o2 }:
                     self.METADATA["repository"] = self._make_formatted_uri(o2)
 
             if p == sdo:codeRepository:

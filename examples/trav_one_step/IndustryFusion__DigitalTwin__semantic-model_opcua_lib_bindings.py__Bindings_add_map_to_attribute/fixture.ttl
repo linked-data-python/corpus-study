@@ -1,4 +1,62 @@
-# Input graph for IndustryFusion__DigitalTwin__semantic-model_opcua_lib_bindings.py__Bindings_add_map_to_attribute — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for Bindings.add_map_to_attribute (IndustryFusion DigitalTwin).
+# Each ex:varN is one var_node; the base: vocabulary is base.ttl's.
 @prefix ex: <http://example.org/> .
+@prefix base: <https://industryfusion.github.io/contexts/ontology/v0/base/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# var1: complete, numeric identifier, datatype given
+ex:var1 base:hasDatatype xsd:double ;
+        base:hasNodeId "6001" ;
+        base:hasIdentifierType base:numericID ;
+        base:hasNamespace ex:ns1 .
+ex:ns1 base:hasUri "http://opcfoundation.org/UA/Machinery/" .
+
+# var2: no hasDatatype -> the default xsd:anyType; string identifier
+ex:var2 base:hasNodeId "Pump.Speed" ;
+        base:hasIdentifierType base:stringID ;
+        base:hasNamespace ex:ns2 .
+ex:ns2 base:hasUri "http://example.org/UA/Pump/" .
+
+# var3: guid and opaque identifiers are two more variables
+ex:var3 base:hasDatatype xsd:string ;
+        base:hasNodeId "6B29FC40-CA47-1067-B31D-00DD010662DA" ;
+        base:hasIdentifierType base:guidID ;
+        base:hasNamespace ex:ns1 .
+ex:var3b base:hasDatatype xsd:string ;
+        base:hasNodeId "AQID" ;
+        base:hasIdentifierType base:opaqueID ;
+        base:hasNamespace ex:ns2 .
+
+# var4: an identifier type idtype2String does not know (prints a warning)
+ex:var4 base:hasNodeId "42" ;
+        base:hasIdentifierType base:otherID ;
+        base:hasNamespace ex:ns1 .
+
+# var5: no hasNodeId (the region raises StopIteration before writing)
+ex:var5 base:hasIdentifierType base:numericID ;
+        base:hasNamespace ex:ns1 .
+
+# var6: its namespace has no hasUri (StopIteration on the last read)
+ex:var6 base:hasNodeId "7" ;
+        base:hasIdentifierType base:numericID ;
+        base:hasNamespace ex:nsEmpty .
+ex:nsEmpty a ex:Namespace .
+
+# var7: two values for the same property (next takes the first)
+ex:var7 base:hasDatatype xsd:int , xsd:long ;
+        base:hasNodeId "1" , "2" ;
+        base:hasIdentifierType base:numericID , base:stringID ;
+        base:hasNamespace ex:ns1 , ex:ns2 .
+
+# neighbours that must NOT match: same local names in another namespace,
+# the properties on the wrong side, and a property of another node
+ex:var1 ex:hasNodeId "WRONG-NAMESPACE" ;
+        ex:hasDatatype xsd:boolean .
+ex:other base:hasDatatype xsd:float ;
+         base:hasNodeId "OTHER" ;
+         base:hasIdentifierType base:guidID ;
+         base:hasNamespace ex:nsOther .
+ex:nsOther base:hasUri "http://example.org/UA/Other/" .
+ex:ns1 base:hasNodeId "NOT-A-VARIABLE" .
+ex:reversed base:hasNamespace ex:var2 .
+ex:ns2 base:hasDatatype xsd:short .

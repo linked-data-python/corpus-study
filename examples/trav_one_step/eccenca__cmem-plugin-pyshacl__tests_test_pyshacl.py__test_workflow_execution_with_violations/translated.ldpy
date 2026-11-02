@@ -56,7 +56,7 @@ def test_workflow_execution_with_violations(_violations_setup: None) -> None:  #
     assert "Bob" in values  # the label of the offending object
     assert '"not a number"' in values  # a literal without a datatype
     # a literal with a datatype, whose lexical form rdflib may normalize
-    assert any(value.startswith('"7') and value.endswith(f"^^<{xsd:float}>") for value in values)
+    assert any(value.startswith('"7') and value.endswith("^^<" + str(xsd:float) + ">") for value in values)
 
     source_shapes = {row[3] for row in rows}
     assert "name of a person" in source_shapes
@@ -67,9 +67,10 @@ def test_workflow_execution_with_violations(_violations_setup: None) -> None:  #
     assert {row[6] for row in rows} == {sh:Violation}
 
     report = export_graph(Client.from_context(TestExecutionContext()), REPORT_GRAPH_URI)
-    results = list(report.subjects(rdf:type, sh:ValidationResult))
+    @graph report
+    results = list(m{ ?s a sh:ValidationResult })
     assert len(results) == EXPECTED_VIOLATIONS
-    assert list(report.objects(predicate=sh:conforms)) == [Literal(False)]
-    assert all(str(report.value(result, rdfs:label)).startswith("SHACL: ") for result in results)
-    flagged = set(report.subjects(shui:conforms, Literal(False, datatype=xsd:boolean)))
+    assert list(m{ [] sh:conforms ?o }) == [Literal(False)]
+    assert all(str(m{ {result} rdfs:label ?l }.first()).startswith("SHACL: ") for result in results)
+    flagged = set(m{ ?s shui:conforms false })
     assert {ex:alice, ex:carol} <= flagged

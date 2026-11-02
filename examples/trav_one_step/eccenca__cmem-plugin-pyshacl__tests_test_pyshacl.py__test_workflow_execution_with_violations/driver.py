@@ -1,4 +1,7 @@
-"""Validation driver for eccenca__cmem-plugin-pyshacl__tests_test_pyshacl.py__test_workflow_execution_with_violations.
+"""EXCLUDED (see meta.json): the region needs a live CMEM instance and the packages
+cmem_client / cmem_plugin_base / cmem_plugin_pyshacl; this skeleton cannot run.
+
+Validation driver for eccenca__cmem-plugin-pyshacl__tests_test_pyshacl.py__test_workflow_execution_with_violations.
 
 This region READS a graph, so the oracle is not isomorphism but the equality
 of the values both versions produce from the same input graph (design record

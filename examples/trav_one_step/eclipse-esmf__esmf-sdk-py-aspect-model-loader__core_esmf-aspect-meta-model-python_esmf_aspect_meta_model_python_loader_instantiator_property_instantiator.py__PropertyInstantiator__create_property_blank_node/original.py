@@ -2,9 +2,9 @@
 # region: PropertyInstantiator._create_property_blank_node (lines 61-99, stratum trav_one_step)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Node, URIRef
-from esmf_aspect_meta_model_python.base.property import Property
-from esmf_aspect_meta_model_python.impl.default_property import DefaultProperty
-from esmf_aspect_meta_model_python.vocabulary.samm import SAMM
+from esmf_context import Property
+from esmf_context import DefaultProperty
+from esmf_context import SAMM
 
 def _create_property_blank_node(self, element_node: BNode) -> Property:
     """Handle a blank node holding a reference to the property and having additional attributes.

@@ -12,11 +12,24 @@
   "categories": {
     "graph_read": 12
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: CMSO->cmso, LDO->ldo, PLDO->pldo, PODO->podo, CDCO->cdco, PROV->prov, ASMO->asmo"
+    "prefixes: CMSO->cmso, LDO->ldo, PLDO->pldo, PODO->podo, CDCO->cdco, PROV->prov, ASMO->asmo",
+    "Twelve selectors, all single-pattern m{ } ... .first(): next((s for s,_,_ in graph.triples((None, P, activity))), None) is `.first()` (it has a default, so first-or-None, not next(iter(...))) and each graph.value(s, p) is `.first()`. The three component reads x/y/z of one vector/normal vector are independent reads fed by one outer node and stay three separate m{ } (fused as one join they would drop the whole vector instead of raising AttributeError on a missing component); plane -> normal vector -> distance are optional hops guarded by `is not None`, and the `for vec in ...: ... break` is kept as written. No true conjunctive chain here (ldpy/016): the stratum has no multi-pattern m{ }.",
+    "Namespaces come from the project (atomrdf.namespace), so `from atomrdf_context import cmso:, prov:` replaces the seven @prefix of the draft (only CMSO and PROV are used by the region).",
+    "Context shim atomrdf_context.py: real namespace IRIs and get_sample_object verbatim from atomrdf 0.12.3 (atomrdf not installed); Shear is a keyword-only stand-in for the pydantic model; `classmethod` is shadowed by the identity because the region is extracted from a class body and a bare module-level classmethod object is not callable. original.py edited only to point its two imports at the shim and to import that classmethod; translated.ldpy has the same imports.",
+    "Not covered, by construction: activity_id=None. rdflib reads None as a wildcard in graph.triples/objects (and graph.value(None, p) returns None as two terms are unbound), whereas an interpolated None raises TypeError in m{ } (ldpy.ANY would restore the wildcard for triples/objects but not for value()). The repository never passes None (the id comes from the graph), so the fixture does not test it.",
+    "Driver: 10 calls: seven activities of the fixture (complete; no derivedFrom/vector/normal vector; nothing at all; normal vector without distance; missing component -> AttributeError on both sides, vector and normal vector; two vectors and two output samples for one activity), a str id, an unknown activity, an empty graph. Neighbours with the predicates reversed or on another activity must not match. Verified by mutation (wasGeneratedBy -> wasDerivedFrom, an extra join pattern on distance): check FAILS."
   ],
   "draft_sha": "5bab6f406814128c",
   "provenance": {

@@ -1,4 +1,27 @@
-# Input graph for ktbs__ktbs__lib_ktbs_engine_method.py__Method_check_deletable — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# State graph (the graph of the Method resource, here a whole kTBS base) for
+# Method.check_deletable.  m1 is used both ways (two traces, two child
+# methods); m2 only through ktbs:hasMethod (a trace and the method m4); m3 only
+# as a parent method (m7 and m4); m4 by nothing.
+@prefix ktbs: <http://liris.cnrs.fr/silex/2009/ktbs#> .
 @prefix ex: <http://example.org/> .
+@prefix : <http://localhost:8001/b1/> .
+
+# m1: used by two traces and parent of two methods
+:t1 a ktbs:ComputedTrace ; ktbs:hasMethod :m1 ; ktbs:hasSource :t0 .
+:t2 a ktbs:ComputedTrace ; ktbs:hasMethod :m1 .
+:m5 a ktbs:Method ; ktbs:hasParentMethod :m1 .
+:m6 a ktbs:Method ; ktbs:hasParentMethod :m1 ; ktbs:hasParameter "p=1" .
+
+# m2: used through ktbs:hasMethod by a trace (here also by m4, below)
+:t3 a ktbs:ComputedTrace ; ktbs:hasMethod :m2 .
+
+# m3: parent of a method only (and of m4, below)
+:m7 a ktbs:Method ; ktbs:hasParentMethod :m3 .
+
+# m4: nothing refers to it as a method; its OWN outgoing links (hasParentMethod
+# m3, hasMethod m2) and the look-alike predicates below must not count for it
+:m4 a ktbs:Method ; ktbs:hasParentMethod :m3 ; ktbs:hasMethod :m2 .
+:t4 ktbs:hasModel :m1 ; ktbs:hasSource :m1 ; ex:hasMethod :m4 ; ex:hasParentMethod :m4 .
+:m3 a ktbs:Method .
+:m1 a ktbs:Method .
+:m2 a ktbs:Method .

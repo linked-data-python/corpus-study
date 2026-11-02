@@ -12,10 +12,22 @@
   "categories": {
     "graph_read": 4
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "translation_notes": [
+    "Four graph.value(subject=, predicate=) -> four single-pattern `m{ {s} {pred} ?o }.first()`, with the predicate interpolated ({self._samm.get_urn(SAMM.property)}, a computed URN: the meta-model version is a run-time value, so no @prefix can name it). `@graph self._aspect_graph` once replaces four `self._aspect_graph.` receivers. The two reads inside self._get_child belong to another method of the repository and are not part of the region (stand-in in the driver).",
+    "Behaviour kept: `if not property_node` is on the term returned by .first(), so an empty literal behaves as a missing property (case ex:emptyprop); a Literal in subject position of an interpolated pattern yields no solution rather than raising (case \"literal-property\"). element_node None would raise TypeError in m{ } where rdflib reads it as a wildcard (value(subject=None, predicate=p) is a wildcard read); unreachable here, the caller dispatches on isinstance(element_node, BNode).",
+    "Context shim esmf_context.py: SAMM.get_urn/samm_prefix and the attribute constants verbatim from vocabulary/samm.py and vocabulary/constants.py @5ca56eb51c (fetched with gh; the package is not installed), Property reduced to a marker, DefaultProperty keeps the constructor arguments of impl/default_property.py as attributes. original.py edited only on its three import lines (module name -> esmf_context); translated.ldpy has the same.",
+    "self is a driver-local stand-in with _aspect_graph, _samm (the real SAMM, 2.1.0), _get_child (the body of InstantiatorBase._get_child, element factory replaced by a recording tuple) and _get_base_attributes (records its argument). The ValueError message names the blank node and the two sides parse different blank node identifiers: the cases that raise on a blank node relabel it identically on both sides.",
+    "Driver: 13 calls: full / minimal / only-optional / only-notInPayload / property as a blank node / two values for one predicate / property without characteristic / literal property / another element with its own flags (must not leak) / only the old meta-model version terms / a blank node that is only an object / empty-literal property / unknown node. Verified by mutation (example value read on the element instead of the property, notInPayload read as optional, `if not property_node` -> `is None`): check FAILS."
+  ],
   "draft_sha": "0d521f078f76a0f9",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.675584+00:00",
