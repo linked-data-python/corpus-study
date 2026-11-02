@@ -42,5 +42,24 @@
     "method": "entry:test_contains",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three names s, p, o become one `triple` tuple, used as is by both membership asserts and by sg.add; nothing else to compress.",
+    "Exception to the symmetry, island-only: in optimized.ldpy the terms are written in place as prefixed names under a computed prefix declared in the function, `@prefix ex: f<{EX}> .` (it still reads the EX constant), so no variable holds them; Python has no way to name the triple inside `in` and `add` other than a variable. `@graph sg` + `+{ }` for the add, `assert [not] m{ }` for the two membership tests.",
+    "Side effect stated: `@graph sg` designates the caller's graph and, by record ldpy/027, adds the block's ex: binding to its namespace manager (no binding is lost, the triples are unchanged; the driver compares by isomorphism). The call-suffix form `+{ }(sg)` / `m{ }(sg)` avoids it, at notation 1.0 instead of 0.79 on this region."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "f<…>",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal goes; URIRef and the EX constant stay.",
+    "LD Python: the whole rdflib import goes (the terms are prefixed names); the EX constant stays, read by the computed prefix."
+  ]
 }

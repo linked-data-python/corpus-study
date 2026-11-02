@@ -63,5 +63,25 @@
       "f<{PREFIX}TestClass> -> f<{PREFIX}TestClas>"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three predicate variables become rdflib's own constants (rdflib.SKOS.definition, rdflib.SKOS.prefLabel, rdflib.RDFS.subClassOf: the same IRIs, all defined in those namespaces, no warning); parent1/parent2 are inlined; the four adds on `subject` become one `g += [...]` (moving the two parent assignments is free: they are constant URIRefs); `key = \"TestClass\"` is inlined into the two asserts. The asserts and the comment stay; the demo() harness is copied as is.",
+    "optimized.ldpy, from optimized.py: the four triples are one `+{ }` with `;` and an object list for the two parents; the subject is written in place as `f<{PREFIX}TestClass>`, so no `subject` local; rdfs: and skos: are declared in the function (the translated header declares no prefix) and used as prefixed names, the parents as IRIs.",
+    "Exception to the symmetry, island-only: `g = rdflib.Graph()` + `@graph g` become `@graph as g` (a fresh graph created and designated in one declaration), and the `subject` local disappears because an island term can be written in place once for four triples; Python needs the variable to avoid repeating the URIRef four times."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "IRI",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the seven unused shim names go; the shim import is put on one line with PREFIX and populate_useful_dicts; `import rdflib` stays. The demo() harness and its `import context_shim` are untouched.",
+    "LD Python: the same, plus `import rdflib` (the graph comes from @graph as g, the terms from the island)."
+  ]
 }

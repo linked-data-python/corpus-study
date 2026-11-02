@@ -67,5 +67,25 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the conditional reassignment of classname becomes an `if`; each run of adds becomes one `graph += [...]` (the class triples; the alias triples, with the aliasOf triple moved up into that batch: it cannot change the subClassOf objects of classname read just after); the parents loop and the alias parent-class loop become comprehensions (the second iterates graph.objects completely before `+=` writes, so the original's list() is no longer needed); `len(taglist) == 0` becomes `not taglist` (taglist is asserted to be a list); the other-properties filter becomes one loop over defn.items() with the list/non-list cases merged into one inner loop; expected_properties stays a named list, on one line. Every assert is kept, in its place, as are the add_tags/define_classes/define_constraints calls (no triple moves across them).",
+    "optimized.ldpy, from optimized.py: `@graph graph` once; the class batch becomes `+{ {classname} a owl:Class, sh:NodeShape ; rdfs:subClassOf {parent} }` and the alias batch one `+{ }` with `.`, `;` and an object list; the two comprehensions become `for` loops writing one `+{ }` each, the parent-class read being `list(m{ {classname} rdfs:subClassOf ?pc })` (materialised, since the loop writes into the graph it reads). No exception to the symmetry.",
+    "Not compressed on the ldpy side: the other-properties `graph.add((classname, propname, pv))` stays rdflib on both sides, as in the translation: propname and pv come from the definitions as data, and graph.add rejects a str where +{ } would coerce it into a Literal."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Literal, BNode and SKOS go; BSH, REC, TAG, SOSA, QUDT, VCARD and REF go from the context import, put on one line; G and A stay (A is used by the region).",
+    "LD Python: the same, plus the whole rdflib.namespace import and SH (the region writes owl:, rdfs:, sh:), `A = rdf:type` (the islands write `a`) and @prefix rdf:, which only served A; brick:, owl:, rdfs: and sh: stay; G stays (default argument)."
+  ]
 }

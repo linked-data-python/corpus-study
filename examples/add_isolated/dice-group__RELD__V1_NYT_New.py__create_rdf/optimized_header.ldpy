@@ -1,0 +1,77 @@
+# Extracted from dice-group/RELD@7ca93acbb6 : V1/NYT_New.py
+# region: create_rdf (lines 215-306, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib.namespace import XSD
+from rdflib import Graph, URIRef # here is some error
+from validate import containsNumber, returnValue, check_type, remove_alphaNumeric
+@prefix prop: <https://reld.dice-research.org/schema/> .
+@prefix res: <https://reld.dice-research.org/resource/> as RES .
+@prefix dbo: <http://dbpedia.org/ontology/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Fixture context restoring the bindings the extracted region reads
+# (relation, dsName, sent_counter, ne_counter, info, subject_dict,
+# object_dict): the original function received/derived them from the
+# enclosing script, which the extraction does not carry.
+relation = "http://ex.org/relation1"
+dsName = "ds"
+sent_counter = 0
+ne_counter = 0
+info = [
+    ("subjA", "objA", [
+        ("A sentence about entities.", {
+            "listOfNamedEntities": [("Entity One", "Person"), ("Entity Two!", "Organization")],
+            "score": 5,
+        }),
+    ], 2, "distA"),
+    ("123", "456", [
+        ("Another sentence with numbers.", {"listOfNamedEntities": [], "score": 7}),
+    ], 1, "distB"),
+]
+subject_dict = {"Some Subject": "subjA", "NumKey": "123"}
+object_dict = {"Some Object": "objA", "ObjNum": "456"}
+g = Graph()
+@graph g
+
+for val in info: # Code for Sentence and relevant info
+
+    +{ {URIRef(relation)} prop:distribution {val[4]}^^{XSD.string} }
+
+    for v in val[2]:
+        sent_id = RES+"S_"+dsName+"_"+ str(sent_counter) # will go to all code
+        sent_counter += 1
+        +{
+            {URIRef(relation)} prop:hasSentence {URIRef(sent_id)} .
+            {URIRef(sent_id)} prop:hasText {v[0]}@en
+        }
+        for key , value in v[1].items(): # code for named entities
+            if key == "listOfNamedEntities":
+                for nam_e in value:
+                    ne_id = RES+'ne_n' + str(ne_counter)
+                    #ne_id = res+ str(nam_e[0]).strip().replace(' ','_')+str(ne_counter)
+                    ne_counter += 1
+                    +{
+                        {URIRef(sent_id)} prop:hasNamedEntity {URIRef(ne_id)} .
+                        {URIRef(ne_id)} a dbo:{remove_alphaNumeric(nam_e[1])} ;
+                           rdfs:label {nam_e[0]}@en
+                    }
+            else:
+                +{ {URIRef(sent_id)} prop:{key} {value}^^{XSD.integer} }
+    ################ Subject Object Code ##################
+    +{ {URIRef(sent_id)} prop:numOfRelation {val[3]}^^{XSD.integer} }
+    subject_string = returnValue(subject_dict,val[0])
+    sub_id = RES+'sub_'+dsName+str(val[0])
+    subject_label = (subject_string if containsNumber(str(subject_string)) or check_type(str(subject_string))
+                     else remove_alphaNumeric(subject_string))
+    +{
+        {URIRef(sent_id)} prop:hasSubject {URIRef(sub_id)} .
+        {URIRef(sub_id)} rdfs:label {subject_label}^^{XSD.string}
+    }
+    object_string = returnValue(object_dict,val[1])#remove_alphaNumeric(val[1])
+    obj_id = RES + 'obj_'+dsName+str(val[1])
+    object_label = (object_string if containsNumber(str(object_string)) or check_type(str(object_string))
+                    else remove_alphaNumeric(object_string))
+    +{
+        {URIRef(sent_id)} prop:hasObject {URIRef(obj_id)} .
+        {URIRef(obj_id)} rdfs:label {object_label}^^{XSD.string} # debatable because the entities might be same
+    }

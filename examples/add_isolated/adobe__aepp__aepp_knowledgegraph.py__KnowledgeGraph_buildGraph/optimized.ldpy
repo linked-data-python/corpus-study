@@ -1,0 +1,117 @@
+# Extracted from adobe/aepp@05c73dfc6d : aepp/knowledgegraph.py
+# region: KnowledgeGraph.buildGraph (lines 273-360, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib.namespace import RDF, RDFS, XSD, DCAT, DCTERMS
+from rdflib import Graph, Namespace, Literal,URIRef
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# Wrapped in a function (context restoration, meta.json: this is one of the
+# regions with no visible graph -- kwargs/df_datasets/graph/*_NODE/
+# *_flow_managers/audiences are all free variables of the original method
+# body).
+def build_graph_region(self, kwargs, df_datasets, graph, CATALOG_NODE,
+                        PROFILE_NODE, FLOWS_NODE, AUDIENCES_NODE,
+                        source_flow_managers, audiences,
+                        destination_flow_managers):
+ @graph graph
+ if kwargs.get('only_schema',False) == False:
+    for index, row in df_datasets.iterrows():
+        dataset = self.CATALOG[row['id']]
+        +{
+            {CATALOG_NODE} {self.CATALOG.contains} {dataset} .
+            {dataset} a dcat:Dataset ;
+               {self.SCHEMA.implements} {URIRef(row['schemaId'])} ;
+               dcterms:title {Literal(row.get('name'))} ;
+               {self.CATALOG.rows} {row.get('datalake_rows')}^^{XSD.integer}
+        }
+        if row['profileEnabled']:
+            +{
+                {PROFILE_NODE} {self.PROFILE.contains} {dataset} .
+                {dataset} {self.PROFILE.linked} {PROFILE_NODE} ;
+                   {self.PROFILE.participates} {self.PROFILE.UPS}
+            }
+        if row['identityEnabled']:
+            +{
+                {dataset} {self.PROFILE.linked} {PROFILE_NODE} ;
+                   {self.PROFILE.participates} {self.PROFILE.UIS}
+            }
+    for element in self.__dataset_preview__:
+        +{
+            {self.CATALOG[element.get('value')]} {self.PROFILE.counts} {element.get('fullIDsCount')}^^{XSD.integer} .
+            {self.CATALOG[element.get('datasetId')]} {self.PROFILE.participates} {self.PROFILE.UPS}
+        }
+    +{ {FLOWS_NODE} {self.FLOWS.contains} {self.FLOWS.SourceFlows} }
+    for flow in source_flow_managers:
+        if getattr(flow, 'datasetId', None) is not None and flow.datasetId in df_datasets['id'].tolist():
+            flow_node = self.FLOWS[flow.id]
+            +{
+                {self.FLOWS.SourceFlows} {self.FLOWS.contains} {flow_node} .
+                {flow_node} rdfs:label {Literal(flow.name)} ;
+                   a "IngestionFlow" ;
+                   {self.FLOWS.loads} {self.CATALOG[flow.datasetId]}
+            }
+            if flow.frequency is not None:
+                +{ {flow_node} {self.FLOWS.frequency} {Literal(flow.frequency)} }
+    if kwargs.get('verbose',False) == True:
+        print("  --Audiences")
+    for audience in audiences:
+        audience_node = self.AUDIENCES[audience['id']]
+        +{
+            {AUDIENCES_NODE} {self.AUDIENCES.contains} {audience_node} .
+            {audience_node} rdfs:label {Literal(audience.get('name'))} ;
+               a {self.AUDIENCES.audience}
+        }
+        evaluationInfo = audience.get('evaluationInfo',{})
+        for mode, evaluation in (('batch', "BATCH"), ('continuous', "STREAMING"),
+                                 ('synchronous', "EDGE")):
+            if evaluationInfo.get(mode,{}).get('enabled',False):
+                +{ {audience_node} {self.AUDIENCES.evaluation} {evaluation} }
+        for path in self.segmentationAPI.extractPaths(audience) or []:
+            if '@' not in path and path != 'xEvent':
+                if path.startswith('xEvent.'):
+                    path = path.replace('xEvent.','')
+                else:
+                    +{ {audience_node} {self.AUDIENCES.behavior} "Profile-based" }
+                node = self.SCHEMA[path.replace('{}', '').replace('[]', '')]
+                if not m{ {node} a {self.SCHEMA.path} }:
+                    +{ {node} a {self.SCHEMA.path} ; {self.SCHEMA.usedIn} rdf:nil }
+                +{ {node} {self.AUDIENCES.usedIn} {audience_node} }
+            if path == 'xEvent':
+                +{
+                    {audience_node} {self.AUDIENCES.behavior} "Event-based" .
+                    {self.SCHEMA.xEvent} {self.AUDIENCES.usedIn} {audience_node} ;
+                       {self.SCHEMA.usedIn} rdf:nil
+                }
+            if '@' in path:
+                +{ {audience_node} {self.AUDIENCES.behavior} "Relationship-based" }
+    if kwargs.get('verbose',False) == True:
+        print("  --Flows")
+    +{ {FLOWS_NODE} {self.FLOWS.contains} {self.FLOWS.DestinationFlows} }
+    for destination in destination_flow_managers:
+        destination_node = self.FLOWS[destination.id]
+        +{
+            {self.FLOWS.DestinationFlows} {self.FLOWS.contains} {destination_node} .
+            {destination_node} a "DestinationFlow" ;
+               rdfs:label {Literal(destination.name)} ;
+               {self.FLOWS.frequency} {Literal(destination.frequency)}
+        }
+        for key, value in destination.attributes.items():
+            node = self.SCHEMA[key.replace('{}', '').replace('[]', '')]
+            +{
+                {node} {self.FLOWS.usedIn} {destination_node} .
+                {destination_node} {self.FLOWS.sharedAttributes} {node}
+            }
+            if value.get('primary',False) == True:
+                +{ {destination_node} {self.FLOWS.primaryAttributes} {node} }
+            if value.get('mandatory',False) == True:
+                +{ {destination_node} {self.FLOWS.mandatoryAttributes} {node} }
+        for audienceId in destination.audiences:
+            +{
+                {destination_node} {self.FLOWS.audiences} {self.AUDIENCES[audienceId]} .
+                {self.AUDIENCES[audienceId]} {self.FLOWS.usedIn} {destination_node}
+            }
+    self.global_graph = graph
+ return graph

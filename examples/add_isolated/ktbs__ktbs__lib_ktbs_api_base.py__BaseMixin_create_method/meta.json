@@ -46,5 +46,26 @@
     "method": "entry:create_method",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: little to compress, the region is mostly guards and the docstring. The three unconditional adds become one `graph += [...]` (still before the parameter loop, so a caller-supplied graph is left in the same partial state when a key holding '=' raises); `\"%s=%s\" % (key, value)` becomes an f-string; `not (t) in g` becomes `t not in g`. Every guard and raise is kept: parent is None, parameters is None, the trust/Method check, graph is None, the '=' check, the final assert.",
+    "optimized.ldpy, from optimized.py: `@graph graph` + one `+{ }` for the batch; the parameter literal is an f-string plain literal in the island; `Literal(label)` becomes `{label}` (label is a str in the API, and node() equals Literal() on a str or a Literal); the Method membership test becomes `not m{ {parent} a {KTBS.Method} }(self.state)` (call suffix: self.state is not the current graph). KTBS stays interpolated: it is the project's namespace object, imported from context. No exception to the symmetry.",
+    "As in the translation, `@graph graph` adds the block's prefixes to a caller-supplied graph's bindings (record ldpy/027); its triples are the same."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "plain literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef goes from rdflib, parent_uri and extend_api from the context import.",
+    "LD Python: Literal, RDF and URIRef go from rdflib, parent_uri, extend_api and SKOS from the context import; @prefix rdf: goes (the region writes `a`), @prefix skos: stays."
+  ]
 }

@@ -75,5 +75,23 @@
       "what": "'@prefix' added to constructions (declared and used, was missing)",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the label f-string `value if value != 'N/A' else 'N/A'` is just `value` and goes inline into the _ensure_type_with_label call; the two mutually exclusive g.set branches become one conditional Literal inside the try, then a single g.set after it.",
+    "The try now guards only the Literal construction, no longer the g.set call of the float branch: g.set on a minted URIRef, an OS term and a Literal cannot raise, so the effect of the except is unchanged; the type and label triples are still written before the possible early return, as in the original.",
+    "optimized.ldpy, from optimized.py: the tail g.add becomes `+{ ... }(g)` (call suffix) and XSD.float becomes xsd:float; g.set stays rdflib API (a replace, which +{ } does not cover, as in the translation). No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Namespace, URIRef, RDF and RDFS go; Literal, XSD and the shim import stay.",
+    "LD Python: Graph, Namespace, URIRef, RDF, RDFS and XSD go (XSD is replaced by xsd:); the @prefix xsd: line is used and stays."
+  ]
 }

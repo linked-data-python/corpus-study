@@ -1,0 +1,66 @@
+# Extracted from dice-group/RELD@7ca93acbb6 : V1/NYT_New.py
+# region: create_rdf (lines 215-306, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib.namespace import DC, DCTERMS, DOAP, FOAF, SKOS, OWL, RDF, RDFS, VOID, XMLNS, XSD
+from rdflib import Graph, URIRef, Literal, Namespace # here is some error
+from  validate import containsNumber , returnValue, check_type, remove_alphaNumeric, is_date, clean_sentences ,wikidata_id_toText
+# Fixture context restoring the bindings the extracted region reads
+# (relation, dsName, sent_counter, ne_counter, info, subject_dict,
+# object_dict): the original function received/derived them from the
+# enclosing script, which the extraction does not carry.
+relation = "http://ex.org/relation1"
+dsName = "ds"
+sent_counter = 0
+ne_counter = 0
+info = [
+    ("subjA", "objA", [
+        ("A sentence about entities.", {
+            "listOfNamedEntities": [("Entity One", "Person"), ("Entity Two!", "Organization")],
+            "score": 5,
+        }),
+    ], 2, "distA"),
+    ("123", "456", [
+        ("Another sentence with numbers.", {"listOfNamedEntities": [], "score": 7}),
+    ], 1, "distB"),
+]
+subject_dict = {"Some Subject": "subjA", "NumKey": "123"}
+object_dict = {"Some Object": "objA", "ObjNum": "456"}
+g = Graph()
+prop = Namespace("https://reld.dice-research.org/schema/")
+res = Namespace("https://reld.dice-research.org/resource/")
+dbo = Namespace("http://dbpedia.org/ontology/")
+
+for val in info: # Code for Sentence and relevant info
+
+    g.add((URIRef(relation), prop.distribution, Literal(val[4], datatype=XSD.string)))
+
+    for v in val[2]:
+        sent_id = res+"S_"+dsName+"_"+ str(sent_counter) # will go to all code
+        sent_counter += 1
+        g += [(URIRef(relation), prop.hasSentence, URIRef(sent_id)),
+              (URIRef(sent_id), prop.hasText, Literal(v[0], lang='en'))]
+        for key , value in v[1].items(): # code for named entities
+            if key == "listOfNamedEntities":
+                for nam_e in value:
+                    ne_id = res+'ne_n' + str(ne_counter)
+                    #ne_id = res+ str(nam_e[0]).strip().replace(' ','_')+str(ne_counter)
+                    ne_counter += 1
+                    g += [(URIRef(sent_id), prop.hasNamedEntity, URIRef(ne_id)),
+                          (URIRef(ne_id), RDF.type, dbo[remove_alphaNumeric(nam_e[1])]),
+                          (URIRef(ne_id), RDFS.label, Literal(nam_e[0], lang='en'))]
+            else:
+                g.add((URIRef(sent_id), prop[key], Literal(value, datatype=XSD.integer)))
+    ################ Subject Object Code ##################
+    g.add((URIRef(sent_id), prop.numOfRelation, Literal(val[3], datatype=XSD.integer)))
+    subject_string = returnValue(subject_dict,val[0])
+    sub_id = res+'sub_'+dsName+str(val[0])
+    subject_label = (subject_string if containsNumber(str(subject_string)) or check_type(str(subject_string))
+                     else remove_alphaNumeric(subject_string))
+    g += [(URIRef(sent_id), prop.hasSubject, URIRef(sub_id)),
+          (URIRef(sub_id), RDFS.label, Literal(subject_label, datatype=XSD.string))]
+    object_string = returnValue(object_dict,val[1])#remove_alphaNumeric(val[1])
+    obj_id = res + 'obj_'+dsName+str(val[1])
+    object_label = (object_string if containsNumber(str(object_string)) or check_type(str(object_string))
+                    else remove_alphaNumeric(object_string))
+    g += [(URIRef(sent_id), prop.hasObject, URIRef(obj_id)),
+          (URIRef(obj_id), RDFS.label, Literal(object_label, datatype=XSD.string))] # debatable because the entities might be same

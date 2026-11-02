@@ -46,5 +46,23 @@
     "method": "entry:test_iadd",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the triple written twice (the add, then the membership assert) becomes one `triple` local; nothing else to compress: the rest is the test's asserts, kept one per line so that a failure still points at its line.",
+    "optimized.ldpy, from optimized.py: the add becomes `+{ <s1> <p1> \"o\" }(otherg)` (call suffix: one statement where the translation designated otherg with @graph for a single write), the membership assert `assert m{ <s1> <p1> \"o\" }(pr.graph)`, the two identifiers relative IRIs (no @base in scope). `g += otherg` is a graph union and stays Python.",
+    "Exception to the symmetry: optimized.ldpy has no `triple` local, because the island writes the three terms in fewer tokens than a Python variable would cost, and an island cannot take a tuple anyway; the local exists only on the Python side, where it is the compression."
+  ],
+  "optimized_constructions": [
+    "+{ }",
+    "m{ }",
+    "call suffix (g)",
+    "IRI",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace goes; URIRef, Literal, the kgraphpy imports and `import context_shim` stay.",
+    "LD Python: the whole rdflib import goes (the terms are written in the islands); the kgraphpy imports and `import context_shim` stay."
+  ]
 }

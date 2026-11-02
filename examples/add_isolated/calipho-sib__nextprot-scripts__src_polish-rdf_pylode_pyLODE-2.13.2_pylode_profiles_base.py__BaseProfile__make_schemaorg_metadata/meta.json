@@ -69,5 +69,24 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `metadata = self.METADATA` once; the three unused locals (publishers, creators, copyright_holder) go; name, description and rights are built inline in their add (Literal cannot raise, so no exception moves); `license = None` comes first instead of an else; date_created moves into the `created` block of copyright_year (it is still bound under the same condition, and Literal raises nothing, so the license/created/repository exceptions keep their order); the md branch of repository goes, because the following `if ... == \"adoc\" ... else` always overwrites it (the source's if-not-elif bug is kept: case 4 still raises the same IndexError); the first two adds become one `g += [...]`.",
+    "Kept on purpose: date_created, date_modified and copyright_year stay locals guarded by the `created`/`modified` keys while their adds are guarded by other keys, so the UnboundLocalError of case 5 is unchanged; `SDO = Namespace(...)` stays, since rdflib's SDO warns on SDO.rights; the two g.bind calls stay; the string statement and the commented-out adds stay as they were.",
+    "optimized.ldpy, from optimized.py: one `+{ }` per add; XSD.date / XSD.int become xsd:date / xsd:int; description and rights are bare interpolations (guarded not None, str in the repository, so node() is Literal()); the title keeps Literal(...) because it is not guarded and node(None) raises where Literal(None) does not.",
+    "Exception to the symmetry, island-only: `g = Graph()`, `SDO = Namespace(...)` and the two g.bind calls become `@graph as g`, a fresh graph that already binds the sdo: and xsd: prefixes of the block; pure Python has no construct that creates a graph and binds its prefixes in one statement. The returned JSON-LD text is identical on all eight calls."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: SDO (shadowed by the local Namespace), SKOS, OWL, PROF, FOAF and the duplicate Graph go; RDF, XSD, Graph, Literal, Namespace and URIRef stay.",
+    "LD Python: everything but Literal and URIRef goes (the graph comes from @graph as g, the terms from sdo: and xsd:); both @prefix lines are used."
+  ]
 }

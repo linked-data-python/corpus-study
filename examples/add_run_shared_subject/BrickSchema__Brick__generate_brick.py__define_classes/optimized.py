@@ -1,0 +1,83 @@
+# Extracted from BrickSchema/Brick@c12949f236 : generate_brick.py
+# region: define_classes (lines 294-374, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+import logging
+from rdflib import Graph, Literal, BNode, URIRef
+from rdflib.namespace import RDF, OWL, RDFS, SKOS
+from brick_context import (
+    BRICK,
+    BSH,
+    REC,
+    TAG,
+    SOSA,
+    QUDT,
+    VCARD,
+    SH,
+    REF,
+    brickschema,
+    add_tags,
+    define_constraints,
+)
+G = brickschema.Graph()
+A = RDF.type
+
+def define_classes(definitions, parent, pun_classes=False, graph=G):
+    """
+    Generates triples for the hierarchy given by 'definitions', rooted
+    at the class given by 'parent'
+    - class hierarchy ('subclasses')
+    - tag mappings
+    - substance + quantity modeling
+
+    If pun_classes is True, then create punned instances of the classes
+    """
+    for classname, defn in definitions.items():
+        if not isinstance(classname, URIRef):
+            classname = BRICK[classname]
+        # class is a owl:Class, subclass of parent
+        graph += [(classname, A, OWL.Class), (classname, A, SH.NodeShape),
+                  (classname, RDFS.subClassOf, parent)]
+
+        if pun_classes:
+            graph.add((classname, A, classname))
+
+        # define mapping to tags if it exists
+        # "tags" property is a list of URIs naming Tags
+        taglist = defn.get("tags", [])
+        assert isinstance(taglist, list)
+        if not taglist:
+            logging.warning(f"Property 'tags' not defined for {classname}")
+        add_tags(classname, taglist, graph=graph)
+
+        # define class structure
+        # this is a nested dictionary
+        subclassdef = defn.get("subclasses", {})
+        assert isinstance(subclassdef, dict)
+        define_classes(subclassdef, classname, graph=graph)
+
+        # handle 'parents' subclasses (links outside of tree-based hierarchy)
+        parents = defn.get("parents", [])
+        assert isinstance(parents, list)
+        graph += [(classname, RDFS.subClassOf, _parent) for _parent in parents]
+
+        # add SHACL constraints to the class
+        constraints = defn.get("constraints", {})
+        assert isinstance(constraints, dict)
+        define_constraints(constraints, classname, graph=graph)
+
+        aliases = defn.get("aliases", [])
+        assert isinstance(aliases, list)
+        for alias in aliases:
+            graph += [(classname, OWL.equivalentClass, alias), (alias, A, OWL.Class),
+                      (alias, A, SH.NodeShape), (alias, OWL.equivalentClass, classname),
+                      (alias, BRICK.aliasOf, classname)]
+            # find parent class of what the alias is equivalent to, add the RDFS subClassOf properties
+            graph += [(alias, RDFS.subClassOf, pc) for pc in graph.objects(classname, RDFS.subClassOf)]
+
+        # all other key-value pairs in the definition are
+        # property-object pairs
+        expected_properties = ["parents", "tags", "substances", "subclasses", "constraints", "aliases"]
+        for propname, propval in defn.items():
+            if propname not in expected_properties:
+                for pv in propval if isinstance(propval, list) else [propval]:
+                    graph.add((classname, propname, pv))

@@ -1,0 +1,37 @@
+# Extracted from AI-SDC/ACRO@eb1d6e370a : test/test_ontology_handling.py
+# region: test_populate_useful_dicts_othersuperclasses_branch (lines 216-237, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from context_shim import PREFIX, populate_useful_dicts  # context shim -- see meta.json
+
+def test_populate_useful_dicts_othersuperclasses_branch() -> None:
+    """Populate_useful_dicts() appends to existing list when key already in othersuperclasses."""
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+    @graph as g
+    +{
+        f<{PREFIX}TestClass> skos:definition "a test class" ;
+           skos:prefLabel "Test Class" ;
+           rdfs:subClassOf <http://example.com/parent1>, <http://example.com/parent2>
+    }
+
+    _, _, othersuperclasses = populate_useful_dicts(g)
+
+    assert "TestClass" in othersuperclasses
+    # Both parents should be present
+    assert len(othersuperclasses["TestClass"]) >= 2
+
+
+# Demo harness (identical on both sides, see meta.json): the test function
+# builds its graph as a local variable and never returns or exposes it, so
+# a plain call has nothing for run_pair to observe (no return value, no
+# argument, no stdout). context_shim's populate_useful_dicts records the
+# graph it receives in LAST_GRAPH; this harness calls the (untouched) test
+# function -- which still raises if either side's own downstream assertions
+# fail -- then hands back that captured graph for isomorphism comparison,
+# the region's oracle.
+import context_shim
+
+
+def demo():
+    test_populate_useful_dicts_othersuperclasses_branch()
+    return context_shim.LAST_GRAPH

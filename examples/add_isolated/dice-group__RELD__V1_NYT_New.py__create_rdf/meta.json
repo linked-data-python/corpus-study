@@ -73,5 +73,25 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: URIRef(prop+'x') becomes prop.x, URIRef(prop+key) prop[key] and URIRef(dbo+...) dbo[...] (remove_alphaNumeric returns a str; the sentence keys are str in the repository, where prop[key] would no longer raise on a non-str key); each run of adds becomes one `g += [...]`; the two unused enumerate indexes go (`for val in info`, `for v in val[2]`); `x = x + 1` becomes `x += 1`; each three-branch containsNumber/check_type/else label becomes one conditional expression (same short-circuit order) bound to subject_label / object_label, then one batch of two triples. The module-level names the driver compares (sent_id, ne_id, sub_id, obj_id, subject_string, object_string, the counters) keep their values.",
+    "A raising term (remove_alphaNumeric(None) when returnValue finds nothing) now raises before the batch it belongs to is written, where the original had written the hasSubject/hasObject or hasNamedEntity triple first: the script dies either way, as with the translation's +{ }.",
+    "optimized.ldpy, from optimized.py: `@graph g`, one `+{ }` per batch (`;` on the shared entity subject); Literal(x, datatype=XSD.y) becomes the typed literal `{x}^^{XSD.y}` and Literal(x, lang='en') the language literal `{x}@en` (both transpile to the same Literal call); prop.x, prop[key] and dbo[...] become prop:x, prop:{key} and dbo:{...}. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: DC, DCTERMS, DOAP, FOAF, SKOS, OWL, VOID and XMLNS go from rdflib.namespace; is_date, clean_sentences and wikidata_id_toText go from the shim import. The fixture block stays byte for byte (the driver substitutes it textually).",
+    "LD Python: the same, plus RDF, RDFS, Literal and Namespace (the islands write a, rdfs:, the literals and the prefixes); the four @prefix lines stay: prop:, dbo:, rdfs: are written as prefixed names, and res: carries the RES Namespace object the ids are built from."
+  ]
 }

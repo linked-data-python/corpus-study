@@ -61,5 +61,21 @@
       "@graph g -> @graph Graph()"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two adds become one `g += [...]`; `g = Graph()` and `return g` stay (chaining Graph().add(...).add(...) costs as many tokens). The demo() harness is copied as is.",
+    "Exception to the symmetry, island-only: in optimized.ldpy the whole body is `return g{ ex:Widget a owl:Class ; rdfs:label \"Widget\" }`, a graph literal that creates, fills and returns the graph in one expression (bound to the block's prefixes); pure Python has no graph expression, so `g = Graph()` and `return g` stay on that side."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "g{ }",
+    "prefixed name",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef and SKOS go; Graph (return annotation), Literal, Namespace (EX), OWL, RDF, RDFS and pytest stay.",
+    "LD Python: Literal, Namespace, URIRef and the whole rdflib.namespace import go; Graph stays for the return annotation, pytest for the decorator; the three @prefix lines are used."
+  ]
 }

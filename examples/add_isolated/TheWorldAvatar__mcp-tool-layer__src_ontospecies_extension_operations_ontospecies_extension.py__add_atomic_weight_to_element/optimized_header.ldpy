@@ -1,0 +1,27 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : src/ontospecies_extension/operations/ontospecies_extension.py
+# region: add_atomic_weight_to_element (lines 566-587, stratum add_isolated)
+# licence of the source repository: see meta.json
+from rdflib import Literal
+from context_shim import OS, locked_graph, _safe_parent, _mint_hash_iri, _ensure_type_with_label, _class
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def add_atomic_weight_to_element(element_iri: str, value) -> str:
+    """
+    Attach atomic weight to an element node. Handles both float and "N/A" values.
+    """
+    with locked_graph() as g:
+        parent = _safe_parent(element_iri)
+        if parent is None:
+            return "element IRI must be absolute https IRI"
+        aw = _mint_hash_iri("AtomicWeight")
+        # Compose label
+        _ensure_type_with_label(g, aw, _class(OS, "AtomicWeight"), f"Atomic Weight {value}")
+        # Handle N/A specially as a string literal; otherwise use float datatype
+        try:
+            weight = Literal("N/A") if value == "N/A" else Literal(float(value), datatype=xsd:float)
+        except Exception:
+            return f"Invalid atomic weight value: {value!r}"
+        g.set((aw, _class(OS, "hasAtomicWeightValue"), weight))
+        +{ {parent} {_class(OS, "hasAtomicWeight")} {aw} }(g)
+        return str(aw)
