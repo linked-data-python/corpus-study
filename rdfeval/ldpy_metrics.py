@@ -167,19 +167,55 @@ def _scan_interpolation(text: str, i: int) -> int:
     return n
 
 
+#: Islands whose body, between the introducer's brace and the closing one,
+#: is Turtle or SPARQL text: `g{ … }`, `+{ … }`, `-{ … }`, `m{ … }`,
+#: `s{ … }`, `e{ … }`.  The introducer with its brace is one token, the
+#: closing brace another; the body is tokenised as RDF text.  (`f{ … }` is not
+#: one of them: its body is a Python expression, an interpolation.)
+BODY_KINDS = {"island:graph", "island:g", "island:addto", "island:removefrom",
+              "island:match", "island:sparql", "island:enode"}
+#: Bodies in SPARQL, where `{ … }` is a group unless it holds an expression
+#: — the transpiler's own oracle (record ldpy/015), approximated here by
+#: Python's compiler.
+SPARQL_KINDS = {"island:sparql", "island:enode"}
+
+
+def _is_expression(text: str) -> bool:
+    if not text.strip():
+        return False
+    try:
+        compile("(%s)" % text, "<interp>", "eval")
+        return True
+    except (SyntaxError, ValueError):
+        return False
+
+
 def tokenize_island(text: str, kind: str, stats: IslandStats) -> None:
     """Tokenise one island's source text into stats (additive)."""
-    # strip the introducer so g{ ... } contributes its braces as punctuation
+    if kind in BODY_KINDS and "{" in text and text.rstrip().endswith("}"):
+        open_, close = text.find("{"), text.rfind("}")
+        stats.tokens += 2                       # `g{` and `}`
+        tokenize_rdf_text(text[open_ + 1:close], stats,
+                          sparql=kind in SPARQL_KINDS)
+        return
+    tokenize_rdf_text(text, stats)
+
+
+def tokenize_rdf_text(text: str, stats: IslandStats,
+                      sparql: bool = False) -> None:
+    """Tokenise Turtle or SPARQL text into stats (additive): a prefixed name,
+    an IRI, a literal with its suffix, a variable are one token each, and an
+    interpolation `{expr}` is one token plus the Python tokens inside."""
     depth = 0
     i, n = 0, len(text)
-    pending_subject = True
-    obj_position = False        # inside a predicate-object list, expecting object
     while i < n:
         m = _ISLAND_TOKEN.match(text, i)
         if not m:
             i += 1
             continue
         g = m.lastgroup
+        if g == "strsuffix":
+            g = "string"                # a literal with its @lang / ^^dt
         tok = m.group(0)
         if g == "comment":
             i = m.end()
@@ -187,6 +223,10 @@ def tokenize_island(text: str, kind: str, stats: IslandStats) -> None:
         if g == "interp":
             end = _scan_interpolation(text, i)
             inner = text[i + 1:end - 1]
+            if sparql and not _is_expression(inner):
+                stats.tokens += 1                   # a SPARQL group's `{`
+                i += 1
+                continue
             # glued suffix? {expr}@lang / {expr}^^dt
             suffix = re.match(r"@[A-Za-z][A-Za-z0-9-]*|\^\^\S+", text[end:end + 40])
             stats.tokens += 1                       # the interpolation itself
@@ -219,6 +259,14 @@ def tokenize_island(text: str, kind: str, stats: IslandStats) -> None:
             elif tok in "])":
                 depth -= 1
         i = m.end()
+
+
+def rdf_text_tokens(text: str, sparql: bool = False) -> int:
+    """Tokens of RDF text — an island's body, or a query or a Turtle document
+    held in a Python string — counted the same way on both sides."""
+    stats = IslandStats()
+    tokenize_rdf_text(text, stats, sparql=sparql)
+    return stats.tokens + stats.interp_py_tokens
 
 
 def _turtle_tokens(text: str):
@@ -391,6 +439,9 @@ class LdpyMeasure:
     scaffolding_tokens: int = 0
     term_depth_sum: int = 0
     python_tokens: int = 0       # tokens outside islands
+    sparql_islands: int = 0      # s{ } islands
+    sparql_tokens: int = 0       # tokens inside their bodies, interpolations
+                                 #   included (the `s{` and `}` excluded)
     masked_source: str = ""      # islands replaced by placeholders (valid Python)
 
     def to_dict(self) -> dict:
@@ -468,6 +519,10 @@ def measure_ldpy_source(source: str) -> LdpyMeasure:
         elif kind in ("island:removefrom", "island:match"):
             pattern_bodies.append(text[text.find("{") + 1:text.rfind("}")])
         tokenize_island(text, kind, stats)
+        if kind == "island:sparql":
+            m.sparql_islands += 1
+            m.sparql_tokens += rdf_text_tokens(
+                text[text.find("{") + 1:text.rfind("}")], sparql=True)
         if kind.startswith("island:prefix") or kind.startswith("island:base"):
             stats.structures += 1
     m.islands = len(spans)

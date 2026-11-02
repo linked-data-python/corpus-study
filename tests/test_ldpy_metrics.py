@@ -159,3 +159,41 @@ def test_a_global_prefix_declaration_is_masked_with_its_modifier():
     assert "global pass" not in m.masked_source
     assert m.islands == 2
     assert m.syntax_nodes > 0
+
+
+def test_an_island_body_is_tokenised_as_rdf_not_as_python():
+    """`g{` opens a Turtle body, not an interpolation: a prefixed name is
+    one token, a literal with its tag is a term."""
+    from rdfeval.ldpy_metrics import IslandStats, tokenize_island
+    stats = IslandStats()
+    tokenize_island('g{ ex:a ex:p ex:b . ex:a ex:q "x"@en }', "island:graph",
+                    stats)
+    # g{ } + six terms + '.' + the tag glued to its literal
+    assert (stats.tokens, stats.terms, stats.interp_py_tokens) == (10, 6, 0)
+
+
+def test_a_sparql_group_is_not_an_interpolation():
+    from rdfeval.ldpy_metrics import IslandStats, tokenize_island
+    stats = IslandStats()
+    tokenize_island("s{ SELECT ?s WHERE { ?s ex:p {limit} } }",
+                    "island:sparql", stats)
+    # s{ } + SELECT ?s WHERE { ?s ex:p {limit} } — the group's braces are
+    # punctuation, {limit} is an interpolation with one Python token
+    assert stats.tokens == 10 and stats.interp_py_tokens == 1
+
+
+def test_embedded_rdf_text_is_counted_apart_on_both_sides():
+    """A query is one token as a Python string and many as an s{ } body:
+    both sides count it apart, tokenised alike, and the host code without
+    it."""
+    from rdfeval.compare import ldpy_side, python_side
+    py = ('rows = g.query("""PREFIX ex: <http://e/>\n'
+          'SELECT ?s WHERE { ?s ex:p ?o }""")\n')
+    ld = ("@prefix ex: <http://e/> .\n"
+          "rows = s{ SELECT ?s WHERE { ?s ex:p ?o } }(g)\n")
+    a, b = python_side(py), ldpy_side(ld)
+    assert a["tokens_embedded"] == 11            # PREFIX … } as RDF text
+    assert a["tokens_host"] == a["tokens"] - 1   # the string removed
+    assert (b["sparql_islands"], b["sparql_tokens"]) == (1, 8)
+    assert b["tokens_embedded"] == 8
+    assert b["tokens_host"] == b["tokens"] - 8 - 2

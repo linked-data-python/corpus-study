@@ -45,7 +45,8 @@ import tokenize
 
 from .analyze import SIGNIFICANT_TOKENS, analyze_source
 from .config import RESULTS_RAW, RESULTS_SUMMARY, provenance
-from .ldpy_metrics import LdpyMetricsError, measure_ldpy_source
+from .ldpy_metrics import (LdpyMetricsError, measure_ldpy_source,
+                           rdf_text_tokens)
 from .constructions import NOT_SHIMS, rests_on_written_export
 from .constructions import normalise as normalise_constructions
 from .study import Study, STUDY
@@ -151,6 +152,10 @@ def _node_depth(root: ast.AST, target: ast.AST) -> int:
     return dfs(root, 0) or 0
 
 
+SPARQL_IN_STRING = re.compile(
+    r"\b(SELECT|ASK|CONSTRUCT|DESCRIBE|INSERT|DELETE|WITH|LOAD|CLEAR|DROP)\b",
+    re.I)
+
 RDF_IN_STRING = re.compile(
     r"@prefix\s|\bPREFIX\s|^\s*<[^>\s]+>\s|\ba\s+\w+:|\w+:\w+\s+\w+:", re.M)
 
@@ -163,13 +168,15 @@ def string_embedded_rdf(source: str) -> dict:
     makes the same RDF visible (and syntax-checked) but multiplies the token
     count, so surface-size comparisons are not meaningful for those pairs
     unless they are analysed separately.  This function reports how much
-    such text a source contains.
+    such text a source contains, and its ``tokens`` counted as an island's
+    body is (``ldpy_metrics.rdf_text_tokens``), so that the text a string
+    hides and the text an island shows are counted alike.
     """
     try:
         tree = ast.parse(source)
     except SyntaxError:
-        return {"literals": 0, "chars": 0, "lines": 0}
-    literals, chars, lines = 0, 0, 0
+        return {"literals": 0, "chars": 0, "lines": 0, "tokens": 0}
+    literals, chars, lines, tokens = 0, 0, 0, 0
     for node in ast.walk(tree):
         if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
             continue
@@ -179,7 +186,10 @@ def string_embedded_rdf(source: str) -> dict:
         literals += 1
         chars += len(text)
         lines += text.count("\n") + 1
-    return {"literals": literals, "chars": chars, "lines": lines}
+        tokens += rdf_text_tokens(
+            text, sparql=bool(SPARQL_IN_STRING.search(text)))
+    return {"literals": literals, "chars": chars, "lines": lines,
+            "tokens": tokens}
 
 
 def subgroup_of(py: dict, ld: dict) -> str:
@@ -204,6 +214,7 @@ def python_side(py_source: str, preamble: str | None = None) -> dict:
     """Surface and RDF metrics of one Python artefact."""
     fa = analyze_source(py_source, preamble=preamble)
     corr = python_correspondence(py_source, preamble=preamble)
+    embedded = string_embedded_rdf(py_source)
     return {
         "loc": fa.total_loc, "code_loc": fa.code_loc,
         "chars": len(py_source), "tokens": fa.tokens,
@@ -215,7 +226,12 @@ def python_side(py_source: str, preamble: str | None = None) -> dict:
         "graph_ops": fa.graph_ops,
         "rdf_ops": fa.rdf_ops,
         "category_counts": fa.category_counts,
-        **{f"string_rdf_{k}": v for k, v in string_embedded_rdf(py_source).items()},
+        **{f"string_rdf_{k}": v for k, v in embedded.items()},
+        # RDF text counted apart: the queries and Turtle documents a string
+        # holds (one Python token each in `tokens`), tokenised as RDF; and
+        # the code around them, without those strings
+        "tokens_embedded": embedded["tokens"],
+        "tokens_host": fa.tokens - embedded["literals"],
         **{f"corr_{k}": v for k, v in corr.items()},
     }
 
@@ -225,6 +241,7 @@ def ldpy_side(ldpy_source: str, preamble: str | None = None) -> dict:
     lm = measure_ldpy_source(ldpy_source)
     # rdflib constructs remaining in the ldpy version (outside islands)
     residual = analyze_source(lm.masked_source, preamble=preamble)
+    embedded = string_embedded_rdf(lm.masked_source)
     return {
         "loc": lm.loc, "code_loc": lm.code_loc,
         "chars": lm.chars, "tokens": lm.tokens,
@@ -236,6 +253,15 @@ def ldpy_side(ldpy_source: str, preamble: str | None = None) -> dict:
         "patterns_expressed": lm.patterns_expressed,
         "patterns_semantic": lm.patterns_semantic,
         "scaffolding_tokens": lm.scaffolding_tokens,
+        # the SPARQL of the s{ } islands, and the RDF text still held in
+        # strings, counted apart as on the Python side; the host code is the
+        # rest, each s{ } island removed whole as a query string is
+        "sparql_islands": lm.sparql_islands,
+        "sparql_tokens": lm.sparql_tokens,
+        **{f"string_rdf_{k}": v for k, v in embedded.items()},
+        "tokens_embedded": lm.sparql_tokens + embedded["tokens"],
+        "tokens_host": (lm.tokens - lm.sparql_tokens - 2 * lm.sparql_islands
+                        - embedded["literals"]),
         "residual_constructors": residual.constructors,
         "residual_rdf_ops": residual.rdf_ops,
         "corr_scaffolding_tokens_per_triple":
