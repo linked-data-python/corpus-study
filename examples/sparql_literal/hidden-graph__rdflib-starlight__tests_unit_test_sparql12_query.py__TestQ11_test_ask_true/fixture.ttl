@@ -1,0 +1,8 @@
+# Input graph for TestQ11.test_ask_true: the data the ASK is about, in plain
+# RDF 1.1 (the reifier stands for the triple term, which rdflib 7.2.1 cannot
+# hold), and a neighbour about another triple that must not be confused.
+@prefix : <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+:bob :knows :carol .
+:r1 rdf:reifies :tt1 ; :verifiedBy :ResearchTeam .
+:r2 rdf:reifies :tt2 ; :verifiedBy :Auditors .

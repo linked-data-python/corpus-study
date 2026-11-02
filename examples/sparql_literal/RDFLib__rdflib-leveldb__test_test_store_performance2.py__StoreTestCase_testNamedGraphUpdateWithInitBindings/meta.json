@@ -12,10 +12,22 @@
   "categories": {
     "graph_read": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "IRI",
+    ".execute()"
+  ],
+  "translation_notes": [
+    "`g.update(\"INSERT { ?a ?b ?c } WHERE {}\", initBindings={\"a\": michel, \"b\": likes, \"c\": pizza})` becomes `@graph g` + `s{ INSERT { {michel} {likes} {pizza} } WHERE {} }.execute()`: the three initBindings entries move into the template as interpolations in term position (which the language turns back into initial bindings), and the update is forced by .execute(). The original's query text is not literal in the strict sense (variables ?a ?b ?c supplied through initBindings), so the template changes shape: ground terms instead of variables. Equivalent on rdflib 7.2.1 (driver).",
+    "rdflib's initBindings with a raw str would never match (the bindings here are URIRefs, so no issue); in ldpy a raw str interpolated in s{ } would become a Literal -- not met here since michel/likes/pizza are terms (`<urn:michel>`, ...).",
+    "The 5-line header constants `michel = URIRef(\"urn:michel\")` etc. become IRIs `<urn:michel>`.",
+    "Context shim leveldb_shim.py: the module-level `import logging` and `from rdflib import URIRef` of test/test_store_performance2.py, which the extracted region uses but does not define; imported identically by both files.",
+    "`self` is a driver stub (plain class: ConjunctiveGraph('Memory') as .graph, .store = 'Memory', an assertEqual raising AssertionError). Calls: empty store (None), urn:graph holding an unrelated triple / a different object for (michel, likes) (AssertionError), the very triple already there (None), another context and the default graph holding triples (None; the stub graph is compared afterwards so a write to the wrong context shows). The duration the method logs is blanked by stdout_filter. Mutants: object `{michel}` instead of `{pizza}`, dropping `.execute()`, `@graph self.graph` -- each makes the check FAIL."
+  ],
   "draft_sha": "b63d9215e0d466a8",
   "provenance": {
     "generated_at": "2026-11-02T18:29:38.537751+00:00",
@@ -27,5 +39,6 @@
     "sparql_literal",
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

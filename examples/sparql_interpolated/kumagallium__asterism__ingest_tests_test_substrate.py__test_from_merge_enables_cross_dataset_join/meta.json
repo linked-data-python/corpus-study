@@ -17,10 +17,24 @@
     "term_constructor": 3,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "s{ }",
+    "f<…>",
+    "prefixed name",
+    "plain literal"
+  ],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE for the part the test is about: the second query is `prefix + \"SELECT ?l \" + frm + body` where `frm = canonical_from_clauses([...])` returns `FROM <g>\\n` clauses built at run time from a function. A dataset clause (FROM / FROM NAMED) spliced as text is syntax, not a term: s{ } has no position for it (an interpolation outside term position makes the query invalid), and `FROM <{x}>` is not term position either. The graph IRIs are not transpile-time constants (they come from canonical_graph_iri(...)); writing them in would drop the call to the function under test. That query is therefore kept as Python string concatenation, with its `prefix` and `body` strings.",
+    "What is translated: the two `.add` calls become `+{ }(ds.graph(g))` (call suffix, since neither named graph is a single current graph); `ex = rdflib.Namespace(...)` and `rdflib.RDFS.label` become `@prefix ex:` / `@prefix rdfs:` and prefixed names; `rdflib.URIRef(canonical_graph_iri(\"a\"))` becomes `f<{canonical_graph_iri(\"a\")}>` (no @base in scope); and the FIRST query (no FROM, a constant text, default graph only) becomes `ds.query(s{ SELECT ?l WHERE { ?s ex:madeOf ?e . ?e rdfs:label ?l } })`, an s{ } passed to Dataset.query. `body` and `prefix` stay as strings because the second query still concatenates them, so the BGP is written twice.",
+    "The mechanical draft was not usable: `ds.graph(g_a) += g{...}` is an augmented assignment to a function call.",
+    "Context shim: asterism/__init__.py, a path redirector (as in trav_one_step/...test_samples_curves) to the genuine corpus/repos/kumagallium__asterism/ingest/src/asterism, so the real asterism.substrate (canonical_graph_iri, canonical_from_clauses, and the other imports of the region) is used unmodified.",
+    "The region is a test whose whole effect is two asserts, so the driver varies one dependency per call, installed in the child process before the call: the genuine run (None), Dataset(default_union=True) (the no-FROM query now finds the join: AssertionError, the call that exercises the s{ } query), canonical_from_clauses patched to emit one FROM, FROM NAMED only, or nothing (AssertionError), and both datasets in one graph (None). A Dataset subclass prints the rows each query returns. Mutant: `ex:madeOf` -> `ex:madeFrom` in the s{ } makes the check FAIL (call[1]: AssertionError vs None, stdout differs)."
+  ],
   "draft_sha": "0007c12f05f7e656",
   "provenance": {
     "generated_at": "2026-11-02T18:29:38.781822+00:00",
@@ -31,5 +45,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

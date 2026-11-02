@@ -2,6 +2,7 @@
 # region: StoreTestCase.testNamedGraphUpdateWithInitBindings (lines 362-375, stratum sparql_literal)
 # licence of the source repository: see meta.json
 from time import time
+from leveldb_shim import logging, URIRef  # context shim, see meta.json
 log = logging.getLogger(__name__)
 michel = URIRef("urn:michel")
 likes = URIRef("urn:likes")

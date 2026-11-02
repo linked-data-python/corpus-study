@@ -14,10 +14,20 @@
     "sparql": 1,
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "not-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "f<…>",
+    "IRI",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE, and NOT VALIDATABLE, for the update: `DELETE { ?r rdf:reifies <<( ?s ?p ?o )>> } WHERE { ... }` uses SPARQL 1.2 triple terms `<<( s p o )>>`, which rdflib 7.2.1's grammar cannot parse; s{ } validates at transpile time with rdflib, so `s{ DELETE { ... <<( ?s ?p ?o )>> } WHERE { ... } }` is rejected (`requete SPARQL invalide : Expected end of text, found 'DELETE'`). The update therefore stays a `g.update(\"\"\"...\"\"\")` string. A finding about the island: no way to opt out of validation for one island, so SPARQL 1.2 text cannot be written in s{ }.",
+    "What is translated, around it: `RDF_REIFIES = URIRef(...)` becomes an IRI, `URIRef(EX + 'stmt1')` becomes `f<{EX}stmt1>`, and `list(g.triples((stmt1, RDF_REIFIES, None)))` becomes `list(m{ {stmt1} {RDF_REIFIES} ?o })` under `@graph g` (the list holds bare objects instead of triples; the assert `== []` is unaffected).",
+    "Executability: the package that runs the update, rdflib-starlight, is not installable here. The driver passes a stub graph (a Graph subclass from fixture.ttl, one plain `?r rdf:reifies ex:ttN` per reification since rdflib 7.2.1 holds no triple term) whose update() prints the whitespace-normalised text it receives, then applies an effect chosen by the case and written by the driver, NOT derived from the SPARQL: remove the reifications of subjects with confidence 0.9 (assert passes), do nothing (AssertionError), remove all (passes; the graph differs afterwards). The pair proves the same text is sent and that the read-back on the graph agrees; it proves nothing about the meaning of the update. Mutants: `stmt2` for `stmt1`, `!= []`, and `confidence \"0.5\"` in the update text each make the check FAIL."
+  ],
   "draft_sha": "a5cf605c87039c7a",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.590602+00:00",
@@ -28,5 +38,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

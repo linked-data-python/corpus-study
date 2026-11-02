@@ -10,10 +10,14 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE, and NOT VALIDATABLE: the ASK query uses SPARQL 1.2 / RDF-star reification syntax (`<< :bob :knows :carol >> :verifiedBy :ResearchTeam`), which rdflib 7.2.1's SPARQL grammar cannot parse. s{ } validates at transpile time with rdflib as the oracle, so `s{ ASK { << :bob :knows :carol >> :verifiedBy :ResearchTeam . } }` is rejected when the file is transpiled: `requete SPARQL invalide : Expected AskQuery, found '<'`. This is a finding about the island, not a defect of the region: a valid query of a newer SPARQL version cannot be written as s{ }, and there is no way to opt out of the validation for one island.",
+    "translated.ldpy is therefore identical to original.py (exact transparency); constructions is empty on purpose.",
+    "Executability: the package that evaluates the query, rdflib-starlight (StarlightGraph), is not on PyPI nor in the study venv. The driver passes a stub graph (a Graph subclass from fixture.ttl) whose query() prints the whitespace-normalised text it receives and answers with an `askAnswer` set by the case (True; False; 1 and \"true\", truthy but not True). The pair therefore proves that both sides send the same text and apply the same `is True` test; it does NOT prove anything about the meaning of the query on a SPARQL 1.2 engine. Mutant: `:carol` -> `:dave` in the translation makes the check FAIL (stdout differs)."
+  ],
   "draft_sha": "e30ae0e88dc20e3d",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.592647+00:00",
@@ -24,5 +28,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

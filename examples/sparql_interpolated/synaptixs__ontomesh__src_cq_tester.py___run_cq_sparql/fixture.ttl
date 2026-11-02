@@ -1,0 +1,15 @@
+# Input graph for _run_cq_sparql: a small enterprise ontology in the default
+# namespace of the region's prologue (https://ontology.example.com/enterprise/),
+# with classes, labels and provenance, plus a class that carries no label.
+@prefix : <https://ontology.example.com/enterprise/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+:Employee a owl:Class ; rdfs:label "Employee" ; skos:definition "A person employed" .
+:Manager a owl:Class ; rdfs:subClassOf :Employee ; rdfs:label "Manager" .
+:Contractor a owl:Class ; rdfs:subClassOf :Employee .
+:Project a owl:Class ; rdfs:label "Project" ; prov:wasDerivedFrom :Charter .
+:Charter a owl:Class .
+<http://example.org/elsewhere/Thing> a owl:Class ; rdfs:label "Elsewhere" .

@@ -1,0 +1,9 @@
+# Input graph for TestSparqlFunctions._query: ex:title values with and without
+# a language tag, a subject with two titles, and neighbours that must not match.
+@prefix ex: <http://example.org/> .
+ex:a ex:title "Hello"@en .
+ex:b ex:title "Bonjour"@fr .
+ex:c ex:title "plain" .
+ex:d ex:title "Hallo"@de-DE .
+ex:e ex:label "not a title"@en .
+ex:f ex:other ex:a .

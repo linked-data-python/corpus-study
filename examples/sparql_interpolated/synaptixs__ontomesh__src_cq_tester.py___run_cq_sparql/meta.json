@@ -10,10 +10,15 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE: the query is `_CQ_SPARQL_PREFIXES + cq.get(\"sparql_equiv\", \"\").strip()` -- an entire query received as DATA (a competency question's SPARQL stored in a record), prefixed by a constant PREFIX block. s{ } needs its query written literally (parsed at transpile time); there is no island for 'run this query text I was handed'. Minimal excerpt: `graph.query(_CQ_SPARQL_PREFIXES + query)`. The constant prologue is the one part that has an equivalent (@prefix), but it only exists to be prepended to the received text, so it has nothing to attach to.",
+    "The error path (`except Exception: return (0, \"ERROR\")`) depends on the text being validated at RUN time, which s{ } moves to transpile time: another reason it cannot apply.",
+    "translated.ldpy is identical to original.py (exact transparency); constructions is empty on purpose.",
+    "Driver: fixture.ttl is a small ontology in the prologue's `:` namespace; 18 calls cover N/A (graph None, no sparql_equiv, blank), PASS/FAIL for queries with rows (through each of the five prologue prefixes) and without, an ASK, a malformed query and an undeclared prefix (ERROR), the prologue's `:` redeclared (to another IRI: FAIL; to the same: PASS), and a cq without expected_non_empty (KeyError compared as a raise). Mutant: changing the skos PREFIX IRI in the prologue makes the check FAIL (call[7])."
+  ],
   "draft_sha": "bba17e36b847a3bd",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.574534+00:00",
@@ -24,5 +29,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

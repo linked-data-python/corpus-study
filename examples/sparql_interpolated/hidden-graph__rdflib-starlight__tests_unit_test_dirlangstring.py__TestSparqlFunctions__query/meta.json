@@ -10,10 +10,15 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE: the query is `f'SELECT ?s ({expr} AS ?v) WHERE {{ ?s <{EX}title> ?t }}'` where `expr` is a SPARQL EXPRESSION handed in by the caller (the test passes e.g. LANG(?t), STRDIR(...), UCASE(?t)). Text spliced as syntax in the projection has no form: s{ } binds a VALUE in term position, and `({expr} AS ?v)` is neither a term nor something e{ } can receive (e{ } is a deferred expression written in the language, not SPARQL text received as data). Minimal excerpt: `({expr} AS ?v)`.",
+    "The only constant part, `<{EX}title>` (EX is a module-level constant), is writable as `<http://example.org/title>`, but a pattern with the projection removed is not the query: translating it would require splitting the SELECT in two, which is refactoring. translated.ldpy is therefore identical to original.py (exact transparency); constructions is empty on purpose.",
+    "Driver: `_query` is called on a graph from fixture.ttl (titles with and without language tag, a subject whose predicate is ex:label, a subject with another predicate) with seven different expressions (?t, STR, LANG, UCASE, STRLEN, a constant, LANGMATCHES), a malformed one (`(((`: the ParseException is compared as a value) and the empty graph; the dict {subject: value} shows which pattern and which expression were sent. Mutant: `title` -> `label` in the f-string makes the check FAIL (ex:e instead of a/b/c/d).",
+    "`self` is unused by the region and passed as None."
+  ],
   "draft_sha": "f73e580bcb883c1a",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.572373+00:00",
@@ -24,5 +29,6 @@
   "strata": [
     "sparql_interpolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }
