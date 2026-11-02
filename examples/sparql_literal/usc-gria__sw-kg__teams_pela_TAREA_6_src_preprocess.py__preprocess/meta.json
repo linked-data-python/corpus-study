@@ -14,10 +14,18 @@
     "serialize_parse": 1,
     "sparql": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }"
+  ],
+  "translation_notes": [
+    "Three `\"PREFIX ns: <...> SELECT ...\"` strings passed to g.query become s{ } islands; the three PREFIX lines become one `@prefix ns:` at the head of the function. The islands are kept in q_fields / q_matches / q_ms and handed to g.query (rdflib returns ResultRow, so r.id, r.wdDistrito... are unchanged). All three have OPTIONAL or are used with r.<var> access, hence s{ } rather than m{ }.",
+    "The two Wikidata templates (dq, sq) stay strings: they hold the placeholder {{VALUES}}, are sent as text to query.wikidata.org by get_wikidata_info and are not queries on a graph of the program (they are not valid SPARQL before the substitution).",
+    "Context shim preprocess_shim.py: get_wikidata_info of the source, verbatim; and the module-level paths, moved out of original.py because the source derives them from __file__ and would read/write outside the example directory: KG_PATH is fixture.ttl (N-Triples, parsed with format='nt' as the region does) and DATA_DIR the example directory (CSV files are compared as text by the harness and removed). The network is replaced in the driver by a local stand-in for requests.get (ok / HTTP 500 / raises).",
+    "Fixture: fields with and without sameAs (one with two), a field without coorY, a non-Campo with a field's properties, matches with a dateTime and with a date, a match without resultado2, a match outside any competition, a broken competition chain. Observed: stdout and the two CSV files. A mutant dropping the resultado2 pattern of q_matches fails the check (verified)."
+  ],
   "draft_sha": "553b1a3145830fa0",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.583491+00:00",
@@ -28,5 +36,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

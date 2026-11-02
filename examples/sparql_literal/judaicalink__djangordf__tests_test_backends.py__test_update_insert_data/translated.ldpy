@@ -3,7 +3,7 @@
 # licence of the source repository: see meta.json
 def test_update_insert_data(backend):
     backend.update(
-        'INSERT DATA { <http://example.org/s> <http://example.org/p> "v" }'
+        s{ INSERT DATA { <http://example.org/s> <http://example.org/p> "v" } }
     )
-    result = backend.query("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }")
+    result = backend.query(s{ CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o } })
     assert len(result) == 1

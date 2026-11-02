@@ -10,10 +10,17 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "s{ }"
+  ],
+  "translation_notes": [
+    "The two literal SPARQL strings passed to backend.update / backend.query become s{ } islands (an INSERT DATA and a CONSTRUCT). The receiver is the project's InMemoryBackend, not a graph, and its methods forward the argument to rdflib's ConjunctiveGraph.update/query: the island is 'handed to rdflib', so no .execute() and no call suffix. Both queries use full IRIs and no prefix, so no @prefix is needed.",
+    "Context shim djangordf_shim.py: the InMemoryBackend of djangordf/backends/memory.py (the `backend` fixture of the source tests), reduced to the methods the region uses; the driver builds it.",
+    "The test is an assertion only: the driver shows it through the return/raise of seven backends (empty, same triple already there, other object, other subject, named graph, an update that does nothing, a query that returns an empty graph). A mutant inserting \"w\" instead of \"v\" fails the check (verified).",
+    "No gain nor loss in size: the island swaps a string for validation at transpile time."
+  ],
   "draft_sha": "783e4f4aca772069",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.594772+00:00",
@@ -24,5 +31,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

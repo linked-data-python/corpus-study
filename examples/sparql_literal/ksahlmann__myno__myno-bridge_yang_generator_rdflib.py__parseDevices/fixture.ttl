@@ -1,4 +1,41 @@
-# Input graph for ksahlmann__myno__myno-bridge_yang_generator_rdflib.py__parseDevices — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for parseDevices: the region reads
+#   ?device a onem2m:Device ; hasFunctionality ?f ; hasService ?s ; hasThingProperty ?p
+# and collects, over every solution, the sets of f, s, p (and the last ?device).
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix base: <http://yang-netconf-mqtt#> .
+@prefix onem2m: <http://www.onem2m.org/ontology/Base_Ontology/base_ontology#> .
 @prefix ex: <http://example.org/> .
+
+# a complete device: several functionalities, services and properties (a product)
+ex:thermo a onem2m:Device ;
+    onem2m:hasFunctionality ex:readTemp, ex:alarm ;
+    onem2m:hasService ex:tempService, ex:alarmService ;
+    onem2m:hasThingProperty ex:celsius, ex:precision .
+
+# a second complete device, with one of each
+ex:lamp a onem2m:Device ;
+    onem2m:hasFunctionality ex:switch ;
+    onem2m:hasService ex:switchService ;
+    onem2m:hasThingProperty ex:power .
+
+# incomplete device: no thing property -> no solution
+ex:fan a onem2m:Device ;
+    onem2m:hasFunctionality ex:spin ;
+    onem2m:hasService ex:spinService .
+
+# not typed Device (another class) although it has all three predicates
+ex:sensorBox a onem2m:Sensor ;
+    onem2m:hasFunctionality ex:decoyFunction ;
+    onem2m:hasService ex:decoyService ;
+    onem2m:hasThingProperty ex:decoyProperty .
+
+# right class but the predicates are in the wrong namespace
+ex:ghost a onem2m:Device ;
+    base:hasFunctionality ex:ghostFunction ;
+    base:hasService ex:ghostService ;
+    base:hasThingProperty ex:ghostProperty .
+
+# no type at all
+ex:untyped onem2m:hasFunctionality ex:u1 ;
+    onem2m:hasService ex:u2 ;
+    onem2m:hasThingProperty ex:u3 .

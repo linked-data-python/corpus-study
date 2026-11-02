@@ -10,10 +10,19 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "IRI",
+    "variable"
+  ],
+  "translation_notes": [
+    "Three triple patterns around fixed IRIs and one projected variable, results read only as `value[0]`: a basic graph pattern whose result shape nothing needs, so m{ }(runner.app.db) instead of s{ SELECT ... }. The comprehension `[value[0] for value in values]` becomes `[value for value in m{ ... }(db)]` (m{ } yields the bare term for one variable): hence minor-restructuring. `a` stands for rdf:type; <bnode:...> is an ordinary IRI with the bnode: scheme in the source.",
+    "The source decorates the test with @disable_test, which replaces it by a function that only prints: as the source applies it, the SPARQL is dead code. Context shim ingest_shim.py keeps disable_test line for line and adds a switch EXERCISE_BODY; the driver sets it so that both sides run the body (otherwise the check would compare two prints). `Runner` is a unittest.TestCase stand-in for the nanomine runner (app.db a Graph, expected_data a dict).",
+    "A bug of the source is kept: with expected_value=None the code assigns expected_authors, so assertCountEqual receives None and raises TypeError; the driver exercises it (and the KeyError when expected_data lacks the key). Thirteen calls: pass, order, wrong values, fewer values, duplicate triple, missing type, missing link, other sample. Deleting the type pattern of the translation fails the check (verified)."
+  ],
   "draft_sha": "ca7ef60c6b80c4f6",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.588436+00:00",
@@ -24,5 +33,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

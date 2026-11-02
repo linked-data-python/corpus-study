@@ -1,6 +1,7 @@
 # Extracted from tetherless-world/materialsmine@0be55da099 : tests/ingest_tester.py
 # region: test_melt_viscosity (lines 673-690, stratum sparql_literal)
 # licence of the source repository: see meta.json
+from ingest_shim import disable_test
 @disable_test
 def test_melt_viscosity(runner, expected_value=None):
     print("\n\nMelt Viscosity")

@@ -12,10 +12,19 @@
   "categories": {
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)"
+  ],
+  "translation_notes": [
+    "prepareQuery(text, initNs) + g.query(q) becomes s{ ... }(g): the initNs dict and the prepareQuery import (module-level context) are replaced by three @prefix declarations (rdf, base, onem2m), the prologue being the block's. The query keeps its DISTINCT, so it is not a basic graph pattern and m{ } would change the multiplicity: s{ } is the construction.",
+    "Rows keep working as in the original: iterating s{ }(g) yields rdflib ResultRow, so `\" %s %s %s %s\" % row` and row[\"device\"] are unchanged.",
+    "Fixture: two complete devices (a 2x2x2 product for one), an incomplete device, a device of another class, a Device with the predicates in the wrong namespace and an untyped subject; the driver adds a decoys-only graph (zero solution), a single device, a prefilled list and an empty graph. Compared: returned list, mutation of the list, stdout. A mutant removing the rdf:type pattern fails (verified).",
+    "The @id of the result is the last device seen: the order of the store is not promised, the run is stable because both sides query the same graph with the same algebra."
+  ],
   "draft_sha": "b6fb5b98f0e2607c",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.586250+00:00",
@@ -26,5 +35,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

@@ -15,9 +15,17 @@
     "term_constructor": 1
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "IRI"
+  ],
+  "translation_notes": [
+    "EXCLUDED, two independent reasons. (1) `from vitalgraph.store.store import VitalGraphSQLStore` / `from vitalgraph.optimized_graph import OptimizedVitalGraph`: in the study venv `ModuleNotFoundError: No module named 'vitalgraph'`; with the repository clone on the path (pinned commit 7fb3616c2d) `ModuleNotFoundError: No module named 'vitalgraph.store'`, both modules having been moved to archive/archive_vitalgraph_old/. (2) store.open('postgresql+psycopg://postgres@127.0.0.1:5432/vitalgraphdb') needs a live PostgreSQL with the WordNet graph.",
+    "Translation written and complete: the two PREFIX lines of both queries become `@prefix vital-core:` / `@prefix haley-ai-kg:` (hyphenated prefixes are accepted), the two query strings become s{ } islands kept in simple_query / complex_query and handed to standard_g.query / opt_g.query. The draft's `graph_iri = <http://vital.ai/graph/wordnet>` (IRI) is kept. Run once outside the study tree against an in-memory stand-in for the two classes: stdout identical to the original's (durations blanked), equivalent.",
+    "Finding, not verifiable here: OptimizedVitalGraph.query (archive/archive_vitalgraph_old/optimized_graph.py) overrides Graph.query, computes `query_string = str(query_object)` and detects text-search patterns by regular expressions on it. str() of an s{ } island is its source text `s{ SELECT ... }` without the PREFIX lines, not the SPARQL string the source passed: a code path that reads the query text, not its algebra, can take another branch. The `FILTER(CONTAINS(...\"happy\"...))` regex would still match; the other detectors were not run."
+  ],
   "draft_sha": "c3e6a92242220bf6",
   "provenance": {
     "generated_at": "2026-11-02T18:29:38.555850+00:00",
@@ -28,5 +36,6 @@
   "strata": [
     "sparql_literal"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

@@ -16,10 +16,19 @@
     "term_constructor": 4
   },
   "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "classification": "excluded",
+  "constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "IRI",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, RDFS->rdfs"
+    "EXCLUDED: the test round-trips a graph through a live ArangoDB (adbrdf.rdf_to_arangodb_by_rpt, arangodb_graph_to_rdf, collections, db.delete_graph). In the study venv the first error is `ImportError: attempted relative import with no known parent package` (`from .conftest import ...`); beyond it, `ModuleNotFoundError: No module named 'arango'` (python-arango, arango_rdf not installed) and the repository's conftest connects to http://localhost:8529 when pytest configures.",
+    "Translation written and complete: the two g.value(predicate=RDF.type, object=RDF.Statement) become `m{ ?s rdf:type rdf:Statement }(g).first()`; the four `(statement, p, o) in rdf_graph_2` become `bool(m{ {statement} p o }(rdf_graph_2))`; URIRef(...) become <...>; the RDF, RDFS imports are replaced by `@prefix rdf:`.",
+    "Fidelity point: rdf_graph_2.value(...) is None when there is no statement, and `(None, p, o) in g` then matches any subject, whereas an interpolated None raises TypeError in m{ }. The translation therefore writes `... .first() or ANY` (`from ldpy import ANY`; a BNode is never falsy) so that the existence checks keep the wildcard. Without it, a stand-in run where the graph read back lost its rdf:Statement typing gave AssertionError on the original and TypeError on the translation.",
+    "Proved once outside the study tree against stand-ins for adbrdf, db and the collections (round trip unchanged; owner triple dropped; rdf:Statement typing dropped; object replaced; extra triple): equivalent on those five calls. The reads here are not 'in g' over a fixed triple but over a term found by a previous read, which is why the wildcard question arises."
   ],
   "draft_sha": "47358f61eb93d180",
   "provenance": {
@@ -31,5 +40,6 @@
   "strata": [
     "trav_existence"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

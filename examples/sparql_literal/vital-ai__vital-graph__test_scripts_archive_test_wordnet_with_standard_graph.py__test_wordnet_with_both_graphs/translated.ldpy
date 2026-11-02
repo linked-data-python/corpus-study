@@ -16,22 +16,22 @@ def test_wordnet_with_both_graphs():
 
     graph_iri = <http://vital.ai/graph/wordnet>
 
+    @prefix vital-core: <http://vital.ai/ontology/vital-core#> .
+    @prefix haley-ai-kg: <http://vital.ai/ontology/haley-ai-kg#> .
+
     # Test with standard Graph
     print("\n🔍 Test 1: Standard rdflib.Graph")
     standard_g = Graph(store=store, identifier=graph_iri)
 
     # Simple query first
-    simple_query = """
-    PREFIX vital-core: <http://vital.ai/ontology/vital-core#>
-    PREFIX haley-ai-kg: <http://vital.ai/ontology/haley-ai-kg#>
-
+    simple_query = s{
     SELECT ?entity ?entityName WHERE {
       ?entity a haley-ai-kg:KGEntity .
       ?entity vital-core:hasName ?entityName .
       FILTER(CONTAINS(LCASE(STR(?entityName)), "happy"))
     }
     LIMIT 3
-    """
+    }
 
     print("1a. Simple query with standard Graph:")
     start_time = time.time()
@@ -43,10 +43,7 @@ def test_wordnet_with_both_graphs():
         print(f"   - {result[0]}: {result[1]}")
 
     # Complex query with standard Graph
-    complex_query = """
-    PREFIX vital-core: <http://vital.ai/ontology/vital-core#>
-    PREFIX haley-ai-kg: <http://vital.ai/ontology/haley-ai-kg#>
-
+    complex_query = s{
     SELECT ?entity ?entityName ?edge ?connectedEntity ?connectedName WHERE {
       ?entity a haley-ai-kg:KGEntity .
       ?entity vital-core:hasName ?entityName .
@@ -59,7 +56,7 @@ def test_wordnet_with_both_graphs():
     }
     ORDER BY ?entityName ?connectedName
     LIMIT 3
-    """
+    }
 
     print("\n1b. Complex query with standard Graph:")
     start_time = time.time()

@@ -4,11 +4,7 @@
 import os
 import pandas as pd
 from rdflib import Graph
-SRC_DIR = os.path.dirname(os.path.abspath(__file__))
-TAREA_6_DIR = os.path.abspath(os.path.join(SRC_DIR, '..'))
-REPO_DIR = os.path.abspath(os.path.join(TAREA_6_DIR, '..'))
-DATA_DIR = os.path.join(TAREA_6_DIR, 'data', 'processed')
-KG_PATH = os.path.join(REPO_DIR, 'TAREA_4', 'kg', 'output.nt')
+from preprocess_shim import DATA_DIR, KG_PATH, get_wikidata_info
 
 def preprocess():
     g = Graph()

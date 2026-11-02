@@ -1,4 +1,82 @@
-# Input graph for usc-gria__sw-kg__teams_pela_TAREA_6_src_preprocess.py__preprocess — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
-@prefix ex: <http://example.org/> .
+# Input graph of preprocess(), as N-Triples (the region parses KG_PATH with format='nt').
+# Prefix ns: = https://example.org/partidos/
+# 
+# --- query 1 (fields): ?id a Campo ; nombreCampo ; coorX ; coorY ; localizadoEn ?d . ?d nombreDistrito ; OPTIONAL sameAsDistrito
+<https://example.org/partidos/distrito/centro> <https://example.org/partidos/nombreDistrito> "Centro" .
+<https://example.org/partidos/distrito/centro> <https://example.org/partidos/sameAsDistrito> <http://www.wikidata.org/entity/Q1> .
+<https://example.org/partidos/distrito/norte> <https://example.org/partidos/nombreDistrito> "Norte" .
+<https://example.org/partidos/distrito/sur> <https://example.org/partidos/nombreDistrito> "Sur" .
+<https://example.org/partidos/distrito/sur> <https://example.org/partidos/sameAsDistrito> <http://www.wikidata.org/entity/Q3> .
+<https://example.org/partidos/distrito/sur> <https://example.org/partidos/sameAsDistrito> <http://www.wikidata.org/entity/Q4> .
+<https://example.org/partidos/campo/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/partidos/Campo> .
+<https://example.org/partidos/campo/1> <https://example.org/partidos/nombreCampo> "Campo Central" .
+<https://example.org/partidos/campo/1> <https://example.org/partidos/coorX> "1.5"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+<https://example.org/partidos/campo/1> <https://example.org/partidos/coorY> "2.25"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+<https://example.org/partidos/campo/1> <https://example.org/partidos/localizadoEn> <https://example.org/partidos/distrito/centro> .
+<https://example.org/partidos/campo/2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/partidos/Campo> .
+<https://example.org/partidos/campo/2> <https://example.org/partidos/nombreCampo> "Campo Norte" .
+<https://example.org/partidos/campo/2> <https://example.org/partidos/coorX> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/campo/2> <https://example.org/partidos/coorY> "-4.75" .
+<https://example.org/partidos/campo/2> <https://example.org/partidos/localizadoEn> <https://example.org/partidos/distrito/norte> .
+<https://example.org/partidos/campo/3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/partidos/Campo> .
+<https://example.org/partidos/campo/3> <https://example.org/partidos/nombreCampo> "Campo Sur" .
+<https://example.org/partidos/campo/3> <https://example.org/partidos/coorX> "0.125"^^<http://www.w3.org/2001/XMLSchema#double> .
+<https://example.org/partidos/campo/3> <https://example.org/partidos/coorY> "7"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/campo/3> <https://example.org/partidos/localizadoEn> <https://example.org/partidos/distrito/sur> .
+# no coorY: not a solution of query 1
+<https://example.org/partidos/campo/4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/partidos/Campo> .
+<https://example.org/partidos/campo/4> <https://example.org/partidos/nombreCampo> "Campo Sin Y" .
+<https://example.org/partidos/campo/4> <https://example.org/partidos/coorX> "9"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/campo/4> <https://example.org/partidos/localizadoEn> <https://example.org/partidos/distrito/centro> .
+# same properties, other class: not a Campo
+<https://example.org/partidos/pista/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://example.org/partidos/Pista> .
+<https://example.org/partidos/pista/1> <https://example.org/partidos/nombreCampo> "Pista Atletismo" .
+<https://example.org/partidos/pista/1> <https://example.org/partidos/coorX> "5"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/pista/1> <https://example.org/partidos/coorY> "5"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/pista/1> <https://example.org/partidos/localizadoEn> <https://example.org/partidos/distrito/centro> .
+# 
+# --- query 2 (matches): ocurreEn ; local/visitante team names ; resultado1 ; resultado2 ; hora
+<https://example.org/partidos/equipo/1> <https://example.org/partidos/nombreEquipo> "Los Aguilas" .
+<https://example.org/partidos/equipo/2> <https://example.org/partidos/nombreEquipo> "Los Búhos" .
+<https://example.org/partidos/equipo/3> <https://example.org/partidos/nombreEquipo> "Las Cebras" .
+<https://example.org/partidos/partido/1> <https://example.org/partidos/ocurreEn> <https://example.org/partidos/campo/1> .
+<https://example.org/partidos/partido/1> <https://example.org/partidos/tieneEquipoLocal> <https://example.org/partidos/equipo/1> .
+<https://example.org/partidos/partido/1> <https://example.org/partidos/tieneEquipoVisitante> <https://example.org/partidos/equipo/2> .
+<https://example.org/partidos/partido/1> <https://example.org/partidos/resultado1> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/1> <https://example.org/partidos/resultado2> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/1> <https://example.org/partidos/hora> "2024-05-01T10:30:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://example.org/partidos/partido/2> <https://example.org/partidos/ocurreEn> <https://example.org/partidos/campo/2> .
+<https://example.org/partidos/partido/2> <https://example.org/partidos/tieneEquipoLocal> <https://example.org/partidos/equipo/3> .
+<https://example.org/partidos/partido/2> <https://example.org/partidos/tieneEquipoVisitante> <https://example.org/partidos/equipo/1> .
+<https://example.org/partidos/partido/2> <https://example.org/partidos/resultado1> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/2> <https://example.org/partidos/resultado2> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/2> <https://example.org/partidos/hora> "2024-06-15"^^<http://www.w3.org/2001/XMLSchema#date> .
+# partido/3: no resultado2 -> not a solution; partido/4: complete, but in no competition (left merge leaves its sport empty)
+<https://example.org/partidos/partido/3> <https://example.org/partidos/ocurreEn> <https://example.org/partidos/campo/1> .
+<https://example.org/partidos/partido/3> <https://example.org/partidos/tieneEquipoLocal> <https://example.org/partidos/equipo/1> .
+<https://example.org/partidos/partido/3> <https://example.org/partidos/tieneEquipoVisitante> <https://example.org/partidos/equipo/3> .
+<https://example.org/partidos/partido/3> <https://example.org/partidos/resultado1> "4"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/3> <https://example.org/partidos/hora> "2024-07-01"^^<http://www.w3.org/2001/XMLSchema#date> .
+<https://example.org/partidos/partido/4> <https://example.org/partidos/ocurreEn> <https://example.org/partidos/campo/3> .
+<https://example.org/partidos/partido/4> <https://example.org/partidos/tieneEquipoLocal> <https://example.org/partidos/equipo/2> .
+<https://example.org/partidos/partido/4> <https://example.org/partidos/tieneEquipoVisitante> <https://example.org/partidos/equipo/3> .
+<https://example.org/partidos/partido/4> <https://example.org/partidos/resultado1> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/4> <https://example.org/partidos/resultado2> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://example.org/partidos/partido/4> <https://example.org/partidos/hora> "2024-08-20T18:00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+# 
+# --- query 3 (sport of a match): jornada tienePartido ; grupo tieneJornada ; competicion tieneGrupo ; tipoDe ; nombreDeporte ; OPTIONAL sameAsDeporte
+<https://example.org/partidos/jornada/1> <https://example.org/partidos/tienePartido> <https://example.org/partidos/partido/1> .
+<https://example.org/partidos/grupo/1> <https://example.org/partidos/tieneJornada> <https://example.org/partidos/jornada/1> .
+<https://example.org/partidos/comp/1> <https://example.org/partidos/tieneGrupo> <https://example.org/partidos/grupo/1> .
+<https://example.org/partidos/comp/1> <https://example.org/partidos/tipoDe> <https://example.org/partidos/deporte/futbol> .
+<https://example.org/partidos/deporte/futbol> <https://example.org/partidos/nombreDeporte> "Fútbol" .
+<https://example.org/partidos/deporte/futbol> <https://example.org/partidos/sameAsDeporte> <http://www.wikidata.org/entity/Q2> .
+<https://example.org/partidos/jornada/2> <https://example.org/partidos/tienePartido> <https://example.org/partidos/partido/2> .
+<https://example.org/partidos/grupo/2> <https://example.org/partidos/tieneJornada> <https://example.org/partidos/jornada/2> .
+<https://example.org/partidos/comp/2> <https://example.org/partidos/tieneGrupo> <https://example.org/partidos/grupo/2> .
+<https://example.org/partidos/comp/2> <https://example.org/partidos/tipoDe> <https://example.org/partidos/deporte/petanca> .
+<https://example.org/partidos/deporte/petanca> <https://example.org/partidos/nombreDeporte> "Petanca" .
+# broken chain (no tipoDe): partido/3 gets no sport
+<https://example.org/partidos/jornada/3> <https://example.org/partidos/tienePartido> <https://example.org/partidos/partido/3> .
+<https://example.org/partidos/grupo/3> <https://example.org/partidos/tieneJornada> <https://example.org/partidos/jornada/3> .
+<https://example.org/partidos/comp/3> <https://example.org/partidos/tieneGrupo> <https://example.org/partidos/grupo/3> .
