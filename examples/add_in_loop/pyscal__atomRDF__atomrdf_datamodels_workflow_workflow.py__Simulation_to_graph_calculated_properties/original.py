@@ -2,7 +2,7 @@
 # region: Simulation.to_graph_calculated_properties (lines 402-416, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, XSD, RDF, RDFS, BNode, URIRef
-from atomrdf.namespace import (
+from atomrdf_context import (
     CMSO,
     LDO,
     PLDO,

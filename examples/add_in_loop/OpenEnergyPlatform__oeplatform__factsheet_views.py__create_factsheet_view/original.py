@@ -2,8 +2,9 @@
 # region: create_factsheet_view (lines 201-253, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import RDF, Graph, Literal, URIRef
-from factsheet.oekg.namespaces import DC, OBO, OEKG, OEO, RDFS, XSD
-from factsheet.utils import remove_non_printable, serialize_publication_date
+from context_shim import DC, OBO, OEKG, OEO, RDFS, XSD
+from context_shim import remove_non_printable, serialize_publication_date
+from context_shim import _publications, bundle, study_URI
 
 for item in _publications:
     publications_URI = URIRef(

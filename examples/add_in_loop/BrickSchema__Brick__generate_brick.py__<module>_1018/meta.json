@@ -10,11 +10,22 @@
   "kind": "statement",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: BRICK->brick, BSH->bsh, REC->rec, RDF->rdf, OWL->owl, RDFS->rdfs, TAG->tag, SOSA->sosa, SKOS->skos, QUDT->qudt, VCARD->vcard, SH->sh, REF->ref"
+    "`G.query(\"\"\"SELECT … WHERE { ?quantity rdf:type brick:Quantity . ?quantity brick:hasQUDTReference ?qudtquant }\"\"\")` is a basic graph pattern, hence `m{ ?quantity a brick:Quantity ; brick:hasQUDTReference ?qudtquant }` (two patterns sharing a subject, written once); the query string, its prologue (supplied by brickschema.Graph's bindings) and the rdf: prefix disappear. `res = …` and `r` are kept as in the original (no refactoring). The two `G.add` become `+{ {brick_quant} qudt:applicableUnit {unit} }` on `@graph G`.",
+    "The 13 names the original imports from bricksrc.namespaces become `from context_shim import brick:, bsh:, …` (prefixes, not Python names).",
+    "Context shim: `brickschema` is not installed in the study venv, nor is bricksrc; context_shim.py gives `brickschema.Graph()` the prefix bindings of the real class AND the slice of the Brick graph that the earlier passes of generate_brick.py had built by line 1018 (quantities with QUDT references, plus neighbours that must not match); `get_units` / `get_units_brick` are lookup tables. Without a populated G the region reads an empty graph and the check would be a hollow green.",
+    "Mutation checked: dropping `a brick:Quantity` from the pattern makes the check FAIL (the untyped neighbours add 2 triples)."
   ],
   "draft_sha": "b26f5bee1327b574",
   "provenance": {
@@ -26,5 +37,6 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

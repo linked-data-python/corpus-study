@@ -14,11 +14,23 @@
     "term_constructor": 8,
     "triple_add": 8
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "typed literal",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: RDF->rdf, DC->dc, OBO->obo, OEKG->oekg, OEO->oeo, RDFS->rdfs, XSD->xsd"
+    "The twelve `bundle.add` of the loop body collapse into seven `+{ }` islands on `@graph bundle`, with `;` for same-subject runs; `RDF.type` is `a`, the OEO/OBO/RDFS terms are prefixed names imported with `from context_shim import oeo:, obo:, …` in place of `from factsheet.oekg.namespaces import …`.",
+    "`URIRef(\"…/publication/\" + item[\"id\"])`, `URIRef(\"…/\" + author[\"iri\"])` and `URIRef(item[\"link_to_study_report\"])` are `f<…{item['id']}…>` (no @base in scope, no encoding in either form, so the IRIs are identical).",
+    "`Literal(item[\"date_of_publication\"], datatype=XSD.dateTime)` is `f\"{item['date_of_publication']}\"^^xsd:dateTime`: equal for a string AND for None (lexical form \"None\"), checked with rdflib 7.2.1.",
+    "`Literal(item[\"doi\"])` is KEPT as `{Literal(item[\"doi\"])}` on purpose: the doi arrives as data from the front end and may be None, in which case the original writes the literal \"None\" whereas a bare `{item[\"doi\"]}` raises TypeError (ldpy 0.7.1). The driver has a publication with `doi: None`, and the mutation `{item[\"doi\"]}` makes the check FAIL. `Literal(item[\"id\"])` and `Literal(remove_non_printable(…))` are bare interpolations: the first is concatenated into an IRI just above (a str or the original raises first), the second is a str by construction.",
+    "Context shim: factsheet.* is a Django project, not installed. context_shim.py holds the namespaces, the two helpers, and the loop's free variables (`bundle`, `study_URI`, `_publications`, locals of the enclosing view that the extraction did not capture); the four publications span the branches of the loop."
   ],
   "draft_sha": "c6ae2ec9f8a69f1a",
   "provenance": {
@@ -32,5 +44,6 @@
     "coercion_datatype",
     "add_isolated"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

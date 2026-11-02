@@ -2,11 +2,11 @@
 # region: process_waterbodies_shp2ttl (lines 128-177, stratum add_in_loop)
 # licence of the source repository: see meta.json
 import pandas as pd
-import shapely
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import GEO, OWL, PROV, RDF, RDFS, SDO, XSD
 import logging
-from namespaces import _PREFIX
+from context_shim import shapely, _PREFIX
+from context_shim import load_waterbodies, initial_kg, build_iris
 ontologyStem = 'http://nhdplusv2.spatialai.org/v1/nhdplusv2-wb-data'
 ontologyIRI = URIRef(ontologyStem)
 logger = logging.getLogger(__name__)

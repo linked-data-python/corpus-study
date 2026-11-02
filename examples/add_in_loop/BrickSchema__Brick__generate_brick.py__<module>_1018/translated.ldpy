@@ -1,49 +1,33 @@
 # Extracted from BrickSchema/Brick@c12949f236 : generate_brick.py
 # region: <module> (lines 1018-1024, stratum add_in_loop)
 # licence of the source repository: see meta.json
-import brickschema
-from bricksrc.namespaces import (
-    BRICK,
-    BSH,
-    REC,
-    RDF,
-    OWL,
-    RDFS,
-    TAG,
-    SOSA,
-    SKOS,
-    QUDT,
-    VCARD,
-    SH,
-    REF,
+from context_shim import (
+    brick:,
+    bsh:,
+    rec:,
+    rdf:,
+    owl:,
+    rdfs:,
+    tag:,
+    sosa:,
+    skos:,
+    qudt:,
+    vcard:,
+    sh:,
+    ref:,
+    brickschema,
+    quantity_definitions,
+    get_units,
+    get_units_brick,
 )
-from bricksrc.quantities import quantity_definitions, get_units
-@prefix brick: <https://brickschema.org/schema/Brick#> .
-@prefix bsh: <https://brickschema.org/schema/BrickShape#> .
-@prefix rec: <https://w3id.org/rec#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tag: <https://brickschema.org/schema/BrickTag#> .
-@prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix qudt: <http://qudt.org/schema/qudt/> .
-@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
-
 G = brickschema.Graph()
-res = G.query(
-    """SELECT ?quantity ?qudtquant WHERE {
-                ?quantity rdf:type brick:Quantity .
-                ?quantity brick:hasQUDTReference ?qudtquant
-                }"""
-)
+@graph G
+res = m{ ?quantity a brick:Quantity ; brick:hasQUDTReference ?qudtquant }
 
 for r in res:
     brick_quant, qudt_quant = r
     for unit in get_units(qudt_quant):
-        G += g{ {brick_quant} qudt:applicableUnit {unit} }
+        +{ {brick_quant} qudt:applicableUnit {unit} }
     # the symbols, units, and labels are already defined in the previous pass
     for unit, symb, label in get_units_brick(brick_quant):
-        G += g{ {brick_quant} qudt:applicableUnit {unit} }
+        +{ {brick_quant} qudt:applicableUnit {unit} }

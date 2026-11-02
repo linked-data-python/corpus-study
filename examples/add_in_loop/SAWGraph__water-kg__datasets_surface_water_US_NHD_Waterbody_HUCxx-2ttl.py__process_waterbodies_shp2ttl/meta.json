@@ -15,11 +15,23 @@
     "term_constructor": 6,
     "triple_add": 15
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: GEO->geo, OWL->owl, PROV->prov, RDF->rdf, RDFS->rdfs, SDO->sdo, XSD->xsd"
+    "Fifteen `kg.add` become nine `+{ }` islands on `@graph kg` (designated after `kg = initial_kg(…)`), with `;` runs for same-subject triples. GEO/RDFS/SDO/XSD/OWL/PROV/RDF come from `from rdflib.namespace import geo:, owl:, …` (the rdflib DefinedNamespaces, so no IRI is retyped).",
+    "FINDING (a limit, not a failure): the SAWGraph terms live in a RUNTIME registry, `_PREFIX = {'hyf': Namespace(…), 'us_nhdplusv2': …}`, indexed by string (`_PREFIX['hyf']['HY_Lake']`). A prefixed name cannot be written for them: `@prefix hyf: <…>` would need the IRI as a literal, i.e. copy it out of the registry and let the two drift. So these ten term positions stay as `{_PREFIX['hyf']['HY_Lake']}` interpolations; only the rdflib vocabularies become prefixed names.",
+    "`Literal(row.GEOMETRY, datatype=GEO.wktLiteral)`, `Literal(str(x), datatype=XSD.string)` and `Literal(row.GNIS_NAME, datatype=XSD.string)` are `f\"{…}\"^^geo:wktLiteral` / `^^xsd:string` (str() of a shapely geometry is its WKT; the stand-in geometry is a WKT string). They keep the xsd:string datatype, which `Literal('x')` would not (INSTRUCTIONS § 2 bis).",
+    "`kg.serialize(outfile, format='turtle')` is kept (no island writes). `@graph kg` adds the block's prefixes to the graph without overwriting the registry's bindings; the written file is compared as an RDF graph.",
+    "Context shim: shapely, geopandas and the shapefile are not available. context_shim.py has `_PREFIX` (IRIs reconstructed from the repository's conventions; both sides read the same registry), the three helpers the script defines above the region (`load_waterbodies` reads a CSV with the shapefile's columns, NULL as None), and a `shapely.wkb` stand-in that drops the Z ordinate of WKT. The driver uses fixed relative paths and the harness compares the written .ttl as a graph; a second call on a missing file compares the raise.",
+    "Not translated (identical to the original): the `gdf_waterbody._set_value` loop and the `logger.info` calls."
   ],
   "draft_sha": "61a84d76e62b3da7",
   "provenance": {
@@ -31,5 +43,6 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

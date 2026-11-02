@@ -1,4 +1,28 @@
-# Input graph for Aleksander-Drozd__csvwlib__csvwlib_tests_TestToRDFConverter.py__TestToRDFConverter_change_urls_in_result — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for csvwlib's change_urls_in_result: a graph of an expected
+# CSVW result whose IRIs point at the remote test location.
 @prefix ex: <http://example.org/> .
+@prefix r: <http://remote.example/tests/> .
+@prefix l: <http://local.example/tests/> .
+
+# remote IRI as subject only
+r:a ex:p ex:x .
+# remote IRI as subject and as object
+r:b ex:p r:c .
+# remote IRI as predicate only
+ex:s r:pred ex:y .
+# remote IRI in subject, predicate and object of one triple
+r:d r:q r:e .
+# remote IRI as object only
+ex:s ex:links r:f .
+# a literal that is, or contains, the remote location (no space, so the IRI is valid): it comes out an IRI
+ex:s ex:note "http://remote.example/tests/doc.csv" .
+# a language-tagged literal containing it
+ex:s ex:note "fr:http://remote.example/tests/doc.csv"@fr .
+# a blank node subject, remote object
+_:b1 ex:p r:g .
+# neighbours that must not change
+ex:s ex:p ex:o .
+ex:s ex:name "plain" .
+l:already ex:p l:other .
+<http://remote.example/other/z> ex:p "http://remote.example/other/z" .
+ex:t ex:count 3 .

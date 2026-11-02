@@ -2,19 +2,11 @@
 # region: process_waterbodies_shp2ttl (lines 128-177, stratum add_in_loop)
 # licence of the source repository: see meta.json
 import pandas as pd
-import shapely
 from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import GEO, OWL, PROV, RDF, RDFS, SDO, XSD
+from rdflib.namespace import geo:, owl:, prov:, rdf:, rdfs:, sdo:, xsd:
 import logging
-from namespaces import _PREFIX
-@prefix geo: <http://www.opengis.net/ont/geosparql#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix sdo: <https://schema.org/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
+from context_shim import shapely, _PREFIX
+from context_shim import load_waterbodies, initial_kg, build_iris
 ontologyStem = 'http://nhdplusv2.spatialai.org/v1/nhdplusv2-wb-data'
 ontologyIRI = URIRef(ontologyStem)
 logger = logging.getLogger(__name__)
@@ -37,37 +29,40 @@ def process_waterbodies_shp2ttl(vpunum, infile, outfile):
                                  shapely.wkb.loads(shapely.wkb.dumps(row.GEOMETRY, output_dimension=2)))
     logger.info('Intialize RDFLib Graph')
     kg = initial_kg(_PREFIX, vpunum)  # Create an empty Graph() with SAWGraph namespaces
+    @graph kg
     logger.info(f'Triplify HUC{vpunum} water bodies')
     for row in gdf_waterbody.itertuples():
         # Get IRIs for the current NHDWaterbody and its geometry
         bodyiri, geomiri = build_iris(row.COMID, _PREFIX)
         if 'estuary' in row.FTYPE.lower():
-            kg += g{ {bodyiri} a {_PREFIX['hyf']['HY_Estuary']} }
+            +{ {bodyiri} a {_PREFIX['hyf']['HY_Estuary']} }
         elif 'lake' in row.FTYPE.lower():
-            kg += g{ {bodyiri} a {_PREFIX['hyf']['HY_Lake']} }
+            +{ {bodyiri} a {_PREFIX['hyf']['HY_Lake']} }
         elif 'reservoir' in row.FTYPE.lower():
-            kg += g{ {bodyiri} a {_PREFIX['hyf']['HY_Impoundment']} }
+            +{ {bodyiri} a {_PREFIX['hyf']['HY_Impoundment']} }
         else:
-            kg += g{ {bodyiri} a {_PREFIX['hyf']['HY_WaterBody']} }
-        kg += g{
-            {bodyiri} rdfs:isDefinedBy {ontologyIRI} ;
-               geo:hasGeometry {geomiri} ;
+            +{ {bodyiri} a {_PREFIX['hyf']['HY_WaterBody']} }
+        +{ {bodyiri} rdfs:isDefinedBy {ontologyIRI} }
+
+        # Triplify the geometry for the current NHDWaterbody
+        +{
+            {bodyiri} geo:hasGeometry {geomiri} ;
                geo:defaultGeometry {geomiri} .
-            {geomiri} geo:asWKT {Literal(row.GEOMETRY, datatype=GEO.wktLiteral)} ;
+            {geomiri} geo:asWKT f"{row.GEOMETRY}"^^geo:wktLiteral ;
                a geo:Geometry
         }
 
         # Triplify current NHDWaterbody attributes
         if not pd.isnull(row.GNIS_NAME):
-            kg += g{ {bodyiri} sdo:name {Literal(row.GNIS_NAME, datatype=XSD.string)} }
-        kg += g{
-            {bodyiri} {_PREFIX['us_nhdplusv2']['hasCOMID']} {Literal(str(row.COMID), datatype=XSD.string)} ;
-               {_PREFIX['us_nhdplusv2']['hasFTYPE']} {Literal(str(row.FTYPE), datatype=XSD.string)} ;
-               {_PREFIX['us_nhdplusv2']['hasFCODE']} {Literal(str(row.FCODE), datatype=XSD.string)} ;
-               {_PREFIX['us_nhdplusv2']['hasReachCode']} {Literal(str(row.REACHCODE), datatype=XSD.string)}
+            +{ {bodyiri} sdo:name f"{row.GNIS_NAME}"^^xsd:string }
+        +{
+            {bodyiri} {_PREFIX['us_nhdplusv2']['hasCOMID']} f"{row.COMID}"^^xsd:string ;
+               {_PREFIX['us_nhdplusv2']['hasFTYPE']} f"{row.FTYPE}"^^xsd:string ;
+               {_PREFIX['us_nhdplusv2']['hasFCODE']} f"{row.FCODE}"^^xsd:string ;
+               {_PREFIX['us_nhdplusv2']['hasReachCode']} f"{row.REACHCODE}"^^xsd:string
         }
         if row.REACHCODE is not None:
-            kg += g{ {bodyiri} {_PREFIX['us_wbd']['containingHUC']} {_PREFIX['us_wbd_data']['d.HUC8.' + str(row.REACHCODE)[:8]]} }
+            +{ {bodyiri} {_PREFIX['us_wbd']['containingHUC']} {_PREFIX['us_wbd_data']['d.HUC8.' + str(row.REACHCODE)[:8]]} }
 
     logger.info(f'Write HUC{vpunum} water body triples to {outfile}')
     kg.serialize(outfile, format='turtle')  # Write the completed KG to a .ttl file

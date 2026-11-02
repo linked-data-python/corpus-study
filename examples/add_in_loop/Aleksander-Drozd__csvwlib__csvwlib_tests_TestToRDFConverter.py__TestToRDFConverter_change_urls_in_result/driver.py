@@ -1,19 +1,43 @@
-"""Validation driver for Aleksander-Drozd__csvwlib__csvwlib_tests_TestToRDFConverter.py__TestToRDFConverter_change_urls_in_result.
+"""Validation driver for csvwlib's TestToRDFConverter.change_urls_in_result.
 
-This region READS a graph, so the oracle is not isomorphism but the equality
-of the values both versions produce from the same input graph (design record
-corpus/405).  `fixture.ttl` is parsed fresh for each side.
+The region walks a graph and rewrites, in place, every triple whose subject,
+predicate or object contains the remote test location (a substring test, so a
+literal containing it is concerned too, and comes out as an IRI).  It
+returns nothing: the oracle is the mutation of the graph argument, which the
+harness compares between the sides.
 
-The fixture is part of the translation: it must hold several solutions of the
-pattern the region reads, the zero-solution case, and neighbouring triples
-that must NOT match.
+`fixture.ttl` holds the cases: the location in the subject only, the
+predicate only, the object only, all three of one triple, a literal that
+contains it (plain and language-tagged), a blank node subject, and
+neighbours that must stay put (other locations, an already local IRI, a
+number).  Four calls vary the pair of locations; the last one has a remote
+location that matches nothing.
 """
-from rdfeval.harness import run_pair
+from pathlib import Path
+from types import SimpleNamespace
+
+from rdfeval.harness import run_pair, fixture_graph
+
+FIXTURE = Path(__file__).resolve().parent / "fixture.ttl"
+
+
+def _call(remote, local):
+    def make():
+        me = SimpleNamespace(_remote_tests_location=remote, _tests_location=local)
+        return (me, fixture_graph(FIXTURE)), {}
+    return make
+
+
+CALLS = [
+    _call("http://remote.example/tests/", "http://local.example/tests/"),
+    _call("http://remote.example/", "file:///data/"),
+    _call("http://remote.example/other/", "http://local.example/other/"),
+    _call("http://nowhere.example/", "http://local.example/"),
+]
 
 VERDICT = run_pair(
     __file__,
     entry='change_urls_in_result',
     fixture="fixture.ttl",
-    # ordered=True only if the region imposes an order (sorted, ORDER BY):
-    # no store promises one, so results are compared as multisets.
+    calls=CALLS,
 )

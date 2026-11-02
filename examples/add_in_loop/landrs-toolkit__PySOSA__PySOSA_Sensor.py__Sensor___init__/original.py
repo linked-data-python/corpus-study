@@ -2,9 +2,9 @@
 # region: Sensor.__init__ (lines 22-45, stratum add_in_loop)
 # licence of the source repository: see meta.json
 from rdflib import BNode, Literal, RDF, RDFS
-from PySOSA import config as cfg
-from PySOSA.ObservableProperty import ObservableProperty
-from PySOSA.Procedure import Procedure
+from context_shim import config as cfg
+from context_shim import ObservableProperty
+from context_shim import Procedure
 obsgraph = cfg.get_graph()
 
 def __init__(self, *args):

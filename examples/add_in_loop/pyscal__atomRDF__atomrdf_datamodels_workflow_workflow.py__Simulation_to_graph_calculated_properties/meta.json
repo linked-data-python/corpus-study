@@ -13,11 +13,21 @@
     "term_constructor": 1,
     "triple_add": 2
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
   "translation_notes": [
-    "prefixes: XSD->xsd, RDF->rdf, RDFS->rdfs, CMSO->cmso, LDO->ldo, PLDO->pldo, PODO->podo, CDCO->cdco, PROV->prov, ASMO->asmo, MDO->mdo"
+    "The two `graph.add` in the nested loops are `+{ {param_uri} asmo:wasCalculatedBy {simulation} }` and `+{ f<{sample_id}> asmo:hasCalculatedProperty {param_uri} }`, on `@graph graph` declared at the top of the function (the graph is its parameter, so `param.to_graph(graph)` and the island act on the same one). `ASMO.…` is `asmo:…` through `from atomrdf_context import asmo:, …`; the unused imports (CMSO, LDO, …, and rdflib's XSD, RDF, RDFS) become prefix imports too, as in the original import list.",
+    "`URIRef(sample_id)` is `f<{sample_id}>` (a str or a URIRef; no @base in scope).",
+    "KNOWN DIFFERENCE, not covered by the driver: if `simulation` (or the URI returned by `to_graph`) is None, the original raises AssertionError from `Graph.add`, the translation TypeError from the island (ldpy 0.7.1: an interpolated None raises). The same invalid call fails on both sides with a different exception type.",
+    "Context shim: atomrdf is not installed; atomrdf_context.py holds the namespaces of atomrdf.namespace (real IRIs). `param.to_graph` is outside the region and is a stub in the driver (it writes a label and returns the property URI)."
   ],
   "draft_sha": "ec1951018b905509",
   "provenance": {
@@ -29,5 +39,6 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

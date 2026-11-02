@@ -15,10 +15,22 @@
     "term_constructor": 3,
     "triple_add": 3
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "translation_notes": [
+    "The walk `for s, p, o in graph.triples((None, None, None))` is `for s, p, o in m{ ?s ?p ?o }`, and each `graph.remove((s, p, o))` / `graph.add((s, p, o))` is `-{ {s} {p} {o} }` / `+{ {s} {p} {o} }` on the graph designated by `@graph graph`. All three terms are bound, so the `-{ }` is an exact removal, not a wildcard.",
+    "The graph is rewritten WHILE the lazy `m{ }` iterates it; this is safe on rdflib's in-memory store (the original does the same with `.triples()`), and the check proves it on a fixture where every position of a triple is rewritten.",
+    "Faithful quirk kept: a literal that contains the remote location is turned into a URIRef (the substring test `in o` is true of a Literal), which the fixture exercises; a literal with a space would produce an invalid IRI on both sides, so the fixture has none.",
+    "Driver: `self` is a SimpleNamespace holding the two locations; the oracle is the mutation of the graph argument (four calls, one of which matches nothing)."
+  ],
   "draft_sha": "4cef11c7ac587423",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.391472+00:00",
@@ -29,5 +41,6 @@
   "strata": [
     "add_in_loop"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }
