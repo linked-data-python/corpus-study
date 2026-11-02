@@ -2,6 +2,7 @@
 # region: Ontology.surface_vertices (lines 137-153, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from rdflib.term import Node
+from minergym_context import TypeAlias
 Point: TypeAlias = tuple[float, float, float]
 
 def surface_vertices(self, surface: Node) -> list[Point]:

@@ -10,10 +10,23 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "from … import p:",
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "translation_notes": [
+    "Property path rdf:rest*/rdf:first (walk of an RDF list) makes the query a non-BGP: s{ }, not m{ }. ?surface is bound by initBindings and NOT projected (SELECT ?x ?y ?z), so it is interpolated in term position ({surface}). The call suffix (self.rdf) is used because the graph is an attribute, not a name that @graph could designate cleanly.",
+    "The original relies on the graph carrying the binding idf: (g.bind(\"idf\", IDF) in Ontology.from_object); the translation obtains the same prefix with `from minergym_context import idf:` (the shim exports the Namespace IDF, a plain rdflib.Namespace as in minergym.ontology). rdf: is declared by @prefix (rdflib graphs predefine it).",
+    "Context shim minergym_context.py: TypeAlias (module-level annotation of the extraction), IDF = Namespace(\"https://energyplus.net/\"), verbatim create_rdf_list / intern_object, and graph_from_object (body of Ontology.from_object, to build the graph the driver queries). original.py and translated.ldpy each gain one import line from the shim (TypeAlias is a typing import upstream).",
+    "Driver: self stub holding only .rdf; surfaces with 3, 2, 2 (one vertex lacking z), and 0 vertices, a non-surface node, an unknown name. Mutants: unbound ?surface (reads every surface) and rdf:rest*/rdf:first -> rdf:first (only the head of the list) both make the check FAIL."
+  ],
   "draft_sha": "3a5ce047053d8a63",
   "provenance": {
     "generated_at": "2026-11-02T18:29:38.993346+00:00",
@@ -24,5 +37,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

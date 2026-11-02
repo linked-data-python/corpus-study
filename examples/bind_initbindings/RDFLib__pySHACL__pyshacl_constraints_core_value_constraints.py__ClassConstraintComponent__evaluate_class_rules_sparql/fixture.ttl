@@ -1,0 +1,21 @@
+# Input graph for the pySHACL ClassConstraintComponent region.
+# Class hierarchy Dog < Mammal < Animal < Thing; instances at several depths;
+# neighbours that must NOT satisfy "instance of ex:Animal": an instance of a
+# SUPER-class of Animal (ex:Thing), an instance of an unrelated class that
+# only shares a sub-class name, and a node that merely is a class (not an
+# instance) of the right hierarchy.
+@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Dog rdfs:subClassOf ex:Mammal .
+ex:Mammal rdfs:subClassOf ex:Animal .
+ex:Animal rdfs:subClassOf ex:Thing .
+ex:Bird rdfs:subClassOf ex:Flyer .
+ex:Flyer rdfs:subClassOf ex:Thing .
+
+ex:rex a ex:Dog .        # two steps below Animal: matches
+ex:fido a ex:Animal .    # zero steps: matches
+ex:tweety a ex:Bird .    # sibling branch: must not match
+ex:rock a ex:Thing .     # SUPER-class of Animal: must not match
+ex:Dog2 ex:isLike ex:Dog .   # only linked by another predicate: must not match
+ex:ghost ex:isA ex:Animal .  # not rdf:type: must not match

@@ -8,6 +8,13 @@ import rdflib.namespace
 import rdflib.plugins.sparql
 import logging.config
 L = logging.getLogger("navocab")
+import vocabulary_context
+from vocabulary_context import DEFAULT_FORMAT
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Restored class statement (see vocabulary_context.py): the region is a method.
+class VocabularyStore(vocabulary_context.VocabularyStore):
 
     def load(
         self,
@@ -46,14 +53,10 @@ L = logging.getLogger("navocab")
         loaded_vocabulary = voc_uri
         if loaded_vocabulary is not None:
             L.info("Loaded vocabulary %s", loaded_vocabulary)
-            q = (
-                VocabularyStore._PFX
-                + """SELECT ?extended
+            qres = s{ SELECT ?extended
             WHERE {
-                ?vocabulary rdfs:subPropertyOf ?extended .
-            }"""
-            )
-            qres = self._g.query(q, initBindings={"vocabulary": loaded_vocabulary})
+                {loaded_vocabulary} rdfs:subPropertyOf ?extended .
+            } }(self._g).execute()
             _extended_vocab = self._result_single_value(qres, abbreviate=False)
             if _extended_vocab is not None:
                 L.info("subPropertyOf Extends: %s", _extended_vocab)
@@ -61,18 +64,8 @@ L = logging.getLogger("navocab")
             # The extended vocabulary is not specified
             # Figure it by examining the broader concepts for each
             # concept in the loaded vocabulary
-            q = (
-                VocabularyStore._PFX
-                + """SELECT ?s
-            WHERE {
-                ?child rdf:type skos:Concept .
-                ?child skos:broader ?s .
-                ?child skos:inScheme ?voc .
-            }"""
-            )
 #            qres = g_loaded.query(q)
-            qres = g_loaded.query(q, initBindings={"voc": loaded_vocabulary})
-            broader_concepts = self._one_res(qres)
+            broader_concepts = list(m{ [ a skos:Concept ; skos:broader ?s ; skos:inScheme {loaded_vocabulary} ] }(g_loaded))
             vocabs = set()
             for c in broader_concepts:
                 concept = self.concept(str(c))
@@ -81,7 +74,15 @@ L = logging.getLogger("navocab")
             for vocab in vocabs:
                 if str(vocab) != str(loaded_vocabulary):
                     L.info("broader concept Extends: %s", vocab)
-                    self._g.add((rdflib.URIRef(loaded_vocabulary), rdfsT("subPropertyOf"), rdflib.URIRef(vocab)))
+                    +{ f<{loaded_vocabulary}> rdfs:subPropertyOf f<{vocab}> }(self._g)
                     self._g.commit()
             return
         L.warning("Loaded vocabulary does not specify skos:ConceptScheme")
+
+
+# driver helper (see vocabulary_context.py) -- not part of the extracted region.
+def _load(g, *args, fixed_concept=False, **kwargs):
+    store = VocabularyStore(g)
+    if fixed_concept:
+        store.concept = vocabulary_context.uri_concept(store)
+    return store.load(*args, **kwargs)

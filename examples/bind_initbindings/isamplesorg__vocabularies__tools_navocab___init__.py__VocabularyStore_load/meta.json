@@ -10,11 +10,27 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
+  "translation_status": "final",
+  "classification": "minor-restructuring",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    ".execute()",
+    "call suffix (g)",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
   "translation_notes": [
-    "unparsable: unexpected indent (<unknown>, line 12)"
+    "Three islands in one method. (1) Query 1 `SELECT ?extended WHERE { ?vocabulary rdfs:subPropertyOf ?extended }` (initBindings vocabulary, not projected) is a BGP but is written s{ }(self._g).execute() and NOT m{ }: its result goes to `self._result_single_value(qres)`, a helper outside the region that calls len(rows), iterates twice and logs one debug record per row, reading r[0]. m{ } has no len(), yields bare terms for one variable (r[0] would be the first character of the IRI) and a rewrite that dropped the helper would drop its log records, which the harness compares. A construction that keeps an rdflib Result is the one that preserves the helper contract. (2) Query 2 (join of three triples, initBindings voc, projected ?s) becomes m{ [ a skos:Concept ; skos:broader ?s ; skos:inScheme {loaded_vocabulary} ] }(g_loaded) read with list(): the blank node keeps ?child non-projected, and the only consumer `self._one_res(qres)` (not abbreviating) is exactly [r[0] for r in rows], so list(m{ }) replaces it (the same multiplicity: the fixture has the same broader concept twice). (3) `self._g.add((URIRef(a), rdfsT(\"subPropertyOf\"), URIRef(b)))` becomes +{ f<{a}> rdfs:subPropertyOf f<{b}> }(self._g); self._g.commit() stays. The two PREFIX preambles of the query strings (VocabularyStore._PFX) become @prefix rdfs: and skos:; `a` replaces rdf:type, so rdf: is not declared.",
+    "FINDING (fidelity, str vs term). `loaded_vocabulary = voc_uri` is a plain str; the original puts it in initBindings as is, and rdflib NEVER matches a raw str against a URIRef or a Literal (checked: Graph.query(..., initBindings={\"s\": \"http://e/a\"}) returns nothing). `{loaded_vocabulary}` coerces a str into a Literal (coercion.md), which matches a Literal in object position. The two agree for a URIRef (passes through) and for a str as long as no triple has a literal with the same text as object of skos:inScheme; checked by adding `ex:l1 skos:inScheme \"http://example.org/vocabA\"` to the fixture and calling with str(A): the original adds nothing, the translation adds A subPropertyOf B (check FAILS), so that stray literal is NOT in the committed fixture; the driver keeps the str call (nothing matches on both sides). Wrapping in URIRef(...) would be a bug fix (the original never matches), not a translation.",
+    "FINDING (latent bug of the original, makes the add branch unreachable). Upstream `concept()` reads through `objects()`, which also binds plain str (`initBindings={\"subject\": subject, ...}`): it always answers vocabulary=None, so `load` can never reach the `self._g.add(...)` branch through the real class. The driver covers it twice: with the real `concept` (nothing added) and with `vocabulary_context.uri_concept`, a driver-support function (NOT upstream, documented as such) installed as store.concept by the helper `_load(..., fixed_concept=True)`.",
+    "Executability: the upstream store is SQLAlchemy/SQLite (not installed), so the shim vocabulary_context.py copies verbatim the module constants, VocabularyConcept, the `VocabularyStore` helpers the region reaches (_PFX, DEFAULT_FORMAT, expand_name, compact_name, _one_res, _result_single_value, objects, narrower, concept) with an __init__(self, g) that takes any rdflib graph (invented, one line). original.py and translated.ldpy get the restored class statement `class VocabularyStore(vocabulary_context.VocabularyStore):` and a trailing driver helper `_load` (outside the region, same in both). The shim logs through the same logger `navocab`; its records (in the example directory) are compared as the pair of the region.",
+    "Quirk shown by the driver: `bindings={\"ex\": ...}` makes upstream raise ValueError at `L.debug(\"binding item k: %\", k)` (malformed format string) as soon as debug records are formatted (the harness formats them); compared as a raise, identical on both sides. A blank node `[ ... ]` in m{ } is not in the closed construction vocabulary (not listed).",
+    "Driver: 8 calls (scheme A with a working concept lookup -> A subPropertyOf B only; scheme already extending Z -> early return; scheme without broader concept; real concept; plain str voc_uri; None -> warning; bindings raising; bindings {}). Fixture neighbours: untyped concept with a broader in scheme F, a concept without scheme whose broader is in H, a scheme C/D pair. Mutants: dropping `a skos:Concept`, dropping the skos:inScheme triple, and subPropertyOf -> subClassOf in the +{ } each make the check FAIL."
   ],
   "draft_sha": "7338ddb27a32a39f",
   "provenance": {
@@ -26,5 +42,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }

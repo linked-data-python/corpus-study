@@ -2,5 +2,13 @@
 # region: query_step_details (lines 574-574, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 from rdflib import Graph, Namespace, URIRef
+from step_conversion_context import graph, step_uri
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-vessel_type_result = list(graph.query(vessel_type_query, initBindings={'step': URIRef(step_uri)}))
+vessel_type_result = list(s{ SELECT DISTINCT ?vesselTypeLabel
+    WHERE {
+        {URIRef(step_uri)} ontosyn:hasVessel ?vessel .
+        ?vessel ontosyn:hasVesselType ?vesselType .
+        ?vesselType rdfs:label ?vesselTypeLabel .
+    } }(graph))

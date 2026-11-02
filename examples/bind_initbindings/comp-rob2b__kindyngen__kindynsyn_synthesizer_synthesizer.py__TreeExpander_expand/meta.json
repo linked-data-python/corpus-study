@@ -10,10 +10,15 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE (query received as data). The queries are the KEYS of self.expanders (dict[str, CompiledExpander]), registered at run time by the steps of the synthesizer (TraverserRegistry.register(query, sweep, traverser)); the region iterates them: `for query, expander in self.expanders.items(): res = self.graph.query(query, initBindings={\"node\": node})`. s{ } needs its query written LITERALLY at the island site (parsed at transpile time), and m{ } a written pattern: there is no island for \"run this query text I was handed\", and the queries are heterogeneous (paths, joins, whatever a step declares). The same text is also the dict key of the result (ret[child][query]), so it must remain a string. Minimal excerpt: `res = self.graph.query(query, initBindings={\"node\": node})` with `query` a loop variable over a runtime dict.",
+    "translated.ldpy is therefore identical to original.py (exact transparency, precedent: TDCC-NES askwol _prepare, kglab GPViz.__init__); constructions is empty on purpose. Nothing else in the region is an RDF operation (the rest is dict bookkeeping).",
+    "Context shim kindyngen_context.py: CompiledExpander and prepare_query copied verbatim from the repository (the signature annotation of expand names CompiledExpander at def time; kindynsyn is not on PyPI), plus two empty placeholder classes (SweepConfig, Traverser) for the annotations of CompiledExpander.append. Both representations import CompiledExpander from it (one added line).",
+    "Driver: self stub with .graph (fixture.ttl) and .expanders (4 real queries: direct, property path, same child through two paths, none matching); nodes a, b, a leaf, an unknown node, and a TreeExpander with no expander. Mutants (initBindings dropped; append dropped) both make the check FAIL."
+  ],
   "draft_sha": "4ea58e38b592f683",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.008848+00:00",
@@ -24,5 +29,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

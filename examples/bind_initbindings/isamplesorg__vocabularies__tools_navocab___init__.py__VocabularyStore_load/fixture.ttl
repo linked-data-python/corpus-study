@@ -1,0 +1,34 @@
+# Vocabulary file loaded by VocabularyStore.load (the `source` argument).
+# Scheme A is the one the driver loads; the others are neighbours.
+#
+#  - A's concepts a1, a2 are both narrower than b1 (scheme B): the same
+#    broader concept twice (multiplicity of the join), a3 is narrower than a0
+#    of A itself (same scheme: no extension), so the only vocabulary A
+#    extends is B.
+#  - e1 is in A with a broader concept of scheme F but is NOT a skos:Concept,
+#    g1 has a broader concept of scheme H but no scheme at all, c1 (scheme C)
+#    has a broader concept in scheme D: none of them may make A extend F, H
+#    or D.
+#  - scheme C already says rdfs:subPropertyOf Z: loading C returns early.
+@prefix ex:   <http://example.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:vocabA a skos:ConceptScheme ; rdfs:label "Vocabulary A" .
+ex:vocabB a skos:ConceptScheme ; rdfs:label "Vocabulary B" .
+ex:vocabC a skos:ConceptScheme ; rdfs:label "Vocabulary C" ; rdfs:subPropertyOf ex:vocabZ .
+ex:vocabD a skos:ConceptScheme ; rdfs:label "Vocabulary D" .
+
+ex:a0 a skos:Concept ; skos:inScheme ex:vocabA .
+ex:a1 a skos:Concept ; skos:inScheme ex:vocabA ; skos:broader ex:b1 .
+ex:a2 a skos:Concept ; skos:inScheme ex:vocabA ; skos:broader ex:b1 .
+ex:a3 a skos:Concept ; skos:inScheme ex:vocabA ; skos:broader ex:a0 .
+ex:b1 a skos:Concept ; skos:inScheme ex:vocabB .
+
+ex:e1 skos:inScheme ex:vocabA ; skos:broader ex:f1 .
+ex:f1 a skos:Concept ; skos:inScheme ex:vocabF .
+ex:g1 a skos:Concept ; skos:broader ex:h1 .
+ex:h1 a skos:Concept ; skos:inScheme ex:vocabH .
+
+ex:c1 a skos:Concept ; skos:inScheme ex:vocabC ; skos:broader ex:d1 .
+ex:d1 a skos:Concept ; skos:inScheme ex:vocabD .

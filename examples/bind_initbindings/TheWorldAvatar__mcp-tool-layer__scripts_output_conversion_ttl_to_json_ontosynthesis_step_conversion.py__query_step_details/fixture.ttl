@@ -1,0 +1,28 @@
+# Input graph for query_step_details (the vessel-type lookup of one step).
+# Step_2 is the step under test (see step_conversion_context.py):
+#   - two vessels of the SAME vessel-type label -> DISTINCT must fold them;
+#   - a vessel of another type -> a second distinct row;
+#   - a vessel whose type has no rdfs:label -> contributes no row.
+# Neighbours that must NOT show up: Step_1 (its own vessel and type), a type
+# label hanging directly on the step (no hasVessel/hasVesselType path), and
+# a vessel type attached to the step instead of to a vessel.
+@prefix ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ontosyn:Step_2 ontosyn:hasVessel ontosyn:Vessel_a, ontosyn:Vessel_b, ontosyn:Vessel_c, ontosyn:Vessel_d ;
+    rdfs:label "Step 2 label (not a vessel type)" ;
+    ontosyn:hasVesselType ontosyn:Type_direct .
+
+ontosyn:Vessel_a ontosyn:hasVesselType ontosyn:Type_beaker .
+ontosyn:Vessel_b ontosyn:hasVesselType ontosyn:Type_beaker2 .
+ontosyn:Vessel_c ontosyn:hasVesselType ontosyn:Type_flask .
+ontosyn:Vessel_d ontosyn:hasVesselType ontosyn:Type_unlabelled .
+
+ontosyn:Type_beaker rdfs:label "Beaker" .
+ontosyn:Type_beaker2 rdfs:label "Beaker" .
+ontosyn:Type_flask rdfs:label "Flask" .
+ontosyn:Type_direct rdfs:label "Direct type: wrong path" .
+
+ontosyn:Step_1 ontosyn:hasVessel ontosyn:Vessel_x .
+ontosyn:Vessel_x ontosyn:hasVesselType ontosyn:Type_vial .
+ontosyn:Type_vial rdfs:label "Vial" .

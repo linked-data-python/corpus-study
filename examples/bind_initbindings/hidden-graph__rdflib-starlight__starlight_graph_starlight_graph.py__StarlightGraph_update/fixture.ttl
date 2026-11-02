@@ -1,4 +1,9 @@
-# Input graph for hidden-graph__rdflib-starlight__starlight_graph_starlight_graph.py__StarlightGraph_update — written during translation.
-# It must cover: several solutions of the pattern the region reads, the
-# zero-solution case, and neighbouring triples that must NOT match.
+# Input graph for StarlightGraph.update (a SPARQL UPDATE run on a raw view of
+# the graph's store). Two sensors, a node of another class, and a status
+# that the DELETE updates of the driver target; the neighbours (ex:o1, the
+# status of ex:o1) must stay untouched by updates that name sensors only.
 @prefix ex: <http://example.org/> .
+
+ex:s1 a ex:Sensor ; ex:status "ok" .
+ex:s2 a ex:Sensor ; ex:status "ok" .
+ex:o1 a ex:Other ; ex:status "ok" .

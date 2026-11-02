@@ -2,6 +2,7 @@
 # region: TreeExpander.expand (lines 135-152, stratum bind_initbindings)
 # licence of the source repository: see meta.json
 import rdflib
+from kindyngen_context import CompiledExpander
 
 def expand(self, node: rdflib.URIRef) -> dict[rdflib.URIRef, dict[str, list[CompiledExpander]]]:
     # Try applying any expander query and if it returns neighbour nodes

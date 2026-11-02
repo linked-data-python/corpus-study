@@ -8,6 +8,11 @@ import rdflib.namespace
 import rdflib.plugins.sparql
 import logging.config
 L = logging.getLogger("navocab")
+import vocabulary_context
+from vocabulary_context import DEFAULT_FORMAT, rdfsT
+
+# Restored class statement (see vocabulary_context.py): the region is a method.
+class VocabularyStore(vocabulary_context.VocabularyStore):
 
     def load(
         self,
@@ -85,3 +90,11 @@ L = logging.getLogger("navocab")
                     self._g.commit()
             return
         L.warning("Loaded vocabulary does not specify skos:ConceptScheme")
+
+
+# driver helper (see vocabulary_context.py) -- not part of the extracted region.
+def _load(g, *args, fixed_concept=False, **kwargs):
+    store = VocabularyStore(g)
+    if fixed_concept:
+        store.concept = vocabulary_context.uri_concept(store)
+    return store.load(*args, **kwargs)

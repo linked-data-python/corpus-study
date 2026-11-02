@@ -14,10 +14,15 @@
     "graph_write": 1,
     "sparql": 1
   },
-  "translation_status": "draft",
-  "classification": null,
+  "translation_status": "final",
+  "classification": "not-expressible",
   "constructions": [],
-  "translation_notes": [],
+  "translation_notes": [
+    "NOT-EXPRESSIBLE (update text and bindings received as data). The region is a forwarding facade: `raw.update(update_object, processor=processor, initNs=initNs, initBindings=initBindings, use_store_provided=use_store_provided)` where the update (a str, or the Update object built from SPARQL 1.2 text by the package sparql1_2_to_rdf) AND the initial bindings are all parameters of the method. s{ } needs its update written LITERALLY (parsed at transpile time) and binds interpolated TERMS, not a mapping received as data: there is no island for \"run this update/these bindings I was handed\". The rest of the region (Graph(store=...) view, a loop of raw.bind(prefix, ns) over self.namespaces(), a registry rebuild) is no triple read or written by notation: @graph / +{ } have nothing to write.",
+    "translated.ldpy is therefore identical to original.py (exact transparency, precedent: TDCC-NES askwol _prepare); constructions is empty on purpose.",
+    "Executability: the package starlight (and sparql1_2_to_rdf) is not on PyPI nor in the study venv. The driver stubs `self` as an rdflib Graph subclass loaded from fixture.ttl with `_is_native = False` and a `_build_registry_from_store` that prints, and passes the update as an already-prepared Update object; the `str` branch (needs sparql1_2_to_rdf) and the native-backend branch (needs starlight.backends.native) are therefore NOT exercised -- the driver covers the rdflib-only path, which is where the bind_initbindings idiom lives. No shim file was needed.",
+    "Driver: INSERT..WHERE over sensors with and without initBindings {s: ex:s1}, a DELETE..WHERE, an update matching nothing, and a graph with its own prefix binding; the fixture has a non-sensor neighbour (ex:o1). Mutant: initBindings=None in the forwarded call -> check FAILS (7 vs 8 triples)."
+  ],
   "draft_sha": "139a3e1f2387c10f",
   "provenance": {
     "generated_at": "2026-11-02T18:29:38.905214+00:00",
@@ -28,5 +33,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "values"
+  "oracle": "values",
+  "article_candidate": false
 }

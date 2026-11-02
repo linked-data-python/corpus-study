@@ -10,10 +10,23 @@
   "kind": "function",
   "rdf_ops": 0,
   "categories": {},
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    ".execute()",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "translation_notes": [
+    "The ASK uses the property path rdf:type/rdfs:subClassOf*, so it is not a BGP and m{ } cannot express it: s{ } with both initBindings ($value, $class) moved to term position ({v}, {class_rule}); neither variable is projected (ASK), so the interpolation is the exact equivalent of initBindings.",
+    "The original query text has no PREFIX lines (rdflib graphs predefine rdf: and rdfs:); the translation declares the two @prefix explicitly, which s{ } needs for its prologue.",
+    "resp.askAnswer: s{ } on a graph is lazy, .execute() forces the rdflib Result, askAnswer is kept as is. bool(s{ ASK ... }(g)) would also work.",
+    "The driver stubs self (shape.logger.debug prints, make_v_result returns a tuple) and passes Literal values (debug branch), a depth-2 subclass instance, a depth-0 instance, and neighbours (sibling class, instance of a super-class, non-rdf:type link) that must not match. Mutant: dropping the * of the path -> check FAILS."
+  ],
   "draft_sha": "ee890f3cf796a7c6",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.458626+00:00",
@@ -24,5 +37,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": true
 }

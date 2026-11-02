@@ -1,0 +1,24 @@
+# Input graph for TreeExpander.expand. The expander queries of the driver
+# read ?node (bound by initBindings) and project ?child:
+#   direct   ?node ex:hasChild ?child
+#   viaPart  ?node ex:hasPart/ex:hasChild ?child     (property path)
+#   viaLink  ?node ex:link ?x . ?x ex:to ?child      (two paths, same child)
+#   sensors  ?node ex:hasSensor ?child               (matches nothing)
+@prefix ex: <http://example.org/> .
+
+ex:a ex:hasChild ex:b, ex:c ;
+     ex:hasPart ex:p ;
+     ex:link ex:x1, ex:x2 .
+ex:p ex:hasChild ex:b, ex:e .      # ex:b is reached by direct AND viaPart
+ex:x1 ex:to ex:c .
+ex:x2 ex:to ex:c .                 # same child twice in one query
+
+ex:b ex:hasChild ex:d .            # grandchild: only for node = ex:b
+
+# neighbours that must not appear for node = ex:a
+ex:z ex:hasChild ex:q ;
+     ex:hasPart ex:p2 ;
+     ex:link ex:x3 .
+ex:p2 ex:hasChild ex:r .
+ex:x3 ex:to ex:s .
+ex:c ex:hasSensor ex:b .           # wrong subject for node = ex:a

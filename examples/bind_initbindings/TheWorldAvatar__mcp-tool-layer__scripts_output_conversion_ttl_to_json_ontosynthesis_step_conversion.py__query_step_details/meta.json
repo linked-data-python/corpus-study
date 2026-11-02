@@ -12,10 +12,22 @@
   "categories": {
     "term_constructor": 1
   },
-  "translation_status": "draft",
-  "classification": null,
-  "constructions": [],
-  "translation_notes": [],
+  "translation_status": "final",
+  "classification": "directly-expressible",
+  "constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "translation_notes": [
+    "The WHERE clause is a basic graph pattern (three triples), but m{ } was deliberately NOT used: the query is SELECT DISTINCT ?vesselTypeLabel, and the code after the region (outside it) reads vessel_type_result[0].vesselTypeLabel on a ResultRow. m{ } would drop DISTINCT (two vessels of one type label give two solutions; a dict.fromkeys wrapper would be needed) and, with one projected variable, yield bare terms instead of rows (with three variables, 3-tuples). s{ } keeps the projection, DISTINCT and the row shape, with ?step bound by initBindings and NOT projected -> term position {URIRef(step_uri)}. Mutant without DISTINCT fails the check.",
+    "URIRef(...) kept inside the interpolation: step_uri is a str, and a bare {step_uri} would coerce to a Literal and match nothing.",
+    "Region is a single module-level statement whose names (graph, step_uri, vessel_type_query) are a function parameter, a parameter and a local of the upstream function. Context shim step_conversion_context.py: graph parsed from fixture.ttl, step_uri = Step_2, vessel_type_query copied verbatim from the lines above the region (original only; the translation inlines it in the island). Module-level state is compared (graph, step_uri, vessel_type_result).",
+    "Fixture: Step_2 with two vessels of the same type label, one other type, one unlabelled type; neighbours: another step Step_1 with a vessel type, a type attached directly to the step, a label on the step. Mutants: dropping DISTINCT, and replacing the anchored step by a free ?step -> both FAIL."
+  ],
   "draft_sha": "813899a7aa3f52fa",
   "provenance": {
     "generated_at": "2026-11-02T18:29:39.438389+00:00",
@@ -26,5 +38,6 @@
   "strata": [
     "bind_initbindings"
   ],
-  "oracle": "isomorphism"
+  "oracle": "isomorphism",
+  "article_candidate": false
 }
