@@ -8,11 +8,12 @@ pair), with what each one removes.
 Four stages: **repository** (§ 1), **file** (§ 2), **region** — and there
 are two of them, the one for the first draw by density (§ 4, frozen) and the
 one for the corpus study by stratum of use (§ 5, living) — then **measured
-pair** (§ 5.3).
+pair** (§ 5.5).
 
 Repository and file figures: wave 2 of 2026-08-28, B7 criteria,
-`config_version` 1.0.0. Figures for the stratified draw and the campaign:
-2026-08-29, seed 20260828 (`rdfeval status` regenerates them).
+`config_version` 1.0.0. Figures for the stratified draw: 2026-08-29, seed
+20260828; for the resumed draw and the campaign: 2026-11-02, seed 20261102,
+`config_version` 1.1.0 (`rdfeval status` regenerates them).
 Table per candidate repository:
 [`results/summary/candidates.csv`](results/summary/candidates.csv).
 
@@ -239,7 +240,7 @@ mixed under a single figure.
 | repositories in the manifest | § 1 | `select.py` | 444 |
 | **eligible for the draw** | `snippet_ok` (republishable licence) **and** not pruned | `strata.py` | **385** |
 | files of the conforming stratum | § 2 | `corpus.py` | 5,190 |
-| **sites** | one located occurrence of a stratum shape, 14 strata | `surface.py` → `results/raw/sites.jsonl` | **29,231** |
+| **sites** | one located occurrence of a stratum shape, 14 strata | `surface.py` → `results/raw/sites.jsonl` | **29,231** — 36,081 since the correction of § 5.4 |
 
 Two remarks on these 385, because they cannot be deduced from § 1:
 
@@ -354,39 +355,104 @@ goes from 190/215 to **190/210**, the 25 regions not evaluable in isolation
 having left the sample. Their finding remains true and documented; it simply
 no longer has support in the tree, only in the git history.
 
-### 5.4 From region to measured pair
+### 5.4 The resumed draw: 350 → 385 (2026-11-02)
 
-Figures of 2026-09-03, on the final sample of 350.
+The analyser and three strata criteria were corrected on 2026-11-01: the
+first analyser recognised a graph only by its name, and missed about a third
+of the sites of the graph-method strata. Every population moved — 36,081
+sites now stand where 29,231 stood, `trav_existence` ×11.5 (the form
+`(s, p, o) in g`), `bind_initbindings` −49 %, `coercion_datatype` −53 % —
+so the sample of § 5.3 no longer described its population. The tables of
+§ 5.1 to § 5.3 describe the draw before that correction; this section is
+how the sample was carried over (records corpus/403 and 404, option E,
+decided by Maxime on 2026-11-02; `rdfeval reprise`).
+
+In each stratum two sub-populations: the sites both analysers see, and the
+sites only the new one sees, a share `f` of the population.
+
+1. **every final region that keeps the stratum stays** — no translated pair
+   leaves the sample for being translated;
+2. a stratum left under 25 is **completed** to 25 from the corrected
+   population, by the rules of the original draw (seed 20261102, cap of 4
+   per repository, region unit);
+3. where `f ≥ 0.15`, a few regions are drawn **among the new sites** — 5,
+   10 for `trav_existence` — the step-2 regions that are new sites counting
+   towards them;
+4. every rate published per stratum is **weighted**: the two parts weigh
+   `1 − f` and `f`, each estimated on its own regions (`aggregate`, block
+   `weighted`).
+
+Which sites the first analyser saw is read from
+`results/raw/sites_analyser_1.0.jsonl`: the surface of `822e3ef~1`, run on
+the same `files_index.jsonl` as the new one.
+
+| stratum | sites | `f` | finals kept | completed | new-only | selected | decided | not expr. | measured | expressible, weighted | tokens, weighted median |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `add_in_loop` | 4,385 | 0.17 | 29 | 0 | 5 | 34 | 34 | 0 | 34 | 100 % | +3.9 % |
+| `add_isolated` | 6,414 | 0.22 | 24 | 1 | 5 | 30 | 29 | 0 | 29 | 100 % | +4.9 % |
+| `add_run_shared_subject` | 1,503 | 0.17 | 30 | 0 | 5 | 35 | 35 | 0 | 35 | 100 % | +10.7 % |
+| `bind_initbindings` | 170 | 0.28 | 13 | 12 | 2 | 27 | 27 | 4 | 23 | 87 % | +0.5 % |
+| `coercion_datatype` | 2,872 | 0.00 | 14 | 11 | 0 | 25 | 25 | 0 | 25 | 92 % | +12.5 % |
+| `ns_def_local` | 1,025 | 0.00 | 21 | 4 | 0 | 25 | 25 | 0 | 25 | 92 % | +3.0 % |
+| `ns_import_project` | 1,279 | 0.00 | 21 | 4 | 0 | 25 | 25 | 0 | 25 | 96 % | +3.1 % |
+| `remove` | 1,021 | 0.38 | 24 | 1 | 4 | 29 | 29 | 0 | 29 | 90 % | +10.3 % |
+| `sparql_interpolated` | 178 | 0.24 | 24 | 1 | 5 | 30 | 29 | 13 | 16 | 49 % | -7.2 % |
+| `sparql_literal` | 1,128 | 0.23 | 22 | 3 | 5 | 30 | 29 | 4 | 25 | 84 % | +0.0 % |
+| `trav_existence` | 3,013 | 0.92 | 25 | 0 | 10 | 35 | 33 | 1 | 32 | 99 % | +3.7 % |
+| `trav_navigation` | 1,389 | 0.26 | 29 | 0 | 5 | 34 | 34 | 0 | 34 | 95 % | -3.0 % |
+| `trav_one_step` | 7,842 | 0.34 | 24 | 1 | 4 | 29 | 28 | 0 | 28 | 97 % | -4.3 % |
+| `trav_single_value` | 3,549 | 0.37 | 35 | 0 | 5 | 40 | 40 | 0 | 40 | 89 % | -7.5 % |
+| **credits** | 35,768 | — | 335 | 38 | 55 | 428 | 422 | 22 | 400 | — | — |
+
+"Finals kept", "completed" and "new-only" are the source of each credit;
+"decided" counts the finals proved equivalent plus the `not-expressible`
+ones, the denominator of the expressibility rate; "measured" the pairs
+`compare` measures (`not-expressible` regions have no pair). The token
+column is the weighted median over the measured pairs, string-embedded
+pairs set apart (§ 5.5). All figures are **provisional**: no pair is
+approved yet.
+
+A region credited to several strata counts in each, hence 428 credits for
+**385 distinct regions** over 146 repositories: 295 were final before the
+resumption, 90 were translated for it (74 new to the draw, 16 drafts of
+the first draw taken up by step 2), by Sonnet agents in 15 batches of six,
+each region checked by `rdfeval check` and by a deliberate break of the
+translation that the check had to catch. 26 final regions of the earlier
+sample lost every stratum they were drawn for: they stay in the tree and
+in `pairs.jsonl`, measured, and out of every published figure
+(`pairs_outside_selection`).
+
+### 5.5 From region to measured pair
+
+Figures of 2026-11-02, on the resumed sample of 385.
 
 | step | criterion | remaining |
 |---|---|---:|
-| regions drawn | § 5.2 | 1,196 |
-| **retained for the article** | § 5.3 | **350** |
-| mechanical draft | written for all of them from the draw on (`materialise = true`) | 350 |
-| **attempted** by an agent | campaign closed on 2026-09-03, no eligible draft left | **350** |
-| not evaluable in isolation | `excluded`: the driver can run neither the original nor the translation | −21 |
-| **translated, status `final`** | translation + driver + proven equivalence | **329** |
-| of which not expressible | the language does not reach it — it is a **result**, not a loss | 26 |
-| of which awkward | `awkward`: a form exists, it gains nothing | 6 |
-| of which expressible | `directly-expressible` (271) + `minor-restructuring` (26) | **297** |
-| measured pairs | metrics computed — **to be replayed, 119 finals post-date the last `compare`** | 190 |
+| **selected** | § 5.4 | **385** |
+| not evaluable in isolation | `excluded`: a live service (CMEM, ArangoDB, a Solid pod, Fuseki, PostgreSQL) or a package the study venv cannot take (`linkml` declares rdflib ≥ 7.6) | −6 |
+| **translated, status `final`** | translation + driver + proven equivalence | **379** |
+| of which not expressible | the language does not reach it — a **result**, not a loss | 22 |
+| of which awkward | `awkward`: a form exists, it gains nothing | 13 |
+| of which expressible | `directly-expressible` (305) + `minor-restructuring` (39) | **344** |
+| measured pairs | every final that is not `not-expressible`; all equivalent on the last `validate` | 357 |
 | **approved** | human review — **lock: `--force` only returns provisional figures** | **0** |
 
-Expressiveness coverage over what could be evaluated: **297 / 329** (90%).
+Expressiveness coverage over what could be evaluated: **344 / 379** (91 %),
+unweighted; the per-stratum rates of § 5.4 are the weighted ones.
 
-The 21 regions that remain at `draft` status are exactly the 21 `excluded`
-ones: without an executable driver, there is no equivalence to prove. No
-stratum therefore reaches 25 finals except four (`add_isolated`,
-`bind_initbindings`, `coercion_datatype`, `trav_navigation`); the others top
-out between 21 and 24, the pruning of § 5.3 having removed the pool that
-would have allowed replacing an `excluded` one.
-
-Of the 190 pairs, the oracle splits into **113 by graph isomorphism** (the
-region builds) and **77 by equality of the values produced** (it reads) — it
-is this second oracle (design record corpus/405) that lets the reading
+Of the 357 pairs, the oracle splits into **218 by graph isomorphism** (the
+region builds) and **139 by equality of the values produced** (it reads) —
+it is this second oracle (design record corpus/405) that lets the reading
 regions enter an evaluation.
 
-### 5.5 Is `examples/` obsolete?
+`from … import p:` is credited in 42 pairs and set apart in none: since
+ldpy 0.7.1 a prefix is imported from an ordinary Python namespaces module
+(record ldpy/013), and the translations import from the repository's own
+module — installed (`nanopub`, `pyshacl`, `apysource`, `plastron`) or
+copied verbatim into a context shim — instead of a `__namespaces__` the
+translator wrote.
+
+### 5.6 Is `examples/` obsolete?
 
 Not yet, and this is a point to settle rather than let drift. The two trees
 are **disjoint** (7 region identifiers in common out of 163 and 1,196, by
@@ -397,11 +463,11 @@ the claims of the first draw, and on a much better population:
 
 | | `examples/` (401) | `examples/` (403) |
 |---|---:|---:|
-| regions | 163 | **1,196** |
-| measured pairs | 141 | 117 |
-| repositories represented | 16 | **65** |
-| share of the heaviest repository | **31%** (`MKLab-ITI/prophet`) | 6% |
-| three heaviest repositories | **73%** | 15% |
+| regions | 163 | **1,196** drawn, **385** in the sample |
+| measured pairs | 141 | **357** |
+| repositories represented | 16 | **138** |
+| share of the heaviest repository | **31%** (`MKLab-ITI/prophet`) | 5% (`altunelyusuf/SemanticTechnologies`) |
+| three heaviest repositories | **73%** | 13% |
 | approved | 151 reviewed | **0** |
 
 401's imbalance is not cosmetic: its top three repositories supply 103 of
@@ -410,19 +476,18 @@ has no longer been analysed since wave 2 (§ 4, open point).
 
 The 401 tree remains **frozen** and **leaves the article** (decided on
 2026-11-01): the quantitative section it still carries is replaced by the
-corpus study's figures once those rest on approved pairs and on the
-resumed draw (the analyser and three strata criteria were corrected on
-2026-11-01, which moved every population; the resumption is proposed in
-the steering records). **Human review is the lock**, not the tooling.
+corpus study's figures once those rest on approved pairs — they already
+rest on the resumed draw (§ 5.4). **Human review is the lock**, not the
+tooling.
 
 The 1,196 regions and the per-stratum table of § 5.2 describe the draw
-before that correction: 36,081 sites now stand where 29,231 stood.
+before that correction; § 5.4 says how the sample was carried over.
 
 ## 6. What remains to be done
 
 1. **Settle the fate of the 44 `prophet` pairs** (§ 4) before freezing the
    article — or make the question moot by approving enough 403 pairs for the
-   401 tree to leave the article (§ 5.4).
+   401 tree to leave the article (§ 5.5).
 2. ~~**Raise the sampling quotas**~~ — done differently: study 403 (§ 5)
    draws 1,196 regions from 242 repositories, against 163 from 17. The point
    remains valid for the first draw, which is not replayed.
@@ -433,10 +498,11 @@ before that correction: 36,081 sites now stand where 29,231 stood.
 4. **Align the 403 draw pool with the B7 criteria** (§ 5.1): it is filtered
    on the licence alone, nine repositories outside the criteria could be
    drawn. No effect to date, but latent.
-5. **Split the 19 "not evaluable"** (§ 5.3) in two: package installable with
-   pip versus system really absent. They are lumped together, and the
-   article draws from them a property of the corpus that might be only a
-   property of the venv.
+5. ~~**Split the "not evaluable"**~~ — done: `excluded_causes.csv`, and
+   the four regions that needed only a pip package are translated. Six
+   remain in the sample of § 5.5, five for a live service and one for a
+   package (`linkml`) whose dependencies the study venv cannot take
+   without leaving rdflib 7.2.1.
 6. **Split the census** rather than discard: `corpus.json` now publishes the
    full totals *and* those of the conforming stratum. Course repositories
    are a stratum, not waste.
