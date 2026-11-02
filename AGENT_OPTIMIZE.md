@@ -66,7 +66,12 @@ rebuilding an invisible bias. Therefore:
    selector loops merged into one multi-pattern `m{ }`, for example). It
    stays in `optimized.ldpy` only, and you write it in
    `optimization_notes`.
-4. Check by reading the two files side by side: outside the RDF lines, they
+4. `optimized.ldpy` is the most compact LD Python, not the most
+   island-rich: where an island would be longer than the Python it
+   replaces (a one-for-one `m{ }.first()` for a short `.value()`, a
+   `-{ }`/`+{ }` pair for `graph.set`), keep the Python. The notation is
+   measured, not assumed.
+5. Check by reading the two files side by side: outside the RDF lines, they
    must be identical line for line, except for the exceptions of point 3.
 
 ## What you edit — and nothing else
