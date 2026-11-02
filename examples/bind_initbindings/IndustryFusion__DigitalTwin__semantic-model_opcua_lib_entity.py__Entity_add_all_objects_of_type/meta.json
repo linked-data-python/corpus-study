@@ -52,5 +52,24 @@
     "method": "fixture:fixture.ttl entry:add_all_objects_of_type",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/else on `isinstance(obj, BNode)` becomes one conditional expression. `unique_onc = set(objects)` replaces `unique_onc.add(o)` in each iteration: collection_to_list returns a list, the set is local, and the log lines keep their order. `bindings` is inlined into `initBindings={'nodeclass': o}`. The `'base': self.basens` entry of initNs goes, because the query never uses base:. The row loop becomes `unique_onc.update(row.onc for row in result)`. The final copy loop becomes `self.e += g.triples((onc, None, None))`, because Graph.__iadd__ takes any iterable of triples. All comments stay.",
+    "optimized.ldpy, from optimized.py: RDF.nil becomes rdf:nil. The query becomes `s{ ... }(g)`, and the call suffix replaces translated.ldpy's `@graph g` line. `{o}` replaces ?nodeclass at its two places, and `{self.opcuans.BaseNodeClass}` replaces the opcua: initNs. The line `self.e += g.triples(...)` is unchanged, because translated.ldpy's `for p, o in m{ {onc} ?p ?o }: +{ {onc} {p} {o} }(self.e)` is longer than the rdflib line.",
+    "No exception to the symmetry rule: outside the RDF lines the two files are identical. The notation ratio is above 1 because the tokenizer counts the s{ } body token by token, but counts the Python query string as one token."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `from rdflib import BNode, RDF` (merged), `from context_shim import collection_to_list`, logging and the logger stay. Graph, Namespace, Literal, URIRef, OWL, RDFS, NGSILD and calculate_array_dimensions go.",
+    "optimized_header.ldpy: `from rdflib import BNode`, `from context_shim import collection_to_list`, logging and the logger stay. The whole rdflib.namespace line goes. Both @prefix are used and stay: rdf: for rdf:nil, rdfs: in the query."
+  ]
 }

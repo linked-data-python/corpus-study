@@ -76,5 +76,25 @@
       "what": "unused prefix declarations dropped from translated.ldpy",
       "check": "OK"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `header` is inlined into `assert CIMMetadataHeader.from_graph(g).subject == URIRef(...)`, and the parametrize decorator is on one line. `records = caplog.messages` stays: the property is read once. The two asserts stay separate, so each raises its own AssertionError, as in the original.",
+    "optimized.ldpy, from optimized.py: `g = Graph()` + `@graph g` becomes `@graph as g`. The fresh graph also carries the dcat: and dcterms: bindings of the block; the driver records g's bindings, and they agree. The two adds become one `+{ [] a {header_type} ; dcterms:identifier \"1234\" }`. DCAT.Dataset becomes dcat:Dataset, and URIRef(\"urn:uuid:1234\") becomes <urn:uuid:1234>.",
+    "Exceptions to the symmetry (island only): `[ ]` removes the `b = BNode()` line, which Python cannot do without naming the node (the driver docstring already records `{b} -> []` as an equivalent mutant). `@graph as g` removes `g = Graph()`. Outside these lines the two files are identical."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "plain literal",
+    "IRI",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: only `create_header_attribute` goes, which gives `from kgraphpy.header import CIMMetadataHeader`. Graph, URIRef, Literal, BNode, Node, DCAT, DCTERMS, RDF and MD are all used.",
+    "optimized_header.ldpy: `from rdflib import Graph, URIRef, Literal, BNode, Node` becomes `from rdflib import Node`. The whole `from rdflib.namespace import DCAT, DCTERMS, RDF` line goes, and so does `create_header_attribute`. The two @prefix (dcat:, dcterms:) are both used and stay."
+  ]
 }

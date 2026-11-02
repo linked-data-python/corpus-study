@@ -1,0 +1,20 @@
+# Extracted from OpenEnergyPlatform/oeplatform@ff28ef6390 : factsheet/helper.py
+# region: _division_members (lines 247-254, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from context_shim import _label  # see meta.json: restores the missing helper
+@prefix oeo: <https://openenergyplatform.org/ontology/oeo/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+def _division_members(g: Graph, division: URIRef):
+    """The sectors defined by ``division``, sorted by label (both patterns)."""
+    return sorted(
+        {sector
+         for sector in [*m{ ?sector oeo:OEO_00000504 {division} }(g),
+                        *m{ ?sector {rdf:type | rdfs:subClassOf} [ a owl:Restriction ;
+                            owl:onProperty oeo:OEO_00000504 ; owl:someValuesFrom {division} ] }(g)]
+         if isinstance(sector, URIRef) and sector != division},
+        key=lambda node: (_label(g, node) or str(node)).lower(),
+    )

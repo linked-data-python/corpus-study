@@ -44,5 +44,23 @@
     "method": "entry:_evaluate_class_rules_sparql",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `non_conformant` goes. It became True exactly when a report was appended, so the function now returns `bool(reports), reports`. `found` goes: the branches become `if isinstance(v, Literal): debug` and `elif <ask>: continue`, then one `reports.append(self.make_v_result(...))`, with `rept` inlined. The one-line `sparql_ask` string is inlined into the query call. `.askAnswer` becomes the truth value of the Result, which rdflib documents as the same bool for an ASK. The debug message is unchanged.",
+    "optimized.ldpy, from optimized.py: `elif s{ ASK { {v} rdf:type/rdfs:subClassOf* {class_rule} } }(target_graph):`. The truth test executes the lazy query, so translated.ldpy's `.execute().askAnswer` goes. The m{ } form with an rdflib path, `m{ {v} {rdf:type / (rdfs:subClassOf * \"*\")} {class_rule} }`, also passes the check, but it has 5 more tokens (124 against 119), so s{ } stays.",
+    "No exception to the symmetry rule: outside the RDF line the two files are identical. The Python side keeps SPARQL, because a triples-API path would need RDF and RDFS imports that the fixed header does not have (pySHACL uses its own constants)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides: `from rdflib.term import Literal, URIRef` becomes `from rdflib.term import Literal`, because URIRef is unused. The path uses both @prefix (rdf, rdfs), so they stay."
+  ]
 }

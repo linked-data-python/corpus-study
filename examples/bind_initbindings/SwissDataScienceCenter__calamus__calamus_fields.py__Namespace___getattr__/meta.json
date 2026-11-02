@@ -50,5 +50,15 @@
     "mutants_killed": [],
     "remaining": "",
     "reexamined": "`as NAME` (record ldpy/027) does not apply: no Namespace object is built in the region; stays not-expressible"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `p` and `qres` are inlined, and `if not next(iter(qres), False):` becomes `if not self.ontology.query(ONTOLOGY_QUERY, initBindings={...}):`. ONTOLOGY_QUERY is an ASK: its Result yields askAnswer when iterated, and also as its truth value. The local `from rdflib.term import URIRef`, the guard and the ValueError stay. The driver does not exercise the raise path, so it was checked by hand: both sides raise the same ValueError.",
+    "optimized.ldpy, from optimized.py: the region is identical and has no island, because the translation classified it as not-expressible. The shared prepared ONTOLOGY_QUERY stays an rdflib call. The header is translated.ldpy's, byte for byte, with the NOT TRANSLATED comment."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides: the two context_shim lines become `from context_shim import ONTOLOGY_QUERY, IRIReference`. Proxy, normalize_type and normalize_value were unused, and they go with the noqa comment about them. The provenance and shim comments stay, and so does the NOT TRANSLATED comment of the ldpy side."
+  ]
 }

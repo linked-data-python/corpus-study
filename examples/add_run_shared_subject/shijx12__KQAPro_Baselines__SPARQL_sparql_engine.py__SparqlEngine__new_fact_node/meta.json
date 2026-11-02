@@ -56,5 +56,20 @@
       "subject {node} replaced by {h}"
     ],
     "remaining": "Non-term inputs (t=None/str/int, h=None) raise AssertionError in the original and become literals in the translation: language gap (coercion of non-terms), unreachable from the repository, so left out of the pilot. Kept only as a recorded gap of the language, no translation change."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: optimized.py is original.py and optimized.ldpy is translated.ldpy, byte for byte.",
+    "optimized.py: the three `self.graph.add((node, self.nodes[...], x))` calls are already minimal. A loop over the three (key, value) pairs costs more tokens. Chaining `.add(...).add(...)` on the returned graph is not idiomatic rdflib (same verdict as the sibling regions of the stratum).",
+    "optimized.ldpy: translated.ldpy's single `+{ {node} p1 {h} ; p2 {r} ; p3 {t} }(self.graph)` is already the most compact form. `node = BNode()` stays because the function returns the node, and a `[ ]` blank node would not give it a name. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "+{ }",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides: `from rdflib import URIRef, BNode, Literal, XSD` becomes `from rdflib import BNode`, because URIRef, Literal and XSD are unused. `from context_shim import SparqlEngine` stays. translated.ldpy has no @prefix to remove."
+  ]
 }

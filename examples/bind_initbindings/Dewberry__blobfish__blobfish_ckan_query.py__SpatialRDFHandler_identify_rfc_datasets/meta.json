@@ -45,5 +45,26 @@
     "method": "entry:identify_rfc_datasets",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The method raises NotImplementedError on its first line, so everything after it is unreachable. The strictest reading would delete that code, and both artefacts would then contain only the raise. But the query is the author's pending implementation, kept on purpose, and a reviewer would not accept its removal. So the dead code stays on both sides and is compressed like live code. The driver proves only the raise. The query part was checked apart on the three versions: raise removed, geof:sfWithin registered as a custom function, three points, one of them with no solution. All three gave the same rows.",
+    "optimized.py: `point` and `point_literal` are inlined into `initBindings={\"p\": self.prepend_crs(Point(x, y).wkt)}`, and `results` into `return self.graph.query(...)`. The multi-line query string stays in its `query` variable. initNs stays, because the query text has no PREFIX lines.",
+    "optimized.ldpy, from optimized.py: `return s{ ... }(self.graph).execute()`. The call suffix replaces translated.ldpy's `@graph self.graph` line. `point_literal` stays a variable: the island writes the term three times (two triple positions and the FILTER argument), where Python writes it once in initBindings. Outside the RDF lines, this is the only difference between the two files, and the island forces it.",
+    "The SPARQL text is unchanged on both sides. A Python string counts as one token, so a shorter query text would only lower the ldpy count, and the gain would go to the notation."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    ".execute()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Polygon, MultiPolygon, URIRef, Literal, BNode, RFC_SHP_URL, SF and CKAN_URL go. The three context_shim imports merge into `from context_shim import Point, GEOF, AORC`. `from rdflib import RDF, DCTERMS`, GEO and Result stay, for initNs and the annotation.",
+    "optimized_header.ldpy: only `from context_shim import Point` and `from rdflib.query import Result` stay. RDF, DCTERMS, GEO, GEOF and AORC served only initNs, which the @prefix lines replace. The query uses all six @prefix (rdf, aorc, dct, geosparql, geof, dcat), so they stay."
+  ]
 }

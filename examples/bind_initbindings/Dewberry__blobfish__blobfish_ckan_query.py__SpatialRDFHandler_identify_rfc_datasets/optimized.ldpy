@@ -1,0 +1,31 @@
+# Extracted from Dewberry/blobfish@db89f34228 : blobfish/ckan/query.py
+# region: SpatialRDFHandler.identify_rfc_datasets (lines 101-118, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from context_shim import Point, Polygon, MultiPolygon
+from rdflib import URIRef, Literal, BNode, RDF, DCTERMS
+from rdflib.namespace._GEO import GEO
+from rdflib.query import Result
+from context_shim import RFC_SHP_URL, GEOF, SF, CKAN_URL
+from context_shim import AORC
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix aorc: <https://github.com/Dewberry/blobfish/blob/aorc_refactor/semantics/rdf/aorc.ttl#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix geosparql: <http://www.opengis.net/ont/geosparql#> .
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+
+def identify_rfc_datasets(self, x: float, y: float) -> Result:
+    raise NotImplementedError("This function relies on geosparql functions which are not implemented in the SPARQL processor for RDFLib")
+    point_literal = self.prepend_crs(Point(x, y).wkt)
+    return s{
+    SELECT  ?s3
+    WHERE   {
+        ?r rdf:type aorc:RFC .
+        ?r dct:spatial/geosparql:hasGeometry ?g .
+        ?g geosparql:asWKT ?w .
+        ?r ^aorc:hasRFC {point_literal} .
+        {point_literal} dcat:dataset ?sda .
+        ?sda ^aorc:hasSourceDataset ?s3 .
+        FILTER (geof:sfWithin({point_literal}, ?w))
+    }
+    }(self.graph).execute()

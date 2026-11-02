@@ -44,5 +44,24 @@
     "method": "entry:surface_vertices",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py is original.py. Moving the multi-line query string into the comprehension saves two tokens but makes the call unreadable (same verdict as the sibling region Ontology_zone_surfaces). `tuple(term.toPython() for term in row)` would be shorter, but a type checker could no longer see the `tuple[float, float, float]` that the `list[Point]` annotation promises. A triples-API version would need imports that the fixed header does not have.",
+    "optimized.ldpy, from optimized.py: `for (x, y, z) in m{ {surface} {idf:vertices / (rdf:rest * \"*\") / rdf:first} [ idf:vertex_x_coordinate ?x ; idf:vertex_y_coordinate ?y ; idf:vertex_z_coordinate ?z ] }(self.rdf)`. The rdflib path in predicate position walks the list. It needs the parentheses because Python's / and * have equal precedence: the mutant without them fails the check. The `[ ]` removes ?vertex and ?vertices, so the island projects exactly ?x ?y ?z. This gives 111 tokens, against 114 for translated.ldpy's s{ }.",
+    "Exception to the symmetry (island only): the m{ } with an interpolated path replaces the SPARQL query. In Python, the same change would need the triples API and RDF and IDF imports, which the fixed header does not have. As in translated.ldpy, idf: comes from `from minergym_context import idf:`, not from the graph's binding at run time. The notation ratio stays above 1 because the Python query is one string token."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header. Both sides use Node, TypeAlias and Point, and the ldpy side also uses idf: and `@prefix rdf:`. The two files are copies of the optimized ones."
+  ]
 }

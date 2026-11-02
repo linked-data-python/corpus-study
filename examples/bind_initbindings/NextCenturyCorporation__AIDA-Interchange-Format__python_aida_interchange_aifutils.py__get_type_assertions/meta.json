@@ -55,5 +55,22 @@
       "m{ } : `rdf:predicate rdf:type` remplacé par `rdf:predicate rdf:subject` (rouge : valeurs diffèrent)"
     ],
     "remaining": "wrong-construction (s{ } ou m{ } pour un BGP pur) reste à juger. La note de traduction attribue le préfixe rdf: implicite à Graph.query() ; selon le trieur c'est le prologue par défaut de prepareQuery (compilé au chargement du module, sans graphe) : note non corrigée ici, la conclusion (@prefix rdf: nécessaire côté ldpy) reste vraie."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `query_result` is inlined, which gives `return [x for (x,) in g.query(_TYPE_QUERY, initBindings=...)]`. The module-level prepared query `_TYPE_QUERY` stays. Moving its text into the call would save two names, but rdflib would then parse the query on every call, and the author prepared it once on purpose.",
+    "optimized.ldpy, from optimized.py: `return list(m{ ?typeAssertion a rdf:Statement ; rdf:predicate rdf:type ; rdf:subject {typed_object} }(g))`. The three patterns share their subject (`;`), and translated.ldpy's intermediate `type_assertions` goes. `_TYPE_QUERY` and its prepareQuery have no counterpart, because m{ } replaces the whole query. These are RDF lines, so this is not an exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header. The Python header imports prepareQuery, which `_TYPE_QUERY` uses. The ldpy header declares only `@prefix rdf:`, which the pattern uses. The two files are copies of the optimized ones."
+  ]
 }

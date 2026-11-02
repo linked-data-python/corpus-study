@@ -48,5 +48,24 @@
     "names_only_original": [
       "vessel_type_query"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py is original.py: the region is one statement, already minimal. Its query text is in the context shim, outside the region.",
+    "optimized.ldpy: translated.ldpy, with the formatted IRI `f<{step_uri}>` in place of `{URIRef(step_uri)}`. No @base is in scope, so the URIRef is the same, and it is still an initBinding, never spliced into the text. The query text is unchanged. Python cannot shorten that text, because it is outside the region; a shorter ldpy text (a sequence path, for example) would be a rereading gain credited to the notation. The notation ratio is above 1 because the ldpy side carries the query inline and the tokenizer counts it token by token, where Python only names a shim string."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "f<\u2026>",
+    "interpolation {expr}",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `from rdflib import Graph, Namespace, URIRef` becomes `from rdflib import URIRef`.",
+    "optimized_header.ldpy: the whole rdflib import line goes, because f<\u2026> replaces URIRef. `from step_conversion_context import graph, step_uri` and the two @prefix (ontosyn, rdfs) are used and stay."
+  ]
 }

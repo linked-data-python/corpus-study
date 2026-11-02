@@ -1,0 +1,16 @@
+# Extracted from Terramorpha/minergym@1d2d586bb1 : minergym/ontology.py
+# region: Ontology.surface_vertices (lines 137-153, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib.term import Node
+from minergym_context import TypeAlias, idf:
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+Point: TypeAlias = tuple[float, float, float]
+
+def surface_vertices(self, surface: Node) -> list[Point]:
+    """Return the vertices of a surface."""
+    return [
+        (x.toPython(), y.toPython(), z.toPython())
+        for (x, y, z) in m{ {surface} {idf:vertices / (rdf:rest * "*") / rdf:first} [
+            idf:vertex_x_coordinate ?x ; idf:vertex_y_coordinate ?y ; idf:vertex_z_coordinate ?z
+        ] }(self.rdf)
+    ]

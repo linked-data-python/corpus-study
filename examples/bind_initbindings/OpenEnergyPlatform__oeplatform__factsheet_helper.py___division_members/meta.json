@@ -62,5 +62,25 @@
       "FILTER (?sector != {division}) -> FILTER (1 = 2)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `members` is inlined into `return sorted({...}, key=...)`. `row[0]` was read twice and becomes the unpacking `for (sector,) in ...`. The text of the module-level SECTOR_MEMBERS_QUERY is unchanged. Its DISTINCT is redundant with the set, but a Python string counts as one token, so a shorter text would only lower the ldpy count.",
+    "optimized.ldpy, from optimized.py: the three-branch UNION becomes the concatenation of two m{ }. The first is `m{ ?sector oeo:OEO_00000504 {division} }`. The second is `m{ ?sector {rdf:type | rdfs:subClassOf} [ a owl:Restriction ; owl:onProperty oeo:OEO_00000504 ; owl:someValuesFrom {division} ] }`. Its rdflib alternative path, in predicate position, merges branches 2 and 3, and its `[ ]` removes ?restriction and ?restriction2. The set already removes duplicates, as DISTINCT did. FILTER (?sector != ?division) becomes `and sector != division` in the condition of the comprehension. Checked apart: Python's != and SPARQL's != agree when the division is a literal or a blank node.",
+    "Exception to the symmetry (island only): m{ } is what allows the split of the UNION into two patterns, the path, and the move of FILTER into Python. In Python, the same split would need two SPARQL strings, or a triples-API version with RDFS and an OEO namespace that the fixed header does not import. Both are longer than the one query string. With s{ } and translated.ldpy's text, the notation ratio was 1.69; with the two m{ }, it is 1.44.",
+    "The notation ratio stays above 1 because the Python query is one string token."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `from rdflib import OWL, RDF, Graph, URIRef` becomes `from rdflib import Graph, URIRef`. OWL and RDF are unused, because the query has its own PREFIX lines.",
+    "optimized_header.ldpy: nothing unused. Graph and URIRef serve the annotation and the isinstance test. All four @prefix (oeo, rdf, rdfs, owl) are used, rdf: and rdfs: in the interpolated path. The file is a copy of optimized.ldpy."
+  ]
 }
