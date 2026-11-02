@@ -34,10 +34,52 @@ HERE = Path(__file__).resolve().parent
 _OUT_PATH = str(Path(tempfile.gettempdir()) / f"csv2rdf_demo_{os.getpid()}.n3")
 
 
-def case():
+def case(extra=None):
     def make():
-        return ((str(HERE / "fixture.csv"), _OUT_PATH), {})
+        if extra is None:
+            return ((str(HERE / "fixture.csv"), _OUT_PATH), {})
+        return ((str(HERE / "fixture.csv"), _OUT_PATH, extra(str(HERE / "fixture.csv"))), {})
     return make
 
 
-VERDICT = run_pair(__file__, entry="demo", calls=[case()])
+# Configuration file for -f: one key per site of the `-f` branch of `main`
+# (out, base, propbase, class, prop0), kept outside the example directory so
+# that nothing the driver writes shows up as a file of the pair.
+_CONF = Path(tempfile.gettempdir()) / f"csv2rdf_demo_{os.getpid()}.ini"
+_CONF.write_text(
+    "[csv2rdf]\n"
+    f"out={_OUT_PATH}\n"
+    "base=http://example.org/conf-instances/\n"
+    "propbase=http://example.org/conf-props/\n"
+    "class=http://example.org/conf/Person\n"
+    "prop0=http://example.org/conf-props/fullName\n",
+    encoding="utf-8",
+)
+
+# Each call below is the only one that reaches one more site of `main`:
+#   (default)      -b, -p                      (BASE, PROPBASE)
+#   --base/-c      --base, -p, -c              (BASE long form, CLASS)
+#   --class        -b, -p, --class             (CLASS long form)
+#   -f             base, propbase, class, prop0 of a configuration file
+#                  (BASE, PROPBASE, CLASS, PROPS[0] from the file)
+#   --propbase     raises ValueError in the original (the closing loop reads
+#                  it as --prop<N>); the raise must be the same.
+VERDICT = run_pair(
+    __file__,
+    entry="demo",
+    calls=[
+        case(),
+        case(lambda csv: ["--base", "http://example.org/long-instances/",
+                          "-p", "http://example.org/props/",
+                          "-c", "http://example.org/Person",
+                          "-o", _OUT_PATH, csv]),
+        case(lambda csv: ["-b", "http://example.org/instances/",
+                          "-p", "http://example.org/props/",
+                          "--class", "http://example.org/Agent",
+                          "-o", _OUT_PATH, csv]),
+        case(lambda csv: ["-f", str(_CONF), csv]),
+        case(lambda csv: ["-b", "http://example.org/instances/",
+                          "--propbase", "http://example.org/props/",
+                          "-o", _OUT_PATH, csv]),
+    ],
+)

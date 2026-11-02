@@ -8,24 +8,13 @@
 # real file (recipe-importer/rdflib/tools/csv2rdf.py) defines above main() --
 # see meta.json / AGENT_BATCH.md "shim de contexte".
 #
-# No @prefix appears below. Every ns_def_local site in this region --
-# `csv2rdf.BASE = rdflib.Namespace(...)` (x4: config-file branch, -b,
-# --base) and `csv2rdf.PROPBASE = rdflib.Namespace(...)` (x2: config-file
-# branch, -p/--propbase) -- is an ASSIGNMENT to an attribute of `csv2rdf`
-# (a CSV2RDF instance), plus five `rdflib.URIRef(...)` assigned the same
-# way to `csv2rdf.CLASS` / `csv2rdf.PROPS[...]`. @prefix is purely lexical
-# and produces no value, so it cannot appear on the right of any of these
-# eleven assignments -- same pattern as the sibling case in this batch
-# (JustlyAI__lmss_entity_extractor__..._OntologyClassifier___init__,
-# `self.LMSS = Namespace(...)`), repeated here across two attributes and a
-# dict. The escape is real, not speculative: `CSV2RDF.convert` (context_shim
-# .py, a DIFFERENT function from this region's `main`) dereferences
-# `self.BASE["%d" % rows]` and `self.PROPBASE[toProperty(x)]` by
-# subscript -- confirmed on the real source (context_shim.py header). Even
-# if @prefix could produce a value, its block scope is `main`'s body
-# (declarations.md#block-scope); it would not survive to reach `convert`,
-# a sibling method. So every Namespace()/URIRef() call is left exactly as
-# rdflib wrote it -- see meta.json for the full accounting.
+# The six `rdflib.Namespace(x)` sites (`csv2rdf.BASE`, `csv2rdf.PROPBASE`:
+# config file, -b/--base, -p/--propbase) become `@prefix base: f<{x}> as
+# BASE .` followed by `csv2rdf.BASE = BASE`: `as NAME` (record ldpy/027) binds
+# a real Namespace object, which `CSV2RDF.convert` (a sibling method, see
+# context_shim.py) then subscripts. No prefixed name is written in `main`,
+# so the declaration only exists to build the object. The five
+# `rdflib.URIRef(x)` sites become `f<{x}>` (no @base in scope).
 import codecs
 import configparser
 import fileinput
@@ -122,16 +111,18 @@ def main():
 
     if "-f" in opts:
         config = configparser.ConfigParser()
-        config.readfp(open(opts["-f"]))
+        config.read_file(open(opts["-f"]))
         for k, v in config.items("csv2rdf"):
             if k == "out":
                 csv2rdf.OUT = codecs.open(v, "w", "utf-8")
             elif k == "base":
-                csv2rdf.BASE = rdflib.Namespace(v)
+                @prefix base: f<{v}> as BASE .
+                csv2rdf.BASE = BASE
             elif k == "propbase":
-                csv2rdf.PROPBASE = rdflib.Namespace(v)
+                @prefix propbase: f<{v}> as PROPBASE .
+                csv2rdf.PROPBASE = PROPBASE
             elif k == "class":
-                csv2rdf.CLASS = rdflib.URIRef(v)
+                csv2rdf.CLASS = f<{v}>
             elif k == "defineclass":
                 csv2rdf.DEFINECLASS = bool(v)
             elif k == "ident":
@@ -147,7 +138,7 @@ def main():
             elif k.startswith("col"):
                 csv2rdf.COLUMNS[int(k[3:])] = column(v)
             elif k.startswith("prop"):
-                csv2rdf.PROPS[int(k[4:])] = rdflib.URIRef(v)
+                csv2rdf.PROPS[int(k[4:])] = f<{v}>
 
     if "-o" in opts:
         csv2rdf.OUT = codecs.open(opts["-o"], "w", "utf-8")
@@ -155,9 +146,11 @@ def main():
         csv2rdf.OUT = codecs.open(opts["--out"], "w", "utf-8")
 
     if "-b" in opts:
-        csv2rdf.BASE = rdflib.Namespace(opts["-b"])
+        @prefix base: f<{opts["-b"]}> as BASE .
+        csv2rdf.BASE = BASE
     if "--base" in opts:
-        csv2rdf.BASE = rdflib.Namespace(opts["--base"])
+        @prefix base: f<{opts["--base"]}> as BASE .
+        csv2rdf.BASE = BASE
 
     if "-d" in opts:
         csv2rdf.DELIM = opts["-d"]
@@ -170,9 +163,11 @@ def main():
         csv2rdf.DEFAULT = column(opts["--default"])
 
     if "-p" in opts:
-        csv2rdf.PROPBASE = rdflib.Namespace(opts["-p"])
+        @prefix propbase: f<{opts["-p"]}> as PROPBASE .
+        csv2rdf.PROPBASE = PROPBASE
     if "--propbase" in opts:
-        csv2rdf.PROPBASE = rdflib.Namespace(opts["--propbase"])
+        @prefix propbase: f<{opts["--propbase"]}> as PROPBASE .
+        csv2rdf.PROPBASE = PROPBASE
 
     if "-l" in opts:
         csv2rdf.LABEL = eval(opts["-l"])
@@ -190,15 +185,15 @@ def main():
         csv2rdf.SKIP = int(opts["--skip"])
 
     if "-c" in opts:
-        csv2rdf.CLASS = rdflib.URIRef(opts["-c"])
+        csv2rdf.CLASS = f<{opts["-c"]}>
     if "--class" in opts:
-        csv2rdf.CLASS = rdflib.URIRef(opts["--class"])
+        csv2rdf.CLASS = f<{opts["--class"]}>
 
     for k, v in opts.items():
         if k.startswith("--col"):
             csv2rdf.COLUMNS[int(k[5:])] = column(v)
         elif k.startswith("--prop"):
-            csv2rdf.PROPS[int(k[6:])] = rdflib.URIRef(v)
+            csv2rdf.PROPS[int(k[6:])] = f<{v}>
 
     if csv2rdf.CLASS and ("-C" in opts or "--defineclass" in opts):
         csv2rdf.DEFINECLASS = True
@@ -212,14 +207,18 @@ def main():
 # and returns what it wrote to -o -- the region's only RDF-observable
 # effect (meta.oracle: isomorphism; see driver.py for why this is compared
 # as text rather than as an rdflib.Graph -- the region never builds one).
-def demo(csv_path, out_path):
-    sys.argv = [
-        "csv2rdf.py",
+#
+# `extra` (identical on both sides) replaces the default options with an argv
+# given by the caller, to reach the other spellings of the same options
+# (--base, --out, --class, -c, -f): each is its own site in `main`.
+def demo(csv_path, out_path, extra=None):
+    sys.argv = ["csv2rdf.py"] + (list(extra) if extra is not None else [
         "-b", "http://example.org/instances/",
         "-p", "http://example.org/props/",
         "-o", out_path,
         csv_path,
-    ]
+    ])
     main()
     with open(out_path, encoding="utf-8") as f:
         return f.read()
+

@@ -39,6 +39,9 @@ def demo(namespace_prefix, basens, opcuans):
         list(self.e),
         sorted((p, str(n)) for p, n in self.e.namespaces()),
         str(self.entity_namespace),
+        # what the sibling method Entity.set_attribute does with it:
+        self.entity_namespace["pressure"],
+        type(self.entity_namespace).__name__,
         str(self.ngsildns),
         self.basens,
         self.opcuans,

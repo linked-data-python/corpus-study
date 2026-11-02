@@ -23,7 +23,8 @@
     "`self` is restored as a call argument the driver builds directly (no shim module needed for it, same convention as the Terramorpha__minergym and RdfUtils.get_all_subreferences precedents elsewhere in this stratum): a minimal `_NS` class carrying only `.namespace`/`.ontology` and the `__str__` that `IRIReference.__str__` needs (via `str.format`'s implicit `str()` fallback) -- not the full `Namespace.__init__`'s ontology-file parsing, which this region never calls. Built ONCE per driver.py case and shared by both sides (not rebuilt per side): the region only reads `self`, and a fresh `_NS` per side would spuriously 'differ' in run_pair's post-call argument comparison since `_NS` defines no `__eq__`, only identity -- exactly the SimpleNamespace-sharing rationale in the Terramorpha driver.",
     "two calls, both steering around the branch that raises ValueError: `ontology=None` (skips the query) and an ontology graph declaring the queried property as an owl:ObjectProperty (query succeeds, no raise). run_pair's entry=/calls= path treats ANY exception from EITHER side as a hard error for the whole call, not a value to compare -- it cannot represent 'both sides raise the same error' as equivalence, so a case built to raise was not used.",
     "checked the anti-hollow-green discipline: changed `IRIReference(self, name)` to `IRIReference(self, name + \"X\")` in translated.ldpy only -- the check FAILS (the second call's ASK query no longer finds `knowsX`, so `__getattr__` raises ValueError where the original does not); restored before finalising.",
-    "Correction (2026-11-01, record corpus/403, defect 2): what this note says of run_pair is not true. run_pair compares a raise like a value — the same exception type and message on both sides, or a difference — and goes on with the next call; it never aborts the comparison on the first side that raises. A workaround described above stays valid, but is not needed."
+    "Correction (2026-11-01, record corpus/403, defect 2): what this note says of run_pair is not true. run_pair compares a raise like a value — the same exception type and message on both sides, or a difference — and goes on with the next call; it never aborts the comparison on the first side that raises. A workaround described above stays valid, but is not needed.",
+    "Re-examined 2026-11-02 after record ldpy/027 (`@prefix p: <IRI> as NAME`): it does not help. The region builds no Namespace object: it is itself the `__getattr__` of calamus's own Namespace class and returns an `IRIReference(self, name)` for an attribute name that arrives at run time, so there is no declaration site to attach `as NAME` to, and `self.namespace` (a received IRI) would only yield a Namespace the method never needs; the reflection hook and the shared pre-parsed ONTOLOGY_QUERY remain the reasons."
   ],
   "draft_sha": "26e76ba6f2008b62",
   "provenance": {
@@ -41,5 +42,13 @@
     "method": "entry:__getattr__",
     "diffs": [],
     "error": null
+  },
+  "repair": {
+    "date": "2026-11-02",
+    "driver": "unchanged",
+    "translation_fixed": false,
+    "mutants_killed": [],
+    "remaining": "",
+    "reexamined": "`as NAME` (record ldpy/027) does not apply: no Namespace object is built in the region; stays not-expressible"
   }
 }

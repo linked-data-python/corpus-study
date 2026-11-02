@@ -103,7 +103,7 @@ def main():
 
     if "-f" in opts:
         config = configparser.ConfigParser()
-        config.readfp(open(opts["-f"]))
+        config.read_file(open(opts["-f"]))
         for k, v in config.items("csv2rdf"):
             if k == "out":
                 csv2rdf.OUT = codecs.open(v, "w", "utf-8")
@@ -193,14 +193,18 @@ def main():
 # and returns what it wrote to -o -- the region's only RDF-observable
 # effect (meta.oracle: isomorphism; see driver.py for why this is compared
 # as text rather than as an rdflib.Graph -- the region never builds one).
-def demo(csv_path, out_path):
-    sys.argv = [
-        "csv2rdf.py",
+#
+# `extra` (identical on both sides) replaces the default options with an argv
+# given by the caller, to reach the other spellings of the same options
+# (--base, --out, --class, -c, -f): each is its own site in `main`.
+def demo(csv_path, out_path, extra=None):
+    sys.argv = ["csv2rdf.py"] + (list(extra) if extra is not None else [
         "-b", "http://example.org/instances/",
         "-p", "http://example.org/props/",
         "-o", out_path,
         csv_path,
-    ]
+    ])
     main()
     with open(out_path, encoding="utf-8") as f:
         return f.read()
+
