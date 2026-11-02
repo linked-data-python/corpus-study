@@ -67,5 +67,24 @@
       "sensor_{i + 1} -> sensor_{i}"
     ],
     "remaining": "Mutants équivalents, non comptés : renommer `sdo:` ou `sosaextend:` est sans effet depuis que l'îlot passe par `(g)` (aucune liaison posée). constructions : « @graph » remplacé par « call suffix (g) » ; la paire reste-t-elle candidate pour l'article sous cette forme ?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the IRI built by `\"...sensor\" + \"_\" + \"{}\".format(i + 1) + \"_\" + idOfNN` becomes one f-string in `URIRef(...)`. idOfNN is a uuid4 string, so the result is the same. The four `g.add` calls become one `g += [...]` list of four tuples. sensorOfNN stays a module-level name, because the driver compares it.",
+    "optimized.ldpy, from optimized.py: the four tuples become one `+{ }(g)` with `;` and an object list `a {addHardware(value)}, sdo:Sensor`. The two rdf:type triples share their predicate, which only Turtle's `,` can factor. `Literal(sensor_info_)` becomes `{sensor_info_}`, the same plain literal for a str. The call suffix `(g)` is kept from the translation: `@graph g` would rebind the repository's schema/sosa_extend/ssn_extend prefixes, which the driver's repo-graph run checks.",
+    "No exception to the symmetry rule beyond the notation itself (`;` and `,`)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "+{ }",
+    "call suffix (g)",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: the unused RDFS leaves `from rdflib.namespace import ...`. Graph, Namespace, ssn_extend, sosa_extend and `g = Graph()` stay, because the driver's repo-graph run replaces that line with code that reads them.",
+    "optimized_header.ldpy: the unused Literal leaves the rdflib import. The three `@prefix` lines are used, and the ssn_extend/sosa_extend Namespaces stay for the driver, as on the Python side."
+  ]
 }

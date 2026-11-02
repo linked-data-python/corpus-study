@@ -51,5 +51,29 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the 33 `g.add((s, p, o))` become one `g += [...]` list of tuples, grouped by subject, with the section comments of the original kept inside the list. The nodes are computed first, in the original order of the NodeNamer calls (name_source_ds can raise on a duplicate, and it is still the first thing called after get_graph).",
+    "optimized.py: every intermediate Literal/URIRef variable used once (period start/end, byte size, last-modified, the three constant IRIs, access description, RFC title/alias, keyword) is inlined in its tuple. The two `\"\".join([...])` become `URIRef(a + b + c)` and `precip_partition_uri + meta.source_uri` (URIRef + str is a URIRef; a non-str field still raises TypeError, as join did). The filter if/elif is kept: a dict would evaluate `meta.ref_date[:4]` eagerly.",
+    "optimized.ldpy, from optimized.py: `@graph g` and the list becomes ONE `+{ }` island, one subject block per node with `;`, separated by `.`. `Literal(x, datatype=XSD.d)` becomes `{x}^^xsd:d` (transpiles to the same Literal call), `URIRef(x)` becomes `f<{x}>` (no @base in scope), the constant IRIs are `<...>`, `Literal(meta.mirror_script)` is `{meta.mirror_script}`.",
+    "Exception to the symmetry rule: in optimized.ldpy, docker_image_uri and transfer_job_node are inlined as the subject of their block (`f<{meta.docker_image_url}>`, `{BNode(node_namer.name_transfer(meta))}`), because `;` writes the subject once. In Python they appear in two and four tuples, so the variable stays. name_transfer is pure, so its later call changes nothing.",
+    "BNode(name) is kept on both sides: the labels reach the serialisation of the real program, and `_:{expr}` would change them."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "from … import p:",
+    "@prefix",
+    "IRI",
+    "prefixed name",
+    "f<…>",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py is a copy of optimized.py: every name of the header is used by the region, its type annotations or demo().",
+    "optimized_header.ldpy: RDF, OWL, XSD, Literal and URIRef go from the rdflib import (replaced by `a`, prefixed names, `^^xsd:` and `f<…>`); DCAT, DCTERMS, PROV stay for demo(), BNode for the region. The five `@prefix` lines and `aorc:` are all used."
+  ]
 }

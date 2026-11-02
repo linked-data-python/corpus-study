@@ -1,0 +1,59 @@
+# Extracted from SAWGraph/water-kg@032ec41357 : datasets/sdwis/sdwa_pws.py
+# region: triplify (lines 192-239, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib.namespace import OWL, XMLNS, XSD, RDF, RDFS
+from rdflib import URIRef, BNode, Literal
+from shim import prefixes, Initial_KG, get_attributes, get_iris
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+def triplify(df):
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    kg = Initial_KG()
+    @graph kg
+    us_sdwis = prefixes['us_sdwis']
+    for idx, row in df.iterrows():
+        # get attributes
+        pws = get_attributes(row)
+        # get iris
+        iris = get_iris(pws)
+        pws_iri = iris['PWS']
+        #print(iris)
+
+        #pws
+        #key data properties
+        +{
+            {pws_iri} a {us_sdwis.PublicWaterSystem} ;
+                {us_sdwis.populationServed} {pws['PopulationServed']}^^xsd:int ;
+                {us_sdwis.serviceConnections} {pws['Connections']}^^xsd:int ;
+                # TODO Activity code - class?
+                {us_sdwis.hasActivity} {pws['ActivityCodeLong']}^^xsd:string ;
+                #TODO season begin/end What datatype for recurring day-month date?
+                {us_sdwis.firstReport} {pws['FirstReport']}^^xsd:date
+        }
+        if pws['Type'] != "NP":
+            +{ {pws_iri} a {us_sdwis['PublicWaterSystem-' + pws['Type']]} }
+        for key in ('Transient', 'GWSW'): #See also primarySourceType
+            if key in pws:
+                +{ {pws_iri} a {us_sdwis['PublicWaterSystem-' + pws[key]]} }
+
+        #extra properties
+        for key, predicate, datatype in (
+            ('Name', us_sdwis.pwsName, xsd:string),
+            ('Name', rdfs:label, xsd:string),
+            ('Deactivation', us_sdwis.deactivationDate, xsd:date),
+            ('Owner', us_sdwis.hasOwnership, xsd:string),
+            ('LastReport', us_sdwis.lastReport, xsd:date),
+        ):
+            if key in pws:
+                +{ {pws_iri} {predicate} {pws[key]}^^{datatype} }
+        if 'SourceType' in pws:
+            #kg.add((iris['PWS'], prefixes['us_sdwis']['primarySource'], Literal(pws['Source'], datatype=XSD.string))) #old literal version
+            +{ {pws_iri} {us_sdwis.primarySourceType} {iris['SourceType']} } #controlled vocab
+
+        #object properties
+        ##combined distribution system
+        if 'CDSID' in pws:
+            +{ {iris['CDS']} a {us_sdwis.CombinedDistributionSystem} .
+               {pws_iri} {us_sdwis.inCombinedSystem} {iris['CDS']} }
+
+    return kg

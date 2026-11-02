@@ -44,5 +44,23 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `if vals == None` / else branches merge. `vals = state.get_list_value(prop) or []` makes the empty-list case go through the general code: `heads` is then `[ns_rdf[\"nil\"]]`, the inner loop writes nothing, and the anchor writes exactly the `(origin, prop, rdf:nil)` triple of the old None branch (the driver's EX.emptyList case). The comment of the empty-list case is kept above that line.",
+    "optimized.py, also: `for i in range(0, len(vals))` + `vals[i]` becomes `for i, val in enumerate(vals)`, and the rdf:first/rdf:rest pair becomes one `graph += [...]`. The BNode heads stay a list built in advance, because each node is read twice (heads[i] and heads[i+1]). rdflib's Collection was not used: on an empty list it anchors a dangling BNode instead of rdf:nil.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, one `+{ {heads[i]} rdf:first {val} ; rdf:rest {heads[i+1]} }` per element and one anchor island. A Turtle collection `( … )` cannot take a list of runtime length. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py is a copy of optimized.py: BNode, graph, state and ns_rdf are all used.",
+    "optimized_header.ldpy: ns_rdf leaves the shim import (replaced by `@prefix rdf:`, which is used)."
+  ]
 }

@@ -59,5 +59,21 @@
       "Literal(version) altered (already killed)"
     ],
     "remaining": "None. The out-of-contract inputs the triage raised (parent_node_id/attribute_iri valued None or a str: `{x}` writes Literal('None') / a literal where rdflib's add() raises) are not reachable from the repo: the two real callers pass URIRef/BNode (extractIffBindings.py:269 entity_id from entities_graph.subjects and attribute[1] = BIND(IRI(...)); lib/bindings.py:45 forwards its own parameters), so they are the known `{expr}`-is-None language gap and stay out of the pilot. article_candidate remains Maxime's call (triage: the island gains nothing in readability, every predicate stays an interpolation)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `randname` is inlined in the subscript that builds bindingiri. The six unconditional `self.bindingsg.add` calls (five on bindingiri, plus boundBy on attribute_iri, moved up before the conditional triple: a graph has no order) become one `self.bindingsg += [...]`. `RDF['type']` becomes `RDF.type`, and `self.basens['X']` / `utils.NGSILD['Property']` become attribute access on the Namespace (the same `term()` call; none of the seven local names is a str method).",
+    "Kept on both sides: the `if logic_transform is not None:` guard with its own write (the driver's falsy Literal(\"\")/Literal(0)/\"\" cases depend on it), and the explicit `Literal(version)`, `Literal(firmware)` and `Literal(logic_transform)`. A bare `{version}` would pass a URIRef through unchanged where Literal() converts it, and it would raise on None.",
+    "optimized.ldpy, from optimized.py: `@graph self.bindingsg` + one `+{ }` that holds both subjects (`;` for bindingiri, `.` then attribute_iri), and the conditional triple as its own island. No @prefix: every predicate is a runtime Namespace, so it stays an interpolation. The one-line `if cond: +{ }` of the translation is written on two lines, like its Python counterpart (PEP 8 E701). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: the unused Graph and XSD leave the rdflib import. Namespace stays for demo(), and random, string, RDF, utils and randnamelength stay for the region.",
+    "optimized_header.ldpy: Graph, XSD and `from rdflib.namespace import RDF` go (rdf:type is `a`). Namespace stays for demo() and Literal for the region. The header had no `@prefix`."
+  ]
 }

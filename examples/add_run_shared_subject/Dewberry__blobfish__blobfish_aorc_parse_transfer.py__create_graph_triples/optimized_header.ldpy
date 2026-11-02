@@ -1,0 +1,94 @@
+# Extracted from Dewberry/blobfish@db89f34228 : blobfish/aorc/parse_transfer.py
+# region: create_graph_triples (lines 175-270, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from rdflib import DCAT, DCTERMS, PROV, BNode
+from context_shim import AORC, AORCFilter, GraphCreator, NodeNamer, CompletedTransferMetadata, aorc:
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+
+def create_graph_triples(
+    meta: CompletedTransferMetadata, graph_creator: GraphCreator, node_namer: NodeNamer, filter: AORCFilter | None
+) -> None:
+    # Apply filter to get distinct graphs depending on metadata properties
+    filter_value = None
+    if filter:
+        if filter.name == "YEAR":
+            filter_value = meta.ref_date[:4]
+        elif filter.name == "RFC":
+            filter_value = meta.rfc_alias
+    g = graph_creator.get_graph(filter_value)
+    @graph g
+
+    source_dataset_node = BNode(node_namer.name_source_ds(meta))
+    source_dataset_period_of_time_node = BNode(node_namer.name_ds_period(meta))
+    precip_partition_uri = f<{meta.aorc_historic_uri + meta.rfc_catalog_uri + meta.precip_partition_uri}>
+    source_distribution_uri = precip_partition_uri + meta.source_uri
+    mirror_dataset_uri = f<{meta.mirror_uri}>
+    mirror_distribution_uri = f<{meta.mirror_public_uri}>
+    script_node = BNode(meta.mirror_script)
+    rfc_office_uri = f<{meta.rfc_office_uri}>
+    +{
+        # Create source dataset instance, properties
+        {source_dataset_node} a aorc:SourceDataset ;
+            dcterms:temporal {source_dataset_period_of_time_node} ;
+            dcterms:accrualPeriodicity <http://purl.org/cld/freq/monthly> ;
+            # Associate distribution with dataset
+            dcat:distribution {source_distribution_uri} .
+        {source_dataset_period_of_time_node} a dcterms:PeriodOfTime ;
+            dcat:startDate {meta.ref_date}^^xsd:date ;
+            dcat:endDate {meta.ref_end_date}^^xsd:date .
+        # Create source dataset distribution instance, properties
+        {source_distribution_uri} a aorc:SourceDistribution ;
+            dcat:byteSize {meta.source_bytes}^^xsd:positiveInteger ;
+            dcterms:modified {meta.source_last_modified}^^xsd:dateTime ;
+            dcat:compressFormat <https://www.iana.org/assignments/media-types/application/zip> ;
+            dcat:packageFormat <https://publications.europa.eu/resource/authority/file-type/NETCDF> .
+        # Create mirror dataset instance, properties
+        {mirror_dataset_uri} a aorc:MirrorDataset ;
+            dcterms:created {meta.mirror_last_modified}^^xsd:dateTime ;
+            owl:Annotation "Access is restricted based on users credentials for AWS bucket holding data"^^xsd:string ;
+            # Associate mirror dataset with source dataset
+            aorc:hasSourceDataset {source_dataset_node} ;
+            # Associate mirror distribution with mirror dataset
+            dcat:distribution {mirror_distribution_uri} .
+        # Create mirror distribution instance, properties
+        {mirror_distribution_uri} a aorc:MirrorDistribution .
+        # Create transfer script instance
+        {script_node} a aorc:TransferScript ;
+            dcterms:identifier {meta.mirror_script} .
+        # Create docker image instance, properties
+        f<{meta.docker_image_url}> a aorc:DockerImage ;
+            aorc:hasTransferScript {script_node} .
+        # Create transfer job activity instance, properties
+        {BNode(node_namer.name_transfer(meta))} a aorc:TransferJob ;
+            aorc:transferred {mirror_dataset_uri} ;
+            prov:used {source_dataset_node} ;
+            prov:wasStartedBy {script_node} .
+        # Create RFC office instance
+        {rfc_office_uri} a aorc:RFC ;
+            aorc:hasRFCName {meta.rfc_name}^^xsd:string ;
+            aorc:hasRFCAlias {meta.rfc_alias}^^xsd:string .
+        # Create precip partition catalog instance, properties
+        {precip_partition_uri} a aorc:PrecipPartition ;
+            dcat:keyword "precipitation"^^xsd:string ;
+            aorc:hasRFC {rfc_office_uri} ;
+            # Associate precip partition catalog with source dataset it holds
+            dcat:dataset {source_dataset_node}
+    }
+
+
+# Demo harness (identical on both sides, see meta.json): create_graph_triples
+# returns None and writes through graph_creator.get_graph(...), not through a
+# plain Graph argument the driver could compare -- GraphCreator has no
+# __eq__, so comparing the argument itself would compare object identity and
+# always fail.  This wraps the call and hands back the one graph it wrote to,
+# compared by isomorphism as usual.
+def demo(meta):
+    graph_creator = GraphCreator({"dcat": DCAT, "prov": PROV, "dct": DCTERMS, "aorc": AORC})
+    node_namer = NodeNamer()
+    create_graph_triples(meta, graph_creator, node_namer, None)
+    return graph_creator.default_graph

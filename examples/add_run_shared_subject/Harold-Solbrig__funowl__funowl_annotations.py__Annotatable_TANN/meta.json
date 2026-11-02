@@ -64,5 +64,23 @@
       "`owl:annotatedProperty {subj[1]}` -> `{subj[0]}`"
     ],
     "remaining": "Le retour None possible de to_rdf (fun_owl_choice.py:77 du dépôt) n'est pas couvert ; la récursion sur des annotations imbriquées réelles non plus (le shim lève) : seul l'appel récursif est témoigné."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four `g.add` calls on the reified BNode `x` become one `g += [...]` list. Both clone_subgraph calls are now evaluated before any of the four triples is written. The ten driver cases include BNode self-loops and neighbourhoods, and they show that this order does not change the resulting graph, as in the translation.",
+    "Kept on both sides: the `if self.annotations:` guard (it also protects the loop against annotations=None), `x`, which is needed after the write by `subj = x`, and the per-annotation loop, whose `t` is passed on to the recursive `annotation.TANN(g, t)`.",
+    "optimized.ldpy is identical to translated.ldpy: the translation was already the compact form (`@graph g` + one `+{ {x} a ... ; owl:annotatedSource ... ; ... }`). It differs from optimized.py only in the RDF lines. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: List, Callable, ClassVar, Any, URIRef, RDFS, PRED and TARG go, all unused. `from rdflib.term import BNode` is merged into `from rdflib import Graph, BNode`.",
+    "optimized_header.ldpy: the same removals. OWL and RDF go too, because the islands use owl: and `a`. The single `@prefix owl:` is used."
+  ]
 }

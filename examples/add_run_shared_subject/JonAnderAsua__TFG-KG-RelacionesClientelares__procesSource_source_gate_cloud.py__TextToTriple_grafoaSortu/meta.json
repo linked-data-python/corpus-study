@@ -57,5 +57,24 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two lookups `i['annotationType']['value']` (2 uses) and `i['annotationText']['value']` (3 uses) become two local variables at the top of the try. Moving the text lookup ahead of the type test does not change the effect: a missing key raises inside the same bare `except: pass`, and nothing has been written yet in that iteration. The three `!=` joined by `and` become `not in ('Sentence', 'Money', 'Date')`, `if(balioztatu):` becomes `if balioztatu:`, `uria`/`objektua` are inlined, and the two `self.grafoa.add` calls become one `self.grafoa += [...]`. The call order (balioztatu, bilatuUria, getType) is unchanged.",
+    "Kept on both sides: the bare `try/except: pass` around each annotation, and the explicit `Literal(annotation_text)`: a bare `{annotation_text}` would raise on a JSON null where Literal(None) writes \"None\", and the bare except would then silently drop the triple.",
+    "optimized.ldpy, from optimized.py: `@graph self.grafoa` + one `+{ f<{self.bilatuUria(annotation_text)}> a f<{self.getType(obj)}> ; rdfs:label {Literal(annotation_text)} }`. `f<{x}>` is `URIRef(str(x))`, the same as URIRef(x) with no @base in scope. Exception to the symmetry rule: `subjektua` is inlined as the subject, because `;` writes it once. In Python it appears in both tuples, so it stays."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: the whole SPARQLWrapper import goes (unused; its RDF was already shadowed by rdflib's on the next line), and so does Graph. URIRef, RDFS, Literal, RDF and the shim stay.",
+    "optimized_header.ldpy: the SPARQLWrapper import, Graph, URIRef (replaced by f<…>), RDFS (replaced by rdfs:) and RDF (replaced by `a`) go, leaving `from rdflib import Literal`. The single `@prefix rdfs:` is used."
+  ]
 }

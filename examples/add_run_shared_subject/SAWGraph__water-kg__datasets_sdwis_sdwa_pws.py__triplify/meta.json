@@ -55,5 +55,25 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy; constructions no longer credit from … import p:"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `prefixes['us_sdwis']` is read once into `us_sdwis` before the loop, and its fixed terms use attribute access (`us_sdwis.pwsName`, the same Namespace term). `iris['PWS']` becomes `pws_iri`, `'X' in pws.keys()` becomes `'X' in pws`, and `str('PublicWaterSystem' + '-' + x)` becomes `'PublicWaterSystem-' + x`.",
+    "optimized.py, restructuring: the five unconditional triples (base type, population, connections, activity, firstReport, moved up beside the others) are one `kg += [...]`. The Transient and GWSW subtypes share one `for key in (...)` loop, and the Type != \"NP\" test keeps its own if. The five optional literal properties (pwsName and rdfs:label of Name, Deactivation, Owner, LastReport) become one table `(key, predicate, datatype)` read by one `if key in pws: kg.add(...)`. The CDS pair is one `kg += [...]`. Every condition of the original is kept with the same test. kg is local and is lost if an exception propagates, so moving the writes changes no observable state.",
+    "optimized.ldpy, from optimized.py: `@graph kg`, one `+{ }` with `;` for the unconditional block, `{x}^^xsd:int|string|date` for the typed literals (it transpiles to the same `Literal(x, datatype=...)`), and `{pws[key]}^^{datatype}` in the table loop, whose datatypes and rdfs:label are prefixed names. `@prefix xsd:` is declared at the top of the function because the extracted header is not to be touched. us_sdwis stays a runtime Namespace (it comes from the `prefixes` dict, which also feeds the graph's bindings): declaring its IRI as a second `@prefix` would duplicate it, just as a Python `Namespace(\"...\")` would.",
+    "No exception to the symmetry rule: every restructuring (alias, table, loop, merge) is on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: OWL, XMLNS, URIRef and BNode go, all unused. XSD, RDF, RDFS, Literal and the four shim names stay.",
+    "optimized_header.ldpy: both rdflib import lines go: XSD, RDF, RDFS and Literal are replaced by xsd:/`a`/rdfs:/typed literals, and the rest are unused. The header's `@prefix rdfs:` is used. `@prefix xsd:` sits in the region and stays there."
+  ]
 }

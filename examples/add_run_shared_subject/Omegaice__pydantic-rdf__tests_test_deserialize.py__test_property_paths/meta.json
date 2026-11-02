@@ -47,5 +47,22 @@
     "method": "entry:test_property_paths",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nine graph writes outside the loop (org data, departments, relationships) become one `graph += [...]` list, with the three section comments inside it. The relationships are grouped by subject, and the people loop comes after the list (a graph has no order). Each loop iteration writes its two triples with one `graph += [...]`. The pydantic model classes, model_rebuild, parse_graph and the asserts are the test's own subject and stay unchanged.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, then one `+{ }` for org that factors its two ex:department objects with `,`, and one `+{ {uri} a {EX.Person} ; {EX.name} f\"Person {i}\" }` per person. The f-string literal replaces `Literal(f\"...\")`. EX is a pytest fixture (a runtime Namespace), so its terms stay interpolations.",
+    "Exception to the symmetry rule: dept1, dept2 and proj1 are each used only as an object of org and as a subject, so in optimized.ldpy they become anonymous blank-node property lists `[ ... ]` inside the org block, and their three `BNode()` assignments disappear. Python has no anonymous-node syntax, so it keeps the three variables. The driver compares by isomorphism, so fresh anonymous nodes are equivalent."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "plain literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Self, XSD, CircularReferenceError and UnsupportedFieldTypeError go, all unused.",
+    "optimized_header.ldpy: the same four go, plus BNode (replaced by `[ ]`) and Literal (replaced by the island literals), leaving `from rdflib import Graph, Namespace` for the signature's annotations. The header had no `@prefix`."
+  ]
 }

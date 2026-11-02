@@ -62,5 +62,23 @@
       "sujet {x} -> [] dans l'îlot else (déjà tué)"
     ],
     "remaining": "Les deux divergences du tri sont hors d'atteinte du dépôt : aucun to_rdf réel d'ObjectPropertyExpression, ClassExpression ou NonNegativeInteger ne rend None (FunOwlChoice délègue à IRI.to_rdf -> URIRef ou à une expression -> BNode, general_definitions.py:39 -> Literal) ; une levée dans objectPropertyExpression.to_rdf (AbbreviatedIRI à préfixe non déclaré, general_definitions.py:141) laisse un graphe partiel différent (ldpy/014), mais cli.py:42-43 le jette avec l'exception et aucun test ne le lit. Le owl: que @graph g lie dans le graphe de l'appelant est déjà lié dans tous les graphes que funowl crée (Graph() par défaut, bind_namespaces='core', presets de PrefixDeclarations). Rien à juger hors de la question article-example."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: rdf:type and owl:onProperty become one `g += [...]`. The if/else loses its else branch: one `g.add` writes `self.min_.to_rdf(g)` under `OWL.minQualifiedCardinality if self.classExpression else OWL.minCardinality`, and `if self.classExpression:` adds owl:onClass alone. The sub-to_rdf calls keep their original order (property, min, class), and the triple of the minimum is written before the class is visited, as in the original.",
+    "Error effect: the 'raising min_' case still leaves type + onProperty in g on both sides. The minimum is now a separate write, so in the qualified branch a raise in classExpression.to_rdf also leaves the same partial graph as the original. What remains different, on both optimized sides as in the translation (record ldpy/014), is a raise in objectPropertyExpression.to_rdf: the type triple is then not written yet. The exception propagates unchanged, and no caller keeps the graph after it (see driver.py).",
+    "optimized.ldpy, from optimized.py: three `+{ }` islands under `@graph g` (instead of the translation's three islands across an if/else). The conditional predicate is interpolated as `{owl:minQualifiedCardinality if self.classExpression else owl:minCardinality}`. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: the unused URIRef and `Literal as RDFLiteral` go.",
+    "optimized_header.ldpy: URIRef, RDFLiteral, OWL and RDF go (prefix owl: and `a` replace the last two), and the two rdflib imports merge into `from rdflib import Graph, BNode`. The single `@prefix owl:` is used."
+  ]
 }

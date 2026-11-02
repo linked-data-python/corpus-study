@@ -49,5 +49,24 @@
     "method": "entry:_catalog",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `g.add` calls become one `g += [(s, ...), (s, ...)]`. `s` stays, because it is used twice. Nothing else can be compressed: Python has no expression that builds and fills a Graph without a walrus.",
+    "optimized.ldpy: the whole function body is `return g{ f<{REC}> a <...#Catalog> ; dct:title \"Cat\" }`. `URIRef(REC)` becomes `f<{REC}>` (no @base in scope), and `Literal(\"Cat\")` becomes `\"Cat\"`.",
+    "Exception to the symmetry rule: the graph literal `g{ }` replaces `g = Graph()` + write + `return g`, and `s` is inlined because `;` writes the subject once. Only an island allows both. The returned graph also binds the dct: prefix. The driver compares graphs by isomorphism, so this has no effect on the verdict."
+  ],
+  "optimized_constructions": [
+    "g{ }",
+    "from … import p:",
+    "f<…>",
+    "IRI",
+    "prefixed name",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py is a copy of optimized.py: Graph, Literal, URIRef, RDF, DCT and REC are all used.",
+    "optimized_header.ldpy: Literal and URIRef leave the rdflib import, and `from rdflib.namespace import RDF` goes. Graph stays for the return annotation, `dct:` and REC are used."
+  ]
 }
