@@ -63,5 +63,23 @@
       "boucle de copie des liaisons retirée — survivait"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `if ...: continue` guards become one positive condition around the add (De Morgan), and str(o).startswith becomes o.startswith, o being a URIRef (a str) once the isinstance test has passed. The namespace-binding copy loop stays: assigning the store's namespace_manager would share it, not copy it. A `filtered += [...]` comprehension measures the same and would leave no place for an island, so the loop was kept.",
+    "optimized.ldpy, from optimized.py: `provenance:definedIn` in the comparison and `+{ {s} {p} {o} }(filtered)` with the call suffix (no @graph, which would bind the imported prefixes on the filtered graph). The demo() harness is copied from each side unchanged.",
+    "The notation gains nothing here: `+{ {s} {p} {o} }(filtered)` and `filtered.add((s, p, o))` weigh the same, as do `provenance:definedIn` and `PROVENANCE.definedIn`.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name",
+    "+{ }",
+    "call suffix (g)",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in the header on either side: Graph, URIRef, Literal and the four namespaces (or prefixes) are all read by the region or by the demo() harness. optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

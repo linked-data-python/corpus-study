@@ -57,5 +57,22 @@
       "attribut de classe en plus — survivait"
     ],
     "remaining": "La première translation_note (« as AAS inutilisé, gardé pour la lisibilité ») est fausse : le dépôt indexe AASNameSpace.AAS[...] quelque 300 fois et le lie par graph.bind ; le `as AAS` est nécessaire, et le pilote le vérifie désormais."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two redundant rdflib.URIRef(...) wrappers go (Namespace indexing already returns a URIRef), and AAS[\"ConceptDescription\"] becomes AAS.ConceptDescription; AAS[\"Identifiable/id\"] keeps the index because of the slash.",
+    "optimized.ldpy, from optimized.py: identical to translated.ldpy, which was already minimal: `@prefix aas: <...> as AAS .` in the class body (the driver compares the class attribute AAS, a Namespace), `aas:ConceptDescription`, and `aas:{\"Identifiable/id\"}` for the local part with a slash.",
+    "The license comment and the two imports precede the class and are treated as the extracted header, as for the other <module> regions: untouched here, pruned in the header variant.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `import rdflib` and DefinedNamespace go; Namespace is imported from rdflib on one line.",
+    "LD Python: both import lines go (`as AAS` gives the Namespace object, nothing else from rdflib is named); the license comment stays."
+  ]
 }

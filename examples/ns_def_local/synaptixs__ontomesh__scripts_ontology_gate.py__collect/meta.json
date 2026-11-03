@@ -37,5 +37,20 @@
     "method": "entry:collect",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: a local `instances(cls)` helper factors the five `_count_predicate_objects(authored, rdflib.RDF.type, X)` calls; the six single-value counts and the owl_ns alias are inlined into the metrics dict; the unused prov_ns Namespace goes. The calls that can raise or that return tuples (_turtle_files, _parse_all, _authored_graph, _multi_domain, _cq_rows, _pitfall_counts) keep their order and their unpacking; only the in-memory triple counts move into the dict.",
+    "optimized.ldpy, from optimized.py: `ns = rdflib.Namespace(...)` becomes `@prefix ent: <...> .` (no `as ns`: the four classes are now prefixed names); rdflib.RDF.type, rdflib.RDFS.range and rdflib.OWL.Thing/Restriction become rdf:, rdfs:, owl: prefixed names, under three @prefix lines declared in the function (rdflib's predefined namespaces have no predeclared prefix in ldpy). With those lines the file is 1 token shorter than with the rdflib attributes kept.",
+    "No exception to the symmetry. Not taken on the ldpy side: `m{ ?s a ent:X }(authored).count()` in place of the shim helper, longer than the helper call."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: List, Optional and Tuple go from the typing import; rdflib and the nine shim helpers stay.",
+    "LD Python: the same three typing names go, and `import rdflib` too (every rdflib name of the region is now a prefixed name); the nine shim helpers stay."
+  ]
 }

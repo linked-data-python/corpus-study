@@ -54,5 +54,21 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the second bind passes NGSILD directly instead of reading back self.ngsildns. Nothing else to compress: the constructor is attribute assignments and two binds.",
+    "optimized.ldpy, from optimized.py: `@prefix uaentity: f<{namespace_prefix}entity/> as ENTITY_NS .` then `self.entity_namespace = ENTITY_NS` (as in translated.ldpy: the sibling method subscripts the Namespace object), and the first bind passes ENTITY_NS.",
+    "Exception to the symmetry rule: `self.e.bind('uaentity', ENTITY_NS)` reads the local name that `as` gives for free; Python has no such name, and adding one (`self.entity_namespace = entity_namespace = Namespace(...)`) measures exactly the same, so it was not carried back: it would make optimized.py read worse for no gain. Without that, the island and the Namespace(...) call it replaces weigh the same."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal, URIRef, BNode, collection_to_list and calculate_array_dimensions go; Graph, Namespace and NGSILD stay.",
+    "LD Python: the same five go, and Namespace too (the dynamic @prefix ... as builds it); Graph and NGSILD stay."
+  ]
 }

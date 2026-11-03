@@ -1,0 +1,54 @@
+# Extracted from synaptixs/ontomesh@f771c8c4ee : scripts/ontology_gate.py
+# region: collect (lines 221-268, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from typing import Any, Dict, List, Optional, Tuple
+import rdflib
+from _shim import (
+    _turtle_files, _parse_all, _authored_graph, _count_predicate_objects,
+    _multi_domain, _alignment_unbound, _malformed_iris, _cq_rows,
+    _pitfall_counts,
+)
+
+def collect(output_dir: str) -> Dict[str, Any]:
+    paths = _turtle_files(output_dir)
+    graphs, failures = _parse_all(paths)
+    authored = _authored_graph(graphs)
+    multi_count, multi_worst = _multi_domain(authored)
+    cq_returning, cq_failing, cq_total = _cq_rows(output_dir)
+
+    def instances(cls):
+        return _count_predicate_objects(authored, rdflib.RDF.type, cls)
+
+    # Phase 5 capabilities. Counted as instances, not declarations: a
+    # vocabulary nothing uses is the failure mode this roadmap exists to
+    # remove, so the metric tracks reified records rather than classes.
+    ns = rdflib.Namespace("https://ontology.example.com/enterprise/")
+
+    # Phase 6: pitfalls firing, from the quality report.
+    pitfalls_firing, pitfalls_critical = _pitfall_counts(output_dir)
+
+    metrics = {
+        "turtle_parse_failures":       len(failures),
+        "multi_domain_properties":     multi_count,
+        "worst_domain_count":          multi_worst,
+        "alignment_subjects_unbound":  _alignment_unbound(graphs),
+        "malformed_iris":              _malformed_iris(authored),
+        "object_properties_ranged_at_thing":
+            _count_predicate_objects(authored, rdflib.RDFS.range, rdflib.OWL.Thing),
+        "owl_restrictions":            instances(rdflib.OWL.Restriction),
+        "cq_tests_returning_rows":     cq_returning,
+        "cq_tests_failing":            cq_failing,
+        "prov_chains":                 instances(ns.DerivationActivity),
+        "temporal_extents":            instances(ns.TemporalExtent),
+        "quantity_values":             instances(ns.QuantityValue),
+        "participations":              instances(ns.Participation),
+        "pitfalls_firing":             pitfalls_firing,
+        "pitfalls_critical":           pitfalls_critical,
+    }
+    detail = {
+        "turtle_files_scanned": len(paths),
+        "turtle_files_parsed":  len(graphs),
+        "cq_tests_total":       cq_total,
+        "parse_failures":       failures,
+    }
+    return {"metrics": metrics, "detail": detail}

@@ -49,5 +49,21 @@
       "IRI figée `base_data_namespace = <…/>` (URIRef sans souscription : TypeError, `[0]` rend 'h')"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is one assignment, `base_data_namespace = R.Namespace(BASE_DATA_URL + \"/\")`; optimized.py is original.py.",
+    "optimized.ldpy is translated.ldpy without the translator's two-line comment above the region line (comments are not added): `@prefix basedata: f<{BASE_DATA_URL}/> as base_data_namespace .`, the dynamic prefix whose `as` keeps the Namespace object the repository subscripts.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BASE_SCHEMA_URL, DEF_CTX and RDF_CONTEXT go from the shim import; `import rdflib as R` stays.",
+    "LD Python: the same three shim names go, and `import rdflib as R` too (the dynamic @prefix ... as builds the Namespace)."
+  ]
 }

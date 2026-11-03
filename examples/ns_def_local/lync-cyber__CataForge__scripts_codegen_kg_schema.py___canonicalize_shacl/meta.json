@@ -54,5 +54,26 @@
     "method": "entry:_canonicalize_shacl",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: Graph().parse(...) chained (parse returns the graph); the list items are sorted when read (`sorted(Collection(...), key=str)`) instead of listed then sorted at rebuild; the fallback branch inlines emit and replaces the `if line` generator with filter(None, ...); term() loses the redundant str() around n3() and its intermediate name; the header list is inlined into the join with `*lines`. The per-triple remove/add are kept: graph.set would drop a second list hanging from the same subject and predicate.",
+    "optimized.ldpy, from optimized.py: `@prefix sh:` without `as SH`, since `(sh:ignoredProperties, sh:in)` are prefixed names in a Python tuple; `@graph as graph` then graph.parse(...); the wildcard remove becomes `-{ ?s sh:order ?o }`, the per-list remove and add `-{ }` and `+{ }`; graph.subject_objects(pred) becomes `m{ ?subject {pred} ?head }`. Collection and rdflib.BNode() stay: no island builds an RDF list in place or mints an anonymous fresh blank node outside g{ }.",
+    "The driver's fixture only exercises the forest path; the to_canonical_graph fallback was checked by hand on a non-forest input (a blank node with two incoming edges, an empty and a two-element sh:in on one subject): original, optimized.py and optimized.ldpy return the same text.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in the header on either side (typing.Any and the _blank_node_labels shim are both used; the prefix is declared inside the function): optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

@@ -56,5 +56,21 @@
       "range(1000) -> range(999) dans random_number — survivait"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the shacl Namespace is bound to a local alias in the same statement (`self.shaclNS = shacl = Namespace(...)`), so the five terms read `shacl.targetClass` instead of `self.shaclNS.targetClass`; the folded rdfSyntax assignment is put on one line. Nothing else to compress: the constructor is a list of attribute assignments the class reads elsewhere.",
+    "optimized.ldpy, from optimized.py: `@prefix shacl: <...> as SHACL_NS .` replaces the alias, `self.shaclNS = SHACL_NS` keeps the Namespace object on self, and the five terms become prefixed names.",
+    "self.rdfSyntax stays `Namespace('...')` in optimized.ldpy: no term of it is used in the region, so an `@prefix ... as NAME .` plus an assignment would be longer than the call it replaces.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Dict, URIRef, Literal and BNode go.",
+    "LD Python: the same four go (Namespace stays for self.rdfSyntax); the header has no @prefix line, the shacl prefix is declared inside the function."
+  ]
 }

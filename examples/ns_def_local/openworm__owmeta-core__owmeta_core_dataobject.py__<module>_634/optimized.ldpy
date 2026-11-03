@@ -1,0 +1,21 @@
+# Extracted from openworm/owmeta-core@cd69d77ad0 : owmeta_core/dataobject.py
+# region: <module> (lines 634-634, stratum ns_def_local)
+# licence of the source repository: see meta.json
+#
+# `from . import ...` (a package-relative import into owmeta_core/__init__.py)
+# is replaced by `from context_shim import ...` so the region resolves
+# outside the owmeta_core package -- same four names, see meta.json /
+# AGENT_BATCH.md "shim de contexte".
+#
+# The region's single statement, `base_data_namespace = R.Namespace(
+# BASE_DATA_URL + "/")`, is written as ONE dynamic @prefix with `as`: the
+# object must escape this block to survive as a class attribute of
+# BaseDataObject (the real source line, owmeta_core/dataobject.py:634, sits
+# in that class body; the extraction flattened it to module scope). The escape
+# is real: owmeta_core/mapped_class.py:52 dereferences it by subscript,
+# `self.base_data_namespace[self.__name__] + '#'`, in a different file. A
+# bare `<...>` IRI would not support `[...]` there.
+import rdflib as R
+from context_shim import BASE_DATA_URL, BASE_SCHEMA_URL, DEF_CTX, RDF_CONTEXT
+
+@prefix basedata: f<{BASE_DATA_URL}/> as base_data_namespace .

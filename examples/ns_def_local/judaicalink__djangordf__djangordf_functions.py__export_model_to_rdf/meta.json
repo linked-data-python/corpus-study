@@ -52,5 +52,27 @@
     "method": "entry:export_model_to_rdf",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five-branch isinstance chain becomes a for/else over (type, datatype) pairs in the same order (bool before int), with the add in the loop and the warning in the else; Literal(dt.isoformat(), datatype=XSD.dateTime) becomes Literal(dt, datatype=XSD.dateTime), whose lexical form rdflib computes with the same isoformat(), so the datetime branch needs no special case; ns_uri, class_uri, field_name, predicate_uri, metadata_class, dump_metadata, target_dir and timestamp are inlined; URIRef(ns[x]) loses the redundant URIRef; the three metadata adds become one `g += [...]`; strftime becomes a format spec in the file-name f-string. The `with open(...)` is kept before serialize, so an unwritable directory still raises before the graph is serialised.",
+    "optimized.ldpy, from optimized.py: the namespace IRI expression goes straight into `@prefix ns: f<{...}> as NS .` (NS kept for g.bind under a computed prefix); `@graph g` after g = Graph(); the two loop adds and the metadata block become +{ } islands, the field literal `{field_value}^^{datatype}` with the datatype interpolated from the pair, which gives Literal(value, datatype=...) as before; `ns:{instance.pk}` needs no str() because the prefixed name builds its local part as a string.",
+    "Gap kept from the translation: dump_name=None writes \"None\" in the original but raises TypeError with `{dump_name}^^xsd:string`; dump_name is a documented str and the driver does not test None.",
+    "The driver's second phase compares the written Turtle text of translated.ldpy only; the same comparison was run by hand on the four optimized artefacts (four cases each, all identical to original.py).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "f<…>",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef goes; XSD is imported from rdflib with the rest (one import line instead of two).",
+    "LD Python: Literal, Namespace, RDF, URIRef and XSD go, only Graph stays from rdflib; the xsd @prefix is used and stays."
+  ]
 }
