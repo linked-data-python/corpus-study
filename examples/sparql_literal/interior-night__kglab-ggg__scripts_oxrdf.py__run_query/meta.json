@@ -65,5 +65,9 @@
     "optimized.ldpy is identical to optimized.py: the query text QUDT_QUERY9 is a header constant, kept byte for byte, so the region has no literal text for s{ } to take; s{ } would also move the measured cost from the 'init' print to the 'exec' print (lazy query).",
     "Observation for the translation, not acted on here: with ../ldpy at 5b807db, `s{ … }(kg)` and `kg.query(s{ … })` both run on a minimal stand-in with kglab's `query(sparql, *, bindings=None)` signature, where the translation notes report a TypeError."
   ],
-  "optimized_constructions": []
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header: optimized_header.py and optimized_header.ldpy are copies of optimized.py and optimized.ldpy. `import time` and QUDT_QUERY9 are read by the region."
+  ]
 }

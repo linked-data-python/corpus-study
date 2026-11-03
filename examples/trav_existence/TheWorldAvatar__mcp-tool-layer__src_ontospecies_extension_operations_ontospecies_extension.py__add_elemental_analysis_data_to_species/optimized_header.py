@@ -1,0 +1,58 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : src/ontospecies_extension/operations/ontospecies_extension.py
+# region: add_elemental_analysis_data_to_species (lines 356-411, stratum trav_existence)
+# licence of the source repository: see meta.json
+from typing import Optional
+from rdflib import URIRef, Literal, RDF
+from context_shim import OS, locked_graph, _is_abs_iri, _mint_hash_iri, _ensure_type_with_label, _class, _list_species_summaries
+
+def add_elemental_analysis_data_to_species(
+    species_iri: str,
+    data_label: str,
+    calculated_value_text: Optional[str] = None,
+    experimental_value_text: Optional[str] = None,
+    empirical_molecular_formula: Optional[str] = None,
+) -> str:
+    with locked_graph() as g:
+        # Basic validations
+        if not species_iri or not data_label:
+            return "ERROR: species_iri and data_label are required."
+        if not _is_abs_iri(species_iri):
+            return "ERROR: species_iri must be an absolute IRI."
+
+        species_ref = URIRef(species_iri)
+
+        # Check if species exists
+        if (species_ref, RDF.type, _class(OS, "Species")) not in g:
+            return (
+                f"ERROR: target species not found.\n"
+                f"Requested: {species_iri}\n"
+                f"Create the species first, then retry.\n"
+                f"Existing Species (up to 20):\n{_list_species_summaries(g, 20)}"
+            )
+
+        # Create EA node
+        ea = _mint_hash_iri("ElementalAnalysisData")
+        _ensure_type_with_label(g, ea, _class(OS, "ElementalAnalysisData"), data_label)
+
+        # Calculated and Experimental WeightPercentage nodes
+        for value_text, kind in (
+            (calculated_value_text, "Calculated"),
+            (experimental_value_text, "Experimental"),
+        ):
+            if value_text:
+                wp = _mint_hash_iri("WeightPercentage")
+                _ensure_type_with_label(g, wp, _class(OS, "WeightPercentage"), kind)
+                g.set((wp, _class(OS, f"hasWeightPercentage{kind}Value"), Literal(value_text)))
+                g.add((ea, _class(OS, f"hasWeightPercentage{kind}"), wp))
+
+        # Empirical molecular formula node (optional)
+        if empirical_molecular_formula:
+            mf = _mint_hash_iri("MolecularFormula")
+            _ensure_type_with_label(g, mf, _class(OS, "MolecularFormula"), empirical_molecular_formula)
+            g.set((mf, _class(OS, "hasMolecularFormulaValue"), Literal(empirical_molecular_formula)))
+            g.add((species_ref, _class(OS, "hasMolecularFormula"), mf))
+
+        # Attach EA to species
+        g.add((species_ref, _class(OS, "hasElementalAnalysisData"), ea))
+
+        return str(ea)

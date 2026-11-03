@@ -71,5 +71,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Dataset, Literal, URIRef, XSD and NamespaceManager go; OWL joins the `from rdflib import` line, which keeps Graph and RDF.",
+    "LD Python: only Graph stays, for the annotation. The rdflib.namespace import goes, and the @prefix rdf: and xsd: lines go (the island writes `a`); @prefix owl: stays."
+  ]
 }

@@ -71,5 +71,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused (URIRef builds the four module-level constants).",
+    "LD Python: URIRef goes from the shim import, because the constants are `<urn:...>` terms."
+  ]
 }

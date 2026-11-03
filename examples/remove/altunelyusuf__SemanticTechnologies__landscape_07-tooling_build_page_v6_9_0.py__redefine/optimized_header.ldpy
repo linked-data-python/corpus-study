@@ -1,0 +1,18 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/07-tooling/build_page_v6_9_0.py
+# region: redefine (lines 61-65, stratum remove)
+# licence of the source repository: see meta.json
+from context_shim import HERE, replay  # context shim, see meta.json
+from rdflib import Graph
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+g = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_8_0.ttl")
+@graph g
+
+def redefine(iri, label=None, defn=None, note=None, scope=None):
+    for predicate, value in ((rdfs:label, label), (skos:definition, defn),
+                             (skos:note, note), (skos:scopeNote, scope)):
+        if value is not None:
+            -{ {iri} {predicate} ?old }
+            +{ {iri} {predicate} {value}@en }
+
+replay(redefine)  # demo harness in the shim, identical on both sides

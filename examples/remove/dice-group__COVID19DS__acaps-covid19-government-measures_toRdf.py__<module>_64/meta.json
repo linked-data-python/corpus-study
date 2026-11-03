@@ -117,5 +117,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: FOAF, OWL, DCTERMS and SKOS go; RDF, RDFS and XSD join the `from rdflib import` line. `import urllib` goes, because `import urllib.parse` already binds `urllib`.",
+    "LD Python: `import urllib` goes for the same reason. The header has no rdflib import; the @prefix lines belong to the region and are all used."
+  ]
 }

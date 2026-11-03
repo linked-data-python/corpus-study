@@ -97,5 +97,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused. `is_during` stays on both sides because importing it registers tfun:isDuring.",
+    "LD Python: Namespace and `from rdflib.namespace import TIME` go, because the @prefix lines replace TFUN, ID and TIME. The three @prefix lines are used."
+  ]
 }

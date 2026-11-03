@@ -90,5 +90,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: List, Tuple, Graph, Namespace, RDFS and XSD go; RDF joins the `from rdflib import` line. All the names of the shim import are used.",
+    "LD Python: the same, and RDF and the @prefix rdf: line go too, because the island writes `a`. Only Optional, URIRef and Literal stay from the library imports."
+  ]
 }

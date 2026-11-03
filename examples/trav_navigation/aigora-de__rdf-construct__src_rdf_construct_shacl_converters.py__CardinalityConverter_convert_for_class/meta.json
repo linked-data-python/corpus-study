@@ -102,5 +102,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal, Namespace and XSD go; OWL joins the `from rdflib import` line.",
+    "LD Python: Literal, Namespace, XSD, RDF, RDFS and OWL go; BNode, Graph and URIRef stay. The rdfs: and owl: @prefix lines are used."
+  ]
 }

@@ -108,5 +108,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF and the shadowed `from rdflib.namespace import DCTERMS` go; RDFS and OWL join the `from rdflib import` line. The module-level `DCTERMS = Namespace(...)` that the region reads (graph.bind) stays, so Namespace stays.",
+    "LD Python: RDF, RDFS, OWL and Namespace go (the islands use rdfs:, owl:, dcterms:); DCTERMS, needed by `graph.bind`, joins the `from rdflib import` line. The three @prefix lines are used."
+  ]
 }

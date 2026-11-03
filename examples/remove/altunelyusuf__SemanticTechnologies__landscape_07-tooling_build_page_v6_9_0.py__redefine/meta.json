@@ -101,5 +101,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace, URIRef, RDF, OWL, DCTERMS, XSD and PROV go; RDFS and SKOS join the `from rdflib import` line. Graph stays for the module-level `g = Graph().parse(...)`, and Literal for the region.",
+    "LD Python: the whole rdflib.namespace import goes, and Namespace, URIRef and Literal go too; only Graph stays. Five of the seven @prefix lines go (rdf, owl, dcterms, xsd, prov); rdfs: and skos: stay."
+  ]
 }

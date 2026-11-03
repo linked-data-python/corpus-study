@@ -64,5 +64,11 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python: the region (lines 86-88) reads only the last `q`. The first five `q = ...` assignments of the header are overwritten before the region runs, so they go on both sides: five prepareQuery(...) calls in Python and five s{ } islands in LD Python. This is the only header change in this batch that removes more than imports, and it is identical on both sides.",
+    "Python: Graph, prepareQuery and NAMESPACE_MAP stay, because the remaining query uses them. LD Python: only Graph is imported; the odml: and rdf: @prefix lines stay, because the remaining query uses them.",
+    "The header-variant notation ratio stays above 1 (about 3.0 against 5.2): in the remaining query, the SPARQL text is one string token in Python and tokenized SPARQL in s{ }."
+  ]
 }
