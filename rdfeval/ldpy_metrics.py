@@ -190,8 +190,17 @@ def _is_expression(text: str) -> bool:
         return False
 
 
+_CALL_SUFFIX = re.compile(r"(?<=\})\s*\([^()]*\)\s*$")
+
+
 def tokenize_island(text: str, kind: str, stats: IslandStats) -> None:
     """Tokenise one island's source text into stats (additive)."""
+    # a call suffix `(g)` may be part of the island's span: its Python
+    # tokens count as such, and the body is still read as RDF text
+    suffix = _CALL_SUFFIX.search(text) if kind in BODY_KINDS else None
+    if suffix:
+        stats.tokens += _python_tokens(suffix.group(0).strip())
+        text = text[:suffix.start()]
     if kind in BODY_KINDS and "{" in text and text.rstrip().endswith("}"):
         open_, close = text.find("{"), text.rfind("}")
         stats.tokens += 2                       # `g{` and `}`

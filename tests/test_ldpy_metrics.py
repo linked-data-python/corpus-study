@@ -197,3 +197,16 @@ def test_embedded_rdf_text_is_counted_apart_on_both_sides():
     assert (b["sparql_islands"], b["sparql_tokens"]) == (1, 8)
     assert b["tokens_embedded"] == 8
     assert b["tokens_host"] == b["tokens"] - 8 - 2
+
+
+def test_a_call_suffix_does_not_turn_the_island_body_into_python():
+    """`+{ … }(g)` and `@graph g` + `+{ … }` count the body alike: the call
+    suffix is part of the island's span, and must not hide its closing
+    brace from the body tokenizer (hyphenated names were split)."""
+    from rdfeval.ldpy_metrics import IslandStats, tokenize_island
+    with_suffix, bare = IslandStats(), IslandStats()
+    tokenize_island("+{ <http://a/s> ex:p-q ex:o-r }(g)", "island:addto",
+                    with_suffix)
+    tokenize_island("+{ <http://a/s> ex:p-q ex:o-r }", "island:addto", bare)
+    assert with_suffix.terms == bare.terms == 3
+    assert with_suffix.tokens == bare.tokens + 3      # `(`, `g`, `)`
