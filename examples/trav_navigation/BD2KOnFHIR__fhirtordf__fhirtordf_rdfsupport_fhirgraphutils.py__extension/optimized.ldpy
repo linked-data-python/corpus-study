@@ -13,6 +13,6 @@ def extension(g: Graph, node: Identifier, extension_predicate: Union[URIRef, str
     ext_pred = str(extension_predicate)
     for ext, p in m{ {node} fhir:Element.extension ?ext . ?ext ?p [] }(g):
         # TODO: Think this through -- do we need something in the RDF
-        if value(g, ext, <http://hl7.org/fhir/Extension.url>) == ext_pred and 'Extension.value' in str(p):
+        if value(g, ext, fhir:Extension\.url) == ext_pred and 'Extension.value' in str(p):
             return value(g, ext, p, asLiteral)
     return None

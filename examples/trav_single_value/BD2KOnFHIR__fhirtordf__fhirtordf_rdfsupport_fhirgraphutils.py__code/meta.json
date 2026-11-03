@@ -29,7 +29,8 @@
     "`FHIR.CodeableConcept.coding` is fhirtordf's DottedNamespace notation: FHIR is `Namespace(\"http://hl7.org/fhir/\")` with dotted attribute chaining, so `FHIR.CodeableConcept.coding` and the prefixed name `fhir:CodeableConcept.coding` (with `@prefix fhir: <http://hl7.org/fhir/>`) denote the exact same URIRef -- Turtle's PN_LOCAL grammar allows the embedded dot. Kept as `FHIR.Coding.system`/`FHIR.Coding.code` (plain Python, not islands) where they appear as ordinary arguments to the untranslated `value()` helper -- those are outside any island, so no prefixed-name notation applies there; only the two direct `g.*` calls inside `code()` itself were translated.",
     "`code()` calls a sibling function `value()` (fhirgraphutils.py lines 11-28) that the tirage's captured context does not include. Restored verbatim in the context shim `fhirgraphutils_context.py` (see meta.json) and imported identically by original.py and translated.ldpy -- it is not part of this region and is left as plain rdflib code, so it does not bias the comparison.",
     "`fhirtordf.rdfsupport.namespaces`/`dottednamespace` are not installed in this environment (no PyPI package, no local sys.path entry): shimmed as a minimal local `fhirtordf` package (see meta.json) reproducing `DottedNamespace`/`DottedURIRef` and `FHIR = DottedNamespace(\"http://hl7.org/fhir/\")` verbatim from the real source (corpus/repos/BD2KOnFHIR__fhirtordf/), trimmed to the one namespace this region uses. Identical for both representations.",
-    "driver.py: `code(g, subject, predicate, system=None, asLiteral=False)` needs external `subject`/`predicate` arguments (both fixed IRIs here, unlike a BNode-anchored fixture, so no lookup indirection was needed). Four calls: match_no_system (ex:Obs1 has exactly one coding, so `system=None` returns unambiguously regardless of iteration order), match_by_system (ex:Obs2 has two codings, only one matching the given system, so the filtered result does not depend on order either), zero_value (ex:Obs3 has no ex:hasCode triple: the trav_single_value zero-solution case), match_as_literal (asLiteral=True, exercising the helper's Literal-vs-str branch). ex:Obs4's coding is fixture neighbourhood no call ever reaches."
+    "driver.py: `code(g, subject, predicate, system=None, asLiteral=False)` needs external `subject`/`predicate` arguments (both fixed IRIs here, unlike a BNode-anchored fixture, so no lookup indirection was needed). Four calls: match_no_system (ex:Obs1 has exactly one coding, so `system=None` returns unambiguously regardless of iteration order), match_by_system (ex:Obs2 has two codings, only one matching the given system, so the filtered result does not depend on order either), zero_value (ex:Obs3 has no ex:hasCode triple: the trav_single_value zero-solution case), match_as_literal (asLiteral=True, exercising the helper's Literal-vs-str branch). ex:Obs4's coding is fixture neighbourhood no call ever reaches.",
+    "2026-11-03: FHIR dotted local names written with Turtle's escape, `fhir:X\\.y` (and `fhir:X\\/n`), which ldpy reads outside islands since c0e1ca6; they replace full IRIs or `FHIR.X.y` attribute chains that the earlier limit forced (record ldpy/012). Five check lines OK."
   ],
   "draft_sha": "90c4177f21a533e1",
   "provenance": {
@@ -70,7 +71,8 @@
   "optimization_notes": [
     "Nothing to compress in Python: optimized.py is original.py. `g.value` then a loop cannot become one `predicate / FHIR.CodeableConcept.coding` path read (that would visit the codings of every value, not only the first one), and `return None` stays because the other returns return a value.",
     "optimized.ldpy: only the coding loop becomes an island, `m{ {c} fhir:CodeableConcept.coding ?o }(g)` (3 tokens shorter than the call); `g.value(subject, predicate)` stays (rule 4: `m{ {subject} {predicate} ?o }(g).first()` is longer). `FHIR.Coding.system` / `FHIR.Coding.code` stay Python: outside an island `fhir:Coding.system` reads as `fhir:Coding` followed by the attribute `.system`.",
-    "The island saves less than the fixed header's `@prefix fhir:` costs, hence a notation ratio above 1. No exception to the symmetry rule."
+    "The island saves less than the fixed header's `@prefix fhir:` costs, hence a notation ratio above 1. No exception to the symmetry rule.",
+    "2026-11-03: FHIR dotted local names written with Turtle's escape, `fhir:X\\.y` (and `fhir:X\\/n`), which ldpy reads outside islands since c0e1ca6; they replace full IRIs or `FHIR.X.y` attribute chains that the earlier limit forced (record ldpy/012). Five check lines OK."
   ],
   "optimized_constructions": [
     "@prefix",
@@ -82,7 +84,8 @@
   ],
   "header_optimization_status": "final",
   "header_optimization_notes": [
-    "Both sides drop Tuple, List (typing), BNode, Literal, RDF (rdflib) and Identifier (rdflib.term); FHIR stays on both sides (FHIR.Coding.*), and so does `@prefix fhir:` (used by the island)."
+    "Both sides drop Tuple, List (typing), BNode, Literal, RDF (rdflib) and Identifier (rdflib.term); FHIR stays on both sides (FHIR.Coding.*), and so does `@prefix fhir:` (used by the island).",
+    "2026-11-03: the ldpy header no longer imports FHIR, unused once the region writes fhir:Coding\\.system."
   ],
   "validation_optimized": {
     "optimized.py": {

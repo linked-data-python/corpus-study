@@ -1018,14 +1018,14 @@
    "rules not approved: +{ } ← .add(); @graph ← (receiver); @prefix ← namespace defined outside the region; m{ }·bool ← .triples(); term: p:l ← NS.l; term: {x} ← x"
   ],
   "BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_fhirgraphutils.py__extension": [
-   "rules not approved: @graph ← (receiver); @prefix ← namespace defined outside the region; m{ }·for ← .objects(); term: . ← several triples; term: <iri> ← string; term: p:l ← NS.l; term: {x} ← x"
+   "rules not approved: @graph ← (receiver); @prefix ← namespace defined outside the region; m{ }·for ← .objects(); term: . ← several triples; term: p:l ← NS.l; term: {x} ← x"
   ],
   "BD2KOnFHIR__fhirtordf__fhirtordf_rdfsupport_rdfcompare.py__rdf_compare_split_primary_subjects": [
    "rules not approved: (g) ← receiver; m{ }·value ← .subject_predicates(); term: {x} ← x"
   ],
   "BD2KOnFHIR__fhirtordf__tests_issue_tests_test_issue4.py__Issue4TestCase_test_decimal": [
    "classification: awkward",
-   "rules not approved: @graph ← (receiver); from … import p: ← import; m{ }·first ← .value(); term: <iri> ← URIRef('…'); term: literal outside island; term: p:l ← NS.l; term: {x} ← x"
+   "rules not approved: @graph ← (receiver); from … import p: ← import; m{ }·first ← .value(); term: literal outside island; term: p:l ← NS.l; term: p:l ← URIRef('…'); term: {x} ← x"
   ],
   "CatholicOS__ontokit-api__ontokit_services_linter.py__OntologyLinter__check_orphan_class": [
    "rules not approved: @graph ← (receiver); @prefix ← rdflib namespace; m{ }·collect ← .subjects(); m{ }·for ← .objects(); m{ }·for ← .subjects(); term: a ← RDF.type; term: p:l ← NS.l; term: {x} ← x"
@@ -1209,7 +1209,7 @@
    "rules not approved: (g) ← receiver; @prefix ← rdflib namespace; m{ }·first ← .value(); m{ }·for ← .objects(); term: p:l ← NS.l; term: {x} ← x"
   ],
   "BD2KOnFHIR__fhirtordf__tests_rdfsupport_tests_test_fhirgraphutils.py__FHIRGraphUtilsTestCase_test_value": [
-   "rules not approved: @graph ← (receiver); @prefix ← namespace defined outside the region; m{ }·first ← .value(); term: p:l ← NS.l; term: {x} ← x"
+   "rules not approved: @graph ← (receiver); @prefix ← namespace defined outside the region; m{ }·first ← .value(); term: p:l ← NS.l; term: p:l ← NS['l']; term: {x} ← x"
   ],
   "Haigutus__triplets__triplets_validation_shacl_ir.py___resolve_path": [
    "rules not approved: @graph ← (receiver); m{ }·bool ← .value(); m{ }·first ← .value(); term: {x} ← x"

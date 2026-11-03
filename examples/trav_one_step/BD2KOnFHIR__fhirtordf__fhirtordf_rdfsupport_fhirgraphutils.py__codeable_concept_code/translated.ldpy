@@ -38,8 +38,8 @@ def codeable_concept_code(g: Graph, subject: Node, predicate: URIRef, system: Op
     coded_entry = m{ {subject} {predicate} ?v }.first()
     if coded_entry:
         for codeable_concept in m{ {coded_entry} fhir:CodeableConcept.coding ?o }:
-            coding_system = value(g, codeable_concept, FHIR.Coding.system)
-            coding_code = value(g, codeable_concept, FHIR.Coding.code)
+            coding_system = value(g, codeable_concept, fhir:Coding\.system)
+            coding_code = value(g, codeable_concept, fhir:Coding\.code)
             if coding_system and coding_code and (system is None or system == coding_system):
                 rval.append(CodeableConcept(coding_system, coding_code, m{ {codeable_concept} rdf:type ?t }.first()))
     return rval

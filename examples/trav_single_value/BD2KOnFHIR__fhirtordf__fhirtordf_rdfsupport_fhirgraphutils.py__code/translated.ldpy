@@ -17,6 +17,6 @@ def code(g: Graph, subject: Node, predicate: URIRef, system: Optional[Union[URIR
     c = m{ {subject} {predicate} ?o }(g).first()
     if c:
         for coding in m{ {c} fhir:CodeableConcept.coding ?o }(g):
-            if not system or str(system) == value(g, coding, FHIR.Coding.system):
-                return value(g, coding, FHIR.Coding.code, asLiteral=asLiteral)
+            if not system or str(system) == value(g, coding, fhir:Coding\.system):
+                return value(g, coding, fhir:Coding\.code, asLiteral=asLiteral)
     return None

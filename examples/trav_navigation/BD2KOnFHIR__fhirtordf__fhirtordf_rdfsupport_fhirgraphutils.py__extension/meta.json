@@ -19,7 +19,6 @@
     "@graph",
     "m{ }",
     "prefixed name",
-    "IRI",
     "variable"
   ],
   "translation_notes": [
@@ -27,7 +26,8 @@
     "`value()` (fhirtordf's own helper, not the region under study) is kept as an ordinary Python call on both sides via a context shim (context_shim.py, copied verbatim from fhirtordf/rdfsupport/fhirgraphutils.py at the pinned commit) -- it is a separate function with its own uniqueness-checking semantics, not itself expressible/inexpressible in this study; only its call sites inside `extension` are what get translated.",
     "`FHIR.Element.extension` used INSIDE the m{ } pattern transpiles correctly as one dotted prefixed name (`fhir:Element.extension`), but the second predicate `FHIR.Extension.url`, used as a bare Python-level term argument to value(g, ext, ...) OUTSIDE any pattern, does not: `fhir:Extension.url` written there parses as prefixed name `fhir:Extension` followed by an ordinary Python `.url` attribute access (AttributeError at run time; confirmed by inspecting the transpiled Python). This is a real lexical inconsistency between term position inside an island pattern and term position in plain Python -- not documented in migrate-from-rdflib.md's two known pitfalls -- and had to be worked around with the full IRI form `<http://hl7.org/fhir/Extension.url>` instead. Flagged per INSTRUCTIONS.md 2 bis / 5 as a possible defect worth a ldpy/012-style note.",
     "`context_shim.py`'s copy of `DottedURIRef` needed its own `__eq__`/`__hash__` (present in the real fhirtordf source, initially dropped by mistake while shimming): without them `FHIR.Element.extension == URIRef('http://hl7.org/fhir/Element.extension')` is False under Python's default reflected-comparison fallback, which silently starved `g.objects()` of any match -- a reminder that DottedNamespace/DottedURIRef fidelity matters for the fixture to exercise anything at all.",
-    "fixture.ttl gives patient1 three candidate extensions: extA (wrong url, must not match), extB (right url but no Extension.value* predicate -- proves the second half of the fused join term is load-bearing, not decorative), and extC (right url AND an Extension.valueString -- the single expected solution). patient2's only extension has the right url but no Extension.value* predicate either (zero-solution from a different angle), and a wholly absent node is the zero-candidate case. Breaking the join's filter ('Extension.value' -> 'Extension.NOPE') was confirmed to flip the check to FAIL."
+    "fixture.ttl gives patient1 three candidate extensions: extA (wrong url, must not match), extB (right url but no Extension.value* predicate -- proves the second half of the fused join term is load-bearing, not decorative), and extC (right url AND an Extension.valueString -- the single expected solution). patient2's only extension has the right url but no Extension.value* predicate either (zero-solution from a different angle), and a wholly absent node is the zero-candidate case. Breaking the join's filter ('Extension.value' -> 'Extension.NOPE') was confirmed to flip the check to FAIL.",
+    "2026-11-03: FHIR dotted local names written with Turtle's escape, `fhir:X\\.y` (and `fhir:X\\/n`), which ldpy reads outside islands since c0e1ca6; they replace full IRIs or `FHIR.X.y` attribute chains that the earlier limit forced (record ldpy/012). Five check lines OK."
   ],
   "draft_sha": "a5d6a8ebd39dc005",
   "provenance": {
@@ -59,14 +59,14 @@
   "optimization_status": "final",
   "optimization_notes": [
     "Python: `for p, o in g.predicate_objects(ext)` becomes `for p in g.predicates(ext)` (the same predicates in the same order, the object was unused). The rest is already minimal: the url check stays outside the inner loop (merging the two conditions would call `value()` once per predicate for one token), and the explicit `return None` stays (the other return returns a value).",
-    "LD Python: EXCEPTION to the symmetry rule, kept in LD Python only: the two selector loops merge into ONE `m{ {node} fhir:Element.extension ?ext . ?ext ?p [] }(g)` (the translator's join, with the unused object now `[]`), so the url check joins the 'Extension.value' test in a single `if`. Both selectors are multi-valued, so the join does not change cardinality; `value()` is called per (ext, p) row instead of once per ext, which raises the same UniquenessError at the same point (an extension with two urls has rows) and changes nothing else. The call suffix `(g)` replaces the translation's `@graph g`, which re-bound `fhir:` on the caller's graph (repair note); `fhir:Extension.url` cannot be written in Python position (the dot ends the name, a backslash escape is rejected), so the full IRI `<http://hl7.org/fhir/Extension.url>` stays, as in the translation, 4 tokens shorter than `FHIR.Extension.url`."
+    "LD Python: EXCEPTION to the symmetry rule, kept in LD Python only: the two selector loops merge into ONE `m{ {node} fhir:Element.extension ?ext . ?ext ?p [] }(g)` (the translator's join, with the unused object now `[]`), so the url check joins the 'Extension.value' test in a single `if`. Both selectors are multi-valued, so the join does not change cardinality; `value()` is called per (ext, p) row instead of once per ext, which raises the same UniquenessError at the same point (an extension with two urls has rows) and changes nothing else. The call suffix `(g)` replaces the translation's `@graph g`, which re-bound `fhir:` on the caller's graph (repair note); `fhir:Extension.url` cannot be written in Python position (the dot ends the name, a backslash escape is rejected), so the full IRI `<http://hl7.org/fhir/Extension.url>` stays, as in the translation, 4 tokens shorter than `FHIR.Extension.url`.",
+    "2026-11-03: FHIR dotted local names written with Turtle's escape, `fhir:X\\.y` (and `fhir:X\\/n`), which ldpy reads outside islands since c0e1ca6; they replace full IRIs or `FHIR.X.y` attribute chains that the earlier limit forced (record ldpy/012). Five check lines OK."
   ],
   "optimized_constructions": [
     "@prefix",
     "m{ }",
     "call suffix (g)",
     "prefixed name",
-    "IRI",
     "variable",
     "interpolation {expr}"
   ],

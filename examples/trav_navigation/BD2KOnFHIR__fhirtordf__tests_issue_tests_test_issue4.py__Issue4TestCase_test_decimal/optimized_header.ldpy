@@ -44,6 +44,6 @@ def test_decimal(self):
     self.assertEqual("2.00"^^xsd:decimal,
                      g.value(
                          g.value(
-                             g.value(<http://hl7.org/fhir/VisionPrescription/33123>,
-                                     <http://hl7.org/fhir/VisionPrescription.dispense>),
-                             <http://hl7.org/fhir/VisionPrescription.dispense.add>), fhir:value))
+                             g.value(fhir:VisionPrescription\/33123,
+                                     fhir:VisionPrescription\.dispense),
+                             fhir:VisionPrescription\.dispense\.add), fhir:value))

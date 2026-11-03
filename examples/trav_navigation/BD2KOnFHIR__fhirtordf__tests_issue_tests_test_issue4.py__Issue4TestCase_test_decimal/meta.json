@@ -23,7 +23,6 @@
     ".first()",
     "prefixed name",
     "typed literal",
-    "IRI",
     "variable",
     "interpolation {expr}"
   ],
@@ -32,7 +31,8 @@
     "The second finding: `g.value(None, p)` is None in rdflib (a missing link propagates), whereas an interpolated None raises TypeError in `m{ }`. Without the guard the cases `two_dispenses`, `no_add` and `no_dispense` raise TypeError where the original raises the assertion error (proved). The reads are therefore written as three statements with `... if x is not None else None`, which is what makes the translation heavier than the three nested calls of the original: nothing in the language propagates an absent upstream value (the previous record's `or ANY` idiom does not apply: here None must stay 'no match', not 'any term').",
     "`Literal(\"2.00\", datatype=XSD.decimal)` is the typed literal `\"2.00\"^^xsd:decimal` (a string argument, so the lexical form is kept; `assertNotEqual` against `\"2.0\"^^xsd:decimal` holds). `Literal(2.00)` (a float) is unchanged: in an island `2.00` would be a decimal. `FHIR` (a DottedNamespace) is imported as `fhir:` from the shim (the import takes `FHIR`); the dotted names are legal Turtle local parts: `fhir:VisionPrescription.dispense.add`. `@graph g` after `g = test_rdf.graph`.",
     "Context shim `fhirtordf_shim.py`: fhirtordf is not installed (rdflib 5, jsonasobj, and the FHIR metadata vocabulary). DottedNamespace/DottedURIRef/FHIR are verbatim; `FHIRResource` is a STAND-IN whose graph is the loader's output frozen in a Turtle file of the directory (the real loader needs the vocabulary). So what is proved is the three reads over loader-shaped graphs, not the loader.",
-    "Driver: six cases over six frozen loader outputs (the loader's '2.0' which makes the expected failure fail, the exact '2.00' which passes, two dispenses, add without value (with 2.00 under neighbouring predicates), no add, no dispense). The raise messages of `assertEqual` carry both values, so the cases are told apart. Broken twice on purpose: the join variant (fails on two_dispenses) and the unguarded chain (fails on two_dispenses, no_add and no_dispense with TypeError); restored."
+    "Driver: six cases over six frozen loader outputs (the loader's '2.0' which makes the expected failure fail, the exact '2.00' which passes, two dispenses, add without value (with 2.00 under neighbouring predicates), no add, no dispense). The raise messages of `assertEqual` carry both values, so the cases are told apart. Broken twice on purpose: the join variant (fails on two_dispenses) and the unguarded chain (fails on two_dispenses, no_add and no_dispense with TypeError); restored.",
+    "2026-11-03: FHIR dotted local names written with Turtle's escape, `fhir:X\\.y` (and `fhir:X\\/n`), which ldpy reads outside islands since c0e1ca6; they replace full IRIs or `FHIR.X.y` attribute chains that the earlier limit forced (record ldpy/012). Five check lines OK."
   ],
   "draft_sha": "9f1f78d2b6563af0",
   "provenance": {
@@ -56,12 +56,12 @@
   "optimization_notes": [
     "optimized.py: the intermediate variables test_json and test_rdf go (`g = FHIRResource(..., loads(json_data)).graph`, after the function-level import); the three nested g.value calls, the assertions and the comments are unchanged -- the chain is already the most compact form.",
     "optimized.ldpy, from optimized.py: the three `Literal(\"2.0x\", datatype=XSD.decimal)` become typed literals `\"2.00\"^^xsd:decimal`; the nested g.value chain is KEPT in Python (the translation's three guarded `m{ }.first()` statements are longer, and a join changes the first-value semantics, see translation_notes), with its terms written as IRIs and a prefixed name. The dotted FHIR names must be full IRIs `<http://hl7.org/fhir/VisionPrescription.dispense>`: outside an island a prefixed name stops at the dot, so `fhir:VisionPrescription.dispense` would read `.dispense` as a Python attribute of the URIRef (AttributeError, checked); `fhir:value` has no dot and stays a prefixed name.",
-    "No exception to the symmetry; no m{ } left in this region."
+    "No exception to the symmetry; no m{ } left in this region.",
+    "2026-11-03: FHIR dotted local names written with Turtle's escape, `fhir:X\\.y` (and `fhir:X\\/n`), which ldpy reads outside islands since c0e1ca6; they replace full IRIs or `FHIR.X.y` attribute chains that the earlier limit forced (record ldpy/012). Five check lines OK."
   ],
   "optimized_constructions": [
     "from … import p:",
     "typed literal",
-    "IRI",
     "prefixed name"
   ],
   "header_optimization_status": "final",

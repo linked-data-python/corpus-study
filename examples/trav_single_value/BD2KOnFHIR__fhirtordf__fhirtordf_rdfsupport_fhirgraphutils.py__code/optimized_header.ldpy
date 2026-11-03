@@ -8,7 +8,6 @@
 from typing import Union, Optional
 from rdflib import Graph
 from rdflib.term import URIRef, Node
-from fhirtordf.rdfsupport.namespaces import FHIR
 from fhirgraphutils_context import value
 @prefix fhir: <http://hl7.org/fhir/> .
 
@@ -17,6 +16,6 @@ def code(g: Graph, subject: Node, predicate: URIRef, system: Optional[Union[URIR
     c = g.value(subject, predicate)
     if c:
         for coding in m{ {c} fhir:CodeableConcept.coding ?o }(g):
-            if not system or str(system) == value(g, coding, FHIR.Coding.system):
-                return value(g, coding, FHIR.Coding.code, asLiteral=asLiteral)
+            if not system or str(system) == value(g, coding, fhir:Coding\.system):
+                return value(g, coding, fhir:Coding\.code, asLiteral=asLiteral)
     return None

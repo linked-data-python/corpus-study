@@ -46,7 +46,7 @@ def test_decimal(self):
 
     # FHIR requires that *all* decimals use the first form.  While the diopter example above
     # would work, issues arise in situations where numbers really ARE decimal...
-    dispense = m{ <http://hl7.org/fhir/VisionPrescription/33123> fhir:VisionPrescription.dispense ?o }.first()
+    dispense = m{ fhir:VisionPrescription\/33123 fhir:VisionPrescription.dispense ?o }.first()
     add = m{ {dispense} fhir:VisionPrescription.dispense.add ?o }.first() if dispense is not None else None
     value = m{ {add} fhir:value ?o }.first() if add is not None else None
     self.assertEqual("2.00"^^xsd:decimal, value)

@@ -486,7 +486,7 @@ review):
 |---|---:|---:|---:|---:|
 | faithful translation (original → `translated.ldpy`) | +5.7 % | +6.9 % | — | — |
 | careful rereading (original → `optimized.py`) | +9.6 % | +9.6 % | +14.5 % | +14.5 % |
-| notation on top (`optimized.py` → `optimized.ldpy`) | +5.1 % | +6.8 % | +8.8 % | +10.0 % |
+| notation on top (`optimized.py` → `optimized.ldpy`) | +5.2 % | +6.8 % | +8.9 % | +10.0 % |
 | both (original → `optimized.ldpy`) | +16.7 % | +18.5 % | +25.8 % | +27.6 % |
 
 By stratum (median, all tokens; header variant after the bar):
@@ -505,8 +505,8 @@ By stratum (median, all tokens; header variant after the bar):
 | sparql_literal | 23 | 23.1 | −20.8 | −2.0 | −1.4 | 29.3 | −26.4 | 0.0 |
 | trav_existence | 30 | 8.0 | 2.7 | 2.7 | 11.6 | 11.8 | 6.7 | 21.7 |
 | trav_navigation | 30 | 9.4 | 4.8 | 4.8 | 14.1 | 11.7 | 9.2 | 19.5 |
-| trav_one_step | 26 | 12.0 | 0.0 | 0.0 | 11.3 | 14.3 | 2.6 | 18.7 |
-| trav_single_value | 29 | 4.9 | 0.0 | 0.0 | 6.8 | 11.2 | 2.3 | 13.2 |
+| trav_one_step | 26 | 12.0 | 0.3 | 0.3 | 11.3 | 14.3 | 2.8 | 18.7 |
+| trav_single_value | 29 | 4.9 | 0.2 | 0.2 | 6.8 | 11.2 | 3.4 | 13.8 |
 
 The notation pays where triples are written — runs of `.add` on a shared
 subject, typed literals, `[ ]` blank nodes, `g{ }` graph literals — and
