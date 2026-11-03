@@ -1,0 +1,25 @@
+# Extracted from jupyter-naas/abi@3fb7f5304d : libs/naas-abi-marketplace/naas_abi_marketplace/applications/linkedin/pipelines/LinkedInExportConnectionsPipeline.py
+# region: LinkedInExportConnectionsPipeline.generate_graph_date (lines 132-149, stratum ns_import_project)
+# licence of the source repository: see meta.json
+from datetime import datetime
+from naas_abi_context import abi:
+from rdflib import Graph, URIRef
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+def generate_graph_date(
+    self, date: datetime | str, date_format: str = "%Y-%m-%dT%H:%M:%S.%fZ"
+) -> tuple[URIRef, Graph]:
+    """Generates a URI for a date based on the given datetime object."""
+    if isinstance(date, datetime):
+        date_uri = abi:{str(int(date.timestamp() * 1000))}  # Create URI using timestamp
+        date_literal = f"{date.strftime(date_format)}"^^xsd:dateTime
+    elif isinstance(date, str):
+        date_uri = abi:{date}
+        date_literal = f{date}
+    return date_uri, g{
+        {date_uri} a owl:NamedIndividual, abi:ISO8601UTCDateTime ;
+            rdfs:label {date_literal}
+    }

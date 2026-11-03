@@ -94,5 +94,9 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides: `report_to_violations` goes and the parenthesised four-line import becomes one line; Path, pandas, VIOLATION_COLUMNS, violations_to_report_graph and the VIOLATIONS context constant (which the driver reads) stay. The prefix import `from rdflib.namespace import dcterms:, prov:, sh:` is inside the region and untouched."
+  ]
 }

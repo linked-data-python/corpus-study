@@ -64,5 +64,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the nine-name rdflib import shrinks to `from rdflib import Namespace` (Graph, RDF, URIRef, util, term, Literal, BNode, XSD unused).",
+    "LD Python: the whole rdflib import line goes; the region's `@prefix sio: f<...> as sio .` needs nothing from it. The Constants shim import stays on both sides. The driver's `sio` probe, redirected to this artefact, passes."
+  ]
 }

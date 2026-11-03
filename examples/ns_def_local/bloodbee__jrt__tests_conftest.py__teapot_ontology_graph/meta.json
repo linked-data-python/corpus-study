@@ -84,5 +84,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef goes and the two imports merge into `from rdflib import Graph, Literal, Namespace, OWL, RDF, RDFS`.",
+    "LD Python: `from rdflib import Graph` goes (g{ } needs no import). pytest stays on both sides for the decorator; the three @prefix lines (stuff, owl, rdfs) are all used."
+  ]
 }

@@ -94,5 +94,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, XSD and PROV go, and the two rdflib imports merge into one `from rdflib import ...` line (rdflib re-exports RDF, RDFS, OWL, SKOS, DCTERMS); the SEM and g2 context lines, BASEDIR and S stay, since the region reads them.",
+    "LD Python: Literal, URIRef and the whole `from rdflib.namespace import ...` line go (the island writes `a`, prefixed names and `@en` literals); Graph and Namespace stay for the g2/SEM context lines; the four @prefix lines (rdfs, owl, skos, dcterms) are all used."
+  ]
 }

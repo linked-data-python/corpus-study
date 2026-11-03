@@ -77,5 +77,9 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides: DatasetCommand, jlo and skos go from the shim import (the shim's configure_task reads its own jlo/skos); log, error, Translator, configure_task, rdflib and re stay. The header has no @prefix, and stays identical on both sides."
+  ]
 }

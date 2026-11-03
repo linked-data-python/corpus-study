@@ -102,5 +102,9 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header is `from rdflib import URIRef` and the eight module-level URIRef constants (ldpy: `<urn:...>` terms) that the region reads: all used, nothing to remove. The two files are copies of optimized.py and optimized.ldpy."
+  ]
 }

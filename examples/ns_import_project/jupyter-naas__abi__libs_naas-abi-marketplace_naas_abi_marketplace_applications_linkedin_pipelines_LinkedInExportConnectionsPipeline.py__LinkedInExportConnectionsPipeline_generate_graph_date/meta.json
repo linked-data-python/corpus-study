@@ -87,5 +87,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: UTC, BFO, CCO and Namespace go; datetime, ABI, OWL, RDF, RDFS, XSD, Graph, Literal and URIRef stay.",
+    "LD Python: UTC, BFO, CCO and OWL, RDF, RDFS, XSD, Literal, Namespace go; datetime (isinstance and annotation), abi:, and Graph and URIRef (annotations) stay; the three @prefix lines (owl, rdfs, xsd) are all used."
+  ]
 }

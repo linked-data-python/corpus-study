@@ -57,5 +57,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, Literal, BNode and the shim's Validation go; Graph, Namespace and Shacl stay.",
+    "LD Python: Namespace, URIRef, Literal, BNode and Validation go; Graph and Shacl stay. The two `@prefix ... as BASENS` / `as OPCUANS` lines stay: the region reads the Namespace objects they bind, not prefixed names."
+  ]
 }

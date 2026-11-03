@@ -89,5 +89,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF and URIRef go; BNode, Graph and Namespace stay for the annotations, Literal and XSD for the body, and the NodeCache shim import for the annotation.",
+    "LD Python: RDF, URIRef and XSD go (xsd:nonNegativeInteger is a prefixed name), and so does the unused `@prefix rdf:`; `@prefix xsd:` stays. The driver's binding phase, redirected to this artefact, still passes: no binding of the original's graph is lost."
+  ]
 }

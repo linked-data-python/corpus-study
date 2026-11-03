@@ -69,5 +69,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, URIRef, Literal and BNode go; only Namespace stays.",
+    "LD Python: the whole rdflib import line goes, since nothing of it is used; `@prefix basens: ... as BASENS` stays, the region reads BASENS."
+  ]
 }
