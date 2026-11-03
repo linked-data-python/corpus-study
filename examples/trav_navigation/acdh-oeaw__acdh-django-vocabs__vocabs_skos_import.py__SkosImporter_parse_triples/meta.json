@@ -66,5 +66,24 @@
       "subject, language, description limités à la première valeur"
     ],
     "remaining": "La note de meta.json selon laquelle run_pair abandonne la comparaison dès qu'un côté lève est périmée (le harnais compare type et message) ; elle reste en place, le pilote réparé exerce la levée."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/else around the loop becomes a guard clause (`if ... not in g: raise`, same message), which dedents the body; the title loop becomes a comprehension that reuses the harness's language_check (equivalent to the original's `str(lang) == \"None\"` test, rdflib 7.2.1 normalising lang='' to None); the five identical `\";\".join` fields become one loop over their names, and the description and source loops one loop of comprehensions; the per-field variable names (c/cp, contr/contrp...) go. Field order, the last-wins license loop and the AttributeError on an IRI source are kept.",
+    "optimized.ldpy, from optimized.py: the guard is `if not m{ ?cs a skos:ConceptScheme }`, the loop `for cs in m{ ?cs a skos:ConceptScheme }`, `g.objects(cs, prop)` becomes `m{ {cs} {prop} ?value }` (one token shorter, prop a materialised IRI from allow_properties) and the license loop `m{ {cs} dct:license ?license }`; the preferredLabel argument tuple takes prefixed names. Nothing fused: the predicates are a Python alternation, and a join on the type would drop schemes lacking a field.",
+    "No exception to the symmetry. preferredLabel stays an rdflib call on both sides (restored by context_shim.py)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph goes (unused, the shim imports its own), and `from rdflib.namespace import DC, RDFS, SKOS` goes (shadowed by the module's own Namespace definitions); the four Namespace lines stay.",
+    "LD Python: Graph, Namespace, RDF and the rdflib.namespace import go; URIRef (the harness's allow_properties) and the shim import stay; the four @prefix lines are all used."
+  ]
 }

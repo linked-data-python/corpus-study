@@ -69,5 +69,24 @@
       "(dataGraph) -> (shape)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the shape graph is parsed in one statement (`Graph().parse(..., format=util.guess_format(...))`); `shape.namespace_manager`, used six times, gets a local name (ns_manager); `shape.triples((None, SKOS.example, None))` with an unused p becomes `subject_objects`; inst is built in one statement (the brackets hold no < or >); the defaultValue loop iterates as nodeValURL (the copy goes) and uses `+=`; `str()` of strings goes; the nodeLabels if/else loses its `not`. Every leftover-value quirk of the bare loops is kept (path, nodeLb, nodeURL keep the previous property shape's value when a predicate is missing, and path or nodeURL still raise UnboundLocalError when the first one has none). The if/else is not turned into `setdefault(inst, {})[path] = ...`: with path unbound, setdefault would leave an empty dict in the module-level nodeLabels before raising.",
+    "optimized.ldpy, from optimized.py: `@graph shape` (checked: on a Graph() it adds no namespace binding, and it never overwrites one, so n3() output is unchanged) makes the six shape reads receiver-less islands: `m{ ?s skos:example ?o }`, the existence guard `m{ {s} a sh:NodeShape }` (bool() goes: it is an if test), and the five single-step `m{ {propShape} sh:P ?v }` reads; each is one to three tokens shorter than the call it replaces (measured). The dataGraph read stays `dataGraph.objects(nodeValURL, rdfs:label)` by rule 4: as `m{ ... }(dataGraph)` it is one token longer.",
+    "No exception to the symmetry. The four property-shape reads are not fused: each is optional and relies on the bare loop's leftover value."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, Namespace, NamespaceManager and XSD go (json, Path and Graph stay for the driving code); the rdflib.namespace names are sorted.",
+    "LD Python: URIRef and Namespace go; @prefix rdf: (the guard writes `a`) and xsd: (only inside a string) go."
+  ]
 }

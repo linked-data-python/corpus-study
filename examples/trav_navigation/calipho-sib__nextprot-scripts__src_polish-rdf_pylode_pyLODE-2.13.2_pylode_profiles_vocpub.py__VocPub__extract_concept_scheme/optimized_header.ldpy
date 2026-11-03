@@ -1,0 +1,77 @@
+# Extracted from calipho-sib/nextprot-scripts@f03504ce5e : src/polish-rdf/pylode/pyLODE-2.13.2/pylode/profiles/vocpub.py
+# region: VocPub._extract_concept_scheme (lines 368-460, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import Literal
+import markdown
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix sdo: <https://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+def _extract_concept_scheme(self):
+    """Extracts standard SKOS ConceptScheme metadata
+
+    Will interpret an owl:Ontology as a skos:ConceptScheme if run against an OWL document
+    """
+
+    self.METADATA.update(creators=set(), contributors=set(), publishers=set())
+    text_keys = {
+        skos:prefLabel: "title", owl:versionInfo: "versionInfo",
+        # dates
+        dcterms:created: "created", dcterms:modified: "modified", dcterms:issued: "issued",
+        <http://purl.org/vocab/vann/preferredNamespacePrefix>: "preferredNamespacePrefix",
+        <http://purl.org/vocab/vann/preferredNamespaceUri>: "preferredNamespaceUri",
+    }
+    @graph self.G
+    for s in m{ ?s a skos:ConceptScheme }:
+        self.METADATA["uri"] = str(s)
+        for p, o in m{ {s} ?p ?o }:
+            if p in text_keys:
+                self.METADATA[text_keys[p]] = str(o)
+
+            if p in (skos:definition, skos:historyNote):
+                key = "description" if p == skos:definition else "historyNote"
+                self.METADATA[key] = (
+                    str(o) if self.outputformat == "md" else markdown.markdown(str(o)))
+
+            if p in (dcterms:source, dcterms:license):
+                self.METADATA[p.split("/")[-1]] = (
+                    self._make_formatted_uri(o)  # '<a href="{0}">{0}</a>'.format(str(o))
+                    if str(o).startswith("http") else str(o))
+
+            if p == owl:versionIRI:
+                self.METADATA["versionIRI"] = self._make_formatted_uri(o)
+
+            if p == dcterms:rights:
+                self.METADATA["rights"] = (
+                    str(o).replace("Copyright", "&copy;").replace("copyright", "&copy;")
+                    .replace("(c)", "&copy;"))
+
+            # Agents
+            if p in [dcterms:creator, dcterms:contributor, dcterms:publisher]:
+                self.METADATA[p.split("/")[-1] + "s"].add(
+                    str(o) if type(o) == Literal else self._make_agent(o))  # Blank Node or URI
+
+            # TODO: cater for other Agent representations
+
+            if p == prov:wasGeneratedBy:
+                for o2 in m{ {o} doap:repository ?o2 }:
+                    self.METADATA["repository"] = self._make_formatted_uri(o2)
+
+            if p == sdo:codeRepository:
+                self.METADATA["repository"] = self._make_formatted_uri(o)
+
+    if self.METADATA.get("title") is None:
+        raise ValueError(
+            "Your taxonomy's ConceptScheme does not indicate any form of title. "
+            "You must declare one of the following for it: rdfs:label, dct:title, skos:prefLabel"
+        )
+
+    if self.COLLECTIONS:
+        self.METADATA["has_collections"] = True
+
+    if self.CONCEPTS:
+        self.METADATA["has_concepts"] = True

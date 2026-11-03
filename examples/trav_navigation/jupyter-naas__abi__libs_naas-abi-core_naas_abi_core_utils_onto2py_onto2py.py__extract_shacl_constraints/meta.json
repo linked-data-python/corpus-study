@@ -53,5 +53,21 @@
       "for … in reversed(list(m{ … }))"
     ],
     "remaining": "Seule la dernière écriture par chemin est observable : un réordonnancement qui la conserve n'est pas distingué."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress; it is original.py unchanged. The three nested selectors are already the minimal Python, and the process_property_shape call cannot be put on one line at that depth without passing 100 characters.",
+    "optimized.ldpy: the translation's join, `m{ ?shape a {SHACL.NodeShape} ; {SHACL.targetClass} ?target_class ; {SHACL.property} ?prop_shape }` under `@graph g` (predicates interpolated, SHACL being a parameter), with the classes filter as an if over its rows; one nesting level less lets the call fit on one line. The translation's comment about the join goes, and so do the two comments that described the merged loops.",
+    "Exception to the symmetry: merging the three loops into one is a restructuring only the multi-pattern m{ } allows (in Python, a comprehension over the same three selectors is longer than the loops). It keeps the call order (ordered=True in the driver); the property-shape read now also runs for target classes the filter rejects, which has no effect."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused on either side (rdflib for the annotation and RDF.type, the three shim names, no @prefix): optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

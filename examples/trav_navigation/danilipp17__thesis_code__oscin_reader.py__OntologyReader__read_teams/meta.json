@@ -59,5 +59,24 @@
       "either island replaced by []"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the black-style folding of the region (each `(s, RDF.type, C) in self.g` tuple over five lines, each call over three) is undone, and the one-use temporaries trigger (twice) and operator are written into the dicts they fill; the composite dict is still appended after its sub-condition loop, so a raise in _int_value (OverflowError on an infinite maxTurns, which the shim does not catch) leaves termination_conditions as the original leaves it. The elif chains, the `mt is not None` guards and the promotion of the first sub TurnLimit are unchanged. The care ratio stays near 1 because the inline graph-building harness, copied as is, outweighs the region.",
+    "optimized.ldpy, from optimized.py: the two traversals become `m{ {team_uri} agentoscin:hasTerminationCondition ?term_uri }` and `m{ {term_uri} agentoscin:hasSubCondition ?sub_uri }` under `@graph self.g`, the six type tests become bare `m{ {x} a agentoscin:C }` in their if/elif (no bool(): an if test), and the _int_value/_str_value predicates become prefixed names.",
+    "No exception to the symmetry; no join (the type dispatch is an elif chain over disjoint classes)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, OWL, RDFS, XSD go, and so do the unused module constants AGENTO, CALLS_CREW, COORD_CUSTOM, COORD_SEQUENTIAL, HAS_DESCRIPTION and HAS_TITLE; RDF and Namespace are imported from rdflib with Graph and Literal. AGENTOSCIN stays (the harness builds its graph with it).",
+    "LD Python: the same names go, and @prefix owl:, rdf:, rdfs:, xsd: and agento: with them; the AGENTOSCIN = Namespace(...) definition and the agentoscin: prefix become one `@prefix agentoscin: <...> as AGENTOSCIN .`, which gives the harness its Namespace object, so Namespace goes too."
+  ]
 }

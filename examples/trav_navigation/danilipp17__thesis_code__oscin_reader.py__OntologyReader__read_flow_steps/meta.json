@@ -63,5 +63,24 @@
       "ordre inversé des agents associés"
     ],
     "remaining": "L'équivalence du break repose sur l'ordre d'insertion commun à g.objects() et m{ } sur le store Memory (dit dans la docstring) ; le populator du dépôt ne lie qu'un agent par étape (populator.py:913-920)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the step_info values that were computed into one-use temporaries (order, routing_logic, next_names, decorator_args, associated_agent_key, aggregation_combinator, calls_crew) are written in the dict literal: two comprehensions replace the append loops, `next(filter(None, ...), None)` replaces the first-truthy-key loop with its break (lazy, so it stops at the same agent), and routing_logic becomes a conditional expression. is_end is inlined in its elif. The edge-mapping block becomes `try: json.loads(... or \"{}\") except (JSONDecodeError, TypeError): {}`, the same value in every case. step_info is now written before step_uri_to_name, so a raise while building the dict (only _int_value can raise) leaves both dicts as the original leaves them. The module-level leftovers that disappear (order, next_names, lit, key, edge_mapping_json...) are not compared; the ones kept (name, is_start, is_conditional, step_type, edge_mapping) keep their values.",
+    "optimized.ldpy, from optimized.py: the six reads become islands under the harness's `@graph self.g`: `m{ {wp_uri} agento:hasWorkflowStep ?step_uri }`, `bool(m{ {step_uri} a agento:StartStep })` and its ConditionalStep twin (bool kept: is_start/is_conditional are compared module values), `m{ {step_uri} a agento:EndStep }` bare in the elif, and three `m{ {step_uri} P ?v }` in the comprehensions; each is two to five tokens shorter than its Python (measured). The _str_value/_int_value arguments become prefixed names.",
+    "No exception to the symmetry; no join (each read fills an independent field)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Optional (the annotation went with the loop), Graph, Namespace, URIRef, OWL, RDFS, XSD, COORD_CUSTOM, COORD_SEQUENTIAL and HAS_DESCRIPTION go; RDF is imported from rdflib with Literal; the shim import fits on one line.",
+    "LD Python: the same, plus RDF, AGENTO and AGENTOSCIN (replaced by the prefixes); @prefix rdf: goes (rdf:type is written `a`)."
+  ]
 }

@@ -1,0 +1,63 @@
+# Extracted from calipho-sib/nextprot-scripts@f03504ce5e : src/polish-rdf/pylode/pyLODE-2.13.2/pylode/profiles/ontdoc.py
+# region: OntDoc._extract_metadata (lines 345-428, stratum trav_navigation)
+# licence of the source repository: see meta.json
+import markdown
+from rdflib import Literal
+from rdflib.namespace import dcterms:, doap:, owl:, prov:, sdo:, skos:
+
+# Wrapped in a function (context restoration, meta.json: the region is the
+# body of a method, `self` is a free variable of it). The body itself, from the
+# `for` line to the end of the file, is what was extracted; only that `for`
+# line is indented by one space, so that it can sit under the `def`.
+def extract_metadata_region(self):
+ text_keys = {
+     dcterms:title: "title", owl:versionInfo: "versionInfo",
+     # dates
+     dcterms:created: "created", dcterms:modified: "modified", dcterms:issued: "issued",
+     <http://purl.org/vocab/vann/preferredNamespacePrefix>: "preferredNamespacePrefix",
+     <http://purl.org/vocab/vann/preferredNamespaceUri>: "preferredNamespaceUri",
+ }
+ @graph self.G
+ for s in m{ ?s a owl:Ontology }:
+    self.METADATA["uri"] = str(s)  # this is the Ontology's URI
+
+    for p, o in m{ {s} ?p ?o }:
+        if p == owl:imports:
+            self.METADATA["imports"].add(self._make_formatted_uri(o))
+
+        if p in text_keys:
+            self.METADATA[text_keys[p]] = str(o)
+
+        if p in (dcterms:description, skos:historyNote):
+            key = "description" if p == dcterms:description else "historyNote"
+            self.METADATA[key] = (
+                str(o) if self.outputformat in ("md", "adoc") else markdown.markdown(str(o)))
+
+        if p in (dcterms:source, dcterms:license):
+            self.METADATA[p.split("/")[-1]] = (
+                self._make_formatted_uri(o) if str(o).startswith("http") else str(o))
+
+        if p == owl:versionIRI:
+            self.METADATA["versionIRI"] = self._make_formatted_uri(o)
+
+        if p == dcterms:rights:
+            self.METADATA["rights"] = (
+                str(o).replace("Copyright", "&copy;").replace("copyright", "&copy;")
+                .replace("(c)", "&copy;"))
+
+        # Agents
+        if p in [
+            dcterms:creator, dcterms:contributor, dcterms:publisher, sdo:editor, sdo:funder, sdo:translator
+        ]:
+            self.METADATA[p.split("/")[-1] + "s"].add(
+                str(o) if type(o) == Literal else self._make_agent(o))  # Blank Node or URI
+
+        if p == prov:wasGeneratedBy:
+            for o2 in m{ {o} doap:repository ?o2 }:
+                self.METADATA["repository"] = self._make_formatted_uri(o2)
+
+        if p == sdo:codeRepository:
+            self.METADATA["repository"] = self._make_formatted_uri(o)
+
+    if self.METADATA.get("title") is None:
+        self.METADATA["title"] = "{no title found}"

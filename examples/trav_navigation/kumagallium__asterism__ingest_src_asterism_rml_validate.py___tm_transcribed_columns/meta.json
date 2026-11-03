@@ -59,5 +59,23 @@
       "is_iri guard removed"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `import rdflib` plus `uri = rdflib.URIRef` become `from rdflib import URIRef as uri`; is_iri is inlined in its `if any(...)`; the reference loop becomes `out.update(<generator>)`. The function-execution loop stays (its len(cols) test needs cols twice, and a walrus is not allowed). The result is a set, so only its content counts.",
+    "optimized.ldpy, from optimized.py: the two outer loops become one join under `@graph graph`, `m{ {tm} r2rml:predicateObjectMap _:pom . _:pom r2rml:objectMap ?om }`. pom is not used in the body, so a labelled blank node joins without being projected; the matcher reads the patterns in the order written, so the traversal starts from tm as the nested loops do. The bracket form `[ r2rml:objectMap ?om ]` is one token shorter but transpiles inner triple first, which scans every rr:objectMap triple in the graph on each call; it is not used. The three reads over a predicate from a run-time tuple become `m{ {om} {uri(p)} ?v }` (predicate interpolated), each one token shorter than `graph.objects(om, uri(p))` (measured).",
+    "Exception to the symmetry: merging the pom/om loops is a restructuring only the multi-pattern m{ } allows (in Python, a generator over the two selectors is longer than the nested loops). The labelled blank node used as an unprojected join variable has no label in the closed construction vocabulary; it is counted under m{ }."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused on either side: the shim import and the five constants are all read (by the region or by the tuples it reads), and the r2rml: prefix is used. optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

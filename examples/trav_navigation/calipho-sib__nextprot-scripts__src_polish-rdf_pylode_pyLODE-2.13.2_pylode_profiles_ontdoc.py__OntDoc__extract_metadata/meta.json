@@ -48,5 +48,25 @@
     "method": "entry:extract_metadata_region",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the seven branches that store `str(o)` under a fixed key (title, versionInfo, the three dates, the two vann properties) become one `text_keys` dict, built before the loop at the region's one-space indentation, and one `if p in text_keys` branch. description and historyNote share one branch (identical md/adoc arms merged into `in (\"md\", \"adoc\")`), as do source and license (same http test, key = the dcterms local name), and the agent branch stores its conditional expression directly. s_str and the date_type/agent_type temporaries go. The predicates are pairwise distinct, so at most one branch fires per triple and the order of the reads, the exception raised half-way in adoc output and the last-wins repository are unchanged.",
+    "optimized.ldpy, from optimized.py: the three reads become `m{ ?s a owl:Ontology }`, `m{ {s} ?p ?o }` and `m{ {o} doap:repository ?o2 }` under `@graph self.G`; namespace terms become prefixed names (in the dict keys too) and the two vann URIRef(...) become IRIs.",
+    "No exception to the symmetry. The outer loops are not fused: the body acts per ontology (uri before, title placeholder after)."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode, DC, PROF and RDFS go; the imports are sorted (Literal, URIRef).",
+    "LD Python: nothing unused (the translation had already dropped URIRef and BNode, and imports exactly the six prefixes used): optimized_header.ldpy is a copy of optimized.ldpy."
+  ]
 }

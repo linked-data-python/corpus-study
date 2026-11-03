@@ -1,0 +1,76 @@
+# Extracted from danilipp17/thesis_code@c2772e3555 : oscin/reader.py
+# region: OntologyReader._read_teams (lines 532-605, stratum trav_navigation)
+# licence of the source repository: see meta.json
+from rdflib import RDF, Graph, Literal
+from oscin_context import ReaderSelf
+@prefix agentoscin: <http://www.semanticweb.org/danilippmann/ontologies/2026/3/agentoscin/> as AGENTOSCIN .
+
+# Build the input graph: one team with four termination conditions covering
+# every branch of the elif chain, including a Composite with two nested
+# sub-conditions (one EventBased, one TurnLimit that promotes max_turns).
+g = Graph()
+team_uri = AGENTOSCIN.team1
+
+turn_limit = AGENTOSCIN.term_turn_limit
+g.add((team_uri, AGENTOSCIN.hasTerminationCondition, turn_limit))
+g.add((turn_limit, RDF.type, AGENTOSCIN.TurnLimitTermination))
+g.add((turn_limit, AGENTOSCIN.hasMaxTurns, Literal(5)))
+
+event_based = AGENTOSCIN.term_event
+g.add((team_uri, AGENTOSCIN.hasTerminationCondition, event_based))
+g.add((event_based, RDF.type, AGENTOSCIN.EventBasedTermination))
+g.add((event_based, AGENTOSCIN.hasTriggerExpression, Literal("on_error")))
+
+routing = AGENTOSCIN.term_routing
+g.add((team_uri, AGENTOSCIN.hasTerminationCondition, routing))
+g.add((routing, RDF.type, AGENTOSCIN.RoutingTermination))
+
+composite = AGENTOSCIN.term_composite
+g.add((team_uri, AGENTOSCIN.hasTerminationCondition, composite))
+g.add((composite, RDF.type, AGENTOSCIN.CompositeTermination))
+g.add((composite, AGENTOSCIN.hasOperator, Literal("AND")))
+sub_event = AGENTOSCIN.term_composite_sub_event
+g.add((composite, AGENTOSCIN.hasSubCondition, sub_event))
+g.add((sub_event, RDF.type, AGENTOSCIN.EventBasedTermination))
+g.add((sub_event, AGENTOSCIN.hasTriggerExpression, Literal("on_timeout")))
+sub_turn_limit = AGENTOSCIN.term_composite_sub_turn_limit
+g.add((composite, AGENTOSCIN.hasSubCondition, sub_turn_limit))
+g.add((sub_turn_limit, RDF.type, AGENTOSCIN.TurnLimitTermination))
+g.add((sub_turn_limit, AGENTOSCIN.hasMaxTurns, Literal(3)))
+
+self = ReaderSelf(g)
+max_turns = None
+termination_conditions: list[dict] = []
+
+@graph self.g
+for term_uri in m{ {team_uri} agentoscin:hasTerminationCondition ?term_uri }:
+    if m{ {term_uri} a agentoscin:TurnLimitTermination }:
+        mt = self._int_value(term_uri, agentoscin:hasMaxTurns)
+        if mt is not None:
+            max_turns = mt
+            termination_conditions.append({"type": "TurnLimit", "max_turns": mt})
+    elif m{ {term_uri} a agentoscin:EventBasedTermination }:
+        termination_conditions.append({
+            "type": "EventBased",
+            "trigger": self._str_value(term_uri, agentoscin:hasTriggerExpression) or ""})
+    elif m{ {term_uri} a agentoscin:RoutingTermination }:
+        termination_conditions.append({"type": "Routing"})
+    elif m{ {term_uri} a agentoscin:CompositeTermination }:
+        sub_conditions: list[dict] = []
+        for sub_uri in m{ {term_uri} agentoscin:hasSubCondition ?sub_uri }:
+            if m{ {sub_uri} a agentoscin:EventBasedTermination }:
+                sub_conditions.append({
+                    "type": "EventBased",
+                    "trigger": self._str_value(sub_uri, agentoscin:hasTriggerExpression) or ""})
+            elif m{ {sub_uri} a agentoscin:TurnLimitTermination }:
+                mt = self._int_value(sub_uri, agentoscin:hasMaxTurns)
+                if mt is not None:
+                    sub_conditions.append({"type": "TurnLimit", "max_turns": mt})
+                    # Promote to team-level so the generator can
+                    # emit the MaxMessageTermination call.
+                    if max_turns is None:
+                        max_turns = mt
+        termination_conditions.append({
+            "type": "Composite",
+            "operator": self._str_value(term_uri, agentoscin:hasOperator) or "OR",
+            "conditions": sub_conditions})

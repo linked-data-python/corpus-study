@@ -67,5 +67,20 @@
       "_is_datatype -> False"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress; it is original.py unchanged. Each step (URIRef filter, guarded range/label/comment lookups that leave the default on a falsy value) is already one statement, and the nested range test is shorter than its elif form.",
+    "optimized.ldpy, from optimized.py: no island survives rule 4. Each `m{ {prop} rdfs:P ?v }.first()` is two tokens longer than `source_graph.value(prop, rdfs:P)`, and `m{ ?prop rdfs:domain {cls} }` plus the `@graph source_graph` it needs is one token longer than `source_graph.subjects(rdfs:domain, cls)` (measured). What is left of the notation is the prefixed names in place of `RDFS.x` in the four calls; the ratio above 1 is the header's three @prefix lines.",
+    "No exception to the symmetry. The three value lookups are not fused into one join: each is optional, and a join would drop the property when one is missing."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode, Literal, Namespace, RDF, XSD and ConverterSelf go (ShaclConfig stays, named in the string annotation of config).",
+    "LD Python: the same, plus RDFS; @prefix rdf: and xsd: go, rdfs: stays."
+  ]
 }

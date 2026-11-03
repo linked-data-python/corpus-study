@@ -49,5 +49,25 @@
     "method": "fixture:fixture.ttl entry:_extract_concept_scheme",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py (the same rewrite as the sibling OntDoc._extract_metadata region): the seven branches that store `str(o)` under a fixed key (title from skos:prefLabel, versionInfo, the three dates, the two vann properties) become one `text_keys` dict and one `if p in text_keys` branch; definition and historyNote share one branch, as do source and license (same http test, key = the dcterms local name); the agent branch stores its conditional expression directly; the three `set()` initialisations become one `METADATA.update(...)`; `len(X.keys()) > 0` becomes `if X:` on the two dicts. The predicates are pairwise distinct, so at most one branch fires per triple: read order, the ValueError guard and the last-wins repository are unchanged.",
+    "optimized.ldpy, from optimized.py: the three reads become `m{ ?s a skos:ConceptScheme }`, `m{ {s} ?p ?o }` and `m{ {o} doap:repository ?o2 }` under `@graph self.G`; namespace terms become prefixed names (dict keys included) and the two vann URIRef(...) become IRIs. The notation ratio is held back by the header's nine @prefix lines (three unused), see the header variant.",
+    "No exception to the symmetry. The reads are not fused: uri is written per scheme between them, and the doap:repository read happens in only one branch."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode, DC and RDFS go; the rdflib import is sorted (Literal, URIRef).",
+    "LD Python: URIRef, BNode and the whole rdflib.namespace import go (the prefixes replace them); @prefix dc:, rdf: and rdfs: go (rdf:type is written `a`); markdown and Literal stay."
+  ]
 }

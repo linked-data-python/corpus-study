@@ -68,5 +68,24 @@
       "garde is_builtin retirée"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two near-identical loops (rdfs:domain, rdfs:range) become one loop over (predicate, name) pairs, the message an f-string of the name; the nested ifs fold into one condition, `set(...).intersection(...)` becomes `property_types.isdisjoint(...)` on the generator, and the range loop's dedup (`existing = [...]; if not existing`) becomes `predicate == RDFS.domain or not any(i.entity == subj for i in issues)`, so the domain loop still repeats an issue per domain triple and the range loop still skips any subject already reported. property_types and the LintIssue call lose their one-item-per-line layout.",
+    "optimized.ldpy, from optimized.py: `graph.subjects(predicate, None)` becomes `m{ ?subj {predicate} [ ] }` (the predicate interpolated from the pair loop), `graph.objects(subj, RDF.type)` becomes `m{ {subj} a ?t }`, and the term constants (property_types, the pair tuple, the domain test) become prefixed names; each island is one to two tokens shorter than the call it replaces (measured).",
+    "No exception to the symmetry: the two reads cannot be joined, the type test being a negation over a set (no FILTER in m{ })."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace goes; OWL is imported from rdflib with RDF, RDFS, Graph and URIRef on one line.",
+    "LD Python: Namespace, RDF, RDFS and OWL go (Graph for the annotation and URIRef for isinstance stay); the three @prefix lines are all used."
+  ]
 }
