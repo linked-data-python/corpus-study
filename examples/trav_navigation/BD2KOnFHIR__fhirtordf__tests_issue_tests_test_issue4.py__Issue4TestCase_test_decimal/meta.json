@@ -51,5 +51,22 @@
     "method": "entry:test_decimal",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the intermediate variables test_json and test_rdf go (`g = FHIRResource(..., loads(json_data)).graph`, after the function-level import); the three nested g.value calls, the assertions and the comments are unchanged -- the chain is already the most compact form.",
+    "optimized.ldpy, from optimized.py: the three `Literal(\"2.0x\", datatype=XSD.decimal)` become typed literals `\"2.00\"^^xsd:decimal`; the nested g.value chain is KEPT in Python (the translation's three guarded `m{ }.first()` statements are longer, and a join changes the first-value semantics, see translation_notes), with its terms written as IRIs and a prefixed name. The dotted FHIR names must be full IRIs `<http://hl7.org/fhir/VisionPrescription.dispense>`: outside an island a prefixed name stops at the dot, so `fhir:VisionPrescription.dispense` would read `.dispense` as a Python attribute of the URIRef (AttributeError, checked); `fhir:value` has no dot and stays a prefixed name.",
+    "No exception to the symmetry; no m{ } left in this region."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "typed literal",
+    "IRI",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused; the three fhirtordf_shim imports are merged into one line.",
+    "LD Python: nothing unused; the three fhirtordf_shim imports (FHIRGraph, fhir:, loads) are merged into one line."
+  ]
 }

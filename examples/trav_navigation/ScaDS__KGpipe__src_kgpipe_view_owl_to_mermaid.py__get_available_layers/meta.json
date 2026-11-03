@@ -44,5 +44,23 @@
     "method": "entry:get_available_layers",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nested loops filling layer_names become `sorted({...})` over a set comprehension with two for clauses; the graph variable stays, since it is read twice.",
+    "optimized.ldpy, from optimized.py: one join `m{ [] a owl:Class, ?class_type }` (the subject is anonymous, nothing projects it), applied by call suffix directly to `_load_graph(ttl_path)`; owl:Class as a prefixed name.",
+    "Exception to the symmetry: fusing the two for clauses into one m{ } is island-only, and it is what removes the second read of graph and hence the graph variable, which optimized.py needs."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS goes.",
+    "LD Python: the whole rdflib.namespace import line (OWL, RDF, RDFS) and the rdf: and rdfs: @prefix lines go; owl: stays."
+  ]
 }

@@ -67,5 +67,24 @@
       "`owl_thing = owl:Thing` -> `owl:Nothing`"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the loop with two `continue` guards, the parents/children lists, the owl_thing alias and the label variable become one list comprehension returned directly: the guards merge into one condition, `parents` becomes `not any(...)` over the subClassOf objects, `children` becomes `(None, RDFS.subClassOf, class_uri) not in graph`, and the label is computed inside details. Both helpers are pure, so computing the label after the local name changes nothing. Comments kept in place.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, the candidate scan `m{ ?class_uri a owl:Class }`, the parents read `m{ {class_uri} rdfs:subClassOf ?p }`, the children existence test `not m{ ?s rdfs:subClassOf {class_uri} }`, and owl:Thing as a prefixed name. Nothing fuses (the gate is a conjunction of negations, and m{ } has no NOT EXISTS), and isinstance(…, URIRef) stays in Python.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace, SKOS, XSD and the shim's OntologyLinter go (the driver imports OntologyLinter from context_shim itself).",
+    "LD Python: Namespace, the whole OWL/RDF/RDFS/SKOS/XSD line and OntologyLinter go; both @prefix lines are used."
+  ]
 }

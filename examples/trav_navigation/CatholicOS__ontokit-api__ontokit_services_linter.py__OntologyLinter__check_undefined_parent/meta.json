@@ -58,5 +58,23 @@
       "break après la première issue"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two nested loops with their `continue` guards, the issues list, parent_str and label become one list comprehension with two for clauses, returned directly; `defined_classes.add(str(OWL.Thing))` becomes `| {str(OWL.Thing)}` on the set comprehension. Both helpers are pure, so computing the label inside details changes nothing. Comments kept.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, the defined-classes scan `m{ ?c a owl:Class }`, owl:Thing as a prefixed name, and the two for clauses fused into ONE join `m{ ?class_uri a owl:Class ; rdfs:subClassOf ?parent_uri }` (a positive AND-chain over all parents, same cardinality as the nested loops).",
+    "Exception to the symmetry: the fusion of the two for clauses into one two-pattern m{ } is a restructuring only the island allows; optimized.py keeps two for clauses. The isinstance filters stay in Python on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace, SKOS, XSD and the shim's OntologyLinter go (the driver imports OntologyLinter from context_shim itself).",
+    "LD Python: Namespace, the whole OWL/RDF/RDFS/SKOS/XSD line and OntologyLinter go; both @prefix lines are used."
+  ]
 }

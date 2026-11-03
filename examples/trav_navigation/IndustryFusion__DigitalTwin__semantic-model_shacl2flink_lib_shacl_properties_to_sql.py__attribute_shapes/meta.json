@@ -58,5 +58,24 @@
     "method": "fixture:fixture.ttl entry:attribute_shapes",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `not list(g.objects(nodeshape, SH.targetClass))` becomes the existence test `(nodeshape, SH.targetClass, None) not in g`. Little else: the worklist traversal (seen/frontier) is already tight, and `paths` must stay a list for `len(paths) == 1`.",
+    "optimized.ldpy, from optimized.py: the translation's islands, which are all shorter than their Python: `m{ ?nodeshape a sh:NodeShape }`, `not m{ {nodeshape} sh:targetClass [] }`, `m{ {shape} sh:property ?prop }`, `list(m{ {prop} sh:path ?path })`, rdf:type as a prefixed name, on `@graph g`. The traversal cannot fold into a pattern (unbounded recursion through connective_clauses).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph and BNode go; RDF and SH stay.",
+    "LD Python: both rdflib import lines go (Graph, RDF, BNode, SH: the region uses rdf: and sh: prefixed names); both @prefix lines are used."
+  ]
 }

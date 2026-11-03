@@ -1,0 +1,102 @@
+@prefix ontomops: <https://www.theworldavatar.com/kg/ontomops/> .
+@prefix ontosyn:  <https://www.theworldavatar.com/kg/OntoSyn/> .
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : scripts/output_conversion_ttl_to_json/ontosynthesis_cbu_conversion.py
+# region: build_cbu_json_from_graph (lines 287-377, stratum trav_navigation)
+# licence of the source repository: see meta.json
+#
+# graph/mop_type_uri/procedures/direct_mops_found are restored from the
+# enclosing function build_cbu_json_from_graph (the region extractor could
+# not carry them: mop_type_uri lives above the region's own line range,
+# line 280 of the real file; `procedures`/`direct_mops_found` are
+# initialised at lines 276/286, just above; `graph` is the enclosing
+# function's own parameter, so the region is itself a nested closure over
+# it). The three helper closures the region calls (_is_guest_mop,
+# _collect_input_aliases_for_mop, _augment_cbu_names) keep their real logic
+# verbatim in mop_helpers.py (see that file's header) -- they read the same
+# `graph` through m{ }-free, untouched rdflib calls, so they cannot diverge
+# between the two sides. Graph/URIRef/RDFS/Literal from the original's
+# import line are gone: nothing in this region's own body needs the raw
+# rdflib names once every read is an island.
+from mop_helpers import make_helpers
+
+mop_type_uri = ontomops:MetalOrganicPolyhedron
+
+
+def run(graph):
+    @graph graph
+    _is_guest_mop, _collect_input_aliases_for_mop, _augment_cbu_names = make_helpers(graph)
+    procedures = []
+    direct_mops_found = 0
+
+    for mop in m{ ?mop a {mop_type_uri} }:
+        print(f"Found MOP: {mop}")
+        direct_mops_found += 1
+        if _is_guest_mop(mop):
+            continue
+        ccdc = str(graph.value(mop, ontomops:hasCCDCNumber, default="N/A"))
+
+        if ccdc == "N/A":
+            continue
+
+        direct_mops_found += 1
+        print(f"Found MOP {mop} with CCDC {ccdc}")
+
+        aliases = _collect_input_aliases_for_mop(mop)
+
+        # Get all CBUs for this MOP
+        cbu_data = []
+
+        for cbu in m{ {mop} ontomops:hasChemicalBuildingUnit ?cbu }:
+            # Get the formula
+            formula_vals = list(m{ {cbu} ontomops:hasCBUFormula ?v })
+            formula = str(formula_vals[0]) if formula_vals else "N/A"
+
+            print(f"Debug: CBU {cbu}, formula_vals: {formula_vals}, formula: {formula}")
+
+            # Get names from labels
+            names = [str(label) for label in m{ {cbu} rdfs:label ?v }]
+
+            def add_names(values, unquote=False):
+                for value in values:
+                    name = str(value).strip()
+                    # Remove surrounding quotes if present
+                    if unquote and name.startswith('"') and name.endswith('"'):
+                        name = name[1:-1]
+                    if name and name not in names:
+                        names.append(name)
+
+            # Get alternative names - each should be a separate literal
+            add_names(m{ {cbu} ontosyn:hasAlternativeNames ?v }, unquote=True)
+            # Get chemical formula if available
+            add_names(m{ {cbu} ontosyn:hasChemicalFormula ?v })
+
+            # Also check owl:sameAs links to chemical inputs for additional information
+            for chem_input in m{ {cbu} owl:sameAs ?v }:
+                # Additional labels from chemical inputs
+                add_names(m{ {chem_input} rdfs:label ?v })
+                # Alternative names from chemical inputs
+                add_names(m{ {chem_input} ontosyn:hasAlternativeNames ?v }, unquote=True)
+                # Chemical formula from chemical inputs
+                add_names(m{ {chem_input} ontosyn:hasChemicalFormula ?v })
+
+            cbu_data.append((formula, names))
+
+        # Sort CBUs by formula for consistency
+        cbu_data = sorted(cbu_data, key=lambda x: x[0])[:2]
+        (formula1, names1), (formula2, names2) = [
+            (formula, _augment_cbu_names(formula, names, aliases)) for formula, names in cbu_data
+        ] + [("N/A", []), ("N/A", [])][len(cbu_data):]
+
+        procedures.append({
+            "mopCCDCNumber": ccdc,
+            "cbuFormula1": formula1,
+            "cbuSpeciesNames1": names1,
+            "cbuFormula2": formula2,
+            "cbuSpeciesNames2": names2,
+        })
+
+    return procedures

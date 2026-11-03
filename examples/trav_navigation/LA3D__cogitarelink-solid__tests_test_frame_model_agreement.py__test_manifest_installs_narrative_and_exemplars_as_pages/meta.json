@@ -63,5 +63,19 @@
       "chacun des trois `.first()` remplacé par `None`"
     ],
     "remaining": "Classification gardée `directly-expressible` : la traduction est maintenant une transcription ligne à ligne (un m{ } par g.objects/g.value), sans la jointure que la strate trav_navigation attendait ; Maxime peut juger si la jointure, correcte seulement sur des entrées complètes (les 6 du manifest réel le sont), a sa place dans un artefact optimisé. Question 1 du tri tranchée par la preuve (l'entrée incomplète reste, comme dans l'original)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the collecting loop with three g.value reads and three `str(x) if x else \"\"` becomes one list comprehension of tuples, `tuple(str(g.value(pi, p) or \"\") for p in (targetResource, body, meta))` -- `str(x or \"\")` is the same as `str(x) if x else \"\"` for every x. The assertion loop is unchanged (already minimal; next() would not be shorter).",
+    "optimized.ldpy, from optimized.py: the OVERLAY_NS.x attributes become prefixed names overlay:x. No m{ }: `m{ {pi} overlay:body ?b }.first()` is longer than `g.value(pi, overlay:body)`, the outer `g.objects(None, overlay:installsPage)` is no longer than `m{ [] overlay:installsPage ?pi }(g)`, and a join would drop incomplete entries (m{ } has no OPTIONAL, see translation_notes).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header (Path, Graph and Namespace/OVERLAY_NS, resp. Graph and the overlay: prefix, are all used by the region or by demo()): the two header-variant files are copies of the optimized ones."
+  ]
 }

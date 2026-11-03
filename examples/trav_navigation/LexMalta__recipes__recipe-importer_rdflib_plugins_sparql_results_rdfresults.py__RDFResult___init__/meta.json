@@ -74,5 +74,25 @@
       "m{ {b} rs:value ?val }.first() -> .one()"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/else around graph.parse becomes `graph = source if isinstance(source, Graph) else Graph().parse(source, **kwargs)` (Graph.parse returns the graph); the type_ variable and its second if/elif dispatch go: each branch calls Result.__init__ with its type and returns early (CONSTRUCT, ASK), the SELECT case falling through. The inner binding loop becomes a dict comprehension appended per solution. self.bindings is still built by append, not a list comprehension: the driver's NO_VARIABLE case raises TypeError mid-way and compares the receiver, whose partial bindings must match (a list comprehension failed that call). The raise on a malformed boolean is kept, after self.askAnswer is set, as in the original. The g += graph copy is kept as `+=` (Graph() + graph would also copy the namespace bindings).",
+    "optimized.ldpy, from optimized.py: `@graph graph`; `m{ ?rs a rs:ResultSet }.first()` for the subject-free value read and `m{ }` for the three .objects() loops (resultVariable, solution, binding); the three g.value(x, RS.p) reads stay Python with rs:p prefixed names, the island being longer. The rs: prefix next to the Python variable rs is the source's own collision (translation_notes); the transpiled code resolves both correctly.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: ResultParser goes.",
+    "LD Python: RDF, Namespace and ResultParser go; the @prefix line is used."
+  ]
 }

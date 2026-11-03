@@ -73,5 +73,25 @@
       "m{ {b} rset:value ?val }.first() -> .one()"
     ],
     "remaining": "Avec la jointure retirée, la paire n'emploie plus de m{ } multi-motifs alors que sa strate est trav_navigation : à Maxime de dire si `directly-expressible` et `constructions` restent justes (aucun îlot déclaré n'a disparu)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the same compression as its LexMalta twin (type_ dispatch replaced by Result.__init__ per branch with early returns, inner loop as a dict comprehension appended per solution, partial bindings on a raise kept), except the source branch: it stays `graph = source; if not isinstance(...): graph = Graph(); graph.load(...)` rather than a conditional expression, because Graph.load returned None in the rdflib this code targeted (it is absent in 7.2.1, so both sides raise AttributeError on a non-Graph source). `askAnswer.value == None` and the single quotes are kept as in the original.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, `m{ ?rs a rset:ResultSet }.first()` (the `a` shorthand replaces the translation's rdf:type), `m{ }` for the three .objects() loops, the three g.value reads in Python with rset: prefixed names.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: ResultParser goes.",
+    "LD Python: ResultParser and the @prefix rdf: line go (the region writes `a`)."
+  ]
 }

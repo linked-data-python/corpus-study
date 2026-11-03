@@ -65,5 +65,25 @@
       "{chem_input} ontosyn:hasAlternativeNames -> ?x ontosyn:hasAlternativeNames"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: URIRef(str(NS) + \"x\") becomes NS.x; the CCDC read becomes `str(graph.value(mop, ONTOMOPS.hasCCDCNumber, default=\"N/A\"))` (same first value, and the `== \"N/A\"` test still catches a literal \"N/A\"); the six name-collecting loops become a list comprehension for the CBU labels plus a local add_names(values, unquote=False) helper called five times (strip, optional unquote, skip empty and duplicates, same order of reads); cbu_formulas/cbu_names become one cbu_data list of pairs; the two `if len(cbu_data) >= n` patches and the four conditional dict values become a sort-and-slice, a comprehension calling _augment_cbu_names on the (at most two) kept CBUs, and padding with fresh (\"N/A\", []) pairs, unpacked into formula1/names1/formula2/names2. formula_vals stays a list (it is printed); direct_mops_found and the run() wrapper lines are kept (restored context). Comments kept.",
+    "Not compressed: the strip/dedupe of names is kept although _augment_cbu_names normalises the two names lists that reach the output anyway -- relying on that helper's internals would be a cross-function coupling a reviewer should refuse.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, `m{ ?mop a {mop_type_uri} }`, and an m{ } for each of the nine .objects() reads (the helper takes the m{ } as its iterable); the CCDC read stays `graph.value(..., default=\"N/A\")` with a prefixed name, since m{ }.first() has no default and `or \"N/A\"` would be wrong on a falsy literal. Nothing fuses (every read is optional, m{ } has no OPTIONAL).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph and Literal go; the rdflib.namespace OWL import is merged into the rdflib line.",
+    "LD Python: the @prefix rdf: line goes (the region writes `a`); the other four prefixes are used."
+  ]
 }

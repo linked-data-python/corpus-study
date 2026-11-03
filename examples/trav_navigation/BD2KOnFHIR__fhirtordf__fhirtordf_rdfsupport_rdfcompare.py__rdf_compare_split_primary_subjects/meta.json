@@ -52,5 +52,16 @@
     "translation_fixed": false,
     "mutants_killed": [],
     "remaining": "Inobservable par construction, pas faute de pilote : les mutants `[]` et `?o2` restent verts et resteront verts sous tout pilote, car le bug amont (rdfcompare.py:128, liste d'un générateur) rend l'îlot mort. Reste à Maxime la question 1 du tri (compter ou non cette région dans les crédits de m{ }, call suffix (g), interpolation {expr}) et la question 2 (le wrapper ne modélise que l'appel primary_subjects(g1) ; un second site g1 != g ne lirait que g1.subjects(), identique des deux côtés, et ne prouverait rien de plus sur la traduction)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two set(generator) become set comprehensions, `.union(anon_subjs)` becomes `| anon_subjs`, and `len([...]) == 0` becomes `not [...]` (still the list of one generator, so the upstream dead-code bug is kept by construction, as in the translation). The dead `anon_subjs` scan is NOT removed: it is the region's only read of its own parameter `g` (the return reads the free variable `g1`), so deleting it would change what happens on an argument that is not a graph.",
+    "optimized.ldpy: identical to optimized.py. The one candidate island, `m{ ?s2 ?p2 {anon_s} }(g)` for `g.subject_predicates(anon_s)`, is longer than the call it replaces (9 tokens against 6, the island needing the (g) suffix), and the two full scans `g.subjects()` / `g1.subjects()` have no island that improves on them; rule 4 keeps the Python. Notation ratio 1.0.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python (the two headers are the same): Optional, List, Callable, Tuple, OWL and RDF go; Set, URIRef, Graph, BNode and Node stay (annotations and isinstance)."
+  ]
 }
