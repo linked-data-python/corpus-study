@@ -50,5 +50,23 @@
     "method": "entry:createTriples",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the ten `g.add` become one `g += [...]` (Graph.__iadd__ takes any iterable of triples), and the two single-use literals `name`/`year` are inlined (their `# lang=\"en\" for language tags` comment kept once above the name triple). The three commented `g.bind` calls stay: a loop over three pairs is not shorter. The commented-out code and the prints are the original's.",
+    "optimized.ldpy, from optimized.py: Namespace objects and binds become six `@prefix` + `@graph g` (as in the faithful translation), the ten triples one `+{ }` with `;` on the shared subjects, `a`, and the two constant typed literals `\"...\"^^xsd:string`/`^^xsd:gYear`.",
+    "Exception to the symmetry rule: the reified-statement blank node becomes an anonymous `[ a rdf:Statement ; ... ]` subject inside the `+{ }`, which removes `bnode = BNode()` and its comment; only the island allows it (rdflib has no anonymous-node syntax). The printed Turtle is unchanged (the original's node was already serialised as `[]`)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef and OWL are unused; the four rdflib imports merge into `from rdflib import BNode, FOAF, Graph, Literal, Namespace, RDF, RDFS, XSD`.",
+    "optimized_header.ldpy: only Graph is still used (prefixes are declared in the function, the blank node is anonymous): `from rdflib import Graph`."
+  ]
 }

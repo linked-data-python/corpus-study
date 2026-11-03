@@ -75,5 +75,25 @@
       ],
       "remaining": "Jugements non traités : wrong-construction (les huit termes {self.BRICK.x}, {bacnet_ns[...]} en noms préfixés) et classification-doubt (.items() -> .values())."
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `self.output_graph = graph = Graph()` gives the adds a short receiver; the seven `bind` calls become one loop over (prefix, namespace) pairs, placed after the five Namespace objects are built (nothing observable happens between); `_key` goes (`.values()`); `ifc_type_name` and `obj_id_string` are inlined, `data[\"ifc_type\"] if data.get(\"ifc_type\") else \"IfcSensor\"` becomes `data.get(\"ifc_type\") or \"IfcSensor\"` (same value: the truthy branch returns what get returned); the two point triples and the five BACnet triples become two `graph += [...]` (Graph.__iadd__ takes any iterable of triples). The error paths keep their partial writes: the equipment triple is added before `point_id` is read, and a missing `point_type` raises before either point triple, as in the original.",
+    "optimized.ldpy, from optimized.py: the Namespace objects and the bind loop become seven `@prefix` with formatted IRIs (no `as`: the keys are now written `ifcInst:{data[\"eq_guid\"]}`, `brick:{data[\"point_type\"]}`, `ifc:{...}`), and `@graph self.output_graph` binds six of them; `bind(\"brick\", self.BRICK)` stays because `Graph()` already binds `brick` and `@graph` does not overwrite it. The plain `for` loop replaces the faithful translation's `for @bindings` (no `?var` is needed once `{data.get(\"bacnet_name\")}` is interpolated directly; the guard excludes None). Three `+{ }`, with `a` for RDF.type and a typed literal over an f-string.",
+    "Exception to the symmetry rule: the BACnet blank node becomes an anonymous `[ ... ]` nested in the `+{ }`, which removes `bacnet_bnode = rdflib.BNode()`; only the island allows this (rdflib has no anonymous-node syntax). Each execution of the island mints a fresh node, so two BACnet rows still get two nodes (call 0 proves it)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "f<…>",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "typed literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: nothing unused (`import rdflib` for BNode and Literal, Graph, Namespace, RDF): a copy of optimized.py.",
+    "optimized_header.ldpy: `import rdflib`, Namespace and RDF are no longer used, and `@prefix rdf:` neither (`a` replaces rdf:type): the header keeps only `from rdflib import Graph`."
+  ]
 }

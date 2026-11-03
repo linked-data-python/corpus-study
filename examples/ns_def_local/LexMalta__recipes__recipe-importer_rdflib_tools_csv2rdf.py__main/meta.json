@@ -59,5 +59,17 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nine short/long option pairs and the matching branches of the configuration-file loop are driven by one table `converters` (long name -> short option, conversion), in the original order of evaluation; the attribute is `name.upper()` (OUT, BASE, DELIM, DEFAULT, PROPBASE, LABEL, IDENT, SKIP, CLASS). Same shape as the optimized sibling schemaorg__sdopythonapp (same csv2rdf.py), with one difference: `column` is not defined in this extract (the shim leaves it out), so the table holds `lambda v: column(v)` instead of `column`, which would raise NameError on every call when the table is built; the lambda keeps the NameError where the original raises it (-D, --default, `default=` in the configuration file). The `--col`/`--prop` loop stays apart: merging it into the table would turn the original's ValueError on `--propbase` (int(\"base\")) into an assignment. `eval`, passed through the table, still runs in main()'s frame.",
+    "optimized.ldpy, from optimized.py: the table holds `rdflib.Namespace` and `rdflib.URIRef` as callables, which no island replaces (an `@prefix ... as NAME` needs an IRI at the declaration, not a callable), so the six Namespace sites and three of the five URIRef sites disappear into the table on both sides; only the two `rdflib.URIRef(v)` of the `prop` branches become `f<{v}>` (no @base in scope). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header: codecs, configparser, fileinput, getopt, sys, rdflib (Namespace and URIRef in the table) and both shim names are used on both sides, and the ldpy header declares no @prefix. The two header-variant files are copies of the optimized ones."
+  ]
 }

@@ -44,5 +44,24 @@
     "method": "entry:_find_species_for_synthesis",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the query goes straight into `_select_uris` (no `q`); `_normalize_product_name` becomes one `str(value).strip().lower().removesuffix(\" synthesis\").strip()` and takes the label itself (its callers always passed `str(label)`, and `str(value or \"\")` of a str is the str); the two target-name loops become one set comprehension over the property path `(ontosyn.hasChemicalOutput * \"?\") / RDFS.label` (the labels of synth and of its outputs), minus \"\" (the `if norm:` filter: an empty name can then never meet on the species side, so the species side needs no filter); `seen`, `_add_species` and the nested species loops become one loop over `subject_objects(RDFS.label | ontospecies.hasProductName)` filtered by the rdf:type membership, deduplicated by an insertion-ordered dict keyed by `URIRef(str(species))` (the original deduplicated on the same string). The `if not target_names: return` guard survives (`return []`, the empty `resolved`).",
+    "optimized.ldpy, from optimized.py: the f-string SPARQL text pasting `<{synth}>` becomes `s{ }` with `{synth}` as an initial binding, its PREFIX lines inherited from the `@prefix` declarations (`_select_uris` hands it to graph.query unchanged); the two Namespace objects go (module-level `@prefix`); the path is interpolated in the predicate position of `m{ }`, with prefixed names as operands; the species loop is one two-pattern `m{ ?species a ontospecies:Species ; {rdfs:label | ontospecies:hasProductName} ?name }` (the Python side does the same join with a membership test, so no exception to the symmetry rule); `URIRef(str(species))` becomes `f<{species}>` (no @base in scope)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: of `typing` only List is used: `from typing import List`; the rdflib imports are all used.",
+    "optimized_header.ldpy: `from typing import List`; Namespace, RDF and RDFS go, and `@prefix rdf:` too (`a` replaces rdf:type); `from rdflib import Graph, URIRef` stays for the signature, with the rdfs:, ontosyn: and ontospecies: prefixes."
+  ]
 }

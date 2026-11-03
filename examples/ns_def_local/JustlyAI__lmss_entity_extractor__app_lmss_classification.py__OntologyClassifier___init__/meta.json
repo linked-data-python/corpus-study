@@ -41,5 +41,18 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `self.graph = Graph()` followed by `self.graph.parse(...)` becomes `self.graph = Graph().parse(graph_path, format=\"turtle\")` (Graph.parse returns the graph). Nothing else in the constructor can be compressed: every other line is one attribute assignment or one log call.",
+    "optimized.ldpy, from optimized.py: the same single change; `self.LMSS = LMSS` stays, with the `@prefix lmss: <http://lmss.sali.org/> as LMSS .` of the header. The island costs a little more than `Namespace(\"...\")` here because the prefix is declared only to produce the object (no prefixed name is written), which is why the notation ratio is above 1. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef, RDFS and Literal are unused; the two rdflib imports merge into `from rdflib import Graph, Namespace`. `import logging`, the logger and the shim import (OntologyClassifier is used by demo) stay.",
+    "optimized_header.ldpy: the `rdflib.namespace` import goes entirely (the object comes from `@prefix ... as LMSS`), and URIRef, RDFS, Literal go: only `from rdflib import Graph` stays. The `@prefix lmss:` line is used and stays."
+  ]
 }

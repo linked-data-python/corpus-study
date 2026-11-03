@@ -58,5 +58,23 @@
       "sujet du triplet de type forcé en IRI (URIRef(self._id)) au lieu de l'objet self"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the type triple is added where the graph is built, `g = Graph().add((self, RDF.type, sd.Service))` (Graph.add returns the graph), and the two local annotations (`g: Graph`, `sd: Namespace`) go. The two conditional adds stay: nothing else to compress.",
+    "optimized.ldpy, from optimized.py: the same fold as a graph literal, `g = g{ {self} a sd:Service }`, then `@graph g` and one `+{ }` per conditional add; `@prefix sd:` stays in the function block. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "g{ }",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef, IdentifiedNode and XSD are unused: the two imports become `from rdflib import Graph, Namespace, RDF`.",
+    "optimized_header.ldpy: no import is left (`g{ }` builds the graph, `a` replaces rdf:type, sd: is a prefix), and neither of the two `@prefix rdf:`/`xsd:` lines is used: the header is reduced to its provenance comments."
+  ]
 }

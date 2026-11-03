@@ -1,0 +1,38 @@
+# Extracted from TheWorldAvatar/mcp-tool-layer@c440a33e08 : scripts/output_conversion_ttl_to_json/ontosynthesis_characterisation_conversion.py
+# region: _find_species_for_synthesis (lines 81-140, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from typing import Dict, List, Any, Optional
+from rdflib import Graph, Namespace, URIRef
+from rdflib.namespace import RDF, RDFS
+from species_context import _select_uris
+
+def _find_species_for_synthesis(graph: Graph, synth: URIRef) -> List[URIRef]:
+    direct_hits = _select_uris(graph, f"""
+    PREFIX ontosyn: <https://www.theworldavatar.com/kg/OntoSyn/>
+    PREFIX ontospecies: <http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#>
+    SELECT DISTINCT ?uri WHERE {{
+      <{synth}> ontosyn:hasChemicalOutput ?uri .
+      ?uri a ontospecies:Species .
+    }}
+    """)
+    if direct_hits:
+        return direct_hits
+
+    # Fallback 1: resolve species by synthesis label / ChemicalOutput label matching.
+    ontosyn = Namespace("https://www.theworldavatar.com/kg/OntoSyn/")
+    ontospecies = Namespace("http://www.theworldavatar.com/ontology/ontospecies/OntoSpecies.owl#")
+
+    def _normalize_product_name(value) -> str:
+        return str(value).strip().lower().removesuffix(" synthesis").strip()
+
+    target_names = {_normalize_product_name(label) for label in graph.objects(
+        synth, (ontosyn.hasChemicalOutput * "?") / RDFS.label)} - {""}
+    if not target_names:
+        return []
+
+    resolved = {}
+    for species, name in graph.subject_objects(RDFS.label | ontospecies.hasProductName):
+        if ((species, RDF.type, ontospecies.Species) in graph
+                and _normalize_product_name(name) in target_names):
+            resolved[URIRef(str(species))] = None
+    return list(resolved)

@@ -1,0 +1,22 @@
+# Extracted from dice-group/RELD@7ca93acbb6 : data_loader.py
+# region: create_graph (lines 789-819, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph
+
+def create_graph():
+    g = Graph()
+    @prefix reld: <http://reld.dice-research.org/schema/> .
+    @prefix reldr: <http://reld.dice-research.org/resource/> .
+    #datasetURI = Namespace("https://reld.dice-research.org/")
+    @prefix dbo: <http://dbpedia.org/ontology/> .
+    @prefix freebase: <http://rdf.freebase.com/ns> .
+    @prefix ps: <http://www.wikidata.org/prop/statement/> .
+    @prefix owl: <http://www.w3.org/2002/07/owl#> .
+    @prefix dc: <http://purl.org/dc/elements/1.1/> .
+    @prefix dcterms: <http://purl.org/dc/terms/> .
+    @prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> .
+    @prefix prov: <http://www.w3.org/ns/prov#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @graph g
+    g.bind("dbo", "http://dbpedia.org/property/")
+    return g

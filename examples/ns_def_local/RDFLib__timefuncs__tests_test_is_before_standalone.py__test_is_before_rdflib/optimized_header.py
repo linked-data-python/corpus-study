@@ -1,0 +1,21 @@
+# Extracted from RDFLib/timefuncs@dd3bde8727 : tests/test_is_before_standalone.py
+# region: test_is_before_rdflib (lines 165-183, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace
+from _shim import tests_dir, is_before_rdflib
+g = Graph().parse(str(tests_dir / "data" / "before.ttl"))
+
+def test_is_before_rdflib():
+    BEFORE = Namespace("https://w3id.org/timefuncs/testdata/before/")
+
+    for n in ["01", "02", "03", "04", "05", "06", "08", "09", "10", "11"]:
+        assert is_before_rdflib(g, BEFORE["a" + n], BEFORE["b" + n])
+
+    for a, b in [("a01", "b02"), ("foo", "bar"), ("b01", "a01"), ("b07", "a07"), ("b10", "a10")]:
+        assert not is_before_rdflib(g, BEFORE[a], BEFORE[b])
+
+    # Test harness only (see meta.json): the original test only asserts and
+    # returns None, which gives the driver nothing to compare. Returning
+    # True (every assertion above already passed to reach this line) makes
+    # the successful run observable without inventing any new check.
+    return True

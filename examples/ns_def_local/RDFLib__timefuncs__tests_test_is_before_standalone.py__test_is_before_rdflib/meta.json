@@ -56,5 +56,19 @@
       "assertion négative foo/bar retirée (survivait)"
     ],
     "remaining": "Mutant équivalent, non compté : before:a01 -> BEFORE.a01 (le `as BEFORE` lie le même Namespace). Aucune liaison de graphe en jeu (pas de @graph)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the ten positive assertions become one loop over the pair numbers (`BEFORE[\"a\" + n]`, `BEFORE[\"b\" + n]`) and the five negative ones a loop over (a, b) local names, in the original order, so is_before_rdflib is called on the same pairs in the same sequence and the first failing assertion still raises AssertionError at the same pair (only the assertion's source line in the traceback differs). The harness `return True` and its comment are kept.",
+    "optimized.ldpy, from optimized.py: `@prefix before: <...> .` without `as` (the object is no longer needed), `before:a{n}`/`before:b{n}` for the computed local parts and `before:{a}`/`before:{b}` in the second loop. No exception to the symmetry rule. The driver's call recorder reads translated.ldpy only; the optimized artefacts keep the call sequence by construction."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: URIRef and BNode are unused: `from rdflib import Graph, Namespace` (Graph builds the module-level g the region reads).",
+    "optimized_header.ldpy: Namespace goes too (`@prefix` without `as`): `from rdflib import Graph`. The shim import and the module-level g stay on both sides."
+  ]
 }

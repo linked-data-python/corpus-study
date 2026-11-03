@@ -75,5 +75,24 @@
       ],
       "remaining": "Les questions de jugement du tri ({URIRef(x)} -> f<…>) restent à Maxime. Un écart hors des entrées documentées : si un label (member[1], member[\"title\"], label, parent_container_label) est un URIRef ou un BNode, Literal(x) en fait un littéral et {x} le garde tel quel ; seul un cofc.ttl dont rdfs:label a une IRI pour valeur l'atteindrait (ContainerOfContainersRenderer, renderer_container.py:393), la docstring du dépôt dit « string elements ». Faut-il le tenir pour hors contrat ?"
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three branches of the member loop share one `g.add((u, RDFS.member, member_uri))` after the if/elif/else (the bare-string branch sets `member_uri = URIRef(member)`); the query-string list, its `len` test and the two-branch `other_qsas_str` become one `\"\".join(x + \"=\" + v + \"&\" ...)` over `query_params.items()` (joining with \"&\" and appending \"&\" is the same as suffixing each item); `page_uri_str` goes (`page_uri_str_nonum + str(self.page)` is the same text); the three triples on `u`, the four on `page_uri` and the two on the parent become `g += [...]`; `parent_uri` names the parent IRI built three times. The `\"uri\" in member` test is kept as is, including its TypeError on a bare string containing \"uri\" (call 6). g is local, so a raise loses the partial graph on both sides as in the original.",
+    "optimized.ldpy, from optimized.py: LDP/XHV and their bind calls become `@prefix ldp:`/`@prefix xhv:` followed by `@graph g` (checked by hand that every binding of the original graph survives in the four new artefacts: the driver's binding check reads translated.ldpy only); every `URIRef(...)` becomes `f<...>` (no @base in scope), including `f<{page_uri_str_nonum}{self.page - 1}>` for the concatenations; seven `+{ }` with `a`, prefixed names and `{self.comment}@en`. As in the faithful translation, `{Literal(self.label)}` stays because a None label must give the literal \"None\" (call 4), while a None comment or member title would raise in the island (not exercised, inherited from the translation). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "language literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: every name of `from rdflib import Graph, Namespace, URIRef, Literal, RDF, RDFS` is used: a copy of optimized.py.",
+    "optimized_header.ldpy: URIRef goes (every IRI is an `f<...>`); Graph and Literal stay, and the two `@prefix rdf:`/`rdfs:` lines are used."
+  ]
 }

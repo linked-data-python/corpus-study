@@ -41,5 +41,18 @@
     "method": "entry:create_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the twelve single-use Namespace variables and the twelve `g.bind` calls become one loop over (prefix, IRI string) pairs in the original bind order (Graph.bind takes a string namespace); the order keeps the second `dbo` filed as `dbo1`. The commented-out `datasetURI` line stays.",
+    "optimized.ldpy, from optimized.py: eleven `@prefix` + `@graph g`, and one `g.bind(\"dbo\", \"http://dbpedia.org/property/\")` for the rebinding a prefix cannot express (as in the faithful translation, but with the IRI string instead of `@prefix dbpedia: ... as dbpedia`: the object is only needed by bind). Measured against the alternative of keeping optimized.py's loop unchanged (notation 1.0), the islands are shorter (0.8). The driver's namespace-table check reads translated.ldpy only: the four new artefacts were checked by hand to produce exactly the original's table. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both headers: URIRef, Literal and Namespace are unused (Namespace survives only in a comment): `from rdflib import Graph`, with its `# here is some error` comment. Same change on both sides."
+  ]
 }

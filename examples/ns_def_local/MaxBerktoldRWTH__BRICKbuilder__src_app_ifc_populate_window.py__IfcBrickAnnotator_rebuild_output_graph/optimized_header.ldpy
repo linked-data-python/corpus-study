@@ -1,0 +1,51 @@
+# Extracted from MaxBerktoldRWTH/BRICKbuilder@28f0710933 : src/app/ifc_populate_window.py
+# region: IfcBrickAnnotator.rebuild_output_graph (lines 484-550, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph
+
+def rebuild_output_graph(self):
+    """Clears and re-serializes components according to active configuration settings mapping definitions."""
+    self.output_graph = Graph()
+
+    # Consistent prefix generation definitions
+    base_inst = self.settings.value("ns_inst", "http://example.org/project#")
+    if not str(base_inst).endswith(('#', '/')):
+        base_inst = str(base_inst) + '#'
+
+    @prefix brick: f<{self.BRICK}> .
+    @prefix ref: f<{self.REF}> .
+    @prefix ifcInst: f<{base_inst}ifcInst:> .
+    @prefix brickInst: f<{base_inst}brickInst:> .
+    @prefix bacnet: <http://buildingsmart.org/bacnet#> .
+    @prefix bldg: f<{base_inst}bldg:> .
+    @prefix ifc: f<{self.settings.value(
+        "ns_ifc", "http://standards.buildingsmart.org/IFC/RELEASE/IFC4/Ontology#"
+    )}> .
+
+    # 1. Bind core standard and target custom namespaces
+    self.output_graph.bind("brick", self.BRICK)
+    @graph self.output_graph
+
+    # 2. Sequential structural iteration over individual items
+    for data in self.annotations_registry.values():
+        eq_uri = ifcInst:{data["eq_guid"]}
+        +{ {eq_uri} a ifc:{data.get("ifc_type") or "IfcSensor"} }
+
+        pt_uri = brickInst:{data["point_id"]}
+        # Link Brick point to physical asset
+        +{ {pt_uri} a brick:{data["point_type"]} ; brick:isPointOf {eq_uri} }
+
+        # 3. Handle BACnet nested blank node structures
+        if data.get("bacnet_name"):
+            raw_type = (
+                str(data.get("bacnet_type", ""))
+                .lower()
+                .replace("analoginput", "analog-input")
+                .replace("analogvalue", "analog-value")
+            )
+            +{ {pt_uri} ref:hasExternalReference [
+                   a ref:BACnetReference ;
+                   bacnet:object-identifier
+                       f"{raw_type},{data.get('bacnet_instance')}"^^bacnet:objectIdentifier ;
+                   bacnet:object-name {data.get("bacnet_name")} ;
+                   bacnet:objectOf bldg:sample-device ] }

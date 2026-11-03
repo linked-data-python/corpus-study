@@ -68,5 +68,26 @@
       "so:Dataset -> so:DatasetX"
     ],
     "remaining": "Mutant équivalent : retirer `path is not None` de la garde reste vert (isUrl(None) est faux). Le shim `schemaOrg.distribution` rend le graphe tel quel (le dépôt n'a pas de méthode à trois arguments) : son effet réel n'est pas observé."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the unused `encodingFormats` list (and its comment) and the `mapping_data = []` initialisation go; the mapping index is one dict comprehension over `json.load(f)`; `container` is a conditional expression; `predUri = URIRef(\"http://schema.org/url\")` is inlined as `so.url` and `URIRef(\"http://schema.org/\" + ...)` becomes `so[...]`; the rows unpack as `pred, value`; `.keys()` goes; the keyword loop with its `continue`s becomes `schema_g += [... for kw in map(str.strip, value.split(',')) if kw]` and the trailing `continue` an `else`; `schema_org_inst` and the reassignment of `schema_g` become `return bald.schemaOrg().distribution(...)`. The file is opened before the query as in the original, so graph=None still raises the same AttributeError.",
+    "optimized.ldpy, from optimized.py: the SPARQL text becomes `s{ }` with `@prefix bald:` (still passed to `graph.query`, not `m{ }`: `m{ }(None)` would raise a different AttributeError message, which the driver compares); `Namespace` goes for `@prefix so:` + `@graph schema_g`; the type triple uses `a`; `URIRef(baseuri)` and `URIRef(path)` become `f<...>` (no @base in scope); `so[...]` becomes `so:{mapping_idx[currField]}`; the non-keyword add becomes `+{ {container} {predUri} {Literal(value)} }` (`Literal(...)` kept: an IRI value must become a literal, call 0). The keyword comprehension stays Python: one `+{ }` per keyword inside a loop and an `if` is longer. No exception to the symmetry rule.",
+    "The driver emits through harness._emit: rdfeval check proves every artefact."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: every import is used (rdflib.Graph, json, Namespace, BNode, URIRef, Literal, the two shim imports): a copy of optimized.py.",
+    "The driver emits through harness._emit: rdfeval check proves every artefact."
+  ]
 }

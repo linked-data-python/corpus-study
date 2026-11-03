@@ -1,0 +1,55 @@
+# Extracted from RDFLib/pyLDAPI@c9be295b4e : pyldapi/renderer_container.py
+# region: ContainerRenderer._generate_mem_profile_rdf (lines 260-316, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+def _generate_mem_profile_rdf(self):
+    g = Graph()
+
+    @prefix ldp: <http://www.w3.org/ns/ldp#> .
+
+    @prefix xhv: <https://www.w3.org/1999/xhtml/vocab#> .
+    @graph g
+
+    u = f<{self.instance_uri}>
+    +{ {u} a rdf:Bag ; rdfs:label {Literal(self.label)} ; rdfs:comment {self.comment}@en }
+    for member in self.members:
+        if "uri" in member:
+            member_uri = f<{member["uri"]}>
+            +{ {member_uri} rdfs:label {member["title"]} }
+        elif isinstance(member, tuple):
+            member_uri = f<{member[0]}>
+            +{ {member_uri} rdfs:label {member[1]} }
+        else:
+            member_uri = f<{member}>
+        +{ {u} rdfs:member {member_uri} }
+
+    # other Query String Arguments
+    other_qsas_str = "".join(x + "=" + v + "&" for x, v in self.request.query_params.items()
+                             if x not in ["page", "per_page"])
+
+    page_uri_str_nonum = "{}?{}per_page={}&page=".format(self.instance_uri, other_qsas_str, self.per_page)
+    page_uri = f<{page_uri_str_nonum}{self.page}>
+
+    # pagination
+    # this page
+    # links to other pages
+    +{ {page_uri} a ldp:Page ; ldp:pageOf {u} ;
+           xhv:first f<{page_uri_str_nonum}1> ;
+           xhv:last f<{page_uri_str_nonum}{self.last_page}> }
+
+    if self.page != 1:
+        +{ {page_uri} xhv:prev f<{page_uri_str_nonum}{self.page - 1}> }
+
+    if self.page != self.last_page:
+        +{ {page_uri} xhv:next f<{page_uri_str_nonum}{self.page + 1}> }
+
+    if self.parent_container_uri is not None:
+        parent_uri = f<{self.parent_container_uri}>
+        +{ {parent_uri} rdf:Bag {u} ; rdfs:member {u} }
+        if self.parent_container_label is not None:
+            +{ {parent_uri} rdfs:label {self.parent_container_label} }
+    return g
