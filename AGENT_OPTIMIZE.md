@@ -70,7 +70,11 @@ rebuilding an invisible bias. Therefore:
    island-rich: where an island would be longer than the Python it
    replaces (a one-for-one `m{ }.first()` for a short `.value()`, a
    `-{ }`/`+{ }` pair for `graph.set`), keep the Python. The notation is
-   measured, not assumed.
+   measured, not assumed. "Longer" is judged on the host code: the text of
+   a query is counted apart (`sparql_tokens`, `tokens_embedded`), token by
+   token in `s{ }` and as one string token in Python, so a `s{ }` that
+   replaces a literal query string is not longer for its SPARQL text —
+   compare what surrounds it.
 5. Check by reading the two files side by side: outside the RDF lines, they
    must be identical line for line, except for the exceptions of point 3.
 
