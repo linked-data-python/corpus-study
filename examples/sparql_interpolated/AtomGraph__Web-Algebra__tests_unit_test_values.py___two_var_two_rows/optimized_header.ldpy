@@ -1,0 +1,12 @@
+# Extracted from AtomGraph/Web-Algebra@128e184aa8 : tests/unit/test_values.py
+# region: _two_var_two_rows (lines 35-39, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+EX_A = "http://ex/a"
+EX_B = "http://ex/b"
+EX_P = "http://ex/p"
+
+
+def _two_var_two_rows():
+    g = g{ f<{EX_A}> f<{EX_P}> "v1" .
+           f<{EX_B}> f<{EX_P}> "v2" }
+    return s{ SELECT ?s ?o WHERE { ?s f<{EX_P}> ?o } ORDER BY ?s }(g).execute()

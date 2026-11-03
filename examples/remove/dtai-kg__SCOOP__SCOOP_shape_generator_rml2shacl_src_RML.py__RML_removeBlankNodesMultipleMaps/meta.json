@@ -74,5 +74,26 @@
       "ligne 68 m{ {p} {self.OJBECT_MAP} ?z } (objet élargi)"
     ],
     "remaining": "Mutants équivalents non comptés : objet élargi des deux -{ } (lignes 55 et 63), qui retirent de toute façon chaque (p, ., *) au fil de la boucle ; le parcours m{ }(graphPredicatObjectMap) voit les mêmes objets malgré les retraits (vérifié avec deux objectMaps sur rdflib 7.2.1). La note de traduction « widening one to a joker makes the driver FAIL » n'était vraie qu'après ce renforcement."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the unused `graphsPOM` goes; graphHelp is created with its \"TM\" entry; the `triples((x, None, None))` loops whose subject was unused become `predicate_objects(x)`, the ones with a single free object become `objects(...)`, the RefObjectMap loop becomes `subjects(None, rr:RefObjectMap)`, and the fully bound `triples((p, OJBECT_MAP, sROM))` loop becomes an `in` test; `tel += 1`. Every comment of the original is kept in place, the commented-out code too.",
+    "optimized.ldpy, from optimized.py: `@prefix rr:`/`rml:` and `@graph self.graph` in the body, `m{ }` for every read (with the `(graphPredicatObjectMap)` suffix for the two reads of the local graph), `+{ }(g)`/`-{ }(g)` for every write on the five local graphs, and `if m{ {p} {self.OJBECT_MAP} {sROM} }:` for the existence test. The RefObjectMap loop has to project `?pROM` (no anonymous predicate in m{ }). The six `self.*` term constants stay interpolated. No exception to the symmetry.",
+    "Little left for the notation: most terms are `self.*` attributes, so each island pays one interpolation per term."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "-{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: `import rdflib` is the whole header on both sides and the region calls `rdflib.Graph()`. The two header-variant files are copies of the optimized ones."
+  ]
 }

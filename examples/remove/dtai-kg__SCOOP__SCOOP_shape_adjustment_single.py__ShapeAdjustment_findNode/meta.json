@@ -66,5 +66,23 @@
       "recursion dropped, append dropped"
     ],
     "remaining": "Not observable, so not compared: @graph self.initial_graph binds sh: on the caller's graph; in the repository that graph comes from XSDtoSHACL, which already binds sh: to the same namespace (XSDtoSHACL.py:745), and adjust() copies only its triples into the serialised adjusted_graph (shape_adjustment_single.py:603-611)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `triples((node, sh:node, None))` becomes `objects(node, self.shaclNS.node)` (s and p were unused) and the four removals become one loop over the four target local names.",
+    "optimized.ldpy, from optimized.py: `for o in m{ {node} sh:node ?o }` and the loop over the four prefixed names with `-{ {o} {target} ?x }`, which is shorter than the translation's four separate islands and than `sh:{target}` over strings. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: the Python header is only the provenance comment and the `sh:` prefix of the LD Python header is used. The two header-variant files are copies of the optimized ones."
+  ]
 }

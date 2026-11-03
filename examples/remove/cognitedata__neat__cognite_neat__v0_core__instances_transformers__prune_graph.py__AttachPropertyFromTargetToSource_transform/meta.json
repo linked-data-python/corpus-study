@@ -63,5 +63,22 @@
       "if self.target_property_holding_new_property is not None: -> if True:"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `.format()` calls become one call on the template picked by a conditional expression (use case A's template ignores the extra keyword); the five-line loop target fits on two lines; the `graph.add` tuple goes from seven lines to three. Both branches of `predicate` keep their comments; the deferred deletion through `nodes_to_delete` stays, because the query result is still being read while the loop runs.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, the add is one `+{ }` whose object is the conditional expression in braces, the fully bound removal is `-{ {source_node} {old_predicate} {target_node} }`, and the two wildcard removals are `-{ ?s ?p {target_node} }` and `-{ {target_node} ?p ?o }`. `graph.query(query)` stays rdflib, as in the translation (the query is a template filled outside the region). No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `cast`, Namespace and URIRef go; the two shim imports are merged into one line.",
+    "LD Python: the same lines go and the same merge is made (the translation's header has no @prefix)."
+  ]
 }

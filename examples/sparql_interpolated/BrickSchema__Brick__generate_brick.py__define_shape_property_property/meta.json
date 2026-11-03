@@ -76,5 +76,27 @@
       "dans une copie où SELECT ?x devient SELECT ?p des deux côtés : ?p sh:path {prop_name} -> ?zz, chaque FILTER NOT EXISTS -> FILTER(1 = 2) ou retiré"
     ],
     "remaining": "La requête de réutilisation (premier îlot s{ }) est morte dans l'original comme dans la traduction (SELECT ?x jamais lié) et jamais atteinte avec ses gardes vraies dans le dépôt ; son interpolation {prop_name} n'est donc observable par aucun appel (les mutants ?zz et FILTER(1 = 2) restent verts), la preuve n'existe que dans une copie où ?x est changé en ?p des deux côtés. Le second îlot (import_from) est exercé, mais le dépôt ne passe jamais cette clé : la strate sparql_interpolated n'y est prouvée que sur un chemin hors dépôt. Le shim context_shim.py garde son add_relationships sans effet (le pilote le remplace) ; wrong-construction non traité."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `len(prop_defn.keys())` becomes `len(prop_defn)`, `len(prop_exists) > 0` becomes `if prop_exists:`, and the query call loses two wrapper lines (the SPARQL text, including the dead `SELECT ?x` with its reflexive pattern, is unchanged); the three adds of the new shape and the two of the enumeration become `graph += [...]`; the import_from branch becomes `Graph().parse(...)` + a comprehension over `predicate_objects(prop_name)` in place of the f-string SELECT (prop_name is always a Node by then, since `graph +=` has already asserted it); the nested `optional` test becomes `if not prop_defn.pop(\"optional\", False):`; the NumericValue branch becomes one add with a conditional predicate.",
+    "optimized.ldpy, from optimized.py: `@graph graph` (the translation wrote `graph += g{ }` for each add), `+{ }` for every add with `a` and `1`, the conditional predicate interpolated as `{sh:or if dtype == bsh:NumericValue else sh:datatype}`, the lookup as `s{ }` read on the current graph, and `m{ {prop_name} ?p ?o }(tmpG)` inside the same comprehension as Python. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "s{ }",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "typed literal",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef goes from the rdflib import; the shim import keeps BSH, RDF, OWL, SH, brickschema and add_relationships on one line (BRICK, REC, RDFS, TAG, SOSA, SKOS, QUDT, VCARD, REF go).",
+    "LD Python: URIRef goes; ten of the thirteen @prefix lines go (bsh, owl, sh stay), and so does `A = rdf:type`, which the region does not use (it writes `a`); `G` stays as the default argument."
+  ]
 }

@@ -1,0 +1,59 @@
+# Extracted from BrickSchema/Brick@c12949f236 : generate_brick.py
+# region: define_shape_property_property (lines 463-524, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, BNode
+from rdflib.collection import Collection
+from context_shim import brickschema, add_relationships
+
+@prefix bsh: <https://brickschema.org/schema/BrickShape#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+G = brickschema.Graph()
+
+def define_shape_property_property(shape_name, definitions, graph=G):
+    @graph graph
+    if "or" in definitions:
+        or_list = []
+        for or_node_defn in definitions.pop("or"):
+            or_node_shape = BNode()
+            or_list.append(or_node_shape)
+            define_shape_property_property(or_node_shape, or_node_defn, graph=graph)
+        or_list_name = BNode()
+        +{ {shape_name} sh:or {or_list_name} }
+        Collection(graph, or_list_name, or_list)
+    for prop_name, prop_defn in definitions.items():
+        # check if there is already a property shape for this.
+        # Only do this is if (a) the property is optional for this shape, and
+        # (b) there are no further requirements; the existing property shapes
+        # don't have any min/max counts or additional requirements
+        if prop_defn.get("optional", False) and len(prop_defn) == 1:
+            prop_exists = list(s{ SELECT ?x WHERE { ?p sh:property ?p .
+                    ?p sh:path {prop_name} .
+                    FILTER NOT EXISTS { ?p sh:minCount ?mc }
+                    FILTER NOT EXISTS { ?p sh:maxCount ?mc }
+                } })
+            if prop_exists:
+                +{ {shape_name} sh:property {prop_exists[0][0]} }
+                continue  # continue to next property
+
+        ps = BNode()
+        +{ {shape_name} sh:property {ps} . {ps} a sh:PropertyShape ; sh:path {prop_name} }
+        if "import_from" in prop_defn:
+            tmpG = Graph().parse(prop_defn.pop("import_from"))
+            graph += [(prop_name, p, o) for p, o in m{ {prop_name} ?p ?o }(tmpG)]
+        if not prop_defn.pop("optional", False):
+            +{ {ps} sh:minCount 1 }
+
+        if "datatype" in prop_defn:
+            dtype = prop_defn.pop("datatype")
+            +{ {prop_name} a owl:DatatypeProperty }
+            +{ {ps} {sh:or if dtype == bsh:NumericValue else sh:datatype} {dtype} }
+        elif "values" in prop_defn:
+            enumeration = BNode()
+            +{ {ps} sh:in {enumeration} ; sh:minCount 1 }
+            Collection(graph, enumeration, map(Literal, prop_defn.pop("values")))
+            +{ {prop_name} a owl:DatatypeProperty }
+        else:
+            +{ {prop_name} a owl:ObjectProperty }
+        add_relationships(ps, prop_defn, graph=graph)

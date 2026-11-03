@@ -62,5 +62,22 @@
       "m{ ?q ?p ?o } (sujet de la lecture élargi)"
     ],
     "remaining": "Mutant équivalent non compté : objet élargi -{ {identifier} {p} ?q } (tout (identifier, p, *) avec p dans la liste est retiré de toute façon)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the walk over every triple of the shape followed by a test on the predicate becomes one `remove((identifier, self.shaclNS[name], None))` per listed predicate, which removes the same triples; the list holds the thirteen local names as strings, so `self.shaclNS` is written once.",
+    "optimized.ldpy, from optimized.py: the list holds the thirteen prefixed names (`sh:in` included) and the removal is `-{ {identifier} {p} ?o }` under `@graph self.adjusted_graph`; `sh:{name}` over a list of strings was measured and is one token longer. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: the Python header is only the provenance comment and the LD Python header only adds the `sh:` prefix, which is used. The two header-variant files are copies of the optimized ones."
+  ]
 }

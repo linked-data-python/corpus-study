@@ -58,5 +58,24 @@
       "littéral \"v2\" -> \"v3\""
     ],
     "remaining": "Le mutant qui remplace le prédicat `{URIRef(EX_P)}` par une variable reste vert, équivalent : la région construit elle-même un graphe qui n'a qu'un prédicat, rien ne peut le distinguer."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `g.add` calls become one `g += [...]`; the query stays the original f-string, since the function must return an rdflib Result.",
+    "optimized.ldpy, from optimized.py: the graph is one `g{ }` with `f<{EX_A}>`/`f<{EX_P}>` (absolute IRIs, no @base, so the same as URIRef), and the query is `s{ ... ?s f<{EX_P}> ?o ... }(g).execute()`, an initial binding instead of string pasting. Nesting the `g{ }` into the s{ } call would save three more tokens; it was not done, to keep the two statements of optimized.py. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "g{ }",
+    "s{ }",
+    ".execute()",
+    "f<…>",
+    "plain literal",
+    "variable",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode goes from the rdflib import.",
+    "LD Python: the whole rdflib import goes (g{ }, the literals and f<…> name no rdflib class); the three EX_* constants stay."
+  ]
 }

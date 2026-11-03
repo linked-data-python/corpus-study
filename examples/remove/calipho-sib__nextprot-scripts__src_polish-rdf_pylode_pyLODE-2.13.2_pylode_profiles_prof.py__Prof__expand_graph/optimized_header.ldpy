@@ -1,0 +1,31 @@
+# Extracted from calipho-sib/nextprot-scripts@f03504ce5e : src/polish-rdf/pylode/pyLODE-2.13.2/pylode/profiles/prof.py
+# region: Prof._expand_graph (lines 42-99, stratum remove)
+# licence of the source repository: see meta.json
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <https://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+def _expand_graph(self):
+    @graph self.G
+    for target, sources in (
+            (rdfs:label, (dc:title, skos:prefLabel, dcterms:title)),
+            (rdfs:comment, (dc:description, dcterms:description, sdo:description, skos:definition)),
+            # Agents
+            # conflate sdo:author with dcterms:creator
+            (dcterms:creator, (dc:creator, sdo:creator, sdo:author)),
+            (dcterms:contributor, (dc:contributor, sdo:contributor)),
+            (dcterms:publisher, (dc:publisher, sdo:publisher)),
+    ):
+        for source in sources:
+            for s, o in m{ ?s {source} ?o }:
+                for p in sources:
+                    -{ {s} {p} {o} }
+                +{ {s} {target} {o} }
+
+    # Resource Descriptors
+    for o in m{ [] prof:hasResource ?o }:
+        +{ {o} a prof:ResourceDescriptor }

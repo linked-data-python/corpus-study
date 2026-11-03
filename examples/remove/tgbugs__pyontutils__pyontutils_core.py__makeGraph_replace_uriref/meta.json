@@ -42,5 +42,15 @@
     "method": "fixture:fixture.ttl entry:replace_uriref",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `trip` temporary is inlined into the `triples()` call, and the loop keeps the triple whole: `rep = list(triple)`, `self.g.remove(triple)`.",
+    "optimized.ldpy is identical to optimized.py, without any island. The only island the translation had, `-{ {s} {p} {o} }`, needs the triple unpacked and `@graph self.g`, which makes it longer than `self.g.remove(triple)`; the read cannot be an island because its pattern is data (the wildcard position is computed). Nothing for the notation here."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing to remove: the header is only the provenance comment on both sides. The two header-variant files are copies of the optimized ones."
+  ]
 }

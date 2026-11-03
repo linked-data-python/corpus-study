@@ -56,5 +56,27 @@
     "method": "fixture:fixture.ttl entry:combine_shapes_with_same_path",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two dct:source collection loops become one loop over the two generators (still walked one after the other), and the per-object append/remove becomes `extend(graph.objects(...))` + `graph.remove((ps, dctsource, None))`; the four merge loops become the sh:in loop plus one loop over a dict {predicate: set} that replaces nodeKinds/dataTypes/classes; `in_values.update(graph.items(o))`; `for item in collection: pass` and the `collection` temporary go (iterating the list again is a no-op once graph.items has walked it); add_or_shape is inlined into a loop over the same dict (its `if not values: return` had the same effect as the empty for loop of the else branch, so nothing is added for an empty set either way); both hand-built RDF lists become `Collection(graph, node, items)`, which writes the same list; the merged shape's sh:path add joins the final sh:property add; the source adds become `graph += [...]` comprehensions.",
+    "Kept: `graph.value` and `graph.remove((ps, SH.path, path))`, where a None path is the wildcard of the original; both commented-out lines.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, `m{ }` for every selector, `-{ }` for the removals (`?o` where Python passes None), `+{ }` for the adds, prefixed names in the dict. `graph.value` and the None-path removal stay Python: `m{ }.first()` and `-{ ... {ldpy.ANY if path is None else path} }` are longer than the Python they replace. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "IRI",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Literal, RDFS and Namespace go from the rdflib import (URIRef, BNode, RDF, SH stay).",
+    "LD Python: `import ldpy`, Graph, URIRef, Literal, RDF, RDFS and Namespace go (BNode and SH stay), and so does `@prefix rdf:`, which the region no longer uses once the RDF lists are built by Collection; `@prefix sh:` stays."
+  ]
 }

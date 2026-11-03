@@ -82,5 +82,28 @@
       "^^xsd:string retiré du commentaire"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the file is read in a `with` block (the explicit close goes) and `line_no`, never read, goes; the seven `fields[i].strip()` become one unpacking of a generator (a line with fewer than seven fields still stops the script, with ValueError instead of IndexError); `status.lower().strip()` loses the redundant strip; the string-concatenated COUNT query and its `cnt` loop become `(URIRef(uri), None, None) not in g` in an elif; the record is stored without the `record` temporary; the dead `if 1==2:` debug block goes; the update loop walks `.items()`, reads the record with two one-line unpackings and RDFS from `rdflib.RDFS`; `len(x)>0` guards on values that are always str become `if new_label:`; `step` comes from `enumerate(goofiles, 1)` and the file names are f-strings.",
+    "Kept for the driver's module-state comparison: the `while True: readline()` loop (a `for line in f_in` would leave `line` at the last line instead of \"\"), the names label/new_label/comment/new_comment/record/k assigned in both loops, and the record dicts with all six keys in `entities_to_change`.",
+    "optimized.ldpy, from optimized.py: `@graph g`, `elif not m{ f<{uri}> ?p ?o }` for the existence test, the four `-{ }` (two wildcards for the entity, `?old_label`/`?old_comment` for the replaced values) and two `+{ ... {new_label}^^xsd:string }`. The s{ } of the translation disappears, because the COUNT query became an existence test on both sides. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "+{ }",
+    "f<…>",
+    "prefixed name",
+    "typed literal",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `from rdflib.namespace import Namespace` and `import sys` go; URIRef, Literal and XSD are imported in one line from rdflib.",
+    "LD Python: `from rdflib.namespace import Namespace` and `import sys` go; `import rdflib` and both @prefix lines are used."
+  ]
 }

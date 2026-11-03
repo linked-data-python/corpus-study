@@ -51,5 +51,26 @@
     "method": "fixture:fixture.ttl entry:_expand_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five copy-and-remove loops become one loop over a table (target, sources); for each source, `self.G.subject_objects(source)` walks lazily as the chain did (so a value removed at an earlier source is not yielded again), the removals become `self.G -= [(s, p, o) for p in sources]` and the add stays. The Resource Descriptors loop reads `self.G.objects(None, PROF.hasResource)`; `itertools.chain` is no longer used. The section headings '# label', '# comment', '# creator', '# contributor', '# publisher' labelled the merged loops and go; '# Agents', the conflation comment and '# Resource Descriptors' stay.",
+    "optimized.ldpy, from optimized.py: the same table with prefixed names, `m{ ?s {source} ?o }` with the predicate interpolated, `+{ {s} {target} {o} }` under `@graph self.G`, and `m{ [] prof:hasResource ?o }` for the last loop.",
+    "Exception to line-for-line identity, not to the symmetry: the removal is `for p in sources:` + `-{ {s} {p} {o} }` in optimized.ldpy (4 tokens fewer than the `-=` comprehension there), while optimized.py keeps `self.G -= [...]`, its own shortest form; the loop is longer in Python, so nothing is carried back."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "-{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: OWL and `from itertools import chain` go; the namespace import keeps DC, DCTERMS, PROF, RDF, RDFS, SDO, SKOS.",
+    "LD Python: the whole `rdflib.namespace` import line and `from itertools import chain` go (every term is a prefixed name); the six @prefix lines are all used."
+  ]
 }
