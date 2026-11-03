@@ -61,5 +61,24 @@
       "repli : `if lbl` forcé à True"
     ],
     "remaining": "Mutants déjà tués avant : îlot vidé, classe élargie, prédicat rdfs:label élargi, motif de type retiré, garde forcée à False ; SELECT DISTINCT -> SELECT est équivalent (déduplication par libellé). Jugement non traité : la note du traducteur voit une occasion `m{ ?s a ontomops:ChemicalBuildingUnit ; rdfs:label ?label }` dans le repli, maintenant prouvable par le pilote ; la jointure change-t-elle l'ordre, donc le gagnant de la déduplication « premier vu » (cbu1/cbu2) ? À trancher (wrong-construction)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `path` inlined; the pairs list plus the seen/out deduplication loop become one dict filled with setdefault (first seen label wins, in the same order, including when the query fails half-way and the fallback adds more); the query is passed inline without initNs, the prefixes resolving through the g.bind the original already makes and rdflib's default rdfs binding; DISTINCT dropped (the label dedup absorbs it); the fallback keeps its two nested selector loops; try/except and both guards kept.",
+    "optimized.ldpy, from optimized.py: the try branch reads the basic graph pattern with m{ }(g) instead of a SPARQL query; @prefix ontomops: in the function replaces Namespace, g.bind and initNs, so ONTOMOPS and the bind disappear (they only served the query's prefix resolution and the fallback's class IRI; the graph is local to the call).",
+    "Exception to the symmetry (island-only): the fallback's two nested loops g.subjects/g.objects become one multi-pattern m{ }(g), the join a single island allows. The try/except is kept with the same effect; since m{ } reads through graph.triples() and never query(), the driver's forced query failure no longer reaches the except branch on the ldpy side, and the result is the same either way.",
+    "Nothing else to compress: the region is mostly the fallback and the dedup."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph goes (unused); Namespace, RDF, RDFS, os and the shim import are used.",
+    "LD Python: Graph, Namespace, RDF and RDFS go (the region uses only islands now) and the unused `@prefix rdf:` (the islands say `a`); os, the shim import and `@prefix rdfs:` stay."
+  ]
 }

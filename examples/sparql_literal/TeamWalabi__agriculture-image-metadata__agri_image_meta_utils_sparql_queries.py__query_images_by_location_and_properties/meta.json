@@ -46,5 +46,24 @@
     "names_only_original": [
       "query"
     ]
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the query string is passed directly to g.query (no `query` variable); the full <https://w3id.org/agri-image/...> and exif IRIs become the prefixed names the query already declares; the baseXYZ list walk is written with nested blank nodes [ rdf:first ...; rdf:rest [ ... ] ], which drops ?baseXYZList, ?rest1 and ?rest2. The explicit SELECT list stays: SELECT * would take its column order from a set in rdflib, and the driver compares the row tuples.",
+    "optimized.ldpy, from optimized.py: the same query in s{ }(g); the prologue comes from the @prefix lines of the header. The driver harness (`rows = ...`) is copied unchanged on both sides.",
+    "The island is kept although the token ratio puts it above the Python: the query is the same SPARQL text on both sides, one string token in optimized.py and tokenised in the island; counted alike (tokens_embedded) the island is not longer. Six OPTIONALs and ORDER BY keep it out of m{ }.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused in the header (Graph is used): copy of optimized.py.",
+    "LD Python: nothing unused (Graph and the three @prefix lines are used): copy of optimized.ldpy."
+  ]
 }

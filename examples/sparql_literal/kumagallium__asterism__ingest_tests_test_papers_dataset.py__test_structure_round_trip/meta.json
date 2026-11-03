@@ -72,5 +72,25 @@
       "m{ } : sujet lié {rdflib.URIRef(PAPER)} -> ?paper (rouge)"
     ],
     "remaining": "LIMIT 1 removed from both queries stays green: the test reads only down[0] and up[0], so the mutant is not observable (the translation keeps LIMIT 1 verbatim). Two up-query kills rely on the store yielding the decoys first (no ORDER BY in the original)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: Graph().parse(...) chained (parse returns the graph); the query calls laid out on fewer lines; the four unpacked up-values and two asserts become one list comparison (both asserts carry no message, so the AssertionError is the same).",
+    "optimized.ldpy, from optimized.py: both queries are m{ }.first() on @graph g (basic graph patterns with LIMIT 1 and no ORDER BY, as in translated.ldpy); the bound IRIs are interpolated as f<{PAPER}> and f<{sent}> instead of {rdflib.URIRef(...)}; .first() replaces list(...)[0].",
+    "No exception to the symmetry. The demo() harness is copied unchanged."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "f<…>",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused in the header (os, rdflib, PAPER, the seam): copy of optimized.py.",
+    "LD Python: nothing unused (the four @prefix lines and rdflib are used): copy of optimized.ldpy."
+  ]
 }

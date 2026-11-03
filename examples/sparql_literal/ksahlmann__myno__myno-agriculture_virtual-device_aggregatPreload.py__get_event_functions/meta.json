@@ -56,5 +56,24 @@
       "base:EventFunctionality -> ?ty"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: prepareQuery + g.query becomes g.query(text, initNs=initNs) (no `q` variable); in the query, rdf:type becomes `a`, the two ?serv patterns share their subject with ';', and the ?dp hop becomes the path onem2m:hasOutputDataPoint/base:mqttTopic (a sequence path keeps the multiplicity of the join).",
+    "optimized.ldpy, from optimized.py: the same query in s{ }(g).execute(); .execute() is still needed because the region calls result.serialize() and returns the Result.",
+    "No exception to the symmetry. The printing and return are kept as they are."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    ".execute()",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the unused prepareQuery import goes, and the initNs dict keeps only the base and onem2m entries the query uses (rdf, om-2 and time go: the counterpart of unused @prefix lines).",
+    "LD Python: @prefix rdf:, om-2: and time: go (unused); base: and onem2m: stay."
+  ]
 }

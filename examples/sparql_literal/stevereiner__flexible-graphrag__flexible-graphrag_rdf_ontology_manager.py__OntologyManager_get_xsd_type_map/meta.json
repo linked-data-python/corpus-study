@@ -49,5 +49,22 @@
       "`if row.range` -> `is not None`"
     ],
     "remaining": "Mutants déjà tués avant : îlot vidé, OPTIONAL retiré, classe élargie, rdfs:range élargi, garde forcée à False. Équivalents : DISTINCT retiré (dict réécrit par clé), `is not None` -> truthiness (un Graph vide ne donne aucune ligne)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the query string inlined into the for; `str(row.range) if row.range else XSD_STRING` becomes str(row.range or XSD_STRING) (same on None and on a falsy literal) assigned directly; the two identical loops over entities and relations merged into one loop over both (same order). The `if key not in xsd_map` test is kept rather than setdefault, which would evaluate _PY_TO_XSD.get eagerly and raise on an unhashable type the original never looks up. DISTINCT kept (it can change which range wins on a store that repeats rows).",
+    "optimized.ldpy, from optimized.py: the query in s{ }(self.graph) with the two @prefix lines in the if-block; OPTIONAL keeps it out of m{ }.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python alike: `from typing import Dict, List, Set, Literal, Optional` becomes `from typing import Dict`."
+  ]
 }

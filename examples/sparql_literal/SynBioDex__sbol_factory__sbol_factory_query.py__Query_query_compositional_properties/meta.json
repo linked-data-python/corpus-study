@@ -66,5 +66,25 @@
       "{URIRef(class_uri)} -> bare {class_uri}"
     ],
     "remaining": "Removing DISTINCT stays green, and must: list(set(...)) deduplicates anyway. The {URIRef(class_uri)} vs {f<{class_uri}>} question is untouched (wrong-construction)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two SELECTs become one, the two class-side patterns joined by UNION, the restriction hop written as the path rdfs:subClassOf/owl:onProperty (no ?restriction), the shared subject patterns factored with ';'; DISTINCT dropped because list(set(...)) deduplicates anyway; the response/extend/list(set()) sequence becomes one set comprehension. The comment on overridden inherited properties is kept, above the merged query.",
+    "optimized.ldpy, from optimized.py: the same single query in s{ }(self.graph); the class IRI is interpolated as f<{class_uri}> (no @base in scope, so it is URIRef(class_uri)) instead of {URIRef(class_uri)}.",
+    "The island is kept although the token ratio puts it above the Python: the query is the same SPARQL text on both sides, one string token in optimized.py and tokenised in the island; counted alike (tokens_embedded) the island is not longer.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "f<\u2026>",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the header holds no import, nothing to remove (copy of optimized.py).",
+    "LD Python: `from rdflib import URIRef` goes (replaced by f<\u2026>); the four @prefix lines are used."
+  ]
 }

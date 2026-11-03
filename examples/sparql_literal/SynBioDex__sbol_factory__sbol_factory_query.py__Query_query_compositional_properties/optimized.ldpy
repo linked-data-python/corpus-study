@@ -1,0 +1,22 @@
+# Extracted from SynBioDex/sbol_factory@5d01ec7f4c : sbol_factory/query.py
+# region: Query.query_compositional_properties (lines 165-194, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from rdflib import URIRef
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sbol: <http://sbols.org/v3#> .
+
+def query_compositional_properties(self, class_uri):
+    # The type of inherited properties are sometimes overridden
+    response = s{
+        SELECT ?property_uri
+        WHERE {
+            ?property_uri rdf:type owl:ObjectProperty ;
+                rdfs:subPropertyOf sbol:directlyComprises .
+            { ?property_uri rdfs:domain/(owl:unionOf/rdf:rest*/rdf:first)* f<{class_uri}> }
+            UNION { f<{class_uri}> rdfs:subClassOf/owl:onProperty ?property_uri }
+        }
+    }(self.graph)
+    return list({str(row[0]) for row in response})

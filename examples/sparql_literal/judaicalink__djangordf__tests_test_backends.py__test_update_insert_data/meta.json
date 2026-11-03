@@ -38,5 +38,22 @@
     "method": "entry:test_update_insert_data",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the update call on one line, the CONSTRUCT result inlined into the assert, and the CONSTRUCT written in its short form CONSTRUCT WHERE { ?s ?p ?o }.",
+    "optimized.ldpy, from optimized.py: the same two queries as s{ } islands handed to the backend.",
+    "The island is kept although the token ratio puts it above the Python: the query is the same SPARQL text on both sides, one string token in optimized.py and tokenised in the island; counted alike (tokens_embedded) the island is not longer.",
+    "Almost nothing to compress: a three-statement test. No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "s{ }",
+    "IRI",
+    "plain literal",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "No header import on either side: the two files are copies of the optimized ones."
+  ]
 }

@@ -42,5 +42,23 @@
     "method": "fixture:fixture.ttl entry:parseDevices",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: prepareQuery + g.query become g.query(text, initNs=initNs) inline in the for; the four patterns on ?device factored with ';' and rdf:type written `a`; set([]) -> set() in one tuple assignment; row[\"x\"] -> row.x; the three final assignments become one device.update(...) (same key order, so the printed dict is unchanged). DISTINCT kept: each row is printed.",
+    "optimized.ldpy, from optimized.py: the same query in s{ }(g); DISTINCT keeps it out of m{ }.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the unused prepareQuery import goes; initNs keeps only onem2m (rdf and base are no longer used by the query).",
+    "LD Python: @prefix rdf: and base: go; onem2m: stays."
+  ]
 }

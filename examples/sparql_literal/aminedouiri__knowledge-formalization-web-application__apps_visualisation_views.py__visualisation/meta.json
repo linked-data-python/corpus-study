@@ -57,5 +57,25 @@
       "only the first row of qres_generation / qres_domaine consumed"
     ],
     "remaining": "Classification minor-restructuring vs directly-expressible (classification-doubt du tri), non traitée. Les requêtes de l'original résolvent ':' par les liaisons du fichier parsé, la traduction par le @prefix lexical : équivalent tant que les viz_*.ttl lient ':' à http://dig.isi.edu/ (c'est le cas des six fichiers du dépôt, que l'application ne fait qu'étendre en mode 'a')."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the six identical parse/query/loop blocks become one generator over (path, class) pairs unpacked into the six lists; each graph built by Graph().parse(path) (parse returns the graph), the query written once with the class name formatted in (constants of the code, the `:` prefix still resolved through the parsed file as in the original); the two Django counts summed in one expression; the context dict passed directly to render. The six section comments go with the blocks they named.",
+    "optimized.ldpy, from optimized.py: the formatted query becomes m{ ?x a :{cls} }(graph), the local part computed by `:{cls}` (a basic graph pattern of one triple: same multiplicity as the SELECT); rows are bare terms, so str(x) instead of str(row[0]).",
+    "The token ratio puts optimized.ldpy 2 % above optimized.py only because the query string counts as one token; counted alike, the island is shorter than the SELECT text plus `% cls`, so it is kept. As in translated.ldpy, `:` is a lexical prefix in ldpy where the Python resolves it through the parsed file.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused in the header: copy of optimized.py.",
+    "LD Python: nothing unused (`@prefix :` is used by the island): copy of optimized.ldpy."
+  ]
 }

@@ -59,5 +59,25 @@
       "owl:onProperty widened to ?op (query 2)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two SELECTs become one with a UNION, the restriction hop written as the path rdfs:subClassOf/owl:onProperty; DISTINCT dropped because list(set(...)) deduplicates; one set comprehension instead of two lists and extend. The comment on overridden inherited properties is kept above the merged query.",
+    "optimized.ldpy, from optimized.py: the same query in s{ }(self.graph) (one island: the call suffix is shorter than @graph); class IRI interpolated as f<{class_uri}>.",
+    "The island is kept although the token ratio puts it above the Python: the query is the same SPARQL text on both sides, one string token in optimized.py and tokenised in the island; counted alike (tokens_embedded) the island is not longer.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "f<\u2026>",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the header holds no import, nothing to remove (copy of optimized.py).",
+    "LD Python: `from rdflib import URIRef` goes (replaced by f<\u2026>); the three @prefix lines are used."
+  ]
 }
