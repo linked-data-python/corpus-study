@@ -1,0 +1,12 @@
+# Extracted from ksahlmann/myno@b67f9de59c : myno-agriculture/myno-bridge/rdflib_jsonld/serializer.py
+# region: Converter.from_graph (lines 175-184, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib.term import URIRef, BNode
+
+def from_graph(self, graph):
+    nodemap = {}
+    for s in set(graph.subjects()):
+        ## only iri:s and unreferenced (rest will be promoted to top if needed)
+        if isinstance(s, URIRef) or (isinstance(s, BNode) and not m{ ?x ?p {s} }(graph)):
+            self.process_subject(graph, s, nodemap)
+    return list(nodemap.values())

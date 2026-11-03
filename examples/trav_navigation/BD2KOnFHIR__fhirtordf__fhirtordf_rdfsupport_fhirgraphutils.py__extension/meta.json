@@ -55,5 +55,24 @@
     "method": "fixture:fixture.ttl entry:extension",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: `for p, o in g.predicate_objects(ext)` becomes `for p in g.predicates(ext)` (the same predicates in the same order, the object was unused). The rest is already minimal: the url check stays outside the inner loop (merging the two conditions would call `value()` once per predicate for one token), and the explicit `return None` stays (the other return returns a value).",
+    "LD Python: EXCEPTION to the symmetry rule, kept in LD Python only: the two selector loops merge into ONE `m{ {node} fhir:Element.extension ?ext . ?ext ?p [] }(g)` (the translator's join, with the unused object now `[]`), so the url check joins the 'Extension.value' test in a single `if`. Both selectors are multi-valued, so the join does not change cardinality; `value()` is called per (ext, p) row instead of once per ext, which raises the same UniquenessError at the same point (an extension with two urls has rows) and changes nothing else. The call suffix `(g)` replaces the translation's `@graph g`, which re-bound `fhir:` on the caller's graph (repair note); `fhir:Extension.url` cannot be written in Python position (the dot ends the name, a backslash escape is rejected), so the full IRI `<http://hl7.org/fhir/Extension.url>` stays, as in the translation, 4 tokens shorter than `FHIR.Extension.url`."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "IRI",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Optional, Tuple, List, Literal, RDF and Node go.",
+    "LD Python: the same, plus FHIR (replaced by the IRI and the fhir: prefix); the @prefix fhir: is used."
+  ]
 }

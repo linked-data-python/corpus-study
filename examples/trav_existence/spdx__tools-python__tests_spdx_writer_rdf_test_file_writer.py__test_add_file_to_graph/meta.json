@@ -48,5 +48,24 @@
     "method": "entry:test_add_file_to_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the first eleven assertions become one loop `for triple in [...]: assert triple in graph`; their terms cannot raise, so building the list eagerly changes nothing. The last three stay separate assertions, in their order: `file.contributors[0]` and `file.attribution_texts[0]` raise IndexError on an empty list, and evaluated eagerly they would replace an AssertionError that an earlier assertion raises in the original.",
+    "LD Python: the same split; the eleven become ONE multi-pattern `assert m{ … }` whose patterns each have their own `[]` (independent blank nodes, so the conjunction holds exactly when every pattern matches somewhere, as the eleven containment tests), the three last stay `assert m{ … }`, with `@graph graph`. The multi-pattern m{ } is the island counterpart of the Python loop (both group the same eleven checks), not a restructuring Python cannot write; but where the loop names the failing triple, the conjunction reports only that one pattern failed, and its independent `[]` make a product that backtracks over the earlier patterns when a late one is missing (one or a few matches per pattern here).",
+    "Not compressed on either side: `Literal(x)` stays around the four optional strings (Literal(None) is 'None', an interpolated None raises), and `SPDX_NAMESPACE` is not given a shorter alias."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "IRI",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing is unused; the three `from spdx_shim import` lines are merged into one.",
+    "LD Python: nothing is unused; the three `from spdx_shim import` lines (two prefixes, two functions) are merged into one."
+  ]
 }

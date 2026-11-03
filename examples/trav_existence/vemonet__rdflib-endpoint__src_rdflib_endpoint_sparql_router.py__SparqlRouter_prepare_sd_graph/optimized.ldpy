@@ -1,0 +1,14 @@
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix formats: <http://www.w3.org/ns/formats/> .
+
+# Extracted from vemonet/rdflib-endpoint@1427c77829 : src/rdflib_endpoint/sparql_router.py
+# region: SparqlRouter.prepare_sd_graph (lines 454-455, stratum trav_existence)
+# licence of the source repository: see meta.json
+from shim import self, sd_subj
+
+@graph self.service_description
+
+if not m{ {sd_subj} sd:resultFormat formats:RDF_XML }:
+    +{ {sd_subj} sd:resultFormat formats:RDF_XML }
+
+service_description = self.service_description  # exposed for the pilot: see meta.json

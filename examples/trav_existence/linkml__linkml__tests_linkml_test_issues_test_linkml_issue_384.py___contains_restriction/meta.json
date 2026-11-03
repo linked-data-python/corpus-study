@@ -62,5 +62,23 @@
       "extra `?r a owl:Restriction`"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the loop with two nested membership tests over generators becomes `return any((r, OWL.onProperty, prop) in g and (r, pred, filler) in g for r in g.objects(c, RDFS.subClassOf))` on two lines; the store lookup matches the same terms as `x in g.objects(...)` (rdflib term equality).",
+    "LD Python: the translation is already minimal, one joined `bool(m{ {c} rdfs:subClassOf ?r . ?r owl:onProperty {prop} . ?r {pred} {filler} }(g))`; optimized.ldpy is identical to translated.ldpy. The join is the island counterpart of the `any(...)` of optimized.py, not a restructuring Python cannot write, so no exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF and XSD go from the rdflib.namespace import.",
+    "LD Python: the whole rdflib.namespace import goes (owl: and rdfs: replace it); both @prefix lines are used."
+  ]
 }

@@ -1,0 +1,29 @@
+# Extracted from spdx/tools-python@cef432adee : tests/spdx/writer/rdf/test_file_writer.py
+# region: test_add_file_to_graph (lines 11-30, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Literal, rdfs:
+from spdx_shim import license_namespace:, spdx_namespace:, add_file_to_graph, file_fixture
+
+def test_add_file_to_graph():
+    graph = Graph()
+    @graph graph
+    file = file_fixture()
+
+    add_file_to_graph(file, graph, "docNamespace", {})
+
+    assert m{
+        <docNamespace#SPDXRef-File> a spdx_namespace:File .
+        [] spdx_namespace:fileName {file.name} .
+        [] spdx_namespace:fileType spdx_namespace:fileType_text .
+        [] spdx_namespace:licenseComments {Literal(file.license_comment)} .
+        [] spdx_namespace:licenseConcluded [] .
+        [] spdx_namespace:licenseInfoInFile license_namespace:MIT .
+        [] spdx_namespace:licenseInfoInFile license_namespace:GPL-2.0-only .
+        [] spdx_namespace:licenseInfoInFile spdx_namespace:noassertion .
+        [] spdx_namespace:copyrightText {Literal(file.copyright_text)} .
+        [] rdfs:comment {Literal(file.comment)} .
+        [] spdx_namespace:noticeText {Literal(file.notice)}
+    }
+    assert m{ [] spdx_namespace:fileContributor {file.contributors[0]} }
+    assert m{ [] spdx_namespace:checksum [] }
+    assert m{ [] spdx_namespace:attributionText {file.attribution_texts[0]} }

@@ -1,0 +1,27 @@
+# Extracted from hidden-graph/rdflib-starlight@b7973da2b5 : tests/unit/test_starlight_graph.py
+# region: TestRdflibCompat.test_remove_triple (lines 47-50, stratum trav_existence)
+# licence of the source repository: see meta.json
+#
+# `sg` is a pytest fixture of the real file (`StarlightGraph()`, a subclass of
+# rdflib.Graph that lives in the `starlight` package, which is not installed
+# here); the driver passes it explicitly -- see driver.py. The region is a
+# test method that only asserts: `demo` below (identical in translated.ldpy,
+# not part of the region) turns the assertion into a value the harness can
+# compare.
+from rdflib import URIRef
+EX = 'http://example.org/'
+
+def test_remove_triple(self, sg):
+    triple = (URIRef(EX+'s'), URIRef(EX+'p'), URIRef(EX+'o'))
+    sg.add(triple)
+    sg.remove(triple)
+    assert triple not in sg
+
+
+# Demo harness (identical on both sides, see meta.json).
+def demo(sg):
+    try:
+        test_remove_triple(None, sg)
+        return ("ok", len(sg))
+    except AssertionError as e:
+        return ("assertion-failed", str(e), len(sg))

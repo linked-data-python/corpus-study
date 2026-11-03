@@ -42,5 +42,21 @@
     "method": "fixture:fixture.ttl entry:from_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: `not any(graph.subjects(None, s))` becomes `(None, None, s) not in graph` (Graph.__contains__ accepts None wildcards and stops at the first match, as any() did), which lets the condition fit on one line; the blank lines go. `isinstance(s, BNode)` stays: without it a Literal subject of a generalised graph would be dispatched. `set(graph.subjects())` is already the shortest form.",
+    "LD Python: the same lines, the containment test written `not m{ ?x ?p {s} }(graph)` with a call suffix instead of an `@graph graph` line; the two throwaway variables make it exactly as long as the Python containment test (notation ratio 1.0): the island is kept because it is not longer, and the measurement shows it gains nothing here. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal goes from the rdflib.term import.",
+    "LD Python: Literal goes from the rdflib.term import; no @prefix in the header."
+  ]
 }

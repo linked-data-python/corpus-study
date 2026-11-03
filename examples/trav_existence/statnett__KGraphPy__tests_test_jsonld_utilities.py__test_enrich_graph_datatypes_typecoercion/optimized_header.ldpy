@@ -1,0 +1,19 @@
+# Extracted from statnett/KGraphPy@38859be62f : tests/test_jsonld_utilities.py
+# region: test_enrich_graph_datatypes_typecoercion (lines 301-313, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Graph, xsd:
+from kgraphpy_shim import enrich_graph_datatypes
+@prefix ex: <http://example.com/> .
+
+def test_enrich_graph_datatypes_typecoercion() -> None:
+    g = Graph()
+    g.bind("ex", "http://example.com/")
+    @graph g
+    +{ ex:age ex:hasAge "30.0"^^xsd:float .
+       ex:duration ex:hasAge "not-a-number" }
+    dt_map = {"http://example.com/hasAge": xsd:integer}
+
+    enrich_graph_datatypes(g, dt_map)
+
+    assert m{ ex:age ex:hasAge "30.0"^^xsd:integer }
+    assert m{ ex:duration ex:hasAge "not-a-number"^^xsd:integer }

@@ -57,5 +57,23 @@
       "guard replaced by if False"
     ],
     "remaining": "The guard replaced by `if True` stays green, and must: g.add of a triple already present is a no-op, so the guard has no observable effect on the graph; this is equivalence, not a weak oracle."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the triple written twice is bound once to `triple`, and `not any(g.triples(triple))` becomes `triple not in g` (Graph.__contains__ is that same search). The guard itself stays although `add` of a present triple is a no-op on the plain Graph the repository uses: on a ConjunctiveGraph or Dataset receiver `triples()` spans every context while `add` writes the default one, so dropping it would change the effect there.",
+    "LD Python: `if not bool(m{ … }):` loses the redundant `bool()`; otherwise the translation (`@graph` + `m{ }` guard + `+{ }`) was minimal. The Python-shaped variant with prefixed names (`triple = (sd_subj, sd:resultFormat, formats:RDF_XML)` …) measures 7 tokens longer, so the islands stay. No exception to the symmetry rule. The `service_description = …` line is the pilot's harness, copied as is."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing is unused (SD, FORMATS, self, sd_subj); optimized_header.py is a copy of optimized.py.",
+    "LD Python: nothing is unused (both @prefix lines, self, sd_subj); optimized_header.ldpy is a copy of optimized.ldpy."
+  ]
 }

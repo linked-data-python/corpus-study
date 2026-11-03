@@ -49,5 +49,24 @@
     "method": "entry:_parse_single_property_shape",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the six identical `ComplexConstraintIR(path_local=…, kind=…, comment=…, message=…, severity=…, raw_turtle=_dump_subgraph(g, bn))` returns go through a local helper `complex_constraint(path_local, kind)` (the supplementary note, which differs in comment and sub-graph, stays explicit); `has_sparql` / `has_alternation` are inlined into their `if` (the two `_literal_int` reads move above them so that a malformed sh:maxCount/sh:minCount still raises before the sparql/or returns, as in the original); `if shape is not None: return shape` becomes `return shape or …` (dataclasses, never falsy); `found = next(..., None)` + conditional unpack becomes `next(_iter_alternations(g, qvs), (None, None))`; `{p for p, _ in g.predicate_objects(qvs)}` becomes `set(g.predicates(qvs))` (twice); blank lines between the short returns go.",
+    "LD Python: the same lines; the two existence tests become `if m{ {bn} sh:sparql ?o }:` and `any(m{ {bn} {pred} ?o } for pred in _ALTERNATION_PREDICATES)` with one `@graph g` line (measured 2 tokens shorter than keeping the containment tests); `SH.x`, `SH['class']`, `RDFS.comment` become prefixed names in Python position. The `g.value(...)` reads stay rdflib calls written with prefixed names: `m{ {bn} sh:path ?o }.first()` measures 2 tokens longer than `g.value(bn, sh:path)`, and `set(g.predicates(qvs))` is shorter than any m{ } form. No exception to the symmetry rule.",
+    "Not compressed: the PropertyShapeIR constructions and the `local_name(x) if x is not None else None` guards (an `and` would turn an empty IRI into '' differently); the `qmin` read in the alternation branch stays inside its condition (hoisting it could raise where the original returned 'nested-node')."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: List, Optional, Tuple, RDF, URIRef and PinIR go; RDFS is merged into the rdflib import.",
+    "LD Python: List, Optional, Tuple, RDF, URIRef, RDFS (replaced by rdfs:) and PinIR go, and the unused `@prefix rdf:`; rdfs: and sh: stay."
+  ]
 }

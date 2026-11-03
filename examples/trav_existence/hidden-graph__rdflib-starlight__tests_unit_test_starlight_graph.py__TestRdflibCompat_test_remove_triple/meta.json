@@ -47,5 +47,23 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the triple built three times is bound once to a local `triple`, then `sg.add(triple)`, `sg.remove(triple)`, `assert triple not in sg`.",
+    "LD Python: the translation is already minimal (`@graph sg` + `+{ }`, `-{ }`, `assert not m{ }`); a variant `triple = (ex:s, ex:p, ex:o)` with the three rdflib calls was measured and is longer (notation 0.79 against 0.69), so the islands stay. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "-{ }",
+    "m{ }",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Literal and BNode go from the rdflib import; URIRef and EX stay.",
+    "LD Python: the whole rdflib import goes (no name of it is used); the single @prefix is used."
+  ]
 }

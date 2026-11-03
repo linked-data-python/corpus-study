@@ -50,5 +50,24 @@
     "method": "entry:test_shacl_rule_attribution",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: the unused function-level `from rdflib import Literal` and the redundant `from rdflib.namespace import RDF as _RDF` (RDF is already imported) go; `g = Graph()` + `g.parse(...)` becomes `g = Graph().parse(...)` (parse returns the graph); the backslash-continued condition fits on one line; the three `next(g.objects(x, p), None)` become `g.value(x, p)` (any=True, default None: the same first object; x is never None where it is read, `deriv` being asserted first). The `found` flag and the loop stay: the first-match form `next((stmt for … if …), None)` measures 4 tokens longer.",
+    "LD Python: the same lines, with prefixed names in Python position (`ns:t1`, `prov:wasDerivedFrom`, `toolkit:rule`), and `g.value(...)` kept (shorter than `m{ … }.first()`). EXCEPTION to the symmetry rule, kept in LD Python only: the selector loop over `?stmt a rdf:Statement` and its two-pattern existence test merge into ONE `m{ ?stmt a rdf:Statement ; rdf:subject ns:t1 ; rdf:predicate ns:flag }(g).first()` followed by `assert stmt is not None, …`, which removes the `found` flag and the `break` (10 tokens shorter than the loop written with islands). The code already takes the first matching statement as its semantics (break after the first), so the join does not change cardinality; which matching statement is first is store order on both sides."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef goes; the rdflib and rdflib.namespace imports are merged (`from rdflib import PROV, RDF, Graph, Namespace`).",
+    "LD Python: nothing is unused; the two rdflib imports are merged (`from rdflib import Graph, prov:, rdf:`); both @prefix lines are used."
+  ]
 }

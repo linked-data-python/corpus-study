@@ -52,5 +52,25 @@
     "method": "entry:test_enrich_graph_datatypes_typecoercion",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Python: `URIRef(\"http://example.com/hasAge\")`, written four times, is bound once to `has_age` (the two other IRIs occur twice each, where a variable saves nothing); the two `g.add` become `g += [triple, triple]`; `Literal(\"not-a-number\", datatype=None)` becomes `Literal(\"not-a-number\")` (the same term); the dict literal goes on one line. The two assertions stay separate: one `and` would save a token and lose which one failed.",
+    "LD Python: the translation was already minimal; only the dict literal goes on one line. The two assertions stay two `assert m{ }` for the same reason as on the Python side (a two-pattern join would save a few tokens). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "prefixed name",
+    "typed literal",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the five unused shim functions (reorder_jsonld, sort_subjects, sort_predicates, load_json_from_url, extract_datatype_map) go; the two rdflib imports are merged.",
+    "LD Python: the same five shim functions go; `from rdflib import Graph, xsd:` and `@prefix ex:` are used."
+  ]
 }
