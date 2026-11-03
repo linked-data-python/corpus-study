@@ -47,5 +47,20 @@
     "method": "fixture:fixture.ttl entry:from_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the six component reads x/y/z of the shear vector and of the normal vector become one local helper `components(vector)`, a comprehension over \"xyz\" with `CMSO[f\"hasComponent_{axis}\"]` (a missing component still raises AttributeError, now before the next component is read, with no other effect); the `for vec in ...: ...; break` loop becomes `next(graph.objects(...), None)` and a conditional expression; the generator over graph.triples() becomes `next(graph.subjects(PROV.wasGeneratedBy, activity), None)`; `normal_vector = distance = None` on one line. Kept: the `if output_sample` and the two `is not None` guards. graph.value(None, P, activity) was rejected: with activity_id=None it returns None where the original's triples() treats None as a wildcard.",
+    "optimized.ldpy, from optimized.py: only the namespace terms change, `PROV.x`/`CMSO.x` becoming prefixed names and `CMSO[f\"hasComponent_{axis}\"]` becoming `cmso:hasComponent_{axis}`. A `m{ }(graph).first()` for either `next(...)` read measured the same 223 tokens, a full `@graph graph` + m{ } version 230: the Python reads are kept, being no longer and exact on activity_id=None, where an interpolated None raises in m{ }. No island is left; no exception to the symmetry rule.",
+    "Most of the notation gain is the header's: the original imports eight names from the namespace module, the translation two prefixes (see the header variant)."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: LDO, PLDO, PODO, CDCO, Literal and ASMO are unused and go; the two shim imports become `from atomrdf_context import get_sample_object, classmethod, CMSO, PROV`.",
+    "optimized_header.ldpy: nothing unused (get_sample_object, classmethod, cmso: and prov: are all used): a copy of optimized.ldpy."
+  ]
 }

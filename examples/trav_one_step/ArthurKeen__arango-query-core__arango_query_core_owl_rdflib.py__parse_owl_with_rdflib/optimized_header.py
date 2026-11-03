@@ -1,0 +1,103 @@
+# Extracted from ArthurKeen/arango-query-core@f75a6be90c : arango_query_core/owl_rdflib.py
+# region: parse_owl_with_rdflib (lines 15-127, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from typing import Any
+from owl_rdflib_context import MappingBundle, MappingSource, _local_name, _xsd_to_simple  # context shim -- see meta.json
+
+def parse_owl_with_rdflib(turtle_text: str) -> MappingBundle:
+    """Parse an OWL/Turtle ontology using rdflib and produce a MappingBundle.
+
+    Handles:
+    - ``owl:Class`` → entity in conceptual schema
+    - ``owl:ObjectProperty`` → relationship in conceptual schema
+    - ``rdfs:domain`` / ``rdfs:range`` → fromEntity / toEntity
+    - ``owl:DatatypeProperty`` → property on the domain entity
+    - ``rdfs:label`` → human-readable name
+    - Custom ``phys:`` annotations → physical mapping (if present)
+    """
+    try:
+        from rdflib import OWL, RDF, RDFS, Graph, Namespace
+    except ImportError as e:
+        raise ImportError(
+            "rdflib is required for OWL ingestion. Install with: pip install arango-cypher-py[owl]"
+        ) from e
+
+    g = Graph()
+    g.parse(data=turtle_text, format="turtle")
+
+    PHYS = Namespace("http://arangodb.com/schema/physical#")
+
+    # ── Extract classes ──────────────────────────────────────────────
+    entities: list[dict[str, Any]] = []
+    entity_props: dict[str, list[dict[str, str]]] = {}
+    # ── Physical mapping from phys: annotations ──────────────────────
+    physical_entities: dict[str, dict[str, Any]] = {}
+    physical_rels: dict[str, dict[str, Any]] = {}
+
+    for cls in g.subjects(RDF.type, OWL.Class):
+        name = _local_name(cls)
+        props = entity_props.setdefault(name, [])
+        entities.append({"name": name, "labels": [name], "properties": props})
+        coll = g.value(cls, PHYS.collectionName)
+        style = g.value(cls, PHYS.style) or g.value(cls, PHYS.mappingStyle)
+        if coll:
+            pm_entry: dict[str, Any] = {
+                "style": str(style) if style else "COLLECTION",
+                "collectionName": str(coll),
+                "properties": {},
+            }
+            type_field = g.value(cls, PHYS.typeField)
+            type_value = g.value(cls, PHYS.typeValue)
+            if type_field:
+                pm_entry["typeField"] = str(type_field)
+            if type_value:
+                pm_entry["typeValue"] = str(type_value)
+            physical_entities[name] = pm_entry
+
+    # ── Extract datatype properties ──────────────────────────────────
+    for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
+        domain = g.value(prop, RDFS.domain)
+        range_uri = g.value(prop, RDFS.range)
+        prop_entry: dict[str, str] = {"name": _local_name(prop)}
+        if range_uri:
+            prop_entry["type"] = _xsd_to_simple(str(range_uri))
+        if domain:
+            domain_name = _local_name(domain)
+            if domain_name in entity_props:
+                entity_props[domain_name].append(prop_entry)
+
+    # ── Extract object properties (relationships) ────────────────────
+    relationships: list[dict[str, Any]] = []
+    for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+        rel_name = _local_name(prop)
+        domain = g.value(prop, RDFS.domain)
+        range_ = g.value(prop, RDFS.range)
+        relationships.append(
+            {
+                "type": rel_name,
+                "fromEntity": _local_name(domain) if domain else "Any",
+                "toEntity": _local_name(range_) if range_ else "Any",
+                "properties": [],
+            }
+        )
+        edge_coll = g.value(prop, PHYS.edgeCollectionName) or g.value(prop, PHYS.collectionName)
+        style = g.value(prop, PHYS.style) or g.value(prop, PHYS.mappingStyle)
+        if edge_coll:
+            pm_entry = {
+                "style": str(style) if style else "DEDICATED_COLLECTION",
+                "edgeCollectionName": str(edge_coll),
+                "properties": {},
+            }
+            if domain:
+                pm_entry["domain"] = _local_name(domain)
+            if range_:
+                pm_entry["range"] = _local_name(range_)
+            physical_rels[rel_name] = pm_entry
+
+    return MappingBundle(
+        conceptual_schema={"entities": entities, "relationships": relationships},
+        physical_mapping={"entities": physical_entities, "relationships": physical_rels},
+        metadata={"source": "owl_rdflib"},
+        owl_turtle=turtle_text,
+        source=MappingSource(kind="owl_turtle"),
+    )

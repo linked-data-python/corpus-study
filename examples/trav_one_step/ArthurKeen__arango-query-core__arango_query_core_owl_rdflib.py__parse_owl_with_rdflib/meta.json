@@ -74,5 +74,21 @@
       "physical class loop replaced by []"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two loops over owl:Class are merged (conceptual entity and physical entry built in one pass), and so are the two loops over owl:ObjectProperty, which now read rdfs:domain and rdfs:range once for the relationship and the physical edge; the `for entity in entities` pass is removed by giving each entity the list `entity_props.setdefault(name, [])` at creation (setdefault, not a reset, so that two classes with one local name share the final list as in the original); `prop_name` is inlined; `import rdflib` becomes `from rdflib import OWL, RDF, RDFS, Graph, Namespace` inside the same try/except ImportError, so the local OWL, RDFS and RDF Namespace definitions go (rdflib's own namespaces give the same IRIs) and only PHYS stays. Kept: the try/except ImportError, every `if x:` guard and both `or` fallbacks, the local type annotations.",
+    "optimized.ldpy, from optimized.py: the three subject loops become `m{ ?cls a owl:Class }`, `m{ ?prop a owl:DatatypeProperty }`, `m{ ?prop a owl:ObjectProperty }` on `@graph g`, PHYS becomes `@prefix phys:` and `PHYS.x`/`RDFS.x` prefixed names, so the try imports only Graph. The 18 `g.value(x, P)` reads stay Python: as `m{ {x} P ?v }.first()` they measured 649 tokens against 623 (rule 4); `g.subjects(rdf:type, ...)` for the loops measured 634. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py and optimized_header.ldpy: nothing unused in the header (Any and the four names of the context shim are all used; the prefixes are declared in the function, not in the header): copies of the optimized artefacts."
+  ]
 }

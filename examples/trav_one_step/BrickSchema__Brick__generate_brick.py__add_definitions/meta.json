@@ -65,5 +65,26 @@
       "garde len(definition[1]) -> True"
     ],
     "remaining": "SELECT DISTINCT est un mutant équivalent (le chemin `*` de rdflib rend chaque paire une fois, même sous deux parents) : non compté. La question wrong-construction du tri (suffixe `(graph)` de s{ } redondant avec @graph graph) reste à juger."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the first SELECT (`?param rdfs:subClassOf* brick:Limit`) becomes `list(graph.subjects(RDFS.subClassOf * \"*\", BRICK.Limit))`: rdflib's SPARQL engine evaluates a one-pattern path through the same graph.triples() path evaluation, so the subjects come in the same order and with the same multiplicity (checked on the driver's three hierarchies); list() keeps the materialisation, since the loop adds to the graph it reads. Like translated.ldpy's s{ }, it no longer depends on the graph binding the brick:/rdfs: prefixes. The `is_alias` list becomes the existence test `(param, BRICK.aliasOf, None) not in graph`; the if/elif chain on the Min/Max prefix becomes a dict.get for the direction and an `elif words[0] in [\"Min\", \"Max\"]` for the setpoint, which removes the `prefix` variable; the template plus .format() becomes an f-string; `class_exists` is inlined into the `if not`; `len(definition[1])` becomes `definition[1]`; `open(Path(...))` becomes `open(\"...\")`; `+=` for the setpoint suffix. Kept: the raise ValueError, both CSV guards, and the second query as a raw f-string (its `brick:{setpoint}` is a prefixed name pasted into SPARQL text, which no island expresses and which a Python-built IRI would not reproduce on a setpoint that is not a valid local name).",
+    "optimized.ldpy, from optimized.py: `@graph graph`; the three graph.add() become `+{ }`, with `f\"{definition[1]}\"@en` and `f\"{limit_def}\"@en` for Literal(..., lang=\"en\") (strings, so the same literals) and `f<{definition[2]}>` for URIRef(definition[2]) (no @base in scope); the path loop becomes `m{ ?param {rdfs:subClassOf * \"*\"} brick:Limit }` (an interpolated rdflib path, same length as the Python selector); the alias test becomes `not m{ {param} brick:aliasOf [] }` (2 tokens shorter). No exception to the symmetry rule. The ldpy artefact is longer (ratio 1.036) because the translation's header declares 13 prefixes for 3 used."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "m{ }",
+    "prefixed name",
+    "language literal",
+    "f<…>",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Path (no longer used by the region), Graph, BNode and ten of the thirteen namespace constants go; the header keeps `from rdflib import Literal, URIRef` and `from context_shim import BRICK, RDFS, SKOS, brickschema`.",
+    "optimized_header.ldpy: Path, Graph, BNode, Literal (replaced by language literals) and every namespace constant go, leaving `from rdflib import URIRef` and `from context_shim import brickschema`; ten of the thirteen `@prefix` lines go, brick:, rdfs: and skos: stay. The notation ratio goes from 1.036 to 0.898."
+  ]
 }

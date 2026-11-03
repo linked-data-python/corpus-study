@@ -1,0 +1,35 @@
+# Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/generate-hed-bundle.py
+# region: read_sweep (lines 175-201, stratum trav_navigation)
+# licence of the source repository: see meta.json
+# Context restored (meta.json): SSTIM and local() are module-level helpers
+# defined earlier in scripts/generate-hed-bundle.py (lines 70, 109-111).
+from rdflib import Graph, URIRef
+
+@prefix sstim: <https://w3id.org/sstim#> .
+
+
+def local(term) -> str:
+    text = str(term)
+    return text.rsplit("#", 1)[-1] if "#" in text else text.rsplit("/", 1)[-1]
+
+
+def read_sweep(graph: Graph) -> dict | None:
+    """The one declarative modulation in SSTIM that a single row cannot express.
+
+    A steady periodic modulation — a flicker rate, a beat frequency — is fully
+    described by its rate, so one row carrying that rate is honest. A *parameter
+    that itself changes across the session* is not: a Martigli breathing period
+    gliding from mp0 to mp1 over md seconds has no single value to put in a
+    column. That distinction, not "is anything oscillating", is what decision 5
+    is about, so only the sweep is detected here.
+
+    Returns None when the configuration is fixed.
+    """
+    for track in graph.subjects(sstim:martigliPeriodInitial, None):
+        mp0 = graph.value(track, sstim:martigliPeriodInitial)
+        mp1 = graph.value(track, sstim:martigliPeriodFinal)
+        md = graph.value(track, sstim:martigliTransitionDuration)
+        if None in (mp0, mp1, md) or float(mp0) == float(mp1):
+            continue  # declared, but not actually sweeping
+        return {"track": local(track), "mp0": float(mp0), "mp1": float(mp1), "md": float(md)}
+    return None

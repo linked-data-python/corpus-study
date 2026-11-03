@@ -66,5 +66,23 @@
       "global loop replaced by [], and gated on `not ontology_iri` (the quirk 'fixed')"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two identical triple loops (given subject, then every owl:Ontology subject) are merged into one by appending the owl:Ontology subjects to `subjects_to_check` (`+= graph.subjects(RDF.type, OWL.Ontology)`), which keeps the order of the original, including its quirk (the global search also runs when ontology_iri is given but has no description); the list is initialised with a conditional expression instead of an append under `if`. The subjects are now read eagerly, which changes nothing observable (the graph is not modified). Kept: the `if value:` guard and the explicit `return None`.",
+    "optimized.ldpy, from optimized.py: `@graph graph`, `subjects_to_check += m{ ?s a owl:Ontology }` and `for obj in m{ {subject} {prop} ?o }`, with the three description properties as prefixed names (143 tokens, against 144 with the Python selectors). No exception to the symmetry rule. The ldpy artefact is longer (ratio 1.108) because the translation's header adds five `@prefix` lines next to the unchanged rdflib imports."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Literal and Namespace are unused and go; the two imports become `from rdflib import DC, DCTERMS, OWL, RDF, RDFS, Graph, URIRef`.",
+    "optimized_header.ldpy: Literal, Namespace and the whole rdflib.namespace import go (`from rdflib import Graph, URIRef`), and `@prefix rdf:` too (the pattern uses `a`); dc:, dcterms:, owl: and rdfs: stay. The notation ratio goes from 1.108 to 0.992."
+  ]
 }

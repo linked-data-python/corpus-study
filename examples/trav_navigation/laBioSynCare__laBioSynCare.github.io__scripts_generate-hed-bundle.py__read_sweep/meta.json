@@ -58,5 +58,20 @@
       "outer m{ } replaced by []"
     ],
     "remaining": "The outer loop's predicate widened to a variable survives about one run in two: it only changes the order of subjects, which the Memory store draws from a hash-ordered set for a full scan, and the mp0 guard skips every subject the predicate would have excluded - an order-only mutant. For Maxime: the fused join is correct whenever the three predicates are functional, which the repository's ontology declares (static/ontology/sstim-patch-studio.ttl:256, sstim-shapes.ttl:522-523) but read_sweep does not check; it could become optimized.ldpy if that constraint is accepted as the region's semantics. Should article_candidate stay true? The line-by-line pair no longer shows a join gain."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: each `next(graph.objects(track, P), None)` becomes `graph.value(track, P)` (rdflib's value() returns the first object or None, any=True by default); the two guards are merged into `if None in (mp0, mp1, md) or float(mp0) == float(mp1): continue`; the returned dict is written on one line. The outer subjects() loop stays: replacing it by subject_objects() would read the per-triple value instead of the first, which fixture_multivalued.ttl tells apart.",
+    "optimized.ldpy, from optimized.py: the only change is `S(\"name\")` replaced by the prefixed name `sstim:name` in Python position. The three reads stay `graph.value(...)`: a one-for-one `m{ {track} P ?x }(graph).first()` is longer (rule 4). The outer loop also stays `graph.subjects(sstim:martigliPeriodInitial, None)`: `m{ ?track sstim:martigliPeriodInitial [] }(graph)` measured 165 tokens against 164. No island is left; no exception to the symmetry rule.",
+    "Not compressed: the three reads are not fused into one join, which would change the result when a predicate is multi-valued (translation notes, repair of 2026-10-30)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: nothing unused (Graph annotates, URIRef builds S, SSTIM, S and local are all used): a copy of optimized.py.",
+    "optimized_header.ldpy: URIRef is unused and goes, leaving `from rdflib import Graph`; the one `@prefix sstim:` is used."
+  ]
 }

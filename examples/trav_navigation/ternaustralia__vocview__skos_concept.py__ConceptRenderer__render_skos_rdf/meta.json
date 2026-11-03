@@ -70,5 +70,21 @@
       "@prefix schema: <http://schema.org/> ajouté au bloc du @graph (survivant avant : le pilote ne voyait pas les liaisons)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the subject is bound once (`subj = URIRef(self.uri)`) and the outer loop reads `Config.g.predicate_objects(subj)` instead of unpacking `triples((URIRef(self.uri), None, None))`; the inner loop that copies the blank node's triples one by one becomes `g += Config.g.triples((obj, None, None))` (Graph.__iadd__ takes any iterable of triples).",
+    "optimized.ldpy, from optimized.py: `URIRef(self.uri)` becomes `f<{self.uri}>` (no @base in scope, so the same IRI), and `@graph g` + `+{ {subj} {pred} {obj} }` replaces `g.add((subj, pred, obj))` (172 tokens against 173 without the pair). The outer read stays `Config.g.predicate_objects(subj)`: `m{ {subj} ?pred ?obj }(Config.g)` measured 176 against 173 (rule 4). `g += Config.g.triples(...)` stays: no island is shorter for a bulk copy. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: render_template is unused and goes (`from flask import Response`); Graph, URIRef, BNode and Config are used.",
+    "optimized_header.ldpy: render_template goes, and URIRef too, replaced by f<…> (`from rdflib import Graph, BNode`). The file has no @prefix."
+  ]
 }

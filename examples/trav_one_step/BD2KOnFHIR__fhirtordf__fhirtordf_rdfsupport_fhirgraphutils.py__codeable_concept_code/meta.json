@@ -62,5 +62,23 @@
       "guard `coding_code` dropped"
     ],
     "remaining": "The shim was edited (a transcription fidelity fix, not an invented input type); previous notes saying 'unmodified' described the first transcription."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `list(...)` around g.objects() goes (the loop does not modify the graph). Nothing else compresses: the `if coded_entry:` guard must stay (g.objects(None, P) would be a wildcard), the filter needs both values twice so a comprehension would need a walrus, and both `g.value(..., any=False)` stay.",
+    "optimized.ldpy, from optimized.py: the coding loop iterates `m{ {coded_entry} fhir:CodeableConcept.coding ?o }(g)` (182 tokens, as with `@graph g`; 185 with the Python selector) and `RDF.type` becomes `rdf:type`. Unlike translated.ldpy, both `g.value(..., any=False)` reads stay Python: `.first()` drops the UniquenessError they raise on two values, and `.one()` also raises on zero, where value() returns None. `FHIR.Coding.system`/`.code` stay, passed to the project's value() helper. The ldpy artefact is longer than optimized.py (ratio 1.028): the two `@prefix` lines of the header outweigh what the island saves."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Union, Tuple, BNode, Literal and Identifier are unused and go; the rdflib imports become `from rdflib import RDF, Graph, Node, URIRef`.",
+    "optimized_header.ldpy: the same names go, and RDF too (replaced by rdf:type): `from rdflib import Graph, Node, URIRef`. Both `@prefix` lines (fhir:, rdf:) are used. Even so the notation ratio stays above 1 (1.018)."
+  ]
 }

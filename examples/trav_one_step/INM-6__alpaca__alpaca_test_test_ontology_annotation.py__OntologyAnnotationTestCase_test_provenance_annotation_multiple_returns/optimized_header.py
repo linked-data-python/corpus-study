@@ -1,0 +1,85 @@
+# Extracted from INM-6/alpaca@2b8dd34fc6 : alpaca/test/test_ontology_annotation.py
+# region: OntologyAnnotationTestCase.test_provenance_annotation_multiple_returns (lines 539-631, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from rdflib import PROV, RDF, Graph, Literal
+from alpaca import activate, deactivate, save_provenance
+from alpaca.ontology import ALPACA
+from alpaca_context import InputObject, process_multiple  # context shim -- see meta.json
+
+def test_provenance_annotation_multiple_returns(self):
+    activate(clear=True)
+    input_object = InputObject()
+    name, output_object = process_multiple(input_object, 45)
+    deactivate()
+
+    # Read PROV information as RDF
+    prov_graph = Graph().parse(data=save_provenance(), format='turtle')
+
+    # Check that the annotations exist (1 per class is expected. None
+    # are expected for the classes of `process`)
+    for cls, count in {"Parameter": 1, "ProcessFunctionMultiple": 1, "ProcessedDataMultiple": 1,
+                       "InputObject": 1, "OutputObject": 1,
+                       "ProcessFunction": 0, "ProcessedData": 0}.items():
+        self.assertEqual(len(list(prov_graph.subjects(RDF.type, self.ONTOLOGY[cls]))), count)
+
+    execution_uri = list(prov_graph.subjects(RDF.type, ALPACA.FunctionExecution))[0]
+    parameter_node = next(prov_graph.subjects(RDF.type, self.ONTOLOGY.Parameter))
+    output_node = next(prov_graph.subjects(RDF.type, self.ONTOLOGY.ProcessedDataMultiple))
+    for triple in [
+        # FunctionExecution is ProcessFunctionMultiple
+        (execution_uri, RDF.type, self.ONTOLOGY.ProcessFunctionMultiple),
+        # Check parameter name
+        (parameter_node, ALPACA.pairName, Literal("param_1")),
+        (parameter_node, ALPACA.pairValue, Literal(45)),
+        # Check returned value
+        (output_node, PROV.wasGeneratedBy, execution_uri),
+        (output_node, RDF.type, ALPACA.DataObjectEntity),
+        (output_node, RDF.type, self.ONTOLOGY.OutputObject),
+    ]:
+        self.assertTrue(triple in prov_graph)
+
+    # Check attributes of returned value
+    expected_attributes = {'name': "SpikeTrain#2", 'channel': 34}
+    for attribute in prov_graph.objects(output_node, ALPACA.hasAttribute):
+        name = prov_graph.value(attribute, ALPACA.pairName).toPython()
+        value = prov_graph.value(attribute, ALPACA.pairValue).toPython()
+        self.assertEqual(value, expected_attributes[name])
+
+        # Check if attribute annotation is present for `name`
+        if name == 'name':
+            self.assertTrue((attribute, RDF.type, self.ONTOLOGY.Attribute) in prov_graph)
+
+    # Check input value
+    input_node = next(prov_graph.subjects(RDF.type, self.ONTOLOGY.InputObject))
+    for triple in [
+        (execution_uri, PROV.used, input_node),
+        (input_node, RDF.type, ALPACA.DataObjectEntity),
+        (output_node, PROV.wasDerivedFrom, input_node),
+    ]:
+        self.assertTrue(triple in prov_graph)
+
+
+# Test harness only (see meta.json): the region is a unittest.TestCase
+# method that only ever asserts and returns None, and it needs `self` (for
+# both self.ONTOLOGY and the assert* methods) which the extracted method no
+# longer has -- driver.py supplies a minimal real unittest.TestCase
+# instance. `demo` turns a failed assertion into a comparable value instead
+# of letting it abort the driver, same convention as the trav_existence /
+# trav_one_step siblings in this stratum that translate a bare `test_*`.
+#
+# `perturb` (repair 2026-10-30) is a seam for the driver, identical on both
+# sides, the region untouched: it rewrites the Turtle that
+# save_provenance() hands the region, so the driver can vary the graph the
+# assertions read (alpaca alone always produces the same passing graph).
+def demo(self, perturb=None) -> object:
+    global save_provenance
+    produced = save_provenance
+    if perturb is not None:
+        save_provenance = lambda: perturb(produced())
+    try:
+        test_provenance_annotation_multiple_returns(self)
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))
+    finally:
+        save_provenance = produced

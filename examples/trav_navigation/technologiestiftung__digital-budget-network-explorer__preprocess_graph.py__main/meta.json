@@ -65,5 +65,24 @@
       "outer island and keyword island replaced by []"
     ],
     "remaining": "Nothing on equivalence. Noted by the triage, not handled here (shim-invents-logic is a judgment): shim.py is not verbatim (BASE, local_name, first_label without schema:name, get_top_level and extract_phrases rewritten); identical on both sides, so without effect on the equivalence."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the identical Gruppe and Funktion blocks become one local helper `top_level(pred, registry)` called twice (their section comments go with them); every `if key not in registry: registry[key] = value` becomes `registry.setdefault(key, value)` (bereiche, klassen, the helper, titel_beschreibung: first_label and concept_labels.get are side-effect free, so evaluating them eagerly changes nothing observable); the keyword list comprehension is written on one line; num() loses its `if v is not None else None`, since float(None) raises TypeError, which its own except already turns into None. Kept: the order of the reads (the loop variables left at module level by the last iteration are compared by the driver), the try/except ValueError on the year, the `if desc` guards (extract_phrases is a helper of the source file, its behaviour on \"\" is not assumed), and the trailing soll filter as written (its inversion differs on NaN).",
+    "optimized.ldpy, from optimized.py: the outer loop becomes `m{ ?s a dh:Haushaltsposten }` and the keyword comprehension iterates `m{ {s} dcterms:subject ?o }` (on the `@graph g` of the header); every `DH.x`, `DCTERMS.x`, `SCHEMA.x` becomes a prefixed name, including the predicates passed to num() and top_level(), so the DH and SCHEMA Namespace definitions go. The eleven `g.value(s, P)` reads stay Python: as `m{ {s} P ?v }.first()` they measured 640 tokens against 626 (rule 4). No exception to the symmetry rule.",
+    "Module-level loop variables that the compression removes (grp_obj, hg_uri, fun_obj, hf_uri) are no longer compared by the driver, which compares only the names both modules define; the accumulators and every kept loop variable are, and match. DH and SCHEMA, locals of main() in the repository, exist only in optimized.py."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Graph, SKOS, OWL and RDFS are unused and go; the two rdflib imports become `from rdflib import DCTERMS, RDF, Namespace`. The shim import is used whole.",
+    "optimized_header.ldpy: both rdflib imports go (nothing of them is used once DH and SCHEMA are prefixes) and so does `@prefix rdf:` (the outer pattern uses `a`); dcterms:, schema: and dh: stay."
+  ]
 }

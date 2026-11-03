@@ -63,5 +63,15 @@
       "the former m{ } translation of each of the four reads on node/rootentity"
     ],
     "remaining": "Four of the six reads are now rdflib (`next(graph.objects(node, p), 'unknown')`) because their subject may be None, a wildcard the language has no form for ({None} -> Literal('None'), known gap 9 of AGENT_TRIAGE, here reached by the repository): is classification `directly-expressible` still right, or `awkward`/`minor-restructuring`? And is the guarded double-pattern form preferable for the study? article_candidate is still true while the triage judged the gain negative: to decide."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the six `next(graph.objects(s, self.basens['p']), 'unknown')` reads become one local helper `value(subject, name)`, nested for the two two-step reads (`value(value(rootentity, 'hasNamespace'), 'hasUri')`); node_id, idtype, rootns, ns, nsurins and result are inlined into the nodeId_to_iri call; the parentheses around the is_entityns comparison go. The reads keep `next(..., 'unknown')`, so a falsy value that is present is kept and a None subject stays a wildcard, as in the original (driver calls 7 to 12).",
+    "optimized.ldpy: identical to optimized.py below the header, which is the translation's and holds no @prefix. Nothing for the notation: every predicate is `self.basens[...]`, a runtime Namespace, and four of the six subjects may be None, which rdflib reads as a wildcard while `{None}` in m{ } becomes Literal('None') (translation notes); an m{ } for the two reads whose subject is never None would split the helper and lengthen the code. translated.ldpy's `@graph graph` and its two `.first()` + `is None` reads are not used (rule 4). Notation ratio 1.0."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py and optimized_header.ldpy: URIRef, Graph, Literal and BNode are unused and go, leaving `from rdflib import Namespace`; the shim import is used. The two headers are the same, so the notation ratio stays 1.0."
+  ]
 }
