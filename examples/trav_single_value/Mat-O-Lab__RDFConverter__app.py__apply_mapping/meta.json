@@ -70,5 +70,23 @@
       "the first +{ } replaced by pass"
     ],
     "remaining": "The tablegroup read is now `next(iter(m{ }))`, not a reduction of the language (`.one()` dropped from constructions); the variable is dead in the repository (app.py:1477). A blank-node column is not exercised: each side parses its own graph, so a BNode key of column_maps and its printed id differ whatever the translation does."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the column loop becomes a dict comprehension; `next(data_graph.objects(column, CSVW.propertyUrl), column)` becomes `data_graph.value(column, CSVW.propertyUrl, default=column)` (value() returns the first object or the default, never raises); the intermediate list non_column_subjects is folded into the note_maps comprehension (`if note not in column_maps`), so that module name is no longer compared; `list()` becomes `[]`.",
+    "optimized.py: in the row loop the inner `if template_url and template_content:` is removed (the enclosing if already requires both, and neither is reassigned); `next(joined_graph.objects(data_node, property), None)` becomes `joined_graph.value(data_node, property)`; the else branch adds `Graph().parse(data=template_content)` without the temp_template_graph variable (still a separate graph, so no template binding reaches joined_graph).",
+    "Kept as loops: the column print loop (it prints per column) and the two loops that fill for_copy_to_set and add its triples, because the region is module state and their loop variables (data, subject, predicate, object) are module values the driver compares; a comprehension would leave other final values.",
+    "optimized.ldpy, from optimized.py: only prefixed names in Python position (`data_graph[: rdf:type : csvw:Column]`, `next(data_graph[: rdf:type : csvw:TableGroup])`, `value(..., csvw:propertyUrl, ...)`, `value(row, csvw:describes)`).",
+    "Rule 4, measured: `next(iter(m{ ?tablegroup a csvw:TableGroup }(data_graph)))` +4 tokens, `m{ ?column a csvw:Column }(data_graph)` +1, `m{ {row} csvw:describes ?data_node }(data_graph).first()` +5, `+{ {subject} {predicate} {row_ns[object]} }(joined_graph)` +4 (both adds) \u2014 all kept as Python. The notation ratio is above 1 only because the translated header carries five @prefix lines, three unused (see the header variant).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, BNode, RDFS, PROV, XSD, the shadowed CSVW import and the three unused shim stubs go; RDF joins the rdflib import; the `CSVW = Namespace(...)` line stays (the region and the driver's input block use CSVW).",
+    "LD Python: URIRef, BNode, RDFS, PROV, XSD and the three unused shim stubs go; CSVW and RDF stay (the restored context block and the driver's input block use them) and join the rdflib import; the rdfs:, prov: and xsd: @prefix lines go, csvw: and rdf: stay."
+  ]
 }

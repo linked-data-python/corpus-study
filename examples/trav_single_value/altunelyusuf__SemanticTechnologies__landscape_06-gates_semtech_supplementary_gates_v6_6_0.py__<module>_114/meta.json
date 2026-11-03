@@ -47,5 +47,25 @@
     "method": "module-state x 5 inputs",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region is the G7 header loop alone (source lines 114-121); the G2/G3 lines before it are context and belong to the extracted header, left byte for byte (translated.ldpy's islands there included).",
+    "optimized.py is identical to original.py: the loop is already in the script's dense one-line-if style. Every read must stay a value() read, because the driver logs every Graph.triples pattern and every triple consumed, and the `not g.value(o, p)` test is a truthiness test (a falsy \"\" or 0 counts as missing) that an `in` test would not reproduce.",
+    "optimized.ldpy, from optimized.py: the Ontology subjects are `list(m{ ?s a owl:Ontology }(g))` (no per-iteration @graph needed); versionInfo/versionIRI keep `g.value(o, owl:...)` with prefixed names, and `g.value(o, p)` has no RDF term to rewrite.",
+    "Rule 4: `m{ {o} owl:versionInfo ?v }(g).first()` is 5 tokens longer than `g.value(o, owl:versionInfo)`, so the three value reads translated.ldpy turned into m{ }.first() go back to value(). `g.subjects(rdf:type, owl:Ontology)` and the m{ } have the same token count; the m{ } is kept because it needs no rdf: prefix.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "variable",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, Literal, SKOS and XSD go; DCTERMS, OWL, RDF and RDFS (used by the context lines and the loop) join the rdflib import.",
+    "LD Python: Namespace, URIRef, Literal and the whole rdflib.namespace import go (the context and the loop use prefixed names; SEM comes from `@prefix sem: ... as SEM`), so only Graph is left; `@prefix rdf:` goes (the loop pattern uses `a`); sem:, rdfs:, owl: and dcterms: stay for the context lines."
+  ]
 }

@@ -47,5 +47,26 @@
     "method": "entry:velocity_twist",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `if not reference_point: reference_point = ...` becomes `reference_point = reference_point or self.rel.g.value(...)` (same truthiness test; the default is read only when the argument is falsy, still None if there is no origin); of_velocity is inlined into the coord.velocity_twist call (rel.velocity is still called first); `GEOM_ENT[\"Frame\"]`, `GEOM_ENT[\"origin\"]` and `RDF[\"type\"]` become attribute access.",
+    "optimized.ldpy, from optimized.py: `@graph self.rel.g`, the frame check is `assert m{ {as_seen_by} a geom_ent:Frame }` (bool() is implied by assert) and the origin read `m{ {as_seen_by} geom_ent:origin ?v }.first()`.",
+    "Rule 4, measured: with the @graph line both islands beat the Python with prefixed names (106 tokens; all Python 113; the origin read kept as `self.rel.g.value(as_seen_by, geom_ent:origin)` 108), so the stratum's m{ }.first() is kept here.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: collection, BNode, Literal and six of the seven namespace classes go; RDF and GEOM_ENT stay.",
+    "LD Python: the rdflib import and the whole namespace-class import go (the region writes `a` and geom_ent: names); only `from kindynsyn.namespaces import geom_ent:` is left."
+  ]
 }

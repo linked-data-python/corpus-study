@@ -48,5 +48,21 @@
     "method": "entry:load_component_model",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the six single-use results computed after `classes` (top_level_classes, examples and the four get_rdf_properties results) are inlined into the ComponentModel call. These callees only read the dataset, so moving them after the coded-properties loop changes nothing but which exception would win if two different steps failed at once. name and descriptions stay variables before `classes`, because get_component_model_classes mutates self.class_index and a failing get_name must still raise before that mutation. The SimpleCodedProperty arguments go on one line (one token, the trailing comma).",
+    "optimized.ldpy, from optimized.py: the five OWL.X / SH.order terms become prefixed names.",
+    "Rule 4: `order = db.value(iri, sh:order)` stays Python. `m{ {iri} sh:order ?o }(db).first()` is 5 tokens longer, and so translated.ldpy's only island is not used. The notation ratio is above 1 because the translated header carries fourteen @prefix lines, twelve unused (see the header variant).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, Literal, twelve of the fourteen rdflib.namespace names, eleven of the fourteen model classes and four of the six common helpers go; OWL and SH join the rdflib import; the four context helpers of the region's own module all stay.",
+    "LD Python: the same, except that OWL and SH go too (they are prefixed names now); the twelve unused @prefix lines go, owl: and sh: stay."
+  ]
 }

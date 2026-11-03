@@ -1,0 +1,37 @@
+# Extracted from comp-rob2b/kindyngen@414ebd52b2 : kindynsyn/synthesizer/graph_factories/dynamics.py
+# region: DynamicsEntitiesCoordinates.inertial_wrench (lines 202-222, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import collection, BNode, Literal, RDF
+from kindynsyn.namespaces import GEOM_ENT, GEOM_REL, GEOM_COORD, RBDYN_ENT, \
+    RBDYN_COORD, RBDYN_OP, QUDT_SCHEMA, QUDT_QKIND, QUDT_UNIT
+from kindynsyn.namespaces import geom_coord:, rbdyn_coord:, rbdyn_op:, qudt_schema:, qudt_unit:
+from kindynsyn.rdflib_tools.helpers import uuid_ref
+def inertial_wrench(self, rigid_body_inertia, velocity_twist, wrench):
+    g = self.g
+    @graph g
+    for inertia_path, other, other_path in [
+        (RBDYN_COORD["as-seen-by"], velocity_twist, GEOM_COORD["as-seen-by"]),
+        (RBDYN_COORD["as-seen-by"], wrench, RBDYN_COORD["as-seen-by"]),
+        (RBDYN_COORD["of-inertia"] / RBDYN_ENT.about, velocity_twist,
+         GEOM_COORD["of-velocity"] / GEOM_REL["reference-point"]),
+        (RBDYN_COORD["of-inertia"] / RBDYN_ENT.about, wrench,
+         RBDYN_COORD["of-wrench"] / RBDYN_ENT["reference-point"]),
+        (RBDYN_COORD["of-inertia"] / RBDYN_ENT["of-body"], velocity_twist,
+         GEOM_COORD["of-velocity"] / GEOM_REL.of),
+        (RBDYN_COORD["of-inertia"] / RBDYN_ENT["of-body"], wrench,
+         RBDYN_COORD["of-wrench"] / RBDYN_ENT["acts-on"]),
+    ]:
+        assert g.value(rigid_body_inertia, inertia_path) == g.value(other, other_path)
+    for subject, unit in [
+        (rigid_body_inertia, "KiloGM"), (rigid_body_inertia, "M-KiloGM"),
+        (rigid_body_inertia, "KiloGM-M2"), (velocity_twist, "RAD-PER-SEC"),
+        (velocity_twist, "M-PER-SEC"), (wrench, "N-M"), (wrench, "N"),
+    ]:
+        assert QUDT_UNIT[unit] in g[subject : qudt_schema:unit]
+
+    id_ = uuid_ref()
+    +{ {id_} a rbdyn_op:InertialWrench ;
+           rbdyn_op:rigid-body-inertia {rigid_body_inertia} ;
+           rbdyn_op:velocity-twist {velocity_twist} ;
+           rbdyn_op:wrench {wrench} }
+    return id_

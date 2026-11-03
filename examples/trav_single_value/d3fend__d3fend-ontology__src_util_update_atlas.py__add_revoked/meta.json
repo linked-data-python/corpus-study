@@ -50,5 +50,29 @@
     "method": "entry:add_revoked",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `tech = tech[\"data\"]` is folded into the generator's iterable; the next() call takes two lines; the two nested ifs merge into one `and` (same short-circuit); `graph.value(atlas_uri, owl.deprecated) is None` becomes `(atlas_uri, owl.deprecated, None) not in graph` (value() returns None exactly when no object exists, so the falsy `owl:deprecated false` still counts as present); the `new` flag gives way to `return 1` / `return 0`; the three adds become one `graph += [...]`.",
+    "optimized.ldpy, from optimized.py: `@graph graph`; the two existence tests are `m{ ?s ?p {atlas_id} } and not m{ {atlas_uri} owl:deprecated ?v }`; the three triples are one `+{ {atlas_uri} rdfs:seeAlso {Literal(revoked_by)} ; owl:deprecated true ; rdfs:comment f\"This technique has been revoked by {revoked_by}\" }`.",
+    "`{atlas_id}` drops translated.ldpy's `Literal()`: when the test is reached atlas_id is a str (`_XMLNS + atlas_id` has already raised TypeError on None or a number), and coercing a str gives the same plain literal. `{Literal(revoked_by)}` keeps its `Literal()`: the coercion differs from Literal() on None (TypeError instead of Literal('None'), and a JSON null is possible) and on URIRef/BNode. The comment is an f-string literal written in the island, the same value as Literal(f\"...\").",
+    "Rule 4 was measured on each part: the island forms are shorter here (130 tokens; with the Python existence tests 147, with the Python adds 158).",
+    "No exception to the symmetry: the change to an existence test is in both files."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "typed literal",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, BNode, SKOS and the shim's get_graph go; Literal, Namespace, URIRef and _xmlns as _XMLNS stay, and so do the owl/rdfs Namespace lines.",
+    "LD Python: the same, and Namespace goes too (owl: and rdfs: are @prefix lines, both used)."
+  ]
 }

@@ -50,5 +50,26 @@
     "method": "entry:inertial_wrench",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `g = self.g` once. The six value equalities, whose left side is always rigid_body_inertia, become a table of (inertia path, other subject, other path) and one assert in a loop. The seven unit assertions become a table of (subject, unit local name) and one assert. The four adds on id_ become one `g += [...]`. Non-hyphenated names use attribute access (`RDF.type`, `QUDT_SCHEMA.unit`, `RBDYN_ENT.about`, `GEOM_REL.of`, `RBDYN_OP.wrench`).",
+    "The reads keep their order and their number: the driver logs every (subject, predicate) the region asks, so the duplicated as-seen-by read of rigid_body_inertia is not factored out. Every assert keeps its bare AssertionError. The path objects are built before the first read, which changes nothing (they read nothing and the names are defined).",
+    "optimized.ldpy, from optimized.py: `@graph g`, one `+{ {id_} a rbdyn_op:InertialWrench ; ... }` for the four triples, and `qudt_schema:unit` in the unit slice. The hyphenated path components (`of-inertia`, `as-seen-by`, ...) cannot be prefixed names outside an island, and rbdyn_ent:/geom_rel: are not imported by the translated header, so the equality table stays Python on both sides.",
+    "Rule 4: the value reads stay `g.value(...)`, shorter than `m{ {s} {path} ?v }.first()` even now that an interpolated path is evaluated. In the unit loop `QUDT_UNIT[unit] in g[subject : qudt_schema:unit]` is shorter than `m{ {subject} qudt_schema:unit {QUDT_UNIT[unit]} }` (10 tokens against 12).",
+    "Metric observation: `+{ ... }(g)` with a call suffix is measured 5 tokens heavier than `@graph g` plus `+{ ... }` (the island text then ends with `)`, so tokenize_island skips its body handling and hyphenated names are split). `@graph g` is the shorter form in any case.",
+    "No exception to the symmetry: both table loops are pure Python and are in both files."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: collection, BNode, Literal, GEOM_ENT and QUDT_QKIND go; RDF, the seven namespace classes the region reads and uuid_ref stay.",
+    "LD Python: the whole rdflib import goes (the type is `a`). RBDYN_OP, QUDT_SCHEMA, GEOM_ENT and QUDT_QKIND go, and so do the unused prefix imports geom_coord:, rbdyn_coord: and qudt_unit:. The five namespace classes still used and the two prefixes rbdyn_op: and qudt_schema: share one import statement."
+  ]
 }

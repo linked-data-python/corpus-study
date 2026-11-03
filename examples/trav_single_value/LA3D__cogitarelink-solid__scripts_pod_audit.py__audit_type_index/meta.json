@@ -62,5 +62,26 @@
       "déjà tués et revérifiés : .one() et next(iter(...)) sur forClass et instanceContainer, sujets {reg} élargis en [] (forClass, instance, instanceContainer), has_instance forcé à True / False, motif de boucle élargi (rdf:type []) ou vidé"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: cls_iri is computed once (`str(cls_node) if isinstance(cls_node, URIRef) else None`), which removes the two `cls_iri = None` lines and the else branch; the literal test becomes `elif cls_iri is None`.",
+    "optimized.py: has_instance is inlined at its only use as `(reg, URIRef(SOLID + \"instance\"), None) not in ti_g` (an existence test, same truth value as `value(...) is not None`, also for an empty literal); the per-container list is initialised with `setdefault`.",
+    "optimized.ldpy, from optimized.py: `@graph ti_g`, the loop is `m{ ?reg a solid:TypeRegistration }` and the existence test `not m{ {reg} solid:instance ?o }`.",
+    "Rule 4: the two value reads that keep the term stay `ti_g.value(reg, solid:forClass)` / `ti_g.value(reg, solid:instanceContainer)` with a prefixed name: `m{ {reg} solid:forClass ?o }.first()` is two tokens longer.",
+    "No exception to the symmetry; the URL/origin logic and all findings are untouched."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "variable",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the unused Graph import goes.",
+    "LD Python: the unused Graph import and the `@prefix rdf:` line go (the loop pattern uses `a`); `@prefix solid:` stays."
+  ]
 }

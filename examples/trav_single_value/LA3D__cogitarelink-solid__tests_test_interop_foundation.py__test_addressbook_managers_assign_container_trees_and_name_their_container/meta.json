@@ -71,5 +71,23 @@
       "assert a is not None -> assert a"
     ],
     "remaining": "The mgr read is now `next(iter(m{ }))`, not a reduction of the language (`.one()` dropped from constructions): does the pair stay directly-expressible, and should the language offer a `next()`-like reduction (first, raise on none)?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the intermediate `mgr` is inlined into the assignment read, `g.value(next(g.subjects(rdflib.RDF.type, ST.Manager)), ST.hasAssignment)`; next() still raises StopIteration on a graph without a manager and takes the first on several. Nothing else to compress: three asserts with their messages, and value() takes the first object, which an `in` test would not.",
+    "optimized.ldpy, from optimized.py: the manager read is `next(iter(m{ ?mgr a st:Manager }(g)))` (shorter than `g.subjects(rdflib.RDF.type, st:Manager)`); the call suffix (g) costs the same as `@graph g` and leaves the input graph's bindings alone.",
+    "Rule 4: the three value reads stay `g.value(..., st:hasAssignment / st:assigns / st:manages)` with prefixed names; `m{ {a} st:assigns ?v }.first()` is longer for each (measured: 152 tokens with them against 149).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "variable",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header (rdflib, ST / @prefix st:, ABTREE_NS, AB_MANAGERS are all read by the region): the two files are copies of the optimized ones."
+  ]
 }

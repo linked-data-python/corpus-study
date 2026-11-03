@@ -1,0 +1,23 @@
+# Extracted from d3fend/d3fend-ontology@cce593d61c : src/util/update_atlas.py
+# region: add_revoked (lines 218-247, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Literal, URIRef
+from build import _xmlns as _XMLNS
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+def add_revoked(graph, tech):
+    @graph graph
+    revoked_by = tech["revoked_by"]
+    atlas_id = next((ref.get("external_id") for ref in tech["data"]["external_references"]
+                     if ref.get("source_name") == "mitre-atlas"), None)
+    atlas_uri = URIRef(_XMLNS + atlas_id)
+
+    # Check if tech already has revoked annotations
+    if m{ ?s ?p {atlas_id} } and not m{ {atlas_uri} owl:deprecated ?v }:
+        # Add a triple indicating deprecation
+        +{ {atlas_uri} rdfs:seeAlso {Literal(revoked_by)} ;
+               owl:deprecated true ;
+               rdfs:comment f"This technique has been revoked by {revoked_by}" }
+        return 1
+    return 0

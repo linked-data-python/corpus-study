@@ -63,5 +63,25 @@
       "déjà tués et revérifiés : boucle prov:used vidée, filtre forcé à True, sujet du filtre élargi en []"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py is identical to original.py: nothing to compress. Inlining `transformation` would give a line over 100 characters, the assert must keep its AssertionError (no single-element unpacking), and value() takes the first object, which an `in` test would not.",
+    "optimized.ldpy, from optimized.py: `@graph metadata_graph`; the prov:used traversal is `m{ {transformation} prov:used ?entity }` and the existence filter is `if m{ {entity} prov:value ?o }` (no bool() needed in an if).",
+    "Rule 4, measured over the 16 combinations: the two value reads stay `metadata_graph.value(..., prov:wasGeneratedBy)` and `metadata_graph.value(..., prov:value)` with prefixed names (107 tokens; with them as m{ }.first() 111).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, XSD, Literal and URIRef go from the rdflib import; Graph (annotation) and Namespace (PROV) stay.",
+    "LD Python: RDF, RDFS, XSD, Literal, Namespace and URIRef go; Graph stays; the single `@prefix prov:` is used."
+  ]
 }

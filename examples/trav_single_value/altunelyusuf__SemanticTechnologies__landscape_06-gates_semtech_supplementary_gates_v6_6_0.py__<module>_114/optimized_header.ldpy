@@ -1,0 +1,47 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v6_6_0.py
+# region: <module> (lines 114-121, stratum trav_single_value)
+# licence of the source repository: see meta.json
+# Context restored (see meta.json): HERE is the script's data directory
+# (/home/claude/semtech-landscape in the real script) -- here this region's own
+# directory, holding small stand-ins for the TTL files and the two tooling
+# modules the script loads; `load`, `nodes`, `secnum` and `cls_iri` come from
+# the context shim semtech_gates_ctx.py.
+from pathlib import Path
+from rdflib import Graph
+from semtech_gates_ctx import load, nodes, secnum, cls_iri
+HERE = Path(__file__).resolve().parent
+@prefix sem: <http://example.org/semtech#> as SEM .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+T = load("taxonomy", "v1_0_0"); EC = load("enrichment_c", "v2_0_0")
+tb = Graph().parse(f"{HERE}/02-ontology/semtech_tbox_v6_6_0.ttl")
+ab = Graph().parse(f"{HERE}/02-ontology/semtech_abox_v6_6_0.ttl")
+sh = Graph().parse(f"{HERE}/02-ontology/semtech_shacl_v6_6_0.ttl")
+rs = Graph().parse(f"{HERE}/01-research/semtech_research_v6_6_0.ttl")
+dc = Graph().parse(f"{HERE}/03-document/semtech_document_v6_6_0.ttl")
+pg = Graph().parse(f"{HERE}/04-page/semtech_page_abox_v6_6_0.ttl")
+IRI = {n["id"]: cls_iri(n) for n in nodes}
+bad = []
+@graph tb
+bad = [n["id"] for n in nodes
+       if str(m{ {IRI[n["id"]]} sem:classCode ?v }.first() or "") != n["id"]
+       or str(m{ {IRI[n["id"]]} sem:sectionNumber ?v }.first() or "") != secnum[n["id"]]]
+edges = [(s, p, o) for p in (sem:{k} for k in EC.REL_PROPS)
+         for s, o in m{ ?s {p} ?o }]
+sem_classes = set(IRI.values())
+bad = [f"{s}|{o}" for s, p, o in edges if s not in sem_classes or o not in sem_classes]
+bad = []
+bad = []
+need = [rdfs:label, dcterms:license, dcterms:rights, dcterms:rightsHolder, dcterms:publisher,
+        dcterms:creator, dcterms:created, dcterms:modified, dcterms:identifier, owl:versionInfo]
+bad = []
+
+for name, g in [("research", rs), ("tbox", tb), ("abox", ab), ("shacl", sh), ("document", dc), ("page", pg)]:
+    onts = list(m{ ?s a owl:Ontology }(g))
+    if len(onts) != 1: bad.append(f"{name}:onts={len(onts)}"); continue
+    o = onts[0]
+    miss = [p.split("#")[-1].split("/")[-1] for p in need if not g.value(o, p)]
+    if miss: bad.append(f"{name}:{miss}")
+    if str(g.value(o, owl:versionInfo)) != "6.6.0": bad.append(f"{name}:ver")
+    if not str(g.value(o, owl:versionIRI) or "").endswith("/6.6.0"): bad.append(f"{name}:viri")

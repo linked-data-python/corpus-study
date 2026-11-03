@@ -1,0 +1,12 @@
+# Extracted from comp-rob2b/kindyngen@414ebd52b2 : kindynsyn/synthesizer/graph_factories/spatial_relations.py
+# region: SpatialRelationsWithCoordinates.velocity_twist (lines 204-210, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from kindynsyn.namespaces import geom_ent:
+def velocity_twist(self, of, with_respect_to, as_seen_by, reference_point=None, angular_velocity=None, linear_velocity=None):
+    @graph self.rel.g
+    assert m{ {as_seen_by} a geom_ent:Frame }
+    reference_point = reference_point or m{ {as_seen_by} geom_ent:origin ?v }.first()
+    return self.coord.velocity_twist(
+        self.rel.velocity(of, with_respect_to, reference_point),
+        as_seen_by, angular_velocity, linear_velocity
+    )

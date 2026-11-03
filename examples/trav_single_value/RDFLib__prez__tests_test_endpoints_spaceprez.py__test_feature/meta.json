@@ -66,5 +66,22 @@
       "m{ ... }.one()"
     ],
     "remaining": "The faithful form is `assert next(iter(m{ ... })) is not None`: m{ } is still the only island, but `next(iter(...))` and `is not None` are Python scaffolding around it, and the earlier note argued for `bool(m{ })` as the most specific construction. Should the pair stay `directly-expressible`, or move to `minor-restructuring` / `awkward`? And is the StopIteration-vs-AssertionError gap (both fail the pytest test) a difference the study must preserve?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the tuple variable expected_response_1 is inlined into `response_graph.triples((...))`, laid out on three lines to stay under 100 characters. `next()` stays: an `in` test would raise AssertionError where the original raises StopIteration on an absent triple.",
+    "optimized.ldpy, from optimized.py: the three terms are written in Python position as `<https://example.com/spaceprez/Feature1>, rdf:type, geo:Feature` inside the same `next(response_graph.triples((...)))`.",
+    "Rule 4: `next(iter(m{ <...> a geo:Feature }(response_graph))) is not None` (the form translated.ldpy needs, since a variable-free m{ } yields a falsy empty Row) is 2 tokens longer, with @graph or with the call suffix, so no m{ } is kept. The notation ratio is above 1 only because the translated header carries three @prefix lines for a three-token gain in the body (see the header variant).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "IRI",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the unused DCAT import goes; URIRef, GEO and RDF stay (GEO is not exported by the rdflib package itself, so the two import lines stay separate).",
+    "LD Python: both import lines go (URIRef, DCAT, GEO and RDF are unused once the terms are an IRI and prefixed names), and so does `@prefix dcat:`; geo: and rdf: stay."
+  ]
 }
