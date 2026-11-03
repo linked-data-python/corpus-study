@@ -56,7 +56,8 @@ from pathlib import Path
 from rdflib import BNode, Graph, URIRef
 
 from obsel_context import KTBS
-from rdfeval.harness import _exec_python, _exec_ldpy, materialise, _unordered, _emit
+from rdfeval.harness import (_exec_python, _exec_ldpy, materialise, _unordered,
+                             _emit, sides_from_env)
 
 EX = "http://example.org/"
 EX_DIR = Path(__file__).resolve().parent
@@ -108,12 +109,16 @@ try:
     ns_o, out_o = _exec_python(EX_DIR / "original.py")
     ns_t, out_t = _exec_ldpy(EX_DIR / "translated.ldpy")
     _, o1, o5 = _fixture()
+    # an optimized Python artefact holds a prepared query, run as the
+    # original is; an island's value is run through its call suffix
+    run_right = (_run_original if sides_from_env()[1].endswith(".py")
+                 else _run_translated)
 
     for label, obs in (("obs=o1 (two related, one wrong-trace neighbour)", o1),
                         ("obs=o5 (zero solutions)", o5),
                         ("obs=_:b1 (a blank-node obsel)", BNode("b1"))):
         ro = _run_original(ns_o, obs)
-        rt = _run_translated(ns_t, obs)
+        rt = run_right(ns_t, obs)
         if _unordered(ro) != _unordered(rt):
             verdict["diffs"].append(f"{label}: solutions differ ({ro!r} vs {rt!r})")
 except Exception:

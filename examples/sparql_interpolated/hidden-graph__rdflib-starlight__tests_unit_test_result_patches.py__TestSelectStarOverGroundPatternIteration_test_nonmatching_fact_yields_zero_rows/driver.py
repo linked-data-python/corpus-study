@@ -139,5 +139,5 @@ except Exception:
 finally:
     Result.__iter__ = original_iter
 
-print("RDFEVAL-VERDICT " + json.dumps(verdict), file=sys.stderr)
+harness._emit(verdict)
 VERDICT = verdict
