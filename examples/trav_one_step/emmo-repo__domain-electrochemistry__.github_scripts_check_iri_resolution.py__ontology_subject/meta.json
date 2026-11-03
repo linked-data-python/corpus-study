@@ -58,5 +58,20 @@
       "`.first()` -> `.one()` (calls 0, 1, 2)"
     ],
     "remaining": "the classification-doubt question of triage.json (directly-expressible vs minor-restructuring) is a judgement left to Maxime."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress. `for subject in graph.subjects(...): return subject` followed by the raise is already the shortest form of 'first solution or RuntimeError'; `next(..., None)` plus an `is None` test is longer. optimized.py is original.py.",
+    "optimized.ldpy, from optimized.py: the loop is kept and only its iterable becomes `m{ ?s a owl:Ontology }(graph)`. translated.ldpy's `@graph graph` + `.first()` + `if subject is not None:` was longer than the Python it replaced; iterating the solutions and returning on the first one keeps the same order (graph.triples() on the same store) and the same raise. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header: `import rdflib` serves the annotations, and `@prefix owl:` is the only prefix and the region uses it. optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

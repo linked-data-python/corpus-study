@@ -68,5 +68,22 @@
       "sem:{f\"Kind{k}\"} -> sem:{k}"
     ],
     "remaining": "Le mutant notes = list(set(m{ … })) reste vert et est équivalent (les objets d'un graphe pour un sujet et un prédicat sont distincts). Le drapeau wrong-construction (sem:{f\"Kind{k}\"} contre sem:Kind{k}) est un jugement, non traité."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region is the five-line loop only (lines 83-87); `kind_cls`, `insts`, `bad = []` and translated.ldpy's `@graph ab` are context lines of the extracted header, taken over byte for byte.",
+    "optimized.py: nothing to compress. The driver compares the module-level values left by the last iteration, so `ks` and `notes` must stay; rewriting the test as `[str(n) for n in notes] != [...]` would save two tokens at the cost of an obscure condition a reviewer would not accept. optimized.py is original.py.",
+    "optimized.ldpy, from optimized.py: the two traversals are islands, as in translated.ldpy, with `a` in place of `rdf:type` (same token count, but the region then needs no `rdf:` prefix). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD` reduced to RDF, the only one the loop reads.",
+    "optimized_header.ldpy: that import line goes entirely (the islands use `a`) and so does `@prefix rdf:`; `@prefix sem:`, Path, Graph and EC stay, since the context lines use them."
+  ]
 }

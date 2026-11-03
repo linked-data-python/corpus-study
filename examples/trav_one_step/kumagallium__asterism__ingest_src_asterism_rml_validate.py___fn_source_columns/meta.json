@@ -54,5 +54,21 @@
       "m{ {ivm} f<{fe_pred}> ?o } -> [] and m{ {ivm} f<{rp}> ?o } -> []"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four double loops `for pred in PREDS: for x in graph.objects(s, uri(pred))` go through one local helper `objects(subject, preds)` that flattens them in the same order (a list comprehension, read eagerly; the graph is not modified meanwhile, so the recursion sees the same triples); the `uri` alias goes with them. The `found` flag becomes `refs = {str(r) ...}`, added to `cols` and tested for emptiness: a reference \"\" still makes `refs` non-empty, so the nested function is still skipped.",
+    "optimized.ldpy, from optimized.py: the helper's read becomes `m{ {subject} f<{pred}> ?o }(graph)` (the predicate is a full IRI string, hence `f<…>`), and the local `import rdflib`, which only served URIRef, goes. A call suffix rather than `@graph graph`: the single island sits in a nested function. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "f<…>",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header: the shim import and the four predicate tuples are all read by the region, and there is no @prefix line. optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

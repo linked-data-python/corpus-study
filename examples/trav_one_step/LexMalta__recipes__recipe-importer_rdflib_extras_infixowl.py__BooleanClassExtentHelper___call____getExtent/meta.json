@@ -56,5 +56,15 @@
       "filtre des sujets BNode (survivait : aucun sujet BNode)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress on the Python side: a two-line generator over `Individual.factoryGraph.subjects(self.operator)`. Turning it into `return (BooleanClass(...) for c in ...)` saves no token and evaluates the graph read eagerly, at the call rather than at the first `next()`.",
+    "optimized.ldpy keeps the Python too (rule 4): `m{ ?s {self.operator} [] }(Individual.factoryGraph)` is 4 tokens longer than `Individual.factoryGraph.subjects(self.operator)` (19 against 15 for the loop header), since the predicate is a runtime value and the graph an attribute that needs a call suffix. optimized.py and optimized.ldpy are therefore both identical to original.py (translated.ldpy's header is the same as original.py's)."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in the header (OWL, BooleanClass, BooleanClassExtentHelper and Individual are all used by the region or the restored `self`): optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

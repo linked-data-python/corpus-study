@@ -1,0 +1,48 @@
+# Extracted from kumagallium/asterism@f0977d4d3a : ingest/tests/test_samples_curves.py
+# region: test_curves_aggregates (lines 319-338, stratum trav_one_step)
+# licence of the source repository: see meta.json
+from pathlib import Path
+import pytest
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DCTERMS, PROV, RDF, XSD
+from asterism.starrydata import (
+    DEFAULT_ONTOLOGY,
+    DEFAULT_RESOURCE,
+    IngestConfig,
+    ingest_curves,
+    ingest_samples,
+    parse_float_array,
+    parse_sample_info,
+)
+SD = Namespace(DEFAULT_ONTOLOGY)
+
+
+def _load(path: Path) -> Graph:
+    # Restores the binding to the test file's own helper (verbatim, same
+    # commit) so the region is executable outside test_samples_curves.py.
+    g = Graph()
+    g.parse(str(path), format="turtle")
+    return g
+
+
+def test_curves_aggregates(curves_csv: Path, tmp_path: Path) -> None:
+    """設計プラン §4 方針 C: x/y 集約値 (Min/Max/PointCount) を出す"""
+    out = tmp_path / "curves.ttl"
+    ingest_curves(curves_csv, out, IngestConfig(emit_prov=False))
+    g = _load(out)
+    c79 = URIRef(DEFAULT_RESOURCE + "curve/6-79-113")  # SID=6 / figure=79 / sample=113
+    aggregates = {}
+    for name, convert, expected in (
+        ("xMin", float, 300.0),
+        ("xMax", float, 650.0),
+        # Y min/max: with negatives, min = -0.0004, max = -0.0001
+        ("yMin", float, pytest.approx(-0.0004)),
+        ("yMax", float, pytest.approx(-0.0001)),
+        ("pointCount", int, 5),
+    ):
+        values = list(g.objects(c79, SD[name]))
+        assert len(values) == 1 and convert(values[0]) == expected
+        aggregates[name] = values[0]
+    # xsd:double / xsd:integer のデータ型確認
+    assert aggregates["xMin"].datatype == XSD.double
+    assert aggregates["pointCount"].datatype == XSD.integer

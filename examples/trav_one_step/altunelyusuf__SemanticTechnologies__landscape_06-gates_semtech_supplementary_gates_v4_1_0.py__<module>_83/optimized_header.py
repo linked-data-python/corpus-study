@@ -1,0 +1,40 @@
+# Extracted from altunelyusuf/SemanticTechnologies@bad0fa7c46 : landscape/06-gates/semtech_supplementary_gates_v4_1_0.py
+# region: <module> (lines 83-87, stratum trav_one_step)
+# licence of the source repository: see meta.json
+#
+# The mechanical context extraction pulled in every prior assignment to `bad`
+# and `ab` textually matching those in the source file: three more `bad = …`
+# statements and an `os.walk` comprehension. Checking against the real file
+# (github.com/altunelyusuf/SemanticTechnologies at the pinned commit) two of
+# those `bad = []` resets and the `os.walk` comprehension sit *after* this
+# region (its own later gates G5/G7), not before it — the extractor grabbed
+# lines on the wrong side of the region it was building context for. The
+# other three (`bad = []`, and the G2/G3 list comprehensions) are real prior
+# lines but are causally inert here: `bad` is reset again immediately before
+# this region's own loop (line 82 of the source file), so nothing upstream of
+# that reset can reach it, and reproducing the G2/G3 comprehensions would
+# need stub bindings (nodes, tb, IRI, secnum, edges, sem_classes) invented
+# for lines this region never reads. Both are dropped; see translation_notes.
+#
+# `ab` originally comes from an external TTL the source pipeline builds
+# (f"{HERE}/02-ontology/semtech_abox_v4_1_0.ttl"), and EC from a
+# dynamically-loaded sibling module — neither is reachable here. `ab` now
+# parses this region's own fixture.ttl; EC.KIND_DEFNS is restored by
+# semtech_context.py (see meta.json). `from rdflib import Graph, Namespace`
+# is restored too: the extracted context used Graph()/Namespace(...) without
+# ever importing them (only `from rdflib.namespace import RDF, ...` reached
+# this window).
+from pathlib import Path
+from rdflib import Graph, Namespace
+from rdflib.namespace import RDF
+from semtech_context import EC
+SEM = Namespace("http://example.org/semtech#")
+ab = Graph().parse(str(Path(__file__).resolve().parent / "fixture.ttl"), format="turtle")
+kind_cls = {SEM[f"Kind{k}"] for k in EC.KIND_DEFNS}
+insts = set(ab.subjects(SEM.hasSourceProvenance, None))
+bad = []
+for i in insts:
+    ks = [t for t in ab.objects(i, RDF.type) if t in kind_cls]
+    notes = list(ab.objects(i, SEM.instanceKindNote))
+    if len(ks) != 1 or len(notes) != 1 or str(notes[0]) != str(ks[0]).split("#Kind")[-1]:
+        bad.append(str(i).split("#")[-1])

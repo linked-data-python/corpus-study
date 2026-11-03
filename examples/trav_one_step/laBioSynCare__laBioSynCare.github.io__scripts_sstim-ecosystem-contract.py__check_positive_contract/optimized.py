@@ -1,0 +1,80 @@
+# Extracted from laBioSynCare/laBioSynCare.github.io@6dd8224b03 : scripts/sstim-ecosystem-contract.py
+# region: check_positive_contract (lines 1096-1125, stratum trav_one_step)
+# licence of the source repository: see meta.json
+#
+# `fixture`, `merged`, `activities` and `errors` are restored here (see
+# meta.json) so the loop is executable outside `check_positive_contract`:
+# `fixture.ttl` is the project's own real fixture graph
+# (static/ontology/instances/ecosystem/fixtures/synthetic-ecosystem.ttl,
+# same commit, copied verbatim), and `values`/`require` are the module's own
+# tiny helpers (also verbatim, lines 412-418).
+from pathlib import Path
+from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef
+from rdflib.namespace import DCTERMS, OWL, PROV, XSD
+ECO = Namespace("https://w3id.org/sstim/ecosystem#")
+PERSON = URIRef("https://w3id.org/sstim/specialist/synthetic-alex-rivera")
+CURATOR = URIRef("https://example.org/agent/synthetic-curator")
+
+
+def values(graph: Graph, subject: URIRef, predicate: URIRef) -> set:
+    return set(graph.objects(subject, predicate))
+
+
+def require(condition: bool, message: str, errors: list[str]) -> None:
+    if not condition:
+        errors.append(message)
+
+
+# Driver seam (identical in both representations): the driver may point
+# the fixture and the context at other files, to exercise the cases the
+# project's positive fixture never produces.  By default: the project's own
+# fixture, and no context file.
+import os
+_FIXTURE_PATH = Path(os.environ.get("RDFEVAL_SSTIM_FIXTURE")
+                     or Path(__file__).parent / "fixture.ttl")
+_CONTEXT_PATH = os.environ.get("RDFEVAL_SSTIM_CONTEXT")
+fixture = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+# The real `merged` is fixture + the ontology/context modules
+# (build_validation_graph); this region only ever tests
+# `(actor, RDF.type, PROV.Agent) in merged`, and every actor it can name
+# (CURATOR, PERSON) already carries that triple directly in the project's
+# fixture, so a second parse of the same file is a faithful-enough
+# stand-in for this region's purposes.  The optional context file stands for
+# the context modules: what it adds is in `merged` and not in `fixture`.
+merged = Graph().parse(str(_FIXTURE_PATH), format="turtle")
+if _CONTEXT_PATH:
+    merged.parse(_CONTEXT_PATH, format="turtle")
+
+activities = set(fixture.subjects(RDF.type, ECO.EngagementActivity))
+errors: list[str] = []
+
+for event in activities:
+    inbound = set(fixture.subjects(ECO.hasEngagementActivity, event))
+    governed = values(fixture, event, ECO.engagementFor)
+    require(len(inbound) == 1 and inbound == governed,
+            f"{event}: activity must belong to exactly one matching relationship", errors)
+    actor = CURATOR
+    if (event, RDF.type, ECO.ConsentDecisionActivity) in fixture:
+        relationship = next(iter(governed), None)
+        if relationship is not None and values(
+            fixture, relationship, ECO.relationshipAgent
+        ) == {PERSON}:
+            actor = PERSON
+    expected_actor = {actor}
+    require(values(fixture, event, PROV.wasAssociatedWith) == expected_actor,
+            f"{event}: expected actor {expected_actor}", errors)
+    require((actor, RDF.type, PROV.Agent) in merged,
+            f"{event}: actor {actor} is not explicitly a prov:Agent", errors)
+
+    event_times = values(fixture, event, PROV.endedAtTime)
+    require(len(event_times) == 1 and next(iter(event_times)).datatype == XSD.dateTime,
+            f"{event}: event time must be one xsd:dateTime", errors)
+    if len(event_times) == 1:
+        current = next(iter(event_times)).toPython()
+        for predecessor in fixture.objects(event, PROV.wasInformedBy):
+            prior_times = values(fixture, predecessor, PROV.endedAtTime)
+            require(len(prior_times) == 1,
+                    f"{event}: predecessor {predecessor} has no unique timestamp", errors)
+            if len(prior_times) == 1:
+                require(next(iter(prior_times)).toPython() < current,
+                        f"{event}: predecessor {predecessor} is not strictly earlier", errors)

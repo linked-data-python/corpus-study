@@ -60,5 +60,16 @@
       "val = None"
     ],
     "remaining": "Le mutant .first() or None reste vert et est équivalent (la garde if val: traite déjà tout terme falsy comme absent)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `fragment` variable is inlined into the return, and each `rsplit(sep, 1)[-1]` becomes `rpartition(sep)[2]`, which gives the same string whether or not the separator occurs (the whole string when it does not). The `if val:` guard and its fall-back are kept as they are: they decide the falsy labels.",
+    "optimized.ldpy keeps `g.value(subject, RDFS.label)` (rule 4): `m{ {subject} rdfs:label ?o }(g).first()` is 3 tokens longer, a one-for-one single-value read on a graph passed as a parameter. The region of optimized.ldpy is therefore that of optimized.py, under translated.ldpy's header, whose three unused @prefix lines make notation > 1."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: `from rdflib.namespace import OWL, RDF, RDFS` reduced to RDFS.",
+    "optimized_header.ldpy: the same import, and the three @prefix lines go since the region uses no prefixed name; the file is identical to optimized_header.py."
+  ]
 }

@@ -67,5 +67,23 @@
       "îlot ConsentDecisionActivity : False, True, prédicat joker, objet joker, sujet joker"
     ],
     "remaining": "Jugements du tri non traités : `activities = set(fixture.subjects(...))` et les cinq `values(fixture, …)` restent en Python, et le crédit 'IRI' vient des constantes PERSON/CURATOR du contexte restauré, pas des lignes de la région."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region is the activity loop (lines 1096-1125); everything above it, including translated.ldpy's `@graph fixture` and its `activities = …` line, is the extracted header, taken over byte for byte.",
+    "optimized.py: little to compress. The expected actor is computed as a term (`actor = CURATOR`, then `actor = PERSON`) and `expected_actor = {actor}` follows, instead of building singleton sets and recovering the actor with `next(iter(expected_actor))`; `actor`, `expected_actor` and `relationship` keep the values the driver compares at module level (relationship is still assigned only in the consent branch). The other reads and requires are already minimal: a comprehension over `event_times` would raise on a URIRef timestamp where the original's short-circuit does not.",
+    "optimized.ldpy, from optimized.py: the two one-step reads become `set(m{ ?a eco:hasEngagementActivity {event} })` and `for predecessor in m{ {event} prov:wasInformedBy ?predecessor }`, the two membership tests `m{ {event} a eco:ConsentDecisionActivity }` (no bool() needed as an `if` condition) and `bool(m{ {actor} a prov:Agent }(merged))` (bool kept: require's parameter is annotated bool), and the namespace terms passed to the module's `values` helper become prefixed names. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Literal, RDFS, DCTERMS and OWL go from the imports.",
+    "optimized_header.ldpy: Literal, RDFS and Namespace go from the rdflib import (RDF stays, the header's `activities` line uses it), the rdflib.namespace import goes entirely, and four @prefix lines go (rdf:, rdfs:, dcterms:, owl:), leaving eco:, prov: and xsd:."
+  ]
 }

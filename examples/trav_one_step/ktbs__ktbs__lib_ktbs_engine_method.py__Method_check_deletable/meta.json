@@ -44,5 +44,22 @@
     "method": "fixture:fixture.ttl entry:check_deletable",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two sibling loops, which differ only by the predicate and the predicate's name in the message, become one loop over `(\"hasMethod\", \"hasParentMethod\")` with `KTBS[prop]` and the name formatted into the message. The messages are byte-identical and come in the same order (every hasMethod user, then every hasParentMethod user). `%` formatting is kept: an f-string is longer in tokens on Python 3.12.",
+    "optimized.ldpy, from optimized.py: `m{ ?i ktbs:{prop} {self.uri} }` with a computed local part, under `@graph self.state` (two tokens fewer than a call suffix on the single island; with the suffix the island only ties with `self.state.subjects(KTBS[prop], self.uri)`). No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "from … import p:",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header (KTBS/ktbs: and Method are both used, there is no @prefix line): optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
+  ]
 }

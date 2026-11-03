@@ -60,5 +60,19 @@
       "@graph retiré"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the five reads into x_min … point_count and their five assertions become one loop over a table (local name of the aggregate, conversion, expected value — `pytest.approx(...)` for the two y values, `int` for pointCount), which reads `list(g.objects(c79, SD[name]))` and asserts its length and value; the two values the datatype assertions need are kept in a dict. The assertions run in the same order and are bare `assert`s, so the first failing one raises the same AssertionError as before; reading each aggregate just before its assertion instead of all five first changes nothing, since a read has no effect.",
+    "optimized.ldpy, from optimized.py: the read stays Python (rule 4). SD is a Namespace known only at run time, so the island would be `m{ {c79} {SD[name]} ?o }(g)`, two tokens longer than `g.objects(c79, SD[name])`; with a single read in the loop, the five islands of translated.ldpy collapse into one in Python as well, and nothing is left for the notation to fold. Only `XSD.double` / `XSD.integer` become the prefixed names `xsd:double` / `xsd:integer`. No exception to the symmetry rule.",
+    "The `@prefix xsd:` line of translated.ldpy's header costs more than the two prefixed names save, hence notation slightly above 1 on optimized.ldpy."
+  ],
+  "optimized_constructions": [
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: BNode, Literal, DCTERMS, PROV, RDF, ingest_samples, parse_float_array and parse_sample_info go; the rdflib.namespace import keeps XSD only and the asterism.starrydata import fits on one line. The context lines (SD, _load) stay.",
+    "optimized_header.ldpy: the same, except that the rdflib.namespace import goes entirely (the region writes xsd:double / xsd:integer) and `@prefix xsd:` stays."
+  ]
 }

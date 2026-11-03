@@ -59,5 +59,23 @@
       "image_ids = []"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the loop that appends to a list, the `image_ids` variable and the seven per-property variables become one set comprehension that calls ImageObject(...) on the reads directly, in the same order of evaluation and with the same (buggy) positional order of the source; `sorted(set(images), ...)` becomes `sorted(images, ...)`. A set built element by element keeps the first of two equal images exactly as `set(list)` does.",
+    "optimized.ldpy, from optimized.py: only the traversal becomes an island, `for image_id in m{ {iri} sdo:image ?image_id }(graph)`, one token shorter than `graph.objects(iri, SDO.image)` with its call suffix. The six `graph.value(image_id, P)` stay Python (rule 4): `m{ {image_id} p ?v }(graph).first()` is 3 tokens longer than each of them, and with only one island left a call suffix costs no more than `@graph graph`. No exception to the symmetry rule.",
+    "In the extracted header, translated.ldpy's fourteen @prefix lines weigh more than the island saves: notation > 1 on optimized.ldpy, which the header variant measures."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: the imports reduced to Graph, URIRef, DCTERMS, SDO, SH, ImageObject and get_descriptions (Dataset, Literal, eleven namespaces and eighteen shim names go); the comment on the pylode shim stays.",
+    "optimized_header.ldpy: the same Python imports (DCTERMS, SDO and SH still serve the six graph.value calls) and only `@prefix sdo:` of the fourteen; the island saves one token and the prefix line costs five, so the header variant still leaves the ldpy side slightly longer (notation 1.027)."
+  ]
 }

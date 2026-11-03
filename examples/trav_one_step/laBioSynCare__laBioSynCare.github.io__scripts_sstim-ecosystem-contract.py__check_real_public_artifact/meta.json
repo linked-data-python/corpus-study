@@ -60,5 +60,23 @@
       "boucle curateur d'agent -> [] et prédicat joker (forme gardée)"
     ],
     "remaining": "Jugements du tri non traités : 4 des 6 @prefix (rdfs, dcterms, owl, xsd) ne servent pas ; article_candidate reste à confirmer maintenant que le pilote prouve les cinq îlots."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three curator/actor loops, which differ by the set walked, the predicate and the role named in the message, become one loop over a table of (set, predicate, role); the messages are byte-identical and come in the same order. The `all_nodes()` loop iterates `{str(term) for term in artifact.all_nodes() if isinstance(term, URIRef)}` instead of skipping non-IRIs with `continue` and converting in the body: the same messages, but in the iteration order of a set of strings rather than of a set of terms, an order that already varied from run to run with string hash randomisation (the driver compares the list as a multiset). The three emptiness requires stay apart: folding them into a loop saves a few tokens for a less readable form.",
+    "optimized.ldpy, from optimized.py: `@graph artifact`, the three class reads `set(m{ ?s a eco:X })`, the namespace terms as prefixed names, and `artifact.subjects()` / `artifact.all_nodes()` kept as rdflib (no fixed term: a whole-graph pattern would be longer).",
+    "Exception to the symmetry rule: the merged loop walks a join, `for actor in m{ [] a {rdf_type} ; {predicate} ?actor }`, over a table of (class, predicate, role), instead of `for node in nodes:` around a one-step read. Only a multi-pattern island folds the walk over the class members into the read; each (node, actor) pair still comes once, since a node's rdf:type triple is unique. One token and one nesting level fewer than the symmetric form `for node in nodes: for actor in m{ {node} {predicate} ?actor }`. The `[]` (a non-distinguished variable shared across `;`) has no label of its own in the construction vocabulary."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py: Literal, RDFS, DCTERMS, OWL and XSD go from the imports.",
+    "optimized_header.ldpy: Literal, Namespace, RDF and RDFS go from the rdflib import, the rdflib.namespace import goes entirely, and four @prefix lines go (rdfs:, dcterms:, owl:, xsd:), leaving eco: and prov:."
+  ]
 }
