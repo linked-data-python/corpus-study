@@ -54,5 +54,15 @@
       "island replaced by None"
     ],
     "remaining": "next(iter(m{ ... }), None) stays green: an equivalent mutant, not counted. The harness compares any two blank nodes as equal, so the trig calls prove a blank-node subject is reached, not which one (the choice is proved on IRIs by fixture_dup.ttl). meta.json says oracle: isomorphism for a region read by values (not mine to change)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is one `rdf_graph.value(predicate=certainty, object=certainty_val_05)`; optimized.py is original.py. The keywords stay (a positional `value(None, certainty, ...)` would be harder to read), and the assignment stays, since it is the region's own statement inside the restored wrapper.",
+    "optimized.ldpy is identical too (rule 4): `@graph rdf_graph` + `m{ ?s {certainty} {certainty_val_05} }.first()` and the suffix form `m{ ... }(rdf_graph).first()` both measured 28 tokens against 26."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header has no import: the header-variant files are copies of the optimized ones."
+  ]
 }

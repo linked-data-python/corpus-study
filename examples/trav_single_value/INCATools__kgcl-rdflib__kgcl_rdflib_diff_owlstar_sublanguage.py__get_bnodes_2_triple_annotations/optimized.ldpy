@@ -1,0 +1,81 @@
+# Extracted from INCATools/kgcl-rdflib@7af638bbd7 : kgcl_rdflib/diff/owlstar_sublanguage.py
+# region: get_bnodes_2_triple_annotations (lines 303-343, stratum trav_single_value)
+# licence of the source repository: see meta.json
+#
+# `for s, p, o in g.triples((i, None, None))` -> `for p, o in m{ {i} ?p ?o }`
+# (see meta.json): a term interpolated into a pattern's subject position is
+# a FIXED filter, not a projected variable (the language's own non-
+# distinguished-variable rule, the same one that lets `[]` stand for "any
+# object, don't care" a few lines below) -- so the solution is a 2-tuple
+# (p, o), not the 3-tuple g.triples() yields. `s` was always exactly `i`
+# here (the pattern's own fixed subject), so the one place `s` was read in
+# the loop body -- `annotations[i].append((s, p, o))` -- becomes
+# `annotations[i].append((i, p, o))`. No RDF meaning changed.
+from rdflib import BNode
+from rdflib.namespace import RDF, RDFS
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+def get_bnodes_2_triple_annotations(g):
+    """Get blank nodes to triple annotations."""
+    @graph g
+    predicates = (owl:annotatedSource, owl:annotatedProperty, owl:annotatedTarget)
+
+    # get blank nodes that have all three required predicates
+    intersection = set(m{ ?i owl:annotatedSource [] ; owl:annotatedProperty [] ;
+                          owl:annotatedTarget [] })
+
+    exclude = {
+        *predicates,
+        # RDF.type,
+    }
+
+    annotations = {}
+    for i in intersection:
+        annotations[i] = []
+        if isinstance(i, BNode):  # this check should be unnecessary
+            # NB these generators are singletons
+            annotations[i] += [(i, p, next(g.objects(i, p))) for p in predicates]
+            if not any(isinstance(o, BNode) for _, _, o in annotations[i]):
+                annotations[i] += [
+                    (i, p, o) for p, o in m{ {i} ?p ?o }
+                    if p not in exclude and not isinstance(o, BNode) and not isinstance(p, BNode)
+                ]
+
+    return annotations
+
+
+# Test harness only (see meta.json): rdflib mints a FRESH internal id for
+# every blank node on every parse (verified by hand -- even an explicitly
+# labelled `_:ann1` does not keep that label across two independent
+# parses of the same file), so `annotations`, keyed by BNode for every
+# non-decoy entry, can never compare equal by plain dict equality between
+# the two sides' independently-parsed fixture graphs -- run_pair's
+# normalise() canonicalises a bare BNode VALUE but not a BNode used as a
+# DICT KEY. `demo` repackages the result as a sorted, bnode-identity-free
+# structure before handing it to run_pair, identically on both sides --
+# the same kind of test-harness repackaging as `demo` in
+# examples/trav_one_step/INM-6__alpaca__.../test_provenance_annotation_multiple_returns
+# (there: assertions -> a comparable string; here: a bnode-keyed dict -> a
+# comparable, order-independent list).
+def _term_key(t):
+    return ("bnode",) if isinstance(t, BNode) else ("term", repr(t))
+
+
+# The SUBJECT of each collected triple is kept too (repair 2026-10-30): it
+# is the dict key itself on every line the region writes, and a BNode has
+# no identity across the two parses, so it is recorded relative to the key
+# ("self") -- anything else (None, another node) shows as itself.
+def _subject_key(s, key):
+    return ("self",) if s == key else _term_key(s)
+
+
+def demo(g) -> object:
+    annotations = get_bnodes_2_triple_annotations(g)
+    entries = []
+    for key, triples in annotations.items():
+        key_entry = ("bnode",) if isinstance(key, BNode) else ("named", str(key))
+        triple_entries = sorted(
+            (_subject_key(s, key), _term_key(p), _term_key(o)) for (s, p, o) in triples
+        )
+        entries.append((key_entry, triple_entries))
+    return sorted(entries, key=repr)

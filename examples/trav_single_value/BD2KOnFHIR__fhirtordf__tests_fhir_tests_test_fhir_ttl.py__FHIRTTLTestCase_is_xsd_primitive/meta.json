@@ -66,5 +66,20 @@
       "garde integer64 -> False"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress in Python: optimized.py is original.py. f-strings in place of `.format` measured longer in tokens, the base_type fallback cannot become an `or` (a falsy allValuesFrom with a non-BNode someValuesFrom keeps the falsy value, which is printed), and `base_type == FHIR.integer64` cannot be inverted to `!=` (DottedURIRef overrides __eq__, not __ne__: a plain URIRef `!=` it is always True).",
+    "optimized.ldpy: no m{ } island survives rule 4; the five reads stay rdflib calls with prefixed names, `g.objects(prim, rdfs:subClassOf)` and `g.value(node, owl:onProperty)` etc. (`m{ {node} owl:onProperty ?o }(g).first()` and the m{ } loop both measured longer). FHIR.value / FHIR.integer64 stay Python (no fhir: prefix in the fixed header).",
+    "The fixed header's three @prefix lines outweigh the region's gain, hence a notation ratio above 1. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py is a copy of optimized.py: every imported name is used.",
+    "optimized_header.ldpy drops RDFS and OWL from the rdflib import (replaced by prefixed names) and `@prefix xsd:` (the region uses XSD as a namespace object in `str(XSD)`, never xsd: as a prefix)."
+  ]
 }

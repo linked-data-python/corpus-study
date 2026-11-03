@@ -70,5 +70,26 @@
       "rdf:object de la prémisse -> rdf:predicate"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph().parse(...)` chained; the three `continue` guards merged into one `if ... or ... or ...: continue`; `next(g.objects(x, P), None)` -> `g.value(x, P)` (six reads); `g.triples((x, P, None))` with `_, _, y` unpacking -> `g.objects(x, P)`; the premises loop becomes a comprehension of `[g.value(prem, term) for term in (RDF.subject, RDF.predicate, RDF.object)]`, filtered with `all(premise)` (same truth test as `ps and pp and po`) and stringified with `list(map(str, premise))` in the dict. s, p, o are still computed once before the loop, so _parse_term raises (or not) exactly as before.",
+    "optimized.ldpy: the rdf:type loop and the three existence guards become ONE multi-pattern island `m{ ?stmt a rdf:Statement ; rdf:subject f<{subject}> ; rdf:predicate f<{predicate}> ; rdf:object {_parse_term(obj)} }` (nested-loop join in written order, so statements come in the same order; the three bound patterns match at most once each). Its interpolations are evaluated once when the island is built, so the s/p/o locals go too. This is the exception to the symmetry rule: only the island joins the type scan and the guards in one read, and only its evaluate-once interpolation lets s/p/o be inlined without re-evaluating _parse_term per statement.",
+    "optimized.ldpy: the two one-step loops are `m{ {stmt} prov:wasDerivedFrom ?deriv }` and `m{ {deriv} toolkit:premise ?prem }` with `@graph g`; the single-value reads stay `g.value(deriv, toolkit:rule)` etc. with prefixed names, and the premise terms tuple is `(rdf:subject, rdf:predicate, rdf:object)` (rule 4: `m{ ... }.first()` measured longer than `g.value(x, prefix:name)`; `g.objects(x, prefix:name)` measured longer than the m{ } loops).",
+    "The premises are not folded into a join with the derivation: a premise with two rdf:subject values would then yield two rows where g.value takes one."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "f<…>",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py drops Iterable, Optional, Sequence, Tuple (typing), BNode, Literal, Variable (rdflib) and OWL, RDFS, XSD (rdflib.namespace); keeps Namespace for TOOLKIT_NS.",
+    "optimized_header.ldpy drops the same typing names, every rdflib name but Graph (URIRef replaced by f<…>, Namespace unused since TOOLKIT_NS is the toolkit: prefix), the whole rdflib.namespace import, and the unused @prefix owl:, rdfs:, xsd:; keeps @prefix toolkit:, prov:, rdf:."
+  ]
 }

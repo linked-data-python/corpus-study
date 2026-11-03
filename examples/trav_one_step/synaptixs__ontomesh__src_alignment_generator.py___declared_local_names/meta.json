@@ -57,5 +57,16 @@
       "rsplit('#') retiré"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `g = rdflib.Graph(); g.parse(...)` becomes `rdflib.Graph().parse(...)` (parse returns the graph); the fallback line scan becomes a set comprehension over `map(str.strip, f)` returned from inside `with open(path)`, so `names` and its `add` loop go. The `except OSError: return set()` still covers the open and the reading, as before.",
+    "optimized.ldpy is identical to optimized.py (rule 4): the only read is `g.subjects()`, free predicate and object; its island form `for s, _p, _o in m{ ?s ?p ?o }` plus `@graph g` measured 82 tokens against 75 for `for s in g.subjects()`.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: `import os` is used. The header-variant files are copies of the optimized ones."
+  ]
 }

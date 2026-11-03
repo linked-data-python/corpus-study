@@ -49,5 +49,26 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `expected_materials.append(dict())` / `mat_num` / `expected_materials[mat_num][key] = ...` sequence becomes one list of three dict literals (comments kept); the two `+=` extensions of altname are merged into their list; the long altname lists become `list(map(rdflib.Literal, [...]))` (the one- and two-element lists stay `[rdflib.Literal(...)]`, shorter). The `.sort()` loop is kept: it sets abbrev/altname to None, and the expected data is kept rather than deleted, since a reviewer would fix that bug rather than drop the data, which would change the behaviour.",
+    "optimized.py: the `materials` comprehension plus the per-chem loop (two reads, `chem.pop`) become one comprehension building each dict in its final key order (id, stdname, density, altname, abbrev, which the assertion message shows), `list(self.app.db.objects(chem, rdflib.SKOS.altLabel)).sort()` in place of the identity comprehension. The same triples() patterns are read (the driver logs them); the query is unchanged.",
+    "optimized.ldpy, from optimized.py: the query is `s{ }` with the header's prefixes under `@graph self.app.db` (kept, not an m{ }: it projects the unbound ?abbrev and its reads are the SPARQL engine's); the two reads are `list(m{ {chem} skos:altLabel ?o }).sort()`; every `rdflib.Literal(constant)` outside the long lists becomes the coercion `f{...}` (same Literal, xsd:double for the floats), the long lists keep `list(map(rdflib.Literal, ...))` (shorter than one `f{}` per name).",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "m{ }",
+    "f{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: `import rdflib` is used on both sides, and the four prefixes (skos, dcterms, rdfs, sio) are all used in the ldpy region. The header-variant files are copies of the optimized ones."
+  ]
 }

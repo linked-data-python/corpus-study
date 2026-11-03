@@ -58,5 +58,16 @@
       "déjà tués et revérifiés : path / select / prefix / namespace / message -> None, .one() sur select et message, sujets {shape_uri} {sparql} {ontology} {declaration} élargis en [], les deux boucles vidées, garde select forcée à False"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two nested `for ontology in graph.objects(sparql, SH.prefixes) for declaration in graph.objects(ontology, SH.declare)` clauses of the generator become one read through the sequence path `SH.prefixes / SH.declare` (same nesting order, duplicates kept). The rest is already minimal (the conditional message key and the `continue` stay).",
+    "optimized.ldpy is identical to optimized.py (rule 4): SH is a run-time parameter, so every island interpolates `{SH.x}`; `m{ }` for the sparql loop, for the path read, or both, with `@graph graph` or a `(graph)` suffix, all measured 1 to 2 tokens longer, and `.first()` for `graph.value` longer still.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header has no import: the header-variant files are copies of the optimized ones."
+  ]
 }

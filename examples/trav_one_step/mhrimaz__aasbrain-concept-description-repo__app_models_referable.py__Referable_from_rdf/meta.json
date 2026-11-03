@@ -58,5 +58,21 @@
       "les 32 autres mutants îlot/sujet/prédicat/cardinalité, déjà tués"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four copies of `x_ref = next(graph.objects(...), None); x_value = None; if x_ref: x_value = x_ref.value` collapse into one local helper `value(node, local_name)` (`ref = graph.value(node, AASNameSpace.AAS[local_name])`, `return ref.value if ref else None`), and the two identical display-name / description loops into one helper `lang_strings(local_name, lang_string_type)`, a list comprehension ending in `or None` (the `if len(...) == 0: ... = None` guard). The Referable(...) call takes the values directly. `graph.value(s, p)` is `next(graph.objects(s, p), None)` for a non-None subject; `subject` is typed IdentifiedNode and the inner nodes come from graph.objects(), so never None.",
+    "optimized.ldpy, from optimized.py: `AASNameSpace.AAS[local_name]` becomes `f<{local_name}>`, resolved against the header's `@base <https://admin-shell.io/aas/3/0/>`; the helpers and their call sites are otherwise identical.",
+    "Rule 4: `m{ {node} f<{local_name}> ?o }.first()` and `m{ {subject} f<{local_name}> ?o }` with `@graph graph` were measured at 168 tokens against 165 for `graph.value(node, f<{local_name}>)` / `graph.objects(subject, f<{local_name}>)`, so the rdflib calls are kept and only the IRI notation is used.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@base",
+    "f<…>"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py is a copy of optimized.py: `import rdflib` (annotations) and the five shim names are all used.",
+    "optimized_header.ldpy drops `AASNameSpace` from the shim import: f<…> with @base replaced its only use. `@base` stays (used)."
+  ]
 }

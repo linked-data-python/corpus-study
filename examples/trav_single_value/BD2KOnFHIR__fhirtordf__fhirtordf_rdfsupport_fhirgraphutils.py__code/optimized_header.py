@@ -1,0 +1,21 @@
+# Extracted from BD2KOnFHIR/fhirtordf@05b23ba1df : fhirtordf/rdfsupport/fhirgraphutils.py
+# region: code (lines 43-50, stratum trav_single_value)
+# licence of the source repository: see meta.json
+#
+# `code()` calls `value()`, a sibling function of the same module (lines
+# 11-28) that the tirage's captured context does not include. Restored
+# verbatim from the context shim (see meta.json).
+from typing import Union, Optional
+from rdflib import Graph
+from rdflib.term import URIRef, Node
+from fhirtordf.rdfsupport.namespaces import FHIR
+from fhirgraphutils_context import value
+
+def code(g: Graph, subject: Node, predicate: URIRef, system: Optional[Union[URIRef, str]]=None,
+         asLiteral: bool=False) -> Union[Node, str, None]:
+    c = g.value(subject, predicate)
+    if c:
+        for coding in g.objects(c, FHIR.CodeableConcept.coding):
+            if not system or str(system) == value(g, coding, FHIR.Coding.system):
+                return value(g, coding, FHIR.Coding.code, asLiteral=asLiteral)
+    return None

@@ -65,5 +65,23 @@
       "for p, o in [] in place of m{ {i} ?p ?o }"
     ],
     "remaining": "The zero-solution case of the three single-value reads (next() raises StopIteration, .first() gives None) stays unreachable by construction (the loop only visits source & property & target); the triage's classification question (directly-expressible vs minor-restructuring for the 3-tuple -> 2-tuple rewrite) is untouched."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: a `predicates` tuple of the three owl:annotated* IRIs; the three subject sets become `set.intersection(*(set(g.subjects(predicate)) for predicate in predicates))`; `exclude` is `{*predicates, # RDF.type, }` (comment kept); the three `next(g.objects(...))` reads and three appends become `[(i, p, next(g.objects(i, p))) for p in predicates]` (a list comprehension, so a StopIteration still propagates); the three per-triple `not isinstance(source|property|target, BNode)` tests become one `any(...)` over those triples before the extras, appended by one comprehension.",
+    "optimized.ldpy, from optimized.py: prefixed names in the `predicates` tuple; the extras read is `m{ {i} ?p ?o }` yielding (p, o), so the triple is `(i, p, o)`; `next(g.objects(i, p))` stays (`.first()` would answer None where next() raises, and is not shorter).",
+    "Exception to the symmetry rule: the intersection is ONE multi-pattern island `set(m{ ?i owl:annotatedSource [] ; owl:annotatedProperty [] ; owl:annotatedTarget [] })`, a join that only an island writes as one read (set() removes the repeated solutions)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides drop RDF and RDFS, unused in the original too (they only appear in the comment `# RDF.type,`): optimized_header.py keeps `from rdflib.namespace import OWL`, optimized_header.ldpy removes the rdflib.namespace import altogether; BNode and `@prefix owl:` stay."
+  ]
 }

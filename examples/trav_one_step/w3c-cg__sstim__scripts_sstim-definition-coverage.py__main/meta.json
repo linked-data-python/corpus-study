@@ -44,5 +44,25 @@
     "method": "module-state",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nested `for predicate in (SKOS.prefLabel, RDFS.label) for l in graph.objects(term, predicate)` becomes one read through the alternative path `SKOS.prefLabel | RDFS.label` (same order, duplicates kept); `novel = ... if labels else _content_words(best)` drops its conditional, since `set().union()` with no argument is the empty set; `str(d).strip()` -> `d.strip()` (a Literal is a str; strip returns a plain str). `labels` keeps `str(l)`: the driver compares the module-level `labels`, and a Literal is not equal to its string there.",
+    "optimized.ldpy, from optimized.py: definitions read by `m{ {term} skos:definition ?d }` (the header's `@graph graph`), labels by `graph.objects(term, skos:prefLabel | rdfs:label)` with prefixed names (rule 4: `m{ {term} {skos:prefLabel | rdfs:label} ?l }` measured 3 tokens longer).",
+    "The driver (entry=None) compares module globals and stdout; on the real ontology there are no failures, so an independent scratch run also compared `failures` and `checked` on 14 synthetic terms covering every branch: identical for original.py, translated.ldpy and both optimized artefacts.",
+    "No exception to the symmetry rule. The notation ratio is slightly above 1 because the translated header (fixed) carries three @prefix lines; the region itself is shorter in ldpy."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "optimized_header.py is a copy of optimized.py: every header import and constant is used by the region or by the restored context.",
+    "optimized_header.ldpy drops `from rdflib.namespace import SKOS, RDFS, OWL`: the restored `subjects` and the region use skos:, rdfs:, owl: prefixed names. The three @prefix lines are all used."
+  ]
 }

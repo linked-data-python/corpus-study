@@ -65,5 +65,23 @@
       "garde system -> True"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress in Python: optimized.py is original.py. `g.value` then a loop cannot become one `predicate / FHIR.CodeableConcept.coding` path read (that would visit the codings of every value, not only the first one), and `return None` stays because the other returns return a value.",
+    "optimized.ldpy: only the coding loop becomes an island, `m{ {c} fhir:CodeableConcept.coding ?o }(g)` (3 tokens shorter than the call); `g.value(subject, predicate)` stays (rule 4: `m{ {subject} {predicate} ?o }(g).first()` is longer). `FHIR.Coding.system` / `FHIR.Coding.code` stay Python: outside an island `fhir:Coding.system` reads as `fhir:Coding` followed by the attribute `.system`.",
+    "The island saves less than the fixed header's `@prefix fhir:` costs, hence a notation ratio above 1. No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides drop Tuple, List (typing), BNode, Literal, RDF (rdflib) and Identifier (rdflib.term); FHIR stays on both sides (FHIR.Coding.*), and so does `@prefix fhir:` (used by the island)."
+  ]
 }
