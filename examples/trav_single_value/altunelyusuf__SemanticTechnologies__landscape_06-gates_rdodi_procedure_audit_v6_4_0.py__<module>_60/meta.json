@@ -84,5 +84,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, OWL, DCTERMS and XSD go; SKOS stays. The context comment and the HERE / RES / rs context lines stay.",
+    "LD Python: Namespace and the whole rdflib.namespace import go (RES is already replaced by res:); @prefix res: and skos: are used."
+  ]
 }

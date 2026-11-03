@@ -96,5 +96,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS, SKOS, DCTERMS and PROV go from the rdflib.namespace import; RDF and OWL stay. The SEM and g_ab context lines stay on both sides (SEM + \"T\" is used).",
+    "LD Python: the rdflib.namespace import goes entirely (`a` and owl: replace RDF and OWL); @prefix rdf: goes (only `a` is used); owl: and sem: are used."
+  ]
 }

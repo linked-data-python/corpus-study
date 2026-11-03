@@ -1,0 +1,40 @@
+# Extracted from IndustryFusion/DigitalTwin@3b40088b88 : semantic-model/opcua/lib/bindings.py
+# region: Bindings.add_map_to_attribute (lines 77-103, stratum trav_one_step)
+# licence of the source repository: see meta.json
+import random
+import string
+from rdflib import Literal
+import opcua_lib_utils as utils
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+randnamelength = 16
+
+def add_map_to_attribute(self, g, attribute_iri, varname, var_node, connector):
+    """
+    Add a map to an attribute.
+    This function associates a OPC Ua variable with a given attribute IRI in the graph.
+    Args:
+        g (rdflib.Graph): The RDF graph to which the map will be added.
+        attribute_iri (rdflib.term.Identifier): The IRI of the attribute to bind.
+        varname (str): The name of the variable to bind.
+        var_node (rdflib.term.Identifier): The identifier of the variable node in the graph.
+        connector (rdflib.term.Identifier): The identifier of the connector to bind.
+
+    """
+    randname = ''.join(random.choices(string.ascii_uppercase + string.digits, k=randnamelength))
+    mapiri = self.binding_namespace['map_' + randname]
+    @graph g
+    dtype = m{ {var_node} {self.basens.hasDatatype} ?o }.first(default=xsd:anyType)
+    node_id = next(iter(m{ {var_node} {self.basens.hasNodeId} ?o }))
+    idtype = next(iter(m{ {var_node} {self.basens.hasIdentifierType} ?o }))
+    ns = next(iter(m{ {var_node} {self.basens.hasNamespace} ?o }))
+    nsuri = next(iter(m{ {ns} {self.basens.hasUri} ?o }))
+    +{
+        {mapiri} a {self.basens.BoundMap} ;
+            {self.basens.bindsConnector} {connector} ;
+            {self.basens.bindsLogicVar} {Literal(varname)} ;
+            {self.basens.bindsMapDatatype} {dtype} ;
+            {self.basens.bindsConnectorParameter}
+                {Literal(f'nsu={nsuri};{utils.idtype2String(idtype, self.basens)}={node_id}')} .
+        {attribute_iri} {self.basens.bindsMap} {mapiri}
+    }(self.bindingsg)

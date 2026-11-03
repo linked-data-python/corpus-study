@@ -71,5 +71,9 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Both sides: Node and URIRef go, and the three esmf_context imports are merged into one line (SAMM stays on both sides: the region calls get_urn(SAMM.x)). No @prefix on the LD Python side."
+  ]
 }

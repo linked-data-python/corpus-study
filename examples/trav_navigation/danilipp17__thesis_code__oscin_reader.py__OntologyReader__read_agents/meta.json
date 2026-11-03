@@ -83,5 +83,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS, XSD and six shim names (AGENTO, CALLS_CREW, COORD_CUSTOM, COORD_SEQUENTIAL, HAS_DESCRIPTION, HAS_TITLE) go; the shim import fits on one line.",
+    "LD Python: the rdflib.namespace import and the whole shim import go; @prefix rdfs:, xsd: and agento: go; owl:, rdf: (rdf:type in the context g.add lines) and agentoscin: are used."
+  ]
 }

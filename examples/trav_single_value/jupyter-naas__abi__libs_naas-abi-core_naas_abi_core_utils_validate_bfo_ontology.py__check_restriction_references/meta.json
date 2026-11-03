@@ -96,5 +96,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the shim's _named_classes and _named_object_properties go; the context comment block stays.",
+    "LD Python: the same, plus OWL, RDF and RDFS from the rdflib import and @prefix rdf: (only `a` is used); rdfs: and owl: are used."
+  ]
 }
