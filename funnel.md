@@ -476,26 +476,50 @@ against the original. The campaign runs by resumable batches
 (`scripts/plan_optimize.py`); first, five regions per stratum drawn with a
 seed (`scripts/draw_optimize.py`, seed 20261103), then all the others.
 
-State on 2026-11-03, 01:5x: 232 regions optimized, 159 with the header
-variant, 782 optimized artefacts proved equivalent; 129 regions to go.
-Median token reductions over the 228 equivalent pairs of the sample
-(`aggregate`, block `optimized`):
+The campaign is complete (2026-11-03, morning): 361 regions carry the four
+artefacts, and the 1,436 optimized artefacts are all proved equivalent.
+Median token reductions over the 357 equivalent pairs of the sample
+(`aggregate --force`, block `optimized`; provisional until the human
+review):
 
-| step | all tokens | host code | header variant (159) |
-|---|---:|---:|---:|
-| faithful translation (original → `translated.ldpy`) | +8.5 % | +9.1 % | — |
-| careful rereading (original → `optimized.py`) | +9.4 % | +9.4 % | +15.7 % |
-| notation on top (`optimized.py` → `optimized.ldpy`) | +7.9 % | +8.6 % | +14.7 % |
-| both (original → `optimized.ldpy`) | +18.4 % | +19.6 % | +30.0 % |
+| step | all tokens | host code | header variant: all | host |
+|---|---:|---:|---:|---:|
+| faithful translation (original → `translated.ldpy`) | +5.7 % | +6.9 % | — | — |
+| careful rereading (original → `optimized.py`) | +9.6 % | +9.6 % | +14.5 % | +14.5 % |
+| notation on top (`optimized.py` → `optimized.ldpy`) | +5.1 % | +6.8 % | +8.8 % | +10.0 % |
+| both (original → `optimized.ldpy`) | +16.7 % | +18.5 % | +25.8 % | +27.6 % |
+
+By stratum (median, all tokens; header variant after the bar):
+
+| stratum | n | rereading | notation | notation, host | both | rereading | notation | both |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| add_in_loop | 32 | 12.6 | 18.0 | 18.7 | 33.5 | 18.7 | 20.9 | 38.7 |
+| add_isolated | 25 | 9.6 | 11.9 | 11.9 | 17.9 | 13.9 | 11.9 | 28.5 |
+| add_run_shared_subject | 30 | 10.2 | 18.8 | 18.8 | 29.5 | 17.6 | 25.6 | 38.3 |
+| bind_initbindings | 21 | 14.6 | −9.7 | 3.6 | 10.0 | 16.2 | −9.8 | 12.0 |
+| coercion_datatype | 21 | 7.7 | 14.2 | 14.2 | 20.5 | 11.3 | 21.5 | 31.5 |
+| ns_def_local | 26 | 11.8 | 6.7 | 6.8 | 20.2 | 17.6 | 7.4 | 36.3 |
+| ns_import_project | 25 | 3.8 | 6.9 | 6.9 | 13.1 | 11.4 | 9.3 | 16.7 |
+| remove | 27 | 16.7 | 10.6 | 10.6 | 27.6 | 19.6 | 9.6 | 30.0 |
+| sparql_interpolated | 12 | 12.2 | 10.2 | 32.6 | 19.1 | 13.0 | 13.7 | 28.4 |
+| sparql_literal | 23 | 23.1 | −20.8 | −2.0 | −1.4 | 29.3 | −26.4 | 0.0 |
+| trav_existence | 30 | 8.0 | 2.7 | 2.7 | 11.6 | 11.8 | 6.7 | 21.7 |
+| trav_navigation | 30 | 9.4 | 4.8 | 4.8 | 14.1 | 11.7 | 9.2 | 19.5 |
+| trav_one_step | 26 | 12.0 | 0.0 | 0.0 | 11.3 | 14.3 | 2.6 | 18.7 |
+| trav_single_value | 29 | 4.9 | 0.0 | 0.0 | 6.8 | 11.2 | 2.3 | 13.2 |
 
 The notation pays where triples are written — runs of `.add` on a shared
-subject, typed literals, `[ ]` blank nodes, `g{ }` graph literals — and is
-neutral to slightly negative on reads that replace a short rdflib call one
-for one. Removing what the region does not use from the header roughly
-doubles both shares: the faithful header weighs on the notation through
-the translation's unused `@prefix` lines, and on the rereading through the
-file's unused imports. In `sparql_*` the notation becomes neutral once the
-query text is counted apart (host code).
+subject, typed literals, `[ ]` blank nodes, `g{ }` graph literals — and
+where a multi-pattern `m{ }` joins loops that Python must nest. It is
+neutral on reads: `g.value(s, ex:p)` with a prefixed name is shorter than
+`m{ {s} ex:p ?o }.first()`, and rule 4 of `AGENT_OPTIMIZE.md` (an island
+longer than the Python it replaces is not used) sends most single-value
+reads back to Python. Removing what the region does not use from the
+header raises both shares: the faithful header weighs on the notation
+through the translation's unused `@prefix` lines, and on the rereading
+through the file's unused imports. In `sparql_*` the notation is neutral
+or positive once the query text is counted apart (host code): a query
+string is one Python token, its text token by token in `s{ }`.
 
 **Model check.** Fable rewrote, independently, the two artefacts of one
 region per stratum (14, `results/raw/model_check/`,
