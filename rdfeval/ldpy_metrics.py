@@ -101,7 +101,8 @@ _ISLAND_TOKEN = re.compile(r"""
   | (?P<blank>_:[\w.-]*)
   | (?P<var>[?$][A-Za-z_][\w]*)
   | (?P<number>[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)
-  | (?P<pname>[A-Za-z_][\w.-]*:[\w.\-·]*|[A-Za-z_][\w.-]*)   # pname or bare 'a'
+  | (?P<pname>[A-Za-z_][\w.-]*:(?:[\w.\-·]|\\[_~.\-!$&'()*+,;=/?\#@%])*
+                |[A-Za-z_][\w.-]*)   # pname (Turtle \ escapes) or bare 'a'
   | (?P<punct>[;,.\[\]()@^])
   | (?P<other>\S)
 """, re.VERBOSE)

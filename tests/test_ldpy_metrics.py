@@ -210,3 +210,13 @@ def test_a_call_suffix_does_not_turn_the_island_body_into_python():
     tokenize_island("+{ <http://a/s> ex:p-q ex:o-r }", "island:addto", bare)
     assert with_suffix.terms == bare.terms == 3
     assert with_suffix.tokens == bare.tokens + 3      # `(`, `g`, `)`
+
+
+def test_an_escaped_local_name_is_one_token():
+    """`fhir:Coding\\.system` (Turtle PN_LOCAL_ESC, read by ldpy outside
+    islands too) weighs what `fhir:Coding` weighs: one prefixed name."""
+    from rdfeval.ldpy_metrics import measure_ldpy_source
+    head = "@prefix fhir: <http://hl7.org/fhir/> .\n"
+    escaped = measure_ldpy_source(head + "y = f(fhir:Coding\\.system)\n")
+    plain = measure_ldpy_source(head + "y = f(fhir:Coding)\n")
+    assert escaped.tokens == plain.tokens

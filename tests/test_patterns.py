@@ -90,3 +90,8 @@ def test_the_audit_draw_is_reproducible():
     assert P.audit_draw(covered) == P.audit_draw(list(reversed(covered)))
     assert len(P.audit_draw(covered)) == P.AUDIT_SIZE
     assert P.audit_draw(["x"]) == ["x"]
+
+
+def test_an_escaped_local_name_is_found_in_the_original():
+    assert P._pname_rule("fhir:Coding\\.system", "v = FHIR.Coding.system") \
+        == "term: p:l ← NS.l"

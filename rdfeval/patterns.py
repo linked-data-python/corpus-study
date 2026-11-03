@@ -326,6 +326,7 @@ def _pname_rule(pname: str, python: str, orig: str = "") -> str:
 
 def _pname_in(pname: str, python: str) -> str:
     local = pname.split(":", 1)[1] if ":" in pname else pname
+    local = re.sub(r"\\(.)", r"\1", local)      # Turtle escapes: `Coding\.system`
     if pname.endswith(":{"):
         return "term: p:{x} ← NS[x]"
     if re.search(rf"(?<![\w:]){re.escape(pname)}(?![\w:])", python):
