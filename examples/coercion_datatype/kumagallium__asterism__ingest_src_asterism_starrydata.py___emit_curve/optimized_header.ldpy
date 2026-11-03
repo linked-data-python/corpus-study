@@ -1,0 +1,133 @@
+# Extracted from kumagallium/asterism@f0977d4d3a : ingest/src/asterism/starrydata.py
+# region: _emit_curve (lines 354-473, stratum coercion_datatype)
+# licence of the source repository: see meta.json
+from rdflib import Graph, Namespace, URIRef
+from context_shim import (  # context shim, see meta.json
+    parse_curator_timestamp,
+    parse_float_array,
+    parse_project_names,
+    quantity_kind_iri,
+    strip_quoted,
+    unit_iri,
+)
+@prefix schema: <https://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+WEBPLOTDIGITIZER_IRI = "https://automeris.io/WebPlotDigitizer"
+
+def _emit_curve(
+    g: Graph,
+    row: dict[str, str],
+    sd: Namespace,
+    sdr: Namespace,
+    ingestion_iri: URIRef | None,
+) -> bool:
+    """1 行 (curves.csv) を Graph に追加。
+
+    NOTE: starrydata は 1 つの figure (figure_id) に複数 sample の curve を載せる
+    ことがあり、また figure_id 自体も paper を跨いで重複しうる (実測 4,466 件)。
+    そのため curve IRI は (SID, figure_id, sample_id) の複合キーで作る:
+        sdr:curve/{SID}-{figure_id}-{sample_id}
+    starrydata 全件で (SID, figure_id, sample_id) は 100% ユニーク (検証済)。
+
+    設計プラン §4「x/y 配列の表現方針」方針 C:
+      - sd:xValuesJSON / sd:yValuesJSON で JSON literal 保持 (xsd:string)
+      - sd:xMin / sd:xMax / sd:yMin / sd:yMax / sd:pointCount を集約値として出す
+      → 2 次元の局所範囲クエリは集約値だけでは答えられない (既知の限界)
+    """
+    @graph g
+    fig_id = row.get("figure_id", "").strip()
+    sample_id = row.get("sample_id", "").strip()
+    paper_sid = row.get("SID", "").strip()
+    if not fig_id or not sample_id or not paper_sid:
+        return False
+    curve_key = f"{paper_sid}-{fig_id}-{sample_id}"
+    curve = sdr[f"curve/{curve_key}"]
+
+    +{
+        {curve} a {sd.Curve}, prov:Entity ;
+           dcterms:identifier {curve_key} ;
+           {sd.rawFigureId} {fig_id}
+    }
+
+    if ingestion_iri is not None:
+        +{ {curve} prov:wasGeneratedBy {ingestion_iri} }
+
+    if figure_name := strip_quoted(row.get("figure_name", "")):
+        +{ {curve} {sd.figureName} {figure_name} }
+
+    +{ {curve} {sd.ofSample} {sdr[f"sample/{paper_sid}-{sample_id}"]} }
+
+    # Phase 1 string predicates are kept as-is for backward compatibility.
+    for col_key, prop in (
+        ("prop_x", sd.propertyX),
+        ("prop_y", sd.propertyY),
+        ("unit_x", sd.unitXString),
+        ("unit_y", sd.unitYString),
+        ("comments", sd.comments),
+    ):
+        if value := strip_quoted(row.get(col_key, "")):
+            +{ {curve} {prop} {value} }
+
+    # Phase 2 #2: additively attach canonical QUDT IRIs when a curated mapping
+    # exists. The string predicates above stay; these let AI clients pivot on a
+    # stable identifier so "Seebeck coefficient" and "thermopower" unify.
+    for col_key, prop, to_iri in (
+        ("prop_x", sd.propertyXQuantity, quantity_kind_iri),
+        ("prop_y", sd.propertyYQuantity, quantity_kind_iri),
+        ("unit_x", sd.unitX, unit_iri),
+        ("unit_y", sd.unitY, unit_iri),
+    ):
+        if iri := to_iri(strip_quoted(row.get(col_key, ""))):
+            +{ {curve} {prop} f<{iri}> }
+
+    # x / y 配列: JSON literal + 集約値
+    x_raw = row.get("x", "")
+    y_raw = row.get("y", "")
+    xs = parse_float_array(x_raw)
+    ys = parse_float_array(y_raw)
+    if x_raw:
+        +{ {curve} {sd.xValuesJSON} {x_raw} }
+    if y_raw:
+        +{ {curve} {sd.yValuesJSON} {y_raw} }
+    if xs:
+        +{ {curve} {sd.xMin} {min(xs)}^^xsd:double ; {sd.xMax} {max(xs)}^^xsd:double }
+    if ys:
+        +{ {curve} {sd.yMin} {min(ys)}^^xsd:double ; {sd.yMax} {max(ys)}^^xsd:double }
+    point_count = min(len(xs), len(ys))
+    if point_count:
+        +{ {curve} {sd.pointCount} {point_count}^^xsd:integer }
+
+    for project in parse_project_names(row.get("project_names", "")):
+        +{ {curve} {sd.projectName} {project} }
+
+    created = strip_quoted(row.get("created_at", ""))
+    if created:
+        +{ {curve} dcterms:created {created} }
+    if updated := strip_quoted(row.get("updated_at", "")):
+        +{ {curve} dcterms:modified {updated} }
+
+    # Phase 2 #6: scientific provenance. Each curve was digitized off a
+    # published figure with WebPlotDigitizer; model that as a distinct
+    # DigitizationActivity (separate from our IngestionActivity, which only
+    # records that *our pipeline* loaded the CSV). A curve is thus
+    # prov:wasGeneratedBy two activities — the original digitization and our
+    # ingestion — which is valid PROV-O.
+    digitization = sdr[f"digitization/{curve_key}"]
+    agent = f<{WEBPLOTDIGITIZER_IRI}>
+    +{
+        {curve} prov:wasGeneratedBy {digitization} .
+        {digitization} a {sd.DigitizationActivity}, prov:Activity ;
+           prov:wasAssociatedWith {agent} .
+        # The WebPlotDigitizer agent description is shared across all curves;
+        # the triples are IRI-keyed so Oxigraph set-semantics dedupes them on
+        # re-ingest.
+        {agent} a prov:SoftwareAgent ;
+           schema:name "WebPlotDigitizer" ;
+           schema:url {agent}
+    }
+    if created and (at_time := parse_curator_timestamp(created)):
+        +{ {digitization} prov:atTime {at_time}^^xsd:dateTime }
+
+    return True

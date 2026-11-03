@@ -51,5 +51,21 @@
       "deleted `g.bind(\"schema\", SCHEMA)` (namespaces differ: schema https://schema.org/ kept)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the nineteen g.bind calls become one loop over (prefix, namespace) pairs in the same order (the order matters: cc and ns1 share an IRI); URIRef('{}{}'.format(BRDFTIME, '2011')) becomes BRDFTIME['2011']. The nineteen Namespace assignments and the global statements stay: the globals are the region's contract.",
+    "optimized.ldpy, from optimized.py: the translation's `global @prefix ... as NAME .` lines (assignment and global export in one declaration) and the same bind loop; the translation's explanatory comment goes.",
+    "Language finding: `brdftime:2011` is rejected off-island (the transpiler leaves it as Python, a SyntaxError) though Turtle allows a local part starting with a digit, and it works inside g{ }. optimized.ldpy therefore keeps BRDFTIME['2011'], as in Python.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "global/nonlocal modifier"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef and Literal go.",
+    "LD Python: URIRef goes."
+  ]
 }

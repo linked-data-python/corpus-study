@@ -66,5 +66,27 @@
       "print de l'avertissement supprimé (vert avant)"
     ],
     "remaining": "Rien d'équivalence à juger sur les entrées du dépôt. Pour mémoire : @graph g et @prefix base: font g.bind() sur le graphe lu, et bind (override=True) retire une liaison existante du même IRI ; si un fichier liait binding: ou uaentity: exactement à base_ns, à opcua: ou à rdf:, la traduction sortirait en sys.exit(1) là où l'original continue. Le dépôt ne l'atteint pas (owl2instances.py:729-731 forge `<prefix>bindings/` et `<prefix>entity/`). opcua_ns disparaît du module traduit (names_only_original) ; binding_server.py ne l'emploie que dans la région (ligne 40)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: Graph().parse(...) is chained; the found_* lookups are folded into the two guards (`if not (binding_ns or g.namespace_manager.store.namespace('binding'))`, no side effects), and the dead reassignments of binding_ns/uaentity_ns go with their comment; the triples() loop becomes g.subjects(RDF.type, BASE.BoundMap).",
+    "optimized.py: the five-branch if/elif datatype chain becomes a python_types dict built once before the loop, a membership test for the warning and .get(datatype_uri, str). The test is `in`, not a None check, because LocalizedText is None. Dict lookup gives the same result as the == chain for RDF terms: a Literal or BNode never equals a URIRef, and equal URIRefs hash equal. The sys.exit guards, the printed lines and the default stay.",
+    "optimized.ldpy, from optimized.py: `@graph g` and `@prefix base: f<{base_ns}> .`, `for s in m{ ?s a base:BoundMap }`, the two g.value reads as separate m{ … }.first() (not joined, which would multiply rows), and opcua:Double etc. as the dict keys (prefixed names work as dict keys before `:`).",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "f<…>",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused; the two rdflib imports merge into `from rdflib import RDF, Graph, Namespace`.",
+    "LD Python: Namespace, RDF and the @prefix rdf line go (the region writes `a`)."
+  ]
 }

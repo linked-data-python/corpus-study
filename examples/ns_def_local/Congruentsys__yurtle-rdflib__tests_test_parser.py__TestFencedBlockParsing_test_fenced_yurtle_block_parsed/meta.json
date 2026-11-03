@@ -56,5 +56,22 @@
       "kb:statusChange -> kb:by (survivait : même compte 1)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the parser variable is inlined (YurtleParser().parse(...)); the kb Namespace and the triples() call stay. The harness return line and its comment are copied as is.",
+    "optimized.ldpy: `@prefix kb:` and `list(m{ ?s kb:statusChange ?o }(doc.graph))` in place of the triples() call (4 tokens fewer than keeping triples() with kb:statusChange). m{ } reads through doc.graph.triples((None, kb:statusChange, None)), so the driver's recorder sees the same call and the same triples; the list holds (s, o) pairs instead of triples, and only its length is read.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, URIRef, PM and YURTLE go.",
+    "LD Python: the whole rdflib import goes, as do PM and YURTLE. The header comment that names the shim import is kept as it is."
+  ]
 }

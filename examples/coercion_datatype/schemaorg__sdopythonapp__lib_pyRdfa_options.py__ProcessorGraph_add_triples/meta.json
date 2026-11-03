@@ -50,5 +50,25 @@
     "method": "entry:add_triples",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `isinstance(context, URIRef) or is_context_string` becomes `is_context_string` (URIRef is a str subclass, so it was already true); the description/date adds and the three rdfa:context adds become `self.graph += [...]`. The rdf:type add of top_class and the guarded info_class add stay separate and first, so a bad top_class or info_class raises with the same partial graph. The Python 2 try/except around basestring and the node.nodeName try/except are kept, as are the six bind calls (they rebind; @graph would not).",
+    "optimized.ldpy, from optimized.py: `@graph self.graph` after the binds, one +{ } per add group, {datetime...isoformat()}^^xsd:dateTime, {Literal(full_msg)} kept (msg may be None), {\"%s\" % context}.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "from … import p:",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: sys and URIRef go; the four rdflib import lines become `from rdflib import BNode, Literal, Namespace`.",
+    "LD Python: sys, URIRef and Namespace go; the shim import (objects and prefixes) and both @prefix ... as lines are used."
+  ]
 }

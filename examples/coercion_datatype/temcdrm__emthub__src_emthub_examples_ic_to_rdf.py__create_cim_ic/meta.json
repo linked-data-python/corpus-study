@@ -50,5 +50,26 @@
     "method": "output-file:create_cim_ic",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three read-if-exists blocks become a local read_ic(suffix, what) helper (same order, same printed lines, None when the file is missing); the unused `bus` read and the tnid/vpu/nomv/deg intermediates go (vmag = 1000.0 * b1 * b2, the same product); URIRef(CIM_NS + 'X') becomes CIM.X or CIM['X.y']; g.bind('emt', EMT_NS) takes the IRI string directly; each row's adds become one `g += [...]`.",
+    "optimized.py: the three SvPowerFlow blocks (branch ends 1 and 2, generator) become one local helper power_flow(svid, tid, p, q) returning the four triples; the branch name is built once with `'_SvXfmrPF_' if tap > 0.0 else '_SvLinePF_'`.",
+    "optimized.ldpy, from optimized.py: `@graph g` (it also binds cim/emt from the header prefixes, so the two bind lines go); the helper becomes add_power_flow, whose body is one +{ } with typed literals {p}^^cim:ActivePower, and the call sites drop `g +=`.",
+    "Exception to the symmetry, island only: in the bus loop the cn and sv variables are inlined into the +{ } as subject terms, because a predicate-object list names each subject once; in Python they are each used two to four times and inlining them would lengthen the code.",
+    "The serialized output file is byte-identical across original.py, optimized.py and optimized_header.ldpy on the driver's input."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "typed literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused (CIM_NS and EMT_NS are read): optimized_header.py is a copy of optimized.py.",
+    "LD Python: CIM_NS and EMT_NS go (unused), `as EMT` goes (EMT is never read); @prefix emt stays because the designated graph inherits it, which reproduces the original g.bind('emt', ...)."
+  ]
 }

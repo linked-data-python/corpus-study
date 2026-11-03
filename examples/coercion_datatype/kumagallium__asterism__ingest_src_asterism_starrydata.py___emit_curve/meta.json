@@ -51,5 +51,27 @@
     "method": "entry:_emit_curve",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two QUDT loops merge into one loop over (column, property, lookup function) in the same order, and `value and (iri := ...)` becomes `iri := to_iri(strip_quoted(...))` (quantity_kind_iri and unit_iri already return None on an empty value); sample_iri is inlined; runs of adds with no call between them that can raise become `g += [...]` (the four first curve triples, the min/max pairs).",
+    "optimized.py: agent = URIRef(WEBPLOTDIGITIZER_IRI) is computed once and reused for wasAssociatedWith and schema:url; the digitization and agent triples become one `g += [...]` placed before the prov:atTime add (parse_curator_timestamp cannot raise on a str, so no partial graph changes); the agent comment is rewrapped inside the list to stay under 100 columns. Adds are otherwise kept in the original order relative to strip_quoted/parse calls, so a raising input leaves the same partial graph.",
+    "optimized.ldpy, from optimized.py: `@graph g` and one +{ } per add or `g += [...]` run (predicate-object lists with ; and ,), the typed literals as {min(xs)}^^xsd:double, {point_count}^^xsd:integer, {at_time}^^xsd:dateTime, strings as bare interpolations, URIRef(iri) as f<{iri}>, agent = f<{WEBPLOTDIGITIZER_IRI}>.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "prefixed name",
+    "f<…>",
+    "typed literal",
+    "plain literal",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused; the two rdflib imports merge into `from rdflib import DCTERMS, PROV, RDF, XSD, Graph, Literal, Namespace, URIRef`.",
+    "LD Python: Literal and the rdflib.namespace line (DCTERMS, PROV, RDF, XSD) go; the four @prefix lines are all used."
+  ]
 }

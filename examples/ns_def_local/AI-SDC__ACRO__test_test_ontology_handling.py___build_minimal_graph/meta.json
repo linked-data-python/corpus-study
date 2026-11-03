@@ -67,5 +67,25 @@
       "@graph g remplacé par @graph rdflib.Graph() (écritures perdues)"
     ],
     "remaining": "Mutant équivalent, non compté : un préfixe supplémentaire q: (liaison seule). Liaisons comparées : aucune liaison de l'original perdue, p: et dpv_owl: en plus (tolérées, ldpy/027) ; le dépôt ne sérialise ni ne lit les liaisons de ce graphe (test_ontology_handling.py et ontology_handler.py ne lisent que les triplets). Le shim met PREFIX = https://example.org/acro-ontology# alors que le dépôt a https://www.w3id.org/statbarnsdc# (ontology_handler.py:18) : identique des deux côtés, aucune liaison rdflib par défaut sur l'un ou l'autre, sans effet sur la preuve."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four three-triple blocks become a table loop over (local name, parent, definition), because every prefLabel equals the local name of its subject; skos and rdfs become rdflib.SKOS and rdflib.RDFS, dpv_owl (used once) becomes a full URIRef; the uri variables go.",
+    "optimized.ldpy: one +{ } holding the twelve triples as four predicate-object lists, with p: from `@prefix p: f<{PREFIX}> .`, skos:/rdfs: as @prefix and the two foreign IRIs written in full.",
+    "Exception to the symmetry, island only: optimized.ldpy unrolls the table that optimized.py loops over. In Python the unrolled `g += [...]` costs 267 tokens against 168 for the loop; in Turtle a predicate-object list names each subject and predicate once, so the unrolled island (104 tokens) beats the loop with an island body (122 tokens).",
+    "The designated graph also carries the p/skos/rdfs prefix bindings, as in the translation; the driver compares triples only."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "+{ }",
+    "f<…>",
+    "IRI",
+    "prefixed name",
+    "plain literal"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python: the shim import keeps only PREFIX (eight unused stubs go) and fits on one line."
+  ]
 }

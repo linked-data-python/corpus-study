@@ -43,5 +43,18 @@
     "method": "entry:query",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the per-variable conversion becomes a local helper to_term() with early returns, so the result rows become one list comprehension of ResultRow over a dict comprehension; the explicit `row_values[var_obj] = None` branch goes, because ResultRow reads its values with values.get(label) and already yields None for a missing variable.",
+    "optimized.py: the four literal branches become three: the int/long branch tries the int cast and falls through to the typed Literal on ValueError (same try/except, same result); the lang and plain branches merge into `Literal(value_str, lang=binding_info.get('xml:lang') or None)`, exact for every falsy lang ('' or a non-string falsy value, which Literal would reject) and for every truthy one.",
+    "optimized.py: the redundant local re-import of BNode and URIRef goes (the module header already imports them); the CONSTRUCT branch returns Graph().parse(...) directly (parse returns the graph); the final else before raise goes. Lazy evaluation is not introduced: the rows are still built eagerly before iter(), so an error is raised at call time, as in the original.",
+    "optimized.ldpy is optimized.py unchanged: no island covers a Literal whose datatype or language tag is run-time data off-island (the `{v}^^dt` suffix exists only in graph term position), and the translation's f{Literal(...)} wrappers were no-op passthroughs that only add tokens. The one site f{value_str} covered, the untyped Literal, is merged into the lang call on both sides. Nothing for the notation here.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in the header on either side (BNode, Graph and URIRef are all read by the region): optimized_header.py and optimized_header.ldpy are copies of optimized.py and optimized.ldpy."
+  ]
 }

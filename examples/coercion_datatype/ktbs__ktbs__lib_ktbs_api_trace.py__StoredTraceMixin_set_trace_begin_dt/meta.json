@@ -44,5 +44,21 @@
     "method": "entry:set_trace_begin_dt",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py is original.py: one graph.set and one graph.remove, nothing to compress.",
+    "optimized.ldpy: XSD.dateTime becomes the prefixed name xsd:dateTime (header @prefix); the translation's f{Literal(...)} wrapper is dropped (a no-op passthrough). graph.set and graph.remove stay rdflib calls: set has no island (it would cost a -{ } plus a +{ }), the editable graph from self.edit() would need an @graph line, and designating it binds the block's prefixes onto it.",
+    "The notation ratio above 1 comes from the unoptimized header's @prefix xsd line; the region lines themselves are two tokens shorter.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph, RDF, RDFS and URIRef go.",
+    "LD Python: Graph, RDF, RDFS, URIRef and XSD go; @prefix xsd is used."
+  ]
 }

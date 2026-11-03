@@ -1,0 +1,65 @@
+# Extracted from BONSAMURAIS/arborist@da18f3d17c : arborist/extract_emissions.py
+# region: setup_empty_graph (lines 22-77, stratum ns_def_local)
+# licence of the source repository: see meta.json
+from rdflib import Graph
+from context_shim import add_common_elements  # context shim, see meta.json
+
+def setup_empty_graph():
+    global dataset, extent2011node
+
+    global @prefix bont:     <http://ontology.bonsai.uno/core#> as BONT .
+    global @prefix brdffo:   <http://rdf.bonsai.uno/flowobject/exiobase3_3_17#> as BRDFFO .
+    global @prefix brdflo:   <http://rdf.bonsai.uno/location/exiobase3_3_17#> as BRDFLO .
+    global @prefix brdftime: <http://rdf.bonsai.uno/time#> as BRDFTIME .
+    global @prefix brdffat:  <http://rdf.bonsai.uno/activitytype/exiobase3_3_17#> as BRDFFAT .
+    global @prefix bfoaf:    <http://rdf.bonsai.uno/foaf/bonsai#> as BRDFFOAF .
+    global @prefix brdfdat:  <http://rdf.bonsai.uno/data/exiobase3_3_17/emission#> as BRDFDAT .
+    global @prefix brdfprov: <http://rdf.bonsai.uno/prov/exiobase3_3_17#> as BRDFPROV .
+    global @prefix cc:       <http://creativecommons.org/ns#> as CC .
+    global @prefix dc:       <http://purl.org/dc/elements/1.1/> as DC .
+    global @prefix dtype:    <http://purl.org/dc/dcmitype/> as DTYPE .
+    global @prefix ns0:      <http://purl.org/vocab/vann/> as NS0 .
+    global @prefix ns1:      <http://creativecommons.org/ns#> as NS1 .
+    global @prefix om2:      <http://www.ontology-of-units-of-measure.org/resource/om-2/> as OM2 .
+    global @prefix ot:       <https://www.w3.org/TR/owl-time/> as OT .
+    global @prefix schema:   <http://schema.org/> as SCHEMA .
+    global @prefix time:     <http://www.w3.org/2006/time#> as TIME .
+    global @prefix xml:      <http://www.w3.org/XML/1998/namespace> as XML .
+    global @prefix prov:     <http://www.w3.org/ns/prov#> as PROV .
+
+    extent2011node = BRDFTIME['2011']
+
+    dataset = "http://rdf.bonsai.uno/data/exiobase3_3_17/emission"
+    g = add_common_elements(
+        Graph(),
+        base_uri=dataset,
+        title="Emission flows from Exiobase",
+        description="Extracted emission flows from exiobase extensions table",
+        author="BONSAI Team",
+    )
+
+    for prefix, namespace in (
+        ("bont", BONT), ("brdffo", BRDFFO), ("brdflo", BRDFLO), ("brdftime", BRDFTIME),
+        ("brdffat", BRDFFAT), ("brdfdat", BRDFDAT), ("brdfprov", BRDFPROV), ("bfoaf", BRDFFOAF),
+        ("cc", CC), ("dc", DC), ("dtype", DTYPE), ("ns0", NS0), ("ns1", NS1), ("om2", OM2),
+        ("ot", OT), ("schema", SCHEMA), ("time", TIME), ("xml", XML), ("prov", PROV),
+    ):
+        g.bind(prefix, namespace)
+
+    return g
+
+
+# --- harness, identical on both sides: the region sets module globals and
+# --- binds prefixes on the graph, neither of which a triple comparison sees.
+def demo():
+    g = setup_empty_graph()
+    return {
+        "namespaces": sorted((p, str(u)) for p, u in g.namespaces()),
+        "globals": {n: str(v) for n, v in sorted(globals().items())
+                    if n in ("BONT", "BRDFFO", "BRDFLO", "BRDFTIME", "BRDFFAT",
+                             "BRDFFOAF", "BRDFDAT", "BRDFPROV", "CC", "DC",
+                             "DTYPE", "NS0", "NS1", "OM2", "OT", "SCHEMA",
+                             "TIME", "XML", "PROV", "extent2011node",
+                             "dataset")},
+        "triples": sorted(map(str, g)),
+    }
