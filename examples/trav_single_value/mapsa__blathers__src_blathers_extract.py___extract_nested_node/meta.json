@@ -65,5 +65,20 @@
       "boucle reduite a la premiere solution"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the structural-namespace test is inverted, so `continue` goes; the NestedRow returned by setdefault is appended to directly (the `row` variable goes; NestedRow and _term_label are still evaluated once per kept pair, as setdefault requires); ExtractedNestedNode is built once at the end with comment= and rows= (both dataclass fields) instead of being built first and then mutated. The comment read now comes after the loop: it has no side effect.",
+    "optimized.ldpy has no island: its region is optimized.py's. `m{ {node} ?pred ?value }` (with @graph or (g)) is longer than `g.predicate_objects(node)` (5 tokens), and `m{ {node} rdfs:comment ?v }.first()` is longer than `g.value(node, RDFS.comment)`, so both stay Python (rule 4).",
+    "No exception to the symmetry. The notation ratio (1.0282) is the cost of the unused `@prefix rdfs:` header line alone.",
+    "`@prefix` is declared only because translated.ldpy's header line `@prefix rdfs:` is kept byte for byte in optimized.ldpy; no island uses it."
+  ],
+  "optimized_constructions": [
+    "@prefix"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: DCTERMS goes; SH and _STRUCTURAL_NS (read by the region) stay with RDF, RDFS, OWL and Namespace.",
+    "LD Python: the same, plus the unused `@prefix rdfs:` line; optimized_header.ldpy is identical to optimized_header.py."
+  ]
 }

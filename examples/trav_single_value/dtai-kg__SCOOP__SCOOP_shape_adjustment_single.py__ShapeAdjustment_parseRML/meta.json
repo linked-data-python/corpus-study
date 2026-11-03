@@ -61,5 +61,25 @@
       "déjà tués par le pilote livré : îlot subjects vidé ou objet élargi, sujet élargi sur logicalSource / subjectMap / predicateObjectMap, logicalSource .first() -> .one() / next(iter()), lectures remplacées par None, boucle POM vidée ou réduite à .first(), garde rdf:type forcée True/False ou changée"
     ],
     "remaining": "Équivalents ou non applicables, non comptés : prédicat élargi (`[]` refusé en position de prédicat par le transpileur, `?p` change la forme du résultat). @graph self.rml_graph + @prefix rdf: ne touche aucune liaison observable : rdf: est déjà lié à cet IRI par rdflib et par les 48 en-têtes RML du dépôt, et rml_graph n'est jamais sérialisé."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: rml_graph is read through the parameter instead of self.rml_graph (same object, still assigned first because the sibling methods read it); the two g.value results are passed straight to getSource/getSubjectMap; the if/else on iterator becomes a conditional expression; the triples map's dict is built once at the end of the iteration instead of being set to {} and then filled in three steps, and the rdf:type branch extends the `classes` list itself, which is the same object the dict holds. Call order is kept (self.iterator is still set before getSubjectMap, whose parseTemplate_csv reads it). Only difference: if a sibling method raises in the middle of an iteration, self.rml_parsed no longer holds the half-filled entry for that triples map; the exception is the same.",
+    "optimized.ldpy, from optimized.py: `@graph rml_graph`; subjects(RDF.type, …) becomes `m{ ?triples_map rdf:type {self.TRIPLES_MAP_CLASS} }` and objects(…, self.POM) becomes `m{ {triples_map_identifier} {self.POM} ?pom }`; `RDF.type` in the comparison becomes `rdf:type`.",
+    "Rule 4: the two g.value(triples_map_identifier, P) reads stay Python. `rml_graph.value(t, P)` costs 10 tokens and `m{ {t} {P} ?o }.first()` costs 13 even with @graph in scope.",
+    "No exception to the symmetry. The region gains 4 tokens (255 to 251), which the header's unused part outweighs (@prefix rdf: is added and the RDF import stays), so the notation ratio comes out at 1.0035 > 1."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef, Literal, Namespace, BNode, RDFS, XSD and OWL go; RDF and Graph are merged into one `from rdflib import RDF, Graph`.",
+    "LD Python: the same imports go, and RDF too (the region writes rdf:type); `@prefix rdf:` is used and stays."
+  ]
 }

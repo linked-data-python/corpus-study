@@ -46,5 +46,20 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: value()'s keyword arguments subject=/predicate= become positional (4 tokens). Nothing else to compress: the test asserts a single read. The demo() harness is copied as is.",
+    "optimized.ldpy has no island: its region is optimized.py's. `@graph self.edm[ids].graph` + `m{ {self.cho[ids]} dc:language ?v }.first()` (translated.ldpy's form) costs exactly as many tokens as the positional value() call, and it needs `@prefix dc:` in the header where the Python form needs URIRef. The form with no island is therefore never longer, so it is the one kept (rule 4).",
+    "No exception to the symmetry. The notation ratio (1.102) is the cost of translated.ldpy's unused `@prefix dc:` header line alone.",
+    "`@prefix` is declared only because translated.ldpy's header line `@prefix dc:` is kept byte for byte in optimized.ldpy; no island uses it."
+  ],
+  "optimized_constructions": [
+    "@prefix"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing is unused (Literal and URIRef are both read); optimized_header.py is a copy of optimized.py.",
+    "LD Python: the `@prefix dc:` line is unused and goes; optimized_header.ldpy is identical to optimized_header.py."
+  ]
 }

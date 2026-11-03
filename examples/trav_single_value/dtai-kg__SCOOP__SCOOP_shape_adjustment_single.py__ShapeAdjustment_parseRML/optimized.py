@@ -1,0 +1,38 @@
+# Extracted from dtai-kg/SCOOP@40c6fc0420 : SCOOP/shape_adjustment_single.py
+# region: ShapeAdjustment.parseRML (lines 50-85, stratum trav_single_value)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef, Literal, Namespace, BNode
+from rdflib.namespace import RDF, RDFS, XSD, OWL
+from scoop_context import ShapeAdjustmentStub
+
+def parseRML(self: ShapeAdjustmentStub, rml_graph: Graph):
+    """
+    A function to parse the RML graph and return a list of dictionary of the triples maps
+    (path of subject map, predicate map, object map, logical source, and classes and properties)
+    """
+    self.rml_graph = rml_graph
+    self.iterator = None
+    self.findNS = []
+    self.findPS = []
+    self.adjusted_shape = []
+    self.rml_parsed = {}
+    for triples_map_identifier in rml_graph.subjects(RDF.type, self.TRIPLES_MAP_CLASS):
+        source, reference_formulation, iterator = self.getSource(
+            rml_graph.value(triples_map_identifier, self.LOGICAL_SOURCE))
+        # self.setSourceType(reference_formulation, iterator)
+        self.iterator = "" if iterator == None else iterator
+        path, classes, template_length, shared_key = self.getSubjectMap(
+            rml_graph.value(triples_map_identifier, self.SUBJECT_MAP))
+        pom_list = []
+        for pom_identifier in rml_graph.objects(triples_map_identifier, self.POM):
+            pom_property = self.getPredicate(pom_identifier)
+            pom_object_path, pom_object_datatype, pom_object_parent, pom_object_template_length, constant, termType = self.getObjectMap(pom_identifier)
+            if pom_property == RDF.type:
+                classes.extend(pom_object_path)
+            else:
+                pom_list.append({'property': pom_property, 'path': pom_object_path, 'datatype': pom_object_datatype, 'parent': pom_object_parent, 'template_length': pom_object_template_length, 'constant': constant, 'termType': termType})
+        self.rml_parsed[triples_map_identifier] = {
+            'source': source, 'reference_formulation': reference_formulation, 'iterator': iterator,
+            'sm': {'path': path, 'classes': classes,
+                   'template_length': template_length, 'shared_key': shared_key},
+            'pom': pom_list}

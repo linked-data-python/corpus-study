@@ -60,5 +60,20 @@
       "@graph g + receiver-less m{ } (the former translation)"
     ],
     "remaining": "Reachability of the fixed defect: it needs an ontology that binds the OWL namespace under another prefix than `owl:` and declares a self-inverse owl:ObjectProperty in the OWL namespace; but `@graph g` also leaves the rebinding on g_combined, which validate_bfo_ontology.py passes to every later check (their `_short` on any OWL IRI). Is overriding a caller's existing binding in `designate` (ldpy/027) the intended semantics, or should it bind without override? Also untouched: article_candidate=true, which the triage judged excessive."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the accumulation loop becomes a list comprehension filtered on `g.value(prop, OWL.inverseOf) == prop` (same iteration order, same per-property read), and the parentheses around the implicitly concatenated message go.",
+    "optimized.ldpy has no island: its region is optimized.py's. `m{ {prop} owl:inverseOf ?v }(g).first()` costs 13 tokens against 9 for g.value. `@graph g` cannot replace the suffix: it binds owl: on the caller's graph and changes `_short`'s output (translation repair of 2026-10-30). So the Python is kept (rule 4).",
+    "No exception to the symmetry. The notation ratio (1.0532) is the cost of the unused `@prefix owl:` header line alone.",
+    "`@prefix` is declared only because translated.ldpy's header line `@prefix owl:` is kept byte for byte in optimized.ldpy; no island uses it."
+  ],
+  "optimized_constructions": [
+    "@prefix"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing is unused (Graph and URIRef in the annotations, OWL, _short, _label); optimized_header.py is a copy of optimized.py.",
+    "LD Python: the `@prefix owl:` line is unused and goes; optimized_header.ldpy is identical to optimized_header.py."
+  ]
 }

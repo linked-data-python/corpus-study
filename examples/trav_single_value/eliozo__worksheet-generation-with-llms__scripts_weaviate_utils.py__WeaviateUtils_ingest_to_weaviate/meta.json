@@ -64,5 +64,26 @@
       "déjà tués par le pilote livré : îlot rdf:type vidé ou objet élargi, sujet élargi sur problemID / problemGrade / problemText, problemGrade .one() / next(iter()), chaque lecture remplacée par None, boucles vidées, garde de langue forcée"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph().parse(...)` is chained; subjects() gets positional arguments; the four dead \"NA\"/0 initialisations go; `as e` (never read) goes; the last three try blocks, which differ only in the property and the conversion, become one loop over (name, convert) in the same read order. `break` with a for/else replaces their `continue`, so the message (f\"Error converting {name}={val} …\", same text) and the skip are the same, and `val` is read the same way (from the previous read if graph.value raises). The single-element `for lang in ['lv']` becomes `lang = 'lv'`. The solution-text concatenation becomes a list over the property path `problemSolution / solutionText` joined with '\\n\\n' (the path walks the same nested objects() in the same order, duplicates kept). The client call is chained, and the return tuple loses its parentheses.",
+    "One visible difference: the data_object keys now come in read order (olympiadType before problemGrade). Dict equality, which is what the driver compares through the fake client, does not see it.",
+    "optimized.ldpy, from optimized.py: `@graph as graph` + `graph.parse(...)` replaces `graph = Graph().parse(...)`; subjects(RDF.type, …) becomes `m{ ?subj a {…Problem} }`; the problemText loop and the path read become `m{ {subj} {P} ?obj }` and `m{ {subj} {A / B} ?text }`, the same length as objects() once @graph is in scope.",
+    "Rule 4: the four graph.value(subj, P) reads stay Python (`m{ … }.first()` is 4 tokens longer each).",
+    "No exception to the symmetry: the try loop, the path and the join of solution texts are all in optimized.py.",
+    "the `@prefix rdf:` line in optimized.ldpy is translated.ldpy's header, kept byte for byte; `a` makes it unused in the region, which is why it is declared but the header variant drops it."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef and Namespace go (`from rdflib import Graph, RDF`).",
+    "LD Python: the whole rdflib import goes (no Graph or RDF left outside the islands: `@graph as graph`, `a`), and so does the `@prefix rdf:` line, which `a` makes unused; only `import sys` stays."
+  ]
 }

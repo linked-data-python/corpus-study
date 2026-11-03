@@ -64,5 +64,24 @@
       "assert True"
     ],
     "remaining": "The faithful form `next(iter(m{ ... }))` is not `.first()`/`.one()`: neither reduction raises StopIteration on zero solutions while taking the first of several. Should the pair stay `directly-expressible`? Does the language want a reduction with next() semantics? And is the zero-Imp case worth preserving, given that the real rules_to_graph always writes one Imp (swrl2rdf_shim.py:166-170)?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the Rule is built inline in the rules_to_graph call (the `rule` variable goes). `imp = next(...)` stays its own statement so that StopIteration is still raised outside the assert (under python -O as well).",
+    "optimized.ldpy, from optimized.py: `next(g.subjects(RDF.type, SWRL.Imp))` becomes `next(iter(m{ ?imp a swrl:Imp }(g)))`, which raises the same bare StopIteration when there is no Imp (Match has no __next__, hence iter()).",
+    "Rule 4: the label read stays `g.value(imp, RDFS.label)`. `m{ {imp} rdfs:label ?label }.first()` costs one token more, and with `@graph g` in place of the suffix the region comes out even instead of one token shorter.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: SameIndividualAtom goes; SWRL = Namespace(...) and EX stay (both read).",
+    "LD Python: SameIndividualAtom, Namespace and RDF go, and so do `@prefix rdf:` (`a` replaces it) and `@prefix rdfs:` (the label read is Python); `@prefix swrl:` and RDFS stay."
+  ]
 }

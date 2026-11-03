@@ -1,0 +1,32 @@
+# Extracted from johnjung/metadata_converters@36a81d6a97 : test_soc_sci_maps_marcxml_to_edm.py
+# region: TestSocSciMapsMarcXmlToEDM.test_cho_language (lines 201-212, stratum trav_single_value)
+# licence of the source repository: see meta.json
+#
+# Test harness only (see meta.json): TestSocSciMapsMarcXmlToEDM.test_cho_language
+# is a unittest.TestCase method that only asserts and returns None, and it
+# needs `self.edm[ids].graph` and `self.cho[ids]` (bound in the real class's
+# setUp, from the MARC conversion) and `self.assertEqual`.  driver.py supplies
+# a real unittest.TestCase instance carrying them.  `demo` (identical on both
+# sides) turns a failed assertion into a comparable value: the message of
+# assertEqual shows the value the region read.
+from rdflib import Literal, URIRef
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+def test_cho_language(self):
+    """get dc:language from MARC to DC converter."""
+
+    ids = '7641168,3451312'
+
+    self.assertEqual(
+        self.edm[ids].graph.value(self.cho[ids],
+                                  URIRef('http://purl.org/dc/elements/1.1/language')),
+        Literal('en')
+    )
+
+
+def demo(self) -> object:
+    try:
+        test_cho_language(self)
+        return "ok"
+    except AssertionError as e:
+        return ("assertion-failed", str(e))

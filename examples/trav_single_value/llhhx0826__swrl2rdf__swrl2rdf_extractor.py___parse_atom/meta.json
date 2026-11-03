@@ -63,5 +63,23 @@
       "déjà tués par le pilote livré : types vidé ou sujet élargi, chaque lecture remplacée par None, sujet élargi sur classPredicate / argument1, classPredicate .one() / next(iter()), branche ClassAtom forcée à False"
     ],
     "remaining": "Équivalents, non comptés : `if args_node is not None` -> `if args_node` ou `if True` (Graph.items s'arrête sur un nœud falsy ou None, terms reste []), `@prefix fam:` vers un autre IRI (rdflib lie le nouvel IRI sous un préfixe dérivé, la liaison du fichier reste). Le `@graph graph` de la traduction ne lie rien (__namespaces__ vide) : les liaisons du graphe appelant sont intactes, vérifié par le pilote."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the IndividualPropertyAtom and DatavaluedPropertyAtom branches, identical except for the class built, become one loop over (SWRL type, class) pairs, and so do the SameIndividualAtom and DifferentIndividualsAtom branches. The order of the six tests is kept, so an atom with two rdf:type values still takes the first branch it matches. The intermediate variables (cls, arg1, prop, a1, a2, builtin, coll) are inlined; reads have no side effect and _term_from_node still raises on a missing argument. The Builtin branch keeps its `args_node is not None` guard, its try/except Exception: pass, and its annotated `terms: List[Term] = []`.",
+    "optimized.ldpy, from optimized.py: `list(graph.objects(atom_node, RDF.type))` becomes `list(m{ {atom_node} a ?t }(graph))`. The call suffix is used rather than @graph, which would cost as much and bind prefixes on the caller's graph.",
+    "Rule 4: the eight graph.value(atom_node, SWRL_x) reads stay Python (`m{ {atom_node} {SWRL_x} ?v }.first()` is longer than `graph.value(atom_node, SWRL_x)`). The notation gains 1 token on this region.",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Set, Literal, Namespace, RDFS and the shim names IRITerm, LiteralTerm, Rule and Variable go; RDF is merged into `from rdflib import BNode, Graph, RDF, URIRef`. The SWRL_* constants are all read and stay.",
+    "LD Python: the same imports go, and RDF too (the region writes `a`); there was no @prefix line."
+  ]
 }

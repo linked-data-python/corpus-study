@@ -56,5 +56,25 @@
       "déjà tués par le pilote livré : rdf:object .one() / next(iter()), chaque lecture remplacée par None, garde forcée à False ou sans o, garde TT_NS forcée"
     ],
     "remaining": "m{ }(graph) passe par graph.triples() comme g.value : aucun moteur de requête du store n'est sollicité d'un côté seulement."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three g.value reads and the three-way None test become one tuple built over (RDF.subject, RDF.predicate, RDF.object) and `return None if None in triple else triple` (rdflib terms never compare equal to None). The tt:HASH guard and its `return None` are kept.",
+    "optimized.ldpy: `return m{ {node} rdf:subject ?s ; rdf:predicate ?p ; rdf:object ?o }(graph).first()`. EXCEPTION to the symmetry, one only an island allows: the three single-value reads become one multi-pattern join. The join is faithful because the original's semantics is already 'the first value of each, or None': Match is a nested-loop join over graph.triples() in the order written, so its first solution is (first s, first p, first o), which is exactly what the three g.value calls give, and the join has no solution as soon as one predicate is missing. The driver checks this on its two-values and missing-component calls.",
+    "The returned value is an ldpy Row, a tuple subclass: it is equal to (s, p, o), unpacks and indexes the same way, and is never a URIRef. Only its repr differs."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal and Variable go; RDF is merged into `from rdflib import RDF, URIRef`.",
+    "LD Python: Literal, Variable and the RDF import go; `@prefix rdf:` is used and stays."
+  ]
 }

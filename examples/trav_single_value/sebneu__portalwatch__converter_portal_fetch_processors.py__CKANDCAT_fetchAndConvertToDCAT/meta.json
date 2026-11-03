@@ -80,5 +80,24 @@
       ],
       "remaining": "wrong-construction (question 2 du tri) : `{URIRef(next_page)}` remplacé par `f<{next_page}>` reste vert, aussi sur la forme réelle (nextPage littéral) ; seul `{next_page}` nu est faux — à juger. La note de translation_notes qui dit que les trois .first() ont chacun une solution était fausse avec l'ancien pilote (le troisième n'en avait aucune) ; elle est vraie avec l'appel 2. article_candidate:true est contesté par le tri : non touché. La forme littérale de hydra:nextPage vient de ckanext-dcat (_add_pagination_triples), absent des clones du corpus : de mémoire, à confirmer si cela compte."
     }
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three value() calls take positional arguments (`graph.value(None, RDF.type, X)`, since value()'s predicate default is RDF.value), and the per-page graph is chained, `rdflib.Graph().parse(p, format=format).value(...)`, so the `g` variable goes. The `while next_page` loop, the logging and the second parse are unchanged.",
+    "optimized.ldpy, from optimized.py: `@graph graph`; the PagedCollection read becomes `m{ ?s a {…PagedCollection} }.first()` and the final loop becomes `m{ ?d a {DCAT.Dataset} }`.",
+    "Rule 4: the two nextPage reads stay Python. The first can have cur = None, where `graph.value(None, P)` answers None but an interpolated None raises in m{ }, so the island would need translated.ldpy's `… if cur is not None else None` guard. The second reads the per-page graph, so it would need a call suffix and `.first()`. Both are longer than value().",
+    "No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    ".first()",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: convert_socrata, graph_from_opendatasoft, graph_from_data_gouv_fr and CKANConverter go; the two context_shim imports are merged, and so are URIRef and RDF (`from rdflib import RDF, URIRef`).",
+    "LD Python: the same, and RDF too (the region writes `a`); there was no @prefix line."
+  ]
 }
