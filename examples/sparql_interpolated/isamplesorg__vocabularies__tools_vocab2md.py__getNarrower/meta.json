@@ -57,5 +57,23 @@
       "{(r)} -> ?anyr, each branch"
     ],
     "remaining": "SELECT DISTINCT in the v branch is an equivalent mutant (every term but ?s is bound, no duplicate possible): not counted. The three original str calls still return [] on both sides; the repository never passes a str, nor r=None (None would leave ?parent unbound in the original and become Literal('None') in the translation, known gap 9) -- not exercised, by design."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: prepareQuery disappears (`g.query(PFX + \"...\", initBindings=...)`), the result loop becomes `[row[0] for row in qres]`, and each query fits on one line. The SPARQL text keeps its tokens, on both sides.",
+    "optimized.ldpy, from optimized.py: `@graph g` and two s{ }, with the same comprehension. The `{(r)}` workaround stays: `s{ ... {r} ... }` still crashes the transpiler (IndexError in _string_end, checked again on this ldpy version). No exception to the symmetry.",
+    "The notation gains nothing here (ratio 1.0): the Python query strings count one token each, while the island bodies are counted as RDF."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `import rdflib` and `import rdflib.plugins.sparql` go; PFX stays.",
+    "LD Python: `import rdflib.plugins.sparql` goes; @prefix skos stays."
+  ]
 }

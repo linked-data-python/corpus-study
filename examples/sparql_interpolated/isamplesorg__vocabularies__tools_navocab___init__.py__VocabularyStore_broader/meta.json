@@ -63,5 +63,24 @@
       "abbreviate=abbreviate -> False"
     ],
     "remaining": "Equivalent mutant, not counted: {concept} -> {rdflib.URIRef(concept)} (subject matched by text on the repository's store). As for narrower, the oracle is a driver emulation of rdflib-sqlalchemy (the package is not installed in the study's venv); with the URIRef wrap on v, on an in-memory Graph (never used by the repository) the translation and the original diverge for a str scheme. Is that emulation acceptable as the oracle, and does minor-restructuring still hold with {rdflib.URIRef(v)} forced?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: prepareQuery disappears, `self._g.query(VocabularyStore._PFX + \"...\", initBindings=...)` parses the same text with the same bindings; `v = self.expand_name(v)` is inlined into the bindings; the dead `res = []` goes; each query fits on one line. The SPARQL text keeps its tokens (only its layout changes), on both sides.",
+    "optimized.ldpy, from optimized.py: the same structure with `@graph self._g` and two s{ }; `{rdflib.URIRef(v)}` becomes `f<{self.expand_name(v)}>`, which now transpiles inside s{ } (it did not when the translation was written) and builds the same URIRef(str(v)); `{concept}` stays bare, as in the translation (subject matched by text on the repository's store). No exception to the symmetry.",
+    "Not compressed: the two branches stay apart (the v branch adds a pattern, not only a binding), and _one_res is still called because it reads r[0] from each row (m{ } yields bare terms for one projected variable)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "interpolation {expr}",
+    "f<\u2026>",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `import rdflib`, `import rdflib.namespace` and `import rdflib.plugins.sparql` go (prepareQuery is gone); typing and the VocabularyStore shim stay.",
+    "LD Python: the same three rdflib imports go (f<...> replaces rdflib.URIRef); typing and @prefix skos stay."
+  ]
 }

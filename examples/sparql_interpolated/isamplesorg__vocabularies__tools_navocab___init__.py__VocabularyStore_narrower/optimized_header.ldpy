@@ -1,0 +1,18 @@
+# Extracted from isamplesorg/vocabularies@a67087996f : tools/navocab/__init__.py
+# region: VocabularyStore.narrower (lines 402-426, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+import typing
+
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+def narrower(
+    self, concept: str, v: typing.Optional[str] = None, abbreviate: bool = False
+) -> list[str]:
+    concept = self.expand_name(concept)
+    @graph self._g
+    if v is None:
+        qres = s{ SELECT ?s WHERE { ?s skos:broader f<{concept}> . } }
+    else:
+        qres = s{ SELECT ?s WHERE { ?s skos:inScheme f<{self.expand_name(v)}> .
+                                    ?s skos:broader f<{concept}> . } }
+    return self._one_res(qres, abbreviate=abbreviate)

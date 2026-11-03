@@ -1,0 +1,12 @@
+# Extracted from isamplesorg/vocabularies@a67087996f : tools/vocab2md.py
+# region: getNarrower (lines 191-208, stratum sparql_interpolated)
+# licence of the source repository: see meta.json
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+def getNarrower(g, v, r):
+    @graph g
+    if v is None:
+        qres = s{ SELECT ?s WHERE { ?s skos:broader {(r)} . } }
+    else:
+        qres = s{ SELECT ?s WHERE { ?s skos:inScheme {v} . ?s skos:broader {(r)} . } }
+    return [row[0] for row in qres]

@@ -53,5 +53,21 @@
       "second and third asserts removed"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "draft",
+  "optimization_notes": [
+    "optimized.py: the graph `g`, used once, is inlined into the query call; the three asserts stay separate and textually unchanged, because the driver identifies the failing assert by its source text.",
+    "optimized.ldpy, from optimized.py: the same inlining, `s{ ... }(_graph_with_one_fact()).execute()` (the call suffix and .execute() are needed: the asserts read list(r), r.bindings and len(r) on an rdflib Result). The three IRIs stay written in place, as in the translation (s{ } cannot splice the EX_* bracketed syntax). No exception to the symmetry.",
+    "Status draft: the driver cannot prove the optimized artefacts without being modified. It prints its own verdict without the `sides` key, so `rdfeval check` reports `driver compared None` for every artefact but translated.ldpy. A copy of the driver, kept in the scratchpad and executing the artefact named by RDFEVAL_SIDES, returned `equivalent` with no diffs for all four artefacts: 8 outcomes each, plain and starlight-patched, with the same failing assert on `match`."
+  ],
+  "optimized_constructions": [
+    "s{ }",
+    "IRI",
+    "call suffix (g)",
+    ".execute()"
+  ],
+  "header_optimization_status": "draft",
+  "header_optimization_notes": [
+    "Nothing unused in either header (the EX_* constants are read by the Python region; the ldpy header imports only _graph_with_one_fact): the two files are copies of the optimized ones. Draft for the same driver reason as the optimized artefacts (verified equivalent by the scratch copy of the driver)."
+  ]
 }

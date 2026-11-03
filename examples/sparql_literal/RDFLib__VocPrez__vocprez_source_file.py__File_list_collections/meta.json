@@ -58,5 +58,22 @@
     "method": "fixture:fixture.ttl entry:list_collections",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `q` is inlined; `SELECT *` becomes `SELECT ?c ?l` (same solutions, explicit column order), so the comprehension `[(x[\"c\"], x[\"l\"]) for x in ...]` becomes `list(map(tuple, ...))`.",
+    "optimized.ldpy, from optimized.py: the query is a basic graph pattern, so it becomes `list(m{ ?c a skos:Concept . ?c rdfs:label ?l }(self.gr))` (m{ } yields (c, l) tuples). Exception to the symmetry, island only: the pure-Python counterpart (subjects/objects loops) needs namespace imports and is longer than the query string.",
+    "The island is shorter in characters but longer in tokens than the Python it replaces, because the query string counts one token. It is kept because the string is SPARQL text, which the study counts apart (tokens_embedded)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header (the Python header has no import; both @prefix lines are used by the m{ }): the two files are copies of the optimized ones."
+  ]
 }

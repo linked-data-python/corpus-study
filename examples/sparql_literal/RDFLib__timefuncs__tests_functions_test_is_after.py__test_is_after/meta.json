@@ -65,5 +65,22 @@
     "method": "entry:demo",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the 22 written expected pairs become one comprehension, `a == b or min(a, b) >= 7` over 1..10 (the diagonal a01-b01 to a06-b06, plus the 4x4 block a07-a10 x b07-b10, in the same sorted order), as on the sibling test_is_during; `q` is inlined into the query call; `sorted([...])` takes a generator with unpacked rows. The return and the demo seam are unchanged.",
+    "optimized.ldpy, from optimized.py: the same comprehension with `str(after:{f\"a{a:02}\"})` (computed local part) in place of `str(AFTER[f\"a{a:02}\"])`, and the query as s{ }(g). No exception to the symmetry."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused (Namespace, TIME, TFUN and AFTER are read by the region; the _context import registers tfun:isAfter).",
+    "LD Python: `Namespace` and `TIME` go (the region reads @prefix time:/tfun:/after:); the _context import stays for its side effect."
+  ]
 }

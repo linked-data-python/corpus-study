@@ -64,5 +64,24 @@
       "ORDER BY dropped from the fallback"
     ],
     "remaining": "The Dataset calls exercise a query the repository never evaluates successfully (self.gr is always a plain Graph, so the fallback always raises there); whether its interpolations deserve credit is Maxime's call (triage question 1). The {URIRef(vocab.uri)} vs {f<{vocab.uri}>} question is untouched (wrong-construction)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `q` is inlined into both query calls; the `top_concepts is not None` guard becomes an early `return None` (kept, same effect); the two dedupe loops merge into one over `list(top_concepts) or <fallback query>`. The fallback ran only when the first query gave no row, and that is when tcs stayed empty. The pl_cache list plus the tcs list become one dict keyed by prefLabel, `tcs.setdefault(pl, (tc, pl))`, returned as `list(tcs.values())` (same order; Literal hash agrees with Literal equality). The SPARQL texts are kept verbatim.",
+    "optimized.ldpy, from optimized.py: the same structure with two s{ }(self.gr); `{URIRef(vocab.uri)}` becomes `f<{vocab.uri}>` (it now transpiles inside s{ }). No exception to the symmetry.",
+    "Not compressible on the ldpy side: the fallback repeats its UNION block twice (GRAPH ?g { B } UNION { B }), and s{ } cannot splice a pattern defined once. The Python query strings count one token each, while the island bodies are counted as RDF; hence the notation ratio above 2."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "s{ }",
+    "call suffix (g)",
+    "f<…>",
+    "interpolation {expr}",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the unused `url_for` goes from the flask import.",
+    "LD Python: `url_for` goes, and so does `from rdflib import URIRef` (replaced by f<...>); @prefix skos stays."
+  ]
 }

@@ -56,5 +56,20 @@
       "each hasTrace line dropped"
     ],
     "remaining": "The repository consumes the value at lib/ktbs/engine/obsel.py:323 as graph.query(_RELATED_OBSELS, initBindings={'obs': node}); with the s{ } value that raises AttributeError: 'PreparedQuery' object has no attribute 'algebra' (re-verified). The driver runs the translated side through the call suffix, i.e. with that call site rewritten outside the region. Is that rewrite acceptable (directly-expressible), a minor-restructuring, or does it make the region not-expressible as written? article_candidate (true) depends on the answer."
-  }
+  },
+  "optimization_status": "draft",
+  "optimization_notes": [
+    "Nothing to compress: the region is one prepared query. optimized.py is original.py and optimized.ldpy is translated.ldpy. The `%` formatting is already the shortest Python: an f-string would double every SPARQL brace and spell out KTBS.hasTrace twice anyway.",
+    "Status draft: the driver runs the right-hand artefact through the island's call-suffix convention (`q(g, {\"obs\": obs})`). A prepareQuery object is not callable, so optimized.py and optimized_header.py FAIL with TypeError, although optimized.py is byte-identical to original.py. The driver cannot prove a Python artefact without being modified. The two ldpy artefacts are OK."
+  ],
+  "optimized_constructions": [
+    "s{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "draft",
+  "header_optimization_notes": [
+    "Python: the unused `RDF` goes from the obsel_context import.",
+    "LD Python: the same (`RDF` is unused there too).",
+    "Draft: optimized_header.py fails for the same driver reason as optimized.py; optimized_header.ldpy is OK."
+  ]
 }

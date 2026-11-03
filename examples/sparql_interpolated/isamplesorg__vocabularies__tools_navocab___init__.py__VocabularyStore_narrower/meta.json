@@ -62,5 +62,23 @@
       "{concept} -> ?anyc, each branch"
     ],
     "remaining": "On an in-memory Graph, which the repository never uses, the fixed translation and the original diverge for a full-IRI str (original [] -- contrary to the repository's own test -- translation 3/2): the pair is equivalent on the repository's store only, through a driver emulation of rdflib-sqlalchemy (the package is not installed in the study's venv). Is that emulation acceptable as the oracle? And with `{rdflib.URIRef(...)}` forced because f<...> is refused inside s{ } (a language gap to record?), does minor-restructuring still hold?"
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: prepareQuery disappears, `self._g.query(VocabularyStore._PFX + \"...\", initBindings=...)` with the same text and bindings; `v = self.expand_name(v)` is inlined into the bindings; each query fits on one line. The SPARQL text keeps its tokens, on both sides.",
+    "optimized.ldpy, from optimized.py: `@graph self._g` and two s{ }; `{rdflib.URIRef(x)}` becomes `f<{x}>` (it now transpiles inside s{ }), with the same URIRef(str(x)). On an input the driver does not use, concept=None, f<...> gives the IRI 'None' and no rows, like the original (a None binding matches nothing), where the translation's rdflib.URIRef(None) raised TypeError. No exception to the symmetry.",
+    "Not compressed: the two branches stay apart, and _one_res stays because it reads r[0] from each row."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "f<\u2026>",
+    "prefixed name"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the three rdflib imports go (prepareQuery is gone); typing and the VocabularyStore shim stay.",
+    "LD Python: the three rdflib imports go (f<...> replaces rdflib.URIRef); typing and @prefix skos stay."
+  ]
 }

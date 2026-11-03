@@ -54,5 +54,24 @@
       "?s dc:description ?o -> ?s ?p ?o (vert avec l'ancien pilote)"
     ],
     "remaining": "Le doute du tri est réel mais hors d'atteinte du dépôt : sur un fichier qui ne déclare pas obo:, l'original lève « Unknown namespace prefix : obo » et la traduction répond (son @prefix est figé à la transpilation, et aucun îlot ne peut lire les préfixes du fichier parsé). Le seul appelant (ontology/views.py:57 -> get_common_data(OPEN_ENERGY_ONTOLOGY_NAME), file='oeo-full.owl') lit la release OEO, dont l'en-tête téléchargé le 2026-10-30 (openenergyplatform.org/ontology/oeo/releases/oeo-full.owl, 2.14.0) déclare xmlns:obo=\"http://purl.obolibrary.org/obo/\" et xmlns:dc elements/1.1 : à Maxime de dire si cette dépendance de l'original aux déclarations du fichier, que la traduction efface, compte comme un écart (réponse « oui » attendue à la question du tri)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `g = Graph().parse((path / file).as_posix())` (Ontology_URI inlined); the four queries read once are inlined into their loops, with rows unpacked as `s, o` and the `Iterable[ResultRow]` annotations dropped; classes_name becomes a dict comprehension (last value wins, as before); both defaultdicts are created before the `if`, so the else branch goes; `ontology in [X]` becomes `ontology == X`; q_global is inlined into the returned dict, so `result` goes. The `split(\"/\")[-1] == \"\"` test is kept, not replaced by endswith (they differ on an empty IRI). Every query still runs in the original order where it can raise (the dc: query before the obo: ones).",
+    "optimized.ldpy, from optimized.py: `@graph g`, then the four single-pattern SELECT DISTINCT ?s ?o queries become m{ ?s p ?o } (a single triple pattern has no duplicate solutions, so DISTINCT has no effect; the rows are unpacked as in optimized.py). q_global keeps s{ } for its FILTER. Exception to the symmetry, island only: the Python counterpart of m{ } (g.subject_objects(RDFS.label)) would need namespace imports and is longer than the query string it would replace, so optimized.py keeps g.query.",
+    "The ldpy side is larger in tokens: each Python query string counts one token, while m{ }/s{ } bodies are counted as RDF."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "s{ }",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `Iterable`, `ResultRow`, `OEO_EXT_NAME` and `ONTOLOGY_ROOT` go (the annotations were removed); defaultdict, Graph and OPEN_ENERGY_ONTOLOGY_NAME stay.",
+    "LD Python: the same four names go; the three @prefix lines are all used."
+  ]
 }
