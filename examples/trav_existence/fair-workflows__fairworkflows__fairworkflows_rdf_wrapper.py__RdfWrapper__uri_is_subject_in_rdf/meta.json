@@ -58,5 +58,21 @@
       "if not bool( -> if bool("
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the message's two adjacent f-strings become one; the force branch is inverted (`if not force: raise ...` then `warnings.warn(message)`), and `UserWarning`, the default category of warnings.warn, is no longer passed. The raise and the warning keep their type and message. The test `rdflib.URIRef(uri) not in rdf.subjects()` stays: `(rdflib.URIRef(uri), None, None) not in rdf` is longer.",
+    "optimized.ldpy, from optimized.py: `if not m{ f<{uri}> ?p ?o }(rdf):`, f<{uri}> in place of `{rdflib.URIRef(uri)}` (firi builds URIRef(str(uri)), the same IRI for a str or a URIRef uri, no @base in scope) and `bool()` dropped.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "f<…>",
+    "call suffix (g)",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: `import warnings` and `import rdflib` are both used on both sides (rdflib.Graph is the annotation of `rdf`). The header-variant files are copies of the optimized ones."
+  ]
 }

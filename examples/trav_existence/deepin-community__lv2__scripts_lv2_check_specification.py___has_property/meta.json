@@ -50,5 +50,16 @@
     "method": "fixture:fixture.ttl entry:_has_property",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the redundant `None` object argument of `model.value(subject, predicate, None)` goes. `(subject, predicate, None) in model` would be one token shorter but is not equivalent when `predicate` is None (value() then returns None, the membership test is True for any triple of the subject), so it is not used.",
+    "optimized.ldpy: identical to optimized.py, no island. `bool(m{ {subject} {predicate} ?o }(model))` (or with `@graph model`) measures 4 tokens more than the Python line it replaces, so the Python is kept (AGENT_OPTIMIZE rule 4).",
+    "No exception to the symmetry rule. The region is a one-line existence test that rdflib already writes compactly: the notation brings nothing here."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused: the only header import, `from rdflib import Graph`, is the annotation of `model`. The header-variant files are copies of the optimized ones."
+  ]
 }

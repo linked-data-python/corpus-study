@@ -57,5 +57,23 @@
       "assertion du fichier compagnon forcée à True"
     ],
     "remaining": "Mutants déjà tués avant : îlot vidé, garde forcée à True/False, objet élargi, prov:Activity, @graph retiré. Équivalents : `not bool(m{ })` -> `m{ }.first() is None` / `not any(m{ })` (un sujet n'est jamais faux). `@graph output_graph` lie prov:/rdf:/rdfs:/xsd: sur le graphe, mais la région ne lit ni ne sérialise ses liaisons."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `input_file` intermediate is inlined into the `run_metadata_cli(...)` call; `not any(output_graph.triples((None, RDF.type, PROV.Entity)))` becomes `(None, RDF.type, PROV.Entity) not in output_graph` (a triple is always truthy, so `any` was an existence test). Both asserts, their message and their order are kept: the sidecar check is still the last one.",
+    "optimized.ldpy, from optimized.py: `assert not m{ ?s a prov:Entity }(output_graph)`, with the call suffix instead of a separate `@graph output_graph` line and `a` for rdf:type; `bool()` dropped, the assert tests truth.",
+    "No exception to the symmetry rule. Not compressed: `output_graph` stays a variable on both sides (inlining the parse into the assert would make an over-long line on the Python side). The notation ratio is above 1 only because the four @prefix lines of the translated header (kept byte for byte) count against the ldpy side; the region line itself is shorter than its Python counterpart."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS, XSD, Literal and URIRef go from the rdflib import.",
+    "LD Python: RDF, RDFS, XSD, Literal, Namespace and URIRef go from the rdflib import (only Graph stays); the rdf:, rdfs: and xsd: @prefix lines go (`a` needs no prefix), prov: stays."
+  ]
 }

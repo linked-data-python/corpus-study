@@ -61,5 +61,25 @@
       "m{ }.first() truthy (kills call[11], emptyThenOk)"
     ],
     "remaining": "Classification: the pair is now `any(m{ ... })` against `any(graph.objects(...))`; for Maxime to judge whether trav_existence is still credited as `bool(m{ })` (no: the construction is m{ } consumed by Python's any) and whether the pair keeps directly-expressible (the call is longer than the original, the gain is nil or negative in tokens)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the loop with its early returns becomes `return any(any(graph.objects(subject, pred)) for pred in LABEL_PREDICATES)` (same short circuit, same truth test on the objects, a bool returned).",
+    "optimized.ldpy, from optimized.py: `any(m{ {subject} {pred} ?o }(graph))` in place of `any(graph.objects(subject, pred))`, with the call suffix since the region is now one statement (`@graph graph` measures the same). The inner `any` keeps rdflib's truthiness of the labels, as the translation's repair requires.",
+    "No exception to the symmetry rule. Folding the loop over LABEL_PREDICATES into one `{subject} ?p ?o` match filtered in Python would be longer on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "prefixed name",
+    "IRI",
+    "m{ }",
+    "call suffix (g)",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF goes from the rdflib import.",
+    "LD Python: RDF and RDFS go from the rdflib import; the rdf: @prefix line goes, rdfs: stays (LABEL_PREDICATES writes rdfs:label)."
+  ]
 }

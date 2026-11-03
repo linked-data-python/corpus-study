@@ -77,5 +77,26 @@
       "loop end changed from rdf:nil"
     ],
     "remaining": "The raise \"Unhandled path class\" is dead code in the source (every key of PRED_TO_PATH_CLASS is handled before or in the list of four) and is not exercised. Collection() stays rdflib (algorithm, not a pattern). Classification and article status for Maxime."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the if/elif/else nesting is flattened into guard clauses: `if not isinstance(pp, BNode): raise ...` right after the URIRef case, `if not first: raise` before the append, `if len(pred_objects) > 1: raise` before the unpacking, and the PRED_TO_PATH_CLASS branch becomes `path_class = PRED_TO_PATH_CLASS.get(bn_pred)` followed by the two returns and the two raises (Unsupported when `path_class is None`, then the dead Unhandled raise, kept). `union_list` and `inner_path` are inlined, `predicate_objects(subject=pp)` loses its keyword, and the raise messages are no longer wrapped. Every raise survives with its message.",
+    "Kept on purpose: `list(Collection(...))` in the sh:union loop and in `alt_list`. A lazy iteration would call `_add_path_to_shape` or parse members before a recursive rdf:rest raises its ValueError, which changes what happens on an input the driver does not use.",
+    "optimized.ldpy, from optimized.py: `@graph self.graph` once, the three `self.graph.value(...)` become `m{ {node} rdf:first ?x }.first()` / `rdf:rest` (the guard keeps value()'s truth test, as the translation's repair requires), `predicate_objects` becomes `list(m{ {pp} ?p ?o })`, and RDF.nil, SH.union, SH.alternativePath become prefixed names. Measured: keeping Python's `.value()` and only islanding predicate_objects is 2 tokens longer, so the islands stay.",
+    "No exception to the symmetry rule. Collection() stays rdflib on both sides (an algorithm over an rdf:List, not a pattern)."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    ".first()",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS, Graph, XSD and Literal go; RDF, SH and Node are imported from rdflib with BNode, Namespace and URIRef (one import instead of three).",
+    "LD Python: RDFS, Graph, XSD, Literal, RDF and SH go (RDF and SH are only written as prefixed names); Node joins the rdflib import; the rdfs: and xsd: @prefix lines go, rdf: and sh: stay."
+  ]
 }

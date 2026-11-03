@@ -46,5 +46,25 @@
     "method": "fixture:fixture.ttl entry:check_domain_violations",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the three nested loops and the append become one list comprehension returned directly, `violations` goes, `g.triples((None, prop, None))` becomes `g.subjects(prop)` (one subject per triple, so the multiplicity is kept), `g.triples((prop, RDFS.domain, None))` becomes `g.objects(prop, RDFS.domain)`, and `not (s, RDF.type, domain) in g` becomes `(s, RDF.type, domain) not in g`. The property set is still built once, by `set(...).union(...)`.",
+    "optimized.ldpy, from optimized.py: `@graph g`, `set(m{ ?p a rdf:Property }).union(m{ ?p a owl:ObjectProperty })`, and `if not m{ {s} a {domain} }` for the existence test.",
+    "Exception to the symmetry rule, which only an island allows: the two inner generators (subjects of prop, domains of prop) are joined into ONE multi-pattern island, `for s, domain in m{ ?s {prop} [] . {prop} rdfs:domain ?d }`; the `[]` object keeps one solution per triple, as the original (checked: multiplicity preserved). The Python side keeps its two `for` clauses.",
+    "Not compressed: the union of the two property sets stays Python (m{ } has no UNION) and so does the negation (no FILTER NOT EXISTS in m{ })."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace, XSD and Literal go from the rdflib import.",
+    "LD Python: Namespace, RDF, RDFS, OWL, XSD and Literal go (only Graph stays); the three @prefix lines are all used and stay."
+  ]
 }

@@ -50,5 +50,23 @@
     "method": "entry:_validate_entity_ttl_structure",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `Graph()` + `.parse()` inside the try become `Graph().parse(...)` (the same exceptions are caught); `.get(k, {}) or {}` and `.get(k, []) or []` lose their redundant default; `top_entity is not None` (twice) becomes one early `return True, []` when `resolved_entity_uri` is falsy (messages is always empty there); `resolved_entity_uri or entity_uri` becomes `resolved_entity_uri` (it is truthy at that point); `(spec or {})` three times becomes `spec = spec or {}`, min_count still computed before the `continue`; `pred`/`target_cls` are inlined and the two list comprehensions become one with `and (not target_class_iri or ...)`; `not any(g.triples((top_entity, None, None)))` becomes `(top_entity, None, None) not in g`; `(len(messages) == 0)` becomes `not messages`.",
+    "optimized.ldpy, from optimized.py: `@graph g` after the try, `not m{ {top_entity} ?p ?o }`, `not m{ {top_entity} a f<{top_class_iri}> }`, `m{ {top_entity} f<{pred_iri}> ?o }` as the comprehension's source and `m{ {o} a f<{target_class_iri}> }` as its filter. The URIRef(str) built in Python become f<…> (no @base in scope, so the same IRI); `bool()` dropped, every island is in a truth context.",
+    "No exception to the symmetry rule. All four early returns and the try/except are kept with their messages."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    "f<…>",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal, Namespace and RDFS go; RDF is imported from rdflib with Graph and URIRef (one import instead of two).",
+    "LD Python: Literal, Namespace, RDF and RDFS go (Graph and URIRef stay); both @prefix lines go, since the region writes `a` and f<…>, no prefixed name."
+  ]
 }

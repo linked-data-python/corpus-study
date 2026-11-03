@@ -70,5 +70,26 @@
       "fusable +{ } removed"
     ],
     "remaining": "Que la sémantique de véracité de l'original (un label \"\" ou un 0 déjà présent compte pour absent) soit un comportement voulu ou un bogue du dépôt : la traduction la reproduit désormais, comme l'exige « même programme »."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the `s_can`/`p_can`/`o_can` aliases go (s, p, o directly); `is_fusable` is inlined as `str(p) in fusable_properties`; the two `set[str]([...] + [...])` become a set comprehension `|` a set display; `Graph()` + `.parse()` become `Graph().parse(...)`; the TrackRecord is built once per fusable triple, before the test, and goes to `discarded` or `selected`; the two JSON dumps become one loop over (name, records) pairs, the path still computed as `parent / (stem + '.<name>.json')`.",
+    "optimized.py, dead code removed: `current_subjects` (built from `seed_graph.subjects(unique=True)` and kept fresh by two `.add`) is never read, so it goes with its comment. Once it is gone, the non-fusable guard `(s, p, o) not in seed_graph` only gates an add of that same triple, and Graph.add is idempotent: the branch becomes an unconditional `seed_graph.add((s, p, o))` (the region's second trav_existence read disappears from both sides; meta.json's translation notes already observed that the guard cannot be observed).",
+    "optimized.ldpy, from optimized.py: `@graph seed_graph`, `any(m{ {s} {p} ?o })` for the fusable guard (one projected variable, so `any` keeps rdflib's truthiness of the objects, as the translation's repair requires), two `+{ {s} {p} {o} }`, and rdfs:label, rdf:type, skos:altLabel as prefixed names. Measured: the call-suffix variant with Python's `.add` kept is 8 tokens longer.",
+    "No exception to the symmetry rule. The notation ratio is slightly above 1 because the four @prefix lines of the translated header (kept byte for byte) outweigh the region's gain. The demo() harness is copied as is."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: OWL and Optional go.",
+    "LD Python: OWL, RDFS, RDF, SKOS and Optional go (the three namespaces are only written as prefixed names); the owl: @prefix line goes, rdfs:, rdf: and skos: stay."
+  ]
 }

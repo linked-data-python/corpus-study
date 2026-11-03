@@ -62,5 +62,23 @@
       "m{ ... }(gbk).first() is not None -> True"
     ],
     "remaining": "La ligne 281 (`done`) est du contexte hors region (lineno 282) et sa traduction credite `bool(m{ })` : a juger (perimetre de la region, pas l'equivalence)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region is the single line 282 (`ev_ok = ...`); the `done = ...` line 281 belongs to the extracted header and is kept byte for byte on each side.",
+    "optimized.py: `gbk.value(f, B2.hasEvidence) is not None` becomes `(f, B2.hasEvidence, None) in gbk` (value() returns None exactly when no triple matches, including for a None subject).",
+    "optimized.ldpy, from optimized.py: `all(m{ {f} b2:hasEvidence ?ev }(gbk) for f in done)`: `.first() is not None` dropped, `all` takes the truth of the match (existence of a solution).",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "call suffix (g)"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header: `from shim import HERE, feats, Namespace, Graph` / `from shim import HERE, feats, Graph`, B2 / @prefix b2:, all used. The header-variant files are copies of the optimized ones."
+  ]
 }

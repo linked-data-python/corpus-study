@@ -1,0 +1,101 @@
+# Extracted from ScaDS/KGpipe@67ca171cfd : src/kgpipe_tasks/entity_resolution/fusion/preference.py
+# region: select_first_value (lines 28-101, stratum trav_existence)
+# licence of the source repository: see meta.json
+from rdflib import Graph, URIRef
+from pathlib import Path
+from typing import Dict, List
+import json
+import os
+import tempfile
+from context_shim import (DataFormat, Data, Registry, OntologyUtil,
+                          TARGET_ONTOLOGY_NAMESPACE, TrackRecord)  # context shim -- see meta.json
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+@Registry.task(
+    input_spec={"source": DataFormat.RDF_NTRIPLES, "target": DataFormat.RDF_NTRIPLES},
+    output_spec={"output": DataFormat.RDF_NTRIPLES},
+    description="Merge RDF entities using first value fusion",
+    category=["EntityResolution", "Fusion"]
+)
+def select_first_value(inputs: Dict[str, Data], outputs: Dict[str, Data]):
+    """
+    For two KGs A and B, merge A into B where for each s_p and
+    1) p is fusable and B does not have any s_p_o or
+    2) p is not fusable erge all s_p_o
+    """
+    ontology_path = os.environ.get("ONTOLOGY_PATH", "false")
+    if ontology_path == "false":
+        raise ValueError("ONTOLOGY_PATH is not set")
+
+    ontology = OntologyUtil.load_ontology_from_file(Path(ontology_path))
+    allowed_predicates = {str(p.uri) for p in ontology.properties} | {
+        str(rdfs:label), str(rdf:type), str(skos:altLabel)}
+    fusable_properties = {str(p.uri) for p in ontology.properties if p.max_cardinality == 1} | {
+        str(rdfs:label), str(rdf:type)}
+
+    source_graph = Graph().parse(inputs["source"].path, format="nt")
+    seed_graph = Graph().parse(inputs["target"].path, format="nt") # seed graph
+    @graph seed_graph
+
+    selected: List[TrackRecord] = []
+    discarded: List[TrackRecord] = []
+
+    for s, p, o in source_graph:
+        if not isinstance(p, URIRef) or str(p) not in allowed_predicates:
+            continue
+
+        if p == rdf:type and not str(o).startswith(TARGET_ONTOLOGY_NAMESPACE):
+            continue
+
+        if str(p) in fusable_properties:
+            # Add exactly one value if none exists yet
+            record = TrackRecord(subject=s, predicate=p, object=o,
+                                 original_subject=s, original_predicate=p, original_object=o)
+            if any(m{ {s} {p} ?o }):
+                discarded.append(record)
+            else:
+                +{ {s} {p} {o} }
+                selected.append(record)
+        else:
+            # Non-fusable: copy if not already present (avoid dupes)
+            +{ {s} {p} {o} }
+
+    output_path = outputs["output"].path
+    for name, records in (("selected", selected), ("discarded", discarded)):
+        with open(output_path.parent / f"{output_path.stem}.{name}.json", "w") as f:
+            json.dump(records, f, default=lambda x: x.model_dump())
+
+    # prov graph is skipped here as no uris are replaced (is done in previouse steps)
+    seed_graph.serialize(output_path, format="nt")
+
+
+# Demo harness (identical on both sides, see meta.json): `select_first_value`
+# reads two graphs from N-Triples FILES and writes its result back to one,
+# so `demo` builds a fresh, isolated temp directory per call, writes
+# `source_nt`/`target_nt` there, sets `ONTOLOGY_PATH` to a tiny JSON
+# ontology (see context_shim.OntologyUtil), runs the region, and returns
+# the resulting graph parsed back from `outputs["output"].path` -- the
+# comparable end state of every read/write this region performs, including
+# both trav_existence reads (`any(seed_graph.objects(...))` and
+# `(s, p, o) not in seed_graph`).
+def demo(source_nt, target_nt, ontology_props=()):
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        source_path = tmp / "source.nt"
+        source_path.write_text(source_nt)
+        target_path = tmp / "target.nt"
+        target_path.write_text(target_nt)
+        output_path = tmp / "output.nt"
+        ontology_path = tmp / "ontology.json"
+        ontology_path.write_text(json.dumps(list(ontology_props)))
+
+        os.environ["ONTOLOGY_PATH"] = str(ontology_path)
+        inputs = {"source": Data(path=source_path), "target": Data(path=target_path)}
+        outputs = {"output": Data(path=output_path)}
+        select_first_value(inputs, outputs)
+
+        result = Graph()
+        result.parse(output_path, format="nt")
+        return result

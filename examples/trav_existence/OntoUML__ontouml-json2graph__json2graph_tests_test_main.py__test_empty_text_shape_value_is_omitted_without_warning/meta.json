@@ -65,5 +65,25 @@
       "assertion 3 replaced by assert True"
     ],
     "remaining": "Le shim remplace toujours le décodeur JSON->RDF du dépôt par un copieur de fixture (déjà relevé par le tri) : la paire est prouvée sur ses trois lectures, pas sur ce que produit le vrai décodeur."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two `not any(ontouml_graph.triples((text_shape_uri, P, None)))` become `(text_shape_uri, P, None) not in ontouml_graph` (a triple is always truthy, so `any` was an existence test). The three asserts stay three separate statements in the same order: the driver compares which one fails.",
+    "optimized.ldpy, from optimized.py: `bool()` dropped around the three islands (assert tests truth), `?o` in place of `[]` for the unprojected object (one token instead of two); `@graph ontouml_graph` and `f<{BASE_URI}view-1_shape>` as in the translation.",
+    "No exception to the symmetry rule. Not compressed: `input_file` stays a variable, since inlining it would move `write_text_shape_project` inside the `catch_warnings` block that turns UnsupportedTextValueWarning into an error."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "f<…>",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDFS, XSD, Graph and Literal go from the rdflib import, the unused shim name write_graph_file goes, and the three shim imports become one.",
+    "LD Python: the whole rdflib import goes (nothing of it is used once the reads are islands and the IRI is f<…>), write_graph_file goes, the three shim imports become one; the rdf:, rdfs: and xsd: @prefix lines go, ontouml: stays."
+  ]
 }
