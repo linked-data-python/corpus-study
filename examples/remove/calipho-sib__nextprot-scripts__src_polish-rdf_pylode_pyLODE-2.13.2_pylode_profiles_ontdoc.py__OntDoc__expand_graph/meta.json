@@ -51,5 +51,26 @@
     "method": "fixture:fixture.ttl entry:_expand_graph",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: each `chain(subject_objects(P1), …)` of the title and description loops becomes one rdflib alternative path `subject_objects(P1 | P2 | …)` (AlternativePath evaluates its members lazily in the same order, so reads and adds interleave as before); the four property-type selectors become a loop over the four OWL classes; the three agent loops (creator, contributor, publisher), identical but for their predicates, become one loop over a (target, sources) table, with `for source in sources` reading in chain order and `for predicate in sources` doing the removes in the original order before the add. The one-word section comments `# creator`, `# contributor`, `# publisher` go with the sections they labelled; `# Agents` and the conflate comment stay. `chain` is no longer used (its import is in the fixed header).",
+    "optimized.ldpy, from optimized.py: `@graph self.G`; the alternative paths are interpolated in m{ } with prefixed names (`m{ ?s {dc:title | rdfs:label | skos:prefLabel | sdo:name} ?o }`, evaluated through graph.triples); `m{ ?s a {property_type} }`, `m{ ?s a owl:Class }`, `m{ ?s owl:onProperty [] }`; the table holds prefixed names and the body is `m{ ?s {source} ?o }`, `-{ {s} {predicate} {o} }`, `+{ {s} {target} {o} }`.",
+    "No exception to the symmetry rule: every restructuring is on both sides."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "+{ }",
+    "-{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: the now unused `from itertools import chain` goes, and DOAP, PROF and PROV from the rdflib.namespace import.",
+    "LD Python: `from itertools import chain` and the whole rdflib.namespace import go (every name is a prefixed name); the seven @prefix lines are all used."
+  ]
 }

@@ -57,5 +57,20 @@
       "`if not len(graph):` -> `if False:` (chargement d'un N-Triples vide désormais visible dans l'enregistreur)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `if not len(graph)` becomes `if not graph` (Graph has no __bool__, so truthiness is len()); the store's inner loader is named once (`inner = self.query_dataset.store._inner`) and the load method is chosen by a one-line conditional; the timed load call and its arguments are re-wrapped on fewer lines. `target` is still computed before the timed clear, so a failing `graph(graph_uri)` raises before the clear is logged, as in the original; the early return and the three timed_debug blocks are kept. The demo harness is copied as is.",
+    "optimized.ldpy, from optimized.py: `@graph target` + `-{ ?s ?p ?o }` inside the timed block (345 tokens against 348 with the call suffix). The serialize/load code has no island.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "-{ }",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python: Dataset, Literal and RDF go from the rdflib import (`from rdflib import Graph, URIRef`: annotations and demo harness); the context shim, the pyoxigraph and timed_debug imports and the two module constants stay. No @prefix in either header."
+  ]
 }

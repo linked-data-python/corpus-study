@@ -65,5 +65,23 @@
       "@prefix sk: au lieu de skos: (liaison skos: écrasée par @graph) -- tué par la seule vérification des liaisons"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress: the region is one statement, `g1.remove((corpus, SKOS.note, None))`. optimized.py is original.py, optimized.ldpy is translated.ldpy (`-{ {corpus} skos:note ?o }`, with the `@graph g1` and `@prefix skos:` of the translated header).",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, OWL, DCTERMS, XSD and PROV go from the rdflib.namespace import (`from rdflib.namespace import SKOS`).",
+    "LD Python: nothing unused (the shim import, the one @prefix and `@graph g1` are all needed); optimized_header.ldpy is a copy of optimized.ldpy."
+  ]
 }

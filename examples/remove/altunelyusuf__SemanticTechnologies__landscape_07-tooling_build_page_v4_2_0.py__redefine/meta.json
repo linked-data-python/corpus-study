@@ -64,5 +64,26 @@
       "en particulier le mutant du trieur : -{ {iri} skos:scopeNote ?o } supprimé (vert avant, rouge maintenant)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four one-line `if x is not None: g.remove(...); g.add(...)` (with `;`) become one loop over (predicate, value) pairs in the original order, each `is not None` guard kept, the remove still before the add. g.set() was rejected: it evaluates the Literal and asserts the subject before removing, so on iri=None it raises without the wildcard removal the original performs first.",
+    "optimized.ldpy, from optimized.py: the same loop with prefixed names in the pair table, `-{ {iri} {predicate} ?o }` and `+{ {iri} {predicate} f\"{value}\"@en }` (the translation's literal form: identical to Literal(value, lang=\"en\") for the string values the builder passes; a non-string value would differ, as in translated.ldpy). The demo harness is copied as is.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "+{ }",
+    "prefixed name",
+    "language literal",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Namespace and URIRef go from the rdflib import, RDF, OWL, DCTERMS, XSD and PROV from the rdflib.namespace import (`RDFS, SKOS` stay); SP stays for the demo harness.",
+    "LD Python: nothing unused (Graph, HERE, SP and both @prefix lines are needed); optimized_header.ldpy is a copy of optimized.ldpy."
+  ]
 }

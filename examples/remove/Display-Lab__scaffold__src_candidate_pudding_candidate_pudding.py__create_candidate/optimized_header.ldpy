@@ -1,0 +1,30 @@
+# Extracted from Display-Lab/scaffold@d368cfe17c : src/candidate_pudding/candidate_pudding.py
+# region: create_candidate (lines 22-40, stratum remove)
+# licence of the source repository: see meta.json
+from typing import Optional
+from rdflib import BNode, Graph
+from rdflib.resource import Resource
+from scaffold_context import CPO, add_convenience_properties, add_motivating_information
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix slowmo: <http://example.com/slowmo#> .
+
+def create_candidate(measure: Resource, template: Resource) -> Optional[Resource]:
+    g: Graph = measure.graph
+    @graph g
+
+    if not template.value(CPO.has_causal_pathway):
+        return None
+
+    candidate = g.resource(BNode())
+    candidate[rdf:type] = slowmo:Candidate
+    candidate[slowmo:RegardingMeasure] = measure
+    candidate[slowmo:AncestorTemplate] = template
+    # TODO: Add candidate[SLOWMO.CausalPathway] = causal_pathway, to make it easier for down stream code
+
+    if not add_motivating_information(candidate):
+        -{ {candidate.identifier} ?p ?o }
+        return None
+
+    add_convenience_properties(candidate)
+
+    return candidate

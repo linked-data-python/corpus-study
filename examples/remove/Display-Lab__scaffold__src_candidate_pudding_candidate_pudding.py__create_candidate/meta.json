@@ -73,5 +73,24 @@
       "add_convenience_properties supprimé"
     ],
     "remaining": "Mutant équivalent, non tué : ajouter `-{ ?s ?p {candidate.identifier} }` (le candidat n'est jamais objet d'un triplet). Jugement non traité : `@prefix cpo` impossible (espace de noms à alias), déjà dit dans translation_notes."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress in Python: optimized.py is original.py. The three `candidate[...] = ...` are Resource.__setitem__ (graph.set with Resource-to-identifier conversion) and already one line each; dropping `g` would move the read of measure.graph after the pathway guard (a different failure on a measure without a graph); `return None` stays explicit in an Optional-returning function.",
+    "optimized.ldpy, from optimized.py: it is translated.ldpy. `@graph g` + `-{ {candidate.identifier} ?p ?o }` (143 tokens) is kept over the call suffix `-{ … }(g)` without the declaration (146); RDF.type and the SLOWMO names are prefixed names; CPO.has_causal_pathway stays Python (aliasing namespace, see translation_notes).",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Literal and URIRef go from the rdflib import; IAO, PSDO, RO and SCHEMA go and the two scaffold_context imports are merged into one line (CPO, SLOWMO and the two helpers).",
+    "LD Python: RDF, Literal and URIRef go from the rdflib import (rdf:type is a prefixed name); the scaffold_context imports are merged into one line with CPO and the two helpers (SLOWMO is now only in a comment); both @prefix lines are used."
+  ]
 }

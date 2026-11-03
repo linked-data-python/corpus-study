@@ -56,5 +56,16 @@
       "auto_flush and _dirty_files -> _dirty_files seul"
     ],
     "remaining": "Question 2 du tri (classification awkward vs not-expressible : le motif reçu en donnée, que -{ } ne sait pas porter, et le crédit de -{ }/@graph pour le seul retrait interne lié) : jugement, non traité. Le mutant `graph` instantané vs relu (@graph self.internal_graph) reste équivalent ici."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `s, p, o = triple` and the three match names go: the received pattern is passed straight to `self.internal_graph.triples(triple)` (rdflib unpacks it itself, so a malformed pattern still raises ValueError before anything is removed), each match is removed as the tuple it is, and `match[0]` is the subject the dirty-file guard tests. The list() snapshot, the URIRef guard, the `if target_file` guard and the auto_flush test are kept.",
+    "optimized.ldpy, from optimized.py: identical, no island. The pattern arrives as data (None wildcards), out of reach of m{ } and -{ }; the inner removal of a match held as a tuple would need `-{ {match[0]} {match[1]} {match[2]} }(self.internal_graph)`, measured at 132 tokens against 117 for the kept `self.internal_graph.remove(match)`. The translation's `@graph self.internal_graph` + `-{ {match_s} {match_p} {match_o} }` therefore disappears from the optimized side.",
+    "No exception to the symmetry rule; notation ratio 1.0."
+  ],
+  "optimized_constructions": [],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python: the unused `Graph` goes from the rdflib import (`from rdflib import URIRef`); the two headers are identical."
+  ]
 }

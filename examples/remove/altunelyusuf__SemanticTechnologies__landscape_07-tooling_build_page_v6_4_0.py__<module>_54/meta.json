@@ -69,5 +69,25 @@
       "@prefix ow: au lieu de owl: -- tué par la seule vérification des liaisons"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Nothing to compress in Python: the region is the one-line loop `for p in (...): g.remove((ONT, p, None))`; optimized.py is original.py.",
+    "optimized.ldpy, from optimized.py: the same one-line loop with `-{ {ONT} {p} ?o }` as its suite (accepted since 0.4.0), where translated.ldpy had opened a block; prefixed names in the tuple; header of translated.ldpy (with `ONT = <…>` and `@graph g`).",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "-{ }",
+    "IRI",
+    "prefixed name",
+    "variable",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, RDFS, SKOS, XSD and PROV go from the rdflib.namespace import (`from rdflib.namespace import OWL, DCTERMS`); URIRef stays (ONT).",
+    "LD Python: nothing unused (the two @prefix lines, `ONT = <…>` and `@graph g` are used); optimized_header.ldpy is a copy of optimized.ldpy."
+  ]
 }

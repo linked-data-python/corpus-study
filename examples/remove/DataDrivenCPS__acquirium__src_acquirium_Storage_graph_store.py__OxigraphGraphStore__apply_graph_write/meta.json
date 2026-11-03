@@ -57,5 +57,20 @@
       "îlot -> `pass` ; `-{ ?s a ?o }` ; garde forcée à True / à False ; receveur = graphe par défaut du store"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the per-triple copy loop becomes `target += incoming` (Graph.__iadd__, one addN with the target as context: same triples in the target, and the store's remove log is unchanged); the two wrapped calls of the bind loop are put on one line each. The try/except around the two binds and the debug log are kept as they were.",
+    "optimized.ldpy, from optimized.py: `@graph target` + `-{ ?s ?p ?o }` for the clear (119 tokens against 122 with the call suffix `-{ ?s ?p ?o }(target)`; no @prefix is in scope, so @graph binds nothing on the target). `target += incoming` stays: no island copies a graph.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "-{ }",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python: Dataset, Literal, RDF and URIRef go from the rdflib import (`from rdflib import Graph`, used by the annotations); `import logging` and `_logger` stay. No @prefix in either header."
+  ]
 }

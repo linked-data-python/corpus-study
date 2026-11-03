@@ -71,5 +71,21 @@
       "message construit avec le mauvais terme"
     ],
     "remaining": "Un mutant reste vert et est équivalent : `_is_abs_iri(object_value) and object_value` (une IRI absolue n'est jamais vide). Les appelants du dépôt passent des str ; aucun cas non-str n'est exercé."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the four-line if/else choosing the object term becomes a conditional expression (`URIRef(...) if _is_abs_iri(object_value) else Literal(...)`, same test, same order); the `else:` after the returning `if` goes. The IRI guard and its early return are kept.",
+    "optimized.ldpy, from optimized.py: `@graph g` inside the with, `if m{ {s} {p} {o} }:` (the translation's `bool(...)` wrapper is redundant in an if) and `-{ {s} {p} {o} }`; 138 tokens against 144 with call suffixes and no declaration.",
+    "No exception to the symmetry rule."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "m{ }",
+    "-{ }",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python and LD Python: Graph and Namespace go from the rdflib import (`from rdflib import URIRef, Literal`); the context shim import stays. No @prefix in either header."
+  ]
 }
