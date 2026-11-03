@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "Python: RDF_NS goes (the region now writes rdflib.RDF.type).",
     "LD Python: `import rdflib`, eliozo_ns and RDF_NS go (the region uses only the eliozo: prefix). Only `@prefix eliozo:` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:addToRdfGraph + g bindings",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:addToRdfGraph + g bindings",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:addToRdfGraph + g bindings",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:addToRdfGraph + g bindings",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

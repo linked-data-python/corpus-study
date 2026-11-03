@@ -76,5 +76,31 @@
   "header_optimization_notes": [
     "optimized_header.py: the whole SPARQLWrapper import goes (unused; its RDF was already shadowed by rdflib's on the next line), and so does Graph. URIRef, RDFS, Literal, RDF and the shim stay.",
     "optimized_header.ldpy: the SPARQLWrapper import, Graph, URIRef (replaced by f<…>), RDFS (replaced by rdfs:) and RDF (replaced by `a`) go, leaving `from rdflib import Literal`. The single `@prefix rdfs:` is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

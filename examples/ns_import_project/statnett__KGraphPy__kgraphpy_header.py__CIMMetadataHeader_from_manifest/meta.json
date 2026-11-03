@@ -77,5 +77,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Both header-variant files (identical): Node, RDF, BNode, Literal, DCTERMS and MD go; Path (annotation), Graph, URIRef, NamespaceManager and collect_specific_namespaces stay. NamespaceManager is not exported by the rdflib top-level package, so its import line cannot be merged."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:from_manifest-outcomes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:from_manifest-outcomes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom:from_manifest-outcomes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom:from_manifest-outcomes",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

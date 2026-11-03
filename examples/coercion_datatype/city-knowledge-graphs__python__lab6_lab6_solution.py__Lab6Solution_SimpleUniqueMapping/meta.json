@@ -71,5 +71,31 @@
   "header_optimization_notes": [
     "Python: BNode, OWL, RDFS and FOAF go. URIRef, Literal, RDF and XSD stay.",
     "LD Python: both import lines go (nothing of rdflib is named in the region), and so do the owl:, rdf:, rdfs: and foaf: @prefix lines. Only xsd: stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:SimpleUniqueMapping",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:SimpleUniqueMapping",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:SimpleUniqueMapping",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:SimpleUniqueMapping",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

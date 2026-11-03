@@ -96,5 +96,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Graph, Namespace, BNode, RDFS, XSD and OWL go; the two rdflib imports merge into `from rdflib import RDF, URIRef, Literal`.",
     "optimized_header.ldpy: `Literal` goes from the rdflib import (the length is now a bare int interpolation); `URIRef` stays and `@prefix shacl:` is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

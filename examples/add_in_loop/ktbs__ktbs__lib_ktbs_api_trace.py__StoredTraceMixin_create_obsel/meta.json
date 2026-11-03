@@ -91,5 +91,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Real, XSD, ParseError, cache_result and ObselProxy are unused and go. The four shim imports are merged into one line.",
     "optimized_header.ldpy: the same names go, and also RDF and RDFS, which the islands replace (a, rdfs:). `from context_shim import ktbs:` and `@prefix rdfs:` stay, both used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

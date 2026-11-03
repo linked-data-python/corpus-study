@@ -82,5 +82,31 @@
   "header_optimization_notes": [
     "optimized_header.py: List, Callable, ClassVar, Any, URIRef, RDFS, PRED and TARG go, all unused. `from rdflib.term import BNode` is merged into `from rdflib import Graph, BNode`.",
     "optimized_header.ldpy: the same removals. OWL and RDF go too, because the islands use owl: and `a`. The single `@prefix owl:` is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:TANN",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:TANN",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:TANN",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:TANN",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

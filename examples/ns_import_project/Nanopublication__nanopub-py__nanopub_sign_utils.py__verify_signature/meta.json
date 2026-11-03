@@ -57,5 +57,31 @@
   ],
   "header_optimization_notes": [
     "Both sides: `encodebytes` and the rdflib names BNode, Graph, Literal go (unused); Dataset and Namespace stay (annotations), URIRef stays. The `logger` line stays. The NPX import (`npx:` in ldpy) stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:verify_signature",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:verify_signature",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:verify_signature",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:verify_signature",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -71,5 +71,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `from rdflib import BNode, RDF` (merged), `from context_shim import collection_to_list`, logging and the logger stay. Graph, Namespace, Literal, URIRef, OWL, RDFS, NGSILD and calculate_array_dimensions go.",
     "optimized_header.ldpy: `from rdflib import BNode`, `from context_shim import collection_to_list`, logging and the logger stay. The whole rdflib.namespace line goes. Both @prefix are used and stay: rdf: for rdf:nil, rdfs: in the query."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:add_all_objects_of_type",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:add_all_objects_of_type",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:add_all_objects_of_type",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:add_all_objects_of_type",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

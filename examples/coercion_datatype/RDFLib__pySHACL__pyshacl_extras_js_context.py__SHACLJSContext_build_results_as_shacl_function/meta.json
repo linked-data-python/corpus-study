@@ -62,5 +62,31 @@
   "header_optimization_notes": [
     "Python: nothing unused, so optimized_header.py is a copy of optimized.py.",
     "LD Python: `from rdflib.namespace import XSD` goes (the region writes xsd:decimal). Literal, URIRef and BNode stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:build",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:build",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:build",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:build",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

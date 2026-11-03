@@ -65,5 +65,31 @@
   "header_optimization_notes": [
     "optimized_header.py: SH, SHACL, Literal and LiteralType go, the two shim import lines become `from etk_context import SHACLOntoConverter, URI, BNode`; `import rdflib` stays.",
     "optimized_header.ldpy: the same shim line, and `import rdflib` goes too (no URIRef call left)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:assert-log+arguments, shim isolated per side",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:assert-log+arguments, shim isolated per side",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom:assert-log+arguments, shim isolated per side",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom:assert-log+arguments, shim isolated per side",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

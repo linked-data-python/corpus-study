@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "Python: Graph, Namespace, XSD, RDF, RDFS, BNode and eight of the nine context names go; `from rdflib import URIRef` and `from atomrdf_context import ASMO` remain.",
     "LD Python: the rdflib import goes entirely (f<…> replaces URIRef) and the prefix import keeps only `asmo:`; Literal and the eight other prefixes go."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:to_graph_calculated_properties",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:to_graph_calculated_properties",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:to_graph_calculated_properties",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:to_graph_calculated_properties",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

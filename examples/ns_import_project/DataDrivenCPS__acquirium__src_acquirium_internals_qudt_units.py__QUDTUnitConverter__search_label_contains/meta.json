@@ -84,5 +84,31 @@
   "header_optimization_notes": [
     "Python: Graph, URIRef, RDF, XSD, UNIT and QUDT_QUANTITY_KIND go; Literal, RDFS and SKOS come from one rdflib import line.",
     "LD Python: Graph, URIRef and the whole rdflib.namespace import go, UNIT and QUDT_QUANTITY_KIND too; Literal and the qudt: prefix stay, and both @prefix lines (rdfs:, skos:) are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

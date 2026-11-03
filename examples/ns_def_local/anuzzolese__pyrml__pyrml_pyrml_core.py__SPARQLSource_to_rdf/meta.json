@@ -76,5 +76,31 @@
   "header_optimization_notes": [
     "optimized_header.py: URIRef, IdentifiedNode and XSD are unused: the two imports become `from rdflib import Graph, Namespace, RDF`.",
     "optimized_header.ldpy: no import is left (`g{ }` builds the graph, `a` replaces rdf:type, sd: is a prefix), and neither of the two `@prefix rdf:`/`xsd:` lines is used: the header is reduced to its provenance comments."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

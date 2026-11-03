@@ -103,5 +103,31 @@
   "header_optimization_notes": [
     "Python: DCTERMS and XSD go (XSD is no longer used after Literal(True)).",
     "LD Python: DCTERMS, RDF, RDFS, SH, XSD, Literal, Namespace and URIRef go, and so does `SHUI = Namespace(...)` (the region writes shui:). Graph stays for demo(). The xsd @prefix goes, because the Turtle `true` needs none."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "demo calls + create_shapes(self) per scenario (graph, exception, shapes_count, get_name calls)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "demo calls + create_shapes(self) per scenario (graph, exception, shapes_count, get_name calls)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "demo calls + create_shapes(self) per scenario (graph, exception, shapes_count, get_name calls)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "demo calls + create_shapes(self) per scenario (graph, exception, shapes_count, get_name calls)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Literal, URIRef, OWL, PROV and XSD are unused and go; the two rdflib imports become `from rdflib import DCTERMS, RDF, RDFS, Graph, Namespace`.",
     "optimized_header.ldpy: only Graph is used (in the annotations), so `from rdflib import Graph` stays alone and the `rdflib.namespace` import goes. The five `@prefix` lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:build_validation_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:build_validation_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:build_validation_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:build_validation_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

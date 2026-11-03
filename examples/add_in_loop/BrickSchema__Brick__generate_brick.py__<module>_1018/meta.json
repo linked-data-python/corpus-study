@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "Python: the 13-name namespace import keeps only QUDT; quantity_definitions goes; the shim import becomes one line.",
     "LD Python: the 13 prefix imports keep brick: and qudt: (the only prefixed names of the region); quantity_definitions goes; one line, as on the Python side."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

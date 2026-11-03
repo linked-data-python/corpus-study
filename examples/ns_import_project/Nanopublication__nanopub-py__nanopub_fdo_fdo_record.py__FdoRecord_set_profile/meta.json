@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "Python: keeps `from typing import Union`, `from rdflib import URIRef`, `from rdflib.namespace import DCTERMS`, `from nanopub.namespaces import FDOC`; Optional, List, Graph, Literal, RDFS, PROV and FDOF go.",
     "LD Python: keeps `from typing import Union`, `from rdflib import URIRef`, `from nanopub.namespaces import fdoc:` and `@prefix dcterms:`; Optional, List, Graph, Literal go, and so does the translator's comment explaining the import choices."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:set_profile",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:set_profile",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:set_profile",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:set_profile",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

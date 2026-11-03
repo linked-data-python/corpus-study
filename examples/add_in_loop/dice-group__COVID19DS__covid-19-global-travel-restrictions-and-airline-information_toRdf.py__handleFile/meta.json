@@ -95,5 +95,31 @@
   "header_optimization_notes": [
     "optimized_header.py: BNode, DCTERMS and OWL are unused imports and go; the two rdflib imports are merged. The first `g = Graph()`, which the second one overwrites, and `resource` (unused, because dice is now `ndice[...]`) also go.",
     "optimized_header.ldpy: BNode, Namespace, Graph, XSD and the whole `rdflib.namespace` import go (only Literal and URIRef are used outside the islands). `g = Graph()`, which `@graph as g` overwrites, and `resource` also go. The eight `@prefix` lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

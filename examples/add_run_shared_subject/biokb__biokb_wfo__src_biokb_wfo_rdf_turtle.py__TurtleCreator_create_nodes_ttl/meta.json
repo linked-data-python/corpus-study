@@ -88,5 +88,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `Graph`, DB_DEFAULT_CONNECTION_STR and EXPORT_FOLDER go (unused); the two context_shim imports are merged into one line.",
     "optimized_header.ldpy: the same shim pruning and merge, and the whole rdflib import line goes (RDF, XSD, Graph, Literal are all replaced by `a`, `^^xs:string` and the islands). `@prefix xs:` stays: it is used, and the driver checks that `xs` stays bound on the serialised graph."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:create_nodes_ttl (as-written + extended: file, bindings, log, real input shapes)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_nodes_ttl (as-written + extended: file, bindings, log, real input shapes)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:create_nodes_ttl (as-written + extended: file, bindings, log, real input shapes)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_nodes_ttl (as-written + extended: file, bindings, log, real input shapes)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -96,5 +96,31 @@
   "header_optimization_notes": [
     "optimized_header.py: only `create_header_attribute` goes, which gives `from kgraphpy.header import CIMMetadataHeader`. Graph, URIRef, Literal, BNode, Node, DCAT, DCTERMS, RDF and MD are all used.",
     "optimized_header.ldpy: `from rdflib import Graph, URIRef, Literal, BNode, Node` becomes `from rdflib import Node`. The whole `from rdflib.namespace import DCAT, DCTERMS, RDF` line goes, and so does `create_header_attribute`. The two @prefix (dcat:, dcterms:) are both used and stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_repair_blank_header_subject_dctidentifier",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_repair_blank_header_subject_dctidentifier",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_repair_blank_header_subject_dctidentifier",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_repair_blank_header_subject_dctidentifier",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

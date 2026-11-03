@@ -64,5 +64,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Self, XSD, CircularReferenceError and UnsupportedFieldTypeError go, all unused.",
     "optimized_header.ldpy: the same four go, plus BNode (replaced by `[ ]`) and Literal (replaced by the island literals), leaving `from rdflib import Graph, Namespace` for the signature's annotations. The header had no `@prefix`."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_property_paths",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_property_paths",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_property_paths",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_property_paths",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

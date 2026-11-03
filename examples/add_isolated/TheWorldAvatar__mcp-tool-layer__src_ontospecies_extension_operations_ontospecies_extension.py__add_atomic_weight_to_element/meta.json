@@ -93,5 +93,31 @@
   "header_optimization_notes": [
     "Python: Graph, Namespace, URIRef, RDF and RDFS go; Literal, XSD and the shim import stay.",
     "LD Python: Graph, Namespace, URIRef, RDF, RDFS and XSD go (XSD is replaced by xsd:); the @prefix xsd: line is used and stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:add_atomic_weight_to_element",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_atomic_weight_to_element",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:add_atomic_weight_to_element",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_atomic_weight_to_element",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

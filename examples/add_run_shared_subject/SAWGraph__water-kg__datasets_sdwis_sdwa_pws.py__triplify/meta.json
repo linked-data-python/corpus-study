@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "optimized_header.py: OWL, XMLNS, URIRef and BNode go, all unused. XSD, RDF, RDFS, Literal and the four shim names stay.",
     "optimized_header.ldpy: both rdflib import lines go: XSD, RDF, RDFS and Literal are replaced by xsd:/`a`/rdfs:/typed literals, and the rest are unused. The header's `@prefix rdfs:` is used. `@prefix xsd:` sits in the region and stays there."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:triplify",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:triplify",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:triplify",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:triplify",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

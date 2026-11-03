@@ -63,5 +63,31 @@
   "header_optimization_notes": [
     "optimized_header.py: of `typing` only List is used: `from typing import List`; the rdflib imports are all used.",
     "optimized_header.ldpy: `from typing import List`; Namespace, RDF and RDFS go, and `@prefix rdf:` too (`a` replaces rdf:type); `from rdflib import Graph, URIRef` stays for the signature, with the rdfs:, ontosyn: and ontospecies: prefixes."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_find_species_for_synthesis",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_find_species_for_synthesis",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_find_species_for_synthesis",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_find_species_for_synthesis",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

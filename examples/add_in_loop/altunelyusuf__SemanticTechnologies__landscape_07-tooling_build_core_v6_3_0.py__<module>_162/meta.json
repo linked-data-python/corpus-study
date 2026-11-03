@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "optimized_header.py: nothing unused in the header (Graph, Namespace, the four shim names and the SEM namespace are all used); a byte copy of optimized.py.",
     "optimized_header.ldpy: the line `SEM = Namespace(...)` and the `Namespace` import go, because the `semtech:` prefix replaces them. The `@prefix semtech:` line stays: it is used, and `@graph g2` must bind it (the driver checks g2's prefix bindings)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

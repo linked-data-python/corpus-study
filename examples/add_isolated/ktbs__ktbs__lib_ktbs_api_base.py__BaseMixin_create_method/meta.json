@@ -67,5 +67,31 @@
   "header_optimization_notes": [
     "Python: URIRef goes from rdflib, parent_uri and extend_api from the context import.",
     "LD Python: Literal, RDF and URIRef go from rdflib, parent_uri, extend_api and SKOS from the context import; @prefix rdf: goes (the region writes `a`), @prefix skos: stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:create_method",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_method",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:create_method",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_method",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

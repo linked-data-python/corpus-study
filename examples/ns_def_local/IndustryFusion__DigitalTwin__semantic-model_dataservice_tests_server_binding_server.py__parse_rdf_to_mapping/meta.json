@@ -88,5 +88,31 @@
   "header_optimization_notes": [
     "Python: nothing unused; the two rdflib imports merge into `from rdflib import RDF, Graph, Namespace`.",
     "LD Python: Namespace, RDF and the @prefix rdf line go (the region writes `a`)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:parse_rdf_to_mapping",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:parse_rdf_to_mapping",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:parse_rdf_to_mapping",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:parse_rdf_to_mapping",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

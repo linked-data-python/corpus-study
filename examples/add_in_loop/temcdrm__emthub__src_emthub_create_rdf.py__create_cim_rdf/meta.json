@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: the `CIM_NS = ...` line goes (the imported CIM namespace replaces it); rdflib, the five context names and EMT_NS stay.",
     "LD Python: `import rdflib`, `CIM`, `CIM_NS` and `EMT_NS` go (f<…>, `cim:` and `emt:` replace them); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

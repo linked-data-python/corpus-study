@@ -97,5 +97,31 @@
   "header_optimization_notes": [
     "Python: XSD and PROV go.",
     "LD Python: Namespace, URIRef, Literal and the whole rdflib.namespace import go (RO_PUB is an IRI island, SRNS no longer exists in the translation's header). Only Graph stays. The five @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state (custom: graphs, shared values, stdout, prefix bindings of g1)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (custom: graphs, shared values, stdout, prefix bindings of g1)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state (custom: graphs, shared values, stdout, prefix bindings of g1)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (custom: graphs, shared values, stdout, prefix bindings of g1)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

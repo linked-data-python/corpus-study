@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `Namespace` goes from the rdflib import, and the rdflib.namespace import keeps only RDFS.",
     "optimized_header.ldpy: the rdflib.namespace import goes entirely and the rdflib import keeps only `Graph` (ONT is an IRI literal, the label a language literal); `@prefix rdfs:` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

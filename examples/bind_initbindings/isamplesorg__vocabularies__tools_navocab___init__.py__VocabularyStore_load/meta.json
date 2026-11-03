@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: `import rdflib.namespace`, `import rdflib.plugins.sparql` and `import logging.config` go (rdflib, logging, typing, vocabulary_context, DEFAULT_FORMAT, rdfsT are used).",
     "LD Python: the same three go, and `import rdflib` too (the add is an island, no rdflib name is left); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_load",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_load",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_load",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_load",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

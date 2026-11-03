@@ -59,5 +59,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python and LD Python alike: OWL and RDF go from the rdflib import; URIRef, Graph, BNode, Node, FHIR and subj_pred_idx_to_uri stay (annotations and body)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:map_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:map_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:map_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:map_node",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

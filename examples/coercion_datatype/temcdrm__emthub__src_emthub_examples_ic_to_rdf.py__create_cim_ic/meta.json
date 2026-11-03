@@ -71,5 +71,31 @@
   "header_optimization_notes": [
     "Python: nothing unused (CIM_NS and EMT_NS are read): optimized_header.py is a copy of optimized.py.",
     "LD Python: CIM_NS and EMT_NS go (unused), `as EMT` goes (EMT is never read); @prefix emt stays because the designated graph inherits it, which reproduces the original g.bind('emt', ...)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "output-file:create_cim_ic",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "output-file:create_cim_ic",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "output-file:create_cim_ic",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "output-file:create_cim_ic",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

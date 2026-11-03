@@ -93,5 +93,31 @@
   "header_optimization_notes": [
     "Python: DC, DCTERMS, DOAP, FOAF, SKOS, OWL, VOID and XMLNS go from rdflib.namespace; is_date, clean_sentences and wikidata_id_toText go from the shim import. The fixture block stays byte for byte (the driver substitutes it textually).",
     "LD Python: the same, plus RDF, RDFS, Literal and Namespace (the islands write a, rdfs:, the literals and the prefixes); the four @prefix lines stay: prop:, dbo:, rdfs: are written as prefixed names, and res: carries the RES Namespace object the ids are built from."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state (as-written + extended fixture)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (as-written + extended fixture)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state (as-written + extended fixture)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (as-written + extended fixture)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "optimized_header.py: the unused Graph and XSD leave the rdflib import. Namespace stays for demo(), and random, string, RDF, utils and randnamelength stay for the region.",
     "optimized_header.ldpy: Graph, XSD and `from rdflib.namespace import RDF` go (rdf:type is `a`). Namespace stays for demo() and Literal for the region. The header had no `@prefix`."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -62,5 +62,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Both sides: `from rdflib.term import Literal, URIRef` becomes `from rdflib.term import Literal`, because URIRef is unused. The path uses both @prefix (rdf, rdfs), so they stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_evaluate_class_rules_sparql",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_evaluate_class_rules_sparql",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_evaluate_class_rules_sparql",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_evaluate_class_rules_sparql",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

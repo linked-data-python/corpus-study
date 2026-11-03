@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "optimized_header.py is a copy of optimized.py: Graph, Literal, URIRef, RDF, DCT and REC are all used.",
     "optimized_header.ldpy: Literal and URIRef leave the rdflib import, and `from rdflib.namespace import RDF` goes. Graph stays for the return annotation, `dct:` and REC are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_catalog",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_catalog",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_catalog",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_catalog",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

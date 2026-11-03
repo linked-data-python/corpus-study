@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "Python: Graph, Literal, REC, OWL, TAG, SOSA, SKOS, QUDT, VCARD and REF go; the context import is put on one line.",
     "LD Python: the same names go, and also BSH, RDF, RDFS and SH (replaced by bsh:, rdf:, rdfs: and sh:); BRICK stays for startswith/len/BRICK[prop]; the five @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:define_relationships + repo bindings",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:define_relationships + repo bindings",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:define_relationships + repo bindings",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:define_relationships + repo bindings",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -61,5 +61,31 @@
   "header_optimization_notes": [
     "Python: Literal goes; URIRef and the EX constant stay.",
     "LD Python: the whole rdflib import goes (the terms are prefixed names); the EX constant stays, read by the computed prefix."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_contains",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_contains",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_contains",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_contains",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

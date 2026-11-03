@@ -69,5 +69,31 @@
     "Both sides keep `import prez_context` (the shim) and `get_curie_id_for_uri`, and the renderer import shrinks to `return_from_graph` (seven unused names go).",
     "Python: Namespace, GEO, ALTREXT, OGCFEAT go; Literal, RDF, PROF, PREZ stay.",
     "LD Python: the whole `from rdflib import Literal, Namespace` goes (the link literal is an interpolation), and `geo:`, `rdf:` (the island writes `a`), `altrext:`, `ogcfeat:` go; `prof:` and `prez:` stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:listing_profiles",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:listing_profiles",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:listing_profiles",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:listing_profiles",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

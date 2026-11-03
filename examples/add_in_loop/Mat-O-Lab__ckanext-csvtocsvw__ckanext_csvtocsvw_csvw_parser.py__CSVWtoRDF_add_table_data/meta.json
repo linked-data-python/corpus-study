@@ -89,5 +89,31 @@
   "header_optimization_notes": [
     "Python: nothing unused, optimized_header.py is a copy of optimized.py.",
     "LD Python: Namespace and the rdflib.namespace import (CSVW, RDF, XSD) go, replaced by the four @prefix lines, all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:add_table_data",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_table_data",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:add_table_data",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_table_data",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

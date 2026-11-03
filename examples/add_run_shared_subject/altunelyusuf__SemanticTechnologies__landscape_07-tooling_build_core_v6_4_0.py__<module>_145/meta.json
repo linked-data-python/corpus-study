@@ -69,5 +69,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `URIRef`, `XSD` and `PROV` go (unused); `Graph`, `Namespace`, `Literal`, RDF/RDFS/OWL/SKOS/DCTERMS, BASEDIR, S and the SEM/g2 lines stay.",
     "optimized_header.ldpy: the whole `from rdflib.namespace import ...` line goes (rdf:type is `a`, the other four are @prefix names) and `URIRef`, `Literal` go from the rdflib import; `Graph` and `Namespace` stay for g2 and SEM, which the region interpolates. The four @prefix lines are all used and stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

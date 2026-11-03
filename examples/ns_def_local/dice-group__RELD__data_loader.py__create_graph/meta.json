@@ -54,5 +54,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Both headers: URIRef, Literal and Namespace are unused (Namespace survives only in a comment): `from rdflib import Graph`, with its `# here is some error` comment. Same change on both sides."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:create_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:create_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

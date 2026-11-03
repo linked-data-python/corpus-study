@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: Dict, URIRef, Literal and BNode go.",
     "LD Python: the same four go (Namespace stays for self.rdfSyntax); the header has no @prefix line, the shacl prefix is declared inside the function."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:__init__ (as-written + extended: attribute types, seeded random, bindings, real inputs)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:__init__ (as-written + extended: attribute types, seeded random, bindings, real inputs)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:__init__ (as-written + extended: attribute types, seeded random, bindings, real inputs)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:__init__ (as-written + extended: attribute types, seeded random, bindings, real inputs)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: URIRef, XSD and PROV go.",
     "LD Python: Namespace, URIRef, Literal and the whole rdflib.namespace import go. Only Graph stays. The seven @prefix lines are used (rdf:type in the list, sp: in the header's lo15/w20)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -73,5 +73,31 @@
   "header_optimization_notes": [
     "Python: Graph, URIRef, PM and YURTLE go.",
     "LD Python: the whole rdflib import goes, as do PM and YURTLE. The header comment that names the shim import is kept as it is."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_fenced_yurtle_block_parsed",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_fenced_yurtle_block_parsed",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_fenced_yurtle_block_parsed",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_fenced_yurtle_block_parsed",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

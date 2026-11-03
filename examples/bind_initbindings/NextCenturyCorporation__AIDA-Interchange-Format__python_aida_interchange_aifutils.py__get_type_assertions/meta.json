@@ -72,5 +72,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused in either header. The Python header imports prepareQuery, which `_TYPE_QUERY` uses. The ldpy header declares only `@prefix rdf:`, which the pattern uses. The two files are copies of the optimized ones."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:get_type_assertions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:get_type_assertions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:get_type_assertions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:get_type_assertions",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

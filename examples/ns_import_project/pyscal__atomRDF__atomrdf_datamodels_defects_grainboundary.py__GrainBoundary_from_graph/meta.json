@@ -84,5 +84,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `from rdflib import Graph, Namespace, XSD, RDF, RDFS, BNode, URIRef` reduced to `from rdflib import RDF`, and the shim import loses the unused CMSO and fits on one line.",
     "optimized_header.ldpy: the rdflib import line goes entirely (RDF is replaced by `@prefix rdf:`); the shim prefix import and the `@prefix rdf:` line are all used and stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:fixture-values, shim isolated per side",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:fixture-values, shim isolated per side",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom:fixture-values, shim isolated per side",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom:fixture-values, shim isolated per side",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

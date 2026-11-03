@@ -94,5 +94,31 @@
   "header_optimization_notes": [
     "optimized_header.py: every name of `from rdflib import Graph, Namespace, URIRef, Literal, RDF, RDFS` is used: a copy of optimized.py.",
     "optimized_header.ldpy: URIRef goes (every IRI is an `f<...>`); Graph and Literal stay, and the two `@prefix rdf:`/`rdfs:` lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_generate_mem_profile_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_generate_mem_profile_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_generate_mem_profile_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_generate_mem_profile_rdf",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

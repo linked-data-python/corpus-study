@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "optimized_header.py: URIRef and OWL are unused; the four rdflib imports merge into `from rdflib import BNode, FOAF, Graph, Literal, Namespace, RDF, RDFS, XSD`.",
     "optimized_header.ldpy: only Graph is still used (prefixes are declared in the function, the blank node is anonymous): `from rdflib import Graph`."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:createTriples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:createTriples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:createTriples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:createTriples",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

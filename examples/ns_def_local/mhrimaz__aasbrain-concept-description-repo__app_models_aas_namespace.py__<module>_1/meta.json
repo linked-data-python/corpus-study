@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "Python: `import rdflib` and DefinedNamespace go; Namespace is imported from rdflib on one line.",
     "LD Python: both import lines go (`as AAS` gives the Namespace object, nothing else from rdflib is named); the license comment stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:class-attributes (value, type, own names, repository uses)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:class-attributes (value, type, own names, repository uses)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom:class-attributes (value, type, own names, repository uses)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom:class-attributes (value, type, own names, repository uses)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

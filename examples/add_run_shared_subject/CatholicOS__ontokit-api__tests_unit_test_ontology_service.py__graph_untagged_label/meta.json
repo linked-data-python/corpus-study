@@ -77,5 +77,31 @@
   "header_optimization_notes": [
     "Python: URIRef and SKOS go; Graph (return annotation), Literal, Namespace (EX), OWL, RDF, RDFS and pytest stay.",
     "LD Python: Literal, Namespace, URIRef and the whole rdflib.namespace import go; Graph stays for the return annotation, pytest for the decorator; the three @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

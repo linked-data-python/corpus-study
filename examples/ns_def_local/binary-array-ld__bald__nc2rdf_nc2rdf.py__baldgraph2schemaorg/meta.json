@@ -89,5 +89,31 @@
   "header_optimization_notes": [
     "optimized_header.py: every import is used (rdflib.Graph, json, Namespace, BNode, URIRef, Literal, the two shim imports): a copy of optimized.py.",
     "The driver emits through harness._emit: rdfeval check proves every artefact."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:baldgraph2schemaorg (custom: isomorphism, bindings of the original kept)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:baldgraph2schemaorg (custom: isomorphism, bindings of the original kept)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:baldgraph2schemaorg (custom: isomorphism, bindings of the original kept)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:baldgraph2schemaorg (custom: isomorphism, bindings of the original kept)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

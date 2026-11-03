@@ -87,5 +87,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python and LD Python: Graph and Namespace go from the rdflib import (`from rdflib import URIRef, Literal`); the context shim import stays. No @prefix in either header."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:delete_triple",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:delete_triple",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:delete_triple",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:delete_triple",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

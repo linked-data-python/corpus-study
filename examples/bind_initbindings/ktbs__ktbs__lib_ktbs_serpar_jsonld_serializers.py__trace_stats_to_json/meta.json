@@ -65,5 +65,31 @@
   "header_optimization_notes": [
     "Python: Counter, defaultdict, chain, KTBS and KTBS_NS_URI go (KTBS_NS_URI fed the '' prefix that optimized.py no longer declares); the shim import fits on one line.",
     "LD Python: the same names go; both @prefix lines are used (xsd: in the FILTER, stats: in m{ } and as a Python term)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:trace_stats_to_json",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:trace_stats_to_json",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:trace_stats_to_json",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:trace_stats_to_json",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

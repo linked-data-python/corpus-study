@@ -84,5 +84,31 @@
   "header_optimization_notes": [
     "Python: `List` goes from the typing import (the dedup loop's annotations are gone).",
     "LD Python: `List` goes likewise; both @prefix lines are used (rdf: in the FILTER, rdfs: in both islands)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_step_details_all_fields",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_step_details_all_fields",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_step_details_all_fields",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_step_details_all_fields",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

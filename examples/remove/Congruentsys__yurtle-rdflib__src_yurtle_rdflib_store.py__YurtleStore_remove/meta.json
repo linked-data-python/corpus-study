@@ -67,5 +67,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python and LD Python: the unused `Graph` goes from the rdflib import (`from rdflib import URIRef`); the two headers are identical."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:remove",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:remove",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:remove",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:remove",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

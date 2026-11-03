@@ -95,5 +95,31 @@
   "header_optimization_notes": [
     "optimized_header.py: nothing unused (`import rdflib` for BNode and Literal, Graph, Namespace, RDF): a copy of optimized.py.",
     "optimized_header.ldpy: `import rdflib`, Namespace and RDF are no longer used, and `@prefix rdf:` neither (`a` replaces rdf:type): the header keeps only `from rdflib import Graph`."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:rebuild_output_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:rebuild_output_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:rebuild_output_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:rebuild_output_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

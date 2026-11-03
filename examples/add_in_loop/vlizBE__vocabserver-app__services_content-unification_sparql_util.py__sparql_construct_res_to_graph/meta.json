@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "Python: Literal goes from the rdflib.term import.",
     "LD Python: both rdflib imports go (`@graph as g` replaces Graph, f<…> replaces URIRef, Literal was unused); the json_to_term import stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:sparql_construct_res_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:sparql_construct_res_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:sparql_construct_res_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:sparql_construct_res_to_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

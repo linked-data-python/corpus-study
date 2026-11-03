@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: the now unused `from itertools import chain` goes, and DOAP, PROF and PROV from the rdflib.namespace import.",
     "LD Python: `from itertools import chain` and the whole rdflib.namespace import go (every name is a prefixed name); the seven @prefix lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

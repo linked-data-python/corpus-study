@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "Python: nothing unused, so optimized_header.py is a copy of optimized.py.",
     "LD Python: RDF and XSD go from the rdflib import (the region writes `a` and xsd:). Graph, URIRef and Literal stay. The xsd @prefix is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:decode_dictionary",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:decode_dictionary",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:decode_dictionary",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:decode_dictionary",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

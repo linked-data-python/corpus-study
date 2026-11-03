@@ -71,5 +71,31 @@
   "header_optimization_notes": [
     "Python: DCTERMS, RDFS, OA, SCHEMA, _slugify and _make_uri go; Path, RDF, SV, load_yaml, SIMPLE_YAML and the `_write_yaml` helper stay.",
     "LD Python: the whole `from rdflib.namespace import DCTERMS, RDF, RDFS` goes and so does `@prefix rdf:` (the island writes `a`), as do _slugify, _make_uri and the translator's comment explaining the import choices; `sv:` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_deterministic_uris",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_deterministic_uris",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_deterministic_uris",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_deterministic_uris",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

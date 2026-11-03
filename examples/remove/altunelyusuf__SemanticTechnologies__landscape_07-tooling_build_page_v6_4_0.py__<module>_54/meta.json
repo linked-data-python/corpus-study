@@ -89,5 +89,31 @@
   "header_optimization_notes": [
     "Python: RDF, RDFS, SKOS, XSD and PROV go from the rdflib.namespace import (`from rdflib.namespace import OWL, DCTERMS`); URIRef stays (ONT).",
     "LD Python: nothing unused (the two @prefix lines, `ONT = <…>` and `@graph g` are used); optimized_header.ldpy is a copy of optimized.ldpy."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

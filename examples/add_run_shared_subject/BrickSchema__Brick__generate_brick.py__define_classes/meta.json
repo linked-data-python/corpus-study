@@ -87,5 +87,31 @@
   "header_optimization_notes": [
     "Python: Graph, Literal, BNode and SKOS go; BSH, REC, TAG, SOSA, QUDT, VCARD and REF go from the context import, put on one line; G and A stay (A is used by the region).",
     "LD Python: the same, plus the whole rdflib.namespace import and SH (the region writes owl:, rdfs:, sh:), `A = rdf:type` (the islands write `a`) and @prefix rdf:, which only served A; brick:, owl:, rdfs: and sh: stay; G stays (default argument)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:define_classes + repo-bound graph (bindings, logging)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:define_classes + repo-bound graph (bindings, logging)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:define_classes + repo-bound graph (bindings, logging)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:define_classes + repo-bound graph (bindings, logging)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

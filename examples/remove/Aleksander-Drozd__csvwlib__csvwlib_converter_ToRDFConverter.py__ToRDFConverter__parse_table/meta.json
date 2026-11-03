@@ -86,5 +86,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Graph and Literal go from the rdflib import (BNode, Namespace, RDF, URIRef stay; CSVW = Namespace(...) is part of the header and used).",
     "optimized_header.ldpy: only BNode and URIRef stay (RDF is `a`, Namespace replaced by @prefix csvw:)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

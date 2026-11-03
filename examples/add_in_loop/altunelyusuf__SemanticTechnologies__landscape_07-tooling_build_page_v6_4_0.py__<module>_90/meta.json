@@ -79,5 +79,31 @@
   "header_optimization_notes": [
     "optimized_header.py: URIRef, XSD and PROV are unused imports and go. `SEM = Namespace(T.BASE)` is unused in the region, so it goes with the shim import `T`; the `;` line becomes `IPO = Namespace(...)` alone.",
     "optimized_header.ldpy: the line `SEM = ...; IPO = ...` goes (the `ipo:` prefix replaces IPO), with Namespace, URIRef, Literal, T and the whole `rdflib.namespace` import, none of them used outside the island. The five `@prefix` lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

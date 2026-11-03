@@ -89,5 +89,31 @@
   "header_optimization_notes": [
     "Python: load_ontouml_vocabulary goes (imported, never called).",
     "LD Python: load_ontouml_vocabulary goes, and so do RDF, Literal and XSD from the rdflib import (only Graph and URIRef stay). The xsd @prefix is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:set_cardinality_relations (custom: isomorphism, bindings, warnings, raises, stdout)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:set_cardinality_relations (custom: isomorphism, bindings, warnings, raises, stdout)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:set_cardinality_relations (custom: isomorphism, bindings, warnings, raises, stdout)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:set_cardinality_relations (custom: isomorphism, bindings, warnings, raises, stdout)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

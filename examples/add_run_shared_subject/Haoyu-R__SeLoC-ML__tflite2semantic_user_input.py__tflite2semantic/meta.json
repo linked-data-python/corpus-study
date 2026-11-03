@@ -86,5 +86,31 @@
   "header_optimization_notes": [
     "optimized_header.py: the unused RDFS leaves `from rdflib.namespace import ...`. Graph, Namespace, ssn_extend, sosa_extend and `g = Graph()` stay, because the driver's repo-graph run replaces that line with code that reads them.",
     "optimized_header.ldpy: the unused Literal leaves the rdflib import. The three `@prefix` lines are used, and the ssn_extend/sosa_extend Namespaces stay for the driver, as on the Python side."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state (as-written + repo-graph bindings)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (as-written + repo-graph bindings)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state (as-written + repo-graph bindings)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (as-written + repo-graph bindings)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

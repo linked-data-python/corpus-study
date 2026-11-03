@@ -88,5 +88,31 @@
   "header_optimization_notes": [
     "Python: SDO (shadowed by the local Namespace), SKOS, OWL, PROF, FOAF and the duplicate Graph go; RDF, XSD, Graph, Literal, Namespace and URIRef stay.",
     "LD Python: everything but Literal and URIRef goes (the graph comes from @graph as g, the terms from sdo: and xsd:); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_make_schemaorg_metadata",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_make_schemaorg_metadata",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_make_schemaorg_metadata",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_make_schemaorg_metadata",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

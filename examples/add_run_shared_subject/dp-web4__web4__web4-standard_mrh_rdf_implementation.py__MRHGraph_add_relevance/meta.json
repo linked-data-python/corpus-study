@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `Graph` and `URIRef` go from the rdflib import (unused).",
     "optimized_header.ldpy: `Literal` goes from the rdflib import, the `from rdflib.namespace import XSD` line goes, and `MRH = Namespace(...)` goes because `mrh:` now replaces MRH[...] as well. Namespace stays for LCT_NS, BNode for the call and the annotation."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

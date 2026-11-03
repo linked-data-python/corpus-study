@@ -58,5 +58,31 @@
   "header_optimization_notes": [
     "The extracted header is only the three provenance comment lines (plus, in translated.ldpy, the translator's comment): the imports are lines of the region. Nothing to remove; the header-variant files are copies of the optimized ones (same driver limitation, hence draft).",
     "The driver emits through harness._emit and honours RDFEVAL_SIDES: rdfeval check proves every artefact."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom: property tables, defaults, built instances (isomorphism), validation reports",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom: property tables, defaults, built instances (isomorphism), validation reports",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom: property tables, defaults, built instances (isomorphism), validation reports",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom: property tables, defaults, built instances (isomorphism), validation reports",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -65,5 +65,31 @@
   "header_optimization_notes": [
     "Python: BASE_SCHEMA_URL, DEF_CTX and RDF_CONTEXT go from the shim import; `import rdflib as R` stays.",
     "LD Python: the same three shim names go, and `import rdflib as R` too (the dynamic @prefix ... as builds the Namespace)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:module-names",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:module-names",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom:module-names",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom:module-names",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

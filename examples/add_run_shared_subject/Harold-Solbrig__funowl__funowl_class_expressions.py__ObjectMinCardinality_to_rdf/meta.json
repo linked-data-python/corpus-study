@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "optimized_header.py: the unused URIRef and `Literal as RDFLiteral` go.",
     "optimized_header.ldpy: URIRef, RDFLiteral, OWL and RDF go (prefix owl: and `a` replace the last two), and the two rdflib imports merge into `from rdflib import Graph, BNode`. The single `@prefix owl:` is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:to_rdf",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

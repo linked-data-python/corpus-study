@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "Python: URIRef goes; XSD is imported from rdflib with the rest (one import line instead of two).",
     "LD Python: Literal, Namespace, RDF, URIRef and XSD go, only Graph stays from rdflib; the xsd @prefix is used and stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:export_model_to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:export_model_to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:export_model_to_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:export_model_to_rdf",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

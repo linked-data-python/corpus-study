@@ -64,5 +64,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python and LD Python: the parenthesised seven-name rdflib import becomes `from rdflib import BNode`, the only name the region uses; the two headers are identical."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_set_identifier",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_set_identifier",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_set_identifier",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_set_identifier",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

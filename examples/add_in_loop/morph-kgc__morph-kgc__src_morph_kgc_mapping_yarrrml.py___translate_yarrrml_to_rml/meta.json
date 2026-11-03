@@ -89,5 +89,31 @@
   "header_optimization_notes": [
     "Python: nothing unused in the header (every RML_* constant and helper is still read), optimized_header.py is a copy of optimized.py.",
     "LD Python: the `@prefix rdf:` line goes (rdf:type is written `a`); rdflib and the three helpers stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "statement:seeded-globals+isomorphism+raises",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "statement:seeded-globals+isomorphism+raises",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "statement:seeded-globals+isomorphism+raises",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "statement:seeded-globals+isomorphism+raises",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

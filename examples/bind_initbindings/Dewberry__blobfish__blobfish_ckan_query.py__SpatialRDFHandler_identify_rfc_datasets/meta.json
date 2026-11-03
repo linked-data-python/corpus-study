@@ -66,5 +66,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Polygon, MultiPolygon, URIRef, Literal, BNode, RFC_SHP_URL, SF and CKAN_URL go. The three context_shim imports merge into `from context_shim import Point, GEOF, AORC`. `from rdflib import RDF, DCTERMS`, GEO and Result stay, for initNs and the annotation.",
     "optimized_header.ldpy: only `from context_shim import Point` and `from rdflib.query import Result` stay. RDF, DCTERMS, GEO, GEOF and AORC served only initNs, which the @prefix lines replace. The query uses all six @prefix (rdf, aorc, dct, geosparql, geof, dcat), so they stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:identify_rfc_datasets",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:identify_rfc_datasets",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:identify_rfc_datasets",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:identify_rfc_datasets",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

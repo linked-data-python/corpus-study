@@ -86,5 +86,31 @@
   "header_optimization_notes": [
     "optimized_header.py: URIRef and BNode are unused imports and go. The first `g = Graph()`, which the second one overwrites, and `resource` (unused, because dice is now `ndice[...]`) also go. The seventeen Namespace objects stay: the bind dict uses them.",
     "optimized_header.ldpy: URIRef, BNode, XSD, RDF and RDFS go (the islands use a, rdfs: and xsd:). DCTERMS and OWL stay for the bind dict. The duplicate `g = Graph()` and `resource` also go. The six `@prefix` lines of the header are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

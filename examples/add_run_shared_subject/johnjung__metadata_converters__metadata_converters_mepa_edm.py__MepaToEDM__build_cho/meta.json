@@ -60,5 +60,31 @@
   "header_optimization_notes": [
     "optimized_header.py: the rdflib.namespace import keeps only DCTERMS. The shim's `graph` stays although the region does not name it: it is the module-level graph the driver compares.",
     "optimized_header.ldpy: the rdflib.namespace import goes entirely (dcterms: is a @prefix); the shim import stays for the same reason."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

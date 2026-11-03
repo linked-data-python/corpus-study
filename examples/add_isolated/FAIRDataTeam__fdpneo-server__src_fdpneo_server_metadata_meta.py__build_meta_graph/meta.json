@@ -79,5 +79,31 @@
   "header_optimization_notes": [
     "Python: meta_graph_uri (unused shim import) goes.",
     "LD Python: meta_graph_uri and Literal go; every imported prefix is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:build_meta_graph (hand-rolled: MetaResult.graph compared by isomorphism, other fields by equality)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:build_meta_graph (hand-rolled: MetaResult.graph compared by isomorphism, other fields by equality)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:build_meta_graph (hand-rolled: MetaResult.graph compared by isomorphism, other fields by equality)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:build_meta_graph (hand-rolled: MetaResult.graph compared by isomorphism, other fields by equality)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

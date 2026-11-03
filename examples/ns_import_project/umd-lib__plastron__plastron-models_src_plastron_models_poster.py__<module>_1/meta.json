@@ -56,5 +56,31 @@
   "header_optimization_notes": [
     "The extracted header is only the three provenance comment lines: the imports are lines of the region. Nothing to remove; the header-variant files are copies of the optimized ones (same driver limitation, hence draft).",
     "The driver emits through harness._emit and honours RDFEVAL_SIDES: rdfeval check proves every artefact."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state (hand-rolled: the Poster class, compared by its descriptors and by an instance's graph)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (hand-rolled: the Poster class, compared by its descriptors and by an instance's graph)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state (hand-rolled: the Poster class, compared by its descriptors and by an instance's graph)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state (hand-rolled: the Poster class, compared by its descriptors and by an instance's graph)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

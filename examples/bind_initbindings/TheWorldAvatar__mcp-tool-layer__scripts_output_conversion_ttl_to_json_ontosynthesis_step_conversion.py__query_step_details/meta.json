@@ -58,7 +58,7 @@
     "@prefix",
     "s{ }",
     "call suffix (g)",
-    "f<\u2026>",
+    "f<…>",
     "interpolation {expr}",
     "prefixed name",
     "variable"
@@ -66,6 +66,32 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "optimized_header.py: `from rdflib import Graph, Namespace, URIRef` becomes `from rdflib import URIRef`.",
-    "optimized_header.ldpy: the whole rdflib import line goes, because f<\u2026> replaces URIRef. `from step_conversion_context import graph, step_uri` and the two @prefix (ontosyn, rdfs) are used and stay."
-  ]
+    "optimized_header.ldpy: the whole rdflib import line goes, because f<…> replaces URIRef. `from step_conversion_context import graph, step_uri` and the two @prefix (ontosyn, rdfs) are used and stay."
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

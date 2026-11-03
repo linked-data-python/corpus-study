@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "Python: Namespace and URIRef go from the rdflib import, RDF, OWL, DCTERMS, XSD and PROV from the rdflib.namespace import (`RDFS, SKOS` stay); SP stays for the demo harness.",
     "LD Python: nothing unused (Graph, HERE, SP and both @prefix lines are needed); optimized_header.ldpy is a copy of optimized.ldpy."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

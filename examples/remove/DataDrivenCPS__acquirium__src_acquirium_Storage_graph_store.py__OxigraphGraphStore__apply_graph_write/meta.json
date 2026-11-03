@@ -72,5 +72,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python and LD Python: Dataset, Literal, RDF and URIRef go from the rdflib import (`from rdflib import Graph`, used by the annotations); `import logging` and `_logger` stay. No @prefix in either header."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_apply_graph_write",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_apply_graph_write",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_apply_graph_write",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_apply_graph_write",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -70,5 +70,31 @@
   "header_optimization_notes": [
     "Python: sys and URIRef go; the four rdflib import lines become `from rdflib import BNode, Literal, Namespace`.",
     "LD Python: sys, URIRef and Namespace go; the shim import (objects and prefixes) and both @prefix ... as lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:add_triples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_triples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:add_triples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_triples",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

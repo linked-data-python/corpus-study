@@ -84,5 +84,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "optimized_header.py and optimized_header.ldpy: only the unused shim import GraphService goes, on both sides. logging, logger, GraphData and _resolve_uri are used, and the three `@prefix` lines (owl:, rdfs:, xsd:) are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

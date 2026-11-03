@@ -52,5 +52,31 @@
   "header_optimization_notes": [
     "Python: List, Optional and Tuple go from the typing import; rdflib and the nine shim helpers stay.",
     "LD Python: the same three typing names go, and `import rdflib` too (every rdflib name of the region is now a prefixed name); the nine shim helpers stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:collect",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:collect",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:collect",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:collect",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

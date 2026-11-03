@@ -92,5 +92,31 @@
   "header_optimization_notes": [
     "Python: Literal and URIRef go from the rdflib import; IAO, PSDO, RO and SCHEMA go and the two scaffold_context imports are merged into one line (CPO, SLOWMO and the two helpers).",
     "LD Python: RDF, Literal and URIRef go from the rdflib import (rdf:type is a prefixed name); the scaffold_context imports are merged into one line with CPO and the two helpers (SLOWMO is now only in a comment); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:create_candidate (hand-written: Resource return described, graphs by isomorphism)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_candidate (hand-written: Resource return described, graphs by isomorphism)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:create_candidate (hand-written: Resource return described, graphs by isomorphism)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:create_candidate (hand-written: Resource return described, graphs by isomorphism)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

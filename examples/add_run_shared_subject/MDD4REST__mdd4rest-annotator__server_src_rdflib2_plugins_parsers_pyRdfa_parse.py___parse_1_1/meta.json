@@ -62,5 +62,31 @@
   "header_optimization_notes": [
     "optimized_header.py is a copy of optimized.py: BNode, graph, state and ns_rdf are all used.",
     "optimized_header.ldpy: ns_rdf leaves the shim import (replaced by `@prefix rdf:`, which is used)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

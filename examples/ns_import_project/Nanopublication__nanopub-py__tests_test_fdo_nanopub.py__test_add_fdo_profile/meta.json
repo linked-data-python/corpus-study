@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "Python: RDF, FDO_DATA_REF_HANDLE, FDO_DATA_REFS_HANDLE and FDOF go; pytest, rdflib (rdflib.Literal), RDFS, DCTERMS, HDL, NPX and the restored helper stay.",
     "LD Python: FDO_DATA_REF_HANDLE, FDO_DATA_REFS_HANDLE and `fdof:` go, and so does the translator's comment explaining the import choices; `hdl:`, `npx:`, `@prefix rdfs:`, `@prefix dcterms:` and the helper stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_add_fdo_profile",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_add_fdo_profile",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_add_fdo_profile",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_add_fdo_profile",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

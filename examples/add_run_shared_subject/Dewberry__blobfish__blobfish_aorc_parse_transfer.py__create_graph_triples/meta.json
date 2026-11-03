@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "optimized_header.py is a copy of optimized.py: every name of the header is used by the region, its type annotations or demo().",
     "optimized_header.ldpy: RDF, OWL, XSD, Literal and URIRef go from the rdflib import (replaced by `a`, prefixed names, `^^xsd:` and `f<…>`); DCAT, DCTERMS, PROV stay for demo(), BNode for the region. The five `@prefix` lines and `aorc:` are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

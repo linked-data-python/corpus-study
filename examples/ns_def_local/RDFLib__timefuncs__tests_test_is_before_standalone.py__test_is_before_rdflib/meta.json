@@ -70,5 +70,31 @@
   "header_optimization_notes": [
     "optimized_header.py: URIRef and BNode are unused: `from rdflib import Graph, Namespace` (Graph builds the module-level g the region reads).",
     "optimized_header.ldpy: Namespace goes too (`@prefix` without `as`): `from rdflib import Graph`. The shim import and the module-level g stay on both sides."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_is_before_rdflib",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_is_before_rdflib",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_is_before_rdflib",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_is_before_rdflib",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

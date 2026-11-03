@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: the unused `from rdflib import Namespace` goes; the rdflib version switch that binds `ns_rdf` stays (ns_rdf is used, and replacing the compatibility branch would change code, not drop an unused import).",
     "LD Python: `from rdflib import Namespace` goes, and so does the whole `import rdflib` / version switch: `ns_rdf` is never referenced in optimized.ldpy, which writes `nsrdf:type` and `a`. `@prefix nsrdf:` and `from pyrdfa_context import ns_rdfa: as nsrdfa:` stay, both used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:handle_prototypes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:handle_prototypes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:handle_prototypes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:handle_prototypes",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -54,5 +54,31 @@
   "header_optimization_notes": [
     "optimized_header.py: URIRef, RDFS and Literal are unused; the two rdflib imports merge into `from rdflib import Graph, Namespace`. `import logging`, the logger and the shim import (OntologyClassifier is used by demo) stay.",
     "optimized_header.ldpy: the `rdflib.namespace` import goes entirely (the object comes from `@prefix ... as LMSS`), and URIRef, RDFS, Literal go: only `from rdflib import Graph` stays. The `@prefix lmss:` line is used and stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

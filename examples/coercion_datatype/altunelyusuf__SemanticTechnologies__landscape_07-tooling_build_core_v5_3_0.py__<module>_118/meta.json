@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: URIRef, XSD and PROV go.",
     "LD Python: Namespace, URIRef, Literal and the whole rdflib.namespace import go (the region writes sem:/owl:/rdfs:/skos:/dcterms: names). The five @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

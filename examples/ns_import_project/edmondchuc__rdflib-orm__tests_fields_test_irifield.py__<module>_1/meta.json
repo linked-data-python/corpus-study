@@ -68,5 +68,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "The extracted header is only the three provenance comment lines (the region is the whole module, its imports included): nothing to remove, the two header-variant files are copies of the optimized ones."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "custom:pytest-functions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "custom:pytest-functions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "custom:pytest-functions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "custom:pytest-functions",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

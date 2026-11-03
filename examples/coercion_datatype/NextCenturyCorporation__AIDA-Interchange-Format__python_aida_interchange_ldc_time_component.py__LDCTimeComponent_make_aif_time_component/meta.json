@@ -67,5 +67,31 @@
   "header_optimization_notes": [
     "Python: URIRef goes (unused).",
     "LD Python: the whole `from rdflib import XSD, Literal, URIRef` line goes, and so does `from shim import interchange_ontology`, because the region now writes aif: and xsd: prefixed names. Both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:make_aif_time_component",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:make_aif_time_component",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:make_aif_time_component",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:make_aif_time_component",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

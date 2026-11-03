@@ -71,5 +71,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Both sides: `from rdflib import URIRef, BNode, Literal, XSD` becomes `from rdflib import BNode`, because URIRef, Literal and XSD are unused. `from context_shim import SparqlEngine` stays. translated.ldpy has no @prefix to remove."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_new_fact_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_new_fact_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_new_fact_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_new_fact_node",
+      "diffs": [],
+      "error": null
+    }
+  }
 }
