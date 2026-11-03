@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "Python: RDFS, XSD, Literal and URIRef go from the rdflib import.",
     "LD Python: RDF, RDFS, XSD, Literal, Namespace and URIRef go from the rdflib import (only Graph stays); the rdf:, rdfs: and xsd: @prefix lines go (`a` needs no prefix), prov: stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "optimized_header.py: BNode, Literal, DCTERMS, PROV, RDF, ingest_samples, parse_float_array and parse_sample_info go; the rdflib.namespace import keeps XSD only and the asterism.starrydata import fits on one line. The context lines (SD, _load) stay.",
     "optimized_header.ldpy: the same, except that the rdflib.namespace import goes entirely (the region writes xsd:double / xsd:integer) and `@prefix xsd:` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_curves_aggregates",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_curves_aggregates",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_curves_aggregates",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_curves_aggregates",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

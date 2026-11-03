@@ -73,5 +73,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "optimized_header.py and optimized_header.ldpy: URIRef, Graph, Literal and BNode are unused and go, leaving `from rdflib import Namespace`; the shim import is used. The two headers are the same, so the notation ratio stays 1.0."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:generate_node_id",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:generate_node_id",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:generate_node_id",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:generate_node_id",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

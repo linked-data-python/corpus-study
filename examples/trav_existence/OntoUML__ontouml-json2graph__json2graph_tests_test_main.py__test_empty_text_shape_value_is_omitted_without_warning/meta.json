@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "Python: RDFS, XSD, Graph and Literal go from the rdflib import, the unused shim name write_graph_file goes, and the three shim imports become one.",
     "LD Python: the whole rdflib import goes (nothing of it is used once the reads are islands and the IRI is f<…>), write_graph_file goes, the three shim imports become one; the rdf:, rdfs: and xsd: @prefix lines go, ontouml: stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo + failing-assertion ordinal",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo + failing-assertion ordinal",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo + failing-assertion ordinal",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo + failing-assertion ordinal",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

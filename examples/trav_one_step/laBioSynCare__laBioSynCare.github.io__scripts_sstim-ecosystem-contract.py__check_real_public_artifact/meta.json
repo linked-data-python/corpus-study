@@ -78,5 +78,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Literal, RDFS, DCTERMS, OWL and XSD go from the imports.",
     "optimized_header.ldpy: Literal, Namespace, RDF and RDFS go from the rdflib import, the rdflib.namespace import goes entirely, and four @prefix lines go (rdfs:, dcterms:, owl:, xsd:), leaving eco: and prov:."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_real_public_artifact",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_real_public_artifact",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_real_public_artifact",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_real_public_artifact",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

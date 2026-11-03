@@ -84,5 +84,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Graph, SKOS, OWL and RDFS are unused and go; the two rdflib imports become `from rdflib import DCTERMS, RDF, Namespace`. The shim import is used whole.",
     "optimized_header.ldpy: both rdflib imports go (nothing of them is used once DH and SCHEMA are prefixes) and so does `@prefix rdf:` (the outer pattern uses `a`); dcterms:, schema: and dh: stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

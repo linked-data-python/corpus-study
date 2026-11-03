@@ -95,5 +95,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused: `import rdflib` is the whole header on both sides and the region calls `rdflib.Graph()`. The two header-variant files are copies of the optimized ones."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:removeBlankNodesMultipleMaps",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:removeBlankNodesMultipleMaps",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:removeBlankNodesMultipleMaps",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:removeBlankNodesMultipleMaps",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

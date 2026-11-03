@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "Python: List, Optional, Tuple, RDF, URIRef and PinIR go; RDFS is merged into the rdflib import.",
     "LD Python: List, Optional, Tuple, RDF, URIRef, RDFS (replaced by rdfs:) and PinIR go, and the unused `@prefix rdf:`; rdfs: and sh: stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_parse_single_property_shape",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_parse_single_property_shape",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_parse_single_property_shape",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_parse_single_property_shape",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

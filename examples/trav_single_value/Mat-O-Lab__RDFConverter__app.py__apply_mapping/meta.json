@@ -77,7 +77,7 @@
     "optimized.py: in the row loop the inner `if template_url and template_content:` is removed (the enclosing if already requires both, and neither is reassigned); `next(joined_graph.objects(data_node, property), None)` becomes `joined_graph.value(data_node, property)`; the else branch adds `Graph().parse(data=template_content)` without the temp_template_graph variable (still a separate graph, so no template binding reaches joined_graph).",
     "Kept as loops: the column print loop (it prints per column) and the two loops that fill for_copy_to_set and add its triples, because the region is module state and their loop variables (data, subject, predicate, object) are module values the driver compares; a comprehension would leave other final values.",
     "optimized.ldpy, from optimized.py: only prefixed names in Python position (`data_graph[: rdf:type : csvw:Column]`, `next(data_graph[: rdf:type : csvw:TableGroup])`, `value(..., csvw:propertyUrl, ...)`, `value(row, csvw:describes)`).",
-    "Rule 4, measured: `next(iter(m{ ?tablegroup a csvw:TableGroup }(data_graph)))` +4 tokens, `m{ ?column a csvw:Column }(data_graph)` +1, `m{ {row} csvw:describes ?data_node }(data_graph).first()` +5, `+{ {subject} {predicate} {row_ns[object]} }(joined_graph)` +4 (both adds) \u2014 all kept as Python. The notation ratio is above 1 only because the translated header carries five @prefix lines, three unused (see the header variant).",
+    "Rule 4, measured: `next(iter(m{ ?tablegroup a csvw:TableGroup }(data_graph)))` +4 tokens, `m{ ?column a csvw:Column }(data_graph)` +1, `m{ {row} csvw:describes ?data_node }(data_graph).first()` +5, `+{ {subject} {predicate} {row_ns[object]} }(joined_graph)` +4 (both adds) — all kept as Python. The notation ratio is above 1 only because the translated header carries five @prefix lines, three unused (see the header variant).",
     "No exception to the symmetry."
   ],
   "optimized_constructions": [
@@ -88,5 +88,31 @@
   "header_optimization_notes": [
     "Python: URIRef, BNode, RDFS, PROV, XSD, the shadowed CSVW import and the three unused shim stubs go; RDF joins the rdflib import; the `CSVW = Namespace(...)` line stays (the region and the driver's input block use CSVW).",
     "LD Python: URIRef, BNode, RDFS, PROV, XSD and the three unused shim stubs go; CSVW and RDF stay (the restored context block and the driver's input block use them) and join the rdflib import; the rdfs:, prov: and xsd: @prefix lines go, csvw: and rdf: stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state x 10 inputs",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state x 10 inputs",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state x 10 inputs",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state x 10 inputs",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

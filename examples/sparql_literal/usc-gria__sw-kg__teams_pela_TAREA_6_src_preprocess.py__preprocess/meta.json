@@ -63,5 +63,31 @@
   "header_optimization_notes": [
     "Python: nothing unused in the header; copy of optimized.py.",
     "LD Python: `from rdflib import Graph` goes (unused once `@graph as g` replaces `g = Graph()`)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:preprocess",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:preprocess",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:preprocess",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:preprocess",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

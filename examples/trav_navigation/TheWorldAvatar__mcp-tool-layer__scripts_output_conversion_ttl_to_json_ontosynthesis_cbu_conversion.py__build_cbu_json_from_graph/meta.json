@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "Python: Graph and Literal go; the rdflib.namespace OWL import is merged into the rdflib line.",
     "LD Python: the @prefix rdf: line goes (the region writes `a`); the other four prefixes are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

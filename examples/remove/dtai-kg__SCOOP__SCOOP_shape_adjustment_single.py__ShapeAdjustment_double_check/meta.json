@@ -79,5 +79,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused: the Python header is only the provenance comment and the LD Python header only adds the `sh:` prefix, which is used. The two header-variant files are copies of the optimized ones."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:double_check",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:double_check",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:double_check",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:double_check",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

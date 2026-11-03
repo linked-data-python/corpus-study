@@ -105,5 +105,31 @@
   "header_optimization_notes": [
     "Python: `from rdflib.namespace import Namespace` and `import sys` go; URIRef, Literal and XSD are imported in one line from rdflib.",
     "LD Python: `from rdflib.namespace import Namespace` and `import sys` go; `import rdflib` and both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

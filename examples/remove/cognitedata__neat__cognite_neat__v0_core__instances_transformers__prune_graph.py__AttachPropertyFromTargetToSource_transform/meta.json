@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "Python: `cast`, Namespace and URIRef go; the two shim imports are merged into one line.",
     "LD Python: the same lines go and the same merge is made (the translation's header has no @prefix)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:transform",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:transform",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:transform",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:transform",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

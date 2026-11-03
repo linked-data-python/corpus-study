@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Union, Tuple, BNode, Literal and Identifier are unused and go; the rdflib imports become `from rdflib import RDF, Graph, Node, URIRef`.",
     "optimized_header.ldpy: the same names go, and RDF too (replaced by rdf:type): `from rdflib import Graph, Node, URIRef`. Both `@prefix` lines (fhir:, rdf:) are used. Even so the notation ratio stays above 1 (1.018)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:codeable_concept_code",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:codeable_concept_code",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:codeable_concept_code",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:codeable_concept_code",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

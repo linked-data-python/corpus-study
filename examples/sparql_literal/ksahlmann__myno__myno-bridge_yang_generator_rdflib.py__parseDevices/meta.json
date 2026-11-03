@@ -60,5 +60,31 @@
   "header_optimization_notes": [
     "Python: the unused prepareQuery import goes; initNs keeps only onem2m (rdf and base are no longer used by the query).",
     "LD Python: @prefix rdf: and base: go; onem2m: stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parseDevices",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parseDevices",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parseDevices",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parseDevices",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

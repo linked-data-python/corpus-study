@@ -86,5 +86,31 @@
   "header_optimization_notes": [
     "Python: Dict, List, Optional, Tuple, RDFS, URIRef, Literal and BNode go; Graph, SH and RDF are merged into one import.",
     "LD Python: the same imports go, and SH, RDF too; the rdf: and rdfs: @prefix lines go (`a` needs neither); sh: is kept."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_shapes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_shapes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_shapes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_shapes",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

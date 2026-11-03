@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "Python: the unused Graph import goes.",
     "LD Python: the unused Graph import and the `@prefix rdf:` line go (the loop pattern uses `a`); `@prefix solid:` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:audit_type_index_body",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:audit_type_index_body",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:audit_type_index_body",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:audit_type_index_body",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

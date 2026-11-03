@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "Python: the unused prepareQuery import goes, and the initNs dict keeps only the base and onem2m entries the query uses (rdf, om-2 and time go: the counterpart of unused @prefix lines).",
     "LD Python: @prefix rdf:, om-2: and time: go (unused); base: and onem2m: stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_event_functions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_event_functions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_event_functions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_event_functions",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

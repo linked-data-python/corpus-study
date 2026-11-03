@@ -69,5 +69,31 @@
   "header_optimization_notes": [
     "Python: URIRef goes; the rdflib and rdflib.namespace imports are merged (`from rdflib import PROV, RDF, Graph, Namespace`).",
     "LD Python: nothing is unused; the two rdflib imports are merged (`from rdflib import Graph, prov:, rdf:`); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_shacl_rule_attribution",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_shacl_rule_attribution",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_shacl_rule_attribution",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_shacl_rule_attribution",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

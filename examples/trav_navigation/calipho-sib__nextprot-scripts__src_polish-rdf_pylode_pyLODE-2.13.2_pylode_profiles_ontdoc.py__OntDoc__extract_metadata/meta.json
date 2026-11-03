@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "Python: BNode, DC, PROF and RDFS go; the imports are sorted (Literal, URIRef).",
     "LD Python: nothing unused (the translation had already dropped URIRef and BNode, and imports exactly the six prefixes used): optimized_header.ldpy is a copy of optimized.ldpy."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:extract_metadata_region",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:extract_metadata_region",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:extract_metadata_region",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:extract_metadata_region",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

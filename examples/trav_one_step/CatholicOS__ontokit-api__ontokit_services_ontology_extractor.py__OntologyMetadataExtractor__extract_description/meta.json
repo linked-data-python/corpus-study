@@ -84,5 +84,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Literal and Namespace are unused and go; the two imports become `from rdflib import DC, DCTERMS, OWL, RDF, RDFS, Graph, URIRef`.",
     "optimized_header.ldpy: Literal, Namespace and the whole rdflib.namespace import go (`from rdflib import Graph, URIRef`), and `@prefix rdf:` too (the pattern uses `a`); dc:, dcterms:, owl: and rdfs: stay. The notation ratio goes from 1.108 to 0.992."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_description",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_description",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_description",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_description",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

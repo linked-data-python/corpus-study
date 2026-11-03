@@ -52,7 +52,7 @@
   },
   "optimization_status": "final",
   "optimization_notes": [
-    "Python: the runs of `g.add((\u2026))` become `g += [triple, \u2026]` lists (Graph.__iadd__ is typed `Iterable[_TripleType]`, and addN asserts the terms are Nodes as add does); `BASE[G.t_ns + node_name] if t_box else BASE[G.a_ns + node_name]` becomes `BASE[(G.t_ns if t_box else G.a_ns) + node_name]`; the split `g.add((data_node, RDFS.label, Literal(\u2026)))` is written on one line; `if len(triples) > 0` becomes `if triples`; the `_translate_triples` call loses its one-argument-per-line layout. `triples != []` stays: on an empty tuple the original raises IndexError, which `if triples and \u2026` would hide.",
+    "Python: the runs of `g.add((…))` become `g += [triple, …]` lists (Graph.__iadd__ is typed `Iterable[_TripleType]`, and addN asserts the terms are Nodes as add does); `BASE[G.t_ns + node_name] if t_box else BASE[G.a_ns + node_name]` becomes `BASE[(G.t_ns if t_box else G.a_ns) + node_name]`; the split `g.add((data_node, RDFS.label, Literal(…)))` is written on one line; `if len(triples) > 0` becomes `if triples`; the `_translate_triples` call loses its one-argument-per-line layout. `triples != []` stays: on an empty tuple the original raises IndexError, which `if triples and …` would hide.",
     "LD Python: the same lines with `@graph g`, the three triple lists as `+{ }` blocks sharing subjects with `;` and `a`, the two single `g.add` as `+{ }`, and the guard `g.value(data_node, SNS.has_value) is None` as `not m{ {data_node} {SNS.has_value} ?v }`; each island was measured against its rdflib form and is shorter (guard 2 tokens, the single adds 4 and 7). No exception to the symmetry rule."
   ],
   "optimized_constructions": [
@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "Python: OWL, BNode, Input, Node, Output, _get_graph_hash and serialize_and_convert_to_networkx go; the flowrep_to_networkx import fits on one line.",
     "LD Python: the same, plus RDF and RDFS (written `a` and rdfs:); the single @prefix rdfs: is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_wf_io_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_wf_io_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_wf_io_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_wf_io_to_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

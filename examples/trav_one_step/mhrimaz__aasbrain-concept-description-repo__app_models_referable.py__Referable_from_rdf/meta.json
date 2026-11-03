@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "optimized_header.py is a copy of optimized.py: `import rdflib` (annotations) and the five shim names are all used.",
     "optimized_header.ldpy drops `AASNameSpace` from the shim import: f<…> with @base replaced its only use. `@base` stays (used)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:from_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:from_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:from_rdf",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:from_rdf",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

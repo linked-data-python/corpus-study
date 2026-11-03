@@ -64,5 +64,31 @@
   "header_optimization_notes": [
     "optimized_header.py is a copy of optimized.py: every header import and constant is used by the region or by the restored context.",
     "optimized_header.ldpy drops `from rdflib.namespace import SKOS, RDFS, OWL`: the restored `subjects` and the region use skos:, rdfs:, owl: prefixed names. The three @prefix lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -73,12 +73,38 @@
     "@prefix",
     "@graph",
     "s{ }",
-    "f<\u2026>",
+    "f<…>",
     "prefixed name"
   ],
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python: the three rdflib imports go (prepareQuery is gone); typing and the VocabularyStore shim stay.",
     "LD Python: the three rdflib imports go (f<...> replaces rdflib.URIRef); typing and @prefix skos stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:narrower",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:narrower",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:narrower",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:narrower",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

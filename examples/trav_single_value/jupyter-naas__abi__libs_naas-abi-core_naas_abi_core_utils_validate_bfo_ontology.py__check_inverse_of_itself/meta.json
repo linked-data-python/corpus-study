@@ -75,5 +75,31 @@
   "header_optimization_notes": [
     "Python: nothing is unused (Graph and URIRef in the annotations, OWL, _short, _label); optimized_header.py is a copy of optimized.py.",
     "LD Python: the `@prefix owl:` line is unused and goes; optimized_header.ldpy is identical to optimized_header.py."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_inverse_of_itself",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_inverse_of_itself",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_inverse_of_itself",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_inverse_of_itself",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

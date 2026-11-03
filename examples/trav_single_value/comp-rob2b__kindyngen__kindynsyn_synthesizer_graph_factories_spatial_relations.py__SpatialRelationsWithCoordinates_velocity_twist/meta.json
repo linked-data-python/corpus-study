@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "Python: collection, BNode, Literal and six of the seven namespace classes go; RDF and GEOM_ENT stay.",
     "LD Python: the rdflib import and the whole namespace-class import go (the region writes `a` and geom_ent: names); only `from kindynsyn.namespaces import geom_ent:` is left."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:velocity_twist",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:velocity_twist",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:velocity_twist",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:velocity_twist",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

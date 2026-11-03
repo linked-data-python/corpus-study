@@ -87,5 +87,31 @@
   "header_optimization_notes": [
     "Python: Namespace goes; OWL is imported from rdflib with RDF, RDFS, Graph and URIRef on one line.",
     "LD Python: Namespace, RDF, RDFS and OWL go (Graph for the annotation and URIRef for isinstance stay); the three @prefix lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_property_no_type",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_property_no_type",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_property_no_type",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_property_no_type",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

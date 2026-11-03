@@ -82,5 +82,31 @@
   "header_optimization_notes": [
     "Python: Optional (the annotation went with the loop), Graph, Namespace, URIRef, OWL, RDFS, XSD, COORD_CUSTOM, COORD_SEQUENTIAL and HAS_DESCRIPTION go; RDF is imported from rdflib with Literal; the shim import fits on one line.",
     "LD Python: the same, plus RDF, AGENTO and AGENTOSCIN (replaced by the prefixes); @prefix rdf: goes (rdf:type is written `a`)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

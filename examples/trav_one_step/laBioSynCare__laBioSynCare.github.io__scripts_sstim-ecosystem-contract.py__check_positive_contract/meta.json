@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Literal, RDFS, DCTERMS and OWL go from the imports.",
     "optimized_header.ldpy: Literal, RDFS and Namespace go from the rdflib import (RDF stays, the header's `activities` line uses it), the rdflib.namespace import goes entirely, and four @prefix lines go (rdf:, rdfs:, dcterms:, owl:), leaving eco:, prov: and xsd:."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state x4 scenarios",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state x4 scenarios",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state x4 scenarios",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state x4 scenarios",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

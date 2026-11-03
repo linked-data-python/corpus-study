@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "Python: Optional, Tuple, List, Literal, RDF and Node go.",
     "LD Python: the same, plus FHIR (replaced by the IRI and the fhir: prefix); the @prefix fhir: is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extension",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extension",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extension",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extension",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

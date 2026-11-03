@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "Python: DCTERMS goes; SH and _STRUCTURAL_NS (read by the region) stay with RDF, RDFS, OWL and Namespace.",
     "LD Python: the same, plus the unused `@prefix rdfs:` line; optimized_header.ldpy is identical to optimized_header.py."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_nested_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_nested_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_nested_node",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_nested_node",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

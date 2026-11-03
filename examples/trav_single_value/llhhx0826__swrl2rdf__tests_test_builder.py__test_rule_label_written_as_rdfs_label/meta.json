@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "Python: SameIndividualAtom goes; SWRL = Namespace(...) and EX stay (both read).",
     "LD Python: SameIndividualAtom, Namespace and RDF go, and so do `@prefix rdf:` (`a` replaces it) and `@prefix rdfs:` (the label read is Python); `@prefix swrl:` and RDFS stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_rule_label_written_as_rdfs_label",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_rule_label_written_as_rdfs_label",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_rule_label_written_as_rdfs_label",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_rule_label_written_as_rdfs_label",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

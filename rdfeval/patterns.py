@@ -20,7 +20,7 @@ stage:
 3. writes the review page ``results/review/patterns.html``: each rule with
    its conditions of use, its counts, its shortest real instances and the
    places where its rdflib call was kept in Python (counter-examples); the
-   verdicts go into ``results/review/pattern_verdicts.json``;
+   verdicts go into ``results/raw/pattern_verdicts.json``;
 4. computes the **coverage** (:func:`coverage`): a pair is covered when its
    driver proves the equivalence, its classification is
    ``directly-expressible``, no hunk brings in Python names the original
@@ -46,14 +46,16 @@ import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
-from .config import RESULTS_SUMMARY, ROOT
+from .config import RESULTS_RAW, RESULTS_SUMMARY, ROOT
 from .constructions import NOT_SHIMS
 from .ldpy_metrics import _ISLAND_TOKEN, island_spans
 
 REVIEW_DIR = ROOT / "results" / "review"
 PATTERNS_JSON = REVIEW_DIR / "patterns.json"
 PATTERNS_HTML = REVIEW_DIR / "patterns.html"
-VERDICTS = REVIEW_DIR / "pattern_verdicts.json"
+# The verdicts are the reviewer's input, kept under version control like the
+# audit's (results/review/ is generated and ignored).
+VERDICTS = RESULTS_RAW / "pattern_verdicts.json"
 COVERAGE = RESULTS_SUMMARY / "pattern_coverage.json"
 
 VERDICT_VALUES = ("approved", "rejected", "needs-work")
@@ -767,7 +769,7 @@ border-bottom:1px solid var(--line)}
 <p>Approve a rule when every instance of it, under its conditions, is the
 translation a competent user would write and is equivalent. Verdicts are
 kept in this browser until exported: save the file as
-<code>results/review/pattern_verdicts.json</code>, then rerun
+<code>results/raw/pattern_verdicts.json</code>, then rerun
 <code>rdfeval patterns</code>.</p>
 {{CARDS}}
 <script>

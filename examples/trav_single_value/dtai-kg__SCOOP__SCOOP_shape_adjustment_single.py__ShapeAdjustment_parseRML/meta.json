@@ -81,5 +81,31 @@
   "header_optimization_notes": [
     "Python: URIRef, Literal, Namespace, BNode, RDFS, XSD and OWL go; RDF and Graph are merged into one `from rdflib import RDF, Graph`.",
     "LD Python: the same imports go, and RDF too (the region writes rdf:type); `@prefix rdf:` is used and stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:parseRML (hand-rolled: self.rml_parsed compared by value, self has no useful __eq__)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:parseRML (hand-rolled: self.rml_parsed compared by value, self has no useful __eq__)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:parseRML (hand-rolled: self.rml_parsed compared by value, self has no useful __eq__)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:parseRML (hand-rolled: self.rml_parsed compared by value, self has no useful __eq__)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

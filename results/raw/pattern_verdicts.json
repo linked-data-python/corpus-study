@@ -1,0 +1,389 @@
+{
+ "reviewer": null,
+ "rules": {
+  "term: {x} ← x": {
+   "verdict": null,
+   "comment": null
+  },
+  "@graph ← (receiver)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: p:l ← NS.l": {
+   "verdict": null,
+   "comment": null
+  },
+  "@prefix ← rdflib namespace": {
+   "verdict": null,
+   "comment": null
+  },
+  "+{ } ← .add()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: a ← RDF.type": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: ; ← repeated subject": {
+   "verdict": null,
+   "comment": null
+  },
+  "@prefix ← Namespace()": {
+   "verdict": null,
+   "comment": null
+  },
+  "(g) ← receiver": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·first ← .value()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·for ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: . ← several triples": {
+   "verdict": null,
+   "comment": null
+  },
+  "from … import p: ← import": {
+   "verdict": null,
+   "comment": null
+  },
+  "@prefix ← namespace defined outside the region": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: <iri> ← URIRef('…')": {
+   "verdict": null,
+   "comment": null
+  },
+  "-{ } ← .remove()": {
+   "verdict": null,
+   "comment": null
+  },
+  "@prefix ← IRIs written in full": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·value ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·for ← .subjects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "@prefix ← (none)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: p:l ← (other)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: p:l ← NS['l']": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·bool ← contains": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: p:l ← p:l (in a query string)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: a ← rdf:type written otherwise": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: \"s\" ← Literal(\"s\")": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: [ ] ← BNode()": {
+   "verdict": null,
+   "comment": null
+  },
+  "@bindings ← .add()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·for ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: {x}^^p:t ← Literal(x, datatype=)": {
+   "verdict": null,
+   "comment": null
+  },
+  "f<…> ← string building": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: p:{x} ← NS[x]": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: {x} ← Literal(x)": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·for ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: {x}@l ← Literal(x, lang=)": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·collect ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·bool ← .value()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·collect ← .subjects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·first ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·truth ← contains": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: \"s\"^^p:t ← Literal(\"s\", datatype=)": {
+   "verdict": null,
+   "comment": null
+  },
+  "@prefix ← .bind()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: <iri> ← string": {
+   "verdict": null,
+   "comment": null
+  },
+  "@graph as g ← g = Graph()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·for ← .predicate_objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·execute ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·bool ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: literal outside island": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·for ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·next ← .value()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: \"s\"@l ← Literal(\"s\", lang=)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: , ← repeated subject and predicate": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: p:l ← URIRef('…')": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·collect ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·first ← .subjects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·for ← .subject_objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← .subject_objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← .subjects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·collect ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "f<…> ← URIRef(f'…')": {
+   "verdict": null,
+   "comment": null
+  },
+  "f{ }·value ← (no graph call)": {
+   "verdict": null,
+   "comment": null
+  },
+  "g{ } ← .add()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·next ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·bool ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: \"s\" ← \"s\"": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: n ← Literal(n)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: {x} ← URIRef(x)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: {x}@l ← (other)": {
+   "verdict": null,
+   "comment": null
+  },
+  "term: {x}^^p:t ← (other)": {
+   "verdict": null,
+   "comment": null
+  },
+  "+{ } ← .addN()": {
+   "verdict": null,
+   "comment": null
+  },
+  "base": {
+   "verdict": null,
+   "comment": null
+  },
+  "f{ }·value ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·bool ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·bool ← .predicates()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·collect ← .predicate_objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·collect ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·collect ← .value()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·count ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·first ← .query()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·first ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·next ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·truth ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·truth ← .predicates()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·truth ← .subjects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·truth ← .value()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← .subject_predicates()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← .triples()": {
+   "verdict": null,
+   "comment": null
+  },
+  "m{ }·value ← contains": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·execute ← .items()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·execute ← .update()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·for ← .items()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·for ← .objects()": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·value ← (no graph call)": {
+   "verdict": null,
+   "comment": null
+  },
+  "s{ }·value ← .items()": {
+   "verdict": null,
+   "comment": null
+  }
+ }
+}

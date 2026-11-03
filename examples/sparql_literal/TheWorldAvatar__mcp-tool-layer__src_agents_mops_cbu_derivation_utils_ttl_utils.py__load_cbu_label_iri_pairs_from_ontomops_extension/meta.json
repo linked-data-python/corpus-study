@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "Python: Graph goes (unused); Namespace, RDF, RDFS, os and the shim import are used.",
     "LD Python: Graph, Namespace, RDF and RDFS go (the region uses only islands now) and the unused `@prefix rdf:` (the islands say `a`); os, the shim import and `@prefix rdfs:` stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:load_cbu_label_iri_pairs_from_ontomops_extension",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:load_cbu_label_iri_pairs_from_ontomops_extension",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:load_cbu_label_iri_pairs_from_ontomops_extension",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:load_cbu_label_iri_pairs_from_ontomops_extension",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

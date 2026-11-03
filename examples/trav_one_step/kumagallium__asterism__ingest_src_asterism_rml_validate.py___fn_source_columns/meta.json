@@ -70,5 +70,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused in either header: the shim import and the four predicate tuples are all read by the region, and there is no @prefix line. optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_fn_source_columns",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_fn_source_columns",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_fn_source_columns",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_fn_source_columns",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

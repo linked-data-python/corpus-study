@@ -69,5 +69,31 @@
   "header_optimization_notes": [
     "Python: BNode, DC and RDFS go; the rdflib import is sorted (Literal, URIRef).",
     "LD Python: URIRef, BNode and the whole rdflib.namespace import go (the prefixes replace them); @prefix dc:, rdf: and rdfs: go (rdf:type is written `a`); markdown and Literal stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_concept_scheme",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_concept_scheme",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_concept_scheme",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_extract_concept_scheme",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

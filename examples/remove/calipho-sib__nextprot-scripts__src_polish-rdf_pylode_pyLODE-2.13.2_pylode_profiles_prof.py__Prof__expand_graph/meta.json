@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: OWL and `from itertools import chain` go; the namespace import keeps DC, DCTERMS, PROF, RDF, RDFS, SDO, SKOS.",
     "LD Python: the whole `rdflib.namespace` import line and `from itertools import chain` go (every term is a prefixed name); the six @prefix lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_expand_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

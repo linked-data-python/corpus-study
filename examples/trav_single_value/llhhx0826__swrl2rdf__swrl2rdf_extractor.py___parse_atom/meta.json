@@ -81,5 +81,31 @@
   "header_optimization_notes": [
     "Python: Set, Literal, Namespace, RDFS and the shim names IRITerm, LiteralTerm, Rule and Variable go; RDF is merged into `from rdflib import BNode, Graph, RDF, URIRef`. The SWRL_* constants are all read and stay.",
     "LD Python: the same imports go, and RDF too (the region writes `a`); there was no @prefix line."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_parse_atom",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_parse_atom",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_parse_atom",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_parse_atom",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

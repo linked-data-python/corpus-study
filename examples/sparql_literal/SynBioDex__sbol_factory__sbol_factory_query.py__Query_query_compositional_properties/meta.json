@@ -77,7 +77,7 @@
   "optimized_constructions": [
     "@prefix",
     "s{ }",
-    "f<\u2026>",
+    "f<…>",
     "call suffix (g)",
     "prefixed name",
     "variable"
@@ -85,6 +85,32 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python: the header holds no import, nothing to remove (copy of optimized.py).",
-    "LD Python: `from rdflib import URIRef` goes (replaced by f<\u2026>); the four @prefix lines are used."
-  ]
+    "LD Python: `from rdflib import URIRef` goes (replaced by f<…>); the four @prefix lines are used."
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_compositional_properties",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_compositional_properties",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_compositional_properties",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:query_compositional_properties",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

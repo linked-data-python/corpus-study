@@ -78,5 +78,31 @@
   "header_optimization_notes": [
     "Python: Graph, Literal, RDFS and Namespace go from the rdflib import (URIRef, BNode, RDF, SH stay).",
     "LD Python: `import ldpy`, Graph, URIRef, Literal, RDF, RDFS and Namespace go (BNode and SH stay), and so does `@prefix rdf:`, which the region no longer uses once the RDF lists are built by Collection; `@prefix sh:` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:combine_shapes_with_same_path",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:combine_shapes_with_same_path",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:combine_shapes_with_same_path",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:combine_shapes_with_same_path",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

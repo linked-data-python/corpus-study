@@ -72,5 +72,31 @@
   "header_optimization_notes": [
     "Python: the five unused shim functions (reorder_jsonld, sort_subjects, sort_predicates, load_json_from_url, extract_datatype_map) go; the two rdflib imports are merged.",
     "LD Python: the same five shim functions go; `from rdflib import Graph, xsd:` and `@prefix ex:` are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_enrich_graph_datatypes_typecoercion",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_enrich_graph_datatypes_typecoercion",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_enrich_graph_datatypes_typecoercion",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_enrich_graph_datatypes_typecoercion",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

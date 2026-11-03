@@ -77,5 +77,31 @@
   "header_optimization_notes": [
     "Python: Graph and BNode go; RDF and SH stay.",
     "LD Python: both rdflib import lines go (Graph, RDF, BNode, SH: the region uses rdf: and sh: prefixed names); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:attribute_shapes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:attribute_shapes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:attribute_shapes",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:attribute_shapes",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -83,5 +83,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Both sides drop RDF and RDFS, unused in the original too (they only appear in the comment `# RDF.type,`): optimized_header.py keeps `from rdflib.namespace import OWL`, optimized_header.ldpy removes the rdflib.namespace import altogether; BNode and `@prefix owl:` stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

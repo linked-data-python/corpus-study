@@ -77,5 +77,31 @@
   "header_optimization_notes": [
     "Python: BNode goes from the rdflib import.",
     "LD Python: the whole rdflib import goes (g{ }, the literals and f<…> name no rdflib class); the three EX_* constants stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_two_var_two_rows (returned type, vars, bindings, rows)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_two_var_two_rows (returned type, vars, bindings, rows)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_two_var_two_rows (returned type, vars, bindings, rows)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_two_var_two_rows (returned type, vars, bindings, rows)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "Python: Graph goes (unused, the shim imports its own), and `from rdflib.namespace import DC, RDFS, SKOS` goes (shadowed by the module's own Namespace definitions); the four Namespace lines stay.",
     "LD Python: Graph, Namespace, RDF and the rdflib.namespace import go; URIRef (the harness's allow_properties) and the shim import stay; the four @prefix lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parse_triples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parse_triples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parse_triples",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:parse_triples",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

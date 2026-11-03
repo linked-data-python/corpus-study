@@ -67,5 +67,31 @@
   "header_optimization_notes": [
     "Python: nothing is unused; the three `from spdx_shim import` lines are merged into one.",
     "LD Python: nothing is unused; the three `from spdx_shim import` lines (two prefixes, two functions) are merged into one."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_add_file_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_add_file_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_add_file_to_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_add_file_to_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -82,5 +82,31 @@
   "header_optimization_notes": [
     "Python: nothing unused (Namespace, TIME, TFUN and AFTER are read by the region; the _context import registers tfun:isAfter).",
     "LD Python: `Namespace` and `TIME` go (the region reads @prefix time:/tfun:/after:); the _context import stays for its side effect."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

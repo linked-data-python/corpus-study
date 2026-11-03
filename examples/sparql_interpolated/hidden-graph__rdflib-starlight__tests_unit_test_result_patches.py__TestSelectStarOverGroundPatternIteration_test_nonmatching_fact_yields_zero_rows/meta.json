@@ -70,5 +70,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused in either header (the EX_* constants are read by the Python region; the ldpy header imports only _graph_with_one_fact): the two files are copies of the optimized ones. Draft for the same driver reason as the optimized artefacts (verified equivalent by the scratch copy of the driver)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_nonmatching_fact_yields_zero_rows (graph seam, failing assert, plain and starlight-patched Result.__iter__)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_nonmatching_fact_yields_zero_rows (graph seam, failing assert, plain and starlight-patched Result.__iter__)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_nonmatching_fact_yields_zero_rows (graph seam, failing assert, plain and starlight-patched Result.__iter__)",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_nonmatching_fact_yields_zero_rows (graph seam, failing assert, plain and starlight-patched Result.__iter__)",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -73,5 +73,31 @@
   "header_optimization_notes": [
     "Python: `Iterable`, `ResultRow`, `OEO_EXT_NAME` and `ONTOLOGY_ROOT` go (the annotations were removed); defaultdict, Graph and OPEN_ENERGY_ONTOLOGY_NAME stay.",
     "LD Python: the same four names go; the three @prefix lines are all used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:read_oeo_context_information",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:read_oeo_context_information",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:read_oeo_context_information",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:read_oeo_context_information",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

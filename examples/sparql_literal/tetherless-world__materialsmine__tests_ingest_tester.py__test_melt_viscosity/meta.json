@@ -57,5 +57,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "The header holds only the shim import of disable_test, which the region uses: the two header-variant files are copies of the optimized ones."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:test_melt_viscosity",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_melt_viscosity",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:test_melt_viscosity",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:test_melt_viscosity",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

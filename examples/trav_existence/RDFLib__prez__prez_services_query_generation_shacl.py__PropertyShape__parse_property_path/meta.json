@@ -98,5 +98,31 @@
   "header_optimization_notes": [
     "Python: RDFS, Graph, XSD and Literal go; RDF, SH and Node are imported from rdflib with BNode, Namespace and URIRef (one import instead of three).",
     "LD Python: RDFS, Graph, XSD, Literal, RDF and SH go (RDF and SH are only written as prefixed names); Node joins the rdflib import; the rdfs: and xsd: @prefix lines go, rdf: and sh: stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

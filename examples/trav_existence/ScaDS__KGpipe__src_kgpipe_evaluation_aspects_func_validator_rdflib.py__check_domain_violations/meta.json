@@ -66,5 +66,31 @@
   "header_optimization_notes": [
     "Python: Namespace, XSD and Literal go from the rdflib import.",
     "LD Python: Namespace, RDF, RDFS, OWL, XSD and Literal go (only Graph stays); the three @prefix lines are all used and stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_domain_violations",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_domain_violations",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_domain_violations",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:check_domain_violations",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

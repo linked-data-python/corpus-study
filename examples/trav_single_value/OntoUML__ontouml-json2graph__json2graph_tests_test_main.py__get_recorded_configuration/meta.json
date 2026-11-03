@@ -83,5 +83,31 @@
   "header_optimization_notes": [
     "Python: RDF, RDFS, XSD, Literal and URIRef go from the rdflib import; Graph (annotation) and Namespace (PROV) stay.",
     "LD Python: RDF, RDFS, XSD, Literal, Namespace and URIRef go; Graph stays; the single `@prefix prov:` is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_recorded_configuration",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_recorded_configuration",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_recorded_configuration",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_recorded_configuration",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

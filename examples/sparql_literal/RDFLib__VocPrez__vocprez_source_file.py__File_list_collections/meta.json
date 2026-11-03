@@ -75,5 +75,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused in either header (the Python header has no import; both @prefix lines are used by the m{ }): the two files are copies of the optimized ones."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:list_collections",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:list_collections",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:list_collections",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:list_collections",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

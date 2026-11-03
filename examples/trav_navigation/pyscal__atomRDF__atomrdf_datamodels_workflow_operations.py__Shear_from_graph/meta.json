@@ -62,5 +62,31 @@
   "header_optimization_notes": [
     "optimized_header.py: LDO, PLDO, PODO, CDCO, Literal and ASMO are unused and go; the two shim imports become `from atomrdf_context import get_sample_object, classmethod, CMSO, PROV`.",
     "optimized_header.ldpy: nothing unused (get_sample_object, classmethod, cmso: and prov: are all used): a copy of optimized.ldpy."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:from_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:from_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:from_graph",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:from_graph",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -108,5 +108,31 @@
   "header_optimization_notes": [
     "optimized_header.py (OK): io (the StringIO parse is gone), URIRef, Namespace and Provenance are unused and go; `from rdflib import PROV, RDF, Graph, Literal`.",
     "optimized_header.ldpy: io, URIRef, Namespace, Provenance, RDF and PROV go (`from rdflib import Graph, Literal`); both `@prefix` lines are used. Draft for the same reason as optimized.ldpy (driver linecache priming); OK in the scratch copy."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:demo",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

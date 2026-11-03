@@ -64,5 +64,31 @@
   "header_optimization_notes": [
     "Python: Graph, Literal, twelve of the fourteen rdflib.namespace names, eleven of the fourteen model classes and four of the six common helpers go; OWL and SH join the rdflib import; the four context helpers of the region's own module all stay.",
     "LD Python: the same, except that OWL and SH go too (they are prefixed names now); the twelve unused @prefix lines go, owl: and sh: stay."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:load_component_model",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:load_component_model",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:load_component_model",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:load_component_model",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

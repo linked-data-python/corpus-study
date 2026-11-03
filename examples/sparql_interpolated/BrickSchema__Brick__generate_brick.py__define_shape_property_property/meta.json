@@ -98,5 +98,31 @@
   "header_optimization_notes": [
     "Python: URIRef goes from the rdflib import; the shim import keeps BSH, RDF, OWL, SH, brickschema and add_relationships on one line (BRICK, REC, RDFS, TAG, SOSA, SKOS, QUDT, VCARD, REF go).",
     "LD Python: URIRef goes; ten of the thirteen @prefix lines go (bsh, owl, sh stay), and so does `A = rdf:type`, which the region does not use (it writes `a`); `G` stays as the default argument."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:define_shape_property_property",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:define_shape_property_property",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:define_shape_property_property",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:define_shape_property_property",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

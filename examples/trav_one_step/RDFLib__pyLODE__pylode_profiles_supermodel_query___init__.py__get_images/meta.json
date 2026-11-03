@@ -77,5 +77,31 @@
   "header_optimization_notes": [
     "optimized_header.py: the imports reduced to Graph, URIRef, DCTERMS, SDO, SH, ImageObject and get_descriptions (Dataset, Literal, eleven namespaces and eighteen shim names go); the comment on the pylode shim stays.",
     "optimized_header.ldpy: the same Python imports (DCTERMS, SDO and SH still serve the six graph.value calls) and only `@prefix sdo:` of the fourteen; the island saves one token and the prefix line costs five, so the header variant still leaves the ldpy side slightly longer (notation 1.027)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_images",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_images",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_images",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:get_images",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

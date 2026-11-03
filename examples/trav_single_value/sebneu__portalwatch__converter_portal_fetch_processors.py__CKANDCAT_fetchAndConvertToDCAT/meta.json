@@ -99,5 +99,31 @@
   "header_optimization_notes": [
     "Python: convert_socrata, graph_from_opendatasoft, graph_from_data_gouv_fr and CKANConverter go; the two context_shim imports are merged, and so are URIRef and RDF (`from rdflib import RDF, URIRef`).",
     "LD Python: the same, and RDF too (the region writes `a`); there was no @prefix line."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:fetchAndConvertToDCAT",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:fetchAndConvertToDCAT",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:fetchAndConvertToDCAT",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:fetchAndConvertToDCAT",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

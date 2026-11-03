@@ -86,5 +86,31 @@
   "header_optimization_notes": [
     "optimized_header.py: Path (no longer used by the region), Graph, BNode and ten of the thirteen namespace constants go; the header keeps `from rdflib import Literal, URIRef` and `from context_shim import BRICK, RDFS, SKOS, brickschema`.",
     "optimized_header.ldpy: Path, Graph, BNode, Literal (replaced by language literals) and every namespace constant go, leaving `from rdflib import URIRef` and `from context_shim import brickschema`; ten of the thirteen `@prefix` lines go, brick:, rdfs: and skos: stay. The notation ratio goes from 1.036 to 0.898."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:add_definitions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_definitions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:add_definitions",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_definitions",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

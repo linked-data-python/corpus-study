@@ -71,5 +71,31 @@
   "header_optimization_notes": [
     "Python: collection, BNode, Literal, GEOM_ENT and QUDT_QKIND go; RDF, the seven namespace classes the region reads and uuid_ref stay.",
     "LD Python: the whole rdflib import goes (the type is `a`). RBDYN_OP, QUDT_SCHEMA, GEOM_ENT and QUDT_QKIND go, and so do the unused prefix imports geom_coord:, rbdyn_coord: and qudt_unit:. The five namespace classes still used and the two prefixes rbdyn_op: and qudt_schema: share one import statement."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:inertial_wrench",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:inertial_wrench",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:inertial_wrench",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:inertial_wrench",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

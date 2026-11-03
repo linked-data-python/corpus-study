@@ -81,5 +81,31 @@
   "header_optimization_notes": [
     "Python: RDF goes from the rdflib import.",
     "LD Python: RDF and RDFS go from the rdflib import; the rdf: @prefix line goes, rdfs: stays (LABEL_PREDICATES writes rdfs:label)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_has_label",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_has_label",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_has_label",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_has_label",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

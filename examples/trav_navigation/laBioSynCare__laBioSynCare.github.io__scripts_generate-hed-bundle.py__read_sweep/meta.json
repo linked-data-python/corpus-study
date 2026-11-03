@@ -73,5 +73,31 @@
   "header_optimization_notes": [
     "optimized_header.py: nothing unused (Graph annotates, URIRef builds S, SSTIM, S and local are all used): a copy of optimized.py.",
     "optimized_header.ldpy: URIRef is unused and goes, leaving `from rdflib import Graph`; the one `@prefix sstim:` is used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:read_sweep",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:read_sweep",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:read_sweep",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:read_sweep",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

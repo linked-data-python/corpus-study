@@ -68,5 +68,31 @@
   "header_optimization_notes": [
     "Python: Literal, Namespace and RDFS go; RDF is imported from rdflib with Graph and URIRef (one import instead of two).",
     "LD Python: Literal, Namespace, RDF and RDFS go (Graph and URIRef stay); both @prefix lines go, since the region writes `a` and f<…>, no prefixed name."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_validate_entity_ttl_structure",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_validate_entity_ttl_structure",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_validate_entity_ttl_structure",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_validate_entity_ttl_structure",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

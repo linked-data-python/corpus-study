@@ -78,5 +78,31 @@
   "header_optimization_notes": [
     "Python: URIRef, OWL, RDFS, XSD go, and so do the unused module constants AGENTO, CALLS_CREW, COORD_CUSTOM, COORD_SEQUENTIAL, HAS_DESCRIPTION and HAS_TITLE; RDF and Namespace are imported from rdflib with Graph and Literal. AGENTOSCIN stays (the harness builds its graph with it).",
     "LD Python: the same names go, and @prefix owl:, rdf:, rdfs:, xsd: and agento: with them; the AGENTOSCIN = Namespace(...) definition and the agentoscin: prefix become one `@prefix agentoscin: <...> as AGENTOSCIN .`, which gives the harness its Namespace object, so Namespace goes too."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state + cases",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

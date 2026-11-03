@@ -69,5 +69,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Nothing unused on either side (rdflib for the annotation and RDF.type, the three shim names, no @prefix): optimized_header.py and optimized_header.ldpy are copies of the optimized artefacts."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extract_shacl_constraints",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extract_shacl_constraints",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extract_shacl_constraints",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:extract_shacl_constraints",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

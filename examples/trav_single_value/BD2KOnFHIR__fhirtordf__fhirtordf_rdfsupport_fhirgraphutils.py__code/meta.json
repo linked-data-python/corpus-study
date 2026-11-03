@@ -83,5 +83,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Both sides drop Tuple, List (typing), BNode, Literal, RDF (rdflib) and Identifier (rdflib.term); FHIR stays on both sides (FHIR.Coding.*), and so does `@prefix fhir:` (used by the island)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:code",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:code",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:code",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:code",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

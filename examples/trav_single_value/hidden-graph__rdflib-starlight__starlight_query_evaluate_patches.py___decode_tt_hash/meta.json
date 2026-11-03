@@ -76,5 +76,31 @@
   "header_optimization_notes": [
     "Python: Literal and Variable go; RDF is merged into `from rdflib import RDF, URIRef`.",
     "LD Python: Literal, Variable and the RDF import go; `@prefix rdf:` is used and stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:_decode_tt_hash",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_decode_tt_hash",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:_decode_tt_hash",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:_decode_tt_hash",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

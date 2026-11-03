@@ -82,5 +82,31 @@
   "header_optimization_notes": [
     "Python: BNode, Literal, Namespace, RDF, XSD and ConverterSelf go (ShaclConfig stays, named in the string annotation of config).",
     "LD Python: the same, plus RDFS; @prefix rdf: and xsd: go, rdfs: stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:convert_for_class",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:convert_for_class",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:convert_for_class",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:convert_for_class",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

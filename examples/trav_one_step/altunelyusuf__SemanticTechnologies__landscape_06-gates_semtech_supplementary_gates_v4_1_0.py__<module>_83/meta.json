@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "optimized_header.py: `from rdflib.namespace import RDF, RDFS, OWL, SKOS, DCTERMS, XSD` reduced to RDF, the only one the loop reads.",
     "optimized_header.ldpy: that import line goes entirely (the islands use `a`) and so does `@prefix rdf:`; `@prefix sem:`, Path, Graph and EC stay, since the context lines use them."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

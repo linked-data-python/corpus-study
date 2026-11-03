@@ -63,5 +63,31 @@
   "header_optimization_status": "final",
   "header_optimization_notes": [
     "Python and LD Python (the two headers are the same): Optional, List, Callable, Tuple, OWL and RDF go; Set, URIRef, Graph, BNode and Node stay (annotations and isinstance)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run_primary_subjects",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run_primary_subjects",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run_primary_subjects",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:run_primary_subjects",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

@@ -81,5 +81,31 @@
   "header_optimization_notes": [
     "optimized_header.py is a copy of optimized.py: every imported name is used.",
     "optimized_header.ldpy drops RDFS and OWL from the rdflib import (replaced by prefixed names) and `@prefix xsd:` (the region uses XSD as a namespace object in `str(XSD)`, never xsd: as a prefix)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:is_xsd_primitive",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:is_xsd_primitive",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:is_xsd_primitive",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:is_xsd_primitive",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

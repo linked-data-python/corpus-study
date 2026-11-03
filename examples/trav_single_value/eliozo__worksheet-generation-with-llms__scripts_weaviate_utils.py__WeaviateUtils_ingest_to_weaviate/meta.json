@@ -85,5 +85,31 @@
   "header_optimization_notes": [
     "Python: URIRef and Namespace go (`from rdflib import Graph, RDF`).",
     "LD Python: the whole rdflib import goes (no Graph or RDF left outside the islands: `@graph as graph`, `a`), and so does the `@prefix rdf:` line, which `a` makes unused; only `import sys` stays."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:ingest_to_weaviate",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:ingest_to_weaviate",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:ingest_to_weaviate",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:ingest_to_weaviate",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

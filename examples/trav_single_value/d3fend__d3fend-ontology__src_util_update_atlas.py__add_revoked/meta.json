@@ -74,5 +74,31 @@
   "header_optimization_notes": [
     "Python: RDF, RDFS, BNode, SKOS and the shim's get_graph go; Literal, Namespace, URIRef and _xmlns as _XMLNS stay, and so do the owl/rdfs Namespace lines.",
     "LD Python: the same, and Namespace goes too (owl: and rdfs: are @prefix lines, both used)."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:add_revoked",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_revoked",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:add_revoked",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:add_revoked",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

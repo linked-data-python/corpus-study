@@ -91,5 +91,31 @@
   "header_optimization_notes": [
     "optimized_header.py drops Iterable, Optional, Sequence, Tuple (typing), BNode, Literal, Variable (rdflib) and OWL, RDFS, XSD (rdflib.namespace); keeps Namespace for TOOLKIT_NS.",
     "optimized_header.ldpy drops the same typing names, every rdflib name but Graph (URIRef replaced by f<…>, Namespace unused since TOOLKIT_NS is the toolkit: prefix), the whole rdflib.namespace import, and the unused @prefix owl:, rdfs:, xsd:; keeps @prefix toolkit:, prov:, rdf:."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "entry:explain_triple",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "entry:explain_triple",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "entry:explain_triple",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "entry:explain_triple",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

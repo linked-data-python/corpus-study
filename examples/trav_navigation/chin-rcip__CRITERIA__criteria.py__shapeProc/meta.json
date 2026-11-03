@@ -88,5 +88,31 @@
   "header_optimization_notes": [
     "Python: URIRef, Namespace, NamespaceManager and XSD go (json, Path and Graph stay for the driving code); the rdflib.namespace names are sorted.",
     "LD Python: URIRef and Namespace go; @prefix rdf: (the guard writes `a`) and xsd: (only inside a string) go."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "module-state",
+      "diffs": [],
+      "error": null
+    }
+  }
 }

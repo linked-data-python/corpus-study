@@ -80,5 +80,31 @@
   "header_optimization_notes": [
     "Python: RDF and XSD go from the rdflib.namespace import.",
     "LD Python: the whole rdflib.namespace import goes (owl: and rdfs: replace it); both @prefix lines are used."
-  ]
+  ],
+  "validation_optimized": {
+    "optimized.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_contains_restriction",
+      "diffs": [],
+      "error": null
+    },
+    "optimized.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_contains_restriction",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.py": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_contains_restriction",
+      "diffs": [],
+      "error": null
+    },
+    "optimized_header.ldpy": {
+      "status": "equivalent",
+      "method": "fixture:fixture.ttl entry:_contains_restriction",
+      "diffs": [],
+      "error": null
+    }
+  }
 }
