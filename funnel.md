@@ -462,33 +462,40 @@ module — installed (`nanopub`, `pyshacl`, `apysource`, `plastron`) or
 copied verbatim into a context shim — instead of a `__namespaces__` the
 translator wrote.
 
-### 5.6 Rereading against notation: 70 optimized pairs
+### 5.6 Rereading against notation
 
 A reader will object that a careful rereading of the Python would gain as
-much as the notation. Five regions per stratum, drawn with a seed among the
-proved pairs of the sample (`scripts/draw_optimize.py`, seed 20261103,
-`results/raw/optimize_sample.json`), carry two more artefacts written by
-Opus under `AGENT_OPTIMIZE.md`: `optimized.py`, the most compact Python a
-demanding reviewer would accept, and `optimized.ldpy`, the same program
-with islands. The driver proves both against the original; 69 of 70 are
-final, the 70th has a driver outside `run_pair`. Median token reductions
-over the 68 that are equivalent and in the sample (`aggregate`, block
-`optimized`):
+much as the notation. Every proved pair of the sample gets two more
+artefacts, written by Opus under `AGENT_OPTIMIZE.md`: `optimized.py`, the
+most compact Python a demanding reviewer would accept, and
+`optimized.ldpy`, the same program with islands — plus their **header
+variant** (`optimized_header.*`), where the extracted header is optimized
+too: the faithful header keeps the file's imports and the translation's
+`@prefix` lines, unused ones included. The same driver proves all four
+against the original. The campaign runs by resumable batches
+(`scripts/plan_optimize.py`); first, five regions per stratum drawn with a
+seed (`scripts/draw_optimize.py`, seed 20261103), then all the others.
 
-| step | all tokens | host code |
-|---|---:|---:|
-| faithful translation (original → `translated.ldpy`) | +4.1 % | +7.3 % |
-| careful rereading (original → `optimized.py`) | +9.5 % | +9.5 % |
-| notation on top (`optimized.py` → `optimized.ldpy`) | +1.9 % | +3.2 % |
-| both (original → `optimized.ldpy`) | +13.1 % | +14.8 % |
+State on 2026-11-03, 01:5x: 232 regions optimized, 159 with the header
+variant, 782 optimized artefacts proved equivalent; 129 regions to go.
+Median token reductions over the 228 equivalent pairs of the sample
+(`aggregate`, block `optimized`):
 
-The notation pays where triples are written — +21.9 % in `add_in_loop`,
-+20.1 % in `add_run_shared_subject`, +20.9 % in `ns_import_project` — and
-is neutral to slightly negative on reads (`trav_*`, −4.7 % to +0.9 %). In
-`sparql_literal` it goes from −67.9 % to +0.7 % once the query text is
-counted apart. The extracted header is not optimized and keeps the
-translation's `@prefix` lines, which weigh against the notation on short
-regions.
+| step | all tokens | host code | header variant (159) |
+|---|---:|---:|---:|
+| faithful translation (original → `translated.ldpy`) | +8.5 % | +9.1 % | — |
+| careful rereading (original → `optimized.py`) | +9.4 % | +9.4 % | +15.7 % |
+| notation on top (`optimized.py` → `optimized.ldpy`) | +7.9 % | +8.6 % | +14.7 % |
+| both (original → `optimized.ldpy`) | +18.4 % | +19.6 % | +30.0 % |
+
+The notation pays where triples are written — runs of `.add` on a shared
+subject, typed literals, `[ ]` blank nodes, `g{ }` graph literals — and is
+neutral to slightly negative on reads that replace a short rdflib call one
+for one. Removing what the region does not use from the header roughly
+doubles both shares: the faithful header weighs on the notation through
+the translation's unused `@prefix` lines, and on the rereading through the
+file's unused imports. In `sparql_*` the notation becomes neutral once the
+query text is counted apart (host code).
 
 **Model check.** Fable rewrote, independently, the two artefacts of one
 region per stratum (14, `results/raw/model_check/`,
