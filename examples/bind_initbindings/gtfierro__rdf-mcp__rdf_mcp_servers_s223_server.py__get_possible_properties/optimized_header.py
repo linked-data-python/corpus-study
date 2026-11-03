@@ -1,0 +1,28 @@
+# Extracted from gtfierro/rdf-mcp@b6aa50fd53 : rdf_mcp/servers/s223_server.py
+# region: get_possible_properties (lines 59-79, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+# (added to make the region executable: the real file imports Graph and
+# Namespace from rdflib, and FastMCP from mcp.server.fastmcp -- neither
+# import survived extraction. `from rdflib import Graph, Namespace` is
+# restored verbatim; FastMCP comes from context_shim.py, see meta.json.)
+from rdflib import Graph, Namespace
+from context_shim import FastMCP
+mcp = FastMCP("GraphDemo", dependencies=["rdflib", "oxrdflib"])
+S223 = Namespace("http://data.ashrae.org/standard223#")
+ontology = Graph().parse("https://open223.info/223p.ttl")
+
+@mcp.tool()
+def get_possible_properties(term: str):
+    """Get the possible properties for a class in the 223P ontology graph"""
+    return [row.path for row in ontology.query("""
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    SELECT DISTINCT ?path WHERE {
+        ?from rdfs:subClassOf* ?fromp .
+        { ?shape sh:targetClass ?fromp }
+        UNION
+        { ?fromp a sh:NodeShape . BIND(?fromp as ?shape) }
+        ?shape sh:property ?prop .
+        ?prop sh:path ?path .
+         FILTER (!isBlank(?path))
+    }
+    """, initBindings={"from": S223[term]})]

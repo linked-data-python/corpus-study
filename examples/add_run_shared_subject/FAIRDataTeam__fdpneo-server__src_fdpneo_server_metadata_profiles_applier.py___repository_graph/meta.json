@@ -81,5 +81,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode goes, and DCAT, LDP, ODRL and VOID from the context_shim import; RDF merges into the rdflib import.",
+    "LD Python: BNode, Literal, URIRef and RDF go (f<…>, interpolation, a replace them); Graph stays for the return annotation; the shim import (dct: included) is unchanged."
+  ]
 }

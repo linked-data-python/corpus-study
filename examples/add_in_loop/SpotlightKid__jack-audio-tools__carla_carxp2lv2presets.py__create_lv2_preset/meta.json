@@ -84,5 +84,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Graph (demo() imports its own), Namespace, NamespaceManager and XSD go; the rdflib and rdflib.namespace imports merge into `from rdflib import BNode, Literal, URIRef, RDF, RDFS`; NS and get_graph stay.",
+    "LD Python: Graph, Literal, URIRef, Namespace, NamespaceManager, RDF, RDFS, XSD and NS go (replaced by f{ }, f<…>, rdfs:, lv2:, pset:, atom:, pstate:); BNode and get_graph stay; the five @prefix lines are used."
+  ]
 }

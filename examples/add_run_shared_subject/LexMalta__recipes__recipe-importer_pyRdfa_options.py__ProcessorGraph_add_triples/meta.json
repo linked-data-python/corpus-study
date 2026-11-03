@@ -86,5 +86,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `sys` goes; the four one-name rdflib imports merge into one line.",
+    "LD Python: `sys` and Literal go (interpolation and a typed literal replace Literal); the rdflib imports merge into one line; the four @prefix lines are used and ns_dc/ns_ht stay for the graph.bind calls."
+  ]
 }

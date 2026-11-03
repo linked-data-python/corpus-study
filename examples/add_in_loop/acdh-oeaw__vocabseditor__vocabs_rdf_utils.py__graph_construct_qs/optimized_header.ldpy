@@ -1,0 +1,24 @@
+# Extracted from acdh-oeaw/vocabseditor@bf418c87b3 : vocabs/rdf_utils.py
+# region: graph_construct_qs (lines 27-53, stratum add_in_loop)
+# licence of the source repository: see meta.json
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+
+def graph_construct_qs(results):
+    main_concept_scheme = results.first().scheme.get_subject()
+    @graph as g
+    g += results.first().scheme.as_graph()
+    for obj in results:
+        +{ f<{obj.create_uri()}> skos:inScheme {main_concept_scheme} }
+        g += obj.as_graph()
+        for x in obj.collection.all():
+            collection = x.get_subject()
+            g += x.as_graph()
+            for predicate, names in ((dc:creator, x.creator), (dc:contributor, x.contributor)):
+                if names:
+                    for i in names.split(";"):
+                        +{ {collection} {predicate} {i.strip()} }
+            for y in x.has_members.all():
+                +{ {collection} skos:member f<{y.legacy_id or y.create_uri()}> }
+    return g

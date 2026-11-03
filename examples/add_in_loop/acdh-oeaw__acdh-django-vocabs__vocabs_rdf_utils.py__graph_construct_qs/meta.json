@@ -84,5 +84,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: RDF, XSD, DC, RDFS go, and the shadowed `from rdflib.namespace import SKOS` goes with them: the module-level `SKOS = Namespace(...)` that the region actually reads stays, so Namespace stays; Graph and URIRef stay for the annotations.",
+    "LD Python: Literal, Namespace, RDF, XSD, DC, RDFS, SKOS and the `SKOS = Namespace(...)` line go (the region writes skos: and a language literal); Graph and URIRef stay for the annotations; the @prefix skos line is used."
+  ]
 }

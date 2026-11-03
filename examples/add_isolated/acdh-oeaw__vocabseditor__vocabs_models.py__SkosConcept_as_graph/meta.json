@@ -102,5 +102,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: DCTERMS, OWL, RDFS and XSD go; DC, RDF, SKOS, Graph, Literal, URIRef stay (SKOS, Graph, Literal and URIRef are also read by the demo harness).",
+    "LD Python: DC, DCTERMS, OWL, RDF, RDFS and XSD go; SKOS, Graph, Literal and URIRef stay for the demo harness's _note_graph; both @prefix lines are used."
+  ]
 }

@@ -99,5 +99,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: rdflib.term.Variable goes; Graph, Namespace (S223) and FastMCP stay.",
+    "LD Python: Variable goes, and the unused @prefix owl and @prefix rdf; rdfs: and sh: are used in the s{ } query and `@prefix s223: … as S223` stays for the `S223[term]` object."
+  ]
 }

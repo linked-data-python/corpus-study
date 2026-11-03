@@ -1,0 +1,35 @@
+# Extracted from RDFLib/VocPrez@ce3c0ea42f : vocprez/model/concept.py
+# region: ConceptRenderer._render_skos_rdf (lines 59-113, stratum add_run_shared_subject)
+# licence of the source repository: see meta.json
+from flask import Response
+from rdflib import DCTERMS, SKOS
+import vocprez._config as config
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+
+def _render_skos_rdf(self):
+    concept = self.concept
+    @graph as g
+    g.bind("dct", DCTERMS)
+    g.bind("skos", SKOS)
+
+    cs = f<{concept.vocab_uri}>
+    g.bind("cs", cs)
+    c = f<{concept.uri}>
+    g.bind("", str(c).rpartition("/")[0] + "/")
+
+    # Concept SKOS metadata
+    +{ {c} a skos:Concept ;
+           skos:prefLabel {concept.prefLabel}@{config.DEFAULT_LANGUAGE} ;
+           skos:definition {concept.definition}@{config.DEFAULT_LANGUAGE} ;
+           skos:inScheme {cs} }
+
+    for v in [*(concept.related_instances or {}).values(), *(concept.other_properties or [])]:
+        for prop in v:
+            value = f<{prop.value}> if str(prop.value).startswith("http") else ?{prop.value}
+            +{ {c} f<{prop.uri}> {value} }
+
+    # serialise in the appropriate RDF format
+    is_json = self.mediatype in ["application/ld+json", "application/json"]
+    graph_text = g.serialize(format="turtle" if is_json else self.mediatype)
+    return Response(graph_text, mimetype=self.mediatype, headers=self.headers)

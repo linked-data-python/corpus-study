@@ -78,5 +78,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: BNode, RDF and RDFS go; `from __future__ import annotations` stays (the `self: Concept` annotation names an undefined class) and SimpleNamespace stays for the demo harness.",
+    "LD Python: BNode, Literal, Namespace, RDF, RDFS and URIRef go, and the unused @prefix rdf and @prefix rdfs; Graph stays for the demo harness; the @prefix dct line is used."
+  ]
 }

@@ -90,5 +90,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused (rdflib for rdflib.Graph, Literal, Namespace for SKOS/DC, URIRef): optimized_header.py is a copy of optimized.py.",
+    "LD Python: `import rdflib` and `from rdflib import Literal, Namespace, URIRef` go entirely (`@graph as g`, f<…>, interpolation and dc:/skos: replace them); both @prefix lines are used."
+  ]
 }

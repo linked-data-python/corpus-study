@@ -91,5 +91,10 @@
     "mutants_killed": [],
     "remaining": "",
     "credit": "unused prefix declarations dropped from translated.ldpy"
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: XSD and the duplicate `from rdflib import Graph, URIRef` go; the remaining rdflib and rdflib.namespace imports merge into one line.",
+    "LD Python: RDF, RDFS, XSD and the duplicate import go (a, rdfs: replace them); OWL stays for `bind(\"owl\", OWL)`; the imports merge into one line; both @prefix lines are used."
+  ]
 }

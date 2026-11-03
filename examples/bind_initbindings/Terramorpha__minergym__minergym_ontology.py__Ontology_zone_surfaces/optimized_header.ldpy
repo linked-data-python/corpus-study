@@ -1,0 +1,10 @@
+# Extracted from Terramorpha/minergym@1d2d586bb1 : minergym/ontology.py
+# region: Ontology.zone_surfaces (lines 126-135, stratum bind_initbindings)
+# licence of the source repository: see meta.json
+from rdflib.term import Node
+@prefix idf: <https://energyplus.net/> .
+
+def zone_surfaces(self, zone: Node) -> list[Node]:
+    """Return all the surfaces that have `zone_name` equal to `zone`."""
+
+    return list(m{ ?surface a "BuildingSurface:Detailed" ; idf:zone_name {zone} }(self.rdf))

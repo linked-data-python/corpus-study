@@ -99,5 +99,10 @@
       "diffs": [],
       "error": null
     }
-  }
+  },
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Edge, Graph, GraphDocument, Meta and PropertyValue go from the context_shim import, which fits on one line; rdflib (annotations), OWL, RDF, RDFS, Node and PropertyTypeEnum stay.",
+    "LD Python: the same five shim names go, and also the whole `from rdflib import OWL, RDF, RDFS` (owl:, a, rdfs: replace them); both @prefix lines are used."
+  ]
 }
