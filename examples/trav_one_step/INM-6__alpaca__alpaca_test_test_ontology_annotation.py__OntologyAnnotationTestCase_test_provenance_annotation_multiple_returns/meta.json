@@ -87,11 +87,12 @@
     ],
     "remaining": "The fix moves one site from `.first()` to `list(m{ })[0]`: `.first()` stays credited at the three sites a count==1 assertion guards. article_candidate is still true while the triage judged the pair not article material: to decide."
   },
-  "optimization_status": "draft",
+  "optimization_status": "final",
   "optimization_notes": [
     "Draft because the driver cannot prove optimized.ldpy without a change: alpaca's @Provenance reads the calling function's source through linecache and ast.parse()s it, and driver.py primes linecache with the transpiled text of translated.ldpy only (TRANSLATED is hard-coded). Run from optimized.ldpy, alpaca finds the raw island text on disk and raises SyntaxError on every call; any ldpy artefact with notation in the function body fails the same way. Checked outside the repository: a scratch copy of the region where optimized.ldpy (then optimized_header.ldpy) takes translated.ldpy's place gives OK on all calls. The driver needs to prime linecache for whichever .ldpy side it runs (RDFEVAL_SIDES); it was not edited.",
     "optimized.py (OK): the seven count assertions become one loop over a {class name: count} dict with `self.ONTOLOGY[cls]`, counting `prov_graph.subjects(RDF.type, ...)` instead of triples(); the six membership assertions before the attribute loop and the three after it become two loops over lists of triples, with their comments inside the lists (assertTrue keeps its argument, which the driver logs; the order of assertions and of possible failures is unchanged, the attribute loop staying between the two groups); the three node reads guarded by a count==1 assertion become `next(...)` and are computed before the first group (they cannot fail there), while execution_uri keeps `list(...)[0]` (unguarded, IndexError); the StringIO parse becomes `Graph().parse(data=save_provenance(), format='turtle')`; expected_attributes on one line. The lines alpaca records (activate to deactivate) are untouched.",
-    "optimized.ldpy, from optimized.py: `@graph prov_graph`; the count becomes `m{ ?s a {self.ONTOLOGY[cls]} }.count()`, execution_uri `list(m{ ?s a {ALPACA.FunctionExecution} })[0]`, the three guarded reads `m{ ?s a {X} }.first()`, the attribute loop `m{ {output_node} {ALPACA.hasAttribute} ?a }`; RDF.type and PROV.x become prefixed names in the triple lists. Each island measured shorter than its Python selector (436 tokens against 443 for the prefixed-name-only version). The two value() reads stay Python. The membership tests stay a loop over Python triples: as one `bool(m{ })` per assertion they are longer. No exception to the symmetry rule."
+    "optimized.ldpy, from optimized.py: `@graph prov_graph`; the count becomes `m{ ?s a {self.ONTOLOGY[cls]} }.count()`, execution_uri `list(m{ ?s a {ALPACA.FunctionExecution} })[0]`, the three guarded reads `m{ ?s a {X} }.first()`, the attribute loop `m{ {output_node} {ALPACA.hasAttribute} ?a }`; RDF.type and PROV.x become prefixed names in the triple lists. Each island measured shorter than its Python selector (436 tokens against 443 for the prefixed-name-only version). The two value() reads stay Python. The membership tests stay a loop over Python triples: as one `bool(m{ })` per assertion they are longer. No exception to the symmetry rule.",
+    "2026-11-03: driver now primes linecache for every .ldpy artefact (alpaca ast.parse()s the calling source); all five check lines OK."
   ],
   "optimized_constructions": [
     "@prefix",
@@ -103,7 +104,7 @@
     "variable",
     "interpolation {expr}"
   ],
-  "header_optimization_status": "draft",
+  "header_optimization_status": "final",
   "header_optimization_notes": [
     "optimized_header.py (OK): io (the StringIO parse is gone), URIRef, Namespace and Provenance are unused and go; `from rdflib import PROV, RDF, Graph, Literal`.",
     "optimized_header.ldpy: io, URIRef, Namespace, Provenance, RDF and PROV go (`from rdflib import Graph, Literal`); both `@prefix` lines are used. Draft for the same reason as optimized.ldpy (driver linecache priming); OK in the scratch copy."

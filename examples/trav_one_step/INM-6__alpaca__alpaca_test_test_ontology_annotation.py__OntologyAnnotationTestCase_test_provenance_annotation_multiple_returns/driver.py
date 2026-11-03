@@ -75,10 +75,13 @@ def _prime_linecache_for_transpiled_source() -> None:
     lets a third-party library's frame introspection see it too.
     """
     from ldpy.transpiler import transpile
-    r = transpile(TRANSLATED.read_text(), filename=str(TRANSLATED))
-    path = str(TRANSLATED)
-    linecache.cache[path] = (len(r.code), None,
-                              r.code.splitlines(keepends=True), path)
+    # every .ldpy artefact the driver may run (RDFEVAL_SIDES swaps an
+    # optimized one in for translated.ldpy), each under its own path
+    for ldpy in sorted(HERE.glob("*.ldpy")):
+        r = transpile(ldpy.read_text(), filename=str(ldpy))
+        path = str(ldpy)
+        linecache.cache[path] = (len(r.code), None,
+                                  r.code.splitlines(keepends=True), path)
 
 
 _prime_linecache_for_transpiled_source()
