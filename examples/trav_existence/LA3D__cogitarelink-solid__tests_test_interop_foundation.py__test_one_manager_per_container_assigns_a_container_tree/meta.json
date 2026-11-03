@@ -62,5 +62,24 @@
       "first assertion dropped"
     ],
     "remaining": "The earlier note that the zero-solution branch cannot be exercised is obsolete: a raise is compared. The original `next(...)` is now `next(iter(m{ }))`, a less compact form than `.first()`."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the `g = graph` alias goes; `assigned is not None and` goes (str(None) does not end with \"ContainerTree\", so the assertion fails with the same message).",
+    "optimized.py: `g.value(a, ST.manages) is not None` becomes `(a, ST.manages, None) in graph`.",
+    "optimized.ldpy, from optimized.py: `next(iter(m{ ?mgr a st:Manager }))` (keeps the StopIteration of the source); the existence read is `m{ {a} st:manages ?x }`; the two value reads stay `graph.value(..., st:...)` with prefixed names (shorter than `m{ }.first()`); `@graph graph` serves the two islands.",
+    "No other exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header: the two header-variant files are copies of the optimized ones."
+  ]
 }

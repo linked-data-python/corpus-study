@@ -40,5 +40,22 @@
     "method": "entry:test_melt_viscosity",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the query result and the `[value[0] for value in values]` pass are merged into one assignment; the query text writes the type pattern with `;` and `a` (the same three triples, in the same order). The print lines, the dead-branch KeyError and the source's `expected_authors` bug are kept as they are.",
+    "optimized.py: `[row[0] for row in runner.app.db.query(...)]`.",
+    "optimized.ldpy: `list(m{ ... }(runner.app.db))`: a basic graph pattern whose single projected variable is all the test reads, so m{ } (bare terms) rather than s{ }, and the comprehension becomes `list(...)`. That is the only difference with optimized.py, and it comes from the island (bare-term projection).",
+    "Notation ratio above 1: in Python the query is one string token, in m{ } the pattern counts token by token. Nothing else to compress."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "IRI",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header holds only the shim import of disable_test, which the region uses: the two header-variant files are copies of the optimized ones."
+  ]
 }

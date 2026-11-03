@@ -1,0 +1,16 @@
+# Extracted from tetherless-world/materialsmine@0be55da099 : tests/ingest_tester.py
+# region: test_melt_viscosity (lines 673-690, stratum sparql_literal)
+# licence of the source repository: see meta.json
+from ingest_shim import disable_test
+@disable_test
+def test_melt_viscosity(runner, expected_value=None):
+    print("\n\nMelt Viscosity")
+    values = list(m{
+        <bnode:cfff5d04317445c49f22102e124ab68e> <http://semanticscience.org/resource/hasValue> ?value ;
+            a <http://nanomine.org/ns/MeltVisocsity> .
+        <http://nanomine.org/sample/l256-s3-potschke-2004_nanomine-meltviscosity_9> <http://semanticscience.org/resource/hasAttribute> <bnode:cfff5d04317445c49f22102e124ab68e> .
+    }(runner.app.db))
+    if expected_value is None:
+        expected_authors = runner.expected_data["melt_viscosity_data"]
+    runner.assertCountEqual(expected_value, values)
+    print("Expected Melt Viscosity values found")

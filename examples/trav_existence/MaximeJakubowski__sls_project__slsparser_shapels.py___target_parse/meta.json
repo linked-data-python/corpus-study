@@ -46,5 +46,24 @@
     "method": "entry:_target_parse",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the sh:targetClass loop and the implicit-class block built the same COUNTRANGE child: the shape is appended to the list of target classes when it is an rdfs:Class, and one loop builds the children (same order); the tail becomes `if not out.children: return SANode(Op.BOT, [])` and `if len(out.children) == 1:` (out.op is always OR there).",
+    "optimized.py: `(shapename, RDF.type, RDFS.Class) in graph` is kept.",
+    "optimized.ldpy, from optimized.py: `m{ {shapename} a rdfs:Class }(graph)`; prefixed names sh:..., rdf:type, rdfs:subClassOf in place of the namespace attributes.",
+    "No other exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: URIRef and BNode go; Graph, Literal, SH, RDF and RDFS are merged into one import.",
+    "LD Python: SH, RDF, RDFS, URIRef and BNode go; the three @prefix lines are used."
+  ]
 }

@@ -58,5 +58,24 @@
       "negation dropped"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `PROV.wasAttributedTo not in self.graph.predicates(c, a)` becomes `(c, PROV.wasAttributedTo, a) not in self.graph`; the nested `_is_membership` helper is inlined into the `if`; `child_entity` and `info_id` are inlined; the input loop builds `cur_entities` with a comprehension over `value.elements if isinstance(value, Container) else [value]`; the `bool()` around `get_uri` goes (only its truth is tested); backslash continuations are joined. Every call keeps its order of evaluation.",
+    "The else branch is dead in the driver (it uses names the extraction does not resolve): its compression is checked by reading only.",
+    "optimized.ldpy, from optimized.py: `not m{ {container_entity} prov:wasAttributedTo {script_agent} }(self.graph)`, with a call suffix instead of the translation's `@graph self.graph` (one island only).",
+    "No other exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: `chain`, RDF and XSD go.",
+    "LD Python: `chain` and the whole rdflib.namespace import go, with the rdf: and xsd: @prefix lines; prov: is kept."
+  ]
 }

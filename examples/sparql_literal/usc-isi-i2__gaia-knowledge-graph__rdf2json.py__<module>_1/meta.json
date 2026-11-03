@@ -54,5 +54,23 @@
       "branch 2 rdf:type widened; rdf:subject / rdf:object widened"
     ],
     "remaining": "Nothing on equivalence: the SPARQL text is identical on both sides and every part of it is now decided by a node of the fixture. sample1.turtle stays a fixture invented for the study (the repository has none)."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: `statements` is inlined into the loop; the two `d[s] = d.get(...)` lines become `d.setdefault(s, {}).setdefault(p, []).append(o)`; `res` is `list(d.values())` after the loop that adds the \"uri\" key (the inner dicts of d still get it); `json.dump(res, f, indent=2)` replaces `f.write(json.dumps(...))`; `dict()` becomes `{}`; the query text writes rdf:type as `a` and uses `;` (same triples, same order).",
+    "optimized.py: `g = rdflib.Graph().parse(...)` on one line.",
+    "optimized.ldpy: s{ } (UNION, FILTER and DISTINCT: not a basic graph pattern) iterated directly on the current graph.",
+    "Exception to the symmetry rule, island-only: `@graph as g` replaces the Graph construction, so `import rdflib` goes and `g.parse(...)` stays its own line.",
+    "Notation ratio above 1: the query is one string token in Python."
+  ],
+  "optimized_constructions": [
+    "@graph",
+    "s{ }",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header is the three provenance comment lines only (the region is the whole module): the two header-variant files are copies of the optimized ones."
+  ]
 }

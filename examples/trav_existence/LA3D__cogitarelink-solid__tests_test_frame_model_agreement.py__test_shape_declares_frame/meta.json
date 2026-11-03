@@ -65,5 +65,23 @@
       ".first() -> .one() sur labelProperty (call[6])"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: nothing to compress, identical to original.py.",
+    "optimized.ldpy: the existence read is `m{ {shape} sub:frameRole ?fr }(g)` (9 tokens, as many as `(shape, sub:frameRole, None) in g`: kept as the stratum's construction); the three g.value reads stay Python with prefixed names, `g.value(shape, sub:frameRole)` (8 tokens against 10 for `m{ … }.first()`); no `@graph` for a single island.",
+    "No other exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "m{ }",
+    "call suffix (g)",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Nothing unused in either header (every namespace feeds FRAMES, `sub:` is used): the two header-variant files are copies of the optimized ones."
+  ]
 }

@@ -1,0 +1,27 @@
+# Extracted from LA3D/cogitarelink-solid@49121503ea : tests/test_interop_foundation.py
+# region: test_one_manager_per_container_assigns_a_container_tree (lines 108-120, stratum trav_existence)
+# licence of the source repository: see meta.json
+#
+# The extracted region built its own graph per slug from a real file on disk
+# (MGR_DIR / REPO, one of the corpus/403 "163 regions with no visible graph"
+# -- see AGENT_BATCH.md): `REPO` is undefined outside the source checkout, so
+# the region cannot even be imported as extracted. Restored the binding as
+# an explicit `graph` parameter (see meta.json), declared once as `@graph
+# graph`, and dropped the now-unused MGR_DIR/file-existence/parse lines
+# (original.py keeps the equivalent `g = graph` -- translated.ldpy needs no
+# local alias since m{ } reads the block's current graph directly).
+@prefix st: <http://www.w3.org/ns/shapetrees#> .
+
+CONTAINER_SLUGS = ["concepts", "people", "places", "events", "organizations", "procedures", "working"]
+
+def test_one_manager_per_container_assigns_a_container_tree(graph):
+    @graph graph
+    for slug in CONTAINER_SLUGS:
+        mgr = next(iter(m{ ?mgr a st:Manager }))
+        a = graph.value(mgr, st:hasAssignment)
+        assert a is not None, f"{slug}: no st:hasAssignment"
+        assigned = graph.value(a, st:assigns)
+        assert str(assigned).endswith("ContainerTree"), f"{slug}: st:assigns must be a ContainerTree"
+        # A container Manager assigns the container tree + names the managed container; the per-resource
+        # validation focus is each contained resource's <#this> (resolved at validation, not pinned here).
+        assert m{ {a} st:manages ?x }, f"{slug}: st:manages must name the container"

@@ -1,0 +1,100 @@
+# Extracted from INM-6/alpaca@2b8dd34fc6 : alpaca/serialization/prov.py
+# region: AlpacaProvDocument._add_function_execution (lines 309-398, stratum trav_existence)
+# licence of the source repository: see meta.json
+from itertools import product
+from rdflib import Graph
+from rdflib.namespace import PROV
+from context_shim import AlpacaProvDocument, membership_execution  # context shim -- see meta.json
+
+def _add_function_execution(self, execution, script_agent, script_info,
+                            session_id):
+    # Add one `FunctionExecution` record to the file, and generate all the
+    # provenance semantic relationships
+
+    function_info = execution.function
+    if function_info.name in ("attribute", "subscript"):
+        # attributes and subscripting operations
+        container = execution.input[0]
+        child = execution.output[0]
+        container_entity = self._create_entity(container)
+        if (container_entity, PROV.wasAttributedTo, script_agent) not in self.graph:
+            self._wasAttributedTo(container_entity, script_agent)
+        self._add_membership(container_entity, self._create_entity(child),
+                             execution.params)
+    else:
+        # This is a function execution. Add Function activity
+        cur_function = self._add_Function(function_info)
+
+        # ID to identify ontology annotations
+        ontology_info = ONTOLOGY_INFORMATION.get(_get_function_name(function_info))
+
+        # Get the FunctionExecution node with function parameters and
+        # other provenance info
+        cur_activity = self._add_FunctionExecution(
+            script_info=script_info, session_id=session_id,
+            execution_id=execution.execution_id,
+            function_info=function_info, params=execution.params,
+            execution_order=execution.order,
+            code_statement=execution.code_statement,
+            start=execution.time_stamp_start,
+            end=execution.time_stamp_end,
+            function=cur_function, ontology_info=ontology_info
+        )
+
+        # Add all the inputs as entities, and create a `used` association
+        # with the activity. URNs differ when the input is a file or
+        # Python object.
+        input_entities = []
+        for key, value in execution.input.items():
+            has_input_uri = ontology_info and ontology_info.get_uri('arguments', key)
+            # If this is a Container, several objects are inside.
+            elements = value.elements if isinstance(value, Container) else [value]
+            cur_entities = [self._create_entity(element) for element in elements]
+            input_entities.extend(cur_entities)
+
+            for cur_entity in cur_entities:
+                self._used(activity=cur_activity, entity=cur_entity)
+                self._wasAttributedTo(entity=cur_entity, agent=script_agent)
+                if has_input_uri:
+                    self._add_ontology_information(cur_entity, ontology_info,
+                                                   'arguments', key)
+
+        # Add all the outputs as entities, and create the `wasGenerated`
+        # relationship.
+        output_entities = []
+        for key, value in execution.output.items():
+            cur_entity = self._create_entity(value)
+            output_entities.append(cur_entity)
+            self._wasGeneratedBy(entity=cur_entity, activity=cur_activity)
+            self._wasAttributedTo(entity=cur_entity, agent=script_agent)
+            if ontology_info:
+                self._add_ontology_information(cur_entity, ontology_info,
+                                               'returns', element=key)
+
+        # Iterate over the input/output pairs to add the `wasDerived`
+        # relationship
+        for input_entity, output_entity in product(input_entities, output_entities):
+            self._wasDerivedFrom(used_entity=input_entity,
+                                 generated_entity=output_entity)
+
+        # Associate the activity to the script
+        self._wasAssociatedWith(activity=cur_activity, agent=script_agent)
+
+# Demo harness (identical on both sides, see meta.json): this region's
+# single extracted operation (`rdf_ops: 1`, a "namespace_term" use of
+# `PROV.wasAttributedTo`) is the existence read
+# `PROV.wasAttributedTo not in self.graph.predicates(container_entity,
+# script_agent)` that guards the call to `self._wasAttributedTo` -- reached
+# only through the `_is_membership` branch (attribute/subscript accesses;
+# the `else` branch, with no namespace-term use of its own, is untouched and
+# unreached here). `demo` builds a fresh `AlpacaProvDocument` stand-in
+# around a graph the caller supplies, runs the region on a `subscript`-kind
+# execution, and returns whether `_wasAttributedTo` was called -- the one
+# bit of information the read decides.
+def demo(graph_data, container, agent):
+    graph = Graph().parse(data=graph_data, format="turtle") if graph_data else Graph()
+    doc = AlpacaProvDocument(graph)
+    execution = membership_execution(container, agent)
+    _add_function_execution(doc, execution, agent, script_info=None,
+                            session_id=None)
+    return len(doc.was_attributed_to_calls)

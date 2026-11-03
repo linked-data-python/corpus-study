@@ -43,5 +43,25 @@
     "method": "fixture:fixture.ttl entry:preprocess",
     "diffs": [],
     "error": null
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "Both sides: the three query variables (q_fields, q_matches, q_ms) and the two Wikidata templates (dq, sq) are inlined into their calls; the four `.map(lambda x: info.get(x, {}).get(key) if pd.notna(x) else None)` lines share a nested helper `wikidata_column(uris, info, key)`, with the pd.notna guard kept; the local query texts are compacted with `;` only.",
+    "Blank nodes `[ ns:nombreEquipo ?local ]` in place of the named join variables ?el/?ev were tried and dropped: on a 200-match graph rdflib then returns the rows in another order, and the row order of matches.csv is observable. A `;` that keeps the same triples in the same order does not change it (checked).",
+    "optimized.ldpy: s{ } for the three queries (q_fields and q_ms have an OPTIONAL; q_matches is a basic graph pattern, but m{ } returns its rows in another order on the same 200-match graph, so s{ } stays); the PREFIX of each string becomes one `@prefix ns:` in the function.",
+    "Exception to the symmetry rule, island-only: `@graph as g` replaces `g = Graph()`, and the s{ } islands are iterated on that current graph without a `(g)` suffix.",
+    "Notation ratio above 1: the three queries are one string token each in Python and are counted token by token in s{ }."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "prefixed name",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: nothing unused in the header; copy of optimized.py.",
+    "LD Python: `from rdflib import Graph` goes (unused once `@graph as g` replaces `g = Graph()`)."
+  ]
 }

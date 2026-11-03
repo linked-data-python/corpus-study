@@ -67,5 +67,24 @@
       "m{ {shapename} sh:path [] } -> m{ {shapename} ?p [] }"
     ],
     "remaining": "Jugements non traités : la région illustre mal trav_existence (une seule garde d'existence, le reste est trav_one_step) et le tri déconseille l'exemple d'article alors que meta.json porte article_candidate: true."
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: the two predicate lists become rdflib alternative paths (`SH.property | SH.node | ...`), which Graph.triples evaluates, so each list is read by one graph.objects/graph.subjects call instead of a loop; the set is built from the first read, the other three go in one `update` call; the sh:or/sh:and/sh:xone loop becomes one path read. `SH.path not in graph.predicates(shapename)` is kept (shorter than the triple-membership form).",
+    "optimized.ldpy, from optimized.py: prefixed names in the two paths; the paths are interpolated in the predicate position of m{ } (`m{ [] {object_parameters} ?o }`, `m{ ?s {subject_parameters} [] }`); `m{ ?s a sh:NodeShape }`; the existence read is `not m{ {shapename} sh:path [] }`; `@graph graph` serves the five islands. The sh:or | sh:and | sh:xone read stays `graph.objects(predicate=...)`: interpolating that expression in m{ } costs 13 tokens against 10.",
+    "No other exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "m{ }",
+    "prefixed name",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: Dict, List, Optional, Tuple, RDFS, URIRef, Literal and BNode go; Graph, SH and RDF are merged into one import.",
+    "LD Python: the same imports go, and SH, RDF too; the rdf: and rdfs: @prefix lines go (`a` needs neither); sh: is kept."
+  ]
 }

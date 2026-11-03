@@ -60,5 +60,22 @@
       "lecture de g : rdf:type -> ?p (call[2], call[6])"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "optimized.py: `g.value(c, RDF.type) is not None` becomes `(c, RDF.type, None) in g`, and `self.e.value(c, RDF.type) is None` becomes `... not in self.e`.",
+    "optimized.ldpy, from optimized.py: `m{ {contentclass} a ?t }(g) and not m{ {contentclass} a ?t }(self.e)`: the translation's `bool(...)` goes (a Solutions is truthy), and the call suffix replaces `@graph g`.",
+    "No other exception to the symmetry rule: outside the RDF lines the two files are identical line for line."
+  ],
+  "optimized_constructions": [
+    "m{ }",
+    "call suffix (g)",
+    "interpolation {expr}",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "Python: OWL and RDFS go.",
+    "LD Python: the rdflib.namespace import and the three @prefix lines go (the islands use `a`)."
+  ]
 }

@@ -78,5 +78,26 @@
       "m{ } q5 : \"Jane Smith\"^^xsd:string -> \"Jane Smith\" (rouge)"
     ],
     "remaining": ""
-  }
+  },
+  "optimization_status": "final",
+  "optimization_notes": [
+    "The region is the whole notebook, so its imports are region lines. optimized.py: the five prepareQuery(..., initNs=...) objects become query strings passed inline to g.query; VCARD is bound once with g.bind('vcard', VCARD) (foaf and xsd are bound by rdflib's default namespace manager), so no initNs is left; the two initBindings become typed literals in the query text (\"Smith\"^^xsd:string, \"Jane Smith\"^^xsd:string), q3's projected ?x (never bound, never read) goes and q5's join variable ?JaneSmith becomes a blank node; Literal, XSD, FOAF and prepareQuery go. The q1..q5 names go (module-level Query objects, which only original.py defines).",
+    "Order of the printed rows: checked on a random 60-person graph that q3 and q5 print in the same order as the original's initBindings form, on both sides.",
+    "optimized.ldpy, from optimized.py: s{ } for q1 and q2 (they print the row itself: an rdflib ResultRow prints as a tuple, an m{ } Row does not), m{ } for q3, q4 and q5 (basic graph patterns read by attribute or as a bare term). The three @prefix declarations replace g.bind and the default bindings.",
+    "Exception to the symmetry rule, island-only: `@graph as g` replaces `g = Graph()`, which lets every island drop its `(g)` suffix; `from rdflib import Graph` is then unused and goes.",
+    "Notation ratio above 1: each query is one string token in Python and counts token by token in the islands."
+  ],
+  "optimized_constructions": [
+    "@prefix",
+    "@graph",
+    "s{ }",
+    "m{ }",
+    "prefixed name",
+    "typed literal",
+    "variable"
+  ],
+  "header_optimization_status": "final",
+  "header_optimization_notes": [
+    "The header is the three provenance comment lines only (the region is the whole module): the two header-variant files are copies of the optimized ones."
+  ]
 }
