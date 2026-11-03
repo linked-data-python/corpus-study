@@ -69,16 +69,13 @@
   "optimization_notes": [
     "optimized.py: the `predicates` list is inlined as the loop's tuple; triples((None, predicate, None)) with a discarded `_` becomes subject_objects(predicate), which reads the same triples in the same order; the two nested ifs merge into one `and` chain (same short-circuit order); str(lit).casefold() becomes lit.casefold(), a Literal being a str whose value is its lexical form. The explicit final `return None` stays.",
     "optimized.ldpy, from optimized.py: the five predicates are prefixed names (rdfs:, skos: from the header's @prefix lines, qudt: from the imported prefix) and the read is `m{ ?subj {predicate} ?lit }(self.graph)`, which goes through graph.triples() in the same order, so the first unit found is the same. Keeping subject_objects(predicate) in optimized.ldpy measures 1.0 against optimized.py instead of 1.02, but drops the island the INSTRUCTIONS §2 table asks for on a traversal.",
-    "No exception to the symmetry."
+    "No exception to the symmetry.",
+    "2026-11-03, rule 4: the m{ ?subj {predicate} ?lit } read is back to subject_objects(predicate), which is shorter; prefixed names remain (both ldpy artefacts)."
   ],
   "optimized_constructions": [
     "from … import p:",
     "@prefix",
-    "prefixed name",
-    "m{ }",
-    "call suffix (g)",
-    "variable",
-    "interpolation {expr}"
+    "prefixed name"
   ],
   "header_optimization_status": "final",
   "header_optimization_notes": [

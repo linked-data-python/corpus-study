@@ -10,7 +10,7 @@ def fhir_decimal_issue_filter(in_both: Graph, in_first: Graph, in_second: Graph)
         pass unit tests
     """
     for s, p, o in list(in_first):
-        o_2 = m{ {s} {p} ?o_2 }(in_second).first()
+        o_2 = in_second.value(s, p)
         if (isinstance(o, Literal) and isinstance(o_2, Literal)
                 and o.datatype == o_2.datatype == xsd:decimal and o.value == o_2.value):
             +{ {s} {p} {o} }(in_both)

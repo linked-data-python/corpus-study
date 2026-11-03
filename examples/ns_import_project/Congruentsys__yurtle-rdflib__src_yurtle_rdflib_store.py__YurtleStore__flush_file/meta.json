@@ -57,15 +57,12 @@
     "optimized.py: the predicate_objects loop with its `continue` guard becomes one `subject_graph += [... if p != PROVENANCE.definedIn]` comprehension (Graph.__iadd__ takes an iterable of triples); the intermediate `doc` is passed straight to write_file, both comments kept above the call. The early-return guard, the binding copy and the four state updates are unchanged.",
     "optimized.ldpy, from optimized.py: the same comprehension reading `m{ {state.subject_uri} ?p ?o }(self.internal_graph)` (two projected variables, so (p, o) tuples) and comparing to `provenance:definedIn`. The loop form with `+{ ... }(subject_graph)` measured 1.0175 against optimized.py, so the comprehension was kept; keeping predicate_objects(...) in the comprehension would be 1 token shorter still (ratio 1.0) but drops the island the INSTRUCTIONS §2 table asks for on a fixed-subject traversal.",
     "The notation costs here: the m{ } pattern weighs one token more than predicate_objects(...), and the prefixed names weigh what the attribute accesses weigh.",
-    "No exception to the symmetry."
+    "No exception to the symmetry.",
+    "2026-11-03, rule 4 (an island longer than the Python it replaces is not used): the m{ } read is back to predicate_objects(...), one token shorter; only prefixed names remain (both ldpy artefacts)."
   ],
   "optimized_constructions": [
     "from … import p:",
-    "m{ }",
-    "call suffix (g)",
-    "prefixed name",
-    "variable",
-    "interpolation {expr}"
+    "prefixed name"
   ],
   "header_optimization_status": "final",
   "header_optimization_notes": [

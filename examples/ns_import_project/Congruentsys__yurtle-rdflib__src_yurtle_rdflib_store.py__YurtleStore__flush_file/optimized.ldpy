@@ -43,7 +43,7 @@ def _flush_file(self, path: Path) -> None:
 
     # Skip provenance triples
     subject_graph += [(state.subject_uri, p, o)
-                      for p, o in m{ {state.subject_uri} ?p ?o }(self.internal_graph)
+                      for p, o in self.internal_graph.predicate_objects(state.subject_uri)
                       if p != provenance:definedIn]
 
     # Create YurtleDocument for serialization

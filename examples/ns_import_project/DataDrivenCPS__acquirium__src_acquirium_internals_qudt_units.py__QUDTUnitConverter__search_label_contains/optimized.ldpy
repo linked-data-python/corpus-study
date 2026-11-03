@@ -24,7 +24,7 @@ from qudt_context import UNIT, QUDT_QUANTITY_KIND, qudt:
 def _search_label_contains(self, text: str) -> UnitDefinition | None:
     target = text.casefold()
     for predicate in (rdfs:label, skos:prefLabel, qudt:symbol, qudt:ucumCode, qudt:uneceCommonCode):
-        for subj, lit in m{ ?subj {predicate} ?lit }(self.graph):
+        for subj, lit in self.graph.subject_objects(predicate):
             if isinstance(lit, Literal) and target in lit.casefold() and self._looks_like_unit(subj):
                 return self._from_uri(subj)
     return None
